@@ -1,0 +1,747 @@
+Title: A Dual Metastable-State Encoding Architecture for Quantum Processing with ^171Yb Atom Arrays
+
+URL Source: https://arxiv.org/pdf/2606.08453v1
+
+Published Time: Tue, 09 Jun 2026 01:15:51 GMT
+
+Number of Pages: 19
+
+Markdown Content:
+# A Dual Metastable-State Encoding Architecture for Quantum Processing with 171 Yb Atom Arrays 
+
+Chun-Wei Liu, 1, ∗ Saiwei Nie, 1, ∗ Eesha Banerjee, 1, ∗ Micah Davidson, 1
+
+Nick Reynolds, 1 Alyssa L. Miller, 2 and Alex P. Burgers 1, 3, †
+
+> 1
+
+Department of Electrical Engineering and Computer Science, University of Michigan, Ann Arbor, Michigan 48109, USA 
+
+> 2
+
+Applied Physics Program, University of Michigan, Ann Arbor, Michigan 48109, USA 
+
+> 3
+
+Quantum Research Institute, University of Michigan, Ann Arbor, Michigan 48109, USA 
+
+Neutral-atom arrays combine scalable qubit registers, long coherence times, flexible optical con-trol, and strong, Rydberg-mediated entangling interactions, making them a promising platform for quantum information processing. However, physical error rates remain a challenge, and fault-tolerant quantum error correction (QEC) requires repeated mid-circuit measurement and reset of ancilla qubits without disturbing nearby data qubits. This requirement introduces significant control and architectural overhead, making qubit encoding an important architectural decision. Here, we propose a dual metastable-state qubit encoding for 171 Yb atoms that utilizes two independent qubit subspaces in the (6 s6p) 3P0 and (6 s6p) 3P2 manifolds. The 3P0 manifold provides a long-coherence nuclear spin (NS) qubit suitable for storage and arithmetic operations, while the 3P2 manifold pro-vides a hyperfine-split (HF) qubit, with ∆ HF = 2 π × 6.7 GHz, that enables fast Raman operations and direct state-selective imaging. Coherent shelving between the two metastable manifolds con-nects the qubit subspaces, allowing operations to be assigned to spectrally distinct processor zones. We simulate single-qubit and two-qubit gate fidelities in 3P2, as well as coherent shelving between the HF and NS qubit subspaces. We incorporate these physical-level estimates into an architectural resource estimation and logical-level simulation. Our approach integrates mid-circuit measurements and fast qubit operations within a single-species platform, providing a versatile framework for future fault-tolerant quantum computing with neutral-atom qubits. 
+
+I. INTRODUCTION 
+
+Neutral atoms trapped in arrays of optical tweezers are a versatile and scalable platform for quantum in-formation processing [1–7]. Qubit basis states are en-coded in the internal degrees of freedom of individual atoms, and coherent single-qubit operations are achieved through external control fields. Two-qubit entangling gates are implemented via excitation to Rydberg states, where strong, long-range interactions mediate entangle-ment. Advancing quantum processors toward practical applications requires scalable platforms and high-fidelity operations, particularly for emerging approaches to fault-tolerant quantum computing [8]. Recent experiments in neutral atom arrays have established several capa-bilities central to scalable, high-fidelity quantum pro-cessors. These include high-fidelity single-qubit gates and Rydberg-mediated two-qubit operations [9–11], co-herent rearrangement with long-range connectivity that enables quantum error correction protocols [3, 12–16], and photonic link capabilities for modular networking and large-scale entanglement generation [17–23]. These features provide the critical components for realizing ro-bust, error-corrected quantum processing of deep circuits using neutral atom arrays [24, 25]. Atomic platforms support a variety of physical qubit encodings that determine the gate speed, operational   
+
+> ∗These authors contributed equally to this work.
+> †aburgers@umich.edu
+
+control systems, and coherence of quantum gate oper-ations. In alkali atoms, qubits are often encoded in the ground-state hyperfine manifold, where large energy splittings enable fast single-qubit rotations through ei-ther microwave or stimulated Raman transitions [26– 28]. Alkaline-earth-like atoms (AEAs) expand the de-sign space, offering several qubit encodings within the atoms’ ground and metastable manifolds. Nuclear-spin qubits in the ground state and J = 0 metastable states of fermionic isotopes of strontium ( 87 Sr, I = 9 /2) and ytter-bium ( 171 Yb, I = 1 /2) offer robustness against dephasing due to the absence of hyperfine coupling [29–32]. Opti-cal clock qubits exploit the narrow, long-lived transitions between J = 0 states to provide highly coherent storage with spectrally selective optical control [33–36]. Recent experimental demonstrations with fine-structure qubits in AEA metastable manifolds have established large elec-tronic energy splittings as a useful resource for spectrally selective encoding [37, 38]. Beyond electronic encodings, neutral atoms can also exploit motional degrees of free-dom, providing bosonic modes for quantum information processing [39, 40]. This diversity of encodings makes AEAs especially attractive for architectures that assign different processor functions to different internal states. With current physical error rates in neutral atoms [41– 43], as circuit depth of quantum algorithms increases, ac-cumulated gate errors and decoherence eventually limit computational fidelity [41–45]. While optimized com-pilation and execution can partially reduce circuit over-head [46], mid-circuit measurement is critical for effec-tive error correction in neutral atoms [47]. Stabilizer-
+
+> arXiv:2606.08453v1 [quant-ph] 7 Jun 2026
+
+2                   
+
+> FIG. 1. Dual-metastable state qubit encoding in a neutral atom processor. a. Qubits are encoded in the two metastable manifolds of 171 Yb: hyperfine (HF) qubits in the (6 s6p)3P2manifold and nuclear spin (NS) qubits in the (6 s6p)3P0
+> manifold. Both manifolds have single-photon coupling to the (6 sns)3S1Rydberg manifold. The (6 s7s)3S1manifold provides an intermediate state for single-qubit operations in the HF subspace and coherent shelving to the NS subspace. The (6 s5ds )3D3
+> manifold provides a non-destructive readout channel via a 1798 nm cycling transition. b. Processor architecture based on this encoding: the arithmetic block utilizes NS qubits for algorithmic operations, and the QEC block uses HF qubits for QEC protocols. Coherent shelving between the 3P2and 3P0manifolds connects the qubit subspaces, allowing data qubits (DQs) to be transferred from the NS to HF subspaces and combined with ancilla qubits (AQs) in the HF subspace for syndrome extraction.
+
+based QEC codes rely on repetitive syndrome extraction to read out error information from data-carrying qubits without directly measuring, and thus disturbing, the en-coded quantum state [48–50]. Such non-destructive ac-cess can be achieved by introducing an additional set of ancilla qubits (AQs) which are spatially or spectrally isolated from data qubits (DQs) during computation [51– 53]. It is therefore beneficial to separate AQs and DQs into distinct qubit subspaces in dual-type encodings, ei-ther across different atomic species [54–57], between dif-ferent isotopes [58, 59], or within separate manifolds of the same atomic species [33, 60] to minimize latency as-sociated with atom movement. With a variety of pos-sible encodings, the metastable states of AEAs are well suited for mid-circuit measurement and error correction [43, 53, 61–64]. In this paper, we propose a dual-manifold qubit en-coding that exploits the unique metastable structure of 
+
+> 171
+
+Yb to establish two distinct qubit subspaces within the (6 s6p) 3P0 and (6 s6p) 3P2 manifolds. We aim to uti-lize the particular strengths of the 3P2 manifold, where the large hyperfine splitting (∆ HF = 2 π × 6.7 GHz) be-tween the F = 5 /2 and F = 3 /2 states enables fast single-qubit rotations via optical Raman transitions. By using the stretched Zeeman states of the manifold, we can achieve direct, state-selective imaging through the cycling transition (6 s6p) 3P2, F = 5 /2, m F = −5/2 ↔
+
+(6 s5d) 3D3, F = 7 /2, m F = −7/2 to perform qubit readout. In the 3P0 manifold, nuclear-spin-1/2 states 
+
+(6 s6p) 3P0, F = 1 /2, m F = ±1/2 exhibit ultra-long co-herence times [65], and the coherent control of these states has been well studied in both rf-driven [64] and optical-driven schemes [33]. Combining the strengths of both manifolds, as shown in Fig. 1a, we present a scheme in which hyperfine (HF) qubits encoded in the 3P2 man-ifold ( |0⟩HF and |1⟩HF ) are used for error correction op-erations, while nuclear-spin (NS) qubits in the 3P0 mani-fold ( |0⟩NS and |1⟩NS ) are used for arithmetic operations, enabling mid-circuit functionality and coherence over nu-merous QEC cycles. Under this dual-encoding scheme, the ability to co-herently switch between the 3P0 and 3P2 manifolds is critical for our architecture. We simulate coherent trans-fer using a two-photon Raman transition mediated by the (6 s7s) 3S1 state. We note that a similar coherent transfer scheme has recently been demonstrated in fine-structure qubits in bosonic isotopes of AEAs [7, 66]. By leaving the absolute ground state outside the computational sub-space, this encoding also supports erasure conversion to detect loss during qubit operations [39, 43, 61, 67]. Motivated by mid-circuit syndrome measurement, we develop a processor architecture that is partitioned into two operational blocks, an arithmetic block and a QEC block, each encoded in one of the metastable manifolds in our scheme (Fig. 1b). This design links physical qubit properties directly to architectural function, making co-optimization across the qubit and processor levels essen-tial for scaling neutral-atom systems. We therefore simu-3late both hardware-level parameters and circuit-level per-formance metrics to guide and assess the architecture de-sign. The paper is organized as follows: In Sec. II, we intro-duce the encoding spaces together with their initializa-tion and trapping conditions. In Sec. III, we present sim-ulations of the universal gate operations, including single-qubit operations and coherent transfer obtained from a full-state master-equation solver, and discuss the imple-mentation of state readout. Furthermore, we discuss two-qubit operations in Rydberg states and demonstrate a controlled-phase gate. Finally, in Sec. IV, we combine these encoding attributes into an architecture design that is compatible with mid-circuit syndrome measurement and evaluate its performance on benchmark circuits.                               
+
+> II. DUAL-METASTABLE STATE QUBIT ENCODING AND TRAPPING
+> FIG. 2. Optical trapping and imaging in the 3P2man-ifold. a. The readout of HF qubits is achieved by selectively imaging |0⟩HF through 3D3, F = 7 /2, m F=−7/2at 1798 nm. b. In 532 nm tweezers, the (6 s5d)3D3manifold is anti-trapped, requiring a pulsed imaging protocol to avoid atom heating [43]. c. Additionally, we investigate trapping in 850 nm tweezers, where the 3D3manifold is trapped. The imaging process can be interleaved with polarization gradient cooling (PGC) to compensate for heating due to the differential trap depth between 3P2and 3D3.d-e. We estimate the coherence time of HF qubits (initialized in |0⟩HF ) to be T1= 1 .78 s in 532 nm tweezers and T1= 1 .44 s in 850 nm tweezers (details in Appendix C).
+
+Our encoding utilizes two metastable qubit subspaces in 171 Yb. The 3P0, F = 1/2 manifold encodes apurely nuclear spin (NS) qubit in the mF Zeeman levels, which we denote as |0⟩NS ≡ 3P0, F = 1 /2, m F = −1/2
+
+and |1⟩NS ≡ 3P0, F = 1 /2, m F = +1 /2 . The 3P2
+
+F = 3/2 manifold encodes a hyperfine (HF) qubit in the Zeeman stretched states of the F = 3/2and F = 5/2 hyperfine levels, which we define as 
+
+|0⟩HF ≡ 3P2, F = 5 /2, m F = −5/2 and |1⟩HF ≡
+
+> 3
+
+P2, F = 3 /2, m F = −3/2 . The unique characteristics of these encodings inform the qubits’ architectural roles. Due to its nuclear-spin character, the NS qubit pro-vides a coherent computational subspace and a promis-ing storage layer for quantum information. High fidelity single and two-qubit gate operations with NS qubits have already been demonstrated in neutral-atom arrays [9, 64, 65, 69, 70], establishing this encoding as a ro-bust quantum processing resource. The large hyperfine splitting of the HF qubit enables fast single-qubit gate operations, making it well-suited as the primary QEC workspace in our dual-metastable architecture. Combin-ing these qubit encodings realizes a single-species neutral-atom processor that supports long-coherence data qubits and fast mid-circuit syndrome extraction. Direct readout through state-selective imaging is a key advantage of our HF qubit encoding that is not available in the NS qubit. The closed, cycling transition, 3P2, F = 5 /2, m F = −5/2 ↔
+
+> 3
+
+D3, F = 7 /2, m F = −7/2 , provides direct imaging of the |0⟩HF state at 1798 nm (where shortwave infrared (SWIR) InGaAs cameras are available for imaging) with a scattering rate of Γ read = 2 π × 295 kHz [71]. |0⟩HF 
+
+qubits will remain in the 3P2, F = 5 /2 manifold due to selection rules during imaging, thereby enabling an-cilla reuse through reinitialization to the |0⟩HF via op-tical pumping from the other 3P2, F = 5 /2, m F levels. This state-selective fluorescence scheme provides a high-contrast readout without disturbing the NS qubits in the computational subspace. These features accelerate syn-drome extraction, making the 3P2 manifold a valuable resource for deep circuit operation. Our scheme utilizes a large set of 171 Yb electronic states, making it essential to identify tweezer wavelengths that can simultaneously confine all relevant manifolds. We use a master-equation approach to calculate the to-tal light shifts of relevant states across a range of tweezer wavelengths (calculations and polarizability plots are found in Appendix A 1). We consider only red-detuned tweezers where atoms stay trapped in the high inten-sity region of tweezers and find that 532 nm trapping light provides attractive potentials for 1S0, 3P1, 3P0,and 3P2 states, making it a strong candidate for initial tweezer loading. However, 532 nm produces an anti-trapping potential for the 3D3 state, which is the pri-mary imaging transition channel for the 3P2 manifold. To mitigate atomic heating during readout of the |0⟩HF 
+
+state, it is necessary to stroboscopically pulse the 532 nm tweezer to eliminate the anti-trapping potential while the atom is excited to the 3D3, F = 7 /2, m F = −7/2 state (Fig. 2a) [43]. As an alternative, we investigate an additional tweezer trapping wavelength at 850 nm. Here, all of the relevant 4                             
+
+> FIG. 3. Single-qubit operation of 3P2hyperfine qubits. a. Level structure and Raman coupling scheme for imple-menting single-qubit operations within the 3P2manifold. The qubit states |0⟩HF and |1⟩HF are coupled via the intermediate
+> 3S1, F ′= 3 /2, m F′=−3/2state using a two-photon Raman transition. b. Scattering error as a function of the two-photon de-tuning ∆ QB with fixed Raman beam powers. To calculate the error, we include Raman and Rayleigh scattering, differential light shifts, and Doppler effects (See Appendix B 1). The inset shows the corresponding Rabi oscillations for ∆ QB = 2 π×20 GHz and ΩQB = 2 π×2 MHz. We select an operating point that balances scattering error and coherent coupling strength. c. Simulated randomized benchmarking of single-qubit gates [68]. The return probability is shown as a function of the number of Clifford gates. Fitting to a fixed-asymptote decay model yields a single-qubit gate fidelity of FQB = 99 .916% (See Appendix B 2).
+
+states, including 3D3, experience attractive trapping po-tentials. This tweezer wavelength introduces a differen-tial light shift between 3P2 and 3D3, but polarization gradient cooling (PGC) can be utilized between imaging pulses to counteract heating, as is commonly done for non-magic imaging (Fig. 2c) [72, 73]. We estimate the T1 coherence time of qubit states in 532 nm and 850 nm tweezers based on Raman and Rayleigh scattering rates to nearby excited states and simulate the scattering dynamics through quantum tra-jectories (shown in Fig. 2b, d). Here we assume an ob-jective numerical aperture NA = 0 .65 and trap depths U0 = 30 μK for both tweezers, corresponding to a power per site of P = 179 μW for 532 nm and P = 260 μW for 850 nm, respectively. We assume an atomic temperature 
+
+T = 3 μK, which is achievable through gray-molasses and Raman sideband cooling [33]. To estimate T ∗ 
+
+> 2
+
+, we use T ∗ 
+
+> 2
+
+= √e2/3 − 1 × 2ℏ/(ηk BT ), where η is the ratio of differential light shift between the hyperfine qubit states and the electronic ground state light shift [3, 9, 74]. An angle of θ = 55 ◦ between the tweezer polarization and the quantization axis, set by an external magnetic field, ensures that both HF qubit states experience the same trap depth (See Appendix A 2 for details). For 532 nm tweezers we find that T1 = 1 .78 s and T ∗ 
+
+> 2
+
+= 467 .22 ms, and in 850 nm tweezers T1 = 1 .44 s and T ∗ 
+
+> 2
+
+= 82 .73 ms. These coherence values show that both tweezer wave-lengths support hundreds of QEC cycles before qubits decohere [75–78].  
+
+> III. UNIVERSAL GATE OPERATIONS
+
+We now describe the gate primitives required for the HF qubit encoding within our dual-manifold architec-ture. In addition to the single- and two-qubit gates nec-essary to implement arithmetic operations and stabilizer-based QEC protocols [50, 80], this architecture requires coherent transfer between the arithmetic and QEC qubit subspaces. Below, we introduce schemes to realize X, Z, and CZ gates on HF qubits, along with coherent shelving operations that transfer quantum states between the NS and HF qubit subspaces.  
+
+> 1. Single-qubit Operations
+
+The large hyperfine splitting of the 3P2 manifold makes the HF qubit a natural platform for fast local opera-tions in our architecture. We propose an optical Raman scheme that utilizes the 3S1 manifold as the intermedi-ate transition between |1⟩HF and |0⟩HF . We model this operation with a pair of 770 nm beams and include a 
+
+B = 10 G magnetic field to provide the frequency se-lectivity necessary to isolate transitions between the HF qubit states from the other Zeeman sublevels. The se-lected Raman pathway drives the π and σ+ transitions from |1⟩HF and |0⟩HF to 3S1, F ′ = 3 /2, m F = −3/2
+
+(shown in Fig. 2a). We model this process using blue-detuned Raman beams that are ∆ QB = 2 π × 20 GHz away from the 3S1, F ′ = 3 /2 manifold in order to min-imize the errors from unwanted scattering channels (see Appendix B 1). We simulate the single-qubit gate fidelity using global randomized benchmarking [68, 77] (see Appendix B 2). Specifically, we sample 30 random circuits from the Clif-ford group and decompose them into the native gate set 
+
+{RX (π), RX (π/ 2) , RZ (π), RZ (π/ 2) , I} using pyGSTi [81], and vary the circuit depth M . The X-rotations are im-plemented via the Raman process described above, with 5
+
+FIG. 4. Coherent shelving between 3P2 and 3P0 manifolds. a. Level structure and Raman coupling scheme used for the coherent shelving (CS) process. The two Raman pathways, CS |0⟩ and CS |1⟩, are modeled using a pair of 770 nm beams detuned by ∆ HF = 2 π × 6.7 GHz, with an additional nuclear-spin splitting ∆ N = 2 π × 11 .5 kHz, and a single 649 nm beam under a magnetic field B = 10 G. These pathways coherently couple |0⟩HF ↔ | 0⟩NS and |1⟩HF ↔ | 1⟩NS via the 3S1 manifold. b. The scattering error as a function of the two-photon detuning ∆ CS is computed for a fixed Raman beam power, which yields the Rabi frequency Ω CS = Ω |0⟩ 
+
+> CS
+
+= Ω |1⟩ 
+
+> CS
+
+= 2 π × 2 MHz at ∆ CS = 2 π × 20 GHz (Detailed in Appendix B 1). Insets show the corresponding Rabi oscillations, illustrating coherent population transfer. c. Simulated benchmarking of the coherent shelving process. The return probability is monitored as a function of the number of repeated shelving round trips, where each round trip consists of two CS( π) pulses (indicated by red boxes). The resulting decay is fitted to an exponential function to extract the round-trip shelving infidelity {ε|0⟩HF  
+
+> CS
+
+, ε |1⟩HF  
+
+> CS
+
+, ε |+⟩HF  
+
+> CS
+
+} for three initializing states {| 0⟩HF , |1⟩HF , |+⟩HF }. d. Practical implementation of the CS process is modeled using interleaved randomized benchmarking, where M shelving operations are inserted into a fixed-length Clifford sequence ( N = 100) [79]. The extracted shelving fidelity is FCS = 99 .936% (Detailed in Appendix B 2). 
+
+a fixed Rabi frequency, Ω QB = 2 π × 2 MHz. We fit the return probability to a fixed-asymptote decay model (see Appendix A 1) and obtain an estimated single-qubit gate fidelity of FQB = 99 .916% (see Fig. 3c). In the present simulation, Z-rotations are implemented via free evolution, allowing the system to accumulate the required phase for the gate. We note that recent experiments have demonstrated fast, local Z-control via light shifts induced by coupling one qubit state to an excited state [24, 42, 82–84]. Incorporating such techniques would fur-ther improve performance, but is not included in the present model. Additionally, decay from 3S1 to the other 
+
+> 3
+
+PJ manifolds creates a finite probability of population leakage out of the HF computational subspace. We es-timate that during a single R X (π) gate, ∼ 76% of the leaked population can be converted to erasure errors (de-tailed in Appendix B 1). 
+
+2. Coherent Shelving 
+
+Our architecture requires coherent shelving (CS) of ar-bitrary qubit states between the HF and NS qubit sub-spaces to realize mid-circuit QEC protocols. Our CS scheme utilizes an optical Raman process that transfers atomic population between the 3P2 and 3P0 manifolds via the 3S1 intermediate state. This scheme uses the same 770 nm Raman beams from the single-qubit gate protocol, but we make both beams σ+-polarized. To cou-ple to the 3P0 manifold, the 770 nm beams are combined with a single σ−-polarized 649 nm beam (see Fig. 4a). The detuning of all beams is set to ∆ CS = 2 π × 20 GHz with respect to the 3S1, F ′ = 3 /2 manifold. This con-figuration couples the qubit states |0⟩HF ↔ | 0⟩NS and 
+
+|1⟩HF ↔ | 1⟩NS via the individual Raman pathways CS |0⟩
+
+and CS |1⟩. In practical operations, these pathways must be triggered simultaneously to ensure coherent transfer of arbitrary qubit states between subspaces, which can be achieved with a single 649 nm beam and two 770 nm beams. 6A key requirement in this implementation is to iden-tify operating conditions under which the two pathways exhibit identical Raman Rabi frequencies (Ω |1⟩ 
+
+> CS
+
+= Ω |0⟩ 
+
+> CS
+
+=2π × 2 MHz) and accumulate the same phase, which re-quires compensating light shifts on the qubit states from the Raman beams. To address this, we first simulate the two Raman pathways independently and use the scatter-ing error (shown in Fig. 4b) to guide the choice of beam powers. We then optimize the |0⟩HF ↔ | 0⟩NS transition to determine the detuning and intensity of the common 649 nm beam and one of the 770 nm beams. Next, we consider the |1⟩HF ↔ | 1⟩NS transition, which involves ad-ditional off-resonant couplings in 3S1 and calculate the AC Stark shifts induced by the Raman beams (described in Appendix A). We adjust the detuning and intensity of the second 770 nm beam such that both shelving channels exhibit identical transfer dynamics. This realizes a global CS pulse that coherently maps arbitrary superpositions in the HF qubit subspace onto their corresponding states in the NS qubit subspace (the laser parameters used in the simulations are provided in Appendix B 1). To validate of the CS processes, we simulate the pop-ulation transfer fidelity using a round-trip protocol and monitor the return probability (Fig. 4c). In our model, we begin with qubits in |0⟩HF , |1⟩HF , and |+⟩HF =(|0⟩HF + |1⟩HF /√2) states and apply two consecutive CS pulses to transfer the population from the HF qubit subspace to the NS qubit subspace and back. We then fit the return probability for each initial state and ex-tract the following operation errors: ε|0⟩HF  
+
+> CS
+
+= 0 .123%, 
+
+ε|1⟩HF  
+
+> CS
+
+= 0 .138%, and ε|+⟩HF  
+
+> CS
+
+= 0 .147% (for details see Appendix B 2). This is consistent with the scattering er-ror analysis in Fig. 4b, where CS |1⟩ exhibits an additional scattering channel compared to CS |0⟩.In our architecture, CS operations are required for the mid-circuit syndrome-extraction protocol. To char-acterize the performance of these operations, we simulate randomized benchmarking sequences with CS round-trip pulses and extract the return probability [3, 79]. In each sequence, a qubit initialized in |0⟩HF undergoes a fixed-length sequence of N = 100 uniformly sampled Clifford gates, with M CS pulse pairs interleaved between them. By varying M < N , we fit the decay of the return prob-ability and extract a fidelity of FCS = 99 .936% (see Ap-pendix B 2 for details). This analysis closely approxi-mates practical operation and confirms that the shelv-ing process preserves coherence for arbitrary qubit states during transfer between manifolds.  
+
+> 3. Rydberg-mediated Two-qubit Gates
+
+Metastable states in alkaline-earth atoms support fast, high-fidelity two-qubit gates through single-photon cou-pling to the Rydberg manifold [11, 43]. To model two-qubit operations in the 3P2 manifold, we simu-late a controlled-phase (CZ ) gate protocol following                                                         
+
+> FIG. 5. Implementing CZ gate in the 3P2
+> manifold. a. We selectively couple |1⟩HF =
+> 3P2, F = 3 /2, m F=−3/2to the Rydberg state |r⟩≡|v= 54 .28 , L = 0 , F = 1 /2, m F=−1/2⟩with a σ+polarized beam at 326 nm and assume the interatomic spacing to be 2.5μm. The estimated interaction energy at this spacing is
+> V=h×100 MHz [69]. b. The time-optimal phase gate design (brown solid line) is modeled assuming a smooth-step amplitude function (purple solid line) with peak Rabi fre-quency Ω r= 2 π×1.5 MHz. The same state and approach is utilized in Refs. [43, 64]. The resulting time evolution tra-jectory of the qubit subspace {01 ,0r}and {11 , W }is shown on the Bloch sphere, where |W⟩HF = ( |1r⟩HF +|r1⟩HF )/√2.
+> c. An estimate of the operational error budget, including spontaneous decay, finite blockade, and gate design, gives a two-qubit gate infidelity 1 − F 2Q = 0 .249%.
+
+Refs. [64, 89, 90]. Our approach selectively couples 
+
+|1⟩HF to the triplet-connected Rydberg state |r⟩ ≡|v = 54 .28 , L = 0 , F = 1 /2, m F = −1/2⟩ through a circu-larly polarized 326 nm beam [69, 91], shown in Fig. 5a. We choose this Rydberg state due to its interaction strength and isolated pair-energy landscape, previously investigated in [69]. We estimate an interaction energy of V = h×100 MHz for the Rydberg pair state |rr ⟩ at an interatomic separa-tion of 2 .5 μm using the open source multichannel quan-tum defect theory (MQDT) software rydcalc [69, 92]. The calculation assumes a 10 G magnetic field oriented perpendicular to the interatomic axis with angle θ = π/ 2and yields C6 ≈ h × 14 .4 GHz , μ m6. We design a time-7                
+
+> FIG. 6. Typical mid-circuit cycle and circuit compilation. a. Data qubits in the arithmetic logic block (ALU) are routed from the staging zone to the computing zone, where we implement logical single-qubit rotations and transversal two-qubit gate operations. Qubits shelved in the QEC block undergo syndrome extraction, in which stabilizer checks are executed using ancilla qubits in the QEC zone. Coherent shelving operations occur when qubits cross the block boundary between the arithmetic and QEC blocks. After syndrome extraction, ancilla qubits are routed to the QEC and readout zones for measurement and reset, after which they can be reused. Data qubits can either remain available for subsequent logical operations or can be shuttled directly to the data readout zone for qubit readout without additional optical shelving. b. Benchmark ansatz used for architectural analysis [85, 86]. Two logical qubits evolved through Mlayers of uniformly sampled logical Clifford gates interleaved with transversal logical CNOT gates. Syndrome extraction of cycles can be performed either mid-circuit or end-circuit, each with Ncycles. c. Compilation workflow for mapping circuits onto the architecture for resource analysis. We adapt the compiler design from [87, 88] and make it manifold-aware. The input circuit is transpiled to the native gate set, then scheduled, placed, and routed across zones while accounting for movement and resource constraints.
+
+optimal pulse for a computational subspace spanned by 
+
+|0⟩HF , |1⟩HF , and |r⟩ following Refs. [64, 89, 90, 93], and find that the Bell state fidelity is optimized at a de-tuning of ∆ r = 2 π × 9 MHz and peak Rabi frequency Ωr = 2 π × 1.5 MHz. These parameters yield a blockade radius of Rb = ( C6/Ωr )1/6 ≈ 4.6 μm . We model the pulse amplitude as a smooth step function and track the Bloch sphere trajectories in the two-atom basis under the optimized gate shown in Fig. 5b. We simulate the error budget (not including Rydberg laser phase noise) under the above conditions and obtain a Bell state infidelity 1−F 2Q = 0 .249% [11, 94–96]. Additionally, our qubit en-coding scheme intentionally omits the ground state 1S0,leaving it available for future erasure error conversion protocols [43, 70].  
+
+> IV. DUAL-METASTABLE STATE ZONED QUANTUM PROCESSOR
+
+We now discuss how the main features of the dual-metastable qubit encoding, including coherent shelving and direct readout, can be leveraged to support mid-circuit protocols in deep circuit regimes within the zoned architecture framework [16]. Even when using correlated decoding, resource anal-yses for neutral atom platforms predict O(1) syndrome extraction rounds per transversal logical gate [85, 86, 97]. This indicates that quantum error correction still con-tributes significantly to both circuit time and resource overhead in near-term machines. Motivated by these con-siderations, we explore how a dual-metastable encoding scheme can support mid-circuit syndrome measurement in deep circuit regimes. In this section, we focus on imple-menting Clifford operations and transversal CNOT gates on logical qubits within a surface-code-based framework. We organize the architecture of the processor into an arithmetic logic block (ALU) and a QEC block, with qubits separated into ALU and QEC subspaces, as il-lustrated in Fig. 6a. Logical operations are performed in the arithmetic block, while repeated syndrome extrac-tion is delegated to the QEC block. A typical mid-circuit processor cycle begins by preparing and arranging data qubits in the staging zone. The data qubits are then transported to the computing zone, where Clifford op-erations and transversal CNOT gates are executed. Af-ter the logical operation, the data qubits are coherently shelved from the arithmetic manifold to the QEC man-8
+
+FIG. 7. Resource estimation and logical-error analysis. a. Logical benchmark circuits and total execution time for end-circuit and mid-circuit syndrome extraction. In the end-circuit case (upper panel), a number of QEC cycles equal to the code distance d is appended after the randomized benchmark circuit. In the mid-circuit case (lower panel), each logical gate is followed by one QEC cycle, forming a logical gadget. In both cases, we use M = 2 Clifford gates interleaved with transversal CNOT gates. Bars show the circuit duration for different code distances d ∈ { 3, 5, 7} for the two manifold assignments, with orange denoting 3P2 as ALU and 3P0 QEC and blue denoting 3P0 as ALU and 3P2 as QEC. b. Fractional active space-time volume of end-circuit (upper panel) and mid-circuit (lower panel) syndrome extraction of the anstaz circuit. Active space-time volume is separated into QEC (dark blue), arithmetic (red), and routing (green). For each manifold assignment and code distance, the plotted fractions are normalized by the total active operation space-time volume, excluding idling. c. Projected logical error rate as a function of the physical two-qubit gate error rate p2Q (for both 3P0 and 3P2 qubits). Solid and dashed lines denote the assignments using 3P2 as the ALU and 3P0 for QEC, and using 3P0 as the ALU and 3P2 for QEC, respectively, while different colors correspond to code distances d ∈ { 3, 5, 7}.
+
+ifold and routed to the QEC block, where they interact with ancilla qubits for stabilizer parity checks. The an-cilla qubits are then moved to the readout zone and mea-sured. After the required number of syndrome-extraction cycles, the data qubits are coherently transferred back to the ALU subspace and returned to the arithmetic block for the next logical operation. The dual-manifold architecture allows operations in the arithmetic block and QEC block to proceed in paral-lel while maintaining low crosstalk. During syndrome ex-traction, qubits participating in QEC operations occupy a different metastable manifold from those used for arith-metic operations, so the corresponding control fields are off-resonant from one another. This allows single-qubit operations, shelving, Rydberg excitation, and readout to be distributed across zones and manifolds without en-forcing strict spatial or temporal separation. Architecture-level performance is directly informed by which qubit manifolds are assigned to the ALU and QEC blocks. The 3P0 and 3P2 manifolds have different oper-ation times and physical error rates, leading to distinct advantages for logical operations and repeated syndrome extraction. We therefore compare the two possible as-signments for dual encoding, with 3P0 used for arith-metic logic and 3P2 for the QEC in one case, and the roles reversed in the other. To evaluate each configuration, we use the ansatz cir-cuit shown in Fig. 6b. The circuit consists of ran-domly sampled logical Clifford operations interleaved with transversal CNOT gates, followed by the inverse Clifford operation. Syndrome extraction can be applied either at the end of the circuit or inserted after each logical operation (corresponding to an error-corrected logical gadget [86]). This construction probes how re-peated logical operations, transversal entangling gates, and mid-circuit syndrome extraction contribute to the 9architecture-level cost (See Fig. 7). We compile the ansatz circuit using a modification of zone-aware compilation (ZAC) [87, 88], summarized in Fig. 6c. The compiler transpiles the input circuit into the native neutral-atom gate set, schedules single- and two-qubit operations across available zones, places atoms according to zone capacity and reuse constraints, and routes atoms between zones. In addition to the stan-dard zone-aware workflow, we introduce a mapping which specifies the manifold assigned to each zone. This allows the compiler to account for resource analysis such as spa-tial and temporal utilization of the architecture. To describe the architecture-level impact of manifold assignments, we use circuit duration and space-time vol-ume for resource analysis. Here, circuit duration is the total time required to implement the ansatz circuits in our architecture, and space-time volume provides a com-bined metric for the number of qubits used and operation time in each zone (details in Appendix D). We compare the durations of two benchmarking ansatz circuits which implement end-circuit and mid-circuit syndrome extrac-tion, using the two manifold assignments (Fig. 7a). For the benchmark circuits considered here, assigning 3P2 to the QEC block and 3P0 to the ALU block leads to shorter circuit durations as the code distance increases, owing to faster operation speed in 3P2 and the ability to reuse an-cilla qubits after each syndrome-extraction cycle through non-destructive readout. The space-time volume metric allows us to visualize the resource overhead associated with different architecture blocks during ansatz circuit implementation. We fur-ther decompose the active space-time volume (excluding idling) into QEC, ALU, and routing for both syndrome-extraction schedules and manifold assignments. The plotted fractions (Fig. 7b) can be interpreted as the dis-tribution of active processor resources. Assigning 3P2 to the QEC block reduces the relative overhead associated with repeated syndrome extraction and yields a more bal-anced distribution of active operations. This is partic-ularly apparent in the mid-circuit syndrome-extraction schedule, which suggests an opportunity for parallel ex-ecution between the ALU and QEC blocks. As seen in Fig. 7a, the trend becomes more pronounced at larger code distances, where the cost of syndrome extraction grows, and the manifold assigned to the QEC block has a stronger effect on the overall circuit duration. We there-fore choose to assign 3P2 as the QEC block and 3P0 as arithmetic logic for the dual-manifold architecture pro-cessor design. We evaluate the logical-level performance of each assignment by constructing physical-level noise mod-els from the operational fidelities presented in Sec. III and sampling the resulting stabilizer circuits using Stim 
+
+[8, 24, 47, 86, 98–100]. The sampled syndromes are de-coded with PyMatching using a minimum-weight perfect-matching decoder [101]. Fig. 7c shows the projected logi-cal error rate as a function of the two-qubit gate error rate in the 3P2 manifold for several code distances. These re-sults provide insight on how architecture-level scheduling and physical operation errors influence the logical error rate of the dual-metastable architecture.  
+
+> V. DISCUSSION
+
+In this work, we analyze the potential of a dual-metastable-state qubit encoding in 171 Yb for processing architectures that support deep quantum circuits requir-ing mid-circuit operations and repeated syndrome mea-surements. Specifically, we focus on the operational ca-pabilities of the 3P2 manifold, whose hyperfine structure offers fast optical Raman single-qubit gates, direct read-out with ancilla reuse, and Rydberg-mediated entangling gates. Qubits encoded in the 3P2 manifold provide fast control while maintaining a simulated T ∗ 
+
+> 2
+
+= 82 ms in an 850 nm tweezer [3, 76, 102]. We simulate single-qubit gates and coherent transfer to the 3P0 manifold with sub-microsecond operation times and fidelities greater than 99 .9%. We expect further improvements in gate fidelities using quantum optimal control techniques [90]. Using a framework that combines compiler and error modeling, we compare architecture designs with 3P2 and 
+
+> 3
+
+P0 qubits and find that utilizing the operation speed of 3P2 qubits for error correction enables shorter circuit duration and lower resource overhead, particularly in the context of mid-circuit error correction. Our encoding scheme currently does not utilize the ground state , 1S0,which enables the conversion of leakage errors into era-sures for both 3P2 and 3P0, which can result in higher error thresholds for surface codes [43, 61, 64]. We envi-sion using depumping cycles to properly isolate erasures for each qubit manifold, and expect this to further re-duce the resource overhead for error correction in our architecture. Our dual-manifold encoding offers several resource uti-lization optimizations. It allows strategic logical qubit layout that can minimize shuttling when interleaving log-ical operations and mid-circuit readout [103]. The sep-aration of subspaces supports the temporal overlap of arithmetic and QEC functions through non-blocking op-erations, allowing different stages of error correction to proceed in parallel across the processor [104, 105]. With coherent shelving between manifolds, the encoding allows an operating circuit to dynamically reconfigure the ratio of qubits in each manifold depending on the hardware needs of a process. This encourages a tailored circuit layout that maximizes resource utilization based on the target algorithm and type of QEC code [106–108]. In future work, we will investigate how these features can improve processor throughput. Additional advantages of this encoding include support for hierarchical memory protocols using the ultra-long co-herence of qubits in the 3P0 manifold [80, 109–113], and the capability to perform magic state distillation, ow-ing to the operation speeds available in the 3P2 manifold [8, 114]. 10 The strengths of our dual-manifold encoding establish the metastable manifolds in 171 Yb as a versatile plat-form for practical quantum processing, and open several areas of investigation for optimizing neutral atom-based architectures. 
+
+> ACKNOWLEDGMENTS
+
+We acknowledge helpful conversations with Shankari Rajagopal, Gokul Ravi, and Jeff Thompson. We thank Shankari Rajagopal and Gokul Ravi for their careful reading of the manuscript. This work was supported by the Army Research Office (Award No. W911NF-25-1-0146) and the Air Force Office of Scientific Research (Award No. FA9550-24-1-0662). EB acknowledges sup-port from the National Science Foundation through the Graduate Research Fellowship Program. The authors de-clare no competing financial interests. 
+
+> Appendix A: Physical Level Modeling Framework
+
+The backend of our physical-level simulation consists of two components. The internal state evolution is de-scribed by a master-equation approach, incorporating op-tical pumping, universal gate operations, and random-ized benchmarking sequences. The motional dynamics are treated using semiclassical Monte Carlo trajectories, from which we extract the survival probability of atoms in the tweezers under given initial conditions, like tweezer depth and atom temperature.  
+
+> 1. Hyperfine Atomic Master Equation
+
+To describe the complex coupling between hyperfine manifolds, particularly for states with larger total angu-lar momentum (e.g., 3P2, and 3D3), we develop a more general numerical model of the internal dynamics. We use this model primarily to estimate the fidelity of single-qubit operations and the coherent shelving process. We follow Ref. [115], starting from the master equation in the hyperfine structure, 
+
+∂t ˜ρ = − i
+
+ℏ [ ˜HA + ˜HAL , ˜ρ]+ X
+
+> Fe
+
+ΓFe
+
+2Fe + 1 2Fg + 1 
+
+X
+
+> q
+
+
+
+Cq ˜ρC † 
+
+> q
+
+− 12 C† 
+
+> q
+
+Cq ˜ρ − 12 ˜ρC † 
+
+> q
+
+Cq
+
+
+
+.
+
+(A1) We can select an appropriate rotating frame along with its dominating drive to find a set of effective detunings ∆i and obtain the hyperfine atomic Hamiltonian [116] ˜HA/ℏ = X
+
+> Fe,m Fe
+
+(δω Fe,m Fe −∆e) |Je, F e, m Fe ⟩ ⟨ Je, F e, m Fe | ,
+
+(A2) and the atom-light interaction Hamiltonian ˜HAL 
+
+˜HAL /ℏ =
+
+X  
+
+> Fg,m Fg ,F e,m Fe
+
+  12 ΩFg ,m Fg ,F e,m Fe |Fe, m Fe ⟩ Fg , m Fg + c.c. .
+
+(A3) The term δω F,m F accounts for the state-dependent en-ergy shifts arising from both magnetic Zeeman shifts and AC Stark shifts induced by the optical tweezer and ap-plied driving fields. The on-resonance single photon Rabi frequency is obtained from the dipole matrix element, 
+
+ℏΩ( F, m F , F ′, m ′ 
+
+> F
+
+) = ⟨F, m F | d · E |F ′, m ′ 
+
+> F
+
+⟩ =
+
+ 2Ii
+
+ϵ0c
+
+1/2
+
+⟨F m F | er q |F ′ m′ 
+
+> F
+
+⟩ . (A4) We solve the time evolution of the system described by Eq.(A1) using QuTiP [117]. With this scheme, we were able to perform numerical simulations of state initializa-tion, single-qubit rotations within each manifold, shelv-ing between the 3P0 and 3P2 manifolds, and randomized benchmarking.  
+
+> 2. AC Stark Shift and Atomic Polarizability
+
+To identify tweezers wavelengths that can trap all necessary atomic states, we calculate the polarizabil-ity of each state. The polarizability follows Kramers– Heisenberg polarizability tensor [118], 
+
+αμν (β, ω ) = X
+
+> β′
+
+2ωβ′β
+
+ℏ
+
+⟨β|dμ|β′⟩⟨ β′|dν |β⟩
+
+ω2 
+
+> β′β
+
+− ω2 . (A5) Here, atomic states β are labeled by their term symbols, and ℏωβ′β = ℏ(ωβ′ − ωβ ) denotes the energy difference between states. The operator dμ represents a Cartesian component of the electric dipole operator d. The polar-izability tensor can be decomposed into scalar, vector, and tensor contributions. The polarizability tensor can be written as 
+
+αμν = αsδμν + iα v
+
+F ϵσμν Fσ
+
++ αt
+
+2F (2 F − 1) 
+
+h
+
+3( FμFν + Fν Fμ) − 2F (F + 1) δμν 
+
+i
+
+.
+
+(A6) 11 
+
+FIG. 8. Light shifts of relevant states. Our particular application only considers red-detuned tweezers, trapping a single atom in the intensity maxima. In this case, the tweezer wavelength ranging from 800 nm to 1000 nm traps all states of interest. The arithmetic logic block ( 3P2) use 850 nm since we only need to trap 3D3 when we are imaging out of 3P2. The ground state (3P2) has a deeper trap depth compared to the excited state ( 3D3), and we can implement attractive sisyphus cooling. 
+
+The scalar, vector, and tensor polarizability are given by 
+
+αs(β; ω) = X
+
+> β′
+
+23
+
+ωββ ′ |⟨ β|| d|| β′⟩| 2
+
+ℏ(ω2 
+
+> ββ ′
+
+− ω2) , (A7) 
+
+αv (β; ω) = X
+
+> β′
+
+(−1) F +F ′+1 
+
+r 6F (2 F + 1) 
+
+F + 1 
+
+×
+
+ 1 1 1
+
+F F F ′
+
+ ωββ ′ |⟨ β|| d|| β′⟩| 2
+
+ℏ(ω2 
+
+> ββ ′
+
+− ω2) , (A8) 
+
+αt(β; ω) = X
+
+> β′
+
+(−1) F +F ′
+
+s
+
+40 F (2 F + 1)(2 F − 1) 3( F + 1)(2 F + 3) 
+
+×
+
+ 1 1 2
+
+F F F ′
+
+ ωββ ′ |⟨ β|| d|| β′⟩| 2
+
+ℏ(ω2 
+
+> ββ ′
+
+− ω2) . (A9) The quantity ⟨β|| d|| β′⟩ is the reduced dipole matrix el-ement (RDME), which can be extracted from either ex-perimentally measured spontaneous decay rates or esti-mated through branching ratios with measured lifetimes [71, 119]. The spontaneous decay rate is related to the RDME via ΓJ′→J = 1
+
+τ = ω30
+
+3πϵ 0ℏc3
+
+2J + 1 2J′ + 1 
+
+× |⟨ J|| er|| J′⟩| 2 . (A10) The dipole matrix element becomes 
+
+⟨F m F |er q |F ′m′ 
+
+> F
+
+⟩ = ⟨F || er|| F ′⟩(−1) F ′−1+ mF
+
+× √2F + 1 
+
+ F ′ 1 Fm′ 
+
+> F
+
+q −mF
+
+
+
+.
+
+(A11) The reduced matrix elements are related by 
+
+⟨F || er|| F ′⟩ = ⟨J|| er|| J′⟩(−1) F ′+J+1+ I
+
+× p(2 F ′ + 1)(2 J + 1) 
+
+ J J′ 1
+
+F ′ F I
+
+
+
+.
+
+(A12) Assuming a tweezer beam propagating along the ˆ z axis, the AC Stark shift is [120] 
+
+Vac (F, m F ; ω) = − I
+
+2cϵ 0
+
+αs(F ; ω)+ αv (F ; ω) sin(2 γ) mF
+
+2F
+
++ αt(F ; ω) 3m2 
+
+> F
+
+− F (F + 1) 2F (2 F − 1) (3 cos 2 θ − 1) 
+
+!
+
+,
+
+(A13) where γ parametrizes the ellipticity of the polarization, ˆϵ = cos γ ˆx + i sin γ ˆy, and θ is the angle between the electric field and the quantization axis. 
+
+3. Optical Pumping Simulation 
+
+Here we describe the numerical simulations of the proposed optical pumping process. The procedure is modeled using the master-equation solver described in Appendix. A 1. To initialize atoms to |0⟩HF 
+
+after loading them into tweezer array, the popula-tion is first prepared in 1S0, F = 1 /2, m F = −1/2
+
+by depleting 1S0, F = 1 /2, m F = +1 /2 through 
+
+> 3
+
+P1, F = 3 /2, m F = −1/2 using a 556 nm beam with σ− polarization. As shown in Fig. 9, atoms in 
+
+> 1
+
+S0, F = 1 /2, m F = −1/2 are then excited via a12                                 
+
+> FIG. 9. The optical pumping scheme for the initial-ization of |0⟩HF .Suppose the atoms are initially at
+> 1S0, F =12, m F=−12, which can be realized by applying a long 556 nm pulse with σ−polarization. The whole op-tical pumping to the 3P2stretched state can be realized by applying a 556 nm, a 1479 nm, and two 1798 nm pulse simul-taneously for 500 μs , which are all σ−polarization.
+
+two-photon process to 3D2, F = 5 /2, m F = −5/2 .The decay branching ratios from 3D2 to 3P2 and 3P1
+
+are 12% and 88%, respectively. Atoms that decay back to 3P1 will continue to cycle to 3D2 and eventually accumulate in the 3P2 manifold. To prepare all atoms in |0⟩HF stretched state, two 1798 nm, σ−-polarized beam detuned by 2π × 1 GHz, assisted by a 15 Gmagnetic field, drive atoms from 3P2, F = 5 /2, 3/2
+
+to 3D3. From 3D3, subsequent spontaneous decay leads to population accumulation in the dark state |0⟩HF .Numerical simulations indicate that a population of 99 .907% in |0⟩HF can be achieved under this optical pumping protocol. 
+
+> Appendix B: Error Estimation of Raman Transitions
+
+Physical-level noise in Raman-driven operations, in-cluding single-qubit gates in the 3P2 manifold and co-herent shelving, is dominated by photon scattering. We model scattering-induced errors within the qubit sub-space using Pauli error channels. Inelastic Raman scat-tering within the qubit subspace produces population transfer between qubit states and is mapped to a Pauli-
+
+X error channel. Elastic Rayleigh scattering instead pre-serves population but induces dephasing through state-dependent scattering amplitudes, and is mapped to a Pauli-Z channel [121–123].  
+
+> 1. Scattering Error
+
+The scattering contributions are evaluated analytically from the Raman transition amplitudes. Assuming the atom is driven from the initial states |β⟩ to the excited states |k⟩ in the 3S1 manifold by driving field ESβ with polarization p ∈ {− 1, 0, 1}, and eventually decay to the final states β′ with a spontaneous decay rate Γ Sβ ′ 
+
+> 0
+
+with polarization q ∈ {− 1, 0, 1}. The Raman scattering rate is then given by the summation of the transition amplitudes over all driving channels and decay channels [121] ΓRam = X  
+
+> β̸=β′;q
+
+ μSβ ESβ 
+
+2ℏ
+
+2
+
+ΓSβ ′
+
+> 0
+
+× X 
+
+> k;p
+
+⟨β′| er q |k⟩ ⟨ k| er p |β⟩
+
+∆kβ μSβ μSβ ′ 
+
+> 2
+
+(B1) where ∆ eβ (∆ eβ ′ ) denotes the two-photon detuning, μSβ 
+
+(μSβ ′ ) is the spin-orbit coupling dipole-matrix elements between the initial (final) state and the 3S1 excited state, which can be related to the decay rate and transition fre-quency by μmn = (3 πϵ 0ℏc3Γmn  
+
+> 0
+
+/ω 3
+
+> mn
+
+)1/2. Spontaneous Raman scattering occurs when the final state differs from the initial state, while spontaneous Rayleigh scattering corresponds to the case where the initial and final states are identical [123] ΓRay = X  
+
+> k;p;q
+
+μSβ ESβ 
+
+2ℏ
+
+q
+
+ΓSβ 
+
+> 0
+
+⟨β| er p |k⟩ ⟨ k| er p |β⟩
+
+∆Sβ μ2
+
+> Sβ
+
+− μSβ ′ ESβ ′
+
+2ℏ
+
+q
+
+ΓSβ ′
+
+> 0
+
+⟨β′| er q |k⟩ ⟨ k| er q |β′⟩
+
+∆Sβ ′ μ2
+
+> Sβ ′
+> 2
+
+(B2) We can then estimate the scattering error during the Raman transitions via the spontaneous scattering prob-ability over the duration of a π-pulse 
+
+PS = Γ S τπ = πΓSC 
+
+ΩR
+
+(B3) where Γ S = (Γ Ram + Γ Ray )/2. Taking into account both spontaneous photon scat-tering and the requirement of matching Raman Rabi frequencies, we adopt a set of experimentally achiev-able conditions and use them throughout the simulations presented in this work. After compensating the differ-ential light shifts and Zeeman shifts (see Appendix A) through the detuning of each laser beam, all Raman pro-cesses are operated at a common two-photon detuning of 2π ×20 GHz, which provides a favorable balance between scattering-induced infidelity and experimentally achiev-able laser power. The corresponding Raman beam con-figurations used in each simulation are summarized in Table I. A more detailed investigation of experimental limitations and optimizations includes laser phase noise, laser linewidth, and larger two-photon detunings which is left for future experimental work. 13                                          
+
+> Operation Wavelength (nm) Polarization Ground state Power (mW) Beam waist (μm)
+> QB 770 σ+|0⟩HF 0.24 30 770 π|1⟩HF 2.38 30 CS |0⟩
+> 770 σ+|0⟩HF 0.24 30 649 σ−|0⟩NS 0.71 30 CS |1⟩
+> 770 σ+|1⟩HF 0.58 30 649 σ−|1⟩NS 0.71 30 CS 770 σ+|0⟩HF 0.24 30 770 σ+|1⟩HF 0.59 30 649 σ−|0,1⟩NS 0.71 30
+
+TABLE I. The intensity configurations of Raman beams for the simulations of proposed qubit operations. 
+
+2. Qubit Operation Benchmarking 
+
+Under the conditions mentioned in the main text Sec.(III), for a single R X (π) gate, we estimate that ap-proximately 55% of the leaked population eventually de-cays to 1S0, while about 21% ends in 3P0. Both cases can be converted into erasure errors by applying a repump-ing pulse. The remaining ∼ 24% remains within nearby magnetic sublevels of the 3P2 manifold through Raman scattering. Two methods are provided to assess coherent shelving. The first method apply M round trips of shelving for given initial states |0⟩HF , |1⟩HF , |+⟩HF states. By fitting the return probability into exponential decay model [60] 
+
+Pr (M ) = A(1 − εCS )M + (1 − A) (B4) we can extract the round-trip shelving error rate 
+
+ε|0⟩HF  
+
+> CS
+
+, ε |1⟩HF  
+
+> CS
+
+, ε |+⟩HF  
+
+> CS
+
+, as shown in Fig. 4c (upper panel). The lower error rate of CS |0⟩ arises from its cleaner three-level coupling pathway and the stretched-state character of the transition. In comparison, CS |1⟩ is more suscep-tible to additional excited-state scattering pathways and weak off-resonant coupling by the other 770 nm beam from |1⟩NS to 3P2, F = 5 /2, m F = −3/2 , leading to leakage outside the qubit subspace. The second method leverages the interleaved random-ized benchmarking sequence to extract effective depolar-izing channels for the proposed scheme. Our work cur-rently does not include laser intensity and phase noises. For single-qubit operations in the 3P2 manifold, the de-polarizing channel is extracted using randomized bench-marking. We assume atomic temperature 3 μK and with counter-propagating Raman beams, we sample 30 cir-cuits from the Clifford group at various depths M using 
+
+pyGSTi [81], and decompose each circuit into the native gate set. Here our simulation assume the SPAM free case. We evolve each circuit from a given initial state, measure the return probability P r , and fit it using the zeroth-order model 
+
+Pr (M ) = Aα M + 1 /d, (B5) where α is the depolarizing parameter, d = 2 n is the dimension of qubit sub-space, and r is the averaged Clif-ford error rate r = ( d − 1)(1 − α)/d . One can relate the depolarizing error rate p = 1 − α = 2 r for single qubit operation ( n = 1) [68, 79, 124]. We then define rQB as average error rate of the single-qubit gate [79, 124] in 
+
+> 3
+
+P2. This gives an averaged Clifford gate fidelity [68] of 
+
+FQB = 1 − rQB = 99 .916%, as shown in Fig. 3c. For coherent shelving, we extract the depolarizing er-ror rate pCS using interleaved randomized benchmarking. Specifically, we interleave M round trips of the coher-ent shelving operation, CS( π), with a fixed total num-ber N = 100 of 3P2 single-qubit operations, using 30 random circuit samples for each value of M . We again fit the return probability using Eq. ?? and obtain de-polarizing parameter ˜ αCS per shelving round-trip. The estimated average error rate per shelving round-trip is ˜rCS = 12 (d−1)(1 − ˜αCS /α QB ) [79]. The round-trip fidelity of coherent shelving is then as ˜FCS = 1 − ˜rCS = 99 .936% as shown in Fig. 4c (lower panel). And we estimate the depolarizing error rate per single path shelving as 
+
+pCS = 1 − √˜αCS .
+
+Appendix C: Tweezer Coherence Times 
+
+We estimate the T1 coherence time through off-resonant scattering from the tweezers. We adapt the result from Ref.[125] and the general dipole operator to 
+
+dq = Σ ϵpdp [126]. Assume that we have the quantization axis align along the z-axis, the scattering rate Γ β→β′ of an initial state |β⟩ to |β′⟩ resulting from a far-detuned trapping beam with polarization p ∈ {− 1, 0, 1} and in-tensity I is [126] Γβ→β′ = C
+
+> +1
+
+X
+
+> q=−1
+
+X
+
+> k
+> +1
+
+X
+
+> p=−1
+
+ϵp
+
+ ⟨β′|er q |k⟩⟨ k|er p|β⟩
+
+ωkβ − ω
+
++ ⟨β′|er p|k⟩⟨ k|er q |β⟩
+
+ωkβ + ω
+
+ 2,
+
+(C1) where we iterate through all dipole allowed transitions with intermediate states |k⟩, and ω is the tweezer fre-quency and ωkβ is the transition frequency between states 
+
+|k⟩ and |β⟩, and 
+
+C = 8π
+
+3 · I ω 3
+
+(4 πϵ 0)2c4ℏ3 . (C2) We then take the scattering rates among |0⟩ , |1⟩, and a virtual state representing leakage out of qubit sub-space and simulate the dynamic through quantum Monte-Carlo trajectories [127–129]. 
+
+Appendix D: Architecture benchmark and simulation details 
+
+The architecture benchmark in Fig. 6 uses an ansatz circuit inspired by interleaved randomized benchmarking 14 [79, 85, 86]. The circuit consists of M uniformly sam-pled logical Clifford gates, each followed by a transver-sal CNOT gate. The Clifford gates are sampled from 
+
+{H, I, S }, and an inverse Clifford operation is applied at the end so that the ideal circuit returns to a known output state. For circuits with more than two logical qubits, transversal CNOT gates are applied in an alter-nating brickwork pattern. We compare two syndrome-extraction schedules. In the mid-circuit schedule, N = 1 syndrome-extraction round is applied after each logi-cal operation. In the end-circuit schedule, syndrome extraction is deferred until the end of the benchmark block, where N = d rounds are applied. The resource-estimation results in Fig. 7a,b use two logical code patches with circuit depth M = 2 and compare both syndrome-extraction schedules. The ansatz circuit is compiled using the manifold-aware extension we developed based on zone-aware com-pilation [87, 88]. The input circuit is first transpiled into the native neutral-atom gate set {U3, CZ} . The sched-uler then organizes single- and two-qubit operations into time layers and assigns them to processor zones subject to zone-capacity constraints. Placement and routing deter-mine the physical sites and atom transport paths needed to implement the scheduled operations. A manifold-aware zone map specifies whether each zone is assigned to the 3P0 or 3P2 manifold, allowing the compiler to use the corresponding operation durations when estimating the total circuit duration and space time volume as shown in Fig. 7a,b. We define the space-time volume reported in Fig. 7b as 
+
+Vspace −time = X
+
+> {z,o }
+
+Nz,o tz,o , (D1) where the sum runs over architectural zones and oper-ations, Nz,o is the number of occupied physical sites or atoms in zone z executing operation o, and tz,o is the total time those atoms spend when executing the opera-tion in the assigned zone. The active space-time volume includes all non-idle operations in the circuit. These in-clude gate execution, readout, and reset in the arithmetic and QEC blocks, together with routing and other sched-uled control operations. The circuit-level noise model is constructed from physi-cal error rates extracted from randomized benchmarking, as discussed in the main text and Appendix B 1. For 3P0,we use hardware-derived error rates from Refs. [43, 70], as summarized in Table II. For the logical-level results in Fig. 7c, we assign the 3P2 manifold to the QEC block and the 3P0 manifold to the arithmetic block. Noise is in-jected according to both the location and timing of each operation in the compiled circuit, making the circuit-level noise model manifold-aware. We mainly follow Ref. [86] for the physical-level noise model. State-preparation er-rors are applied after reset operations and are modeled as a depolarizing channel. Single-qubit gate errors are ap-plied after each physical single-qubit operation and are modeled as a depolarizing channel. Shuttling errors are applied whenever qubits are moved and are modeled as a biased Pauli channel, followed by a Y channel repre-senting loss during transport. Measurement errors are modeled as bit-flip X errors applied before measurement, which flip the reported measurement outcome. Two-qubit gate errors are applied after each CNOT operation and are modeled as a biased two-qubit Pauli channel [47]. Shelving errors are inserted whenever a qubit is trans-ferred between the arithmetic and QEC zones, corre-sponding to a change between the 3P0 and 3P2 manifolds, and are modeled as a depolarizing channel. We model the decoherence effects from T1 and T ∗ 
+
+> 2
+
+with the Pauli twirling approximation [103, 130]. A single-qubit Pauli channel with error probabilities {pX , p Y , p Z } is written as 
+
+E1Q (ρ) = (1 − p)ρ + X 
+
+> M∈{ X,Y,Z }
+
+pM M ρM †, (D2) where p = pX + pY + pZ . The single-qubit depolariz-ing channel is the special case in which the error is dis-tributed uniformly over the three non-identity Pauli op-erators, pX = pY = pZ = p/ 3. Similarly, two-qubit gate errors are modeled using a two-qubit Pauli channel, 
+
+E2Q (ρ) = (1 − p)ρ + X 
+
+> M∈P
+
+pM M ρM †, (D3) where p = P  
+
+> M∈P
+
+pM and 
+
+P = {IX, IY, IZ, XI, XX, XY, XZ, Y I, Y X, Y Y, Y Z, ZI, ZX, ZY, ZZ }. (D4) A two-qubit depolarizing channel is the special case in which the total two-qubit error probability is distributed uniformly over these 15 non-identity two-qubit Pauli op-erators, i.e., pM = p/ 15 for all M ∈ P .Loss and erasure-type errors are not included in the current simulation framework. These errors can be treated separately from Pauli errors because they cor-respond to detectable leakage or atom loss, rather than an unknown Pauli error acting on qubits [47, 98, 99]. We leave a detailed investigation of erasure-aware noise modeling and decoding to future work. The resulting stabilizer circuits are sampled using Stim [100]. The sampled syndromes are decoded with PyMatching [101] using a minimum-weight perfect-matching decoder. The logical error rate is extracted as a function of the two-qubit gate error rate ϵ2Q in the 3P2
+
+manifold for different surface-code distances. 15                                   
+
+> 3P2physical operation Error Duration ( μs) Noise channel
+> State preparation †0.929% 500 depolarizing Single-qubit gate †0.084% 0.25 depolarizing Two-qubit CZ gate †0.249% 0.25 Pauli Atom transport §0.5% 15 Pauli, Y-error Coherent shelving †0.064% 0.25 depolarizing Qubit Readout ‡0.1% 4000 X-error Coherence T1†1.44 s −Pauli Twirling Dephasing T∗
+> 2†0.082 s −Pauli Twirling
+
+TABLE II. Summary of physical operation errors, durations, and corresponding noise channels for qubits encoded in the 
+
+> 3
+
+P2 manifold. † Values derived from Sec.(II) and Sec.(III).  
+
+> ‡
+
+Estimated by comparing the achievable scattering rate of the 3P2 ↔3 D3 with 1S0 with method mentioned in [61]. § As this value is limited by the atomic temperature and trajec-tory [3, 43], we adopt the value reported in Ref. [103] as a representative estimate. [1] N. Schlosser, G. Reymond, I. Protsenko, and P. Grang-ier, Sub-poissonian loading of single atoms in a micro-scopic dipole trap, Nature 411 , 1024 (2001). [2] H. Bernien, S. Schwartz, A. Keesling, H. Levine, A. Om-ran, H. Pichler, S. Choi, A. S. Zibrov, M. Endres, M. Greiner, V. Vuleti´ c, and M. D. Lukin, Probing many-body dynamics on a 51-atom quantum simulator, Na-ture 551 , 579 (2017). [3] H. J. Manetsch, G. Nomura, E. Bataille, X. Lv, K. H. Leung, and M. Endres, A tweezer array with 6,100 highly coherent atomic qubits, Nature 647 , 60 (2025). [4] A. Holman, Y. Xu, X. Sun, J. Wu, M. Wang, Z. Zhu, B. Seo, N. Yu, and S. Will, Trapping of single atoms in metasurface optical tweezer arrays, Nature 649 , 859– (2026). [5] K.-N. Schymik, S. Pancaldi, F. Nogrette, D. Barredo, J. Paris, A. Browaeys, and T. Lahaye, Single atoms with 6000-second trapping lifetimes in optical-tweezer arrays at cryogenic temperatures, Phys. Rev. Appl. 16 , 034013 (2021). [6] N.-C. Chiu, E. C. Trapp, J. Guo, M. H. Abobeih, L. M. Stewart, S. Hollerith, P. L. Stroganov, M. Kalinowski, A. A. Geim, S. J. Evered, S. H. Li, X. Lyu, L. M. Peters, D. Bluvstein, T. T. Wang, M. Greiner, V. Vuleti´ c, and M. D. Lukin, Continuous operation of a coherent 3,000-qubit system, Nature 646 , 1075 (2025). [7] Y. Li, Y. Bao, M. Peper, C. Li, and J. D. Thompson, Fast, continuous and coherent atom replacement in a neutral atom qubit array, arXiv:2506.15633 (2025). [8] P. Sales Rodriguez, J. M. Robinson, P. N. Jepsen, Z. He, C. Duckering, C. Zhao, K.-H. Wu, J. Campo, K. Bag-nall, M. Kwon, et al. , Experimental demonstration of logical magic state distillation, Nature 645 , 620 (2025). [9] S. Ma, A. P. Burgers, G. Liu, J. Wilson, B. Zhang, and J. D. Thompson, Universal gate operations on nuclear spin qubits in an optical tweezer array of 171 Yb atoms, Phys. Rev. X 12 , 021028 (2022). [10] S. J. Evered, D. Bluvstein, M. Kalinowski, S. Ebadi, T. Manovitz, H. Zhou, S. H. Li, A. A. Geim, T. T. Wang, N. Maskara, H. Levine, G. Semeghini, M. Greiner, V. Vuleti´ c, and M. D. Lukin, High-fidelity parallel entangling gates on a neutral-atom quantum computer, Nature 622 , 268 (2023). [11] R. B.-S. Tsai, X. Sun, A. L. Shaw, R. Finkelstein, and M. Endres, Benchmarking and fidelity response theory of high-fidelity rydberg entangling gates, PRX Quantum 
+
+6, 010331 (2025). [12] A. Y. Kitaev, Quantum computations: algorithms and error correction, Russ. Math. Surv. 52 , 1191 (1997). [13] M. Endres, H. Bernien, A. Keesling, H. Levine, E. R. Anschuetz, A. Krajenbrink, C. Senko, V. Vuletic, M. Greiner, and M. D. Lukin, Atom-by-atom assembly of defect-free one-dimensional cold atom arrays, Science 
+
+354 , 1024 (2016). [14] D. Barredo, S. de L´ es´ eleuc, V. Lienhard, T. Lahaye, and A. Browaeys, An atom-by-atom assembler of defect-free arbitrary two-dimensional atomic arrays, Science 354 ,1021 (2016). [15] H. Levine, A. Keesling, G. Semeghini, A. Omran, T. T. Wang, S. Ebadi, H. Bernien, M. Greiner, V. Vuleti´ c, H. Pichler, and M. D. Lukin, Parallel implementation of high-fidelity multiqubit gates with neutral atoms, Phys. Rev. Lett. 123 , 170503 (2019). [16] D. Bluvstein, H. Levine, G. Semeghini, T. T. Wang, S. Ebadi, M. Kalinowski, A. Keesling, N. Maskara, H. Pichler, M. Greiner, V. Vuletic, and M. D. Lukin, A quantum processor based on coherent transport of entangled atom arrays, Nature 604 , 451 (2022). [17] D. Matsukevich, T. Chaneliere, M. Bhattacharya, S.-Y. Lan, S. Jenkins, T. Kennedy, and A. Kuzmich, Entan-glement of a photon and a collective atomic excitation, Phys. Rev. Lett. 95 , 040405 (2005). [18] X. Luan, J.-B. B´ eguin, A. P. Burgers, Z. Qin, S.-P. Yu, and H. J. Kimble, The integration of photonic crystal waveguides with atom arrays in optical tweezers, Adv. Quantum Technol. 3, 2000008 (2020). [19] S. G. Menon, N. Glachman, M. Pompili, A. Dibos, and H. Bernien, An integrated atom array-nanophotonic chip platform with background-free imaging, Nat. Com-mun. 15 , 6156 (2024). [20] Y. Li and J. D. Thompson, High-rate and high-fidelity modular interconnects between neutral atom quantum 16 
+
+processors, PRX Quantum 5, 020363 (2024). [21] L. Li, X. Hu, Z. Jia, W. Huie, W. K. C. Sun, Aakash, Y. Dong, N. Hiri-O-Tuppa, and J. P. Covey, Paral-lelized telecom quantum networking with an ytterbium-171 atom array, Nat. Phys. 21 , 1826 (2025). [22] J. Sinclair, J. Ramette, B. Grinkemeyer, D. Bluvstein, M. D. Lukin, and V. Vuleti´ c, Fault-tolerant optical in-terconnects for neutral-atom arrays, Phys. Rev. Res. 7,013313 (2025). [23] S. Sunami, S. Tamiya, R. Inoue, H. Yamasaki, and A. Goban, Scalable networking of neutral-atom qubits: Nanofiber-based approach for multiprocessor fault-tolerant quantum computers, PRX Quantum 6, 010101 (2025). [24] D. Bluvstein, S. J. Evered, A. A. Geim, S. H. Li, H. Zhou, T. Manovitz, S. Ebadi, M. Cain, M. Kali-nowski, D. Hangleiter, et al. , Logical quantum proces-sor based on reconfigurable atom arrays, Nature 626 ,58 (2024). [25] D. Bluvstein, A. A. Geim, S. H. Li, S. J. Evered, J. P. Bonilla Ataides, G. Baranes, A. Gu, T. Manovitz, M. Xu, M. Kalinowski, et al. , A fault-tolerant neutral-atom architecture for universal quantum computation, Nature 649 , 39 (2026). [26] M. P. Jones, J. Beugnon, A. Ga¨ etan, J. Zhang, G. Messin, A. Browaeys, and P. Grangier, Fast quantum state control of a single trapped neutral atom, Phys. Rev. A 75 , 040301 (2007). [27] M. Saffman, T. G. Walker, and K. Mølmer, Quantum information with rydberg atoms, Rev. Mod. Phys. 82 ,2313 (2010). [28] Z.-H. Wang, G. Li, Y.-L. Tian, and T.-C. Zhang, Quan-tum state manipulation of single-cesium-atom qubit in a micro-optical trap, Front. Phys. 9, 634 (2014). [29] A. Noguchi, Y. Eto, M. Ueda, and M. Kozuma, Quantum-state tomography of a single nuclear spin qubit of an optically manipulated ytterbium atom, Phys. Rev. A 84 , 030301 (2011). [30] A. D. Ludlow, M. M. Boyd, J. Ye, E. Peik, and P. O. Schmidt, Optical atomic clocks, Rev. Mod. Phys. 87 ,637 (2015). [31] A. Cooper, J. P. Covey, I. S. Madjarov, S. G. Porsev, M. S. Safronova, and M. Endres, Alkaline-earth atoms in optical tweezers, Phys. Rev. X 8, 041055 (2018). [32] S. Saskin, J. T. Wilson, B. Grinkemeyer, and J. D. Thompson, Narrow-line cooling and imaging of ytter-bium atoms in an optical tweezer array, Phys. Rev. Lett. 
+
+122 , 143002 (2019). [33] J. W. Lis, A. Senoo, W. F. McGrew, F. R¨ onchen, A. Jenkins, and A. M. Kaufman, Midcircuit operations using the omg architecture in neutral atom arrays, Phys. Rev. X 13 , 041035 (2023). [34] I. S. Madjarov, J. P. Covey, A. L. Shaw, J. Choi, A. Kale, A. Cooper, H. Pichler, V. Schkolnik, J. R. Williams, and M. Endres, High-fidelity entanglement and detection of alkaline-earth rydberg atoms, Nat. Phys. 16 , 857 (2020). [35] A. W. Young, W. J. Eckner, W. R. Milner, D. Kedar, M. A. Norcia, E. Oelker, N. Schine, J. Ye, and A. M. Kaufman, Half-minute-scale atomic coherence and high relative stability in a tweezer clock, Nature 588 , 408 (2020). [36] D. T. C. Allcock, W. C. Campbell, J. Chiaverini, I. L. Chuang, E. R. Hudson, I. D. Moore, A. Ransford, C. Ro-man, J. M. Sage, and D. J. Wineland, omg blueprint for trapped ion quantum computing with metastable states, Appl. Phys. Lett. 119 , 214002 (2021). [37] S. Pucher, V. Kl¨ usener, F. Spriestersbach, J. Geiger, A. Schindewolf, I. Bloch, and S. Blatt, Fine-structure qubit encoded in metastable strontium trapped in an optical lattice, Phys. Rev. Lett. 132 , 150605 (2024). [38] G. Unnikrishnan, P. Ilzh¨ ofer, A. Scholz, C. H¨ olzl, A. G¨ otzelmann, R. K. Gupta, J. Zhao, J. Krauter, S. Weber, N. Makki, et al. , Coherent control of the fine-structure qubit in a single alkaline-earth atom, Phys. Rev. Lett. 132 , 150606 (2024). [39] A. L. Shaw, P. Scholl, R. Finkelstein, R. B.-S. Tsai, J. Choi, and M. Endres, Erasure cooling, control, and hyperentanglement of motion in optical tweezers, Sci-ence 388 , 845 (2025). [40] Z. Li, R. De, R. Sivakumar, W. Huie, H.-T. Wei, J. D. Piel, C. H. Greene, K. R. A. Hazzard, Z. Z. Yan, and J. P. Covey, Quantum science with arrays of metastable helium-3 atoms, arXiv:2601.06763 (2026). [41] S. J. Evered, M. Xu, S. H. Li, A. A. Geim, J. Ataides, M. Kalinowski, D. Bluvstein, N. Maskara, C. Kokail, M. Greiner, et al. , High-fidelity entangling gates and nonlocal circuits with neutral atoms, arXiv:2604.25987 (2026). [42] A. Radnaev, W. Chung, D. Cole, D. Mason, T. Bal-lance, M. Bedalov, D. Belknap, M. Berman, M. Blakely, I. Bloomfield, et al. , Universal neutral-atom quantum computer with individual optical addressing and non-destructive readout, PRX Quantum 6, 030334 (2025). [43] B. Zhang, G. Liu, G. Bornet, S. P. Horvath, P. Peng, S. Ma, S. Huang, S. Puri, and J. D. Thompson, Lever-aging erasure errors in logical qubits with metastable 
+
+> 171
+
+Yb atoms, arXiv:2506.13724 (2025). [44] J. Preskill, Quantum Computing in the NISQ era and beyond, Quantum 2, 79 (2018). [45] J. Preskill, Beyond nisq: The megaquop machine, ACM Trans. Quant. Comp. 6, 1 (2025). [46] T. G. Draper, S. A. Kutin, E. M. Rains, and K. M. Svore, A logarithmic-depth quantum carry-lookahead adder, arXiv: quant-ph/0406142 (2004). [47] K. Sahay, J. Jin, J. Claes, J. D. Thompson, and S. Puri, High-threshold codes for neutral-atom qubits with bi-ased erasure errors, Phys. Rev. X 13 , 041013 (2023). [48] A. M. Steane, Error correcting codes in quantum theory, Phys. Rev. Lett. 77 , 793 (1996). [49] D. Gottesman, Stabilizer codes and quantum error cor-rection (California Institute of Technology, 1997). [50] A. G. Fowler, M. Mariantoni, J. M. Martinis, and A. N. Cleland, Surface codes: Towards practical large-scale quantum computation, Phys. Rev. A 86 , 032324 (2012). [51] M. Kjaergaard, M. E. Schwartz, J. Braum¨ uller, P. Krantz, J. I.-J. Wang, S. Gustavsson, and W. D. Oliver, Superconducting qubits: Current state of play, Annu. Rev. Condens. Matter Phys. 11 , 369–395 (2020). [52] E. Deist, Y.-H. Lu, J. Ho, M. K. Pasha, J. Zeiher, Z. Yan, and D. M. Stamper-Kurn, Mid-circuit cavity measurement in a neutral atom array, Phys. Rev. Lett. 
+
+129 , 203602 (2022). [53] M. Norcia, W. Cairncross, K. Barnes, P. Battaglino, A. Brown, M. Brown, K. Cassella, C.-A. Chen, R. Coxe, D. Crow, et al. , Midcircuit qubit measurement and re-arrangement in a 171 Yb atomic array, Phys. Rev. X 13 ,041034 (2023). 17 
+
+[54] S. Anand, C. E. Bradley, R. White, V. Ramesh, K. Singh, and H. Bernien, A dual-species rydberg ar-ray, Nat. Phys. 20 , 1744 (2024). [55] D. Petrosyan, S. Norrell, C. Poole, and M. Saffman, Fast measurements and multiqubit gates in dual-species atomic arrays, Phys. Rev. A 110 , 042404 (2024). [56] Z. Zhang, J. Arunseangroj, and W. Xu, Dual-type dual-element atom arrays for quantum information process-ing, arXiv:2503.16896 (2025). [57] R. White, V. Ramesh, A. Impertro, S. Anand, F. Cesa, G. Giudici, T. Iadecola, H. Pichler, and H. Bernien, Quantum cellular automata on a dual-species rydberg processor, arXiv:2601.16257 (2026). [58] Y. Zeng, P. Xu, X. He, Y. Liu, M. Liu, J. Wang, D. Pa-poular, G. Shlyapnikov, and M. Zhan, Entangling two individual atoms of different isotopes via rydberg block-ade, Phys. Rev. Lett. 119 , 160502 (2017). [59] Y. Nakamura, T. Kusano, R. Yokoyama, K. Saito, K. Higashi, N. Ozawa, T. Takano, Y. Takasu, and Y. Takahashi, Hybrid atom tweezer array of nuclear spin and optical clock qubits, Phys. Rev. X 14 , 041062 (2024). [60] H.-X. Yang, J.-Y. Ma, Y.-K. Wu, Y. Wang, M.-M. Cao, W.-X. Guo, Y.-Y. Huang, L. Feng, Z.-C. Zhou, and L.-M. Duan, Realizing coherently convertible dual-type qubits with the same ion species, Nat. Phys. 18 , 1058 (2022). [61] Y. Wu, S. Kolkowitz, S. Puri, and J. D. Thompson, Era-sure conversion for fault-tolerant quantum computing in alkaline earth rydberg atom arrays, Nat. Commun. 13 ,4657 (2022). [62] K. Singh, C. E. Bradley, S. Anand, V. Ramesh, R. White, and H. Bernien, Mid-circuit correction of cor-related phase errors using an array of spectator qubits, Science 380 , 1265 (2023). [63] T. M. Graham, L. Phuttitarn, R. Chinnarasu, Y. Song, C. Poole, K. Jooya, J. Scott, A. Scott, P. Eichler, and M. Saffman, Midcircuit measurements on a single-species neutral alkali atom quantum processor, Phys. Rev. X 13 , 041051 (2023). [64] S. Ma, G. Liu, P. Peng, B. Zhang, S. Jandura, J. Claes, A. P. Burgers, G. Pupillo, S. Puri, and J. D. Thompson, High-fidelity gates and mid-circuit erasure conversion in an atomic qubit, Nature 622 , 279 (2023). [65] A. Jenkins, J. W. Lis, A. Senoo, W. F. McGrew, and A. M. Kaufman, Ytterbium nuclear-spin qubits in an optical tweezer array, Phys. Rev. X 12 , 021027 (2022). [66] R. Tao, O. Lib, F. Gyger, H. Timme, M. Ammenwerth, I. Bloch, and J. Zeiher, Universal gates for a metastable qubit in strontium-88, arXiv:2506.10714 (2025). [67] P. Scholl, A. L. Shaw, R. B.-S. Tsai, R. Finkelstein, J. Choi, and M. Endres, Erasure conversion in a high-fidelity rydberg quantum simulator, Nature 622 , 273 (2023). [68] E. Knill, D. Leibfried, R. Reichle, J. Britton, R. B. Blakestad, J. D. Jost, C. Langer, R. Ozeri, S. Sei-delin, and D. J. Wineland, Randomized benchmarking of quantum gates, Phys. Rev. A 77 , 012307 (2008). [69] M. Peper, Y. Li, D. Y. Knapp, M. Bileska, S. Ma, G. Liu, P. Peng, B. Zhang, S. P. Horvath, A. P. Burg-ers, and J. D. Thompson, Spectroscopy and modeling of 
+
+> 171
+
+Yb rydberg states for high-fidelity two-qubit gates, Phys. Rev. X 15 , 011009 (2025). [70] A. Senoo, A. Baumg ˜A¯Irtner, J. W. Lis, G. M. Vaidya, Z. Zeng, G. Giudici, H. Pichler, and A. M. Kaufman, High-fidelity entanglement and coherent multi-qubit mapping in an atom array, arXiv:2506.13632 (2025). [71] S. G. Porsev, Y. G. Rakhlina, and M. G. Kozlov, Electric-dipole amplitudes, lifetimes, and polarizabili-ties of the low-lying levels of atomic ytterbium, Phys. Rev. A 60 , 2781 (1999). [72] D. J. Wineland, J. Dalibard, and C. Cohen-Tannoudji, Sisyphus cooling of a bound atom, J. Opt. Soc. Am. B 
+
+9, 32 (1992). [73] K. N. Blodgett, D. Peana, S. S. Phatak, L. M. Terry, M. P. Montes, and J. D. Hood, Imaging a 6Li atom in an optical tweezer 2000 times with Λ-enhanced gray molasses, Phys. Rev. Lett. 131 , 083001 (2023). [74] S. Kuhr, W. Alt, D. Schrader, I. Dotsenko, Y. Mirosh-nychenko, A. Rauschenbeutel, and D. Meschede, Anal-ysis of dephasing mechanisms in a standing-wave dipole trap, Phys. Rev. A 72 , 023406 (2005). [75] J. Beugnon, C. Tuchendler, H. Marion, A. Ga¨ etan, Y. Miroshnychenko, Y. R. Sortais, A. M. Lance, M. P. Jones, G. Messin, A. Browaeys, and P. Grangier, Two-dimensional transport and transfer of a single atomic qubit in optical tweezers, Nat. Phys. 3, 696 (2007). [76] H. Levine, D. Bluvstein, A. Keesling, T. T. Wang, S. Ebadi, G. Semeghini, A. Omran, M. Greiner, V. Vuleti´ c, and M. D. Lukin, Dispersive optical systems for scalable raman driving of hyperfine qubits, Phys. Rev. A 105 , 032618 (2022). [77] T. Xia, M. Lichtman, K. Maller, A. W. Carr, M. J. Piotrowicz, L. Isenhower, and M. Saffman, Random-ized benchmarking of single-qubit gates in a 2d array of neutral-atom qubits, Phys. Rev. Lett. 114 , 100503 (2015). [78] R. Guo, X. He, C. Sheng, J. Yang, P. Xu, K. Wang, J. Zhong, M. Liu, J. Wang, and M. Zhan, Balanced coherence times of atomic qubits of different species in a dual 3 × 3 magic-intensity optical dipole trap array, Phys. Rev. Lett. 124 , 153201 (2020). [79] E. Magesan, J. M. Gambetta, B. R. Johnson, C. A. Ryan, J. M. Chow, S. T. Merkel, M. P. da Silva, G. A. Keefe, M. B. Rothwell, T. A. Ohki, M. B. Ketchen, and M. Steffen, Efficient measurement of quantum gate error by interleaved randomized benchmarking, Phys. Rev. Lett. 109 , 080505 (2012). [80] Q. Xu, J. P. Bonilla Ataides, C. A. Pattison, N. Raveen-dran, D. Bluvstein, J. Wurtz, B. Vasi´ c, M. D. Lukin, L. Jiang, and H. Zhou, Constant-overhead fault-tolerant quantum computation with reconfigurable atom arrays, Nat. Phys. 20 , 1084 (2024). [81] E. Nielsen, K. Rudinger, T. Proctor, A. Russo, K. Young, and R. Blume-Kohout, Probing quantum processor performance with pygsti, Quantum Sci. Tech-nol. 5, 044002 (2020). [82] D. C. McKay, C. J. Wood, S. Sheldon, J. M. Chow, and J. M. Gambetta, Efficient z gates for quantum comput-ing, Phys. Rev. A 96 , 022330 (2017). [83] T. Graham, Y. Song, J. Scott, C. Poole, L. Phuttitarn, K. Jooya, P. Eichler, X. Jiang, A. Marra, B. Grinke-meyer, et al. , Multi-qubit entanglement and algorithms on a neutral-atom quantum computer, Nature 604 , 457 (2022). [84] G. Wang, W. Xu, C. Li, V. Vuleti´ c, and P. Cappel-laro, Individual-atom control in an array through phase 18 
+
+modulation, Phys. Rev. Appl. 23 , 024072 (2025). [85] M. Cain, C. Zhao, H. Zhou, N. Meister, J. P. B. Ataides, A. Jaffe, D. Bluvstein, and M. D. Lukin, Correlated decoding of logical algorithms with transversal gates, Phys. Rev. Lett. 133 , 240602 (2024). [86] R. Ismail, I.-C. Chen, C. Zhao, R. Weiss, F. Liu, H. Zhou, S.-T. Wang, A. Sornborger, and M. Kornjaˇ ca, Transversal architecture for megaquop-scale quantum simulation with neutral atoms, PRX Quantum (2026). [87] W.-H. Lin, D. B. Tan, and J. Cong, Reuse-aware compi-lation for zoned quantum architectures based on neutral atoms, in 2025 IEEE International Symposium on High Performance Computer Architecture (HPCA) (IEEE, 2025) pp. 127–142. [88] Y. Stade, W.-H. Lin, J. Cong, and R. Wille, Routing-aware placement for zoned neutral atom-based quan-tum computing, in 2025 IEEE/ACM International Con-ference On Computer Aided Design (ICCAD) (IEEE, 2025) pp. 1–9. [89] S. Jandura and G. Pupillo, Time-Optimal Two- and Three-Qubit Gates for Rydberg Atoms, Quantum 6, 712 (2022). [90] S. Jandura, J. D. Thompson, and G. Pupillo, Optimiz-ing rydberg gates for logical-qubit performance, PRX Quantum 4, 020336 (2023). [91] Y. Nakamura, N. Ozawa, T. Kusano, R. Yokoyama, K. Shibata, T. Takano, Y. Takasu, and Y. Takahashi, Development of a high-power ultraviolet laser system and observation of fast coherent rydberg excitation of ytterbium, J. Phys. Soc. Jpn. 94 , 014301 (2025). [92] R. Kuroda, V. M. Hughes, M. Poitrinal, M. Peper, and J. D. Thompson, Microwave spectroscopy and mul-tichannel quantum defect analysis of ytterbium 6 snp ,6snf , and 6 sng rydberg states, Phys. Rev. A 112 ,042817 (2025). [93] D. F. Locher, J. Old, K. Brechtelsbauer, J. Holschbach, H. P. B¨ uchler, S. Weber, and M. M¨ uller, Multi-qubit rydberg gates for quantum error correction, arXiv:2512.00843 (2025). [94] S. de L´ es´ eleuc, D. Barredo, V. Lienhard, A. Browaeys, and T. Lahaye, Analysis of imperfections in the coher-ent optical excitation of single atoms to rydberg states, Phys. Rev. A 97 , 053803 (2018). [95] A. Pagano, S. Weber, D. Jaschke, T. Pfau, F. Meinert, S. Montangero, and H. P. B¨ uchler, Error budgeting for a controlled-phase gate with strontium-88 rydberg atoms, Phys. Rev. Res. 4, 033019 (2022). [96] A. L. Shaw, Learning, verifying,and erasing errors on a chaotic and highlyentangled programmable quantum simulator , Ph.d. thesis, California Institute of Technol-ogy, Department of Physics (2024). [97] H. Zhou, C. Duckering, C. Zhao, D. Bluvstein, M. Cain, A. Kubica, S.-T. Wang, and M. D. Lukin, Resource analysis of low-overhead transversal architectures for re-configurable atom arrays, in Proceedings of the 52nd Annual International Symposium on Computer Archi-tecture (2025) pp. 1432–1448. [98] H. Perrin, S. Jandura, and G. Pupillo, Quantum error correction resilient against atom loss, Quantum 9, 1884 (2025). [99] F. Kobayashi and S. Nagayama, Erasure-tolerance scheme for the surface codes on neutral atom quantum computers, IEEE Transactions on Quantum Engineer-ing 7, 1–13 (2026). [100] C. Gidney, Stim: a fast stabilizer circuit simulator, Quantum 5, 497 (2021). [101] O. Higgott and C. Gidney, Pymatching v2, https:// github.com/oscarhiggott/PyMatching (2022). [102] J. Miles, M. Lichtman, A. Scott, J. Scott, S. Nor-rell, M. Bedalov, D. Belknap, D. Cole, S. Eubanks, M. Gillette, et al. , Qubit syndrome measurements with a high fidelity rb-cs rydberg gate, arXiv:2603.13492 (2026). [103] J. Viszlai, S. Lin, S. Dangwal, C. Bradley, V. Ramesh, J. Baker, H. Bernien, and F. T. Chong, Interleaved log-ical qubits in atom arrays, in 2025 IEEE International Symposium on High Performance Computer Architec-ture (HPCA) (IEEE, 2025) pp. 261–274. [104] C. V. Ramamoorthy and H. F. Li, Pipeline architecture, ACM Comput. Surv. 9, 61–102 (1977). [105] S. M. Patom¨ aki, M. F. Gonzalez-Zalba, M. A. Fogarty, Z. Cai, S. C. Benjamin, and J. J. L. Morton, Pipeline quantum processor architecture for silicon spin qubits, npj Quantum Inf. 10 , 31 (2024). [106] H. Wang, D. B. Tan, P. Liu, Y. Liu, J. Gu, J. Cong, and S. Han, Q-pilot: Field programmable qubit array compilation with flying ancillas, in Proceedings of the 61st ACM/IEEE Design Automation Conference (2024) pp. 1–6. [107] T. Kobori, Y. Suzuki, Y. Ueno, T. Tanimoto, S. Todo, and Y. Tokunaga, Lsqca: Resource-efficient load/store architecture for limited-scale fault-tolerant quantum computing, in 2025 IEEE International Symposium on High Performance Computer Architecture (HPCA) 
+
+(IEEE, 2025) pp. 304–320. [108] W. J. Huggins, T. Khattar, A. Xu, M. Harrigan, C. Kang, G. H. Low, A. Fowler, N. C. Rubin, and R. Babbush, The fluid allocation of surface code qubits (flasq) cost model for early fault-tolerant quantum al-gorithms, arXiv:2511.08508 (2025). [109] D. D. Thaker, T. S. Metodi, A. W. Cross, I. L. Chuang, and F. T. Chong, Quantum memory hierarchies: Ef-ficient designs to match available parallelism in quan-tum computing, SIGARCH Comput. Archit. News 34 ,378–390 (2006). [110] V. Giovannetti, S. Lloyd, and L. Maccone, Quantum random access memory, Phys. Rev. Lett. 100 , 160501 (2008). [111] F. Cesa, H. Bernien, and H. Pichler, Fast and error-correctable quantum ram, arXiv:2503.19172 (2025). [112] S. Stein, S. Sussman, T. Tomesh, C. Guinn, E. Tureci, S. F. Lin, W. Tang, J. Ang, S. Chakram, A. Li, et al. ,Hetarch: Heterogeneous microarchitectures for super-conducting quantum systems, in Proceedings of the 56th Annual IEEE/ACM International Symposium on Mi-croarchitecture (2023) pp. 539–554. [113] W. Yang, J. Chadwick, M. H. Teo, J. Viszlai, and F. Chong, Spacetime-efficient and hardware-compatible complex quantum logic units in qldpc codes, arXiv:2602.14273 (2026). [114] S. Bravyi and A. Kitaev, Universal quantum computa-tion with ideal clifford gates and noisy ancillas, Phys. Rev. A 71 , 022316 (2005). [115] D. A. Steck, Quantum and atom optics (available online at http://steck.us/teaching, revision 0.16.7, 2026). [116] T. H. Einwohner, J. Wong, and J. C. Garrison, Analyt-ical solutions for laser excitation of multilevel systems in the rotating-wave approximation, Phys. Rev. A 14 ,19 
+
+1452 (1976). [117] N. Lambert, E. Gigu` ere, P. Menczel, B. Li, P. Hopf, G. Su´ arez, M. Gali, J. Lishman, R. Gadhvi, R. Agarwal, 
+
+et al. , Qutip 5: The quantum toolbox in python, Phys. Rep. 1153 , 1 (2026). [118] B. H. Bransden and C. J. Joachain, Physics of atoms and molecules (Pearson Education India, 2003). [119] T. O. H¨ ohn, R. A. Villela, E. Zu, L. Bezzo, R. M. Kroeze, and M. Aidelsburger, Determining the 3p0
+
+excited-state tune-out wavelength of 174 Yb in a triple-magic lattice, PRX Quantum 7, 010303 (2026). [120] R. M. Kroeze, S. L. Kristensen, and S. Pucher, 171 Yb reference data, arXiv:2509.04416 (2025). [121] I. Moore, W. Campbell, E. Hudson, M. Boguslawski, D. Wineland, and D. Allcock, Photon scattering er-rors during stimulated raman transitions in trapped-ion qubits, Phys. Rev. A 107 , 032413 (2023). [122] R. Ozeri, W. M. Itano, R. B. Blakestad, J. Britton, J. Chiaverini, J. D. Jost, C. Langer, D. Leibfried, R. Reichle, S. Seidelin, J. H. Wesenberg, and D. J. Wineland, Errors in trapped-ion quantum gates due to spontaneous photon scattering, Phys. Rev. A 75 , 042329 (2007). [123] H. Uys, M. J. Biercuk, A. P. VanDevender, C. Os-pelkaus, D. Meiser, R. Ozeri, and J. J. Bollinger, De-coherence due to elastic rayleigh scattering, Phys. Rev. Lett. 105 , 200401 (2010). [124] E. Magesan, J. M. Gambetta, and J. Emerson, Charac-terizing quantum gates via randomized benchmarking, Phys. Rev. A 85 , 042311 (2012). [125] S. D¨ orscher, R. Schwarz, A. Al-Masoudi, S. Falke, U. Sterr, and C. Lisdat, Lattice-induced photon scatter-ing in an optical lattice clock, Phys. Rev. A 97 , 063419 (2018). [126] M. J. Martin, Quantum Metrology and Many-Body Physics: Pushing the Frontier of the Optical Lattice Clock , Ph.d. thesis, University of Colorado, Department of Physics (2013). [127] R. Nowak and J. P. Clemens, Quantum trajectory the-ory of superradiant emission from randomly distributed atomic samples, J. Opt. Soc. Am. B 25 , 564 (2008). [128] J. P. Clemens, L. Horvath, B. C. Sanders, and H. J. Carmichael, Collective spontaneous emission from a line of atoms, Phys. Rev. A 68 , 023809 (2003). [129] A. J. Daley, Quantum trajectories and open many-body quantum systems, Adv. Phys. 63 , 77–149 (2014). [130] J. Ghosh, A. G. Fowler, and M. R. Geller, Surface code with decoherence: An analysis of three superconducting architectures, Phys. Rev. A 86 , 062318 (2012).

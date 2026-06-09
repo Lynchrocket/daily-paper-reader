@@ -1,0 +1,783 @@
+Title: Breakeven demonstration of quantum low-density parity-check codes
+
+URL Source: https://arxiv.org/pdf/2606.06455v1
+
+Published Time: Fri, 05 Jun 2026 01:36:23 GMT
+
+Number of Pages: 16
+
+Markdown Content:
+## Breakeven demonstration of quantum low-density parity-check codes 
+
+Edwin Tham, ∗ Michael L. Goldman, ∗ Shantanu Debnath, Ashay N. Patel, Jyothi Saraladevi, Jason Nguyen, Erik Nielsen, Neal Pisenti, Kenneth Wright, John Gamble, and Nicolas Delfosse 
+
+IonQ, Inc. 
+
+(Dated: June 5, 2026) High-rate quantum low-density parity-check (qLDPC) codes are a leading candidate for fault-tolerant quantum computing. They feature higher encoding rates than planar alternatives such as the surface code, but their implementation often entails significant hardware hurdles like the need for long-range couplers. We leverage the flexibility of a trapped-ion quantum computer to demonstrate nine quantum error-correcting codes with starkly different qubit connectivity requirements on a sin-gle device without any hardware reconfiguration. These experiments span three families of quantum error-correcting codes: qLDPC codes, topological codes, and concatenated codes. With a qLDPC code encoding 4 logical qubits into 18 physical qubits, we achieve a logical error rate up to 9× better than a previous demonstration of a similar code on superconducting solid-state qubits. Moreover, our implementation exhibits breakeven performance, with some instances achieving qubit lifetimes comparable to or slightly exceeding that of our trapped-ion qubits. We use a novel implementation of the optical-metastable-ground (OMG) architecture for addressable mid-circuit measurement and reset, which enables us to perform these experiments without any ion transport or dedicated coolant ions, requirements that typically consume a large fraction of the runtime or ion count of trapped-ion quantum computers. 
+
+I. INTRODUCTION 
+
+To reach large-scale quantum computing applications, a fault-tolerant quantum computer (FTQC) is needed that integrates extensive quantum error correction [1]. The surface code is one of the most popular choices because it can be implemented with a two-dimensional grid of qubits using only gates acting on neighboring qubits [2, 3]. Leveraging the simplicity of this planar lay-out, the surface code was realized experimentally by sev-eral teams [4–8], culminating in Google’s experiment be-low the breakeven point, which produced a logical qubit whose lifetime is longer than the lifetime of its constituent physical qubits [7]. However, the qubit overhead of the surface code is massive, as each logical qubit is expected to consume a block of hundreds of physical qubits to reach a sufficiently low logical error rate for large-scale applications. Quantum low-density parity-check (qLDPC) codes [9, 10] are obtained by relaxing the locality constraints of surface code, allowing qubits to interact beyond nearest-neighbors as long as each qubit is interacting with a bounded number of other qubits. This results in codes that encode a larger number of logical qubits per block, reducing the qubit overhead of quantum error correc-tion. Numerical simulations show that several fami-lies of qLDPC codes can outperform surface codes, and FTQC architectures relying on qLDPC codes are dis-cussed in [11–15]. Promising qLDPC codes include hy-pergraph product (HPG) codes [16, 17], bivariate bicycle (BB) codes [18] and their BB5 variant [19], and radial codes [20]. However, experimental realization of these codes is non-trivial due to the challenge in implementing  
+
+> ∗These authors contributed equally to this work.
+
+non-local gates. Only recently has one particular instance of a BB code been shown experimentally, which used a superconducting chip equipped with long-range couplers built to implement the specific BB code [21]. This ex-periment realized a BB code encoding 4 logical qubits in 18 physical ones, using 32 superconducting transmon qubits, achieving a logical error rate of ≈ 9% per logical qubit per syndrome cycle. In this work, we use a trapped ion device with forty 133 Ba + ions to demonstrate five distinct high-rate qLDPC codes. On a BB5 code with the same num-ber of logical and physical qubits as the code demon-strated in [21], we achieve a logical error rate 4× better for Z errors and 9× better for X errors. We also re-port logical performance in the breakeven regime. Defin-ing a qubit lifetime as the 1/e survival time averaged over all single-qubit state preparations, several code in-stances exhibit logical qubit lifetimes comparable to, and in one case marginally exceeding, that of the underlying physical qubits. In one code, the lifetime exhibited was 
+
+3.95 ± 0.68 s, compared to 3.3 ± 0.9 s for our physical qubits. To underscore the flexibility of our hardware, we also implemented two other classes of codes with larger en-coding rates than the surface code: topological codes on a manifold with toroidal topology and concatenated codes. We experimentally demonstrate toric codes, en-coding two logical qubits per block, and the [[4 , 2, 2]] code concatenated with itself, producing a code encoding 4 logical qubits into 16 physical qubits. Trapped-ion de-vices had previously been used to demonstrate various block codes [22–26], and larger concatenated codes [27]. The performance and flexibility of our device stem from several key attributes. First, all our gates are based on steerable Raman beams addressing any ion – or pairs thereof – in a single stationary chain, obviating the need 
+
+> arXiv:2606.06455v1 [quant-ph] 4 Jun 2026
+
+2for physical transport. Second, we use a novel implemen-tation [28] of the optical-metastable-ground (OMG) ar-chitecture [29], which allows for in-place mid-circuit mea-surements (MCM) of many qubits in each MCM round. Notably our OMG implementation allows ancilla qubits, which are measured frequently via MCM in any QEC im-plementation, to also be used to sympathetically cool the chain. This avoids a need for dedicated coolant ions and sidesteps signficant technical complexities in co-trapping different atomic species. Finally, by not using physical transport at all, we have far more modest cooling require-ments. By contrast, in trapped-ion systems that rely heavily on transport of ions, transport and cooling con-sume a majority of execution time (see Fig 4 in [30]), and up to 50% of the ions are used only for cooling [30, 31].  
+
+> II. MID-CIRCUIT MEASUREMENT
+
+Our implementation uses a trapped-ion quantum com-puter based on a stationary chain of forty 133 Ba + ions (Fig. 1A). Each physical qubit is encoded in the states 
+
+|0S ⟩ ≡ | F = 0 , m F = 0 ⟩ and |1S ⟩ ≡ | F = 1 , m F = 0 ⟩ of the ground 62S1/2 manifold. Figure 1D depicts the stan-dard sequence of physical operations in our system. In step (i), we apply sequential, unitary one- and two-qubit gates by illuminating target ions in 62S1/2 with 532 nm beams (green). This architecture features all-to-all con-nectivity without qubit transport. The sequence from (ii)-(vi) shows our implementa-tion of MCM using the OMG architecture. This archi-tecture utilizes phase-coherent shuttling of a qubit be-tween multiple encoding manifolds within a single ion, enabling MCM without needing to shuttle ions spatially. It also enables sympathetic cooling of the chain’s mo-tional modes without dedicated coolant ions or a sepa-rate atomic species, which constitute up to half of the ions in other trapped-ion devices [30]. To protect idle qubits not measured during MCM, we first shelve the whole chain by using a global, bichro-matic 1762 nm beam (red) to transfer all ions from 
+
+|0S ⟩ and |1S ⟩ to the states |0D ⟩ ≡ | F = 2 , m F = +1 ⟩
+
+and |1D ⟩ ≡ | F = 3 , m F = +1 ⟩ in the metastable 52D5/2
+
+manifold. These states were chosen because their en-ergy difference is first-order insensitive to magnetic fluc-tuations around our system’s bias field of 17 .7 G. We then selectively deshelve some subset of ions to be mea-sured, termed the readout ancillae , through combined use of the same steerable Raman and global 1762 nm beams. Raman beams sequentially drive transitions on specific ions between one of the qubit states and an in-termediate state in 52D5/2, and then the 1762 nm beam deshelves all population in that intermediate state in par-allel across all ions. Once some subset of ions has been deshelved to 62S1/2, we drive the strong 62S1/2 − 62P1/2
+
+and 52D3/2 − 62P1/2 transitions with global beams at 493 and 650 nm, which either cools the ions or optically pumps them to |0S ⟩.We use this mechanism twice: first in (iii) to deshelve the |1D ⟩ qubit state of the readout ancillae in order to perform the state readout, and then in (iv) to sympathet-ically cool the chain with the ancillae and reset them to 
+
+|0S ⟩. Finally, in (v) and (vi), we reverse this mechanism to reinitialize the ancillae to |0D ⟩ before deshelving the entire chain and resuming regular gate operations. Detecting fluorescence during steps (iii) and (iv) pro-vides two bits of information per MCM round. The first is the measurement bit, where a bright detection consti-tutes a projective measurement of |1D ⟩. The second is the check bit, where unexpected fluorescence (i.e., a dark ancilla or bright non-ancilla qubit) indicates an ion that has leaked out of its proper qubit manifold. This leakage can be caused by either technical imperfections in the MCM sequence or spontaneous emission during Raman gates. We do not convert detected leakage into erasures but rather post-select, rejecting shots in which leakage was detected during any MCM round or in a final check at the end of the circuit (see Appendix E for rejection rates). As with a similar technique developed in neutral atoms [32], this reduces the MCM detection infidelity, idle errors of non-ancilla qubits during MCM, and one-and two-qubit gate errors. We remark that this form of post-selection, which has also been used in other QEC demonstrations [21, 27], can be converted to erasures with conditional reset of af-flicted ions. To justify the scalability of this approach and demonstrate that leakages do not significantly af-fect the logical error rate, we simulate re-initializing a leaked qubit rather than discarding the entire measure-ment (see Appendix E). We find that in the regime of our experiments, doing so only degrades the logical error rate by about 10-17%. To our knowledge, our system constitutes the first demonstration of the full OMG architecture in a fully-functional trapped-ion quantum computer. Components of the architecture have been demonstrated previously in two ions [33, 34] or a single ion [35], but this work is the first to implement it with both the scale, in terms of the number of qubits and the ability to entangle them, and the fidelity required to perform computations comparable to those demonstrated here.  
+
+> III. QUANTUM MEMORY EXPERIMENTS
+
+All the codes considered in this work are stabilizer codes [36]. Recall that a stabilizer code with param-eters [[ n, k, d ]] is defined by a set of stabilizer genera-tors S1, . . . , S n−k that are independent commuting Pauli operators acting on n qubits. The code space is a 2k-dimensional subspace of the n-qubit Hilbert space, com-prised of the set of code states |ψ⟩ satisfying Si |ψ⟩ = |ψ⟩
+
+for all i. We interpret |ψ⟩ as a state of k logical qubits en-coded within n physical qubits . The minimum distance , d,of the code measures its error-correction capability, with any error acting on up to ⌊(d − 1) /2⌋ physical qubits be-3AOD 
+
+> AOD
+> Trap
+> Ancillae Code
+> block
+> MCM
+> Shelve /
+> Deshelve
+
+# A B C
+
+# D   
+
+> "Groundstate"
+> Qubit
+> "Metastable"
+> Qubit
+> Intermediate
+> Transfer State
+> Gates
+> 532 nm
+> Raman
+> (i) (ii)
+> 1762 nm
+> Coherent S-D
+> Transfer
+> (iii)
+> 1762 nm
+> Selective move to
+> intermediate state,
+> then D to S transfer ,
+> and then readout.
+> 532 nm
+> Raman
+> 493 nm
+> (iv)
+> 1762 nm
+> Repeat selective
+> deshelve for state;
+> 532 nm
+> Raman
+> then reset and cool.
+> (v)
+> Reshelve ancillae
+> 532 nm
+> Raman
+> 1762 nm
+> (vi)
+> Coherent D-S
+> transfer
+> 1762 nm
+> 493 nm
+> Qubits
+> X checks Z checks
+
+FIG. 1: A Ion trap depicted with six ions, with gates realized via counter-propagating Raman beams (green) steered from either side with acousto-optic deflectors (AOD). B An example syndrome circuit, measuring XXXX and 
+
+ZZZZ stabilizers of the [[4 , 2, 2]] code using two ancillae (top rails) prepared in |+⟩ and measured in X. C Tanner graphs whose edges depict the highly non-trivial two-qubit gate connectivities required to implement syndrome circuits for a BB5 (left) and concatenated [[4 , 2, 2]] (right) codes. D Sequence of physical operations implementing OMG-based mid-circuit measurements, with open (filled) circles representing the 0 (1) qubit state. ing correctable. In this work, we implement only CSS codes where each Si is a product of I and either X or Z,but not both. To protect a code state from error, a syndrome circuit 
+
+is executed repeatedly, which measures stabilizer gen-erators Si of the code. In the absence of errors, these measurements return a trivial outcome since |ψ⟩ is a +1-eigenstate of Si. Conversely, non-trivial measurement outcomes indicate presence of error. We refer to one set of measurements of all stabilizer generators as a code cy-cle , and the corresponding duration as a cycle time . Syn-drome data gathered over one or more code cycles may be used to infer corrections, using a classical algorithm called the decoder .A Pauli operator P , written as the product of single-qubit operators P = P1P2 . . . P n, can be measured by successively applying two-qubit controlled-Pj gates for all j’s, controlled on a single |+⟩ ancilla. Measurement of the ancilla in the X basis then yields the value of P .Our syndrome circuits are constructed similarly, and we designate na ≤ 40 − n out of forty ions as ancillae. At any given time, each ancilla ion is assigned to measure a specific stabilizer generator Si. Controlled-Pauli gates corresponding to each Si are implemented sequentially. For illustration, Figure 1B shows our syndrome circuit for the [[4 , 2, 2]] code using na = 2 .On our system, the na ancillae are all measured simul-taneously, in consolidated MCM rounds (Fig. 1B “MCM” box, and Fig. 1D), then simultaneously reset and re-assigned to subsequent stabilizer generators. Batched ancilla measurement following sequential gates was con-sidered in [19]; here we chose 10 ≤ na ≤ 16 , subject to ion availability. In experiments with multiple code cy-cles r, ancilla usage is pipelined such that ancillae that are read out in a single MCM round may measure sta-bilizer generators from consecutive code cycles. This pipelining is intended to avoid idling unassigned ancil-lae and to minimize the number of MCM rounds to at most ⌈r(n − k)/n a⌉. While all of our syndrome circuits follow the template of Fig. 1B, many permutations of stabilizer generators, and ordering of gates implementing their measurements, are possible. For brevity, we refer interested readers to Appendix B where we detail specific gate and Si ordering, along with na for each code. Our experimental demonstrations encompass three families of quantum error correction codes: five distinct qLDPC codes, two topological codes on a toric mani-fold, and a concatenated code. Our qLDPC codes con-41 2 3 4 5 6     
+
+> # of Syndrome Rounds
+> 0
+> 20
+> 40
+> 60
+> 80
+> 100
+> Survival Probability (%)
+> qLDPC X-basis Survival Curve
+> BB5-[[18, 4, 3]]
+> BB5-[[24, 4, 4]]
+> BB5-[[30, 4, 5]]
+> GB4-[[16, 2, 4]]
+> GB4-[[26, 2, 5]] 123456
+> # of Syndrome Rounds
+> 0
+> 20
+> 40
+> 60
+> 80
+> 100
+> Survival Probability (%)
+> qLDPC Z-basis Survival Curve
+> BB5-[[18, 4, 3]]
+> BB5-[[24, 4, 4]]
+> BB5-[[30, 4, 5]]
+> GB4-[[16, 2, 4]]
+> GB4-[[26, 2, 5]]
+
+FIG. 2: Survival probabilities 1 − εL for the BB5 and GB4 codes versus number of syndrome cycles, for X (left) and 
+
+Z (right) eigenstate memory experiments. Circles and solid curves indicate the probability that no logical fault occurred in any of the encoded logical qubits. Diamonds and dashed curves indicate the corresponding probabilities without decoding. Error bars around each point depict the 95% Wilson confidence intervals for our estimate of εL,and shaded bands show 95% confidence bands around each fitted curve. sist of three BB5 codes and two GB4 codes (GB codes with weight-4 stabilizer generators) – see Appendix A for a full description of each code. The topological codes are a d = 3 standard toric code [37] and a d = 4 ro-tated variant [38, 39]. The concatenated code is the 
+
+[[4 , 2, 2]] code concatenated with itself. The patterns of controlled-Pauli gates needed to implement the syndrome circuits vary greatly across codes, and especially across code families. In order to accommodate just one qLDPC instance, Wang et al. , built bespoke “air-bridge” struc-tures alongside Josephson junctions with carefully opti-mized resistances [21, 40]. It is remarkable, therefore, that our all-to-all gate connectivity affords us the flex-ibility to implement all three families of codes with no hardware reconfiguration. Furthermore, we leverage that flexibility to choose advantageous mappings of qubits to ions, which lets us increase the average fidelity of the two-qubit gates used by each circuit with no change to the underlying hardware, calibrations, or circuit struc-ture (see Appendix F). We performed memory experiments , where a quantum state is prepared and then kept coherent as long as possi-ble. In error-corrected experiments, a code cycle – which corresponds to one full set of stabilizer generator mea-surements – is repeated several times. For each code (en-coding k logical qubits), we prepare four logical states corresponding to ±1-eigenstates of ZkL or XkL (here sub-script L denotes a logical operator). For +1 -eigenstates, it suffices to prepare all physical qubits in |0⟩n or |1⟩n;for −1-eigenstates, this is followed by one layer of single-qubit Pauli operators targeting physical qubits that im-plement ZL or XL. Each logical state preparation is sub-jected to a number of code cycles r ∈ { 1, 2, ..., 6}, after which all qubits of the code are destructively measured in X or Z respectively. We run each memory experiment 
+
+2, 000 times, for a total of 48 , 000 shots per code instance. All syndrome data and qubit measurement outcomes are then decoded using the beam decoder with width 32 and 340 iterations [41]. 
+
+IV. RESULTS 
+
+A logical error is said to occur if, upon decoding, any of the code’s k logical qubits is found to be in a state at the end of a memory experiment that differs from its initial preparation. For each code instance and state prepara-tion basis, we calculate the logical error rate per cycle εL
+
+across code cycles r and fit to: 
+
+1 − εL = C
+
+ 1 + e−r/τ 
+
+2
+
+k
+
+(1) with fit parameters τ and C. From that fit, we infer the 
+
+logical error rate per cycle per qubit as, pL = 12 (1 −e−1/τ ).Figure 2 depicts plots of 1 − εL, with their fits as sur-vival curves, for our qLDPC code implementations. Ta-ble I tabulates pL and τ , showing the logical performance of the codes we implement. Also shown, is the BB6 
+
+[[18 , 4, 4]] code in Wang et al [21]. Compared to our BB5 
+
+[[18 , 4, 3]] implementation, which contains the same num-ber of physical and logical qubits, we achieve 4× and 9×
+
+lower logical error rate for XL and ZL eigenstate memory experiments, respectively. To facilitate comparisons between physical and logical qubits, we multiply τ for each code by its cycle time (see Appendix G) to obtain 1/e survival times TX and 
+
+TZ for the XL and ZL eigenstates. We remark that, by construction, TX measures survival time of an XL
+
+eigenstate in exactly the same sense as T ∗ 
+
+> 2
+
+relaxations do 5                                                                                                                                  
+
+> Xeigenstate Zeigenstate Code τpL(10 −2)τpL(10 −2)BB [[18 ,4,3]] 24 .4±5.42.01 ±0.645 .7±3.01.08 ±0.8
+> BB [[24 ,4,4]] 22 .4±3.52.18 ±0.436 .9±7.91.34 ±0.4
+> BB [[30 ,4,5]] 14 .3±6.13.37 ±2.427 .0±4.41.82 ±0.3
+> GB [[16 ,2,4]] 33 .2±5.41.48 ±0.344 .7±7.01.10 ±0.2
+> GB [[26 ,2,5]] 26 .0±4.41.88 ±0.451 .5±9.50.96 ±0.2
+> Tor [[18 ,2,3]] 31 .9±5.61.54 ±0.349 .7±9.81.00 ±0.2
+> Tor [[16 ,2,4]] 27 .6±3.11.78 ±0.236 .5±1.01.35 ±0.5
+> Con [[16 ,4,4]] 15 .6±4.03.10 ±1.020 .8±5.6 2 .35 ±0.83 [[18 ,4,4]] [21] -8.67 ±0.21 -9.15 ±0.27
+
+TABLE I: Logical error rate per logical qubit per syndrome cycle pL, and fit τ , for memory experiments with X and Z eigenstates. ‘Tor”=Toric and “Con”=Concatenated. The BB6 code of [21] is also shown for comparison. for physical qubits under white phase noise, as measured under standard Ramsey experiments. Our qubits were measured to have T ∗ 
+
+> 2
+
+≈ 1.1 ± 0.3 s (Appendix I). For a more general comparison of qubit memories, we turn to a notion of lifetime similar to that introduced in the below-breakeven surface code experiment by Google Quantum AI et al [7]. Let N (t) be a quantum channel representing the noise accumulated on a qubit over a time 
+
+t ≥ 0. Define the channel decay speed as 
+
+DN (t) := − ddt FN (t) (2) where FN (t) is the process fidelity of N (t) with respect to the trivial identity channel [42]. The channel decay speed measures the rapidity at which the fidelity drops. We define the lifetime of a qubit that undergoes the chan-nel N (t), to be LN := 1 /D N (0) . This generalizes the notion of a 1/e survival time, under exponential decay, to be independent of specific preparation bases. We take 
+
+N (t) to be decay channels natural to each type of qubit. Our definition of lifetime differs from [7] only in the con-straint imposed while inferring the parameters of N (t)
+
+(see Appendix H). Table II summarizes lifetimes for all the codes we im-plement. We remark that, in all codes except the con-catenated [[4 , 2, 2]] , the logical qubit lifetimes are com-parable to our physical qubits’ to within error bars, and they even exceed it slightly in several cases.  
+
+> V. CONCLUSION
+
+We described several quantum error correction experi-ments in the breakeven regime, demonstrating three fam-ilies of codes that have played a critical role in the de-velopment of the theory of quantum error correction and which today have the potential to enable the first gener-ations of fault-tolerant quantum computers. With a BB code, we demonstrate logical error rates 4× and 9× lower                                                                                       
+
+> Code TX(s) TZ(s) TN(s) BB [[18 ,4,3]] 1.03 ±0.23 1 .93 ±0.13 2 .44 ±0.47
+> BB [[24 ,4,4]] 1.46 ±0.23 2 .41 ±0.52 3 .36 ±0.57
+> BB [[30 ,4,5]] 1.23 ±0.52 2 .31 ±0.38 2 .91 ±1.12
+> GB [[16 ,2,4]] 1.17 ±0.19 1 .57 ±0.25 2 .55 ±0.41
+> GB [[26 ,2,5]] 1.65 ±0.28 3.27 ±0.63.95 ±0.68
+> Tor [[18 ,2,3]] 1.25 ±0.22 1 .95 ±0.38 2 .84 ±0.51
+> Tor [[16 ,2,4]] 0.97 ±0.11 1 .28 ±0.04 2 .11 ±0.19
+> Con [[16 ,4,4]] 0 .60 ±0.16 0 .81 ±0.22 1 .32 ±0.34
+> Physical* 1.1±0.3∞3.3±0.9
+
+TABLE II: Logical qubit lifetimes in seconds. The 1/e 
+
+survival times, TX & TZ for eigenstates of XL & ZL are shown, as well as the overall lifetime TN of each qubit undergoing decay under channel N . *For physical qubits, values shown are T ∗ 
+
+> 2
+
+and T1 respectively. for Z and X errors compared to a prior experiment on superconducting qubits [21]. This flexibility and level of performance was enabled by our novel implementation of the OMG architecture, which was the first demonstration in a fully-functioning trapped-ion quantum computer. As we transition toward larger systems, it would be beneficial to increase parallelism to reduce the execution time of large quantum circuits. Increasing the number of Raman zones, for example, speeds up gates and se-lective shelving/deshelving operations. A more scalable direction is based on electronic qubit control [43], in-creasing gate parallelism while leveraging record-fidelity gates [44, 45]. Furthermore enhancements like dynamical decoupling, which we do not use here, can significantly improve both T ∗ 
+
+> 2
+
+of physical qubits, as well as the life-times of logical qubits. A perennial challenge in implementing QEC lies in rec-onciling hardware constraints of specific systems, with the needs of particular codes. Quantum LDPC codes, which are a leading contender for qubit-efficient fault-tolerant architectures thanks to their high encoding-rate, are notoriously challenging to implement given their two-qubit gate connectivity requirements. Trapped-ions, which boasts record-fidelity gates and a high degree of flexibility and reconfigurability, makes a natural plat-form for the implementation of qLDPC codes. This work highlights the implementation of high-rate qLDPC codes leveraging the flexibility of a trapped-ion device, and therefore represents an important milestone towards a qubit-efficient fault-tolerant architecture. 6
+
+[1] P. W. Shor, Fault-tolerant quantum computation, in Pro-ceedings of 37th conference on foundations of computer science (IEEE, 1996) pp. 56–65. [2] E. Dennis, A. Kitaev, A. Landahl, and J. Preskill, Topological quantum memory, Journal of Mathematical Physics 43 , 4452 (2002). [3] A. G. Fowler, M. Mariantoni, J. M. Martinis, and A. N. Cleland, Surface codes: Towards practical large-scale quantum computation, Physical Review A 86 , 032324 (2012). [4] S. Krinner, N. Lacroix, A. Remm, A. Di Paolo, E. Genois, C. Leroux, C. Hellings, S. Lazar, F. Swiadek, J. Her-rmann, et al. , Realizing repeated quantum error correc-tion in a distance-three surface code, Nature 605 , 669 (2022). [5] Y. Zhao, Y. Ye, H.-L. Huang, Y. Zhang, D. Wu, H. Guan, Q. Zhu, Z. Wei, T. He, S. Cao, et al. , Realization of an error-correcting surface code with superconducting qubits, Physical Review Letters 129 , 030501 (2022). [6] D. Bluvstein, S. J. Evered, A. A. Geim, S. H. Li, H. Zhou, T. Manovitz, S. Ebadi, M. Cain, M. Kali-nowski, D. Hangleiter, J. P. Bonilla Ataides, N. Maskara, I. Cong, X. Gao, P. Sales Rodriguez, T. Karolyshyn, G. Semeghini, M. J. Gullans, M. Greiner, V. Vuletić, and M. D. Lukin, Logical quantum processor based on reconfigurable atom arrays, Nature 626 , 58 (2024). [7] Google Quantum AI, Quantum error correction below the surface code threshold, Nature 638 , 920 (2025). [8] T. He, W. Lin, R. Wang, Y. Li, J. Bei, J. Cai, S. Cao, D. Chen, K. Chen, X. Chen, et al. , Experimental quan-tum error correction below the surface code threshold via all-microwave leakage suppression, Physical Review Let-ters 135 , 260601 (2025). [9] D. J. MacKay, G. Mitchison, and P. L. McFadden, Sparse-graph codes for quantum error correction, IEEE Transactions on Information Theory 50 , 2315 (2004). [10] N. P. Breuckmann and J. N. Eberhardt, Quantum low-density parity-check codes, PRX quantum 2, 040101 (2021). [11] Q. Xu, J. P. Bonilla Ataides, C. A. Pattison, N. Raveen-dran, D. Bluvstein, J. Wurtz, B. Vasić, M. D. Lukin, L. Jiang, and H. Zhou, Constant-overhead fault-tolerant quantum computation with reconfigurable atom arrays, Nature Physics 20 , 1084 (2024). [12] T. J. Yoder, E. Schoute, P. Rall, E. Pritchett, J. M. Gam-betta, A. W. Cross, M. Carroll, and M. E. Beverland, Tour de gross: A modular quantum computer based on bivariate bicycle codes, arXiv preprint arXiv:2506.03094 (2025). [13] P. Webster, L. Berent, O. Chandra, E. T. Hockings, N. Baspin, F. Thomsen, S. C. Smith, and L. Z. Cohen, The pinnacle architecture: Reducing the cost of breaking rsa-2048 to 100 000 physical qubits using quantum ldpc codes, arXiv preprint arXiv:2602.11457 (2026). [14] M. Cain, Q. Xu, R. King, L. R. Picard, H. Levine, M. En-dres, J. Preskill, H.-Y. Huang, and D. Bluvstein, Shor’s algorithm is possible with as few as 10,000 reconfigurable atomic qubits, arXiv preprint arXiv:2603.28627 (2026). [15] F. Tripier, W. C. Chung, J. Young, S. Alam, B. Bjork, A. Brodutch, F. L. Buessen, N. J. Coble, T. Dellaert, D. Maslov, et al. , Fault-tolerant quantum computing with trapped ions: The walking cat architecture, arXiv preprint arXiv:2604.19481 (2026). [16] M. A. Tremblay, N. Delfosse, and M. E. Beverland, Constant-overhead quantum error correction with thin planar connectivity, Physical Review Letters 129 , 050504 (2022). [17] A. Aydin, N. Delfosse, and E. Tham, Cyclic Hypergraph Product Code, arXiv:2511.09683 (2026). [18] S. Bravyi, A. W. Cross, J. M. Gambetta, D. Maslov, P. Rall, and T. J. Yoder, High-threshold and low-overhead fault-tolerant quantum memory, Nature 627 ,778 (2024). [19] M. Ye and N. Delfosse, Quantum error correction for long chains of trapped ions, arXiv:2503.22071 (2025). [20] T. R. Scruby, T. Hillmann, and J. Roffe, High-threshold, low-overhead and single-shot decodable fault-tolerant quantum memory, PRX Quantum 7, 020310 (2026). [21] K. Wang, Z. Lu, C. Zhang, G. Liu, J. Chen, Y. Wang, Y. Wu, S. Xu, X. Zhu, F. Jin, Y. Gao, Z. Tan, Z. Cui, N. Wang, Y. Zou, A. Zhang, T. Li, F. Shen, J. Zhong, Z. Bao, Z. Zhu, Y. Han, Y. He, J. Shen, H. Wang, J.-N. Yang, Z. Song, J. Deng, H. Dong, Z.-Z. Sun, W. Li, Q. Ye, S. Jiang, Y. Ma, P.-X. Shen, P. Zhang, H. Li, Q. Guo, Z. Wang, C. Song, H. Wang, and D.-L. Deng, Demonstration of low-overhead quantum error correction codes, Nature Physics (2026). [22] D. Aasen, A. Aeppli, S. Armstrong, S. Banerjee, K. Barnes, E. Becker, J. M. Bello-Rivas, T. Bjork-man, B. J. Bloom, I. Bloomfield, T. Bohdanowicz, and G. Booth, Quantum error correction with the toric code, Atom Computing (2026). [23] C. Ryan-Anderson, N. C. Brown, M. S. Allman, B. Arkin, G. Asa-Attuah, C. Baldwin, J. Berg, J. G. Bohnet, S. Braxton, N. Burdick, J. P. Campora, A. Chernoguzov, J. Esposito, B. Evans, D. Francois, J. P. Gaebler, T. M. Gatterman, J. Gerber, K. Gilmore, D. Gresh, A. Hall, A. Hankin, J. Hostetter, D. Lucchetti, K. Mayer, J. My-ers, B. Neyenhuis, J. Santiago, J. Sedlacek, T. Skripka, A. Slattery, R. P. Stutz, J. Tait, R. Tobey, G. Vittorini, J. Walker, and D. Hayes, Implementing Fault-tolerant Entangling Gates on the Five-qubit Code and the Color Code, arXiv:2208.01863 (2022). [24] L. Egan, D. M. Debroy, C. Noel, A. Risinger, D. Zhu, D. Biswas, M. Newman, M. Li, K. R. Brown, M. Cetina, and C. Monroe, Fault-tolerant control of an error-corrected qubit, Nature 598 , 281 (2021). [25] C. Ryan-Anderson, N. Brown, C. Baldwin, J. Dreiling, C. Foltz, J. Gaebler, T. Gatterman, N. Hewitt, C. Hol-liman, C. Horst, et al. , High-fidelity teleportation of a logical qubit using transversal gates and lattice surgery, Science 385 , 1327 (2024). [26] A. Paetznick, M. P. d. Silva, C. Ryan-Anderson, J. M. Bello-Rivas, J. P. C. III, A. Chernoguzov, J. M. Dreil-ing, C. Foltz, F. Frachon, J. P. Gaebler, T. M. Gatter-man, L. Grans-Samuelsson, D. Gresh, D. Hayes, N. He-witt, C. Holliman, C. V. Horst, J. Johansen, D. Luc-chetti, Y. Matsuoka, M. Mills, S. A. Moses, B. Neyenhuis, A. Paz, J. Pino, P. Siegfried, A. Sundaram, D. Tom, S. J. Wernli, M. Zanner, R. P. Stutz, and K. M. Svore, Demon-stration of logical qubits and repeated error correction with better-than-physical error rates, arXiv:2404.02280 7
+
+(2024). [27] S. Dasu, M. DeCross, A. Y. Guo, A. Lavasani, J. Behrends, A. Benhemou, Y.-H. Chen, K. Mayer, C. N. Self, S. Simsek, et al. , Computing with many en-coded logical qubits beyond break-even, arXiv preprint arXiv:2602.22211 (2026). [28] IonQ, Work in preparation. (2026). [29] D. T. C. Allcock, W. C. Campbell, J. Chiaverini, I. L. Chuang, E. R. Hudson, I. D. Moore, A. Ransford, C. Ro-man, J. M. Sage, and D. J. Wineland, omg blueprint for trapped ion quantum computing with metastable states, Applied Physics Letters 119 , 214002 (2021). [30] A. Ransford, M. Allman, J. Arkinstall, J. Campora III, S. F. Cooper, R. D. Delaney, J. M. Dreiling, B. Estey, C. Figgatt, A. Hall, et al. , Helios: A 98-qubit trapped-ion quantum computer, arXiv preprint arXiv:2511.05465 (2025). [31] S. A. Moses, C. H. Baldwin, M. S. Allman, R. Ancona, L. Ascarrunz, C. Barnes, J. Bartolotta, B. Bjork, P. Blan-chard, M. Bohn, et al. , A race-track trapped-ion quantum processor, Physical Review X 13 , 041052 (2023). [32] S. Ma, G. Liu, P. Peng, B. Zhang, S. Jandura, J. Claes, A. P. Burgers, G. Pupillo, S. Puri, and J. D. Thompson, High-fidelity gates and mid-circuit erasure conversion in an atomic qubit, Nature 622 , 279–284 (2023). [33] Y. Yu, K. Yan, D. Biswas, V. N. Zhang, B. Harraz, C. Noel, C. Monroe, and A. Kozhanov, In situ mid-circuit qubit measurement and reset in a single-species trapped-ion quantum computing system, Phys. Rev. Res. 
+
+7, 043355 (2025). [34] H.-X. Yang, J.-Y. Ma, Y.-K. Wu, Y. Wang, M.-M. Cao, W.-X. Guo, Y.-Y. Huang, L. Feng, Z.-C. Zhou, and L.-M. Duan, Realizing coherently convertible dual-type qubits with the same ion species, Nature Physics 18 , 1058 (2022). [35] Z.-Y. Chen, I. Goetting, G. Toh, Y. Yu, M. Sha-laev, S. Saha, A. Kalakuntla, H. B. Shi, C. Monroe, A. Kozhanov, and C. Noel, Noninvasive mid-circuit mea-surement and reset on atomic qubits, Phys. Rev. A 113 ,012606 (2026). [36] D. Gottesman, Stabilizer codes and quantum error cor-rection (California Institute of Technology, 1997). [37] S. B. Bravyi and A. Y. Kitaev, Quantum codes on a lattice with boundary, arXiv:quant-ph/9811052 (1998), _eprint: quant-ph/9811052. [38] H. Bombin and M. A. Martin-Delgado, Optimal resources for topological two-dimensional stabilizer codes: Com-parative study, Physical Review A 76 , 012305 (2007). [39] A. A. Kovalev and L. P. Pryadko, Improved quantum hypergraph-product LDPC codes, in 2012 IEEE Inter-national Symposium on Information Theory Proceedings 
+
+(2012) pp. 348–352. [40] X. Zhang, W. Jiang, J. Deng, K. Wang, J. Chen, P. Zhang, W. Ren, H. Dong, S. Xu, Y. Gao, F. Jin, X. Zhu, Q. Guo, H. Li, C. Song, A. V. Gorshkov, T. Iadecola, F. Liu, Z.-X. Gong, Z. Wang, D.-L. Deng, and H. Wang, Digital quantum simulation of Floquet symmetry-protected topological phases, Nature 607 , 468 (2022). [41] M. Ye, D. Wecker, and N. Delfosse, Beam search decoder for quantum LDPC codes, arXiv:2512.07057 (2025). [42] L. H. Pedersen, N. M. Møller, and K. Mølmer, Fidelity of quantum operations, Physics Letters A 367 , 47 (2007). [43] M. Malinowski, D. Allcock, and C. Ballance, How to wire a 1000-qubit trapped-ion quantum computer, PRX Quantum 4, 040313 (2023). [44] C. Löschnauer, J. Mosca Toba, A. Hughes, S. King, M. Weber, R. Srinivas, R. Matt, R. Nourshargh, D. All-cock, C. Ballance, et al. , Scalable, high-fidelity all-electronic control of trapped-ion qubits, PRX Quantum 
+
+6, 040313 (2025). [45] A. Hughes, R. Srinivas, C. Löschnauer, H. Knaack, R. Matt, C. Ballance, M. Malinowski, T. Harty, and R. Sutherland, Trapped-ion two-qubit gates with> 99.99% fidelity without ground-state cooling, arXiv preprint arXiv:2510.17286 (2025). [46] L. Vaidman, L. Goldenberg, and S. Wiesner, Error pre-vention scheme with four particles, Physical Review A 
+
+54 , R1745 (1996). [47] E. Nielsen, J. K. Gamble, K. Rudinger, T. Scholten, K. Young, and R. Blume-Kohout, Gate Set Tomography, Quantum 5, 557 (2021). [48] T. J. Proctor, A. Carignan-Dugas, K. Rudinger, E. Nielsen, R. Blume-Kohout, and K. Young, Direct randomized benchmarking for multiqubit devices, Phys. Rev. Lett. 123 , 030503 (2019). [49] E. Nielsen, K. Rudinger, T. Proctor, A. Russo, K. Young, and R. Blume-Kohout, Probing quantum processor per-formance with pygsti, Quantum Science and Technology 
+
+5, 044002 (2020). [50] D. C. McKay, I. Hincks, E. J. Pritchett, M. Car-roll, L. C. G. Govia, and S. T. Merkel, Benchmark-ing quantum processor performance at scale (2023), arXiv:2311.05933 [quant-ph]. [51] F. Bloch, Nuclear Induction, Physical Review 70 , 460 (1946). [52] N. F. Ramsey, A Molecular Beam Resonance Method with Separated Oscillating Fields, Physical Review 78 ,695 (1950). 8                                    
+
+> Appendix A: Code Definitions High-rate qLDPC Codes
+> Code ℓ m AB
+> BB [[18 ,4,3]] 33
+> 1 + x1 + y+xy 2
+> BB [[24 ,4,4]] 43BB [[30 ,4,5]] 53GB [[16 ,2,4]] 181 + y1 + y5
+> GB [[26 ,2,4]] 1 13 1 + y10 y9+y11
+
+TABLE III: Table of quasi-cyclic code polynomials. Bivariate-Bicycle (BB) [18] and Generalized-Bicycle (GB) codes are quasi-cyclic codes built atop circulant bi-nary matrices, Qℓ ∈ Fℓ×ℓ 
+
+> 2
+
+. This is equivalent to a square identity matrix Iℓ of size ℓ with columns cyclicly shifted by one, whose first is (0 , 1, 0, 0, ... ). Then, with integers 
+
+ℓ, m, and matrices x = Qℓ ⊗ Im, y = Iℓ ⊗ Qm, a BB / GB code is defined by matrix-valued polynomials A(x, y )
+
+and B(x, y ) such that its X and Z stabilizer generators are taken to be first n − k independent rows of: 
+
+HX = [ A|B ], HZ = [ BT |A T ]. (A1) The GB code differs only in that either ℓ = 1 or m = 1 .The combined number of monomial terms that com-prise A and B determines the weight wc of the code’s sta-bilizer generators ( i.e. , its check weight ); we will refer to such a code as BB-wc or GB-wc. In this work, we demon-strate three BB-5 instances that form an explicit code family with parameters [[6 d, 4, d ]] (d ∈ { 3, 4, 5}). We also implement two GB-4 codes ( [[16 , 2, 4]] and [[26 , 2, 5]] ). Table III lists A and B for each. An example Tanner graph for a BB5 circuit is shown in Fig. 1C in the main text. 
+
+> Toric Codes
+
+Toric codes can be expressed as a specific subset of BB codes, with ℓ = m = d and polynomials 
+
+A(x) = 1 + x, B(y) = 1 + y. (A2) We implement a standard [[18 , 2, 3]] Toric code. Ad-ditionally, we implemented a rotated [[16 , 2, 4]] variant obtained by a coordinate change in x and y [38, 39], with the following parity check matrices. Figure 3 depicts a 2D lattice. The Tanner graphs of both Toric codes we imple-ment are delimited by square boundaries, with toroidal boundary conditions applying between opposite edges of each square. 
+
+HX =
+
+
+
+1 1 0 0 1 1 0 0 0 0 0 0 0 0 0 00 0 0 0 0 1 1 0 0 1 1 0 0 0 0 00 0 0 0 0 0 0 0 1 1 0 0 1 1 0 00 1 1 0 0 0 0 0 0 0 0 0 0 1 1 00 0 1 1 0 0 1 1 0 0 0 0 0 0 0 00 0 0 0 1 0 0 1 1 0 0 1 0 0 0 00 0 0 0 0 0 0 0 0 0 1 1 0 0 1 1
+
+
+
+HZ =
+
+
+
+0 1 1 0 0 1 1 0 0 0 0 0 0 0 0 00 0 0 0 1 1 0 0 1 1 0 0 0 0 0 00 0 0 0 0 0 0 0 0 1 1 0 0 1 1 01 1 0 0 0 0 0 0 0 0 0 0 1 1 0 01 0 0 1 1 0 0 1 0 0 0 0 0 0 0 00 0 0 0 0 0 1 1 0 0 1 1 0 0 0 00 0 0 0 0 0 0 0 1 0 0 1 1 0 0 1
+
+
+
+(A3) 
+
+> Concatenated Codes
+
+Code concatenation nests quantum codes by substi-tuting physical qubits in one code with logical qubits of another code. The result is usually a code with greater minimum distance but poorer encoding rate. We start with the [[4 , 2, 2]] error-detection code [46]. Its lone stabilizer generators in each basis are exception-ally simple: 
+
+SX = X1X2X3X4, SZ = Z1Z2Z3Z4. (A4) We then concatenate the [[4 , 2, 2]] code with itself by en-coding two “inner” copies, which usually occupy eight physical qubits, into the logical qubits of four “outer” copies. This concatenation is illustrated by the Tanner graph shown in Fig. 1C in the main text. Denote by X(c) 
+
+> L,κ
+
+and Z(c)
+
+> L,κ
+
+, the logical Pauli operators for the κ-th logical qubit of the c-th “outer” [[4 , 2, 2]] code. In addition to the regular stabilizer generators of each of the four “outer” [[4 , 2, 2]] codes, the two “inner” copies add the following: 
+
+S(1)  
+
+> X
+
+=X(1) 
+
+> L, 1
+
+X(2) 
+
+> L, 1
+
+X(3) 
+
+> L, 1
+
+X(4) 
+
+> L, 1
+
+S(2)  
+
+> X
+
+=X(1) 
+
+> L, 2
+
+X(2) 
+
+> L, 2
+
+X(3) 
+
+> L, 2
+
+X(4) 
+
+> L, 2
+
+S(1)  
+
+> Z
+
+=Z(1) 
+
+> L, 1
+
+Z(2) 
+
+> L, 1
+
+Z(3) 
+
+> L, 1
+
+Z(4) 
+
+> L, 1
+
+S(2)  
+
+> Z
+
+=Z(1) 
+
+> L, 2
+
+Z(2) 
+
+> L, 2
+
+Z(3) 
+
+> L, 2
+
+Z(4)  
+
+> L, 2
+
+(A5) The result is a [[16 , 4, 4]] concatenated code that, unlike the base [[4 , 2, 2]] code, can both detect and correct er-rors. Table III shows polynomials that define the par-ity check matrices for quasi-cyclic qLDPC codes (see Eq. (A1)). Note, Toric codes (see Appendix A) share a similar structure, but we omit them in this table since they are listed simply in Eq. (A2). 9
+
+FIG. 3: A 2D lattice on which we depict the Tanner graphs of a standard [[18 , 2, 3]] (dashed square) and rotated [[16 , 2, 4]] (rotated square) toric codes. Although not drawn on a toric surface, the boundaries of the solid and dashed squares are understood to wrap around along opposing edges to satisfy the toric boundary conditions.                            
+
+> Appendix B: Syndrome Circuits, State Preparation, and Measurements
+> Code nnans
+> BB [[18 ,4,3]] 18 14 14 BB [[24 ,4,4]] 24 10 20 BB [[30 ,4,5]] 30 10 26 GB [[16 ,2,4]] 16 14 14 GB [[26 ,2,5]] 26 12 24 Tor [[18 ,2,3]] 18 16 16 Tor [[16 ,2,4]] 16 14 14 Con [[16 ,4,4]] 16 12 12
+
+TABLE IV: The numbers of physical qubits in the code block ( n), physical ancillae ( na), and stabilizer generators measured ( ns) per code cycle used in the implementation of syndrome circuits for each code. Everywhere in this work, we use bare ancillae syn-drome extraction circuits. Due to the way our system is engineered, gates are applied strictly sequentially. Gates follow a “check first” order – that is all gates for one check are applied, before gates for a subsequent check – as il-lustrated in Fig. 1B. We interleave X and Z stabilizer generators – i.e. , X
+
+stabilizer generators are always followed by Z stabilizer generators, and vice versa. Denote by Hred  
+
+> X
+
+and Hred 
+
+> Z
+
+the matrices consisting of the first (n − k)/2 independent rows of HX and HZ respectively (see Eqs. (A1) to (A3)). And denote by hX [i] and hZ [i] the i-th row of Hred  
+
+> X
+
+and 
+
+Hred  
+
+> Z
+
+respectively. For each i, we execute a controlled-Pauli gate controlled by an ancilla, targeting qubits at indices j where hX [i][ j] or hZ [i][ j] is nonzero; we do so in ascending order of j. Then, our syndrome circuits for one code cycle of qLDPC and Toric codes measure checks in the following order: hX [1] , h Z [1] , h X [2] , h Z [2] , ..., h X [( n−
+
+k)/2] , h Z [( n − k)/2] . We checked numerically that such a construction results in fault-tolerant syndrome circuits. In the case of the [[4 , 2, 2]] code, we simply implement 
+
+SX first before SZ (see Eq. (A4)). In its concatenated variant, we implement SX and SZ for each [[4 , 2, 2]] block first (interleaving X and Z as before), before proceeding with the weight-8 stabilizer generators in Eq. (A5). No-tably, these weight-8 checks result in a non-fault-tolerant circuit for the concatenated [[4 , 2, 2]] code. In Table IV, we list the numbers of physical qubits in the code block ( n), physical ancillae ( na), and stabilizer generators measured in each syndrome cycle ( ns = n−k). Whereas n, k and ns are attributes of the code, we se-lect na under the constraint of only having a total of 40 physical ions. In GB [[16 , 2, 4]] and BB [[18 , 4, 3]] , we se-lect na = ns, so the number of MCM rounds is equal to 
+
+r−1 (with stabilizer generators in the last syndrome cycle measured via one final destructive measurement that in-cludes all na ancillae). In GB [[26 , 2, 5]] and BB [[24 , 4, 4]] ,we select na = ns/2, so there are 2r − 1 MCM rounds. Finally, in BB [[30 , 4, 5]] , we use only na = 10 ancil-lae, fully utilizing our 40-ion chain. However, because 
+
+ns and na are not congruent, we make use of the ancilla pipelining technique described in the main text to mini-mize the number of MCM rounds required. For example, for r = 2 , we required 5 MCM rounds (plus a set of final destructive measurements) to measure all r × ns = 52 
+
+required stabilizer generators using our na = 10 ancillae. 
+
+> Appendix C: Quantum Characterization, Verification, and Validation (QCVV)
+
+We interspersed QEC circuit experiments with charac-terization circuits designed to assess the level and type of errors on the qubits. Single- and two-qubit gates in the system are period-ically calibrated using long-standing techniques which, with high confidence, eliminate systematic errors in the control pulses. Therefore we felt justified in assuming predominantly stochastic noise on these gates. We used direct randomized benchmarking (DRB) to determine the overall error rate as we explain below. The behavior of MCM operations was less established, given the novelty of our OMG-based approach. In par-ticular, we wanted to quantify the effective idle channel afflicting qubits of the codeblock during MCM where an-cillae are measured. We do so with two standard charac-terization protocols: gate set tomography (GST) [47] and direct randomized benchmarking (DRB) [48]. In each case, the protocol was applied to a single target qubit, on which gates from the set G ∈ { RX (π/ 2) , R Y (π/ 2) , I }
+
+were applied (here I denotes “idle”, with no operation be-ing applied to the target qubit). During each I operation, we perform one round of MCM during which a fixed set of different qubit is read out. We reiterate, though, that 10 the entire chain is shelved to 52D5/2 during the MCM procedure, as it is during computations. That way, er-rors accumulated throughout this I operation correspond to idle noise accrued by the target qubit as a result of an MCM round. GST by design estimates errors on each operation in G
+
+separately, and so obtaining idle noise using GST requires no special modification to the standard protocol. The (single qubit) GST noise model is as follows. Four param-eters specify coherent and stochastic errors on the laser amplitude and phase used to implement the RX (π/ 2) and 
+
+RY (π/ 2) gates. Idle noise is parameterized using 1) the rates of coherent X, Y, and Z rotations, and 2) the rates of X-, Y-, and Z-axis Pauli stochastic errors. The noise model therefore has a total 4 + 6 = 10 parameters. Fiducial and germ circuits were selected using the 
+
+pygsti [49] package, which resulted in four germs (the repeated portion of a GST circuit) and 14 fiducial pairs (the non-repeated beginning and ending portions of a GST circuit). Germ depths of 1, 2, 4, 8, 16 , and 32 
+
+result in a total of 81 GST circuits. GST was initialy run with variations on how the MCM was performed in order to tune the MCM operation (varying delay times and laser pulse parameters). It consistently achieved a good fit to the data ( nσ < 3, a metric used in [47]), in-dicating its error estimates could be trusted to provide useful information during this tune-up stage. Through-out all the runs, estimated infidelities of the single-qubit gates ( RX (π/ 2) , R Y (π/ 2) ) was ≈ 3 × 10 −4. After tun-ing of MCM was complete, the estimated entanglement infidelity of idle noise (due to the MCM’s effect on the target qubit) lie between 0 and 8 × 10 −4. The idle noise was predominantly Z-axis stochastic error, which is ex-pected given the underlying physics of the system. As a further check of the overall effect an MCM round has on data qubits, we performed DRB. DRB circuits are constructed by randomly sampling gates[48]. We sam-pled gates from the set G, with probability q(g) for g ∈ G.We let q(RX (π/ 2)) = q(RY (π/ 2)) = 12 (1 − q(I)) . DRB circuits with depths of 1, 50, 300, and 1000 were gener-ated, each with q(I) ∈ { 0.25 , 0.75 }. For each q(I), the survival curve with respect to circuit depth is fitted, and the two resulting curves are used to infer different error rates for I and { RX or RY }. From DRB, we infer an idle noise of 8.7 × 10 −4 ± 7.2 × 10 −4 during an MCM round. This is consistent with the GST result. Error rates for two-qubit Mølmer-Sorensen (MS) gates – the native two-qubit gate on our device – were ob-tained using DRB. Each DRB experiment (targeting MS gates on one pair qubits) consists of 4 random DRB cir-cuits at depths 1, 5, 22, and 100. Within each layer of the DRB circuit, we select either the MS gate with probability q(M S ), or a layer of single-qubit gates other-wise. Each single-qubit gate layer consists of gates cho-sen uniformly randomly from {RX (π/ 2) , R Y (π/ 2) }. We let q(M S ) ∈ { 0.25 , 0.75 }. The DRB experiment is re-peated for all possible pairs of target qubits on a 40-ion chain (so we refer to this as a fully-spanning two-qubit 10 3 10 2 10 1
+
+> Two-qubit gate noise rate
+> 0
+> 20
+> 40
+> 60
+> 80
+> 100
+> 120
+> # of gates (by target ion pair)
+> DRB result (two-qubit gate noise)
+
+FIG. 4: Distribution of two-qubit (MS) gate noise as measured by DRB. 
+
+DRB ). Figure 4 shows the distribution of noise rates we measured. We use this distribution to select qubit-to-ion mapping such that high-performing MS gates are prefer-entially used, while low-performing MS gates are avoided (see Appendix F). The two-qubit DRB described above measured noise rate of one MS gate ( i.e. targeting one pair of qubits) at a time, in isolation. As a consequence, the results shown in Fig. 4 leave out other sources of errors that might degrade MS gates during regular circuit execution (e.g. crosstalk resulting from laser beam overlap). There-fore we supplemented the fully spanning two-qubit DRB above with simultaneous two-qubit DRB [50]. In simulta-neous two-qubit DRB, circuits are designed as described above, except instead of targeting just one pair of qubits at a time, each circuit applies gates to a small set of disjoint qubit pairs. We selected representative sets on 5 qubit pairs (10 qubits) and performed 2-qubit DRB on 2, 3, 4, or all 5 of the pairs simultaneously. (We remark that even though the DRB circuits are constructed with lay-ers of gates comprised of multiple non-overlapping two-qubit gates, in practice those two-qubit gates are still executed sequentially due to hardware constraints). Fig-ure 5 shows two-qubit gate noise rates (indexed by qubit pair) obtained from simultaneous two-qubit DRB. We found higher noise rates than in Fig. 4 (where only one qubit pair at a time is targeted) – we attribute this increase to effects like crosstalk that is generally not re-flected in Fig. 4. The noise rates obtained through si-multaneous DRB reflect two-qubit gate performance un-der more realistic conditions. Since it would take a pro-hibitively long time to run simultaneous DRB on all pos-sible sets of pairs of target qubits, we instead scaled noise rates from fully-spanning DRB (Fig. 4, omitting pair we do not use in the experiment) so that its mean matches the average noise rate from small sets like that shown in Fig. 5. We use that scaled noise rate to inform two-qubit 11 0: (27, 5) 
+
+> 0: (30, 16)
+> 0: (29, 3)
+> 0: (22, 12)
+> 0: (25, 1)
+> 1: (27, 5)
+> 1: (30, 16)
+> 1: (29, 3)
+> 1: (22, 12)
+> 2: (27, 5)
+> 2: (30, 16)
+> 2: (29, 3)
+> 3: (27, 5)
+> 3: (30, 16)
+> Set-index: qubit pair
+> 0.0000
+> 0.0025
+> 0.0050
+> 0.0075
+> 0.0100
+> 0.0125
+> 0.0150
+> 0.0175
+> 0.0200
+> DRB 2Q error rate
+
+FIG. 5: Simultaneous two-qubit DRB results. Estimated MS gate error rate, aggregated over 36 runs, is shown as a function of qubit pair. In each run, simultaneous DRB is performed on the sets of 5, 4, 3, and then 2 disjoint pairs separated by the vertical dashed lines. An average error rate above the mean in Fig. 4 indicates the presence of crosstalk. gate noise for example in instantiating our decoder’s de-tector error model. Furthermore, by sticking with small sets of pairs of qubits, our simultaneous DRB experi-ments are fast enough to run periodically, between QEC memory experiments, to serve as point checks to catch anomalous system behaviour. 
+
+Appendix D: Approximate Pauli Noise Model 
+
+Noise Type Strength Idle ( 62S1/2) X error 10 −5
+
+Z error 4 × 10 −5
+
+Idle (per MCM round) X error 10 −4
+
+Z error 4 × 10 −4
+
+2-qb gate Depolarizing *1-qb gate Depolarizing 3.2 × 10 −4
+
+Measurement Bit-flip 9 × 10 −3
+
+Leakage (per MCM round) - 1.7 × 10 −3
+
+TABLE V: Table of stochastic Pauli noise. Here, asterisk (*) indicates a variable value (see Fig. 4) Table V shows the stochastic Pauli noise model used for simulations and for instantiating our decoder. We obtain these values first with a coarse estimate via QCVV (Appendix C), and then with fine tuning by repeatedly decoding under slightly different values for each noise. During fine tuning, we use the sum of all logical error rates across all memory experiments as our cost function. Idle noise in 62S1/2 is estimated per gate time (for simplicity, we do not assign different durations to two-and one-qubit operations). We ascribe different X vs Z
+
+error rates, to reflect known behaviour of our physical qubits in both 62S1/2 and 52D5/2 manifolds, with Z er-rors (phase-flips) being far more prevalent compared to 
+
+X errors (bit-flips). Idle noise during mid-circuit mea-surement (MCM) encompasses the full shelve-measure-deshelve-reset sequence described in Section II, and we model it as a single layer of idle operations during which every qubit that is not measured ( i.e. , not an ancilla) is afflicted by depolarizing noise with the stated rate. We assume leakage occurs only during MCM. For de-coding of experimental data, the decoder is instantiated ignoring leakage error since we post-select away instances where leakage is detected. For simulations, on the other hand, where erasure conversion is assumed (see Fig. 8), we insert fully depolarized states with the stated prob-ability on each qubit that is not measured, immediately following each round of MCM. 
+
+Appendix E: Leakage, Post-selection, and Simulation 
+
+To avoid deleterious effects of subspace leakage, we post-select and reject shots in which leakage was detected (see the Mid-Circuit Measurement section of the main text). The dominant source of leakage on our system are technical imperfections in OMG, which we use to im-plement mid-circuit measurements (MCM). Therefore in-creased syndrome cycles r, which necessitates more MCM rounds, correlates strongly with increased leakage. BB5-[[18,4,3]] 
+
+> BB5-[[24,4,4]]
+> BB5-[[30,4,5]]
+> GB4-[[16,2,4]]
+> GB4-[[26,2,5]]
+> 0
+> 10
+> 20
+> 30
+> 40
+> 50
+> 60
+> 70
+> Rejection Rate (%)
+> Leakage rejection rates
+> r=1
+> r=2
+> r=3
+> r=4
+> r=5
+> r=6
+
+FIG. 6: Leakage detection and rejection rates for various codes and number of syndrome cycles r. BB5-[[30,4,5]] exhibits the worst rejection rates, with r = 1 and r = 6 
+
+having rejection rates of 17.8% and 74.8%, respectively. Figure 6 shows the resulting rejection rates for our high-rate qLDPC code implementations. Colored bars are cumulative; for instance, the BB [[30 , 4, 5]] , which was most demanding in number of MCM rounds, exhibited 12 the highest rejection rates with r = 1 and r = 6 syn-drome cycle implementations being rejected at rates of 17.8% and 74.8% respectively. 0.4 × 0.6 × 0.8 × 1 ×   
+
+> Noise Multiplier
+> 10 3
+> 10 2
+> Logical error per round per qubit
+> Extrapolated logical performance (BB5)
+> [[18, 4, 3]], X
+> [[24, 4, 4]], X
+> [[30, 4, 5]], X
+> [[18, 4, 3]], Z
+> [[24, 4, 4]], Z
+> [[30, 4, 5]], Z
+
+FIG. 7: Simulated BB5 memory performance, with increased/decreased physical noise rates. Dots along 1×
+
+noise multiplier are experimental points for reference. Shaded bands show increase in logical error rate, if leaked qubits are re-initialized with the maximally mixed state instead of rejected via post-selection. In the worst case, erasure conversion yields relative increase of 
+
+11% (dotted, green). 0.4 × 0.6 × 0.8 × 1 ×   
+
+> Noise Multiplier
+> 10 3
+> 10 2
+> Logical error per round per qubit
+> Extrapolated logical performance (GB4)
+> [[16, 2, 4]], X
+> [[26, 2, 5]], X
+> [[16, 2, 4]], Z
+> [[26, 2, 5]], Z
+
+FIG. 8: Simulated GB4 memory performance, with increased/decreased physical noise rates. Dots along 1×
+
+noise multiplier are experimental points for reference. Shaded bands show increase in logical error rate, if leaked qubits are re-initialized with the maximally mixed state instead of rejected via post-selection. In the worst case, erasure conversion yields relative increase of 
+
+20% (dotted, red). Though we do not do so in this work, it is possible to convert detected leakage into erasures, and avoid post-selection entirely. We evaluate the impact such an era-sure conversion can have on logical performance, through simulation. Figures 7 and 8 show simulation results us-ing the same stochastic Pauli noise used to instantiate our decoder (see Appendix D). In these simulations, we scale every noise source in the memory circuit by a fixed amount, shown as “multipliers” on the horizontal axes. Points at the 1× multiple column show experimental data, for comparison. Shaded bands above each curve in Figs. 7 and 8 show corresponding increases in logical error rates resulting from erasure conversion (instead of post-selection). To obtain those shaded bands, simulate the case where each detected leakage is followed by reset and re-initialization of the afflicted qubit(s) in the maximally mixed state. In the worst case, the relative increase in logical error rate from that added erasure amounts to 11% for BB5 codes, or equivalently a 10% decrease in logical qubit survival time TZ . For GB4 code, it amounts to an 20% 
+
+relative increase in logical error rate, or a 17% decrease in logical qubit survival time TZ , at worst. 
+
+Appendix F: Qubit Mapping 
+
+Due to technical imperfections ( e.g. , in calibration or gate design), not all ion pairs experience the same two-qubit gate fidelity. Therefore, for a given circuit with gates performed between a fixed set of qubit pairs, the mean infidelity of the gates in that circuit depends on how those qubit pairs are mapped to ion pairs. Because our Raman architecture enables us to apply two-qubit gates between any pair of ions, we can, in principle, specify an arbitrary qubit-to-ion mapping. We note that such flexibility is not shared by hardware with fixed qubits, wherein the set of permissible two-qubit gates is sparse. In this work, we choose a slightly constrained approach for the sake of technical simplicity. For each circuit code, we select disjoint sets of ions to serve as readout ancillae and non-ancilla data qubits. These sets are both contigu-ous, so that all ancillae are grouped together and all data qubits are grouped together. We emphasize that this re-striction is a choice and not a fundamental limitation of our system. We then vary the mapping between ancillae and ions within the first set and the mapping between data qubits and ions within the second set. To guide this remapping, we extract our figure of merit from the fully-spanning direct randomized benchmark-ing (DRB) data described in Appendix C. For a given code and mapping, we calculate the average gate infi-delity of all two-qubit gates in the code’s syndrome cir-cuit, weighted by the number of times each gate is used. Starting from several random initial mappings, we iter-atively select the qubit pair that contributes the most infidelity and try to reduce or eliminate its impact by varying the ancilla and data qubit mappings. As shown in Fig. 9, this algorithm has the effect of avoiding ion pairs in the higher-error end of the fidelity distribution, instead concentrating the ion pairs used by the circuits in the lower-error end of the distribution. In other words, 13 we select a bespoke mapping for each code that replaces low-quality entangling gates with higher-quality gates, with no change to the system hardware, gate calibra-tions, or circuit structure. The results of this remapping are illustrated in Fig. 9, which shows a series of histograms of two-qubit gate in-fidelities for each high-rate qLDPC code in our experi-ment. The lighter grey histograms show all 780 ion pairs that are possible in a 40-ion chain, and the darker grey histograms show only the subset of pairs, which consist of one ion from the set of ancilla ions and one from the set of data qubit ions, that could possibly be used for each code. As each code might require different numbers of ancillae and data qubits, the darker grey histograms may vary slightly. The red histograms show the pairs corresponding to an arbitrary default map, whereas the green histograms show the pairs corresponding to an op-timized map. We do not claim that these maps are the globally optimal choices, but then do reduce the average infidelity, relative to the default maps, by approximately a third to a half for most circuits. The BB5, d=5 code is a notable exception. As shown in Table IV, the BB [[30 , 4, 5]] code is the only code for which the number of MCM bits to be read out per round is not an integer multiple of the number of physical read-out ancillae used. As we describe in the main text, we pipeline ancilla usage to reduce the number of MCM rounds required, which means that a single MCM round may be used to measure stabilizer generators from con-secutive code cycles. As a result, for this particular code, the same stabilizer generator can be read out using differ-ent ancillae in different rounds, and so this code makes use of every possible ion pair at some point during its multiple syndrome cycles. This gives us less flexibility to remap this code, and so the remapping gains (12% in-fidelity reduction compared to a default map) are more modest; unlike with the other codes, we can choose to use less-performant ion pairs fewer times during the syn-drome circuit, but we cannot avoid them altogether. We note, however, that we could choose not to pipeline an-cilla usage, in which case the improvement due to remap-ping would be comparable to those for the other codes, but that would require a greater number of MCM rounds for some numbers of syndrome cycles. 
+
+FIG. 9: Distribution of DRB fidelity of two-qubit gates utilized in each circuit. The dashed lines are placed at the mean infidelitiy (unweighted for the grey histograms, weighted by the number of times each ion pair is used in the syndrome circuits for the red and green histograms). The infidelity reduction percentages are calculated for the weighted mean of the optimized map (green) relative to that of the default map (red). 14 
+
+> Appendix G: Syndrome Circuit Duration
+
+In this section, we show a detailed breakdown of exe-cution time for the syndrome circuits for all codes. We depict the full circuits graphically in Fig. 10. For each code instance, we show six horizontal traces correspond-ing to implementations over r = 1 , ..., 6 syndrome cy-cles. Vertical black bars delimit the start and stop of the memory experiment – the leading/trailing red traces cor-respond to the initial state preparation of physical qubits and their final state measurement, which we do not count when computing the “lifetime” of our logical qubits (see main text). We also neglect the single-qubit gates re-quired to prepare the logical qubits into the various XL
+
+or ZL eigenstates. The durations of the syndrome circuit segments (green/blue) in between MCM rounds (red) are generally proportional to wn a, with w being the stabilizer genera-tor weight of the code ( w = 4 and w = 5 for the GB and BB codes we implement, respectively) and na denoting the number of physical ancillae in the implementation. The relationship between the number of syndrome cy-cles r and the number of measurement segments (red; in-cludes MCM rounds and final destructive measurement) is discussed in Appendix B. Most codes require either 
+
+r − 1 or 2r − 1 MCM rounds, depending on whether we read out all ( na = ns) or half ( na = ns/2) of our sta-bilizer generators in each MCM round. However, due to ion availability, the BB [[30 , 4, 5]] code uses just na = 10 
+
+ancillae to measure ns = 26 stabilizer generators per syndrome cycle. Because na and ns are not commen-surate, our pipelining of ancillae (see main text) implies the exact number of red measurement segments (given by 
+
+⌈r(n − k)/n a⌉) is not a constant multiple of r. Another consequence is that the final syndrome circuit segment for this code is often shorter than the other segments, and its length varies from one value of r to another. 
+
+FIG. 11: Durations of all qLDPC codes implemented. Dashed lines are r × Tcycle , included as guides to the eye, where Tcycle are the cycle times listed in Table VI. Figure 11 shows the same memory experiment dura-tions as Fig. 10, but as a function of r. We define the                           
+
+> Code Tcycle (ms) BB [[18 ,4,3]] 42.18 BB [[24 ,4,4]] 65.27 BB [[30 ,4,5]] 85.71 GB [[16 ,2,4]] 35.09 GB [[26 ,2,5]] 63.41 Tor [[18 ,2,3]] 39.18 Tor [[16 ,2,4]] 35.06 Con [[16 ,4,4]] 38.75
+
+TABLE VI: Cycle time Tcycle (i.e. , duration per syndrome cycle) for each code, in milliseconds. cycle time Tcycle for each code to be the duration of the longest memory experiment for that code ( i.e. , that of 
+
+r = 6 ), divided by six. We list these values in Table VI. We show linear interpolations based on Tcycle in Fig. 11 as guides to the eye, primarily to emphasize the fact that the duration of each memory experiment is well approx-imated by a linear function in r. To obtain a survival time for logical qubits with each code, we multiply the value τ , which we extract from the exponential fit to that code’s observed logical error rate (see Eq. (1)), by that code’s cycle time Tcycle .We now examine how the duration of the MCM pro-tocol scales with the number of ancillae being read out (na). A major advantage of our OMG-based MCM tech-nique is that an arbitrary set of ancillae can be read out in a single MCM round, but that operation is not com-pletely parallel. The 1762 nm shelving/deshelving pulses and all operations within 62S1/2 are performed in par-allel with global beams, but the Raman gates used to transfer ancillae from either |0D ⟩ or |1D ⟩ to the 52D5/2
+
+intermediate state and back are applied sequentially by steerable 532 nm beams. In Fig. 12, we show the du-ration of the MCM protocol for values of na from 0 to 20, corresponding to reading out up to half the chain. The linear fit demonstrates that this duration is domi-nated by the fixed, parallel operations, and reading out each additional ancilla only increases the total duration by approximately 2%. Because the MCM duration scales so weakly with na, the MCM protocol can be practically considered to be a parallel operation. 15 
+
+FIG. 10: Blue/green lines indicate two-/one-qubit Raman gates, and red lines indicate periods of state preparation, MCM, or readout. All Raman gates are plotted individually, but the lines overlap because of finite line thickness. Black lines indicate the circuits’ start and end times. Circuits are grouped by value of d (code distance), with the number of syndrome cycles r running from 1-6 from top to bottom within each group. 
+
+FIG. 12: Duration of the MCM protocol as a function of na, the number of ancillae read out. The black points represent values of na used for the codes presented in this work (see Table IV). 
+
+> Appendix H: Comparing Physical and Logical Qubits
+
+Here we define the noise channels N (t) for our physical and logical qubits, and we use them to compute explicit expressions for the qubit lifetimes that we report. We will take the process fidelity FN (t) (w.r.t. the identity) to mean the fidelity of a state after having evolved through the channel N for a period of time t, for input states averaged over the Haar measure [42]. We describe an idling atomic qubit as undergoing T1
+
+and T ∗ 
+
+> 2
+
+relaxations [51]. These relaxations are defined (over some time t) as the channel with Kraus set: 
+
+K ∈
+
+(  1 00 e−t/T ∗
+
+> 2
+
+
+
+,
+
+ 0 √1 − e−t/T 1
+
+0 0
+
+
+
+,
+
+ 0 00 p1 − e−2t/T ∗ 
+
+> 2
+
+et/T 1 e−t/ 2T1
+
+ )
+
+(H1) 16 This yields process fidelity and decay speed: 
+
+Fphys (t) = 12 + 16 (2 e−t/T ∗ 
+
+> 2
+
++ e−t/T 1 )
+
+Dphys (0) = 13T ∗
+
+> 2
+
++ 16T1
+
+(H2) (H3) For our 133 Ba + qubits, T1 is immeasurably long, so we take 1/T 1 = 0 , which implies a physical qubit lifetime of 
+
+Lphys = 3 T ∗ 
+
+> 2
+
+.For our logical qubits, we define a general Pauli channel with Kraus set: 
+
+K ∈ { √γ0I} ∪ 
+
+(s 
+
+1 − e−γσ t
+
+|P | + 1 σ σ ∈ P
+
+)
+
+, (H4) where γ0 = 1
+
+|P | + 1 1 + X
+
+> σ∈P
+
+e−γσ t
+
+!
+
+(H5) Here, P ⊆ { X, Y, Z } is a set of single-qubit Pauli opera-tors. The corresponding process fidelity and decay speed (with |P | = 3 ) are: 
+
+Flog (t) = 13 + 16 1 + X
+
+> σ∈P
+
+e−γσ t
+
+!
+
+Dlog (0) = 16
+
+X
+
+> σ∈P
+
+γσ
+
+!
+
+(H6) To determine parameters γσ of the general Pauli chan-nel, we let the decay speed of X and Z eigenstates under this channel be equal to that observed in experimental data, as t → 0 hence: 
+
+12TX
+
+= 14 (γY + γZ ) (H7) 
+
+12TZ
+
+= 14 (γX + γY ) (H8) We remark that, because our memory experiments were performed only on X and Z eigenstates, parameters γσ
+
+cannot all be uniquely determined from experimental data alone. In [7], the channel is determined by also setting γY = 0 , which maximizes p(Y ) 
+
+> L
+
+and gives a pes-simistic estimate of lifetime. Here we instead choose 
+
+γX = γY , which reflects the noise bias on our device (see Table V), and agrees with what we observe in sim-ulations of our syndrome circuits. This yields the logical qubit lifetime: 
+
+1
+
+Llog 
+
+= 13
+
+ 12TZ
+
++ 1
+
+TX
+
+
+
+(H9) 
+
+Appendix I: Physical T ∗ 
+
+> 2
+
+Measurement 
+
+The T ∗ 
+
+> 2
+
+coherence time of our system was character-ized with a standard Ramsey experiment [52]. Figure 13 shows the Ramsey contrast for our 133 Ba + 62S1/2 qubit, as a function of time. We remark that the T ∗ 
+
+> 2
+
+phase decay we observe in our physical qubits are overwhelmingly driven by noise in the magnetic field environment, rather than by any T2 decay that is fundamental to the hyperfine splitting itself. Mag-netic field noise acts over time on an initial preparation of |+⟩, with a Z error as follows: 
+
+|+⟩ → 
+
+Z ∞
+
+> 0
+
+dωf (ω)eiZωt |+⟩ (I1) Here, f (ω) is a spectral density function that describes the noise. For common well-behaved f (ω), at times t greater than the auto-correlation time implied by f and the Wiener-Khinchin theorem, the phase decay behaves in accor-dance with the channel of Eq. (H1). On the other hand, at times when t∆ω → 0 (where ∆ω is the width of distri-bution f ), then the error described in Eq. (I1) is almost coherent and the survival of |+⟩ is more closely described by cos 2(αt ) (for some parameter α), than by the more fa-miliar e−t/T ∗ 
+
+> 2
+
+.On our system, we observe magnetic field noise very narrowly concentrated around ω ≈ 1 Hz and, to a lesser extent, ω ≈ 60 Hz. Correspondingly, in our Ramsey experiment at times t < 1000 ms, the survival of the state 
+
+|+⟩ sees a mild drop (behaving like cos 2(αt ) for αt ≪ 1), before a sharp exponential fall off thereafter (see Fig. 13). There, the red line is a fit to data of e−t/T ∗ 
+
+> 2
+
+, from which we obtain T ∗ 
+
+> 2
+
+= 1 .1 ± 0.3 s. Also shown is a survival curve for one logical qubit of the GB [[26 , 2, 5]] code, as a comparison. 0.1 10 100 1000 
+
+> Time in milliseconds
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> Survival or Ramsey contrast
+> Fit, Ramsey contrast
+> GB4 fit, d=5, 1 logical qb
+
+FIG. 13: Ramsey measurement of T ∗ 
+
+> 2
+
+of physical qubits. Superimposed, is the fitted survival curve for the GB [[26 , 2, 5]] qLDPC code, for one logical qubit, as guide to the eye.

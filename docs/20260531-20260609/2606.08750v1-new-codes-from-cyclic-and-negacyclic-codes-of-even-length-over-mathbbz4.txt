@@ -1,0 +1,562 @@
+Title: New Codes from Cyclic and Negacyclic Codes of Even Length over ℤ_4
+
+URL Source: https://arxiv.org/pdf/2606.08750v1
+
+Published Time: Tue, 09 Jun 2026 01:23:52 GMT
+
+Number of Pages: 16
+
+Markdown Content:
+# New Codes from Cyclic and Negacyclic Codes of Even Length over Z4 ∗
+
+## Nuh Aydin Mohamed O. Belghith Godwin Idowu Trang T.T. Nguyen Long B. Tran Kenyon College, Gambier OH 43022, USA 
+
+Abstract 
+
+This paper uses theoretical results previously established in the literature to design search algorithms to find new linear codes over Z4 from cyclic and negacyclic codes of even length. As a result of these searches, we have found 2500 new cyclic codes and 730 negacyclic codes. These new codes exhibit improved parameters compared to previously known codes. Additionally, we have obtained binary quantum codes with good parameters from such Z4 codes. 
+
+Keywords: Cyclic codes, Constacyclic, Quasi-cyclic codes, Quasitwisted cyclic codes 
+
+MSC codes: 68Q25, 68R10, 68U05 
+
+# 1 Introduction and Motivation 
+
+After the discovery that some good non-linear binary codes can be obtained as images of Z4-linear codes (also called quaternary codes in the literature) in [15], research on codes over Z4 and codes over many other finite rings exploded. Codes over rings became a prominent topic in algebraic coding theory. Given the influence of the publication [15], much subsequent research on codes over 
+
+Z4, and the fact that many of the rings studied are extensions of Z4, codes over Z4 attained a prominent place in algebraic coding theory. As a result, a database of best known codes over Z4
+
+was established [5], similar to the one on linear codes over fields [14]. The initial database [5] was relocated and expanded in a recent work [6]. In the process of updating the database, researchers found thousands of new linear codes over Z4 from cyclic codes of odd length, and quasi-cyclic (QC) codes that used those cyclic codes as building blocks (or seeds). This work is a continuation of the work done in [6]. In this work, our aim is to expand the earlier work and to find more Z4-linear codes with better parameters for the database. We conducted computer searches on cyclic codes of even length over Z4, both free and non free, as well as negacyclic codes of even length. Addi-tionally, we also constructed binary quantum codes derived from cyclic and negacyclic codes over Z4.The paper is organized as follows. We start with some basic facts and definitions in section 2 about codes over Z4. Then, we summarize basic facts about cyclic codes and some of their general-izations in section 3. We explain the theory we use in producing the algorithms in section 4. Finally, we present the results of computer searches in section 5. 
+
+# 2 Basic Definitions 
+
+## 2.1 Z4 codes 
+
+A code C of length n over Z4 is a subset of Zn 
+
+> 4
+
+, and a linear code is a submodule (equivalently, an additive subgroup) of Zn 
+
+> 4
+
+. Elements of C are called codewords. A matrix whose rows generate C is  
+
+> ∗This research was supported by Kenyon College Summer Science Scholars research program. Nuh Aydin is the corresponding author.
+
+1
+
+> arXiv:2606.08750v1 [cs.IT] 7 Jun 2026
+
+called a generator matrix. Any linear code over Z4 is equivalent to a code with a generator matrix 
+
+G of the form 
+
+Ik1 A B
+
+0 2Ik2 2C
+
+
+
+(1) where A and C are Z2-matrices and B is a Z4-matrix. We say that C is of type 4k1 2k2 , which is also the size of C. We denote the parameters of C as [n, k 1, k 2, d L] or just [n, k 1, k 2, d ], where n is the length of C and dL or d is the minimum Lee distance of C. Besides the Lee distance, Euclidean and Hamming distances are also considered for codes over Z4, however, in this paper we primarily consider the Lee distance because it is the most relevant metric when we consider binary images of 
+
+Z4-codes and compare them with existing binary codes. The Euclidean distance is important for the notion of Type II codes [11]. A Z4-linear code is not necessarily a free module, a module with a basis. It is free if and only if k2 = 0 . If k2 is zero, we call C a free code. Otherwise, C is non-free. The Lee weights of 0, 1, 2, 3 ∈ Z4, denoted by wL(0) , w L(1) , w L(2) , w L(3) , respectively, are defined by 
+
+wL(0) = 0 , wL(1) = wL(3) = 1 , wL(2) = 2 .
+
+The Lee weight wL(x) of x = ( x1, x 2, . . . , x n) ∈ Zn 
+
+> 4
+
+is defined to be the integral sum of the Lee weights of its components: 
+
+wL(x) = 
+
+> n
+
+X
+
+> i=1
+
+wL(xi).
+
+This weight function defines a distance function 
+
+dL(x, y ) = wL(x − y)
+
+on Zn 
+
+> 4
+
+, which is called the Lee distance. The Gray map ϕ : Zn 
+
+> 4
+
+→ Z2n 
+
+> 2
+
+is the coordinate-wise extension of the bijection Z4 → Z22 defined by 
+
+0 → 00 ,
+
+1 → 01 ,
+
+2 → 11 ,
+
+3 → 10 .
+
+The image ϕ(C) of a linear code C over Z4 of length n by the Gray map is a binary code of length 
+
+2n. We know that ϕ is both a weight-preserving map from 
+
+(Zn 
+
+> 4
+
+, Lee weight (wL)) to (Z2n 
+
+> 2
+
+, Hamming weight (wH )) 
+
+and a distance-preserving map from 
+
+(Zn 
+
+> 4
+
+, Lee distance (dL)) to (Z2n 
+
+> 2
+
+, Hamming distance (dH )) .
+
+We also know that for any linear code C over Z4, its Gray map image ϕ(C) is distance invariant, so its minimum Hamming distance dH is equal to the minimum Hamming weight wH . Thus, we know that the minimum Hamming distance of ϕ(C) is equal to the minimum Lee weight dL of C.Additionally, we know that 
+
+wL = wH = dH = dL.
+
+Thus, ϕ(C) is a binary code but not necessarily a linear code because the Gray map is not linear. Conditions that characterize binary codes that can be obtained as Gray images of Z4-linear codes are given in [17] (Corollary 3.15 and Corollary 3.17). We refer the reader to [17] for more details on codes over Z4.One of the main problems of coding theory is to determine the optimal values of the parameters of a linear code and explicitly construct codes with those parameters. For codes over finite fields, there 2have been databases of best known linear codes (BKLC). For example, the online database [14] is well known. The Magma software also contains such a database [1]. For codes over Z4, a database was introduced more recently [6]. Looking at the tables, we observe that in most cases optimal codes are not known. Researchers often use computer searches to find codes with better parameters than currently BKLCs. However, exhaustive searches over all linear codes are not feasible due to two fundamental computational challenges. First, computing the minimum distance of an arbitrary linear code is NP-hard [16], and it quickly becomes infeasible for larger dimensions. Second, for a given length, dimension, and the finite field GF (q), the number of linear codes is too big to conduct exhaustive computer searches, except for small lengths and dimensions. Given these computational complexity challenges, researchers often focus on promising subclasses of linear codes with rich mathematical structures. 
+
+# 3 Cyclic Codes and Their Generalizations 
+
+Cyclic codes and their various generalizations play a key role in algebraic coding theory. Their structure makes them easier to implement in practice, and they establish a key link between algebra and coding theory. 
+
+Definition 3.1. A code C of length n over a finite field Fq is called a cyclic code if for every codeword 
+
+v = ( v0, v 1, . . . , v n−1) ∈ C , the word obtained by cyclically shifting v by one position to the right, that is, σ(v) = ( vn−1, v 0, v 1, . . . , v n−2), is also in C.
+
+One of the useful generalizations of cyclic codes are quasi-cyclic (QC) codes. Those linear codes which are invariant under a cyclic shift by some fixed number of positions are quasi-cyclic. 
+
+Definition 3.2. A code linear C of length n over a finite ring or a field is called a quasi-cyclic code of index ℓ if for every codeword v = ( v0, v 1, . . . , v n−1) ∈ C , the word obtained by cyclically shifting v
+
+by ℓ positions, that is, σℓ(v) = ( vn−ℓ, v n−ℓ+1 , . . . , v n−1, v 0, v 1, . . . , v n−ℓ−1), is also in C.
+
+Definition 3.3. A linear code of length N over a ring R is constacyclic if for some unit a ∈ R, the code is invariant under the automorphism σa defined by 
+
+(c0, c 1, . . . , c N −1) 7 → (ac N −1, c 0, c 1, . . . , c N −2).
+
+Note that the special case a = 1 gives cyclic codes. In the case a = −1, we say that the code is 
+
+negacyclic . Constacyclic codes of length N over R can be identified as ideals in the quotient ring 
+
+R[x]/⟨xN − a⟩ via the isomorphism from RN to R[x]/⟨xN − a⟩ defined by 
+
+(v0, v 1, . . . , v N −1) 7 → v0 + v1x + · · · + vN −1xN −1.
+
+The algebraic structure of cyclic and constacyclic codes over a finite field Fq is quite simple. They are ideals in the quotient ring Fq [x]/⟨xN − a⟩ which is a principal ideal ring. For every constacyclic code 
+
+C of length N over Fq , there is a unique monic polynomial g(x) of least degree in C that generates 
+
+C, i.e., C = ⟨g(x)⟩ = {f (x)g(x) mod xN − a : f (x) ∈ Fq [x]}. This polynomial is called the standard generator polynomial of C and it divides xN −a. Hence, there is a one-to-one correspondence between constacyclic codes of length N over Fq and divisors of xN − a over Fq . When gcd( N, q ) = 1 , the polynomial xN − a has N distinct roots (in an extension of Fq ), otherwise it has repeated roots. In either case, all constacyclic codes of length N over Fq can be obtained from the divisors of xN − a.
+
+# 4 Cyclic Codes of Even Length over Z4
+
+When we consider cyclic codes over Z4, their algebraic structure is more complicated. In the case 
+
+gcd( N, 4) = 1 , that is when N is odd, their structure is similar to the case of cyclic codes over Fq .This is the easier case where the factorization of xN − 1 into irreducibles over Z4 is unique and can be obtained from the factorization of xN − 1 into irreducibles over Z2 via the Hensel lift [17]. Let 3N be the length of a Z4-linear code. It can uniquely be written as N = 2 k · n where n is odd. We can classify the codes in Z4 based on the parity of code length N . If k = 0 then N = n is odd. This is the case considered in [6] where the authors found a large number of new Z4-linear codes from cyclic codes of odd length over Z4. The structure of cyclic codes of odd length over Z4 is given by the following theorem: 
+
+Theorem 4.1 ([8]) . Let C be a cyclic code in Rn = Z4[x]/⟨xn − 1⟩ where n is odd. Then, Rn is a principal ideal ring and 
+
+C = ⟨(g(x), 2a(x)) ⟩ = ⟨g(x) + 2 a(x)⟩
+
+where g(x), a(x) are polynomials with a(x) | g(x) | (xn − 1) mod 4 .
+
+If k ≥ 1 (N = 2 k · n as above), then N is even. We consider two subcases: 
+
+• If k = 1 , then N is said to be oddly even, that is, N is a multiple of 2 and not 4. 
+
+• If k > 1, then N is a multiple of 4. The first theorem for which we implemented a search algorithm only handles the oddly even case: 
+
+## 4.1 Cyclic codes of oddly even length 
+
+The case of cyclic codes of oddly even length is first studied in [9]. 
+
+Theorem 4.2 ([9]) . Let N = 2 n where n is odd, and C be an ideal in Z4[X]/⟨XN − 1⟩. Then C is generated by an element of the form 
+
+
+
+a1(X2)a2(X2)a3(X2)˜b(X)c(X), 2a1(X2)a2(X)b(X)
+
+
+
+where Xn − 1 = a1(x)a2(x)a3(x)b(x)c(x)d(x), a1(x), a 2(x), a 3(x), b (x), c (x) and d(x) are monic and pairwise relatively prime polynomials in Z4[X], and ˜b(X) is a monic polynomial such that ˜b(x) ≡ b(x)(mod 2 Z4[X]) .
+
+The main challenge when handling codes with an even length N over Z4 is that xN − 1 does not have a unique factorization into irreducibles and Hensel lifting does not work. Computer algebra systems such as Magma do not offer any implementation of factorization in this case. Consequently, we must manually check every possible polynomial with a degree ≤ N . The possibilities grows exponentially, and exhaustive searches becomes intractable for larger values of N due to both CPU time and the memory need. This theorem is useful as it allows us to structure our search for the cyclic codes of length N = 2 ·n
+
+where n is odd. We can find the irreducible factors of xn − 1 in Z2 and find their unique Hensel lifts in Z4. The factors are then distributed randomly between a1(x), a2(x), a3(x), b(x), c(x) and d(x).To illustrate the process, we use a specific example. Let N = 6 and n = 3 . The cyclotomic factors (another term for irreducible factors) of xn − 1 over Z4 are given by x + 3 and x2 + x + 1 . We assign 
+
+x + 3 to b(x) and x2 + x + 1 to d(x). The ideal C in Z4[X]/⟨X6 − 1⟩ is then formed by structuring the remaining factors a1(x), a2(x), a3(x), and c(x) to the identity element of Z4 as there is not enough distinct factors. In other words, we set a1(x) = a2(x) = a3(x) = c(x) = 1 .Given: 
+
+a1(x) = 1 
+
+a2(x) = 1 
+
+a3(x) = 1 
+
+b(x) = x + 3 
+
+c(x) = 1 
+
+d(x) = x2 + x + 1 
+
+4The ideal C is of the form 
+
+C = ⟨a1(X2)a2(X2)a3(X2)˜b(X)c(X), 2a1(X2)a2(X)b(X)⟩.
+
+Substituting the values 
+
+C = ⟨1 · 1 · 1 · ˜b(X) · 1, 2 · 1 · (x + 3) ⟩ = ⟨˜b(X), 2( x + 3) ⟩.
+
+Here, ˜b(X) is a monic polynomial such that ˜b(x) ≡ b(x) (mod 2 Z4[X]) . Since b(x) = x + 3 , we have 
+
+˜b(x) = x + 1 or ˜b(x) = x + 3 which we will choose for the sake of simplicity. So, the ideal C becomes 
+
+C = ⟨x + 3 , 2( x + 3) ⟩.
+
+Finally, the polynomials that generate an ideal C for N = 6 and n = 3 are x + 3 and 2x + 2 .Therefore, the generating polynomials are: 
+
+f1(X) = x + 3 
+
+f2(X) = 2( x + 3) = 2 x + 6 ≡ 2x + 2 (mod 4) 
+
+The resulting cyclic code is a code with k1 = 5 and k2 = 0 and minimum Lee distance of 2. The parameters of this code, and all of the codes obtained in this work have been computed using the Magma software. This structured approach helps in reducing the computational complexity and aids in identifying the valid cyclic codes over Z4. However, as N grows larger and as shown in the table below, the number of ideals grows exponentially. Thus, exhaustive searches are only possible for smaller lengths. We set the cap for exhaustive searches to length 48. From length 48 and up until length 98, we gathered random subsets of 10,000 codes for each oddly even length. With the oddly even numbers out of the way, we shifted our attention to the case where N = 2 k ·n
+
+such that k > 1. Since we already found the codes such that k = 1 , we restricted our search for the general case to k > 1. The number of codes per length was found using a formula in [9] while the the number of free codes and codes with a single generator polynomial were found through computational exhaustive searches which became infeasible after a certain point. This is why many entries for even lengths are blank in Table 1. 5Table 1: The numbers of cyclic codes, free cyclic codes, and cyclic codes with one generator polynomial over Z4 for 1 ≤ N ≤ 100 
+
+N #Cyclic #Free #1-Gen 1 3 2 32 7 4 63 9 4 94 23 10 16 5 9 4 96 63 24 48 7 27 8 27 8 135 46 76 9 27 8 27 10 147 72 120 11 9 4 912 1035 260 576 13 9 4 914 1183 400 857 15 243 32 243 16 2519 17 27 8 27 18 4347 19 9 4 920 7935 21 729 64 729 22 7203 23 27 8 27 24 106515 25 27 8 27 26 28707 27 81 16 81 28 293687 29 29 4 29 30 583443 31 2187 128 2187 32 655287 33 243 32 243 34 476847 35 729 64 729 36 4579875 37 9 4 938 1835043 39 243 32 243 40 11953575 41 27 8 27 42 50690367 43 81 16 81 44 24235215 45 6561 256 6561 46 29503663 47 27 8 27 48 513566163 49 243 32 243 50 154141407 
+
+n #Cyclic #Free #1-Gen 51 6561 256 6561 52 386347215 53 9 4 954 1139561703 55 243 32 243 56 7298992215 57 243 32 243 58 1879048227 59 9 4 960 42500851875 61 9 4 962 17960084863 63 1594323 8192 1594323 64 42949672823 65 2187 128 2187 66 68641485507 67 9 4 968 1.03E+11 69 729 64 729 70 4.18E+11 71 27 8 27 72 1.93E+12 73 19683 512 19683 74 4.81E+113 75 6561 256 6561 76 1.58E+12 77 729 64 729 78 4.35E+12 79 27 8 27 80 1.46E+13 81 243 32 243 82 7.70E+12 83 9 4 984 2.59E+14 85 531441 4096 531441 86 3.08E+13 87 243 32 243 88 1.49E+14 89 19683 512 19683 90 6.77E+14 91 59049 1024 59049 92 4.07E+14 93 4782969 16384 4782969 94 4.93E+14 95 243 32 243 96 8.76E+15 97 27 8 27 98 5.20E+15 99 6561 256 6561 100 8.72E+15 64.2 General case of cyclic codes of even length 
+
+The form of a generator of a cyclic code of even length in the general case is given in [2]. 
+
+Theorem 4.3 ([2]) . 1. Let C be a cyclic code of even length N over Z4. Then either (a) C is a free module with a single generator 
+
+C = ⟨g(x) + 2 p(x)⟩,
+
+where g(x) | (xn − 1) mod 2 and (g(x) + 2 p(x)) | (xN − 1) mod 4 , or, (b) C = ⟨(g(x)+2 p(x), 2a(x)) ⟩ where g(x), a(x), and p(x) are polynomials with g(x) | (xN −1) mod 2 , a(x) | g(x) mod 2 , a(x) | p(x)
+
+ xN −1
+
+> g(x)
+
+
+
+mod 2 , and deg( a(x)) > deg( p(x)) .
+
+To generate all free cyclic codes for a given N over Z4, we need to exhaustively combine the divisors g(x) of xN − 1 over Z2. For each g(x), we then explore the polynomial vector space to find a polynomial p(x) with coefficients in Z4 and a maximum degree of N . The goal is to find p(x) such that g(x) + 2 p(x) | (xN − 1) mod 4 . For example, consider N = 6 and g(x) = x2 + x + 1 , which is a divisor of x6 − 1 in Z2. Through exhaustive search, we find that a possible p(x) is x. Thus, 
+
+g(x) + 2 p(x) = x2 + x + 1 + 2 x = x2 + 3 x + 1 . We verify that x2 + 3 x + 1 divides x6 − 1 mod 4 . In fact, 
+
+x6 − 1 ≡ (x2 + 3 x + 1) · Q(x) mod 4 and Q(x) ≡ x4 + x3 + 3 x + 3 .
+
+Next, we create a circulant matrix of length 6 from the polynomial x2 + 3 x + 1 :
+
+
+
+1 3 1 0 0 00 1 3 1 0 00 0 1 3 1 00 0 0 1 3 11 0 0 0 1 33 1 0 0 0 1
+
+
+
+The cyclic code generated by this matrix has parameters k1 = 4 , k2 = 0 , and a minimum Lee weight of 2. 
+
+## 4.3 Negacyclic codes 
+
+Considering constacyclic codes over Z4 that are not cyclic codes, there is only one unit in Z4
+
+different from 1 which is a = 3 = −1. Such codes are called negacyclic. Moreover, it is well known that negacyclic codes of odd length are equivalent to cyclic codes of odd length over Z4 via the isomorphism f (x) → f (−x) [7]. Therefore, it suffices to consider negacyclic codes of even length over Z4. Their structure is given in the following theorem. 
+
+Theorem 4.4 ([10]) . Let C be a negacyclic code over Z4 of length N = 2 an, n odd. If C is considered as an ideal in Z4[x]/⟨xN + 1 ⟩, then C = ⟨g(x)⟩, where 
+
+g(x) = 
+
+> 2a+1
+
+Y
+
+> i=0
+
+[gi(x)] i
+
+and {gi(x)} are monic co-prime divisors of xn − 1 in Z4[x].
+
+This is another theorem that helps significantly with computational efficiency. With this theorem, we can find all negacyclic codes for a particular length N by reducing the search to an odd n = N 
+
+> 2a
+
+<N , saving computational power and allowing easy access to the divisors through Hensel lifting. To illustrate the process, we examine N = 6 , which means a = 1 and n = 3 . The two factors for x3 − 1
+
+are x + 3 and x2 + x + 1 . We choose g0(x) = x + 3 and g1(x) = x2 + x + 1 . Since in this case, we 7have two divisors, which is less than the required number of terms 2a + 2 = 2 1 + 2 = 4 , we will take 
+
+g2(x) = 1 and g3(x) = 1 . For our example, the terms are 
+
+g0(x) = x + 3 , g1(x) = x2 + x + 1 , g2(x) = 1 , g3(x) = 1 .
+
+Now, combining these terms, we obtain 
+
+g(x) = ( g0(x)) 0(g1(x)) 1(g2(x)) 2(g3(x)) 3 = ( x + 3) 0(x2 + x + 1) 1(1) 2(1) 3 = x2 + x + 1 .
+
+Next, we create the circulant matrix of size 6 from this polynomial: 
+
+
+
+1 1 1 0 0 00 1 1 1 0 00 0 1 1 1 00 0 0 1 1 11 0 0 0 1 11 1 0 0 0 1
+
+
+
+The negacyclic code generated by this matrix has the parameters k1 = 4 , k2 = 2 and the minimum Lee weight 2. After exhaustively obtaining all negacyclic codes for all even lengths up to 30, we investigated various methods of obtaining quantum codes from all the Z4 codes we have constructed. 
+
+## 4.4 Quantum codes 
+
+Building large scale quantum computers is a very active area of research. A critical part of this effort is the ability to control quantum errors. There are various methods of constructing quantum error correcting codes (QECC) over finite fields Fq , many of them based on the CSS construction [12]. Codes over extension rings of Fq have been utilized to construct QECCs over Fq . A large number of works are available in the literature on this approach. Recently, some binary QECCs have been obtained from the extension rings of Z4 in [13] and [3]. One of our goals in this work was to obtain some binary quantum codes from codes over Z4, rather than from codes over an extension ring of 
+
+Z4 as done in the recent papers. We used a method similar [13] and [3]. Additionally, we examined the Gray image of a Z4-linear code and applied CSS construction to the image as well as the binary codes associated to any Z4-linear codes: torsion and residue codes. To explain CSS construction, we recall some relevant basic facts about classical codes. For any u = ( u1, . . . , u n) and v = ( v1, . . . , v n)
+
+in Fnq , the (Euclidean) inner product u · v is defined as 
+
+u · v = u1v1 + u2v2 + · · · + unvn.
+
+The dual code of C is defined as 
+
+C⊥ = {v ∈ Fnq : u · v = 0 for all u ∈ C}.
+
+A code C that is contained in its dual, C ⊆ C⊥, is called self-orthogonal or weakly self-dual. Acode C that contains its dual, C⊥ ⊆ C, is called dual-containing. If C = C⊥ then we say that C is self-dual. If C ∩ C⊥ = {0} then C (and C⊥) is called a linear complementary dual (LCD) code. 
+
+## 4.5 CSS Construction 
+
+We can apply the CSS construction to obtain QECCs from cyclic, quasi-cyclic, and negacyclic codes. For this, we need two codes such that one is contained in the dual of the other one. Hence for cyclic and constacyclic codes, this condition is characterized by the ideal inclusion 
+
+⟨g(x)⟩ ⊇ ⟨ g(x)f (x)⟩.
+
+So we take C⊥ 
+
+> 2
+
+= ⟨g(x)f (x)⟩ ⊆ ⟨ g(x)⟩ = C1.8Theorem 4.5 (CSS construction [12]) . Let C1 and C2 be two linear codes over Fq with parameters 
+
+[n, k 1, d 1]q and [n, k 2, d 2]q with C⊥ 
+
+> 2
+
+⊆ C1. Then there exists a QECC with parameters [[ n, k 1 + k2 −
+
+n, min( d1, d 2)]] q . In case C1 is a dual-containing code, that is, C⊥ 
+
+> 1
+
+⊆ C1, there exists a QECC with parameters [[ n, 2k1 − n, d 1]] q .
+
+## 4.6 Binary Residue and Torsion Codes of a Z4 Code 
+
+For every linear code over Z4, there are two binary linear codes associated with it and they posses a property that makes them suitable in applying the CSS construction. In order to identify these codes, [17] introduced the following three maps α, β, γ from Z4 to Z2. Clearly, α is an additive group 
+
+Z4 α β γ
+
+0 0 0 01 1 0 12 0 1 13 1 1 0Table 2 homomorphism from Z4 to Z2, but β and γ are not. Each element x ∈ Z4 has a 2-adic expansion 
+
+x = α(x) + 2 β(x).
+
+We also have 
+
+α(x) + β(x) + γ(x) = 0 mod 2 for all x ∈ Z4.
+
+The maps α, β, γ can be extended to Zn 
+
+> 4
+
+in an obvious way. For x = ( x1, . . . , x n) ∈ Zn 
+
+> 4
+
+, define 
+
+α(x) = ( α(x1), . . . , α (xn)) , β(x) = ( β(x1), . . . , β (xn)) , γ(x) = ( γ(x1), . . . , γ (xn)) .
+
+Then ϕ is extended to Zn 
+
+> 4
+
+as follows: 
+
+ϕ(x) = ( β(x), γ (x)) for all x ∈ Zn 
+
+> 4
+
+.
+
+Clearly, the extended ϕ is a bijection from Zn 
+
+> 4
+
+to Z2n 
+
+> 2
+
+. For any x ∈ Zn 
+
+> 4
+
+, ϕ(x) is called the binary image of x under ϕ.
+
+Proposition 4.6 ([17], Proposition 3.18) . Let C be a Z4-linear code of length n, and C(1) and C(2) 
+
+be the binary codes defined by: 
+
+C(1) = {α(c) | c ∈ C} and C(2) = {β(c) | c ∈ C, α (c) = 0 }.
+
+(i) Both C(1) and C(2) are binary linear codes, and C(1) ⊆ C(2) .(ii) If C is of type 4k1 2k2 and has generator matrix (1), then the residue code C(1) is a binary linear [n, k 1]-code with generator matrix 
+
+(Ik1 A α(B)) 
+
+and the torsion code C(2) is a binary linear [n, k 1 + k2]-code with generator matrix 
+
+ Ik1 A α(B)
+
+Ik2 C
+
+
+
+.
+
+Since C(1) ⊆ C(2) , they can be directly used in the CSS construction. There is also a specific CSS construction that could be used with this condition: 
+
+Theorem 4.7 ([12], Theorem 9) . Let C1 ⊆ C2 be binary linear codes. We obtain an [[ n, k 2 − k1, d ]] 
+
+code, where 
+
+d = min {dist (C2 \ C1), dist (C⊥ 
+
+> 1
+
+\ C⊥ 
+
+> 2
+
+)}.
+
+95 Computational Results 
+
+Our computer searches yielded many new linear codes over Z4. A Z4-linear code is new if either its parameters do not appear in the database [4], or are better than the parameters of the comparable code on the database. Of the new codes we have found, 2500 of them are from cyclic codes of oddly even lengths. Table 2 below shows a small sample of these new codes. In the tables below, a polynomial is represented as a list of coefficients in descending order of the terms to save space. For example, the string “13” on the first row of Table 3 represents the polynomial f (x) = x + 3 . In Table 3, the polynomials f and g are such that f = a1(X2)a2(X2)a3(X2) and g = 2 a1(X2)a2(X)b(X) are the generator polynomials for the codes whose parameters are displayed in the first column. The generator polynomials are obtained from Theorem 4.2. A total of 2500 record breaking codes have been identified in the category of oddly even length codes. As for the free codes in Table 4, each code’s generator f is chosen such that f (x) = g(x) + 2 p(x) is a divisor of xN − 1 which is the first case of Theorem 4.3. In this case, we have been able to obtain codes with best known parameters. No record-breakers were found mainly because most free codes up until our exhaustive search cap of 38 were already part of the database. Finally, and for the negacyclic codes in Table 5, each code can be generated from the polynomial g, constructed according to Theorem 4.4. A total of 730 record breakers have been identified in the negacyclic category. Table 3: A sample of new codes from cyclic codes of oddly even length 
+
+[N, k 1, k 2, d ] f g
+
+[6 , 5, 1, 2] 13 2[10 , 6, 4, 2] 11111 2[14 , 4, 1, 10] 10310221033 2202222002 [18 , 11 , 1, 4] 11213013 2002002 [22 , 10 , 10 , 4] 1100000000033 202 [26 , 12 , 12 , 4] 110000000000033 202 [30 , 14 , 4, 8] 11200000022020213 2020020200202 [34 , 16 , 10 , 4] 1302000000202220213 222020222 [38 , 19 , 1, 4] 12200000000000000003 2222222222222222222 
+
+10 Table 4: Some good codes from free cyclic codes of even lengths 
+
+[n, k 1, k 2, d ] f
+
+[4 , 1, 0, 4] 3131 [6 , 2, 0, 6] 13211 [8 , 1, 0, 8] 31313131 [10 , 4, 0, 8] 3320211 [12 , 2, 0, 8] 33011033011 [14 , 3, 0, 12] 311230013321 [16 , 2, 0, 16] 121012101210121 [18 , 2, 0, 18] 13211013211013211 [20 , 8, 0, 8] 1212202202101 [22 , 10 , 0, 8] 3100202200011 
+
+Table 5: Record breaking negacyclic codes 
+
+[n, k 1, k 2, d ] g
+
+[2 , 0, 1, 4] 22 [4 , 0, 1, 8] 2222 [6 , 2, 2, 4] 132310 [10 , 4, 4, 4] 113303311 [12 , 1, 3, 6] 331111333311 [14 , 0, 9, 8] 2220020000000 [18 , 1, 7, 8] 131313133111111113 [20 , 2, 6, 8] 12101210303201032101 [22 , 10 , 10 , 4] 113300000003311 [34 , 0, 10 , 20] 2222222220002022200000000022202000 [36 , 2, 8, 16] 303230323030321210301230123010323210 [38 , 1, 1, 38] 31133113311331133113311331133113311331 
+
+11 We also obtained quantum codes from Z4 cyclic, quasi-cyclic, and negacyclic codes with even length. By applying the CSS construction, we have obtained QECCs with either optimal parameters according to [14], or the same parameters as best-known codes documented in the literature, with additional properties such as being reversible, dual containing, and self-orthogonal. These are presented in Table 6, with the additional properties denoted by acronyms: reversible (R), dual containing (DC), and self-orthogonal (SO). Table 6: Quantum Codes from classical Z4 codes with even length 
+
+[[ n, k, d ]] f g Parameters References Additional Properties 
+
+[[12 , 8, 2]] + 131313 222222 [12, 2, 6] [14] R and SO 
+
+[[12 , 10 , 2]] ∗+ 13 2 [12, 11, 2] [14] DC and SO 
+
+[[20 , 18 , 2]] ∗+ 0 2222222222 [20, 1, 20] [14] R and SO 
+
+[[20 , 16 , 2]] + 1111111111 2222222222 [20, 2, 10] [14] R and SO 
+
+[[20 , 2, 6]] ∗ 1120233 202 [20, 9, 4] [14] R and SO 
+
+[[28 , 22 , 2]] 1213 2 [28, 25, 2] [14] DC 
+
+[[28 , 24 , 2]] 11111111111111 22222222222222 [28, 2, 14] [14] R and SO 
+
+[[28 , 26 , 2]] ∗ 13 2 [28, 27, 2] [14] R and DC 
+
+[[36 , 30 , 2]] 0 2002002002002002 [36, 3, 12] [14] R and SO 
+
+[[36 , 32 , 2]] 111 2 [36, 34, 2] [14] R and DC 
+
+[[36 , 34 , 2]] ∗ 13 2 [36, 35, 2] [14] R and DC 
+
+[[44 , 40 , 2]] + 1313131313131313131313 2222222222222222222222 [44, 2, 22] [14] R and SO 
+
+[[44 , 42 , 2]] ∗+ 13 2 [44, 43, 2] [14] R and DC 
+
+[[52 , 48 , 2]] 0 2020202020202020202020202 [52, 2, 26] [14] R*: best known quantum codes +: these codes are also obtainable using negacyclic codes 12 We also obtained quantum codes with the same parameters as best-known codes using Proposition 3.18 from [3]. These are given in Table 7. Table 7: Quantum Codes from Proposition 4.6 
+
+[[ n, k, d ]] f g C(1) C(2) C
+
+[[6 , 4, 2]] 131313 22 [6, 1, 6] [6, 5, 2] ((6 , 41 24)) [[10 , 8, 2]] 1111111111 22 [10, 1, 10] [10, 9, 2] ((10 , 41 28)) [[14 , 12 , 2]] 11111111111111 22 [14, 1, 14] [14, 13, 2] ((14 , 41 212 )) [[18 , 16 , 2]] 131313131313131313 22 [18, 1, 18] [18, 17, 2] ((18 , 41 216 )) [[22 , 20 , 2]] 1313131313131313131313 22 [22, 1, 22] [22, 21, 2] ((22 , 41 220 )) [[26 , 24 , 2]] 13131313131313131313131313 22 [26, 1, 26] [26, 25, 2] ((26 , 41 225 )) [[30 , 28 , 2]] 131313131313131313131313131313 22 [30, 1, 30] [30, 29, 2] ((30 , 41 229 )) 
+
+From the computational results, we made the following observation regarding quantum codes obtained via the binary codes 
+
+C(1) and C(2) associated with a quaternary code described in [3]. First, we recall the definition of an MDS code. One of the elementary bounds on the parameters [n, k, d ] of a classical linear code over a finite field is the Singleton bound which states 
+
+k ≤ n − d + 1 . Codes whose parameters attain the equality in this bound are called MDS codes which are optimal. The quantum version of the Singleton bound is k ≤ n − 2d + 1 [12, Theorem 23]. A quantum code whose parameters attain the equality in this bound is called a quantum MDS code. 
+
+Theorem 5.1. Using Proposition 3.18 in [3] on a Z4-linear code C of length n, we always obtain a quantum code with parameters 
+
+[[ n, n − 2, 2]] which is a quantum MDS code. Proof. Using Proposition 3.18 in [3] on a Z4-linear code C of length n and of type 412n−2, we obtain 2 binary codes with parameters 
+
+C(1) = [ n, 1, n ] and C(2) = [ n, (n − 2) + 1 , 2] = [ n, n − 1, 2] . Since C1 ⊆ C2, we can use the CSS construction given in Theorem 4.7. Thus, we obtain a quantum code with parameters [[ n, k 2 − k1, d ]] = [[ n, (n − 1) − 1, min {dist (C2 \ C1), dist (C⊥ 
+
+> 1
+
+\ C⊥ 
+
+> 2
+
+)}]] = [[ n, n − 2, 2]] , which is an MDS code. We also obtain some QECCs from negacyclic codes using CSS construction. These are summarized in Table 8. 13 Table 8: Quantum Codes from negacyclic codes of even length over Z4
+
+[[ n, k, d ]] f Parameters References Additional Properties 
+
+[[24 , 22 , 2]] ∗ 13 [24,23, 2] [14] Reversible and Dual Containing 
+
+[[24 , 20 , 2]] 121 [24,22, 2] [14] Reversible and Dual Containing 
+
+[[24 , 18 , 2]] 1133 [24,21, 2] [14] Reversible and Dual Containing 
+
+[[40 , 38 , 2]] ∗ 13 [40,39, 2] [14] Reversible and Dual Containing 
+
+[[40 , 36 , 2]] 121 [40,38, 2] [14] Reversible and Dual Containing 
+
+[[40 , 34 , 2]] 1133 [40,37, 2] [14] Reversible and Dual Containing *: best known quantum codes. 14 6 Concluding Remarks 
+
+By conducting computer searches to find new cyclic and negacyclic codes of even length over Z4, we have found 3270 new quaternary linear codes that have been added to the database [4]. Moreover, we used elementary methods to obtain binary quantum codes with best known parameters from 
+
+Z4 codes. Our work can be extended by finding ways to handle computer searches for cyclic and negacyclic codes of larger lengths, and exploring other generalizations of cyclic codes such as quasi-twisted (QT) codes, polyclic codes, and generalized polycyclic codes of even lengths over Z4.
+
+# Acknowledgments 
+
+We thank the Kenyon Summer Science Scholars program for funding this research. 
+
+# References 
+
+[1] Magma computer algebra system, online, available at https://magma.maths.usyd.edu.au/ magma/ .[2] T. Abualrub and I. Siap. Reversible cyclic codes over Z4. Australasian Journal of Combinatorics ,38:195, 2007. [3] M. Ashraf, N. Khan, W. Rehman, and G. Mohammad. Quantum codes over an extension of 
+
+Z4. In Shakir Ali, Mohammad Ashraf, Vincenzo De Filippis, and Nadeem ur Rehman, edi-tors, Advances in Ring Theory and Applications , pages 375–389, Cham, 2024. Springer Nature Switzerland. [4] N. Aydin. Database of Z4 codes, online, http://quantumcodes.info/Z4 .[5] N. Aydin and T. Asamov. A database of Z4 codes. Journal of Combinatorics, Information & System Sciences , 34(1-4):1–12, 2009. [6] N. Aydin, Y. Lu, and V. Onta. An updated database of Z4 codes and an open problem about quasi-cyclic codes. In S. El Hajji, S. Mesnager, and S. El Mamoun, editors, Codes, Cryptology and Information Security , pages 395–406, Cham, 2023. Springer Nature Switzerland. [7] N. Aydin and D. K. Ray-Chaudhuri. Quasi-cyclic codes over Z4 and some new binary codes. 
+
+IEEE Transactions on Information Theory , 48(7):2065–2069, 2002. [8] N. Aydin, I. Siap, and T. Abualrub. Quaternary quasi-cyclic codes with even length components. 
+
+Ars Combinatoria , 101:425–434, 2011. [9] T. Blackford. Cyclic codes over Z4 of oddly even length. Discrete Applied Mathematics ,128(1):27–46, 2003. [10] T. Blackford. Negacyclic codes over Z4 of even length. IEEE Transactions on Information Theory , 49(6):1417–1424, 2003. [11] A. Bonnecaze, P. Sole, C. Bachoc, and B. Mourrain. Type II codes over Z4. IEEE Transactions on Information Theory , 43(3):969–976, 1997. [12] A. R. Calderbank, E. M. Rains, P. M. Shor, and N. J. A. Sloane. Quantum error correction via codes over GF (4) . IEEE Transactions on Information Theory , 44(4):1369–1387, 1998. [13] H. Q. Dinh, N. Kumar, and A. K. Singh. A study of quantum codes obtained from cyclic codes over a non-chain ring. International Journal of Information and Coding Theory , 2022. [14] M. Grassl. Code tables: Bounds on the parameters of various types of codes. http://www. codetables.de/ .15 [15] A. R. Hammons, P. V. Kumar, A. R. Calderbank, N. J. A. Sloane, and P. Sole. The Z4-linearity of kerdock, preparata, goethals, and related codes. IEEE Transactions on Information Theory ,40(2):301–319, March 1994. [16] A. Vardy. The intractability of computing the minimum distance of a code. IEEE Transactions on Information Theory , 43(6):1757–1766, 1997. [17] Z.-X. Wan. Quaternary codes , volume 8 of Ser. Applied Mathematics . World Scientific Pub. Co., 1997. 16

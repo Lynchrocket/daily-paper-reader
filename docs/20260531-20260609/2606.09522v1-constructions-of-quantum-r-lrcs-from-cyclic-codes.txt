@@ -1,0 +1,746 @@
+Title: Constructions of Quantum (r,δ)-LRCs from cyclic codes
+
+URL Source: https://arxiv.org/pdf/2606.09522v1
+
+Published Time: Tue, 09 Jun 2026 02:23:16 GMT
+
+Number of Pages: 21
+
+Markdown Content:
+# Constructions of Quantum ( r, δ )-LRCs from cyclic codes 
+
+## Rajendra Prasad Rajpurohit 1 and Maheshanand Bhaintwal 1* 1Department of Mathematics, Indian Institute of Technology Roorkee, Roorkee, 247667, India. *Corresponding author(s). E-mail(s): maheshanand@ma.iitr.ac.in; Contributing authors: rajendrarajpurohit20@gmail.com; 
+
+Abstract 
+
+Classical (r, δ ) locally recoverable codes (LRCs) play a central role in distributed data storage systems as they enable an efficient recovery from erasures by access-ing a small number of surviving symbols. Motivated by their prospective use in future quantum data storage and by recent theoretical progress on quantum locally recoverable codes (qLRCs), we investigate the construction of qLRCs from classical cyclic (r, δ )-LRCs. Our approach identifies cyclic LRCs whose defin-ing sets satisfy a dual-containing condition, allowing them to serve as valid CSS ingredients. We present three explicit families of (r, δ )-qLRCs, two of which are optimal with respect to the quantum Singleton-like bound, whenever the codes are pure, thereby providing optimal examples. Additionally, the codes presented in Constructions 2 and 3 have no bound on their lengths with respect to the field size required to obtain these codes. 
+
+Keywords: Cyclic codes, LRCs, Quantum LRCs 
+
+MSC Classification: 94B05 , 94B15 
+
+# 1 Introduction 
+
+Locally recoverable codes (LRCs) were introduced to address the challenge of efficient recovery in distributed storage systems, in the event of node failures, by enabling recovery of erased symbols through a small number of surviving symbols [1]. A code 1
+
+> arXiv:2606.09522v1 [cs.IT] 8 Jun 2026
+
+symbol is said to have locality r if it can be reconstructed by accessing at most r
+
+other symbols, so that each coordinate belongs to a small repair group, called local set , which supports efficient single-erasure recovery with usually low bandwidth than code dimension. To cope with the situation when multiple simultaneous erasures affect a single local set, the concept of ( r, δ )-locality was introduced [2], in which every coordinate lies in a local set of length at most r + δ − 1 and minimum distance at least 
+
+δ, where δ ≥ 2, so that up to δ − 1 erasures in each local set are correctable. A good amount of literature has been developed on classical LRCs in the past decade. A singleton-type bound for ( r, δ )-LRCs is given in [2]. Several optimal con-structions achieving the Singleton-like bound for LRCs have been proposed, including the important work of Tamo and Barg [3] based on good polynomials and subcodes of Reed–Solomon codes. In recent years, numerous constructions have been pro-posed using cyclic and quasi-cyclic codes [4–7], algebraic geometry codes [8], and matrix-product codes [9]. Further developments include LRCs with availability [10], hierarchical locality [11–13], and unequal locality [14]. Collectively, these results form a rich theory connecting algebraic coding techniques with practical distributed storage requirements. Quantum error-correcting codes (QECCs) form the foundation of reliable quantum computation and quantum communication. They protect quantum information from decoherence, noise, and adversarial disturbances by encoding logical qubits into larger systems using stabilizer or subsystem constructions [15]. Particularly, QECCs, which are constructed via the Calderbank-Shor-Steane (CSS) framework, have formed the foundation of modern quantum coding theory, bridging classical error correction with quantum error correction [16, 17]. A recent focus in quantum coding theory concerns locality properties and is moti-vated by practical architectural constraints in near-term quantum devices. Quantum locally recoverable codes (qLRCs) extend the classical notion of LRCs to quantum settings by enabling recovery of erased qudits using only a bounded number of other qudits in a repair set [18]. This notion parallels the classical ( r, δ )-LRC framework while addressing the fundamentally different structure of quantum error correction. This local recovery capability is of interest both for future large-scale quantum memories and for near-term quantum error correction. The study of qLRCs is still developing, but has seen several recent contributions. Golowich and Guruswami [18] introduced qLRCs and provided the first constructions using quantum Tamo–Barg codes, and proved a Singleton-like bound for qLRCs. Since then, many constructions of such codes have been provided in the literature [19–24]. These developments highlight ongoing progress, but explicit qLRC families derived from cyclic LRCs remain limited. 2In this work, we construct three new families of quantum ( r, δ ) locally recoverable codes derived from classical cyclic ( r, δ ) LRCs. We obtain conditions on the defining set of a cyclic code C that ensure that the dual code of C is contained in C, allowing these classical cyclic LRCs to serve as valid CSS components. Our Constructions 1 and 3 yield explicit qLRCs, which achieve the quantum Singleton-like bound for locality, whenever pure, thus giving optimal examples. Additionally, codes from Constructions 2 and 3 have no bound imposed on their lengths with respect to the field size required to obtain these codes. Moreover, to the best of our knowledge, Construction 2 is the first construction of LRCs which satisfy the afformanionted condition without imposing the condition q ≡ 1 mod r + 1. In Section 2, we present the fundamental definitions and background required for LRCs and qLRCs. Section 3 provides constructions of dual-containing cyclic LRCs of length n = q − 1 over Fq . In Section 4, we investigate dual-containing LRCs with locality r and ( r, δ ), respectively, whose lengths is not bounded by the field size required for their construction. From these classical codes, we derive the corresponding qLRCs. While this work was in progress, we learned very recently that Galindo et al. [25] have independently presented constructions of qLRC using BCH codes with minimum distance δ. However, the construction methodology and the resulting code parameters are different from those obtained in our work. The parameters of the qLRCs constructed in this paper are given in Table 1. Note that the codes presented in Theorem 5 and Theorem 10 are distance-optimal when pure.                                                                        
+
+> Table 1 Parameters of the constructed codes, where L=r+δ−1 and the notations are as defined in the corresponding references.
+> Reference Classical LRC Parameters qLRC Parameters Restrictions Theorem 5 [q−1 = gL, (g−1) r+ ( δ−1) , r + 1] [[ gL, (g−2)( r−δ+ 1) ,≥r+ 1]] q2≤δ≤r
+> Theorem 8 [qm−1 = M L, M (L−oL(q)) ,≥2] [[ M L, M (L−2oL(q)) ,≥2]] qδ= 2, oL(q) is odd Theorem 10 [qm−1, M r, δ ][[ M L, M (r−δ+ 1) ,≥δ]] q
+> q≡1 (mod L),
+> 2≤δ≤ ⌈ L/ 2⌉
+
+# 2 Preliminaries 
+
+A linear code C of length n and dimension k is a k-dimensional subspace of Fnq , and is referred to as an [ n, k ] linear code over Fq . The elements of C are known as codewords .The dual code of C, denoted by C⊥, is defined as C⊥ = {x ∈ Fnq | x·c = 0 for all c ∈ C} .It is well known that C⊥ is also a linear code with parameters [ n, n − k]. 3The Hamming distance between two codewords is the number of positions in which they differ. The minimum distance of C is the smallest Hamming distance between any two distinct codewords in C. If the minimum distance of C is d, then C is called an [ n, k, d ] code. A linear code C of length n over Fq is called cyclic if, for every codeword (c0, c 1, . . . , c n−1) ∈ C , its cyclic shift ( cn−1, c 0, . . . , c n−2) also belongs to C. By associ-ating each codeword with a polynomial c(x) = c0 + c1x + · · · + cn−1x n−1, cyclic codes can be viewed as ideals in the quotient ring Fq [x]/⟨xn − 1⟩. Since this ring is principal, every cyclic code C is generated by a unique monic divisor g(x) of xn − 1, called the generator polynomial of C. Thus, C = ⟨g(x)⟩, and dimension of C is k = n − deg g(x). An alternative description is given through the defining set, which consists of the exponents of the roots of g(x) in some extension field of Fq . This algebraic framework makes cyclic codes both theoretically appealing and practically useful. 
+
+Definition 1 (Defining Set) . Let C be a cyclic code of length n over the Fq , and let α
+
+be a primitive n-th root of unity in some extension field of Fq . If g(x) is the generator polynomial of C, then the defining set Z of C is defined by 
+
+Z = { i ∈ { 0, 1, . . . , n − 1} | g(αi) = 0 }.
+
+Definition 2. Let C be a cyclic code of length n over Fq , and let γ be a primitive n-th root of unity in some extension field of Fq . If the defining set of C contains a set of consecutive powers 
+
+{γb, γ b+1 , . . . , γ b+δ−2}
+
+for some integer b, then the minimum distance of C satisfies 
+
+d(C) ≥ δ. 
+
+The following theorem provides a condition for a cyclic code to contain its dual. 
+
+Theorem 1. Let C ⊆ Fnq be a cyclic code of length n with defining set Z ⊆ Zn.Then, C is a dual-containing code if and only if Z ∩ − Z = ∅, where −Z is defined as 
+
+−Z = {n − i : i ∈ Z}.
+
+Definition 3. Let n be a positive integer and q be an integer such that gcd( q, n ) = 1 .For any integer i such that 0 ≤ i ≤ n−1, the q-cyclotomic coset of i modulo n, denoted by Si, is defined by 
+
+Si = i · qj (mod n) | j ∈ Z≥0 .
+
+Definition 4. Let n ≥ 2 be a positive integer and let q be an integer such that 
+
+gcd( q, n ) = 1 . The order of q modulo n, denoted by On(q), is the smallest positive integer t such that 
+
+qt ≡ 1 (mod n).
+
+42.1 Locally recoverable codes 
+
+Let C be a linear [ n, k ] code. We say that the i-th coordinate of C has locality r if there exists a set R ⊆ [n]\{ i}, |R| ⩽ r, such that across all codewords c ∈ C , the value of the coordinate c(i) is determined by the values of the coordinates {c(j)} | j ∈ R}.Equivalently, the ith coordinate has locality r if the dual code C⊥ contains a codeword 
+
+c of Hamming weight at most r + 1 such that the coordinate i is in the support of c.It is shown in [1] that a linear code C with locality r and minimum distance d satisfies the upper bound 
+
+d ≤ n − k −
+
+ kr
+
+
+
++ 2 .
+
+This bound is called the Singleton-type bound for LRCs. The codes with ( r, δ ) locality are a generalization of LRCs, and address the problem of recovering erased symbols in a code when more than one data symbol is erased from a local set. 
+
+Definition 5. The ith coordinate of an [n, k, d ] linear code C is said to have (r, δ )-locality if there exists a subset Ri ⊆ [n] such that (i) i ∈ Ri and |Ri| ⩽ r + δ − 1;(ii) The minimum Hamming distance of the punctured code C| Ri obtained by deleting the code symbols cj , j ∈ [n]\Ri, is at least δ.
+
+The set Ri is referred to as a local set for the ith coordinate. A linear code C is said to have all symbol ( r, δ )-locality and is called an ( r, δ ) LRC if all the n coordinates have ( r, δ )-locality [26]. It is well known that the minimum distance d of a code with ( r, δ )-locality satisfies the bound 
+
+d ≤ n − k + 1 −
+
+ kr
+
+
+
+− 1
+
+
+
+(δ − 1) . (1) A linear code with ( r, δ )-locality is called distance-optimal if it achieves the above bound. 
+
+## 2.2 Quantum stabilizer codes and qLRC 
+
+Let H be a Hilbert space of dimension q over the field C. The n-fold tensor product 
+
+H⊗n is a Hilbert space of dimension qn over C. A quantum code with parameters [[ n, k, d Q]] q is a qk-dimensional subspace Q ⊆ H⊗n, where dQ denotes the minimum distance of the code. Calderbank and Shor [16], and Steane [17], introduced a method for constructing quantum codes from classical linear codes. This method is known as the Calderbank– Shor–Steane (CSS) construction. It provides a way to obtain quantum stabilizer codes from classical codes that satisfy a suitable duality condition. 5Theorem 2 (CSS construction [16, 17]) . Let C1 and C2 be two linear codes over Fq
+
+with parameters [n, k 1] and [n, k 2], respectively. If C⊥ 
+
+> 2
+
+⊆ C 1, then there exists a quantum code with parameters [[ n, k 1 + k2 − n, d Q]] q , where 
+
+dQ = min { wH (C1 \ C⊥ 
+
+> 2
+
+), w H (C2 \ C⊥ 
+
+> 1
+
+) }.
+
+In particular, if C⊥ ⊆ C for a linear code C of parameters [n, k, d ], then there exists a quantum stabilizer code Q(C) with parameters 
+
+[[ n, 2k − n, d Q]] q , dQ = wH (C \ C ⊥).
+
+A quantum code Q(C) is said to be pure if its minimum distance dQ is equal to the minimum distance of the code C.The CSS construction provides a systematic way to obtain quantum stabilizer codes from classical linear codes that satisfy the dual-containing property. Using this construction, a stablizer code was presented in [21] which satisfies the property of ( r, δ )quantum LRC. Their key results include deriving qLRCs using a classical LRCs. We first introduce the definition of ( r, δ ) quantum LRC as described in [21]. 
+
+Definition 6 (Quantum ( r, δ )-locally recoverable codes) . Let Q ⊂ C⊗nq be an 
+
+[[ n, K, d ]] q quantum code. The i-th coordinate of Q is said to have (r, δ )-locality if there exists a subset 
+
+Ri ⊆ [n], i ∈ Ri, and |Ri| ≤ r + δ − 1,
+
+such that the code Q can recover from any set of δ − 1 erasures occurring in the coordinate set Ri.A quantum code Q is said to be a quantum (r, δ )-LRC if every coordinate has 
+
+(r, δ )-locality. 
+
+More about the basic notions of quantum computation can be found in the references [15, 16, 27]. 
+
+Theorem 3. Let C ⊆ Fnq be a linear code with parameters [n, k, d ]q . Suppose that C is a Euclidean dual-containing code, i.e. C⊥ ⊆ C , and that δ ≤ d  C⊥ .
+
+Define Q(C) to be the stabilizer quantum code obtained from C via the standard 
+
+CSS construction given in Theorem 2. Then: 1. Q(C) has the parameters [[ n, κ = 2 k − n, d Q ≥ d]] q .2. C is a classical (r, δ )-LRC if and only if Q(C) is an (r, δ )-qLRC. 
+
+Moreover, if Q(C) is a pure quantum code, then the parameters [[ n, 2k−n, d Q = d]] q
+
+of Q(C) satisfy the quantum Singleton-like bound [21] 
+
+k + 2 dQ + 2 
+
+ n + k
+
+2r
+
+
+
+− 1
+
+
+
+(δ − 1) ≤ n + 2 .
+
+6A pure ( r, δ )-qLRC is said to be optimal if it satisfies the above bound with equality. 
+
+# 3 Dual-containing cyclic LRCs with n|(q − 1) and quantum LRCs 
+
+In this section, we construct cyclic codes through the set of zeros of the generator polynomial, ensuring that the code satisfies the condition of locally recoverability as well as the dual-containing property. First we give an important result which will be useful in our constructions. 
+
+Theorem 4. [28] Let n be a positive integer such that gcd( n, q ) = 1 . Let γ ∈ Fqs be a primitive n-th root of unity, where Fqs is the splitting field of xn − 1 over Fq . Let r
+
+and δ be positive integers such that 2 ≤ δ ≤ r and L = r + δ − 1 divides n. Set M = nL .Let C be a cyclic code of length n over Fq with complete defining set Z. Consider integers l1 < l 2 < · · · < l δ−1, forming an arithmetic progression with δ − 1 terms and common difference b, where gcd( b, n ) = 1 . Define the set 
+
+A = { jL + li : 1 ≤ i ≤ δ − 1, 0 ≤ j ≤ M − 1}.
+
+If Z contains A, then the cyclic code C has (r, δ )-locality. 
+
+Using Theorem 4, we present a construction of a dual-containing ( r, δ )-LRCs, which we can use as CSS components for constructing qLRCs. 
+
+Construction 1. Let n = q − 1, and let α be a primitive n-th root of unity in Fq . Let 
+
+r and δ be positive integers such that 2 ≤ δ ≤ r, L = r + δ − 1, L | n, and g = n/L .Define the set 
+
+A =
+
+> g−1
+
+[
+
+> j=0
+
+{jL + 1 , jL + 2 , . . . , jL + ( δ − 1) } ⊆ Zn.
+
+For any fixed u ∈ [1 , g − 1] such that (g − 2u)L (mod n) /∈ [0 , 2r − 2] , define a set 
+
+B = {uL + i : 0 ≤ i ≤ r − 1}.
+
+Let C be the cyclic code with Z = A ∪ B as the defining set. 
+
+Theorem 5. The linear code C given in Construction 1 above, satisfies the following properties: 1. C is a distance-optimal cyclic dual-containing (r, δ )-LRC over Fq with parameters 
+
+[g(r + δ − 1) , (g − 1) r + ( δ − 1) , r + 1] .2. The minimum distances d(C) and d(C⊥) of C and C⊥, respectively, satisfy 
+
+d(C) = r + 1 , d(C⊥) ≥ r + 1 ≥ δ. 
+
+73. There exists an (r, δ )-qLRC with parameters [[ n, 2k − n, ≥ r + 1]] q = [[ g(r + δ −
+
+1) , (g − 2)( r − δ + 1) , ≥ r + 1]] q .Proof. 1. Notice that the defining set Z of C contains the set A, with li = i, as described in Theorem 4, hence the code C is an ( r, δ )-LRC. Now, to show that C is dual-containing, we first show that A ∩ (−A) = ∅. For any x ∈ A, we have −x (mod n) = n − x. Since x = jL + t for some j ∈ [0 , g − 1] and t ∈ [1 , δ − 1], it follows that 
+
+−x = n − (jL + t) = ( g − j)L − t = sL − t
+
+for some s ∈ [0 , g − 1]. Now suppose −x ∈ A. Then, for some 1 ≤ t′ ≤ δ − 1 and 0 ≤ k ≤ g − 1, we must have 
+
+kL + t′ ≡ sL − t (mod n).
+
+This congruence holds for certain k and s if and only if t + t′ is a multiple of 
+
+L = r + δ − 1. However, the maximum possible value of t + t′ is 2( δ − 1), and since δ ≤ r, we obtain 
+
+t + t′ < r + δ − 1 = L, 
+
+which implies that t+t′ cannot be a multiple of L. This is a contradiction. Therefore, no such x exists in A, and hence A ∩ (−A) = ∅.
+
+Next, we consider the intersection A ∩ (−B). Recall that B = {uL + i1 : 0 ≤
+
+u ≤ g − 1, 0 ≤ i1 ≤ r − 1}, where L = r + δ − 1 and n = Lg .For any y ∈ B, we have y = uL + i1 with 0 ≤ i1 ≤ r − 1. Then 
+
+−y (mod n) ∈ A if and only if − (uL + i1) ≡ jL + t (mod n)for some j ∈ [0 , g − 1] and t ∈ [1 , δ − 1]. This congruence is equivalent to (j + u)L + ( i1 + t) ≡ 0 (mod n).
+
+Thus, for the congruence to hold, we must have i1 + t ≡ 0 (mod L), i.e., i1 + t
+
+should be at least L.However, since t ≤ δ − 1 and i1 ≤ r − 1, we obtain 
+
+i1 + t ≤ (r − 1) + ( δ − 1) = r + δ − 2 < r + δ − 1 = L, 
+
+which implies that i1 + t cannot be a multiple of L. Consequently, no such y exists, and we conclude that A ∩ (−B) = ∅.
+
+8Finally, we show that ( −B) ∩ B = ∅. For any y = uL + i1 ∈ B ∩ − B, there must exist integers i2 ∈ [0 , r − 1] such that (g − u)L − i1 ≡ uL + i2 (mod n).
+
+This congruence simplifies to 
+
+i1 + i2 ≡ (g − 2u)L (mod n).
+
+The equation does not have a solution since ( g − 2u)L (mod n) /∈ [0 , 2r − 2]. Therefore, we conclude that B ∩ − B = ∅.
+
+Combining all together, and by Theorem 1, it follows that C is a dual-containing cyclic code. 2. Note that the defining set Z of C contains the set {uL, uL +1 , uL +2 , · · · , uL +r−1},comprising r consecutive elements. By BCH bound (2), the minimum distance d(C)of C satisfies d(C) ≥ r + 1. It remains to show that d(C) ≤ r+1. Note that the set Z contains ( g−1)( δ−1)+ r
+
+elements. The dimension k of C is given by 
+
+k = n − | Z| = g(r + δ − 1) − (( g − 1)( δ − 1) + r)= gr + g(δ − 1) − g(δ − 1) + ( δ − 1) − r
+
+= ( g − 1) r + ( δ − 1) .
+
+Now, using the distance bound (1), we obtain 
+
+d(C) ≤ n − k + 1 −
+
+ kr
+
+
+
+− 1
+
+
+
+(δ − 1) 
+
+≤ (g − 1)( δ − 1) + r) + 1 −
+
+ (g − 1) r + ( δ − 1) 
+
+r
+
+
+
+− 1
+
+
+
+(δ − 1) 
+
+≤ (g − 1)( δ − 1) + r) + 1 −
+
+ 
+
+(g − 1) + (δ − 1) 
+
+r
+
+
+
+− 1
+
+
+
+(δ − 1) 
+
+≤ (g − 1)( δ − 1) + r) + 1 − (g − 1)( δ − 1) , since δ − 1 < r 
+
+≤ r + 1 .
+
+Hence, d(C) = r + 1 and the code C is a distance-optimal ( r, δ )-LRC. For d(C⊥), we have C⊥ ⊆ C . This simply implies that d(C⊥) ≥ d(C) = r + 1 ≥ δ
+
+as we have r ≥ δ.93. As the code C is an LRC with ( r, δ ) locality, and with d(C⊥) ≥ r ≥ δ, the quantum code Q(C) obtained by the CSS construction as claimed in Theorem 3, is an ( r, δ )-qLRC with parameters [[ g(r + δ − 1) , (g − 2)( r − δ + 1) , ≥ r + 1]] q .
+
+Remark 1. Since the classical code obtained by Construction 1 is distance-optimal, the corresponding quantum code Q(C) is distance-optimal whenever pure. 
+
+Remark 2. The construction of qLRCs from dual-containing LRCs was presented in [20] for the case δ = 2 . In this setting, our construction differs from theirs in the following aspects. First, the construction in [20] achieves minimum distance l + 1 ,where l + 1 < r + 1 since l < r is assumed. In contrast, our construction attains minimum distance r + 1 . Moreover, we remove the additional restriction u + 2 l < r + 2 
+
+imposed in [20]. To increase the minimum distance, the authors in [20] include an additional l roots in the first coset. Instead, we make use of the condition (g − 2u)L
+
+(mod n) /∈ [0 , 2r − 2] and place these roots in the uth coset. This approach allows us to increase the minimum distance to r + 1 .
+
+We present two examples: one for the case when the obtained code is pure, and the other for the case when it is not. 
+
+Example 1. Let n = 2 4 − 1 = 15 , r = 4 and δ = 2 . We get L = r + δ − 1 = 5 and 
+
+g = 3 . We take u = 2 and verify that (g − 2u)L = (3 − 4) · 5 = −5 ≡ 10 (mod 15) 
+
+and 10 /∈ [0 , 6] . The set A in this case is A = ∪2
+
+> j=0
+
+{5j + 1 } = {1, 6, 11 } and the set 
+
+B = {10 , 11 , 12 , 13 }.The set Z = {1, 6, 10 , 11 , 12 , 13 } is the defining set for the code C. Using MAGMA calculator [29], we verified that the code Q(C) is pure distance-optimal (r = 4 , δ =2) -qLRC with parameters [[15 , 3, 5]] q=2 4 .
+
+Example 2. Let n = 13 − 1 = 12 , r = 3 and δ = 2 . We get L = r + δ − 1 = 4 and 
+
+g = 3 . We take u = 2 and verify that (g − 2u)L = (3 − 4) · 4 = −4 ≡ 8 (mod 12) 
+
+and 8 /∈ [0 , 4] . The set A in this case is : A = ∪2
+
+> j=0
+
+{4j + 1 } = {1, 5, 9} and the set 
+
+B = {8, 9, 10 }.The set Z = {1, 5, 8, 9, 10 } is the defining set for the code C. We further use MAGMA calculator [29] to verify that there is no codeword of weight 4 in C \ C ⊥, and moreover, Q(d(C)) = 5 > d (C). Thus, the induced quantum code is not pure and has parameters [[12 , 2, 5]] q=13 .
+
+# 4 Dual-containing LRCs with unbounded length and quantum LRCs 
+
+In Construction 1 presented above, the code length is bounded above by the size of the underlying field, i.e., n ≤ q − 1. However, in distributed data storage systems, 10 it is desirable to have codes with a large length over relatively small fields, as this significantly reduces the computational cost and latency associated with finite field arithmetic. In this subsection, we will present cyclic LRCs of unbounded length that also possess the property of dual containment. We begin by solving the problem in its most general form in the following theorem. 
+
+Theorem 6. Let n be a positive integer and q be a prime power such that gcd( q, n ) = 1. Let L ≥ 2 be a positive divisor of n and T ⊆ [1 , L − 1] . Define a set 
+
+S = { jL + t (mod n) : 0 ≤ j ≤ M − 1, t ∈ T }, M = nL .
+
+For each a ∈ S let Ca be the q-cyclotomic coset modulo n containing a, and let H be the union of all q-cyclotomic cosets Ca modulo n with a ∈ S, i.e., 
+
+H = [
+
+> a∈S
+
+Ca.
+
+Define the set 
+
+O = { qst (mod L) : t ∈ T, s ≥ 0}.
+
+Then H ∩ (−H) = ∅ if and only if O ∩ {− t (mod L) : t ∈ T } = ∅.
+
+Proof. Suppose H ∩ (−H)̸ = ∅. This implies that there exists an element x such that 
+
+x ∈ H and −x ∈ H. By the definition of H, there exist a, b ∈ S and non-negative integers e, f such that x ≡ a · qe (mod n) and −x ≡ b · qf (mod n). Substituting the first congruence into the second, we get −(a · qe) ≡ b · qf (mod n). Without loss of generality, we may assume that f > e . This implies that −a ≡
+
+b · qf −e (mod n), which means that −a is an element of the cyclotomic coset Cb. Thus, 
+
+−a ≡ b q s (mod n), where s = f − e.We know that a, b ∈ S implies a = jL + ta (mod n) and b = kL + tb (mod n) for some 0 ≤ j, k ≤ M − 1. Substituting these values in the above equation, we get (kL + ta)qs ≡ − (jL + tb) (mod n).
+
+Using the fact that L|n, we reduce the above equation modulo L. This gives 
+
+qsta ≡ − tb (mod L).
+
+So tb ∈ O ∩ {− t : t ∈ T }, which implies that O ∩ {− t : t ∈ T }̸ = ∅.Conversely suppose that O ∩ {− t : t ∈ T }̸ = ∅. Then there exist ta, t b ∈ T and 
+
+s ≥ 0 that satisfy 
+
+qsta ≡ − tb (mod L).
+
+11 Choose an integer j ∈ { 0, . . . , M − 1} and define 
+
+a := jL + ta ∈ S, b := j′L + tb ∈ S, 
+
+where j′ is a non-negative integer. Then 
+
+qsa = qs(jL + ta) = L jq s + qsta.
+
+Since qsta ≡ − tb (mod L), we have qsta + tb = cL for some integer c. Now, let 
+
+qsa + b ≡ L jq s + j′ + c (mod n) for some j′ ∈ { 0, . . . , M − 1}. We choose j′ so that it satisfies 
+
+j′ ≡ − (jq s + c) (mod M ).
+
+With this choice of j′, the integer jq s + j′ is a multiple of M , and hence L(jq s + j′)is a multiple of M L = n. Therefore, 
+
+qsa + b ≡ 0 (mod n), i. e., qsa ≡ − b (mod n).
+
+Thus, −b ∈ H. Since −b ∈ − H, we have H ∩ (−H)̸ = ∅. Therefore, the two conditions are equivalent. Theorem 6 establishes a complete equivalence between the disjointness of the sets 
+
+H and −H. While exact, this criterion may be difficult to apply directly to obtain examples. Note that one can obtain dual-containing LRCs with δ = |T | + 1 using the above theorem. We next derive some restrictions on L and obtain the set H for particular values of t, which leads to the construction of LRCs with δ = 2. 
+
+Theorem 7. Let n = qm −1 for some positive integer m and prime power q, let L ≥ 2
+
+be a divisor of n, and let t < L be a positive integer such that gcd( t, L ) = 1 . Define 
+
+St = { jL + t (mod n) : 0 ≤ j ≤ M − 1}, M = nL ,
+
+and let H = S 
+
+> a∈St
+
+Ca be the union of all q-cyclotomic cosets modulo n with a ∈ St.If the multiplicative order oL(q) of q modulo L is odd, then H ∩ (−H) = ∅.
+
+Moreover, the cardinality of H is given by 
+
+|H| = M · oL(q).
+
+Proof. By Theorem 6, the condition H ∩ (−H) = ∅ holds if and only if 
+
+Ot ∩ {− t (mod L)} = ∅, where Ot = { qst (mod L) : s ≥ 0}.
+
+12 Since gcd( t, L ) = 1, multiplication by t−1 modulo L gives 
+
+t−1Ot = { qs (mod L) : s ≥ 0}.
+
+If oL(q) is odd and L > 2, then −1̸ ≡ qs (mod L) for any s. For if −1 ≡ qs (mod L)for some s, then 1 ≡ q2s (mod L), implying that oL(q) | 2s, which gives oL(q) | s, as 
+
+oL(q) is odd. So 1 ≡ qs (mod L), which is a contradiction. Hence −1 /∈ t−1Ot, which implies that −t / ∈ O t. By Theorem 6, we get H ∩ (−H) = ∅.
+
+Now, we determine |H|. Let x ∈ H. Then x = aq b (mod n) for some a = jL +t ∈ St
+
+and b ≥ 0. Reducing modulo L gives 
+
+x ≡ tq b (mod L).
+
+So the residue of x modulo L lies in the orbit Ot = { qst (mod L) : s ≥ 0 }. Hence, 
+
+H ⊆ [
+
+> t′∈O t
+
+St′ , where St′ = { jL + t′ (mod n) : 0 ≤ j ≤ M − 1}.
+
+Conversely, let t′ ∈ O t. Then t′ ≡ tq s (mod L) for some integer s ≥ 0. For each 
+
+j ∈ { 0, 1, . . . , M − 1}, we have 
+
+aq s = ( jL + t)qs = ( jq s + k)L + t′ for some k.Let j′ = jq s + k (mod M ). Then there exists an integer w, such that jq s + k =
+
+j′ + wM. 
+
+Substituting back, we get aq s = ( j′ + wM )L + t′. Now, using n = M L , we get 
+
+aq s = j′L + t′ (mod n) ∈ St′ .
+
+Since n = qm − 1 = M L , we have gcd( q, M ) = 1. The map j → j′ (mod M ) is a bijection of the index set {0, 1, 2, · · · , M − 1}. As j runs through all possible values, so does j′. Therefore, all elements of St′ appear among the residues of aq s (mod n)as a varies in St. Hence St′ ⊆ H, giving 
+
+H = [
+
+> t′∈O t
+
+St′ .
+
+Each St′ consists of M distinct elements modulo n, and for distinct residues t′
+
+> 1
+
+, t ′ 
+
+> 2
+
+∈Ot, the sets St′ 
+
+> 1
+
+and St′ 
+
+> 2
+
+are disjoint, since t′ 
+
+> 1
+
+and t′ 
+
+> 2
+
+differ modulo L. Therefore, 
+
+|H| = X
+
+> t′∈O t
+
+|St′ | = M · |O t| = M · oL(q).
+
+13 The above theorem leads to the following construction. 
+
+Construction 2 (LRC with δ = 2) . Let n = qm − 1 for some positive integer m and a prime power q, and let L = r + 1 ≥ 3 be a divisor of n. Let γ be a primitive n-th root of unity in the extension field Fqm . Define the set 
+
+R = {γi : i ∈ H},
+
+where the index set H is as defined in Theorem 7. Let C be the cyclic code whose generator polynomial has R as its set of roots. 
+
+Theorem 8. The code C, given in Construction 2 above, is an [n = M L, M (L −
+
+oL(q), ≥ 2] dual-containing LRC with locality r over Fq . Equivalently, there exists an 
+
+(r, δ = 2) -qLRC with parameters [[ M L, M (L − 2oL(q)) , ≥ 2]] q .Proof. Note that the defining set of code C is H, which contains the set St, therefore by Theorem 4, C is LRC with locality r. Also, H ∩ − H = ∅, implies that the code C
+
+is dual-containing. Finally, deg g(x) = |R| = M.o L(q), therefore the dimension k of C
+
+is given by k = n − deg g(x) = M (L − oL(q)) .
+
+The existence of ( r, δ = 2)-qLRC with parameters [[ M L, M (L − 2oL(q)) , ≥ 2]] q
+
+directly follows from Theorem 3. 
+
+Example 3. Let q = 2 , m = 6 , n = 2 6 − 1 = 63 , L = r + 1 = 7 , M = nL = 9 .
+
+Let γ be a primitive 63 rd root of unity in an extension of F2. Take t = 1 , and define 
+
+S1 = { 7j + 1 (mod n) : 0 ≤ j ≤ 8} = {1, 8, 15 , 22 , 29 , 36 , 43 , 50 , 57 }.
+
+We obtain 
+
+O = {2s · 1 (mod 7) : s ≥ 0} = {1, 2, 4}.
+
+The set H = S 
+
+> t′∈O t
+
+St′ = { 7j + t′ (mod n) : t′ ∈ O , 0 ≤ j ≤ 8}. Define 
+
+g(x) = Y
+
+> i∈H
+
+(x − γi) ∈ F2[x].
+
+The cyclic code C with the generator polynomial g(x) is an [n = 63 , k = 36 , d = 3] 
+
+dual-containing LRC with locality r = 6 over F2. The corresponding quantum code has parameters [[63 , 9, 3]] q=2 with locality 6.
+
+We further restrict the conditions on parameters to easily construct such a set H.The following corollary is a direct implication of Theorem 7. 14 Corollary 1. Let m be an odd positive integer and n = qm − 1. Let L be a divisor of 
+
+n. Define the set 
+
+S = {jL + 1 | 1 ≤ jL + 1 ≤ n},
+
+and let H be the union of all q-cyclotomic cosets Ca modulo n with a ∈ S. Then, 
+
+H ∩ (−H) = ∅.Proof. It suffices to show that oL(q) is odd. Now, as qm ≡ 1 (mod n) and L | n, the equation, qm ≡ 1 (mod L) holds. This implies that oL(q) | m. Since m is odd, oL(q)is odd. 
+
+Example 4. Let q = 2 , m = 9 , n = qm − 1 = 2 9 − 1 = 511 , and L = 73 . Then 
+
+M = nL = 511 73 = 7 .Let γ be a primitive 511 -st root of unity in the extension field F29 of F2. Take t = 1 ,and define 
+
+S1 = { 73 j + 1 (mod 511) : 0 ≤ j ≤ 6 } = {1, 74 , 147 , 220 , 293 , 366 , 439 }.
+
+We obtain 
+
+O = {2s · 1 (mod 73) : s ≥ 0} = {1, 2, 4, 8, 16 , 32 , 64 , 55 , 37 }.
+
+The set O has cardinality 9 since o73 (2) = 9 .Let 
+
+H = [
+
+> a∈S1
+
+Ca = [
+
+> t′∈O
+
+St′ = [
+
+> t′∈O
+
+{ 73 j + t′ (mod 511) : 0 ≤ j ≤ 6 }.
+
+Define the polynomial 
+
+g(x) = Y
+
+> i∈H
+
+(x − γi) ∈ F2[x].
+
+The set H has |O|· M = 9 ·7 = 63 elements, so deg g(x) = 63 . Therefore the cyclic code 
+
+C with the generator polynomial g(x) is an [511 , 511 − 63] = [511 , 448] dual-containing LRC over F2 with locality r = L−1 = 72 , and minimum distance 3. The corresponding quantum code has parameters [[511 , 385 , 3]] q=2 with locality r = 72 .
+
+Example 5. Let q = 3 , m = 5 , n = qm − 1 = 3 5 − 1 = 242 , and L = 11 . Then 
+
+M = nL = 242 11 = 22 .
+
+Let γ be a primitive 242 -nd root of unity in an extension of F3. Take t = 1 , and define 
+
+S1 = { 11 j + 1 (mod 242) : 0 ≤ j ≤ 21 }.
+
+15 We compute 
+
+O = {3s · 1 (mod 11) : s ≥ 0} = {1, 3, 9, 5, 4}.
+
+Thus, we have o11 (3) = 5 . Let 
+
+H = [
+
+> t′∈O
+
+St′ = [
+
+> t′∈{ 1,3,9,5,4}
+
+{ 11 j + t′ (mod 242) : 0 ≤ j ≤ 21 }.
+
+Define the polynomial 
+
+g(x) = Y
+
+> i∈H
+
+(x − γi) ∈ F3[x].
+
+The set H has |O| · M = 5 · 22 = 110 elements, so deg g(x) = 110 . Therefore the cyclic code C with the generator polynomial g(x) is a [242 , 132 , 5] dual-containing locally recoverable code over F3 with locality r = L − 1 = 10 . The corresponding qLRC has parameters [[242 , 22 , 5]] q=3 with locality 10 .
+
+In the examples presented above, we notice that it is possible to construct such sets for a specific value of t. However, when |T | ≥ 2, the problem becomes complicated, as it is challenging to find numbers that satisfy multiple conditions simultaneously. A simpler way to find multiple continuous segments for each multiple of L, while maintaining the property that H ∩ (−H) = ∅, is given in the following theorem. Here, we assume q ≡ 1 (mod L). The authors in [28] use a similar condition on q to construct LRCs with unbounded length. 
+
+Theorem 9. Let n = qm − 1 for some integer m > 0 and prime power q. Let 
+
+L ≥ 2 be a divisor of n, and suppose that q ≡ 1 (mod L). Let M = n/L and 
+
+T ⊆ { 1, 2, . . . , ⌈L/ 2⌉ − 1}. Define 
+
+S = { jL + t (mod n) : 0 ≤ j ≤ M − 1, t ∈ T }.
+
+For each a ∈ S, let Ca denote the q-cyclotomic coset modulo n containing a, and let 
+
+H = [
+
+> a∈S
+
+Ca.
+
+Then H = S, and consequently |H| = M |T | = nL |T |. Also, H is inverse free, i.e. 
+
+H ∩ (−H) = ∅.Proof. Let a = jL + t ∈ S with 0 ≤ j ≤ M − 1 and t ∈ T . For any integer i ≥ 0, consider 
+
+x ≡ qia (mod n), 0 ≤ x ≤ n − 1.
+
+Since q ≡ 1 (mod L), we have qi ≡ 1 (mod L). Hence 
+
+x ≡ qi(jL + t) ≡ jL + t ≡ t (mod L).
+
+16 Therefore x − t is divisible by L. Write x − t = Lk for some integer k.Because 0 ≤ x ≤ n − 1 = M L − 1 and 0 ≤ t ≤ L − 1, we get 0 ≤ x − t < M L. 
+
+Then k = x−tL satisfies 0 ≤ k ≤ M − 1. It follows that 
+
+x = kL + t, 0 ≤ k ≤ M − 1, t ∈ T, 
+
+and hence x ∈ S.Thus, every element of the q-cyclotomic coset Ca lies in S, i.e. Ca ⊆ S. The reverse inclusion S ⊆ H is trivial from the definition of H. Therefore H = S, and the cardinality of H is 
+
+|H| = |S| = M |T | = nL |T |.
+
+Finally we show H ∩ (−H) = ∅. By Theorem 6 we have the equivalence 
+
+H ∩ (−H) = ∅ ⇐⇒ O ∩ {− t (mod L) : t ∈ T } = ∅,
+
+where O = {qst (mod L) : t ∈ T, s ≥ 0}. Under the hypothesis q ≡ 1 (mod L) the orbit is trivial: for every t ∈ T and every s ≥ 0 we have qst ≡ t (mod L), so O = T .Hence, the condition O ∩ {− t (mod L) : t ∈ T } = ∅ of Theorem 6 reduces to 
+
+T ∩ {− t (mod L) : t ∈ T } = ∅.
+
+Now, T ⊆ { 1, . . . , ⌈L/ 2⌉ − 1} ensures that for every t ∈ T the residue −t (mod L) = 
+
+L − t lies in {⌊ L/ 2⌋ + 1 , . . . , L − 1}, which is disjoint from {1, . . . , ⌈L/ 2⌉ − 1}. Then it follows that T ∩ {− t (mod L) : t ∈ T } = ∅, and hence by Theorem 6 we conclude that H ∩ (−H) = ∅. This completes the proof. Using the above theorem, we present a construction of a dual-containing ( r, δ )-LRC. 
+
+Construction 3. Let n = qm − 1 for some positive integer m and prime power q, let 
+
+L = r + δ − 1 ≥ 2 be a divisor of n such that q ≡ 1 (mod L), and 2 ≤ δ ≤ ⌈ L/ 2⌉.Define a set 
+
+R = { jL + t (mod n) : 0 ≤ j ≤ M − 1, 1 ≤ t ≤ δ − 1 }.
+
+Let γ be a primitive n-th root of unity in the field Fqm . Define a polynomial 
+
+g(x) = Y
+
+> i∈R
+
+(x − γi).
+
+Let C be a cyclic code with generator polynomial g(x).
+
+17 Theorem 10. The linear code C, given in Construction 3, is an optimal [n, M r, δ ]
+
+dual-containing (r, δ )-LRC over Fq . Equivalently, there exist an (r, δ )-qLRC with parameters [[ M (r + δ − 1) , M (r − δ + 1) , ≥ δ]] q .Proof. It is clear from Theorem 9 that the set R is closed with respect to q-cycotomic cosets modulo n, and hence g(x) ∈ Fq . This implies that the code C is over Fq . This also implies that the defining set for code C can be directly obtained from R itself. Therefore, by Theorem 4, C is an ( r, δ )-LRC. The optimality of C can be proved in a similar manner as in Theorem 5. Also, note that the set R is contained in the set H given in Theorem 9. Moreover, we have 
+
+δ ≤ ⌈ L 
+
+> 2
+
+⌉. Combining all together, and by Theorem 9, we conclude that C is a dual-containing ( r, δ )-LRC over Fq . The parameters of the corresponding qLRC can be obtained from Theorem 3. 
+
+Example 6. Let q = 11 , m = 2 , n = qm − 1 = 11 2 − 1 = 120 , and L = r + δ − 1 = 10 
+
+such that δ ≤ ⌈ L/ 2⌉ = 5 . Then we get M = nL = 120 10 = 12 . For this example, we fix 
+
+δ = 4 and thus we get r = 7 . Note that we have q = 11 ≡ 1 (mod L = 10) . The set R
+
+is given as 
+
+R = { 10 j + t (mod n) : 0 ≤ j ≤ 11 , 1 ≤ t ≤ 3 }.
+
+The 11 -cyclotomic coset of any element a ∈ R will contain at most two elements, and is given by Ca = {a, 11 a (mod 120) }. Moreover, since q ≡ 1 (mod L), we get H = R
+
+and |H| = |R| = 12 · 3 = 36 .
+
+Now, let γ be a primitive 120 th primitive root of unity in F121 , and let C be a cyclic code with the generator polynomial having roots γi : i ∈ R. Then C is a [120 , 84 , 4] 
+
+dual-containing (r = 7 , δ = 4) -LRC over F11 . The corresponding quantum code is a distance-optimal pure (r = 7 , δ = 4) -qLRC with parameters [[120 , 48 , 4]] q=11 .
+
+# 5 Conclusion 
+
+In this work, we have studied some constructions of qLRCs from classical cyclic (r, δ )-LRCs. By determining which defining sets of cyclic LRCs yield dual-containing conditions, we developed a method for constructing CSS-type qLRCs. We presented three explicit families of ( r, δ )-qLRCs, two of which attain the quantum Singleton-like bound whenever the codes are pure. Moreover, Constructions 2 and 3 admit code lengths that are unbounded with respect to the field size, which is desirable for prac-tical applications. As a direction for future work, our methods based on Theorems 7 and 9 primarily address the cases where δ = 2, and δ ≤ ⌈ L 
+
+> 2
+
+⌉ with q ≡ 1 (mod L), respectively. However, extending these constructions to cover arbitrary values of δ
+
+without the condition q ≡ 1 (mod L), for unbounded lengths with respect to field 18 sizes, remains an open and challenging problem. In particular, finding examples with 
+
+|T | ≥ 2 for Theorem 6 presents an interesting challenge. 
+
+# Acknowledgment 
+
+The first author would like to thank the University Grants Commission, India, for financial support. 
+
+# References 
+
+[1] Gopalan, P., Huang, C., Simitci, H., Yekhanin, S.: On the locality of codeword symbols. IEEE Transactions on Information Theory 58 (11), 6925–6934 (2012) [2] Prakash, N., Lalitha, V., Kumar, P.V.: Optimal linear codes with a local-error-correction property. In: Proceedings of the IEEE International Symposium on Information Theory (ISIT), pp. 2776–2780 (2012) [3] Tamo, I., Barg, A.: A family of optimal locally recoverable codes. IEEE Transactions on Information Theory 60 (8), 4661–4676 (2014) [4] Goparaju, S., Calderbank, R.: Binary cyclic codes that are locally repairable. In: 2014 IEEE International Symposium on Information Theory, pp. 676–680 (2014). IEEE [5] Tamo, I., Barg, A., Goparaju, S., Calderbank, R.: Cyclic lrc codes and their sub-field subcodes. In: 2015 IEEE International Symposium on Information Theory (ISIT), pp. 1262–1266 (2015) [6] Chen, B., Xia, S.-T., Hao, J., Fu, F.-W.: Constructions of optimal cyclic ( r, δ )locally repairable codes. IEEE Transactions on Information Theory 64 (4), 2499– 2511 (2018) [7] Chen, Z., Barg, A.: Cyclic and convolutional codes with locality. IEEE Transac-tions on Information Theory 67 (2), 755–769 (2021) [8] Barg, A., Tamo, I., Vl˘ adut ¸, S.: Locally recoverable codes on algebraic curves. IEEE Transactions on Information Theory 63 (8), 4928–4939 (2017) [9] Luo, G., Ezerman, M.F., Ling, S.: Three new constructions of optimal locally repairable codes from matrix-product codes. IEEE Transactions on Information Theory 69 (1), 75–85 (2023) 19 [10] Rawat, A.S., Papailiopoulos, D.S., Dimakis, A.G., Vishwanath, S.: Locality and availability in distributed storage. IEEE Transactions on Information Theory 
+
+62 (8), 4481–4493 (2016) [11] Sasidharan, B., Agarwal, G.K., Kumar, P.V.: Codes with hierarchical locality. In: 2014 IEEE International Symposium on Information Theory (ISIT), pp. 1257– 1261 (2015). IEEE [12] Zhang, G., Liu, H.: Constructions of optimal codes with hierarchical locality. IEEE Transactions on Information Theory 66 (12), 7333–7340 (2020) [13] Luo, G., Cao, X.: Optimal cyclic codes with hierarchical locality. IEEE Transac-tions on Communications 68 (6), 3302–3310 (2020) [14] Kadhe, S., Sprintson, A.: Codes with unequal locality. In: 2016 IEEE International Symposium on Information Theory (ISIT), pp. 435–439 (2016). IEEE [15] Nielsen, M.A., Chuang, I.L.: Quantum Computation and Quantum Information, 1st edn. Cambridge University Press, Cambridge (2000) [16] Calderbank, A.R., Shor, P.W.: Good quantum error-correcting codes exist. Physical Review A 54 (2), 1098–1105 (1996) [17] Steane, A.: Multiple-particle interference and quantum error correction. Proceed-ings of the Royal Society of London A 452 (1954), 2551–2577 (1996) [18] Golowic, L., Guruswami, V.: Quantum locally recoverable codes. In: Proceedings of the 2025 Annual ACM-SIAM Symposium on Discrete Algorithms (SODA), pp. 5512–5522 (2025). SIAM [19] Cao, M., Zhou, K.: Optimal quantum ( r, δ )-locally repairable codes from matrix-product codes. arXiv preprint arXiv:2508.03597 (2025) [20] Luo, G., Chen, B., Ezerman, M.F., Ling, S.: Bounds and constructions of quan-tum locally recoverable codes from quantum css codes. IEEE Transactions on Information Theory (2025) [21] Galindo, C., Hernando, F., Mart´ ın-Cruz, H., Matsumoto, R.: Quantum ( r, δ )-locally recoverable codes. arXiv preprint arXiv:2412.16590 (2024) [22] Bu, K., Gu, W., Li, X.: Quantum locally recoverable code with intersecting recovery sets. arXiv preprint arXiv:2501.10354 (2025) 20 [23] Xie, D., Zhu, S., Sun, Z.: Two families of optimal quantum locally recoverable codes. International Journal of Theoretical Physics 64 (4), 1–17 (2025) [24] Zhou, K., Cao, M.: Optimal quantum ( r, δ )-locally repairable codes via classical ones. Journal of Combinatorial Theory, Series A 223 , 106212 (2026) [25] Galindo, C., Hernando, F., Matsumoto, R.: Quantum ( r, δ )-Locally Recoverable BCH and Homothetic-BCH codes. arXiv preprint arXiv:2601.22567 (2026) [26] Kamath, G.M., Prakash, N., Lalitha, V., Kumar, P.V.: Codes with local regen-eration and erasure correction. IEEE Transactions on information theory 60 (8), 4637–4660 (2014) [27] Gottesman, D.: Stabilizer codes and quantum error correction. PhD thesis, Cali-fornia Institute of Technology (1997). https://arxiv.org/abs/quant-ph/9705052 [28] Fang, W., Fu, F.-W.: Optimal cyclic (r, δ ) locally repairable codes with unbounded length. Finite Fields and Their Applications 63 , 101650 (2020) [29] Bosma, W., Cannon, J., Playoust, C.: The Magma algebra system. I. The user language. J. Symbolic Comput. 24 (3-4), 235–265 (1997). Computational algebra and number theory (London, 1993) 21

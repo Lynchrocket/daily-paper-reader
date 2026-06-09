@@ -1,0 +1,1060 @@
+Title: Quantum Global Variational Learning for Quantum Error Correction
+
+URL Source: https://arxiv.org/pdf/2606.08592v1
+
+Published Time: Tue, 09 Jun 2026 01:11:53 GMT
+
+Number of Pages: 24
+
+Markdown Content:
+# Quantum Global Variational Learning for Quantum Error Correction 
+
+Shun Ryuzaki 1 and Hideo Mukai 1,2 
+
+> 1Computer Science Program, Graduate School of Science and Technology, Meiji University
+> 2Department of Computer Science, School of Science and Technology, Meiji University
+
+Efficient quantum error correction is es-sential for the advancement of quantum computing. We propose a quantum neu-ral network with a global structure that reduces the number of unitary matrices re-quired in quantum circuits. This approach resulted in a 97% reduction in training time and up to a 25% improvement in the training completion rate, ultimately achieving a 100% success rate in training while surpassing the error correction per-formance reported in previous studies. In addition, we demonstrated the enhanced robustness of quantum error correction against internal network noise. Moreover, the fidelity of quantum error correction under internal network noise increased by up to 15% due to the reduced computa-tional load. 
+
+# 1 Introduction 
+
+One of the critical obstacles in the development of quantum computers is the identification and cor-rection of errors in quantum computation within a reasonable timeframe [1]. Information stored in quantum bits (qubits) is highly sensitive and vul-nerable to thermal disturbances or interference among qubits. As a result, noise in quantum com-putation is inevitable, making error correction a matter of paramount importance [2, 3]. Quantum error correction requires redundant encoding to recover accurate quantum informa-tion without delay. The advancement of error correction methods that are both rapid and effi-cient is urgently needed, since prolonged correc-tion of a given error increases the likelihood of additional errors occurring [3, 4]. 
+
+> Shun Ryuzaki: ce235047@meiji.ac.jp Hideo Mukai: mukai@meiji.ac.jp
+
+Autonomous quantum error correction using quantum machine learning without measure-ments has garnered significant attention. Con-ventional quantum error correction performs quantum operations after introducing ancilla qubits. However, measurement of these ancilla qubits collapses superposition states into classi-cal information, and the correct quantum state is restored via feedback based on this classical outcome. By contrast, quantum error correc-tion with quantum machine learning eliminates such measurements, giving rise to a fully self-contained approach that is inherently more suit-able for quantum computers, as it avoids pro-cesses that may introduce additional errors. Another important challenge is ensuring con-vergence during training, which can suffer due to saddle points or local minima in the cost func-tion. It has been observed that the learning pro-cess becomes increasingly unstable as the depth and width of the network grow. Our proposed model significantly reduced training time without compromising the accuracy of quantum error correction. Furthermore, the shorter training time mitigates convergence fail-ures caused by saddle points or local minima. In the present study, we also addressed the barren plateau problem, which frequently hinders quan-tum machine learning and variational quantum algorithms (VQAs). Barren plateaus severely re-strict the ability to achieve fast convergence to-ward optimal solutions, or may even render such convergence impossible, due to unfavorable cost function landscapes. This issue strongly depends on parameter initialisation and network struc-ture, with wider or deeper networks generally yielding less stable training. To address this challenge, we propose a model that reduces the number of parameters. This de-sign substantially lowers the probability of con-vergence failure caused by saddle points or local 
+
+1
+
+> arXiv:2606.08592v1 [cs.LG] 7 Jun 2026
+
+minima, primarily due to reduced training time. Our approach also enables the scaling of networks that were previously intractable, thereby improv-ing the overall performance of quantum error cor-rection. 
+
+# 2 Background 
+
+In this section, we provide a brief overview of quantum error correction (QEC) to clarify the context of the results presented in this work. We first elaborate on the quantum error correction codes used to protect quantum information from noise. Next, we introduce the quantum Hamming bound, an important theoretical notion in QEC. The quantum Hamming bound defines the upper limit of QEC performance according to the code length and the type of errors, serving as a fun-damental index for evaluating the capability of different QEC schemes. 
+
+2.1 Quantum error correction code 
+
+The central principle of QEC is the encoding of quantum information using redundant codes. This redundancy enables the recovery of the orig-inal information even if part of it is corrupted by noise. For example, a single-qubit state 
+
+|ψ⟩ = α |0⟩ + β |1⟩
+
+can be encoded as 
+
+|ψL⟩ = α |0L⟩ + β |1L⟩ . (1) 
+
+The encoded quantum state belongs to the code space HL, spanned by the two logical ba-sis states |0L⟩ and |1L⟩. When noise causes the encoded state to leave the code space HL, this de-viation can be detected. Consequently, the types and accuracy of correctable errors are determined by the choice of encoding, in particular the defi-nitions of |0L⟩ and |1L⟩.Noise detection and error inference are neatly described using the stabiliser formalism, which leverages concepts from group theory [5]. Sta-biliser operators Si are defined as Pauli operators, and the group generated by them forms the sta-biliser group S. A stabiliser acts on logical states as 
+
+|ψL⟩ = Si |ψL⟩ , (2) 
+
+such that the code space HL is invariant under this subgroup of the Pauli group. A stabiliser generator is a minimal set of operators sufficient to stabilise the code space. A two-dimensional logical code space encoded by n qubits is sta-bilised by (n − 1) independent stabiliser gener-ators. QEC via the stabiliser formalism proceeds in two stages: error detection and recovery. In the detection stage, all stabiliser generators are mea-sured, yielding an error syndrome. When the quantum state is error-free, (2) holds for all sta-bilisers. When noise is present, the resulting pat-tern of syndromes identifies which qubit was af-fected and by what type of error. The recov-ery step then applies the corresponding correc-tion operation. For example, if a bit-flip error is detected, the affected qubit is flipped again to re-store the original state. Because syndrome anal-ysis involves classical computation, the identifi-cation and mapping of syndromes to corrections are typically performed by a classical computer. When the number of stabiliser generators equals the number of physical qubits, the sta-biliser code defines a one-dimensional quantum state. More generally, using n physical qubits to encode a single logical qubit, the code space is de-fined as a two-dimensional subspace stabilised by the group generated from (n − 1) stabiliser gener-ators. Thus, by choosing appropriate stabiliser generators, one can properly define the logical code space HL.As a concrete example, consider correcting bit-flip errors in an n-qubit repetition code. In this case, the logical states in (1) are encoded as 
+
+|0L⟩ = |00 · · · 0⟩   
+
+> ︸︷︷ ︸
+> nqubits
+
+, |1L⟩ = |11 · · · 1⟩   
+
+> ︸︷︷ ︸
+> nqubits
+
+. (3) 
+
+We then select the following stabiliser generators for generality: 
+
+⟨Z1Zn, Z 2Zn, . . . , Z n−1Zn⟩ = S, (4) 
+
+where Zi (i = 1 , 2, . . . , n ) denotes a Pauli-Z op-erator acting on the i-th qubit. Error correction using this stabiliser construc-tion is straightforward. If a bit-flip error occurs on the k-th qubit (k < n ), the syndrome asso-ciated with ZkZn anticommutes with the error operator Xk, leading to 
+
+ZkZnXk |ψL⟩ = −XkZkZn |ψL⟩
+
+= −Xk |ψL⟩ . (5) 
+
+2Thus, the sign change in the syndrome unam-biguously reveals the location of the error, since the other stabilisers remain unaffected. However, if the error occurs on the n-th qubit, all syn-dromes become negative due to anticommutation with Xn. Additionally, when errors affect qubits other than the n-th, syndromes can change back from negative to positive, which coincides with the syndrome pattern of multiple errors across the system. Considering probability distributions, it is most likely that a bit-flip on the n-th qubit is responsible when the number of negative syn-dromes exceeds n 
+
+> 2
+
+. Therefore, correction of the 
+
+n-th qubit is given statistical priority. Based on these observations, we propose an error correction algorithm that incorporates this prioritization. Using this method, we achieved er-ror correction performance approaching the theo-retical upper limit when the error rate was below 
+
+0.50 .
+
+2.2 Quantum Hamming Bound 
+
+In designing efficient quantum error correction codes, it is essential to encode as many logical qubits as possible using a smaller number of phys-ical qubits, while retaining sufficient error correc-tion capability. The quantum Hamming bound provides one of the fundamental criteria by im-posing a limit on the number of correctable er-rors in a given number of physical qubits for a code encoding a given number of logical qubits. Although the quantum Hamming bound applies only to non-degenerate codes, it nevertheless es-tablishes an upper bound on the potential of quantum error correction (QEC) with respect to qubit numbers. We calculated the minimum number of phys-ical qubits n required to reliably correct errors when encoding k logical qubits redundantly into 
+
+n physical qubits. Suppose errors occur on j
+
+physical qubits. Then the number of possible er-ror locations is given by 
+
+( nj ).
+
+Moreover, because each error may be of Pauli type X, Y , or Z, there are in total 3j possible errors. To ensure reliable correction, each error-affected codeword must correspond to an orthog-onal subspace of dimension 2k in order to non-degenerately correct k logical qubits. Since these orthogonal subspaces must be contained within the Hilbert space of dimension 2n defined by the 
+
+n physical qubits, the following inequality must hold: t∑
+
+> j=0
+> (
+
+nj
+
+> )
+
+3j 2k ≤ 2n. (6) 
+
+This condition defines the quantum Hamming bound, which prohibits the existence of non-degenerate codes that encode k logical qubits into fewer than the required n physical qubits deter-mined by the inequality. In the present study, we primarily focus on bit-flip errors and depolariza-tion noise. As an illustrative example, we derive the minimum number of qubits required when assuming at most a single-qubit error, based on Eq. (6) .First, consider the case of bit-flip errors only. Since this restricts the possible errors from 
+
+{X, Y, Z } to a single error type, the factor 3j in Eq. (6) does not apply. Thus, the code must sat-isfy: 
+
+2( n + 1) ≤ 2n. (7) 
+
+The smallest value of n satisfying this inequality is n = 3 , indicating that three physical qubits are sufficient to correct one bit-flip error within an encoded block of three qubits. Next, we consider n-qubit codes capable of cor-recting all three types of Pauli errors ( X, Y , and 
+
+Z) on a single physical qubit. Assuming the code has the ability to correct one arbitrary error in n
+
+qubits, Eq. (6) becomes: 
+
+(3 n + 1)2 ≤ 2n. (8) 
+
+The smallest solution is n = 5 , implying that no non-degenerate quantum code can exist with fewer than five qubits under this condition. 
+
+# 3 Related studies 
+
+Theory and application of QEC have been exten-sively explored through a variety of approaches. Recently, methods based on quantum ma-chine learning have attracted significant atten-tion. Approaching QEC through quantum ma-chine learning enables error correction tailored to the characteristics of each quantum comput-ing device, while avoiding reliance on classical post-processing. This promises both higher per-formance and faster execution. Beer et al. proposed the Dissipative Quan-tum Neural Network (DQNN), a feedforward 
+
+3quantum neural network capable of universal quantum computation [6]. Subsequently, Bon-darenko and Feldmann demonstrated the prepa-ration of the GHZ state, a specific quantum state, with high accuracy using a quantum au-toencoder (QAE) [7]. Building on these develop-ments, Locher et al. achieved quantum error cor-rection of random quantum states using a QAE, thereby exploiting the capability of quantum ma-chine learning to address diverse types of noise [8]. In their study, they introduced a systematic method for determining quantum information encodings, which had previously been designed manually, as well as a technique to reduce train-ing time by utilising the inverse matrix of the encoder within the decoder section. 
+
+3.1 Dissipative Quantum Neural Networks 
+
+We focus in particular on quantum error correc-tion implemented by Dissipative Quantum Neu-ral Networks (DQNNs), a class of feed-forward quantum neural networks. While the DQNN is executed on quantum hardware, parameter op-timization is performed on classical hardware. Thus, the overall system constitutes a quantum– classical hybrid architecture [9, 10]. The network is composed of multiple neurons, where each neuron corresponds to a qubit that retains quantum information. Considering the mapping Ek from layer k − 1 to layer k, the col-lection of channels Q across the entire network is formed by the concatenation of all interlayer mappings Ek.
+
+ρout = Q(ρin ) = Eout (. . . E3(E2(ρin ))) (9) 
+
+In the DQNN, an interlayer mapping Ek is rep-resented by a unitary matrix that transfers the total quantum information of the previous layer to the neurons of the subsequent layer. The map-ping Ek from layer k − 1 to layer k is illustrated in Fig. 1. The formal expression is given as follows: 
+
+ρk =Ek(ρk−1)= Tr 
+
+> k−1
+
+[U nk 
+
+> k
+
+. . . U 1 
+
+> k
+
+(ρk−1⊗|0⟩⊗nk ⟨0|⊗nk )U 1† 
+
+> k
+
+. . . U nk † 
+
+> k
+
+]
+
+(10) 
+
+Here, the unitary matrices serve as the train-ing parameters. Each unitary operator represents 
+
+...
+
+ρk−1 U 1 
+
+> k
+
+U 2 
+
+> k
+
+U nk
+
+> k
+
+. . . Trace ...
+
+|0⟩⊗nk ... ... ρk
+
+Figure 1: Mapping from DQNN layer k − 1 to layer k.The interlayer mapping in the Quantum Autoencoder (QAE) is illustrated. First, the tensor product of the density operator ρk−1 and nk ancillary states |0⟩ is con-structed, representing the expansion of the quantum in-formation from layer k−1 together with the initial states 
+
+|0⟩ assigned to each node in layer k. Subsequently, nk
+
+unitary operations U jk are applied sequentially to ρk−1
+
+and the ancillary states, where each U jk corresponds to an edge connecting layer k − 1 to the j-th node in layer 
+
+k. After all unitary operations are applied, the combined system of nk−1 + nk qubits is reduced to nk qubits by performing a partial trace over the auxiliary subsystem. The resulting reduced state constitutes the output of the interlayer mapping. 
+
+the connection to a single qubit in the subsequent layer, and sequential application of these opera-tors across layers generates the quantum states of the next layer. In the k-th layer, there are nk
+
+unitary operators, and the layer width consists of 
+
+(nk−1 + 1) qubits. For training the process Q, we employ back-propagation in the context of unsupervised learn-ing. The training dataset consists of pairs of in-put and target quantum states, (ρin , ρ targ ). The objective of training is to produce the target quantum state ρtarg from the output state ρout =
+
+Q(ρin ), where Q represents the mapping defined by the network. In general, the similarity between quantum states is quantified by fidelity. For an output state ρout and a target state ρtarg , fidelity is de-fined as 
+
+F(ρtarg , ρ out )=
+
+(
+
+Tr 
+
+√√ρtarg ρout 
+
+√ρtarg 
+
+)2
+
+=
+
+(
+
+Tr 
+
+√
+
+|ψL⟩ ⟨ ψL| ρout |ψL⟩ ⟨ ψL|
+
+)2
+
+=
+
+(√ 
+
+⟨ψL| ρout |ψL⟩ Tr 
+
+√
+
+|ψL⟩ ⟨ ψL|
+
+)2
+
+= ⟨ψL| ρout |ψL⟩ . (11) 
+
+The loss function L for training in the DQNN is 
+
+4defined as the infidelity, computed using Eq. (11) .The cost function C is then defined as the average of the loss functions evaluated over all training samples. Explicitly, for a target state and the corresponding network output, the loss function 
+
+L and the cost function C are given by 
+
+L(ρi
+
+> targ
+
+, ρ i
+
+> out
+
+) = 1 − F (ρi
+
+> targ
+
+, ρ i
+
+> out
+
+), (12) 
+
+C = 1
+
+N
+
+> N∑
+> i=1
+
+L(ρi
+
+> targ
+
+, ρ i
+
+> out
+
+). (13) 
+
+To minimise the cost function, the parame-ters of the unitary operations are updated us-ing classical optimization methods such as gra-dient descent. Iteratively repeating this pro-cess drives the cost function toward its minimum value, thereby improving the performance of the network. Further details of the training proce-dure are provided in Appendix A. 
+
+3.2 Quantum autoencoders 
+
+We here briefly describe the Quantum Autoen-coder (QAE), one of the Dissipative Quantum Neural Networks (DQNNs) extensively employed in the present study [11, 12, 13, 14, 15]. The QAE is a quantum neural network de-signed for error correction, analogous to the role of autoencoders in classical information process-ing. The QAE architecture features a hidden layer with fewer qubits than the input and output layers, mirroring its classical counterpart. To realise quantum error correction (QEC) us-ing the QAE, input logical qubits containing noise are processed by the encoder and compressed into a reduced number of qubits in the hidden layer. The decoder then reconstructs the logical qubits, ideally free from noise. The QAE network utilised in this work is depicted in Fig. 2. The encoded quantum state vector |ψL⟩ is com-bined with noise introduced by a noise network, resulting in the noisy input. This state is pro-cessed by the feed-forward quantum neural net-work Q to produce the output density matrix 
+
+ρout .The noise channel N generates errors on ar-bitrary qubits with probability p. The QNN Q
+
+receives quantum states with noise as input and outputs noise-reduced quantum states. Accord-ingly, the training data (ρin , ρ targ ) are defined as 
+
+(ρin , ρ targ ) = ( N (|ψL⟩ ⟨ ψL|) , |ψL⟩ ⟨ ψL|) . (14) 
+
+|ψ1
+
+> L
+
+⟩
+
+|ψ2
+
+> L
+
+⟩ ...
+
+|ψnL⟩
+
+N ...
+
+Q
+
+... ρout          
+
+> Figure 2: Network structure of quantum error correction (QEC) simulating a quantum neural network (QNN) on classical computers. For the encoded quantum informa-tion |ψL⟩, the noise network Nintroduces noise of a specified type and error rate. The resulting noisy quan-tum state is processed by the QNN Qto yield the cor-rected, noise-free quantum state ρL. The cost function is defined to maximise the fidelity between the target state |ψL⟩and the reconstructed state ρL.
+
+In this study, the number of qubits in the hid-den layer is generally set to one for simplicity. An exception is made in Sec. 7.3, where multi-ple hidden qubits are used to evaluate tolerance to internal network noise. While the number of hidden layers can, in principle, be greater, we limit ourselves to a three-layer architecture in this work. This restriction is motivated by the fact that increasing network depth significantly raises the training cost and reduces tolerance to internal noise. Overall, using QEC with a QAE, we obtained fidelity values close to the theoretical limits pre-dicted for QEC with stabiliser codes. Further-more, we established self-exploratory QEC meth-ods capable of autonomously discovering encod-ing strategies, performing encoding, and operat-ing effectively under internal network noise. Be-yond simple QEC, these methods achieved rea-sonable success in various scenarios. Nevertheless, one of the remaining challenges is the potential convergence to non-optimal solu-tions. We observed that saddle points and local minima in the cost function landscape become increasingly pronounced as network size grows. Since enlarging the QEC network is crucial for enhancing its capacity, addressing this problem is of paramount importance. To overcome this challenge, it is necessary to conduct large-scale training. The solution ob-tained after convergence heavily depends on the initial parameters of the unitary matrices. There-fore, it is desirable to identify a set of initial con-ditions that consistently lead to the global op-timum while avoiding local minima and saddle points. However, it is evident that finding such initial conditions becomes increasingly difficult as 
+
+5the network expands, both in terms of the num-ber and the size of the unitary matrices. 
+
+# 4 Quantum global variational learning 
+
+We propose a computationally efficient method to enable the enlargement of QEC networks by miti-gating unwanted convergence to barren plateaus, such as saddle points or local minima. To achieve this, we simplify the training process by reducing the number of unitary matrices serving as net-work parameters. We refer to this approach as Quantum Global Variational Learning (QGVL), as it adopts a single global unitary matrix for in-terlayer mapping rather than multiple local uni-tary matrices, as in conventional methods. QGVL retains the basic QAE structure shown in Fig. 2; however, its most distinctive feature lies in the design of its interlayer mapping, depicted in Fig. 3. In the QAE, each unitary matrix con-nects the entire preceding layer to a single qubit in the subsequent layer, thereby requiring sepa-rate unitary operations for each node in the next layer. In contrast, QGVL employs a single, larger unitary matrix that simultaneously incorporates all qubits in both the previous and the next layer. The interlayer mapping in QGVL is formulated as 
+
+ρk = Ek(ρk−1)= Tr k−1
+
+> [
+
+Uk
+
+> (
+
+ρk−1 ⊗ | 0⟩⊗nk ⟨0|⊗nk
+
+> )
+
+U †
+
+> k
+> ]
+
+,
+
+(15) 
+
+where Tr k−1 denotes the partial trace over the qubits in layer k − 1.The reduction in the number of unitary matri-ces is significant. For a network with an m-n-m
+
+structure, the QAE requires (m + n) unitary ma-trices, whereas QGVL requires only two. We now examine the consequences of employ-ing larger unitary matrices in QGVL compared to QAE. For an m-n-m architecture, the QAE utilises n matrices of dimension (m + 1) and m
+
+matrices of dimension (n+1) . In contrast, QGVL requires only two matrices, each of dimension 
+
+(m + n). Although reducing the number of ma-trices clearly decreases the total number of oper-ations, one might expect that the increased size of the individual matrices in QGVL could raise the computational cost per operation. However, in the QAE, each unitary matrix is extended to 
+
+ρk−1 ...
+
+|0⟩⊗nk ...
+
+Uk
+
+Trace ...
+
+... ρk         
+
+> Figure 3: Interlayer mapping from layer k−1to layer k.The Kronecker product is taken between the input quan-tum state ρk−1and the initial ancillary states |0⟩⊗nk
+> corresponding to the output qubits. A partial trace is then performed over the qubits in the input layer to ob-tain the output state.
+
+match the width of the network layer before ex-ecution, resulting in an effective matrix dimen-sion identical to that in QGVL. Consequently, the computational load per matrix operation is equivalent in both approaches. For further details, including the training pro-cedure, see Appendix A. For the training of the Quantum Neural Net-work (QNN), we employed the Rectified Adam (RAdam) optimiser using the norm of comlex gra-dient matrix as secondary momentum. 
+
+# 5 Denoising with noiseless channel 
+
+First, we compared the performance of quantum error correction (QEC) implemented using the Quantum Autoencoder (QAE) and the Quantum Global Variational Learning (QGVL) approach under the assumption of a noiseless network. As QGVL simplifies the training scheme by reduc-ing the number of parameters relative to QAE, it might be presumed to exhibit lower QEC capa-bility. In this section, we present the results of applying QGVL to two representative quantum error models: X (bit-flip) errors and depolariza-tion errors. 
+
+5.1 Bit flip error correction 
+
+5.1.1 3-qubit error correction 
+
+Specifically, we describe the implementation of QEC for X errors using the QGVL network on a simple 3-qubit system. The network architecture is defined by a 3-1-3 configuration of qubits, as depicted in Fig. 4. The parameters of the pro-
+
+6ρin 
+
+|0⟩
+
+U1 Trace 
+
+|0⟩
+
+|0⟩
+
+|0⟩
+
+U2
+
+Trace 
+
+ρout        
+
+> Figure 4: Quantum Autoencoder (QAE) network archi-tecture consisting of 3-1-3 qubits. The network outputs noise-free quantum information ρout from a 3-qubit in-put quantum state. The encoder and decoder corre-spond to the first and second interlayer mappings, re-spectively, each acting on four qubits. The trainable parameters of the network are the unitary matrices U1
+> and U2associated with these interlayer mappings.
+
+posed network are encapsulated in the unitary matrix U1 for the encoding module and U2 for the decoding module. For the encoding of quantum states, we em-ployed the 3-qubit repetition code, which defines the code space via the logical codewords |0L⟩ and 
+
+|1L⟩:
+
+|0L⟩ = |000 ⟩ , |1L⟩ = |111 ⟩ (16) 
+
+The 3-qubit system represents the minimal configuration capable of redundantly encoding single-qubit quantum information and enabling correction of a single error. This property is rig-orously guaranteed by Eq. (6) , derived from the quantum Hamming bound. In our experiments, we implemented QEC using both the QGVL framework and the stabiliser code, with the sta-biliser code serving as a theoretical benchmark to assess the effectiveness of QGVL. The stabiliser generators for the 3-qubit repetition code are de-fined as follows: 
+
+I ⊗ Z ⊗ ZZ ⊗ Z ⊗ I (17) 
+
+Error detection and correction are performed using the stabiliser group generated by these op-erators. We now describe the noise settings used in this study. The parameter p denotes the error rate per qubit. To evaluate the expected value of the logical error rate and determine the threshold for 
+
+p at which QEC should be applied, we proceed as follows. Without error correction codes, the error rate is p, since errors independently affect a single qubit. When error correction codes are deployed, the logical error rate is 
+
+pL = p3 + 3 p2(1 − p),
+
+as neither double- nor triple-qubit errors can be corrected within the code. Thus, under the as-sumption of a noiseless network, deploying error correction is beneficial as long as p > p L, a condi-tion satisfied for p < 0.5. When p > 0.5, the like-lihood of correction is reversed, since 1 − p < 0.5.In these experiments, we applied the noise channel N , which induces a Pauli X error on each qubit with probability p. The noise operation is defined by 
+
+N bit p (ρ) = (1 − p)ρ + pXρX (18) 
+
+Training data were organised using the noise network N . First, 10 4 quantum state vectors |ψ⟩
+
+were randomly generated via the Permuted Con-gruential Generator (PCG), and then encoded as 
+
+|ψL⟩ using the 3-qubit repetition code. Pairs of quantum states before and after application of the noise network, (N (|ψL⟩ ⟨ ψL|), |ψL⟩ ⟨ ψL|), serve as the input and target states, respectively. Test data for evaluation were also generated. To compare QEC performance as a function of the error rate p, we varied p from 0.00 to 0.50 in increments of 0.05 during both training and eval-uation. Model evaluation was performed by com-paring the mean fidelity for test data obtained from the trained model to the fidelity achievable by the ideal stabiliser-based QEC code. Fidelity for each data point was evaluated prior to av-eraging, and comparisons with values based on either physical qubits or the stabiliser code were performed. This approach allows capturing indi-vidual correction errors, which would otherwise be masked by averaging. Thus, we analyzed the local error correction capability by inspecting fi-delity for each data point. Specifically, we ex-tracted 10 2 outputs for each data instance and measured the fidelity of the target data at a fixed error rate p = 0 .20 .Additionally, quantum operations involved in error correction were visualised using Quantum Process Tomography (QPT); see Appendix B for details. Quantum operations realised by QGVL were compared to those by the stabiliser code and to the absence of any operations. In our exper-iments, error correction by QGVL at p = 0 .20 
+
+7Figure 5: Fidelity between target quantum states and error-corrected quantum states obtained using the 3-qubit QGVL (solid line), compared with the fidelity in the case of a single-qubit error among three qubits (dot-ted line), and the fidelity achieved by algorithmic correc-tion using the stabiliser code (black dots). The target quantum states were generated from 10 4 randomly pre-pared quantum states encoded with the repetition code. The input quantum states were produced by introducing bit-flip noise in accordance with the error rates indicated on the x-axis. 
+
+was visualised by QPT. For simplicity, QPT in-put bases were restricted to the Kronecker prod-ucts of |0⟩ and |1⟩, in accordance with the repe-tition code. QPT results using alternative bases (|0⟩ , |1⟩ , |+⟩ , |−⟩ ) are provided in Appendix B. The variation in mean fidelity as a function of error rate achieved by QGVL is depicted in Fig. 5. Notably, QEC via QGVL produced results that matched those obtained using the stabiliser code. Mean fidelities exceeding those of the uncorrected physical qubits were observed for p in (0 .00 , 0.50) .Fidelities for individual data points are shown in Fig. 6. The fidelities obtained from the QGVL are plotted together with those achieved by the stabiliser code for comparison. While fidelities corresponding to errors in physical qubits are zero, the fidelities of the output states produced by the encoding method are distributed within the range (0 .0, 1.0) when errors occur. In Fig. 7, the results of quantum operations obtained through Quantum Process Tomography (QPT) are visualised. The observables exhibit positive values when the number of overlaps be-tween the input basis states |1⟩ and the Pauli-Z
+
+operator is even, and negative values when it is odd. Moreover, the observation of input bases containing a greater number of |1⟩ states than       
+
+> Figure 6: Fidelity obtained by the 3-qubit QGVL from
+> 10 2test data with a bit-flip error rate of p= 0 .1. Results for physical qubits and stabiliser codes are also shown for comparison. The fidelity of noiseless or fully corrected quantum target states is plotted at 1. In contrast, the fidelity of noisy physical qubits is 0, whereas the fideli-ties of logical qubits after error correction operations are distributed within the range (0 .0,1.0) .
+
+|0⟩ states corresponds to the expected observables derived from the state |111 ⟩.The results of these experiments demonstrate that QGVL achieves quantum error correction with fidelity comparable to that attained by the stabiliser code using the 3-qubit repetition code. 
+
+5.1.2 Comparison with more qubits 
+
+In the previous section, we demonstrated the fea-sibility of training a 3-qubit quantum error cor-rection (QEC) network. Here, we extend the analysis to multiple-qubit encodings to illustrate the scalability of training larger networks with more qubits, which is the overarching goal in de-veloping robust QEC methods. It is generally expected that increasing the number of qubits improves the accuracy of QEC under idealised conditions, as assumed in prior studies where no noise is present in the qubits constituting the net-work. Even when internal noise is present, scala-bility remains critical since the trade-off between error rates and the number of encoding qubits determines the optimal encoding strategy. In this section, we implement QEC with 5-, 7-, and 9-qubit encodings, extending beyond the 3-qubit case discussed previously. We employ the repetition code appropriate for each qubit num-ber. For training, we generate 10 4 random quan-tum states |ψL⟩, which are then encoded. The 
+
+8(a) Identity (b) With QGVL (c) With stabiliser              
+
+> Figure 7: Quantum Process Tomography (QPT) results without any operation (a), using QGVL (b), and employing the stabiliser code (c). The input basis comprised the set {| 0⟩,|1⟩} ⊗3, and the measurement operators were drawn from {I, X, Z, Y }⊗3. Observables correspond to Pauli operators including: III ,IIZ ,IZI ,IZZ ,ZII ,ZIZ ,ZZI ,and ZZZ .
+
+input data are obtained by passing the encoded states through a noise channel, while the target data correspond to the original noise-free states. Test data are generated analogously. The noise error rate p is varied from 0.0 to 4.5 in increments of 0.5. The network’s performance is evaluated by computing the mean fidelity over these datasets and comparing it to that achieved by the sta-biliser code across corresponding error rates and qubit numbers. The results indicate that for all qubit counts (5, 7, and 9), the mean fidelity achieved by QEC using QGVL matches that of the stabiliser code. Figure 10 displays the mean fidelity and asso-ciated quantum error rates. As the number of qubits increases from 3 to 9, the mean fidelity im-proves, demonstrating enhanced QEC accuracy. Furthermore, at error rates of 0 and 0.5, the mean fidelity converges to the same value regardless of the number of qubits, reflecting error-free and uncorrectable regimes, respectively. Under these conditions, the encoding method does not influ-ence the correction accuracy. 
+
+5.2 Depolarising error correction 
+
+In this section, we evaluate the performance of quantum error correction (QEC) under depolar-isation noise using the Quantum Global Varia-tional Learning (QGVL) method. Depolarisation errors consist of three types of errors—bit-flip, phase-flip, and bit-phase-flip—occurring with equal probability. This noise model is more com-plex and realistic than the single-error model con-
+
+...
+
+ρin 
+
+|0⟩
+
+U1
+
+Trace 
+
+...
+
+|0⟩
+
+|0⟩ ...
+
+|0⟩
+
+U2
+
+Trace 
+
+... ρout                
+
+> Figure 8: Multiple-qubit layered QGVL network of the QAE with an m-1-mqubit architecture, where the input and output layers each comprise mqubits. Noise-free output quantum information ρout is obtained from the
+> m-qubit input quantum information ρin . This configu-ration generalises the network depicted in Fig. 4. The network consists of two interlayer mappings, each with a width of m+ 1 qubits: the first serves as the encoder and the second as the decoder. The unitary matrices U1
+> and U2associated with these mappings represent the trainable parameters.
+
+sidered in the previous section. We begin by im-plementing QEC with the 5-qubit code, which is the minimal code capable of effectively cor-recting depolarisation errors. Subsequently, we explore QEC using the Steane and Shor codes, which are important encoding schemes involving larger numbers of qubits. 
+
+5.2.1 5-qubit error correction code 
+
+We conducted QEC experiments with the small-est QGVL network capable of correcting depolar-
+
+95-qubit 7-qubit 9-qubit Figure 9: Fidelity distributions of quantum states error-corrected by QGVL with 5, 7, and 9 qubits are shown alongside the target quantum states (solid line). For each qubit count, fidelities corresponding to theoretically correctable errors (dotted line) and fidelities achieved through algorithmic quantum error correction using the stabiliser code (black dots) are also plotted. The target quantum states comprise 10 4 randomly generated quantum states encoded using the repetition code. Input quantum states are generated by applying bit-flip errors to the encoded quantum states, with error rates indicated on the x-axis.  
+
+> Figure 10: Fidelity distributions of error-corrected quan-tum states by QGVL with 9, 7, 5, and 3 qubits are compared to the fidelities of the corresponding target quantum states. The dataset and noise model are as described above.
+
+isation errors. According to the quantum Ham-ming bound (Eq. (8) ), the minimal number of qubits required for depolarisation-error correction is five. This implies that 1-qubit error can be cor-rected using a 5-qubit code; thus, we designed a 5-1-5 qubit network corresponding to m = 5 as shown in Fig. 8. The trainable parameters of the network are the unitary matrices U1 and U2, act-ing as the encoder and decoder respectively. For encoding quantum states, we use the 5-qubit error-correcting code with logical encoding states |0L⟩ and |1L⟩ given by 
+
+|0L⟩ = 14 (|00000 ⟩ + |11000 ⟩ + |01100 ⟩ + |00110 ⟩
+
++ |00011 ⟩ + |10001 ⟩ − | 10100 ⟩ − | 01010 ⟩− | 00101 ⟩ − | 10010 ⟩ − | 01001 ⟩ − | 11110 ⟩− | 01111 ⟩ − | 10111 ⟩ − | 11011 ⟩ − | 11101 ⟩)
+
+(19) 
+
+|1L⟩ = 14 (|11111 ⟩ + |00111 ⟩ + |10011 ⟩ + |11001 ⟩
+
++ |11100 ⟩ + |01110 ⟩ − | 01011 ⟩ − | 10101 ⟩− | 11010 ⟩ − | 01101 ⟩ − | 10110 ⟩ − | 00001 ⟩− | 10000 ⟩ − | 01000 ⟩ − | 00100 ⟩ − | 00010 ⟩)
+
+(20) 
+
+The QGVL network is trained to acquire QEC capabilities for these encoded quantum states. The stabiliser code is used as the ideal fault-free reference for evaluation. The stabiliser generators for the 5-qubit code are 
+
+I ⊗ Z ⊗ X ⊗ X ⊗ ZZ ⊗ I ⊗ Z ⊗ X ⊗ XX ⊗ Z ⊗ I ⊗ Z ⊗ XX ⊗ X ⊗ Z ⊗ I ⊗ Z
+
+(21) 
+
+and the group generated by these stabilisers en-ables detection and correction of any single-qubit error. Next, we describe the noise model. Each qubit is subjected to depolarising errors occurring with probability p. The expected logical error rate is 
+
+10 computed via the binomial distribution. Without error correction, the error rate naturally equals p.Employing the 5-qubit code, errors affecting more than two qubits are uncorrectable. Consequently, the expected logical error rate is 
+
+pL = p5 + 5 p4(1 − p) + 10 p3(1 − p)2 + 10 p2(1 − p)3,
+
+and error suppression occurs provided p > p L.This condition holds for values of p < 0.13112 
+
+under the assumption of a noiseless network. In our experiments, the noise channel N mod-els depolarisation errors with error rate p, defined as follows: 
+
+N bit p (ρ) =(1 − p)ρ + p
+
+3 (XρX + Y ρY + ZρZ )
+
+(22) 
+
+Preparation of training data for depolarisation errors involves a distinct encoding scheme and noise model compared to the bit-flip error case. Randomly generated 10 4 quantum state vectors 
+
+|ψ⟩ are encoded as |ψL⟩ according to Eq. (19) us-ing the 5-qubit error-correcting code. The pairs of quantum states before and after the application of the noise channel, (N (|ψL⟩ ⟨ ψL|), |ψL⟩ ⟨ ψL|),serve as the input and target states, respectively. Test data are generated and prepared in the same manner. The error rate p of the noise channel is var-ied from 0.00 to 0.50 in increments of 0.05. Both the network training process and the correspond-ing error correction performance are evaluated at each error rate. Performance assessment is based on the mean fidelity computed between the net-work outputs for test data and their correspond-ing target states, which is then compared to the fidelity obtained from quantum error correction using the stabiliser code. The results, presented in Fig. 11, demonstrate that the mean fidelity exhibits a characteristic in-flection point and decreases as the quantum er-ror rate increases. The fidelities achieved via al-gorithmic QEC with the stabiliser code and via QEC using QGVL are largely comparable in mag-nitude. These findings imply that the QGVL net-work successfully acquires a QEC strategy capa-ble of correcting depolarisation errors uniformly distributed across qubits.     
+
+> Figure 11: Dependence of fidelity on the depolarisation error rate for quantum states corrected by the 5-qubit QGVL network trained with the 5-qubit error-correcting code (solid line). Also shown are fidelities obtained through algorithmic correction using the 5-qubit sta-biliser code (black dots) and fidelities of noisy physi-cal single qubits under identical conditions (dotted line). The data comprise 10 4randomly generated quantum states. For both QGVL and the stabiliser code, input states are generated by encoding these quantum states with the 5-qubit error-correcting code followed by appli-cation of depolarisation errors on each qubit with rate
+> p.
+
+5.2.2 Steane code 
+
+As in the case of bit-flip errors, we performed ex-periments with larger numbers of qubits than in Section 5.2.1 to evaluate the scalability of QGVL. Here, we assess error correction capabilities using the Steane code, a type of CSS code designed to correct depolarization errors in a 7-qubit system. The Steane code enables error detection and cor-rection via stabiliser generators, which are given by 
+
+I ⊗ I ⊗ I ⊗ X ⊗ X ⊗ X ⊗ XI ⊗ X ⊗ X ⊗ I ⊗ I ⊗ X ⊗ XX ⊗ I ⊗ X ⊗ I ⊗ X ⊗ I ⊗ XI ⊗ I ⊗ I ⊗ Z ⊗ Z ⊗ Z ⊗ ZI ⊗ Z ⊗ Z ⊗ I ⊗ I ⊗ Z ⊗ ZZ ⊗ I ⊗ Z ⊗ I ⊗ Z ⊗ I ⊗ Z
+
+(23) 
+
+The first three stabiliser generators correspond to Pauli-Z errors, while the last three address Pauli-X errors. Compared to the [5,1,3] 5-qubit error-correcting code, the Steane code enables correction of both one X and one Z error, as well as individual Pauli errors, at the expense of 
+
+11 requiring more qubits. However, not all errors in-volving two qubits are correctable, and correction is impossible for more than two X and Z errors or for simultaneous errors involving Y operators. The logical codewords of the Steane code that are associated with the stabiliser generators in Eq. (23) are defined as |0L⟩ and |1L⟩:
+
+|0L⟩ = 12√2 ( |0000000 ⟩ + |1101001 ⟩
+
++ |1011010 ⟩ + |0110011 ⟩
+
++ |0111100 ⟩ + |1010101 ⟩− | 1100110 ⟩ − | 0001111 ⟩)
+
+(24) 
+
+|1L⟩ = 12√2 ( |1111111 ⟩ + |0010110 ⟩
+
++ |0100101 ⟩ + |1001100 ⟩
+
++ |1000011 ⟩ + |0101010 ⟩− | 0011001 ⟩ − | 1110000 ⟩)
+
+(25) 
+
+As before, the training dataset consists of ran-domly generated quantum state vectors encoded according to Eq. (24) . For each encoded state, the noise network (22) introduces depolarization er-rors with a specified error rate p, analogous to the 5-qubit case. Each pair of quantum states after application of the noise network N and the cor-responding original quantum state, (N (ψL), ψ L),forms the input and target states for training. For the experiments, the training set comprises 
+
+10 4 randomly generated quantum state vectors. The error rate p of the noise network is varied from 0.00 to 0.50 in increments of 0.05 . Network training and evaluation of performance are car-ried out for each value of p. The performance of trained models is assessed by averaging the fidelity between the output of the trained net-work and the target states on the test data, and comparing this with the theoretical fidelity ob-tained from QEC using the stabiliser code and that achieved by the QAE. The results are presented in Fig. 12. As in the 5-qubit case, the mean fidelity decreases as the quantum error rate increases. Error correction with QGVL achieves a performance level equiv-alent to algorithmic QEC using the Steane code stabiliser code, demonstrating that QGVL suc-cessfully acquires the error correction strategy embodied by the Steane code.    
+
+> Figure 12: Relationship between fidelity and depolari-sation error rate for quantum states corrected by the 7-qubit QGVL network trained with the Steane code (solid line), fidelity achieved through algorithmic quantum er-ror correction via the Steane stabiliser code (black dots), and fidelity of physical single-qubit states with depolari-sation error under identical conditions (dotted line). For both QGVL and the stabiliser code, input states are pre-pared by encoding the quantum states using the Steane code and subsequently introducing depolarisation errors with error rate pto each qubit.
+
+5.2.3 Shor code 
+
+Finally, we implemented quantum error correc-tion using the Shor code. The Shor code is a 9-qubit, degenerate code that provides protection against depolarisation errors. The logical code-words for the Shor code are |0L⟩ and |1L⟩, defined as follows: 
+
+|0L⟩ = 12√2 (|000 ⟩ + |111 ⟩)⊗3 (26) 
+
+|1L⟩ = 12√2 (|000 ⟩ − | 111 ⟩)⊗3 (27) 
+
+Stabiliser generators for these logical codes are: 
+
+I ⊗ I ⊗ I ⊗ I ⊗ I ⊗ I ⊗ I ⊗ Z ⊗ ZI ⊗ I ⊗ I ⊗ I ⊗ I ⊗ I ⊗ Z ⊗ I ⊗ ZI ⊗ I ⊗ I ⊗ I ⊗ Z ⊗ Z ⊗ I ⊗ I ⊗ II ⊗ I ⊗ I ⊗ Z ⊗ I ⊗ Z ⊗ I ⊗ I ⊗ II ⊗ Z ⊗ Z ⊗ I ⊗ I ⊗ I ⊗ I ⊗ I ⊗ IZ ⊗ I ⊗ Z ⊗ I ⊗ I ⊗ I ⊗ I ⊗ I ⊗ II ⊗ I ⊗ I ⊗ X ⊗ X ⊗ X ⊗ X ⊗ X ⊗ XX ⊗ X ⊗ X ⊗ I ⊗ I ⊗ I ⊗ X ⊗ X ⊗ X
+
+(28) 
+
+12 The stabiliser generators for these logical codes are: 
+
+Zi |0L⟩ = Zi
+
+1
+
+√2 (|000 ⟩ + |111 ⟩)= 1
+
+√2 (|000 ⟩ − | 111 ⟩)= |1L⟩
+
+(29) 
+
+Zi |1L⟩ = Zi
+
+1
+
+√2 (|000 ⟩ − | 111 ⟩)= 1
+
+√2 (|000 ⟩ + |111 ⟩)= |0L⟩
+
+(30) 
+
+where i ∈ {0, 1, 2} denotes the specific qubit within a block. Thus, it is unnecessary to identify which qubit within a block suffered an error, since the change of state is independent of this position. Error correction is executed via a phase flip of any qubit in the block. The Shor code can correct a single Pauli X error within a block and one Pauli Z
+
+error across the entire code. Moreover, it can correct a Pauli error that is a superposition of X
+
+and Z errors. Following this coding procedure, both train-ing and test datasets were prepared. Specifi-cally, 5.0 × 10 4 random quantum state vectors were encoded via each code. The larger dataset was necessary to encompass all noise patterns re-sulting from the increased number of qubits and possible error combinations. These states were passed through the noise channel N to obtain pairs (N (|ψL⟩ ⟨ ψL|), |ψL⟩ ⟨ ψL|) as input and tar-get data. Test sets were generated analogously. Training and validation of the network were performed with noise error rates p ranging from 0.00 to 0.50 in increments of 0.05. Model vali-dation was conducted by comparing the mean fi-delity between the model outputs on test data and the target states, as well as the fidelity achievable by QEC using the stabiliser code. The impact of qubit number on mean fidelity was ex-amined by comparing results for the 5-qubit code, Steane code, and Shor code. Figure 13 shows the fidelity obtained by 9-qubit QGVL after learning with the Shor code. Unlike the five- or 7-qubit (Steane) codes, fidelity with the Shor code slightly exceeded that obtained by the stabiliser code. This is attributable to the Shor code’s degenerate nature, allowing the net-work to learn and correct a greater variety of error     
+
+> Figure 13: Relationship between fidelity and depolari-sation error rate for quantum states corrected by the 9-qubit QGVL network trained with the Shor code (solid line), fidelity achieved via algorithmic quantum error cor-rection using the Shor stabiliser code (black dots), and fidelity for physical single-qubit states under the same conditions (dotted line). For both QGVL and the sta-biliser code, input states are prepared by encoding the quantum states with the Shor code and introducing de-polarisation errors with error rate pto each qubit.
+
+patterns. Additional comparisons among the 5-qubit code, Steane code, and Shor code are shown in Fig. 14, where the 5-qubit code consistently yields the highest fidelity, followed by the Shor code and then the Steane code, regardless of error rate. The relative improvement is due to the bal-ance between the number of newly possible errors introduced by additional qubits and the capacity for error correction. Overall, the Shor code demonstrated higher error correction performance than the Steane code owing to its degenerate structure, while the Steane code is not considered optimal for correct-ing depolarisation errors with equally probable 
+
+X, Y , and Z errors. 
+
+# 6 Exploring encoding method 
+
+To this point, we have assessed the learning ca-pabilities of QGVL for quantum error correction (QEC) using predefined encoding schemes. As a result, we identified optimal error correction strategies within logical code spaces spanned by, for example, repetition codes and 5-qubit error correction codes. Nevertheless, QEC restricted to predefined coding methods cannot fully leverage the potential to tailor error correction strategies to the specific characteristics of quantum hard-
+
+13 Figure 14: Fidelity comparison for QGVL networks with the 5-qubit error correction code, Steane code, and Shor code. Results presented in Figs. 11, 12, and 13 are com-pared against fidelities for physical qubits. 
+
+ware. Therefore, in the present work, we aimed to discover novel logical encoding methods capable of preserving quantum information under previ-ously undefined quantum errors, thereby enabling more versatile QEC strategies. To accomplish this, we trained two distinct net-work architectures. The first network is focused on identifying logical encodings that are robust against quantum noise, while the second network performs error correction tailored to the discov-ered encoding. The exploratory network is a QGVL model with the architecture illustrated in Fig. 15. Un-like previous networks, which adopted an m-1-m
+
+qubit structure—where the number of qubits in the input and output layers exceeds that in the hidden layer—this network exchanges the roles of encoder and decoder, resulting in a 1-m-1 qubit configuration. The noise channel N is positioned between two unitary operations, which serve as trainable parameters. The network first encodes a single-qubit state vector into multiple qubits using the initial uni-tary operation, U E 
+
+> 1
+
+, given a predefined or train-able encoding method. The resulting encoded qubits are then exposed to targeted noise pro-cesses via the noise channel. The second unitary operation, U E 
+
+> 2
+
+, subsequently removes the noise in an attempt to recover the original single-qubit quantum information. By training the network to maximise the similarity between output and input states, it is possible to identify encoding methods enabling reversible decoding of quantum 
+
+|ψ⟩
+
+|0⟩
+
+|0⟩ ...
+
+|0⟩
+
+U E
+
+> 1
+
+Trace 
+
+... N ... U E
+
+> 2
+
+Trace 
+
+|0⟩
+
+...
+
+ρout                 
+
+> Figure 15: Quantum neural network for learning the en-coding unitary matrix UE
+> 1that maps 1-qubit quantum information |ψ⟩into a higher-dimensional code space. This network adopts an inverted QEC architecture, act-ing as an encoder for QEC. Specifically, the Kronecker product of the 1-qubit input state |ψ⟩with the neces-sary number of ancilla qubits is computed. The encoded quantum state is then represented as the partial trace over the initial 1-qubit. The noise channel Nsubse-quently acts on the encoded state, introducing errors to be learned. Finally, the Kronecker product with an ad-ditional 1-qubit initial state |0⟩and a subsequent partial trace yield the output 1-qubit quantum state, ρout . By optimizing the fidelity between ρout and |ψ⟩, the net-work learns noise-tolerant encoding unitary matrices.
+
+information, even in the presence of noise. The second network is a QGVL model depicted in Fig. 16. This network learns QEC strategies tailored to the encoding discovered by the first network, differing from previous QGVL architec-tures only in the use of the newly learned encod-ing. The process of initial encoding and noise application follows: 
+
+ρin = N (Tr  
+
+> ψ
+
+(U E 
+
+> 1
+
+(|ψ⟩ ⟨ ψ| ⊗ | 0⟩ ⟨ 0|⊗n)U E† 
+
+> 1
+
+)) (31) 
+
+We trained the network using QGVL, employ-ing the encoded quantum state combined with noise as the input state and the corresponding noise-free quantum state as the target state. The original quantum state can be recovered from the encoded quantum state using the first decoding unitary matrix, U E 
+
+> 2
+
+.During training of the first network, 10 4 ran-domly generated quantum states were used as both input and target states. As the network in-troduces noise internally, the unitary matrices are optimised using these identical input and target sets. Subsequently, after generating another set of 10 4 random quantum state vectors, the sec-ond network encodes the quantum states using the unitary matrix learned by the first network. The results are presented in Fig. 17. We achieved fidelity levels comparable to those ob-
+
+14 |ψ⟩
+
+|0⟩
+
+|0⟩ ...
+
+|0⟩
+
+U E
+
+> 1
+
+Trace 
+
+... N ...
+
+Q
+
+... ρout 
+
+Figure 16: Quantum neural network for QEC incorporating a trained encoding unitary matrix U E 
+
+> 1
+
+. In the first stage, as shown in Fig. 15, a single-qubit quantum state |ψ⟩ is encoded into a multi-qubit state. The encoded state is then subjected to noise via the channel N . The quantum neural network Q is subsequently trained to correct errors, similarly to the procedure in previous experiments. Once the effective encoding method is identified in the noisy channel, the network can learn to remove the introduced errors from the encoded information. 
+
+Figure 17: Fidelity attained by the 3-qubit QGVL while exploring new encoding methods for bit-flip error cor-rection. The size of the dataset for both training and testing is 10 4. For comparison, results are plotted along-side those for error correction using the repetition code and corresponding stabiliser code shown in Fig. 5, as well as the fidelity of the uncorrected physical code. 
+
+tained by error correction with the assigned en-coding methods using the stabiliser code, as well as with QEC performed by QGVL. It should be noted that the code space onto which the original quantum state is projected is a novel code space discovered by the current model. To visualise this, we performed quantum process tomography (QPT, see Appendix B for details) for the encoder obtained through train-ing. The results, shown in Fig. 18, demonstrate that, in contrast to previous training procedures using predefined encodings, the quantum states are mapped to an entirely different code space. 
+
+# 7 Denoising with noisy channel 
+
+Up to this point, our experiments have oper-ated under the idealised assumption of a noise-
+
+Figure 18: QPT of error correction using QEC trained via QGVL. Quantum operations are visualised with the input quantum state U E 
+
+> 1
+
+(|ψ⟩) and the output Q(U E 
+
+> 1
+
+(|ψ⟩)) as generated by the quantum neural network. 
+
+free quantum neural network (QNN). However, in practice, quantum states may be subject to unex-pected errors induced either during idle periods or through gate operations, typically arising from in-teractions with the environment. In this section, we evaluate quantum error correction (QEC) per-formance in the presence of internal noise within QNNs such as QGVL, thereby conducting exper-iments under more realistic conditions. Our investigations focus on the correction of bit-flip errors. We first examine error correction using a 3-qubit QGVL network, which represents the simplest possible architecture for this pur-pose. The correction capability of the QGVL net-work is assessed by comparing its outputs to those of a conventional QAE. Subsequently, we expand the analysis to networks with increased width, specifically 5-qubit and 7-qubit architectures. Fi-nally, we implement more redundant structures, including a 5-3-5 qubit network and a 7-1-7 qubit network, in order to assess the impact of wider 
+
+15 network configurations on error correction per-formance. 
+
+7.1 3-qubit error correction code 
+
+We investigated the correction of bit-flip errors in a 3-qubit QGVL network subject to internal noise. The experimental setup was identical to that described in Section 5.1. For encoding, the 3-qubit repetition code was employed, as defined in Eq. (16) , with the corresponding stabiliser gen-erators specified in Eq. (17) . Test data were pre-pared as described in Section 5.1. We now elaborate on the application of network noise, which is a critical aspect of the present experiment. Because the probability of noise generation within the network depends on the characteristics of the quantum device and its op-erational environment, precise estimation of its fluctuation is generally infeasible. Thus, in this study, we assume that noise affecting different quantum states is equally probable. Quantum information propagating through the forward layers of the network is successively transformed by interlayer mappings. In networks with two such mappings, three distinct quantum states exist by virtue of the transformation be-tween layers. Moreover, since the input quantum states already contain error due to the genera-tion of training data, the impact of internal net-work noise in our experiment is represented by applying the noise channel N , with generation probability pn, to quantum states following each interlayer mapping. When evaluating QEC performance for QNNs operating in noisy conditions, it is necessary to take into account additional noise introduced by the network itself, beyond the input errors. This effect is determined by both the network noise probability pn and the input error rate p. We as-sessed the noise tolerance of QEC by identifying risk-benefit pairs (p, p n) that balance these fac-tors. Figures 19(a) and (b) present comparison re-sults for the ranges of p and pn for QGVL and QAE, along with the corresponding physical qubit results. The QGVL network attained supe-rior fidelity across a broader range of input error rates and network noise rates, indicating greater tolerance to network noise compared to the QAE. 
+
+7.2 Noisy channel with more qubits 
+
+It is essential to examine experimentally the im-pact of increasing the number of qubits within a QNN subject to internal noise. Under noiseless conditions, expanding the code length by using more qubits in QGVL networks leads to enhanced error correction performance. However, when in-ternal network noise is present, an increased num-ber of qubits within the network also means more qubits are exposed to noise, resulting in a decline in overall fidelity. We assessed the noise tolerance of QGVL net-works as the number of input qubits was in-creased from three to five and seven. For training, the repetition code was utilised as in the noiseless case (see Section 5.1.1). Performance evaluation employed the risk-profit analysis introduced pre-viously in Section 7.1. Figure 20 shows a comparison of the fidelities achieved by QGVL networks of three, five, and seven qubits under noisy conditions, relative to that of a single physical qubit. As the number of qubits in the QGVL network increases, error correction performance improves, evidenced by a broader region in which fidelity exceeds that of the physical qubit. 
+
+7.3 Multiple neurons in hidden layer 
+
+Until now, the hidden layer in our networks has consisted of a single qubit. In the presence of internal network noise, a hidden layer composed of only 1-qubit, as in the 3-1-3 architecture, car-ries the risk of complete information loss if that qubit is corrupted. To address this vulnerabil-ity, we introduced multiple qubits into the hid-den layer, which ensures that not all quantum information is lost when an error occurs. Specifi-cally, we implemented a 5-3-5 network, where the hidden layer contains three qubits and both the input and output layers each contain five qubits. All layers are encoded using the 5-qubit error cor-rection code. This modification is expected to improve the break-even error rate for effective er-ror correction. Increasing the number of qubits in the hidden layer does raise the computational cost for training and operation because the size of the unitary matrices depends on both the in-put/output and hidden layer dimensions. How-ever, the scalability achieved by QGVL allows these experiments to be conducted with reason-
+
+16 (a) QGVL (b) QAE 
+
+Figure 19: Ranges of input noise error rate p and network noise error rate pn in which the fidelity achieved by QGVL (a) and QAE (b) exceeds that of the physical qubit. Outcomes for network noise error rates pn ranging from 0.00 to 0.10 are displayed. Both networks employed the 3-qubit repetition code for encoding. The domain in which QGVL outperforms the physical qubit is 2.77 times larger than the corresponding domain for QAE, and at the highest pn
+
+value, this ratio is 2.70. 
+
+error rate 0.0 0.1 0.2 0.3 0.4 0.5 physical 1.00 0.933 0.866 0.799 0.734 0.666 
+
+QGVL 0.982 0.966 0.916 0.838 0.754 0.662 QAE 0.955 0.934 0.891 0.815 0.736 0.638 
+
+Table 1: Fidelity scores for QGVL and QAE with network noise pn = 0 .02 . Both QGVL and QAE outperform the physical qubit across the ranges illustrated in Fig. 19.   
+
+> (a) 3-qubit (b) 5-qubit (c) 7-qubit
+
+Figure 20: Range of input noise error rate p and network noise error rate pn for which the fidelity of 3-, 5-, and 7-qubit QGVL networks under internal noise exceeds the fidelity of a single physical qubit. The range of pn spans from 0.00 to 0.20. The maximum probability of network noise generation is 1.41 times higher for the 5-qubit network and 1.62 times higher for the 7-qubit network compared to the 3-qubit case. Likewise, the area under the curve increases by factors of 1.40 and 1.63 for the five- and 7-qubit networks, respectively, compared to the 3-qubit network. 
+
+able computational and time resources. In the experiment, we used a 5-3-5 QNN with 5-qubit input and output layers and a 3-qubit hid-den layer. The training data and stabiliser code were the same as those used in Section 5.2.1. Ex-panding the width of the hidden layer required increasing the size of the unitary matrices, from six qubits in the 5-1-5 structure to eight qubits in the 5-3-5 network. To evaluate effectiveness, we compared the fidelity of the 5-3-5 QGVL to that of the 7-1-7 QGVL, which also uses eight total qubits in the input and hidden layers, un-der conditions of internal network noise. For this comparison, we plotted the pairs of input error 
+
+17 Figure 21: Error correction capabilities of the 5-3-5 QGVL with multiple qubits in the hidden layer compared to the 7-1-7 QGVL. The maximal fidelity attained for each combination of input error rate p and network noise rate pn is shown: white for the physical qubit, light grey for the 5-3-5 QGVL, and dark grey for the 7-1-7 QGVL. Encoding was performed using the five- and 7-qubit rep-etition codes, respectively. 
+
+rate and network noise error rate that yielded the highest fidelities for physical qubits, 5-3-5 QGVL, and 7-1-7 QGVL. The results are shown in Fig. 21. Under noise-free conditions, the 5-3-5 QGVL achieved fidelity similar to the 5-1-5 QGVL. However, in the pres-ence of internal network noise, the 5-3-5 QGVL outperformed the 7-1-7 QGVL, even though the latter showed superior performance in noise-free situations. Notably, the 5-3-5 QGVL provided better fidelity in regions with higher network noise and lower input error rates, thereby expand-ing the parameter space where its fidelity sur-passed that of the physical qubit. 
+
+# 8 Learning performance 
+
+Finally, we investigated enhancements in learning performance enabled by the simplified QGVL ar-chitecture. Quantum error correction (QEC) util-ising quantum machine learning methods, such as variational quantum algorithms (VQAs), has of-ten been criticised for its vulnerability to the bar-ren plateau phenomenon which is characterised by the vanishing of gradients during training. In the QAE framework, because the unitary matrix parameters are randomly initialised, the network’s ability to avoid barren plateaus criti-cally depends on initial conditions. As a result, 
+
+ρin 
+
+|0⟩
+
+|0⟩
+
+|0⟩
+
+U1
+
+Trace 
+
+|0⟩
+
+|0⟩
+
+|0⟩
+
+|0⟩
+
+|0⟩
+
+U2
+
+Trace 
+
+ρout       
+
+> Figure 22: Architecture of the 5-3-5 QGVL network. The use of multiple qubits in the hidden layer enhances network fault tolerance by protecting against internal network noise that may arise during computation. In the 5-1-5 structure, information is irretrievably lost if the single intermediate qubit is corrupted by noise after the U1operation. In contrast, the 5-3-5 configuration introduces redundancy not only in the input layer but also in the hidden layer, enabling error correction via the
+> U2operation in the decoder, even if one of the three intermediate qubits is affected by noise.
+
+achieving optimal quantum error correction typ-ically requires multiple random restarts. More-over, as network depth and width increase, the intractability of training escalates, undermining scalability for larger or more complex tasks. Our proposed QGVL method achieves a signif-icant reduction in the number of unitary matrices (i.e., network parameters), thereby mitigating the risk of barren plateaus caused by excessive pa-rameterization. In this section, we systematically assess the training capability and scalability of QGVL by comparing training time and conver-gence probability to those of the QAE. 
+
+N (ρ) =(1 − p)ρ + p
+
+3 (X1ρX 1 + X2ρX 2 + X3ρX 3)
+
+(32) 
+
+During training, pairs (N (ψL), ψ L), where ψL
+
+denotes the logical code and N applies the noise channel, were used as input and target states re-spectively. Using these data, we independently trained QGVL and QAE networks. In order to compare the convergence behavior and required training time, we established two distinct criteria for ter-minating the training process. 
+
+18 
+
+|Ct − Ct−1| < 10 −8
+
+Ct < 1
+
+N
+
+> N∑
+> i=1
+
+L(ρi
+
+> targ
+
+, QEC( ρi
+
+> in
+
+)) (33) 
+
+Here, ct denotes the value of the cost func-tion at step t, and QEC represents the quantum error-corrected state obtained using the stabiliser code corresponding to the applied noise. Empiri-cally, when training converges for a given dataset, the resulting fidelity often surpasses that of con-ventional error correction. Therefore, training is considered complete when parameter updates be-come sufficiently small after adequate progress has been made. In our experiments, we also set a maximum number of parameter updates for the network, recording the time taken for training to reach completion. Each network was trained 10 3 times to facilitate robust comparison of training times and convergence steps. QGVL showed substantial improvements over QAE in both training success rate and time to convergence. The results are summarised in Ta-ble 2. For example, QGVL achieved perfect com-pletion in all training runs, improving the train-ing success rate by 12% for 3-qubit and by 25% for 5-qubit architectures compared to QAE. These findings suggest that QGVL successfully avoids the barren plateau problem, which has been a significant challenge for QAE. The mean training time was reduced by 80% in the 3-qubit case and by 96% in the 5-qubit case, indicating that the reduction in trainable parame-ters leads to much more efficient training. Across all cases, the standard deviation in training time was less than 2.4% of the mean, suggesting that convergence times were tightly concentrated and that local minima were largely avoided. QGVL also reduced the average number of training steps by 7% for 3-qubit networks and by 57% for the more complex 5-qubit networks. Random initialisation facilitated rapid conver-gence and enabled escape from local optima, de-spite the possibility of barren plateaus. Dif-ferences between minimum and maximum step counts reflect the influence of initialisation; early convergence sometimes resulted from fortuitously chosen initial parameters. Finally, QGVL reduced the mean learning time per step by 36% for 3-qubit and by 92% for 5-qubit networks compared to QAE. This improve-ment is a direct consequence of reduced training time per epoch due to the streamlined model ar-chitecture. 
+
+# 9 Discussion and outlook 
+
+9.1 QGVL’s positive effect 
+
+In this study, we proposed quantum error cor-rection (QEC) via QGVL as a quantum machine learning based approach to quantum error cor-rection. Using QGVL, we successfully corrected errors occurring in input quantum information within predefined code spaces. This capabil-ity mitigates vulnerability to qubit noise, which is a major challenge in the realisation of quan-tum computers, and enables the construction of quantum memories for storing quantum informa-tion. QGVL employs a global unitary matrix as the trainable parameter in the QEC procedure, thereby reducing the number of required unitary matrices compared with previous methods and consequently shortening training time and lower-ing computational cost. Furthermore, this reduction in model complex-ity allows QGVL to train larger networks. Un-der noiseless conditions, QGVL achieved shorter training times and faster convergence to a (near) globally optimal solution while maintaining accu-racy comparable to existing approaches. Even in the presence of depolarizing errors, QGVL pre-served this level of accuracy. These results indi-cate that QGVL is well suited for implementation on real quantum devices subject to various noise mechanisms. In the case of noisy networks, QGVL also im-proved error correction accuracy and training ef-ficiency compared with previous work, primarily because the number of unitary operations in the quantum circuit was reduced, which in turn de-creased the number of potential noise-generating operations. When internal network noise was present, the QGVL-based network was able to remove noise from encoded quantum information as long as the error probability remained below a certain threshold. QGVL increased the admis-sible internal noise threshold, thereby enhancing protection of quantum information. This thresh-old could be further raised by enlarging the net-work and introducing multiple qubits in the hid-den layer. 
+
+19 QGVL QAE 3-qubit 5-qubit 7-qubit 3-qubit 5-qubit Success rate of training [%] 100 100 97 89 80 Average of training time [s] 325 429 1579 1629 13715 Standard deviation of training time [ s2] 54 111 254 327 3508 Average of steps 123 144 377 133 341 Standard deviation of steps 16 .0 37.8 40.9 20.7 74.6 Maximum number of steps 169 261 459 229 497 Minimum number of steps 74 61 97 97 196 Learning time per step [s] 2.63 2.96 4.17 12.2 40.1         
+
+> Table 2: Comparison of total training time and step count for QGVL and QAE. Training hyperparameters: 10 3
+> data points, 10 2training runs, and a maximum of 500 steps. The input/output layers comprised 3, 5, and 7 qubits for QGVL and QAE, respectively. See (33) for stopping criteria. Only successful training runs are included in the calculations, except for the "Success rate of training."
+
+Moreover, network enlargement became feasi-ble due to shorter training times and fewer oc-currences of convergence to local minima. Un-der the assumption of negligible internal network noise, the admissible error threshold could be in-creased by enlarging the network through addi-tional input-layer qubits. In contrast, under more realistic conditions with internal network noise, a higher admissible error threshold was obtained by expanding the network via additional hidden-layer qubits. In the experiments described above, quantum information was first encoded using a predefined code space. By modifying the network architec-ture, we then realised an encoding in an opti-mal code space adapted to the given noise model. This extension not only enables QEC for un-known noise channels but also allows channel-adaptive encoding and QEC that are robust against the types of noise that occur in practi-cal quantum devices. As a consequence, the op-timal parameters differ for each encoding, which complicates decoding for an adversary and fur-ther enhances robustness. 
+
+9.2 Limitation of current study 
+
+In the present study, larger-qubit networks were successfully trained; however, the number of trainable qubits remains limited. The current upper bound is 9 qubits, because training 11-qubit networks could not be completed within a reasonable time. Consequently, the logical er-ror rate remains higher than that of error correc-tion codes employing larger numbers of physical qubits. Further enlargement of the qubit count will require more efficient training schemes and is therefore left for future work. Another issue to be addressed in future re-search is the optimization of complex-valued gra-dients during training. In this study, the absolute value of each matrix element was used as a sec-ondary momentum term, and optimization was performed on the corresponding real-valued norm without distinguishing between real and imagi-nary components. This procedure relies on a re-duced amount of information, since complex val-ues are compressed into real scalars. Enhancing this optimization method to exploit the full com-plex structure is expected to enable more efficient training and, in turn, QEC on larger and more complex networks. 
+
+# References 
+
+[1] J. Preskill. “Lecture notes for physics 229:quantum information and computation”. CreateSpace Independent Publishing Plat-form. (2015). url: https://books.google. co.jp/books?id=MIv8rQEACAAJ .[2] Simon J Devitt, William J Munro, and Kae Nemoto. “Quantum error correction for be-ginners”. Reports on Progress in Physics 76 ,076001 (2013). [3] B M Terhal, J Conrad, and C Vuillot. “To-wards scalable bosonic quantum error cor-rection”. Quantum Science and Technology 
+
+5, 043001 (2020). 
+
+20 [4] Barbara M. Terhal. “Quantum error cor-rection for quantum memories”. Rev. Mod. Phys. 87 , 307–346 (2015). [5] Daniel Eric Gottesman. “Stabiliser codes and quantum error correction”. California Insti-tute of TechnologyPage 2900 (1997). [6] Terry Farrelly Kerstin Beer, Dmytro Bon-darenko et al. “Training deep quantum neu-ral networks”. Nature Communications 11 ,808 (2020). [7] Dmytro Bondarenko and Polina Feldmann. “Quantum autoencoders to denoise quantum data”. Physical Review Letters 124 (2020). [8] David F. Locher, Lorenzo Cardarelli, and Markus Müller. “Quantum error correction with quantum autoencoders”. Quantum 7,942 (2023). [9] Kerstin Beer, Daniel List, Gabriel Müller, Tobias J. Osborne, and Christian Struck-mann. “Training quantum neural networks on nisq devices” (2021). arXiv:2104.06081. [10] Kunal Sharma, M. Cerezo, Lukasz Cincio, and Patrick J. Coles. “Trainability of dissipa-tive perceptron-based quantum neural net-works”. Physical Review Letters 128 (2022). [11] Jonathan Romero, Jonathan P Olson, and Alan Aspuru-Guzik. “Quantum autoen-coders for efficient compression of quantum data”. Quantum Science and Technology 2,045001 (2017). [12] L Lamata, U Alvarez-Rodriguez, J DMartín-Guerrero, M Sanz, and E Solano. “Quantum autoencoders via quantum adders with genetic algorithms”. Quantum Science and Technology 4, 014007 (2018). [13] Hailan Ma, Chang-Jiang Huang, Chunlin Chen, Daoyi Dong, Yuanlong Wang, Re-Bing Wu, and Guo-Yong Xiang. “On compression rate of quantum autoencoders: Control design, numerical and experi-mental realization”. Automatica 147 ,110659 (2023). [14] Carlos Bravo-Prieto. “Quantum autoen-coders with enhanced data encoding”. Ma-chine Learning: Science and Technology 2,035028 (2021). [15] Chenfeng Cao and Xin Wang. “Noise-assisted quantum autoencoder”. Phys. Rev. Appl. 15 , 054012 (2021). 
+
+21 A Training Network 
+
+In this section, we provide a detailed explanation of network training with explicit equations. The objective of the QGVL network Q is to output noise-free encoded quantum states from encoded quantum information that has been subjected to a specified noise channel. To this end, training data are constructed from pairs of quantum state vectors. First, a randomly generated quantum state vector 
+
+|ψ⟩ is transformed into an encoded state |ψL⟩ according to the encoding scheme appropriate to each experiment. The target state for training is the density operator 
+
+ρtarg = |ψL⟩ ⟨ ψL| .
+
+The corresponding input training data are obtained by applying the noise channel N to this density operator, yielding 
+
+ρin = N (ρtarg ).
+
+To maximise the fidelity between the network output ρout = Q(N (ρin )) and the target state ρtarg ,we minimise the cost function in Eq. (34) , defined as the one-minus-average fidelity: 
+
+C = 1 − 1
+
+N
+
+> N∑
+> i=1
+
+⟨ρi
+
+> targ
+
+| ρi 
+
+> out
+
+|ρi
+
+> targ
+
+⟩ (34) 
+
+In the actual training procedure, the unitary matrix in each layer is treated as a trainable parameter and is updated iteratively. Using stochastic gradient descent (SGD) as the underlying optimization method, the unitary matrix Uk(s + ϵ) at step s + ϵ is updated according to 
+
+Uk(s + ϵ) = eiϵK k (s)Uk(s) (35) 
+
+so that unitarity of Uk is preserved at each step. The update operator Kk(s) is computed in a manner analogous to backpropagation. For a given layer 
+
+k, the input state ρi 
+
+> in
+
+of the i-th training sample (out of a total of N samples) is propagated forward through the network up to the unitary Uk, while the corresponding target state ϕi 
+
+> targ
+
+is propagated backward from the output side. The commutator Mk serves as an error operator between these forward-and backward-propagated quantum states: 
+
+Mk(s, i ) = [ Uk(s) . . . U 2(s)
+
+> (
+
+ρi 
+
+> in
+
+⊗ | 0 . . . 0⟩ ⟨ 0 . . . 0|hidden 
+
+> )
+
+U2(s)† . . . U k(s)†,Uk+1 (s)† . . . U out (s)† (
+
+1hidden ⊗ | ϕi
+
+> targ
+
+⟩ ⟨ ϕi
+
+> targ
+
+|
+
+> )
+
+Uout (s) . . . U k+1 (s)] 
+
+(36) 
+
+The commutators Mk(s, i ) are evaluated for all N training samples, since each commutator encodes the error contribution from the i-th data point at layer k. The update operator Kk(s) is then obtained as the averaged commutator: 
+
+Kk(s) = i dim(U k)2N
+
+> N∑
+> i=1
+
+Mk(s, i ) (37) 
+
+Finally, the unitary matrices are updated using Eqs. (35) and (37) . Compared with QAE, QGVL requires significantly fewer unitary matrices. Consequently, the number of matrices Uk, update opera-tors Kk, and commutators Mk is reduced, which leads to an expected improvement in computational cost. We evaluated the computational cost under the assumption that multiplication of two N ×N matrices scales as O(N 3). In an m-n-m QAE, there are n square matrices of dimension 2m+1 and m square matrices of dimension 2n+1 , whereas QGVL employs only two square matrices of dimension 2m+n. If one naïvely assumes direct unitary matrix multiplication, the corresponding costs are O(2 3( m+1) n +23( n+1) m) for QAE and O(2 3( m+n)+1 ) for QGVL. This comparison would suggest that QAE is less 
+
+22 |ρ1
+
+> k−1
+
+⟩
+
+|ρ2
+
+> k−1
+
+⟩ ...
+
+|ρnk−1 
+
+> k−1
+
+⟩
+
+V 1 
+
+> k
+
+V 2 
+
+> k
+
+V nk
+
+> k
+
+. . . Trace ...
+
+|0⟩⊗nk ...
+
+|ρ1
+
+> k
+
+⟩
+
+|ρ2
+
+> k
+
+⟩
+
+...
+
+|ρnk 
+
+> k
+
+⟩
+
+Figure 23: Interlayer mapping operations in a DQNN on a classical simulator. Because strictly local unitary operations, as depicted in Fig. 1, are difficult to implement efficiently on a classical computer, we instead perform operations using the extended unitary matrices defined in Eq. (38) . As a consequence, the size of the unitary matrices in interlayer mappings is the same as in the original DQNN, but nk such operations are required. The total computational cost is further increased by the overhead of extending and compressing unitary matrices in the classical simulation. 
+
+costly than QGVL, even in the simplest 3-1-3 architecture. However, this conclusion does not hold in practice, because on a classical computer it is not feasible to update only small local blocks within highly sparse unitary matrices without effectively working with the full matrix dimension. The actual computation required for QAE therefore follows the structure illustrated in Fig. 23. Consequently, the effective size of the unitary matrices in QAE becomes comparable to that in QGVL, and because QAE requires (m + n) such operations, its total computational cost is in fact larger than that of QGVL. We now derive the computational cost more precisely. For a unitary matrix U jk of size 2nk−1+1 , we first take the Kronecker product with the identity matrix of size 2nk −1 to obtain an extended unitary matrix V jk of size 2nk−1+nk :
+
+V jk = SWAP   
+
+> nk+1 ,n k+j
+
+(U jk ⊗ Ink −1) (38) 
+
+The computational cost is then estimated using these extended unitary matrices. The interlayer mapping can be written as 
+
+ρk = Ek(ρk−1) = Tr 
+
+> k−1
+
+[V nk 
+
+> k
+
+. . . V 1 
+
+> k
+
+(ρk−1 ⊗ | 0⟩⊗nk ⟨0|⊗nk )V 1† 
+
+> k
+
+. . . V nk † 
+
+> k
+
+] (39) 
+
+As Eqs. (38) and (39) indicate, the size of the effective unitary matrices in QAE is the same as in QGVL. However, because the number of required applications is (m + n) in QAE, its overall compu-tational cost is evidently higher than that of QGVL. We next examine the difference in computational cost between QAE and QGVL in more detail. When the number of training data is sufficiently large, in addition to the matrix multiplications for each of the nk unitaries in QAE, the application of SWAP gates must also be taken into account. In both cases, the cost per operation scales as O((nk−1 + nk)3), and the total cost per layer becomes proportional to (2 nk − 1) . When the number of data is small, further costs from computing matrix exponentials, partial traces, and Kronecker products must also be considered. Convergence to an optimal solution in either QAE or QGVL is not guaranteed to proceed at a uniform rate, since the training dynamics depend sensitively on the cost landscape. As a result, the average total training time can vary substantially with the presence of local minima and with the initial choice of unitary matrices, even though the per-step computational cost scales in proportion to the average training time. 
+
+# B Quantum Process Tomography 
+
+In this study, various quantum operations, including those implemented by QNN-based QEC, were applied to quantum states. Quantum Process Tomography (QPT) was introduced to characterise and 
+
+23 visualise these quantum processes. To clarify QPT, we first review Quantum State Tomography (QST), a closely related method. In general, QST is used to experimentally reconstruct an unknown quantum state, whereas QPT extends this idea to reconstruct the action of an unknown quantum process on quantum states. For simplicity, consider first a single-qubit state. The operators I√2 , X√2 , Y√2 , Z√2 form an orthonormal basis of operators with respect to the Hilbert–Schmidt inner product. An unknown single-qubit density matrix ρ can be written as 
+
+ρ = Tr( ρ)I + Tr( Xρ )X + Tr( Y ρ )Y + Tr( Zρ )Z
+
+2 (40) 
+
+Here, Tr( Aρ ) denotes the expectation value of the observable A. When the number of measurement repetitions m is sufficiently large, the sample mean of the measurement outcomes approaches Tr( Aρ )
+
+by the central limit theorem, with an approximately Gaussian distribution of standard deviation ∆( A)√m ,where ∆( A) is the standard deviation of A. Since ∆( A) ≤ 1 for Pauli observables, the statistical error of the estimate is at most 1√m .We now extend this to an n-qubit state. Using tensor products of Pauli matrices as before, an unknown n-qubit density operator ρ can be expanded as 
+
+ρ = ∑⃗v
+
+Tr( σv1 ⊗ σv2 ⊗ . . . ⊗ σvn ρ)σv1 ⊗ σv2 ⊗ . . . ⊗ σvn
+
+2n (41) 
+
+where the sum runs over ⃗v = ( v 1, . . . , v n) with vi ∈ { 0, 1, 2, 3}, and σ0, σ 1, σ 2, σ 3 denote I, X, Y, Z ,respectively. In this way, all possible tensor-product Pauli operators form a basis, and the state ρ can be reconstructed from measured expectation values. On this basis, QPT can be described as follows. Let the Hilbert space have dimension d. Choose a set of d2 input states |ψ1⟩ , . . . , |ψd2 ⟩ such that the projectors |ψj ⟩ ⟨ ψj | span the operator space. For each input state, the corresponding output state E(|ψj ⟩ ⟨ ψj |) is reconstructed by QST. Since E is linear, its action on arbitrary states can then be expressed as a linear combination in this operator basis, thereby providing a full characterization or “visualisation” of the quantum process E. In the present study, Pauli operators were employed as the basis to represent errors, and thus were also used as the operator basis for QPT to give a clear description of the underlying error processes and correction operations. 
+
+24

@@ -1,0 +1,2013 @@
+Title: Average-Case and Smoothed Near-Optimality for Color-Code Decoding
+
+URL Source: https://arxiv.org/pdf/2606.10399v1
+
+Published Time: Wed, 10 Jun 2026 00:31:06 GMT
+
+Number of Pages: 32
+
+Markdown Content:
+# Average-Case and Smoothed Near-Optimality for Color-Code Decoding 
+
+Daniel Gibney 1 and Jackson Huffstutler 11Department of Computer Science, University of Texas at Dallas 
+
+daniel.gibney@utdallas.edu ,jackson.huffstutler@utdallas.edu 
+
+Abstract 
+
+Minimum-weight decoding for two-dimensional color codes is NP-hard (Walters and Turner 2026), motivating the search for approximation guarantees beyond worst-case exact decoding. We study a block-based decoder for triangular color-code lattices. The decoder partitions the lattice using periodically spaced boundary walls, solves each block exactly by a frontier dynamic program, and then repairs the residual syndrome on the boundary. This gives a deterministic additive guarantee of the form 
+
+|Ealg | ≤ OPT( S) + O(n/τ ),
+
+where n is the number of vertices and τ is the wall spacing. We show that this additive guarantee becomes a near-optimal multiplicative guarantee under natural noise models. For constant-rate iid face noise and constant local degree, choosing τ =Θ( ϵ−1) gives a (1 + ϵ)-approximation with probability 1 − exp( −Ω( n)), in time n2O(ϵ−1). We also prove a smoothed analogue: the same near-optimality guarantee holds when an arbitrary adversarial error pattern is perturbed by independent constant-rate noise. Finally, in a low-probability regime with p = o(1 / log 2 n), the syndrome decomposes into small active regions with high probability, allowing independent component-wise decoding and yielding an exact minimum-weight correction in subexponential-in-n overhead. These results show that, despite worst-case hardness, color-code decoding admits strong average-case, smoothed, and sparse-regime guarantees. 
+
+# 1 Introduction 
+
+Topological quantum error-correcting codes are among the leading candidates for protecting quan-tum information from local noise. The central algorithmic task in such codes is decoding: given a measured syndrome, one must find a correction whose syndrome agrees with the observed syndrome and whose application is unlikely to create a logical error. For surface codes under independent 
+
+X- and Z-type noise, this problem is closely connected to minimum-weight perfect matching and related combinatorial optimization methods [7, 3, 4]. Color codes, introduced by Bombin and Martin-Delgado, have additional algebraic structure and support a richer set of transversal logi-cal gates, making them an attractive alternative to surface codes [1, 6]. However, this additional structure also makes the design and analysis of fast decoders more subtle. A number of decoders 1
+
+> arXiv:2606.10399v1 [cs.DS] 9 Jun 2026
+
+for color codes have been developed, including projection-based and restriction-based approaches that reduce aspects of color-code decoding to surface-code or toric-code decoding [2, 8]. Recent complexity-theoretic work gives a strong motivation for studying approximate color-code decoding. Walters and Turner proved that minimum-weight decoding in the two-dimensional color code is NP-hard, even in the code-capacity setting [9]. Thus, unless P = NP, one cannot expect a polynomial-time algorithm that exactly solves every instance of minimum-weight color-code decoding. This separates color-code decoding from the matching-solvable surface-code setting and suggests that the natural algorithmic questions are no longer only about exact decoding, but also about approximation, typical-case behavior, and smoothed guarantees. There is already a simple worst-case approximation baseline. Using matching-based restricted-lattice decoding and a local lifting step, the restriction-decoder framework gives a correction whose weight is at most three times the minimum-weight correction for the corresponding color-code syndrome [8, 5]. This shows that constant-factor approximation is possible in polynomial time. The question addressed in this paper is whether one can do much better under natural noise assumptions. In particular, we show that a block-based decoder is near-optimal with high probability at constant noise rate, remains near-optimal in a smoothed model with an arbitrary adversarial error followed by random noise, and becomes exact in a sufficiently sparse low-probability regime. We study an approximation-theoretic version of color-code decoding on a triangular color-code lattice. Let G denote the lattice, let F be the set of triangular faces, and let V be the set of vertices. An error is a set of faces E ⊆ F . Its syndrome is the set 
+
+S(E) := {v ∈ V : |{ f ∈ E : v ∈ f }| ≡ 1 (mod 2) } .
+
+Thus a vertex belongs to the syndrome exactly when it is incident to an odd number of error faces. Given a syndrome S ⊆ V , we consider the minimum-size syndrome realization problem OPT( S) := min {| E| : E ⊆ F, S (E) = S}.
+
+The goal is to compute a correction E with S(E) = S whose size is close to OPT( S). This captures the combinatorial core of minimum-weight decoding. For topological decoding, one must also account for homology, since two corrections with the same syndrome may differ by a nontrivial logical operator. We handle this by adding a homology-aware postprocessing step that preserves the syndrome while forcing the output into a prescribed homology class. Our algorithm is based on a block decomposition. We insert periodically spaced boundary walls into the lattice, solve each resulting block exactly, and then repair the residual syndrome left on the boundary walls. The local block problem has width O(τ ), where τ is the wall spacing, and can be solved by a frontier dynamic program. The boundary repair uses a parity correction on boundary graphs, applied separately to the three vertex colors. This yields a deterministic additive guarantee of the form 
+
+|Ealg | ≤ OPT( S) + O
+
+ nτ
+
+
+
+where n = |V |. The main work of the paper is to convert this additive guarantee into stronger probabilistic statements. Under constant-rate iid noise, the syndrome has linear size with high probability, and therefore the additive term is small relative to OPT( S). Under smoothed noise, the same conclusion holds even after an arbitrary fixed error pattern is chosen adversarially. In the low-probability regime, the syndrome decomposes into small active regions, which can be solved independently to obtain an exact global optimum. 21.1 Our Results 
+
+We now summarize the main guarantees proved in the paper. All of the results use the same underlying block geometry: the lattice is divided by periodically spaced boundary walls, and local regions are solved exactly. For the constant-rate and smoothed guarantees, the remaining boundary syndrome is then repaired; in the sparse regime, the same geometry is used to isolate inflated active components that can be decoded independently. The first result shows that, at constant noise rate, this gives a near-optimal correction with high probability. 
+
+Theorem 1 (Constant-rate near-optimality) . Assume iid face noise with constant probability p ∈
+
+(0 , 1) , and assume every vertex is incident to exactly d = O(1) faces. For every ϵ > 0, there is a choice of wall spacing 
+
+τ = Θ( ϵ−1)
+
+such that the block decoder outputs a correction Ealg satisfying 
+
+|Ealg | ≤ (1 + ϵ) OPT( S)
+
+with probability 1 − exp( −Ω( n)) . The running time is 
+
+n 2O(ϵ−1).
+
+The next result shows that the same guarantee is robust to adversarial perturbations. Instead of assuming that the entire error is random, we allow an arbitrary fixed error pattern and then add independent random noise. 
+
+Theorem 2 (Smoothed near-optimality) . Assume every vertex is incident to exactly d = O(1) 
+
+faces. Let E0 ⊆ F be an arbitrary fixed error pattern, and let Np ⊆ F be iid face noise with constant probability p ∈ (0 , 1) . Let 
+
+S := S(E0 ⊕ Np).
+
+For every ϵ > 0, there is a choice of wall spacing 
+
+τ = Θ( ϵ−1)
+
+such that the block decoder outputs a correction Ealg satisfying 
+
+|Ealg | ≤ (1 + ϵ) OPT( S)
+
+with probability 1 − exp( −Ω( n)) .
+
+In the sparse-noise regime, the behavior is different. Rather than using the boundary repair to obtain an approximation guarantee, we show that the syndrome breaks into small active regions. This result uses only local two-dimensional geometry at logarithmic scales: roughly, logarithmic-radius block neighborhoods must have quadratic growth, local regions must have the expected two-dimensional treewidth, and any connected correction that crosses a logarithmic-width buffer must have size proportional to the buffer width. These conditions hold for the usual planar color-code patches and also for periodic two-dimensional lattices, such as tori, as long as the injectivity radius is at least logarithmic in the system size. 3Theorem 3 (Exact decoding when p = o(1 / log 2 n)) . For lattice families with logarithmically two-dimensional block geometry, the inflated active-component decoder can be chosen so that, whenever 
+
+p = o
+
+ 1log 2 n
+
+
+
+,
+
+it produces a globally minimum-weight correction with high probability. The total running time is 
+
+n 2O((log n)3/2).
+
+# 2 Constant Error Rate Solution 
+
+2.1 Algorithm 
+
+Let G denote the triangular color-code lattice. Let F be the set of triangular faces and let V be the set of vertices. For a set of faces E ⊆ F, define its syndrome by 
+
+S(E) := {v ∈ V : |{ f ∈ E : v ∈ f }| ≡ 1 (mod 2) } .
+
+That is, a vertex belongs to S(E) iff it is incident to an odd number of faces in E. Let S ⊆ V be the starting syndrome. 
+
+Block and boundary decomposition. We choose a set of boundary faces 
+
+F∂ ⊆ F
+
+formed by periodically spaced vertical columns and anti-diagonal columns of triangles. These boundary faces form connected “walls” in the lattice. The spacing between consecutive walls is denoted by τ . A vertex is called a boundary vertex if it is incident to at least one boundary face. Let 
+
+V∂ := {v ∈ V : ∃f ∈ F∂ with v ∈ f }.
+
+The remaining vertices are called interior vertices: Vint := V \ V∂ . Similarly, a face is called an interior face if it is not a boundary face: Fint := F \ F∂ .
+
+We define a block to be a maximal connected component of the sublattice induced by the interior faces Fint , where two faces are adjacent if they share a vertex. Let B = {B1, . . . , B q} denote the resulting collection of blocks. For a block Bi, let F (Bi) ⊆ Fint be its set of faces, and let 
+
+V (Bi) := {v ∈ V : v ∈ f for some f ∈ F (Bi)}
+
+be the vertices incident to faces of Bi. The interior vertices of the block are denoted as 
+
+I(Bi) := V (Bi) ∩ Vint .
+
+and the boundary vertices adjacent to Bi are denoted ∂V Bi := V (Bi) ∩ V∂ .
+
+4Local solutions. Define the local target syndrome in block Bi by 
+
+Si := S ∩ I(Bi).
+
+Our local decoder for Bi computes a minimum-size set of faces Ei ⊆ F (Bi) such that 
+
+S(Ei) ∩ I(Bi) = Si.
+
+No constraint is imposed on the syndrome produced on ∂V Bi.
+
+Define the aggregate local solution 
+
+Eloc := 
+
+> q
+
+M
+
+> i=1
+
+Ei.
+
+The residual syndrome is 
+
+R := S ⊕ S(Eloc ).
+
+By construction, R ⊆ V∂ .
+
+Dynamic programming inside one block. Suppose a block Bi is a τ × τ sublattice. We now describe a dynamic programming algorithm for the local problem in Bi running in time 
+
+τ 22O(τ ).
+
+Let 
+
+Fi := F (Bi), Ii := I(Bi),
+
+and recall that the local problem is to find a minimum-size set Ei ⊆ Fi such that 
+
+S(Ei) ∩ Ii = Si.
+
+There is no constraint on the syndrome produced on the boundary vertices ∂V Bi. We order the faces of Fi column by column, from left to right, and within each column from bottom to top. Let 
+
+f1, f 2, . . . , f N
+
+be this ordering, where N = |Fi| = O(τ 2). For k = 0 , 1, . . . , N , define 
+
+Pk := {f1, . . . , f k}, Uk := Fi \ Pk.
+
+Thus Pk is the set of faces already processed, and Uk is the set of faces not yet processed. The dynamic program maintains the parity values only on the current frontier . Define 
+
+Wk := {v ∈ Ii : v is incident to at least one face in Pk and at least one face in Uk}.
+
+These are exactly the interior vertices whose final parity has not yet been determined, because future unprocessed faces may still toggle them. By the choice of the column ordering, the frontier intersects only a constant number of columns of the τ × τ block. Hence |Wk| = O(τ ) for every k.A state at time k is a parity vector σ ∈ { 0, 1}Wk . The value Dk(σ) is defined to be the minimum number of selected faces among Pk such that: 51. the parity induced on each frontier vertex v ∈ Wk is σ(v), and 2. every interior vertex v ∈ Ii that is incident only to processed faces, meaning 
+
+{f ∈ Fi : v ∈ f } ⊆ Pk,
+
+already has the required final parity 1[v ∈ Si].
+
+If no partial solution satisfies these conditions, we set Dk(σ) = + ∞. The initialization is D0(∅) = 0, where the unique state is the empty parity vector. All other states have value + ∞.Now suppose we have computed Dk−1 and want to process the next face fk. For each state 
+
+σ ∈ { 0, 1}Wk−1 , we consider the two possibilities x ∈ { 0, 1}, where x = 1 means that fk is included in the local correction and x = 0 means that it is not included. Including fk toggles the parity of each interior vertex incident to fk. Boundary vertices are ignored because the local problem imposes no constraints on ∂V Bi. Thus, from σ and x, we obtain a temporary parity assignment on the vertices in 
+
+Wk−1 ∪ (fk ∩ Ii).
+
+We then restrict this assignment to the new frontier Wk, obtaining a candidate state σ′ ∈ { 0, 1}Wk .During this transition, some interior vertices leave the frontier. These are the vertices v ∈ Ii
+
+such that all faces incident to v have now been processed: 
+
+{f ∈ Fi : v ∈ f } ⊆ Pk.
+
+For each such vertex, the temporary parity must equal the required target value 
+
+1[v ∈ Si].
+
+If this condition fails, the transition is discarded. Otherwise, we update 
+
+Dk(σ′) = min {Dk(σ′), D k−1(σ) + x}.
+
+After all faces have been processed, the frontier is empty: WN = ∅. The value of the local optimum is therefore min {| Ei| : Ei ⊆ Fi, S (Ei) ∩ Ii = Si} = DN (∅).
+
+By storing predecessor pointers, we can also recover an optimal set of faces Ei ⊆ Fi.It remains to justify the running time. At every step, 
+
+|Wk| = O(τ ),
+
+so the number of states is 2|Wk | = 2 O(τ ).
+
+There are N = O(τ 2) faces, and for each face we try two choices, corresponding to including or not including the face. Therefore the total running time is 
+
+O(τ 2) · 2O(τ ) = τ 22O(τ ).
+
+The space usage is 2 O(τ ) if only the optimum value is needed, and τ 22O(τ ) if all predecessor pointers are stored for reconstruction. Alternatively, reconstruction can be done with standard divide-and-conquer traceback using 2 O(τ ) working space. 6Resolving the residual syndrome. For each color c ∈ { R, G, B }, let Vc ⊆ V be the set of vertices of color c. For any syndrome X ⊆ V , define 
+
+Xc := X ∩ Vc.
+
+We first observe that the residual syndrome satisfies a color-parity invariant. 
+
+Lemma 1 (Color parity invariant) . For every set of faces E ⊆ F ,
+
+|S(E) ∩ VR| ≡ | S(E) ∩ VG| ≡ | S(E) ∩ VB | (mod 2) .
+
+Consequently, 
+
+|RR| ≡ | RG| ≡ | RB | (mod 2) .
+
+Proof. Each triangular face is incident to exactly one red, one green, and one blue vertex. Thus adding or removing a face toggles exactly one syndrome vertex of each color. Therefore the parities of the three color classes always change together. Since R = S ⊕ S(Eloc ), and both S and S(Eloc )are syndromes of face sets, the same parity condition holds for R.For each color c ∈ { R, G, B }, define the boundary graph 
+
+Hc = ( V∂ ∩ Vc, A (Hc)) as follows. Two vertices 
+
+u, v ∈ V∂ ∩ Vc
+
+are adjacent if there is a two-face boundary move 
+
+Ma = {f 1 
+
+> a
+
+, f 2 
+
+> a
+
+} ⊆ F∂
+
+consisting of two adjacent boundary faces such that 
+
+S(Ma) = {u, v }.
+
+We fix one such move Ma for every edge a = {u, v } ∈ A(Hc). We assume that the boundary walls are chosen so that 
+
+• each Hc is connected; 
+
+• there exists a boundary face f ⋆ ∈ F∂ whose three vertices belong to HR, H G, H B , respectively; 
+
+•
+
+|A(HR)| + |A(HG)| + |A(HB )| = O(n/τ ).
+
+We will use the following standard parity-subgraph argument, which is the tree-specialized form of the T -join construction used in matching and Chinese postman formulations. We include the proof for completeness. 
+
+Lemma 2 (Tree parity correction) . Let T = ( U, A ) be a tree, and let X ⊆ U be a set of vertices with |X| even. Then there exists a set of edges AX ⊆ A such that the vertices of odd degree in the subgraph (U, A X ) are exactly the vertices of X.
+
+7Proof. Root T at an arbitrary vertex r. For every non-root vertex u, let Tu denote the subtree rooted at u, and let eu be the edge from u to its parent. Define 
+
+AX := {eu : |X ∩ V (Tu)| ≡ 1 (mod 2) }.
+
+We show that the odd-degree vertices of ( U, A X ) are exactly X. Let u̸ = r, and let u1, . . . , u k
+
+be the children of u. The degree of u in ( U, A X ), modulo 2, is deg AX (u) ≡ 1eu∈AX +
+
+> k
+
+X
+
+> j=1
+
+1euj ∈AX (mod 2) .
+
+By definition of AX , 1eu∈AX ≡ | X∩V (Tu)| (mod 2) and 1euj ∈AX ≡ | X∩V (Tuj )| (mod 2) . Therefore deg AX (u) ≡ | X ∩ V (Tu)| +
+
+> k
+
+X
+
+> j=1
+
+|X ∩ V (Tuj )| (mod 2) .
+
+Since the subtree rooted at u decomposes into the disjoint union 
+
+V (Tu) = {u} ⊔ V (Tu1 ) ⊔ · · · ⊔ V (Tuk ),
+
+we have 
+
+|X ∩ V (Tu)| ≡ 1u∈X +
+
+> k
+
+X
+
+> j=1
+
+|X ∩ V (Tuj )| (mod 2) .
+
+Substituting this identity gives deg AX (u) ≡ 1u∈X + 2 
+
+> k
+
+X
+
+> j=1
+
+|X ∩ V (Tuj )| ≡ 1u∈X (mod 2) .
+
+For the root r, there is no parent edge. Hence deg AX (r) ≡
+
+> k
+
+X
+
+> j=1
+
+1erj ∈AX (mod 2) ,
+
+where r1, . . . , r k are the children of r. Since |X| is even, 0 ≡ | X| ≡ 1r∈X +
+
+> k
+
+X
+
+> j=1
+
+|X ∩ V (Trj )| (mod 2) .
+
+Therefore deg AX (r) ≡ 1r∈X (mod 2) .
+
+Thus the odd-degree vertices of ( U, A X ) are exactly X.8Applying Lemma 2, we root each spanning tree Tc at an arbitrary vertex r. Process the vertices in postorder. For each vertex u, maintain a bit 
+
+p(u) := 1[u ∈ Rc]which records whether the subtree rooted at u currently has odd residual parity. When processing a non-root vertex u, if p(u) = 1, add the edge from u to its parent to A′ 
+
+> c
+
+and toggle p(parent( u)). If p(u) = 0, add no edge. After all non-root vertices have been processed, the root parity is zero because |Rc| is even. The selected edge set A′ 
+
+> c
+
+has odd-degree vertices exactly Rc.
+
+Lemma 3 (Boundary repair) . Every residual syndrome R ⊆ V∂ can be corrected by a set of boundary faces E∂ ⊆ F∂ such that 
+
+S(E∂ ) = R
+
+and 
+
+|E∂ | = O(n/τ ).
+
+Proof. By Lemma 1, 
+
+|RR| ≡ | RG| ≡ | RB | (mod 2) .
+
+First suppose these three quantities are even. Fix a color c ∈ { R, G, B }. Choose a spanning tree Tc of Hc. Since |Rc| is even, Lemma 2 applied to Tc with X = Rc gives a set of tree edges 
+
+A′ 
+
+> c
+
+⊆ A(Tc)whose odd-degree vertices are exactly Rc.For every selected edge a ∈ A′
+
+> c
+
+, include the corresponding elementary boundary move Ma. Let 
+
+Ec := M
+
+> a∈A′
+> c
+
+Ma.
+
+Since each move Ma has syndrome equal to the two endpoints of a, the syndrome produced by Ec
+
+on color-c boundary vertices is exactly Rc. Doing this independently for c = R, G, B , define 
+
+E∂ := ER ⊕ EG ⊕ EB .
+
+Then 
+
+S(E∂ ) = R. 
+
+Moreover, 
+
+|E∂ | ≤ 2 ( |A(TR)| + |A(TG)| + |A(TB )|) = O(n/τ ).
+
+Now suppose the three quantities |RR|, |RG|, |RB | are odd. For each color c, choose one vertex 
+
+xc ∈ Rc.
+
+Let f ⋆ ∈ F∂ be the fixed boundary face with vertices 
+
+r⋆ ∈ VR, g⋆ ∈ VG, b⋆ ∈ VB .
+
+Define 
+
+x⋆R := r⋆, x⋆G := g⋆, x⋆B := b⋆.
+
+9For each color c, first apply the even case to 
+
+Rc \ { xc},
+
+which has even cardinality. This leaves only the residual color-c syndrome vertex xc. Next apply Lemma 2 in Hc to the two-element set 
+
+{xc, x ⋆c }.
+
+Replacing each selected tree edge by its corresponding boundary move moves the remaining color-c
+
+syndrome from xc to x⋆c .Doing this for all three colors leaves residual syndrome exactly 
+
+{r⋆, g ⋆, b ⋆}.
+
+Since 
+
+S({f ⋆}) = {r⋆, g ⋆, b ⋆},
+
+adding f ⋆ cancels the remaining syndrome. The total number of boundary faces used is still 
+
+O(|A(HR)| + |A(HG)| + |A(HB )|) = O(n/τ ).
+
+Lemma 4 (Deterministic additive guarantee) . For every valid syndrome S, the block decoder out-puts a correction Ealg satisfying 
+
+S(Ealg ) = S
+
+and 
+
+|Ealg | ≤ OPT( S) + O
+
+ nτ
+
+
+
+.
+
+Proof. Let E⋆ be a minimum-size correction for S, so 
+
+S(E⋆) = S and |E⋆| = OPT( S).
+
+Fix a block Bi. Since vertices in I(Bi) are not incident to boundary faces, every face incident to a vertex of I(Bi) is an interior face. Moreover, all interior faces incident to a common interior vertex lie in the same block, because blocks are connected components of the interior-face sublattice, with adjacency defined by sharing a vertex. Therefore 
+
+E⋆i := E⋆ ∩ F (Bi)is feasible for the local problem in Bi, since 
+
+S(E⋆i ) ∩ I(Bi) = S ∩ I(Bi) = Si.
+
+The local decoder chooses a minimum-size feasible set Ei, hence 
+
+|Ei| ≤ | E⋆i |.
+
+Summing over all blocks gives 
+
+|Eloc | ≤ X
+
+> i
+
+|Ei| ≤ X
+
+> i
+
+|E⋆ ∩ F (Bi)| ≤ | E⋆| = OPT( S).
+
+10 By construction, 
+
+R := S ⊕ S(Eloc )is supported on the boundary vertices. Lemma 3 gives a set of boundary faces E∂ ⊆ F∂ such that 
+
+S(E∂ ) = R and |E∂ | = O(n/τ ).
+
+Let 
+
+Ealg := Eloc ⊕ E∂ .
+
+Then 
+
+S(Ealg ) = S(Eloc ) ⊕ S(E∂ ) = S(Eloc ) ⊕ R = S. 
+
+Also, 
+
+|Ealg | ≤ | Eloc | + |E∂ | ≤ OPT( S) + O(n/τ ).
+
+This proves the claim. 
+
+2.2 Time Complexity 
+
+Each block contains O(τ 2) faces, so the local optimization problem inside one block can be solved in time 
+
+τ 22O(τ ).
+
+The number of blocks is O(n/τ 2). Therefore the total time for all local computations is 
+
+O
+
+ nτ 2 · τ 22O(τ )
+
+= n2O(τ ).
+
+By Lemma 3, resolving the residual syndrome takes time 
+
+O(n/τ ).
+
+Hence the total running time is 
+
+n2O(τ ) + O(n/τ ) = n2O(τ ).
+
+Setting τ = Θ( ϵ−1), this becomes 
+
+n2O(ϵ−1).
+
+2.3 Average-case Approximation Ratio 
+
+To avoid the degenerate ratio 0 /0, define Γ( S) := 
+
+
+
+1, S = ∅,
+
+SOL( S)OPT( S) , S̸ = ∅.
+
+If S = ∅, the decoder returns the empty correction, and the guarantee is trivial. Thus, for the ratio analysis, it remains to consider the case |S| ≥ 1. In this case OPT( S) ≥ 1. Since every face is incident to three vertices, every feasible correction has size at least |S|/3. Equivalently, 
+
+|S| ≤ 3 OPT( S),
+
+11 and hence 1OPT( S) ≤ 3
+
+|S| ≤ 61 + |S| .
+
+By Lemma 4, SOL( S) ≤ OPT( S) + O(n/τ ).
+
+Therefore, for S̸ = ∅,Γ( S) ≤ 1 + O
+
+ nτ OPT( S)
+
+
+
+≤ 1 + nτ · O
+
+ 11 + |S|
+
+
+
+.
+
+The same inequality also holds for S = ∅, by the definition Γ( ∅) = 1. Taking expectations gives 
+
+E[Γ( S)] ≤ 1 + nτ · O
+
+
+
+E
+
+ 11 + |S|
+
+ 
+
+.
+
+We next study the quantity (1 + |S|)−1, treating |S| as a random variable. 
+
+Lemma 5. Assume iid face noise with probability p. Let Sv be the indicator random variable for the event v ∈ S. If v is incident to dv triangles, then 
+
+Pr[ Sv = 1] = 1 − (1 − 2p)dv
+
+2 .
+
+In particular, if every vertex is incident to exactly d triangles, then 
+
+Pr[ Sv = 1] = 1 − (1 − 2p)d
+
+2 .
+
+Proof. First, Sv = 1 if and only if an odd number of faces incident to v are in the error set. Let 1, . . . , d v index the faces incident to v, and let Ei = 1 if face i is in error and Ei = 0 otherwise. By assumption, the Ei’s are independent Bernoulli( p) random variables. Let 
+
+Xv =
+
+> dv
+
+X
+
+> i=1
+
+Ei.
+
+Then 
+
+E[( −1) Xv ] = Pr( Xv is even) − Pr( Xv is odd) .
+
+Since 1 = Pr( Xv is even) + Pr( Xv is odd) ,
+
+we get Pr( Xv is odd) = 1 − E[( −1) Xv ]2 .
+
+By independence, 
+
+E[( −1) Xv ] = 
+
+> dv
+
+Y
+
+> i=1
+
+E[( −1) Ei ] = (1 − 2p)dv .
+
+Therefore Pr[ Sv = 1] = Pr( Xv is odd) = 1 − (1 − 2p)dv
+
+2 .
+
+The regular case dv = d follows immediately. 12 Lemma 6. Assume iid face noise with probability p, and let dv be the number of faces incident to 
+
+v. Then 
+
+μ := E[|S|] = X
+
+> v∈V
+
+1 − (1 − 2p)dv
+
+2 .
+
+In the regular case where every vertex is incident to exactly d faces, 
+
+μ = n · 1 − (1 − 2p)d
+
+2 .
+
+Proof. Using the indicator variables Sv,
+
+E[|S|] = X
+
+> v∈V
+
+E[Sv] = X
+
+> v∈V
+
+Pr( Sv = 1) .
+
+Substituting Lemma 5 gives the first claim. If dv = d for every vertex v, this simplifies to the stated regular-case formula. 
+
+Lemma 7 (Lower tail for the syndrome size) . Assume iid face noise with probability p. Assume every face is triangular and every vertex is incident to at most d faces. Let 
+
+Sv := 1[v ∈ S], |S| = X
+
+> v∈V
+
+Sv,
+
+and let 
+
+μ := E[|S|].
+
+Then 
+
+Pr 
+
+
+
+|S| < μ
+
+2
+
+
+
+≤ (2 d + 1) exp 
+
+
+
+− μ
+
+8(2 d + 1) 2
+
+
+
+.
+
+In particular, for constant d,
+
+Pr 
+
+
+
+|S| < μ
+
+2
+
+
+
+≤ exp( −Ω( μ)) .
+
+Proof. Construct a dependency graph D on vertex set V as follows. Two vertices u, v ∈ V are adjacent in D if there exists a face incident to both u and v. Equivalently, Su and Sv are adjacent if they may depend on a common face-error indicator. Since every vertex is incident to at most d triangular faces, and each such face contains at most two other vertices, the maximum degree of D is at most 2 d. Hence D has a proper coloring with 
+
+q := 2 d + 1 colors. Let 
+
+V = V1 ⊔ · · · ⊔ Vq
+
+be the corresponding color classes. For each j ∈ [q], define 
+
+Xj := X
+
+> v∈Vj
+
+Sv, μj := E[Xj ].
+
+Within a fixed color class Vj , no two vertices share an incident face. Therefore the random vari-ables {Sv : v ∈ Vj } depend on disjoint sets of face-error indicators, and hence they are mutually independent. 13 We now apply an additive Chernoff bound to each Xj . For every a > 0, Pr( Xj < μ j − a) ≤ exp 
+
+
+
+− a2
+
+2μj
+
+
+
+,
+
+with the convention that the probability is zero if a > μ j .Take 
+
+a := μ
+
+2q .
+
+If 
+
+Xj ≥ μj − μ
+
+2q
+
+for every j ∈ [q], then 
+
+|S| =
+
+> q
+
+X
+
+> j=1
+
+Xj ≥
+
+> q
+
+X
+
+> j=1
+
+μj −
+
+> q
+
+X
+
+> j=1
+
+μ
+
+2q = μ − μ
+
+2 = μ
+
+2 .
+
+Therefore n
+
+|S| < μ
+
+2
+
+o
+
+⊆
+
+> q
+
+[
+
+> j=1
+
+
+
+Xj < μ j − μ
+
+2q
+
+
+
+.
+
+By the union bound, Pr 
+
+
+
+|S| < μ
+
+2
+
+
+
+≤
+
+> q
+
+X
+
+> j=1
+
+Pr 
+
+
+
+Xj < μ j − μ
+
+2q
+
+
+
+.
+
+For each j, either μj < μ/ (2 q), in which case the corresponding event is empty, or else Chernoff gives Pr 
+
+
+
+Xj < μ j − μ
+
+2q
+
+
+
+≤ exp 
+
+
+
+− μ2
+
+8q2μj
+
+
+
+.
+
+Since μj ≤ μ, this is at most exp 
+
+
+
+− μ
+
+8q2
+
+
+
+.
+
+Thus Pr 
+
+
+
+|S| < μ
+
+2
+
+
+
+≤ q exp 
+
+
+
+− μ
+
+8q2
+
+
+
+.
+
+Substituting q = 2 d + 1 completes the proof. 
+
+Lemma 8 (Upper bound on expectation) . Let 
+
+μ := E[|S|].
+
+If every face is triangular and every vertex is incident to at most d faces, then 
+
+E
+
+ 11 + |S|
+
+
+
+≤ 21 + μ + (2 d + 1) exp 
+
+
+
+− μ
+
+8(2 d + 1) 2
+
+
+
+.
+
+In particular, for constant d,
+
+E
+
+ 11 + |S|
+
+
+
+≤ 21 + μ + exp( −Ω( μ)) .
+
+14 Proof. Split according to whether |S| ≥ μ/ 2. If |S| ≥ μ/ 2, then 11 + |S| ≤ 21 + μ .
+
+If |S| < μ/ 2, we use the trivial bound 11 + |S| ≤ 1.
+
+Therefore 
+
+E
+
+ 11 + |S|
+
+
+
+≤ 21 + μ + Pr 
+
+
+
+|S| < μ
+
+2
+
+
+
+.
+
+Applying Lemma 7, we get 
+
+E
+
+ 11 + |S|
+
+
+
+≤ 21 + μ + (2 d + 1) exp 
+
+
+
+− μ
+
+8(2 d + 1) 2
+
+
+
+.
+
+For constant d, the second term is exp( −Ω( μ)). Applying Lemma 8, 
+
+E
+
+ 11 + |S|
+
+
+
+≤ 21 + μ + exp( −Ω( μ)) ,
+
+for constant d. In the regular case, where every vertex is incident to d faces, by Lemma 6, 
+
+μ = nα, α := 1 − (1 − 2p)d
+
+2 .
+
+Therefore 
+
+E
+
+ 11 + |S|
+
+
+
+≤ 21 + nα + exp( −Ω( nα )) .
+
+Hence nτ · E
+
+ 11 + |S|
+
+
+
+≤ O
+
+ 1
+
+τ α 
+
+
+
++ nτ exp( −Ω( nα )) .
+
+When nα → ∞ , the second term is negligible. Thus 
+
+nτ · E
+
+ 11 + |S|
+
+
+
+= O
+
+ 1
+
+τ α 
+
+
+
+.
+
+For small p and constant d,
+
+α = 1 − (1 − 2p)d
+
+2 = dp + O(p2).
+
+Therefore nτ · E
+
+ 11 + |S|
+
+
+
+= O
+
+ 1
+
+τ dp 
+
+
+
+,
+
+up to lower-order terms. To get an expected approximation bound by 1 + ϵ/ 2, it suffices to take 
+
+τ = Θ 
+
+ 1
+
+ϵα 
+
+
+
+.
+
+For small p and constant d, this is 
+
+τ = Θ 
+
+ 1
+
+ϵdp 
+
+
+
+.
+
+For constant p, d , this simplifies to 
+
+τ = Θ( ϵ−1).
+
+15 2.4 High-probability Average-case Approximation Ratio 
+
+In this subsection we convert the expected approximation guarantee into a high-probability guar-antee. The key point is that it is enough to prove that the syndrome size |S| is unlikely to be much smaller than its expectation. Recall that the algorithm satisfies SOL ≤ OPT + C nτ
+
+for some absolute constant C > 0. Therefore, whenever OPT > 0, SOL OPT ≤ 1 + C nτ OPT .
+
+Since every face is incident to three vertices, every feasible correction for S has size at least |S|/3. Hence, whenever |S| ≥ 1, OPT ≥ |S|
+
+3 .
+
+Therefore SOL OPT ≤ 1 + 3 C nτ |S| ≤ 1 + 6 C nτ (1 + |S|) .
+
+Let 
+
+A := 6 C. 
+
+Thus, on every nonzero syndrome, SOL OPT ≤ 1 + A nτ (1 + |S|) . (1) In the regular case where every vertex is incident to d faces, we have 
+
+μ := E[|S|] = nα, α := 1 − (1 − 2p)d
+
+2 .
+
+We use the bounded-dependency lower-tail bound from Lemma 7. Namely, since every face is triangular and every vertex is incident to at most d faces, Pr 
+
+
+
+|S| < μ
+
+2
+
+
+
+≤ (2 d + 1) exp 
+
+
+
+− μ
+
+8(2 d + 1) 2
+
+
+
+.
+
+Substituting μ = nα , this becomes Pr 
+
+
+
+|S| < μ
+
+2
+
+
+
+≤ (2 d + 1) exp 
+
+
+
+− nα 
+
+8(2 d + 1) 2
+
+
+
+. (2) Now choose 
+
+τ ≥ 2Aαϵ .
+
+Then An ϵτ ≤ αn 
+
+2 = μ
+
+2 .
+
+16 Consequently, by (1), if SOL OPT > 1 + ϵ, 
+
+then 1 + |S| < An ϵτ ≤ μ
+
+2 .
+
+In particular, Pr 
+
+ SOL OPT > 1 + ϵ
+
+
+
+≤ Pr 
+
+
+
+|S| < μ
+
+2
+
+
+
+.
+
+Applying (2), we obtain Pr 
+
+ SOL OPT > 1 + ϵ
+
+
+
+≤ (2 d + 1) exp 
+
+
+
+− nα 
+
+8(2 d + 1) 2
+
+
+
+.
+
+Thus, if 
+
+τ = Θ 
+
+ 1
+
+αϵ 
+
+
+
+,
+
+then the algorithm outputs a (1 + ϵ)-approximation with probability at least 1 − (2 d + 1) exp 
+
+
+
+− nα 
+
+8(2 d + 1) 2
+
+
+
+.
+
+For constant p, d with α > 0, this simplifies to the following: taking 
+
+τ = Θ( ϵ−1)gives a (1 + ϵ)-approximation with probability at least 1 − exp( −Ω( n)) .
+
+For small p and constant d, we have α = dp + O(p2). Therefore the same argument gives a (1 + ϵ)-approximation by taking 
+
+τ = Θ 
+
+ 1
+
+ϵdp 
+
+
+
+,
+
+with failure probability exp( −Ω( np )) . In particular, this high-probability guarantee is meaningful whenever np → ∞ .
+
+2.5 Controlling Homology Classes 
+
+The approximation guarantee above concerns the minimum-size realization of the observed syn-drome. For topological decoding, however, the homology class of the correction is also relevant, because two corrections with the same syndrome may differ by a nontrivial logical operator. In this subsection we describe a postprocessing step that allows the output to be forced into any prescribed homology class at an additional additive cost O(n/τ ). This should be viewed as a homology-control mechanism, not as a guarantee that the decoder knows the homology class of the true error. 17 Suppose the code is embedded on a surface of genus g. Fix a basis γ1, . . . , γ 2g for the nontrivial homology classes of the surface. For a face set E ⊆ F, define its homology signature h(E) ∈ F2g 
+
+> 2
+
+by 
+
+h(E)i := |E ∩ γi| (mod 2) . Observe that homology is additive modulo 2: 
+
+h(E1 ⊕ E2) = h(E1) + h(E2).
+
+The syndrome operator does not determine homology. Indeed, if S(Z) = ∅, then for every face set E,
+
+S(E ⊕ Z) = S(E).
+
+Thus adding a zero-syndrome cycle changes the correction while preserving the syndrome. We assume that the boundary-wall system contains zero-syndrome representatives of a homology basis, each of size O(n/τ ). For each nontrivial homology class, fix a representative cycle 
+
+Z1, . . . , Z 2g ⊆ F∂
+
+such that S(Zi) = ∅ and h(Zi) = ei, where ei is the i-th standard basis vector of F2g 
+
+> 2
+
+. This is an additional geometric assumption on the chosen wall system: the walls must contain zero-syndrome representatives of a homology basis, each of size O(n/τ ). Let Ealg = Eloc ⊕ E∂ be the correction produced by the approximation algorithm. Its homology class is h(Ealg ) = h(Eloc ) + h(E∂ ).
+
+Suppose we wish to output a correction in a prescribed homology class 
+
+h0 ∈ F2g 
+
+> 2
+
+.
+
+In particular, if one wishes to restrict attention to homologically trivial corrections, one may take 
+
+h0 = 0 . If the desired homology class is known or prescribed, the construction below forces the output into that class. If the desired homology class is unknown, one may instead run the procedure for all 2 2g homology classes and return the minimum-size resulting correction, as in minimum-weight decoding. Since the genus g is constant, this increases the running time only by a constant factor. Define 
+
+δ := h0 + h(Ealg ).
+
+In component form: 
+
+δ = ( δ1, . . . , δ 2g) ∈ F2g 
+
+> 2
+
+.
+
+Next, define 
+
+Z(δ) := M
+
+> i:δi=1
+
+Zi,
+
+i.e., Z(δ) is the symmetric difference of all homology-correction cycles whose corresponding coor-dinate of δ equals 1. The final correction is 
+
+Efinal := Ealg ⊕ Z(δ).
+
+Since each Zi has empty syndrome, 
+
+S(Efinal ) = S(Ealg ) = S. 
+
+Moreover, 
+
+h(Efinal ) = h(Ealg ) + h(Z(δ)) = h0.
+
+18 Hence the homology class of the output can be controlled independently of the syndrome. Finally, since the cycles Zi are supported on the boundary walls, 
+
+|Zi| = O(n/τ ).
+
+Because the genus is constant, only constantly many such cycles are required. Therefore homology correction changes the solution size by at most another additive O(n/τ ), and the approximation guarantee remains unchanged. For constant genus g, all of the steps above, i.e., precomputing the cycles Zi, determining 
+
+h(Ealg ), and applying Z(δ), can be implemented in O(n) time. Thus the homology-aware modifi-cation does not change the asymptotic running time. 
+
+2.6 Smoothed Average-case Approximation 
+
+We now show that the same approximation guarantee holds in a smoothed model. Instead of assuming that the entire error is random, we allow an arbitrary adversarial error pattern and then add independent random noise. Let E0 ⊆ F be an arbitrary fixed error set. Let Np ⊆ F be a random face set in which each face is included independently with probability p. The observed error is 
+
+E := E0 ⊕ Np,
+
+and the observed syndrome is 
+
+S := S(E0 ⊕ Np).
+
+The adversarial set E0 is completely arbitrary and may depend on the lattice size. The randomness is only over Np.As before, assume that every vertex is incident to exactly d faces. Define 
+
+α := 1 − (1 − 2p)d
+
+2and 
+
+β := min {α, 1 − α}.
+
+We assume β > 0. For constant p, d bounded away from the degenerate cases, β = Θ(1). 
+
+Lemma 9 (Syndrome density under smoothed noise) . Let E0 ⊆ F be arbitrary and let Np be independent face noise. Then 
+
+E[|S(E0 ⊕ Np)|] ≥ βn. 
+
+Moreover, 
+
+Pr 
+
+
+
+|S(E0 ⊕ Np)| < βn 
+
+2
+
+
+
+≤ (2 d + 1) exp 
+
+
+
+− βn 
+
+8(2 d + 1) 2
+
+
+
+.
+
+In particular, for constant d,
+
+Pr 
+
+
+
+|S(E0 ⊕ Np)| < βn 
+
+2
+
+
+
+≤ exp( −Ω( βn )) .
+
+19 Proof. For a vertex v, let 
+
+Av := 1[v ∈ S(E0)] be the fixed adversarial syndrome bit, and let 
+
+Zv := 1[v ∈ S(Np)] be the random syndrome bit generated by the added noise. Since the syndrome map is linear over 
+
+F2,
+
+1[v ∈ S(E0 ⊕ Np)] = Av ⊕ Zv.
+
+By the same parity calculation used in Lemma 5, Pr( Zv = 1) = α = 1 − (1 − 2p)d
+
+2 .
+
+Therefore Pr( Av ⊕ Zv = 1) = 
+
+(
+
+α, Av = 0 ,
+
+1 − α, Av = 1 .
+
+Thus, in either case, Pr( Av ⊕ Zv = 1) ≥ β. 
+
+Summing over all vertices gives 
+
+μ := E[|S(E0 ⊕ Np)|] ≥ βn. 
+
+It remains only to apply the bounded-dependency lower-tail argument from Lemma 7. Indeed, the random variable 
+
+Yv := 1[v ∈ S(E0 ⊕ Np)] depends only on the independent noise variables on faces incident to v. Thus the same dependency graph, in which two vertices are adjacent if they share an incident face, has maximum degree at most 2 d. Within each color class of a proper (2 d + 1)-coloring of this dependency graph, the variables Yv depend on disjoint sets of face-noise variables and are therefore independent. Hence the proof of Lemma 7 gives Pr 
+
+
+
+|S(E0 ⊕ Np)| < μ
+
+2
+
+
+
+≤ (2 d + 1) exp 
+
+
+
+− μ
+
+8(2 d + 1) 2
+
+
+
+.
+
+Since μ ≥ βn , we have 
+
+
+
+|S(E0 ⊕ Np)| < βn 
+
+2
+
+
+
+⊆
+
+n
+
+|S(E0 ⊕ Np)| < μ
+
+2
+
+o
+
+,
+
+and therefore Pr 
+
+
+
+|S(E0 ⊕ Np)| < βn 
+
+2
+
+
+
+≤ (2 d + 1) exp 
+
+
+
+− βn 
+
+8(2 d + 1) 2
+
+
+
+.
+
+For constant d, this is exp( −Ω( βn )). 20 Theorem 4 (Smoothed near-optimality) . Let E0 ⊆ F be arbitrary, and let Np ⊆ F include each face independently with probability p. Let 
+
+S := S(E0 ⊕ Np).
+
+Assume every vertex is incident to d faces. Let 
+
+α = 1 − (1 − 2p)d
+
+2 , β = min {α, 1 − α}.
+
+Then the block decoder with wall spacing τ = Θ 
+
+ 1
+
+> βϵ
+
+
+
+outputs a (1+ ϵ)-approximation with probability at least 
+
+1 − (2 d + 1) exp 
+
+
+
+− βn 
+
+8(2 d + 1) 2
+
+
+
+.
+
+In particular, for constant p, d with β = Θ(1) , taking τ = Θ( ϵ−1) gives a (1 + ϵ)-approximation with probability 
+
+1 − exp( −Ω( n)) .
+
+Proof. The deterministic analysis of the block decoder gives SOL ≤ OPT + C nτ
+
+for some lattice-dependent constant C > 0. Therefore, whenever OPT > 0, SOL OPT ≤ 1 + C nτ OPT .
+
+Since every face is incident to three vertices, any feasible correction for syndrome S has size at least 
+
+|S|/3. Thus OPT ≥ |S|
+
+3 .
+
+Consequently, SOL OPT ≤ 1 + 3 C nτ |S| .
+
+By Lemma 9, with probability at least 1 − (2 d + 1) exp 
+
+
+
+− βn 
+
+8(2 d + 1) 2
+
+
+
+,
+
+we have 
+
+|S| ≥ βn 
+
+2 .
+
+On this event, SOL OPT ≤ 1 + 3 C nτ (βn/ 2) = 1 + 6Cβτ .
+
+Choosing 
+
+τ ≥ 6Cβϵ 
+
+gives SOL OPT ≤ 1 + ϵ. 
+
+This proves the claim. 21 Remark 1. Taking E0 = ∅ recovers the i.i.d. noise case. Thus the smoothed result extends the average-case guarantee: even if an adversary fixes an arbitrary initial error pattern, adding inde-pendent face noise of constant density makes the block decoder near-optimal with high probability. 
+
+Remark 2 (Vanishing perturbation density) . For small p and constant d, we have 
+
+β = dp + O(p2),
+
+provided p is in the regime where α ≤ 1/2. Hence the same proof gives a (1 + ϵ)-approximation by taking 
+
+τ = Θ 
+
+ 1
+
+ϵdp 
+
+
+
+,
+
+with failure probability 
+
+exp( −Ω( np )) .
+
+Thus this smoothed guarantee remains meaningful for p = p(n) → 0 whenever 
+
+np → ∞ ,
+
+although the running time worsens as p decreases. 
+
+# 3 Sparse Regime: Inflated Active Components 
+
+We now describe a sparse-noise regime in which exact decoding reduces, with high probability, to independent exact decoding on separated local regions. Unlike the constant-rate and smoothed analyses, we do not use the boundary repair step here. Instead, we exploit the fact that, when the noise rate is sufficiently small, the syndrome is supported on well-separated active regions. Throughout this section, the error is generated by iid face noise with probability p = p(n). We write E ⊆ Fn for the random generating error and 
+
+S := S(E)for its syndrome. Connected components of face sets are taken with respect to the adjacency relation in which two faces are adjacent if they share a vertex. 
+
+3.1 Block geometry 
+
+Let {L n} be a sequence of finite triangular cell complexes, where Ln has vertex set Vn, face set Fn,and 
+
+|Vn| = n. 
+
+Assume that Ln is equipped with a block decomposition Bn at scale τ = τ (n). Let HB be the block-adjacency graph: its vertices are the blocks in Bn, and two blocks are adjacent if they are adjacent in the cell complex. For blocks B, B ′ ∈ B n, let dist HB (B, B ′)denote their graph distance in HB. For block sets X , Y ⊆ B n, define dist HB (X , Y) := min {dist HB (B, B ′) : B ∈ X , B ′ ∈ Y} .
+
+22 For a block B and a block set K, we write dist HB (B, K ) := min  
+
+> B′∈K
+
+dist HB (B, B ′).
+
+For a face f ∈ Fn, let B(f ) denote the set of blocks incident to the vertices of f . For a face set 
+
+X ⊆ Fn, define 
+
+B(X) := [ 
+
+> f∈X
+
+B(f ).
+
+For a block set X ⊆ B n, define 
+
+F (X ) := {f ∈ Fn : B(f ) ⊆ X } 
+
+and 
+
+V (X ) := {v ∈ Vn : ∃f ∈ F (X ) with v ∈ f }.
+
+Thus, if E′ ⊆ F (X ), then 
+
+S(E′) ⊆ V (X ).
+
+This convention ensures that local corrections supported in a local face region cannot create syn-drome outside the corresponding local vertex region. For a set of blocks K ⊆ B n and an integer a ≥ 0, let 
+
+Na(K) := {B ∈ B n : dist HB (B, K ) ≤ a}.
+
+We write 
+
+Fa(K) := F (Na(K)) , Va(K) := V (Na(K)) .
+
+Definition 1 (Logarithmically two-dimensional block family) . We say that {L n} is logarithmically two-dimensional with respect to the block decompositions Bn if there is a scale 
+
+Ln = Ω(log n)
+
+and constants 
+
+Cdeg , C loc , C size , C blk , C face , C gr , C tw , λ ann , λ multi > 0
+
+such that the following properties hold for all sufficiently large n and all radii 1 ≤ s ≤ Ln.
+
+(1) Bounded local geometry. Every vertex is incident to at most Cdeg faces, every face has constant size, and the block graph HB has maximum degree at most Cdeg . Moreover, for every face f ,
+
+diam HB (B(f )) ≤ Cloc .
+
+Also, if two block sets X , Y ⊆ B n satisfy 
+
+V (X ) ∩ V (Y)̸ = ∅,
+
+then 
+
+dist HB (X , Y) ≤ Cloc .
+
+23 (2) Block size and total size. Each block contains at most Csize τ 2 faces and at most Csize τ 2
+
+vertices. The total number of blocks and faces satisfies 
+
+|B n| ≤ Cblk 
+
+nτ 2
+
+and 
+
+|Fn| ≤ Cface n. 
+
+(3) Two-dimensional growth. For every block set K ⊆ B n,
+
+|N s(K)| ≤ Cgr |K|(s + 1) 2.
+
+In particular, for every block B ∈ B n,
+
+|N s(B)| ≤ Cgr (s + 1) 2.
+
+(4) Local treewidth. For every block set K ⊆ B n with |K| = k, the face-vertex incidence graph of the subcomplex induced by Ns(K) has treewidth at most 
+
+Ctw τ s pmax {k, 1}.
+
+(5) Annulus crossing. For every block set K ⊆ B n, every connected face set X ⊆ Fn, and every 1 ≤ s ≤ Ln/2, if 
+
+X ∩ Fs(K)̸ = ∅ and X ∩  F2s(K)c̸ = ∅,
+
+then 
+
+|X| ≥ λann τ s. 
+
+Equivalently, any connected face set that starts in the inner region Fs(K) and reaches outside the larger region F2s(K) must cross the annulus F2s(K) \ Fs(K), and such a crossing has size 
+
+Ω( τ s ).
+
+(6) Multi-region crossing. Let K1, . . . , K ℓ ⊆ B n be block sets satisfying 
+
+dist HB (Ki, K j ) > 6s
+
+for every i̸ = j. If a connected face set X ⊆ Fn intersects each of 
+
+Fs(K1), F s(K2), . . . , F s(Kℓ),
+
+then 
+
+|X| ≥ λmulti τ s (ℓ − 1) .
+
+Let 
+
+λ0 := min {λann , λ multi }.
+
+Remark 3 (Planar patches and tori) . The definition above is local. It does not require the under-lying complex to be planar or to have boundary. A triangular lattice patch in the plane satisfies the definition. A periodic triangular lattice on a torus also satisfies it, provided the injectivity radius of the torus is Ω(log n) in block distance. For the usual L × L toric lattice, the injectivity radius is 
+
+Θ( L) = Θ( √n), while the sparse decoder below only uses radii r = Θ(log n).
+
+24 3.2 The inflated active-component decoder 
+
+A block B ∈ B n is called active if 
+
+S ∩ V ({B})̸ = ∅.
+
+Let A ⊆ B n be the set of active blocks. For an integer r ≥ 1, define the coarse active graph H(r) as follows. The vertices of H(r) are the active blocks. Two active blocks B, B ′ ∈ A are adjacent if dist HB (B, B ′) ≤ 6r. 
+
+Let Kr denote the set of connected components of H(r).For each component K ∈ K r, define the local target syndrome 
+
+SK := S ∩ V2r(K).
+
+The decoder solves the exact local problem min {| EK | : EK ⊆ F2r(K), S (EK ) = SK }.
+
+The final output is 
+
+Eout := M
+
+> K∈K r
+
+EK .
+
+The rest of the section proves that, in the sparse regime, these local problems are feasible, independent, and sufficient for global optimality. 
+
+3.3 The sparse good event 
+
+We now package the technical sparse-region properties into one event. 
+
+Definition 2 (Sparse good event) . Fix parameters r, t, R ≥ 1 with 2r ≤ Ln. The sparse good event 
+
+G(r, t, R ) is the event that the following properties all hold. 
+
+(1) Small active components. Every connected component K ∈ K r contains at most t active blocks: 
+
+|K| ≤ t. 
+
+(2) Separated inflated regions and syndrome partition. For distinct components K, K ′ ∈Kr,
+
+F2r(K) ∩ F2r(K′) = ∅ and V2r(K) ∩ V2r(K′) = ∅.
+
+Moreover, the local syndromes SK = S ∩ V2r(K) form a disjoint partition of the global syn-drome: 
+
+S = G
+
+> K∈K r
+
+SK .
+
+(3) Small local witnesses. For every K ∈ K r, there exists a face set 
+
+LK ⊆ F2r(K)
+
+such that 
+
+S(LK ) = SK and |LK | ≤ R. 
+
+25 (4) No escape and no merging for optima. Every global minimum-size correction E⋆ for S
+
+decomposes over the inflated regions. That is, there are face sets 
+
+E⋆K ⊆ F2r(K)
+
+such that 
+
+E⋆ = M
+
+> K∈K r
+
+E⋆K and S(E⋆K ) = SK
+
+for every K ∈ K r.
+
+We next prove that good events occur with high probability. 
+
+Lemma 10 (The sparse good event holds with high probability) . Let {L n} be a logarithmically two-dimensional block family. There exist constants 
+
+C∗, C long , c ∗ > 0,
+
+depending only on the block geometry, such that the following holds. Let 
+
+η := C∗r2τ 2p. 
+
+If 
+
+nη c∗t = o(1) ,nη c∗R = o(1) ,n(Clong τ 2p)c∗r = o(1) ,
+
+and 
+
+2R < λ 0τ r, 
+
+then 
+
+Pr( G(r, t, R )) → 1.
+
+Proof. First, a lattice-animal counting argument in the block graph shows that large coarse active components are unlikely. Indeed, by two-dimensional growth, an r-neighborhood of a block contains 
+
+O(r2) blocks and hence O(r2τ 2) faces. Thus the probability of finding a coarse connected active structure of size s is bounded by 
+
+n  C∗r2τ 2pc∗s = nη c∗s,
+
+after adjusting the constants. Taking s = t and using nη c∗t = o(1), every component of H(r) has at most t active blocks with high probability. Second, the same counting argument, applied to connected sets of error faces, shows that the total generating error associated with any one active component has size at most R with high probability. More precisely, if an inflated active component required a generating witness of size at least R, then the random error would contain an r-coarsely connected set of at least c∗R error faces. The probability of this event is at most 
+
+nη c∗R = o(1) .
+
+26 Consequently, with high probability, for every K ∈ K r there is a face set LK ⊆ F2r(K) satisfying 
+
+S(LK ) = SK and |LK | ≤ R. 
+
+Third, another standard lattice-animal bound shows that no connected component of the gen-erating error has block diameter at least r/ 2, with probability at least 1 − n(Clong τ 2p)c∗r.
+
+The assumption 
+
+n(Clong τ 2p)c∗r = o(1) therefore implies that every nonzero-syndrome component of the generating error is captured inside 
+
+Fr(K) for a unique active component K.The separation statement is deterministic once r is sufficiently large. If K̸ = K′ are distinct connected components of H(r), then every active block in K is at block distance more than 6 r from every active block in K′. Hence their 2 r-neighborhoods are separated by a positive block-distance margin. The bounded-locality assumptions then imply 
+
+F2r(K) ∩ F2r(K′) = ∅ and V2r(K) ∩ V2r(K′) = ∅.
+
+Moreover, every syndrome vertex lies in an active block, so the sets 
+
+SK = S ∩ V2r(K)form a disjoint partition of S.It remains to justify the no-escape and no-merging property. Condition on the events proved above, and let E⋆ be a minimum-size correction for S. Decompose E⋆ into connected face compo-nents. First suppose a connected component C of E⋆ touches the syndrome of two or more distinct active components, say 
+
+K1, . . . , K ℓ, ℓ ≥ 2.
+
+Because C realizes syndrome vertices in each SKi , bounded locality implies that C intersects each inner region Fr(Ki). Since distinct active components are separated by distance more than 6 r, the multi-region crossing property gives 
+
+|C| ≥ λmulti τ r (ℓ − 1) .
+
+On the other hand, the local witnesses LK1 , . . . , L Kℓ have total weight at most ℓR . Since ℓ ≤ 2( ℓ−1) for ℓ ≥ 2, the condition 2R < λ 0τ r 
+
+implies 
+
+ℓR < λ 0τ r (ℓ − 1) ≤ λmulti τ r (ℓ − 1) .
+
+Thus replacing the part of E⋆ responsible for those local syndromes by the corresponding local witnesses would strictly decrease the weight, while preserving the global syndrome. This contradicts the optimality of E⋆. Therefore no connected component of a global optimum can merge two distinct inflated active regions. 27 Next suppose a connected component C of E⋆ contributes to a single local syndrome SK but is not contained in F2r(K). Since it contributes to SK , bounded locality implies that 
+
+C ∩ Fr(K)̸ = ∅.
+
+Since C̸ ⊆ F2r(K), the annulus-crossing property gives 
+
+|C| ≥ λann τ r ≥ λ0τ r. 
+
+But LK realizes the same local syndrome SK with 
+
+|LK | ≤ R < λ 0τ r. 
+
+Replacing the escaping part by LK again strictly decreases the weight while preserving the syn-drome, contradicting optimality. Hence every global optimum decomposes into pieces supported inside the disjoint regions 
+
+F2r(K), and each such piece realizes the corresponding local syndrome SK . Therefore all prop-erties in Definition 2 hold with high probability. 
+
+3.4 Exactness on the good event 
+
+Lemma 11 (Exactness conditioned on the sparse good event) . If the sparse good event G(r, t, R )
+
+holds, then the inflated active-component decoder outputs a globally minimum-size correction. Proof. For each K ∈ K r, the good event provides a feasible local witness LK ⊆ F2r(K) with syndrome SK . Hence the local optimization problem min {| EK | : EK ⊆ F2r(K), S (EK ) = SK }
+
+is feasible. Let EK be an optimal local solution, and let 
+
+Eout := M
+
+> K∈K r
+
+EK .
+
+Because the regions F2r(K) are pairwise disjoint, the local outputs have disjoint supports, so 
+
+|Eout | = X
+
+> K∈K r
+
+|EK |.
+
+Because the local syndromes SK form a disjoint partition of S,
+
+S(Eout ) = M
+
+> K∈K r
+
+S(EK ) = M
+
+> K∈K r
+
+SK = S. 
+
+Thus Eout is feasible for the global syndrome. Now let E⋆ be a global minimum-size correction for S. By the no-escape and no-merging property of the good event, it decomposes as 
+
+E⋆ = M
+
+> K∈K r
+
+E⋆K ,
+
+28 where 
+
+E⋆K ⊆ F2r(K) and S(E⋆K ) = SK .
+
+Since EK is a minimum-size realization of SK inside F2r(K), 
+
+|EK | ≤ | E⋆K |
+
+for every K. Therefore 
+
+|Eout | = X
+
+> K
+
+|EK | ≤ X
+
+> K
+
+|E⋆K | = |E⋆| = OPT( S).
+
+Since Eout is feasible, we also have 
+
+|Eout | ≥ OPT( S).
+
+Hence 
+
+|Eout | = OPT( S),
+
+as claimed. 
+
+3.5 Parameterized sparse exact decoding 
+
+Theorem 5 (Parameterized sparse exact decoding) . Let {L n} be a logarithmically two-dimensional block family in the sense of Definition 1. Assume iid face noise with probability p = p(n), and let 
+
+S = S(E) be the resulting syndrome. Let r, t, R ≥ 1 be parameters with 
+
+2r ≤ Ln,
+
+and define 
+
+η := C∗r2τ 2p, 
+
+where C∗ > 0 is the constant from Lemma 10. Suppose that 
+
+nη c∗t = o(1) ,nη c∗R = o(1) ,n(Clong τ 2p)c∗r = o(1) ,
+
+and 
+
+2R < λ 0τ r. 
+
+Then, with high probability, the inflated active-component decoder produces a globally minimum-size realization of S. That is, 
+
+S(Eout ) = S and |Eout | = OPT( S).
+
+Moreover, if every connected component of H(r) has at most t active blocks, the total running time is 
+
+n 2O(τ r √t).
+
+29 Proof. By Lemma 10, the sparse good event G(r, t, R ) holds with high probability. On this event, Lemma 11 implies that the decoder outputs a globally minimum-size correction. It remains to justify the running time. On the event that every component K ∈ K r has at most t active blocks, the local treewidth property gives that the face-vertex incidence graph of each inflated region F2r(K) has treewidth 
+
+O(τ r √t).
+
+A standard bounded-treewidth dynamic program, analogous to the frontier dynamic program from Section 2, solves the exact local syndrome realization problem in time 2O(τ r √t) poly( tr 2τ 2).
+
+The number of inflated regions is at most the number of blocks, which is O(n/τ 2). Thus the total running time is 
+
+n 2O(τ r √t),
+
+absorbing polynomial factors in r, t, τ into the displayed bound. 
+
+Corollary 1 (Exact decoding for p = o(1 / log 2 n)) . Let {L n} be a logarithmically two-dimensional block family in the sense of Definition 1. Assume iid face noise with probability 
+
+p = o
+
+ 1log 2 n
+
+
+
+.
+
+Choose a constant block size 
+
+τ = Θ(1) 
+
+and an inflation radius 
+
+r = Θ(log n)
+
+with 2r ≤ Ln. Then the inflated active-component decoder produces a globally minimum-weight correction with high probability. The total running time is 
+
+n 2O((log n)3/2).
+
+Proof. Let 
+
+t = Θ(log n) and R = Θ(log n),
+
+choosing the constants so that 2R < λ 0τ r. 
+
+Since τ = Θ(1), r = Θ(log n), and 
+
+p = o
+
+ 1log 2 n
+
+
+
+,
+
+we have 
+
+η = C∗r2τ 2p = o(1) .
+
+Therefore, with t = Θ(log n) and R = Θ(log n), 
+
+nη c∗t = o(1) and nη c∗R = o(1) .
+
+30 Also, 
+
+n(Clong τ 2p)c∗r = o(1) ,
+
+because r = Θ(log n) and p = o(1 / log 2 n). Thus all hypotheses of Theorem 5 hold, so the decoder is exact with high probability. Finally, the running time from Theorem 5 is 
+
+n 2O(τ r √t) = n 2O((log n)3/2),
+
+since τ = Θ(1), r = Θ(log n), and t = Θ(log n). 31 References 
+
+[1] H. Bombin and M. A. Martin-Delgado. Topological quantum distillation. Physical Review Letters , 97(18):180501, 2006. [2] Nicolas Delfosse. Decoding color codes by projection onto surface codes. Physical Review A ,89(1):012317, 2014. [3] Eric Dennis, Alexei Kitaev, Andrew Landahl, and John Preskill. Topological quantum memory. 
+
+Journal of Mathematical Physics , 43(9):4452–4505, 2002. [4] Jack Edmonds. Paths, trees, and flowers. Canadian Journal of Mathematics , 17:449–467, 1965. [5] Shouzhen Gu, Lily Wang, and Aleksander Kubica. The color code, the surface code, and the transversal CNOT: NP-hardness of minimum-weight decoding, 2026. [6] H. G. Katzgraber, H. Bombin, and M. A. Martin-Delgado. Error threshold for color codes and random three-body ising models. Physical Review Letters , 103(9):090501, 2009. [7] A. Yu. Kitaev. Fault-tolerant quantum computation by anyons. Annals of Physics , 303(1):2–30, 2003. [8] Aleksander Kubica and Nicolas Delfosse. Efficient color code decoders in d ≥ 2 dimensions from toric code decoders. Quantum , 7:929, 2023. [9] Mark Walters and Mark L. Turner. Minimum weight decoding in the colour code is NP-hard, 2026. 32

@@ -6,64 +6,77 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-05-31 ~ 2026-06-09
-- 运行时间：2026-06-09 22:25:51 UTC
+- 最新运行日期：2026-05-12 ~ 2026-06-10
+- 运行时间：2026-06-10 08:27:10 UTC
 - 运行状态：成功
-- 本次总论文数：14
-- 精读区：8
-- 速读区：6
+- 本次总论文数：19
+- 精读区：10
+- 速读区：9
 
 ### 今日简报（AI）
-1. 今日整理了14篇量子纠错相关论文，精读8篇，重点关注表面码阈值与LLM辅助编码设计。  
-2. 最值得看：表面码在最近邻相关错误下的最小对偶估计（9.0分），以及利用LLM搜索发现新型双变量自行车码（9.0分）。  
-3. 建议优先阅读这两篇高分工作，理解错误相关性对性能的影响，并关注AI在纠错码自动发现中的应用潜力。
-- 详情：[/20260531-20260609/README](/20260531-20260609/README)
+今日聚焦量子纠错码解码，精读10篇中两篇满分论文分别探讨量子LDPC码的信念传播列表解码和最大似然解码。最值得关注的方向是量子LDPC码的高效解码算法，以及量子三正交码的构造与解码。建议后续关注Quantum LDPC Codes的实用解码方案，如多基方法。
+- 详情：[/20260512-20260610/README](/20260512-20260610/README)
 
 ### 精读区论文标签
-1. [A Minimal Duality Estimate for the Surface-Code Threshold under Nearest-Neighbor Correlated Errors](/20260531-20260609/2606.02052v1-a-minimal-duality-estimate-for-the-surface-code-threshold-under-nearest-neighbor-correlated-errors)  
+1. [Multiple-Bases Belief Propagation List Decoding for Quantum LDPC Codes](/20260512-20260610/2605.14170v1-multiple-bases-belief-propagation-list-decoding-for-quantum-ldpc-codes)  
+   标签：评分：10.0/10、query:qec-decoding
+   evidence：面向量子LDPC码的量子纠错解码器
+2. [Maximum Likelihood Decoding of Quantum Error Correction Codes](/20260512-20260610/2605.17230v1-maximum-likelihood-decoding-of-quantum-error-correction-codes)  
+   标签：评分：10.0/10、query:qec-decoding
+   evidence：量子纠错的最大似然解码综述
+3. [Rethink the Role of Neural Decoders in Quantum Error Correction](/20260512-20260610/2605.12046v1-rethink-the-role-of-neural-decoders-in-quantum-error-correction)  
    标签：评分：9.0/10、query:qec-decoding
-   evidence：表面码阈值对偶估计
-2. [Evolutionary Discovery of Bivariate Bicycle Codes with LLM-Guided Search](/20260531-20260609/2606.02418v1-evolutionary-discovery-of-bivariate-bicycle-codes-with-llm-guided-search)  
+   evidence：用于表面码解码的神经网络解码器
+4. [Univariate Bicycle Quantum LDPC Codes: Explicit Logical Structure and Distance Bounds](/20260512-20260610/2605.14173v1-univariate-bicycle-quantum-ldpc-codes-explicit-logical-structure-and-distance-bounds)  
    标签：评分：9.0/10、query:qec-decoding
-   evidence：通过LLM引导的进化搜索发现量子LDPC码
-3. [Hybrid Clifford Codes via Operator Algebra Quantum Error Correction and Projective Representation Theory](/20260531-20260609/2606.02531v1-hybrid-clifford-codes-via-operator-algebra-quantum-error-correction-and-projective-representation-theory)  
+   evidence：量子LDPC码构造与分析
+5. [Sparse Mamba Decoder for Quantum Error Correction: Efficient Defect-Centric Processing of Surface Code Syndromes](/20260512-20260610/2605.17156v1-sparse-mamba-decoder-for-quantum-error-correction-efficient-defect-centric-processing-of-surface-code-syndromes)  
    标签：评分：9.0/10、query:qec-decoding
-   evidence：混合Clifford码与算子代数量子纠错
-4. [Quantum error correction with the toric code](/20260531-20260609/2606.04079v1-quantum-error-correction-with-the-toric-code)  
+   evidence：用于高效表面码综合症处理的稀疏Mamba解码器
+6. [Sparse Mamba Decoder for Quantum Error Correction: Efficient Defect-Centric Processing of Surface Code Syndromes](/20260512-20260610/2605.17156v2-sparse-mamba-decoder-for-quantum-error-correction-efficient-defect-centric-processing-of-surface-code-syndromes)  
    标签：评分：9.0/10、query:qec-decoding
-   evidence：直接研究表面码解码和容错量子纠错，使用环面码
-5. [Finite-Basis Duality Estimate for the Surface-Code Threshold under Correlated Bit-Flip Errors](/20260531-20260609/2606.04723v1-finite-basis-duality-estimate-for-the-surface-code-threshold-under-correlated-bit-flip-errors)  
+   evidence：用于表面码综合征的稀疏Mamba解码器，以缺陷为中心的处理
+7. [Translation-invariant quantum low-density parity-check codes from compactified fracton models](/20260512-20260610/2605.19298v1-translation-invariant-quantum-low-density-parity-check-codes-from-compactified-fracton-models)  
    标签：评分：9.0/10、query:qec-decoding
-   evidence：相关比特翻转错误下表面码的阈值
-6. [Breakeven demonstration of quantum low-density parity-check codes](/20260531-20260609/2606.06455v1-breakeven-demonstration-of-quantum-low-density-parity-check-codes)  
+   evidence：来自分形子模型的量子LDPC码
+8. [A Posterior MWPM Decoding Boosts the XYZ Planar Code](/20260512-20260610/2605.23236v1-a-posterior-mwpm-decoding-boosts-the-xyz-planar-code)  
    标签：评分：9.0/10、query:qec-decoding
-   evidence：直接展示了qLDPC码及逻辑错误率
-7. [Quantum Hierarchical Locally Recoverable Codes](/20260531-20260609/2606.06736v1-quantum-hierarchical-locally-recoverable-codes)  
+   evidence：用于XYZ平面码（表面码变体）的后验MWPM解码
+9. [Towards Scalable Quaternary Message-Passing Decoding for Quantum Error Correction](/20260512-20260610/2605.24177v1-towards-scalable-quaternary-message-passing-decoding-for-quantum-error-correction)  
    标签：评分：9.0/10、query:qec-decoding
-   evidence：提出量子层级局部可恢复码，包含高效解码算法
-8. [Quantum Global Variational Learning for Quantum Error Correction](/20260531-20260609/2606.08592v1-quantum-global-variational-learning-for-quantum-error-correction)  
+   evidence：面向量子纠错的四进制消息传递解码
+10. [Best-First Ordered Statistics Decoding of Quantum LDPC Codes](/20260512-20260610/2605.25777v1-best-first-ordered-statistics-decoding-of-quantum-ldpc-codes)  
    标签：评分：9.0/10、query:qec-decoding
-   evidence：提出用于量子纠错解码的量子神经网络
+   evidence：量子LDPC码的解码算法
 
 ### 速读区论文标签
-1. [QEC and EAQEC Codes from Hermitian Sums and Hulls of Cyclic Codes over $\mathbb{F}_2 \times (\mathbb{F}_2+v\mathbb{F}_2)$](/20260531-20260609/2606.02137v1-qec-and-eaqec-codes-from-hermitian-sums-and-hulls-of-cyclic-codes-over-mathbbf2-times-mathbbf2vmathbbf2)  
+1. [4D and 5D Layer Codes through Color Routing](/20260512-20260610/2605.18961v1-4d-and-5d-layer-codes-through-color-routing)  
    标签：评分：8.0/10、query:qec-decoding
-   evidence：利用循环码的Hermitian和与核构造QEC和EAQEC码
-2. [A Dual Metastable-State Encoding Architecture for Quantum Processing with $^{171}\mathrm{Yb}$ Atom Arrays](/20260531-20260609/2606.08453v1-a-dual-metastable-state-encoding-architecture-for-quantum-processing-with-171mathrmyb-atom-arrays)  
+   evidence：基于量子低密度奇偶校验码构造高维分层码
+2. [On Constructing and Decoding Quantum Triorthogonal Codes](/20260512-20260610/2605.24519v1-on-constructing-and-decoding-quantum-triorthogonal-codes)  
    标签：评分：8.0/10、query:qec-decoding
-   evidence：提出用于171Yb原子容错量子纠错的双亚稳态编码架构
-3. [Practical gates by Majorana fermion motion](/20260531-20260609/2606.03916v1-practical-gates-by-majorana-fermion-motion)  
+   evidence：量子三正交码的构造与解码
+3. [Learning Logical Operations for Arbitrary Quantum Error Correction Codes](/20260512-20260610/2605.28162v2-learning-logical-operations-for-arbitrary-quantum-error-correction-codes)  
+   标签：评分：8.0/10、query:qec-decoding
+   evidence：学习量子纠错码的逻辑操作，面向容错量子计算的协同设计
+4. [SCOPE: A Syndrome-Driven Control Plane for QEC-Enabled Quantum Networks](/20260512-20260610/2606.08873v1-scope-a-syndrome-driven-control-plane-for-qec-enabled-quantum-networks)  
+   标签：评分：8.0/10、query:qec-decoding
+   evidence：基于症状的量子纠错网络控制平面
+5. [Quantum Precoded Polar Codes](/20260512-20260610/2605.12796v1-quantum-precoded-polar-codes)  
    标签：评分：7.0/10、query:qec-decoding
-   evidence：通过马约拉纳费米子实现平面泡利稳定子码及逻辑门
-4. [Affine Filtering Measurements and Their Applications to Quantum Decoding](/20260531-20260609/2606.07852v1-affine-filtering-measurements-and-their-applications-to-quantum-decoding)  
+   evidence：量子纠错码构造，与表面码比较
+6. [A Two-Branch Finite-Field Construction for Regular CSS LDPC Bases](/20260512-20260610/2605.23894v1-a-two-branch-finite-field-construction-for-regular-css-ldpc-bases)  
    标签：评分：7.0/10、query:qec-decoding
-   evidence：仿射滤波测量用于量子解码
-5. [New Codes from Cyclic and Negacyclic Codes of Even Length over $\mathbb{Z}_4$](/20260531-20260609/2606.08750v1-new-codes-from-cyclic-and-negacyclic-codes-of-even-length-over-mathbbz4)  
+   evidence：正则CSS LDPC基矩阵构造用于量子码
+7. [Learning Logical Operations for Arbitrary Quantum Error Correction Codes](/20260512-20260610/2605.28162v1-learning-logical-operations-for-arbitrary-quantum-error-correction-codes)  
    标签：评分：7.0/10、query:qec-decoding
-   evidence：从Z4循环/负循环码得到新二元量子码
-6. [Constructions of Quantum $(r,δ)$-LRCs from cyclic codes](/20260531-20260609/2606.09522v1-constructions-of-quantum-r-lrcs-from-cyclic-codes)  
-   标签：评分：7.0/10、query:qec-decoding
-   evidence：利用循环码和CSS结构构造量子局部可恢复码
+   evidence：容错量子纠错框架
+8. [End-to-End Formalization of Quantum Error Correction](/20260512-20260610/2605.16523v1-end-to-end-formalization-of-quantum-error-correction)  
+   标签：评分：6.0/10、query:qec-decoding
+   evidence：容错量子纠错中QEC码参数的形式化验证
+9. [Quantum Error Correction Assisted Axion Search in CMOS Spin Qubit Arrays](/20260512-20260610/2605.17457v1-quantum-error-correction-assisted-axion-search-in-cmos-spin-qubit-arrays)  
+   标签：评分：6.0/10、query:qec-decoding
+   evidence：量子纠错应用于轴子搜索
 
 
 <div class="dpr-home-promo-card">

@@ -1,0 +1,1798 @@
+Title: Towards Scalable Quaternary Message-Passing Decoding for Quantum Error Correction
+
+URL Source: https://arxiv.org/pdf/2605.24177v1
+
+Published Time: Tue, 26 May 2026 00:14:05 GMT
+
+Number of Pages: 22
+
+Markdown Content:
+# Towards Scalable Quaternary Message-Passing Decoding for Quantum Error Correction 
+
+Boqing Zhang 1,2 , Henry D. Pfister 2,3 , Hanwen Yao 2, and Siyuan Niu 1
+
+> 1
+
+Department of Electrical and Computer Engineering, University of Central Florida, Orlando, FL 32816, USA 
+
+> 2
+
+Department of Electrical and Computer Engineering, Duke University, Durham, NC 27708, USA 
+
+> 3
+
+Department of Mathematics, Duke University, Durham, NC 27708, USA 
+
+Abstract 
+
+The scalability and interpretability of message-passing (MP) decoding, such as (quaternary) Belief Prop-agation, remain open challenges in quantum error correction. Even for surface codes, arguably the first testbed for decoding methods, studies of improved MP decoders have mostly been restricted to small distances ( d ≲ 19 ). Moreover, the mismatch with established message-passing theory limits the decoder’s interpretability, making it unclear whether MP decoding can sustain its effectiveness at large system sizes. This work takes a step toward a more principled and interpretable MP decoding framework, with the goal of making MP-based decoding more reliable and bridging theory and practice. We introduce a dilution method, which allows a quaternary Min-Sum (MS) decoder to exhibit an apparent depolarizing thresh-old of 16% up to distance 20 , outperforming Minimum-Weight Perfect Matching in finite-length regimes. Notably, for X-noise, the standard MS decoder under dilution has worst-case complexity O(N log 2 d)
+
+and outperforms BP-OSD at d = 65 . The observed ∼ 9% threshold may correspond to a true asymptotic threshold. Finally, we give a graph-dilution argument that interprets the success of the dilution method and offers insight into when MP algorithms can genuinely scale. Taken together, these results provide encouraging progress toward scalable and interpretable MP decoding in quantum error correction. 
+
+# 1 Introduction 
+
+Message-passing (MP) algorithms such as Belief Propagation (BP) have achieved remarkable success as scalable decoders for classical low-density parity-check (LDPC) codes. When extended to quantum error correction, quaternary message passing offers additional advantages over standard decoding methods such as Minimum-Weight Perfect Matching (MWPM), as it operates directly on the joint X-Z Tanner graph and thus has the natural potential to capture the intrinsic correlations between X and Z Pauli errors [1]. In the fault-tolerant quantum computing era, MP decoders are also highly appealing from a hardware perspective: they are local, parallelizable, and well-suited for low-latency, on-chip implementations [2]. Despite these appealing features, standard MP decoders 1 face severe non-convergence issues when directly applied to quantum stabilizer codes [1, 3–5]. In the classical setting, MP algorithms like BP are exact on trees, and their asymptotic behavior on families of random classical LDPC codes, whose Tanner graphs are locally tree-like, can be rigorously characterized through information-theoretic and statistical-physics anal-yses [6, 7]. However, most quantum LDPC codes [8–10], including topological codes, must embed sufficient global structure to enforce stabilizer commutativity. Hence, their Tanner graphs are highly degenerate and inevitably contain abundant short loops [1], placing them far outside this favorable tree-like regime. For quantum codes, the behavior of BP and many variants proposed to improve it, is difficult to explain and predict from existing theory. This includes Relay-BP [2], BP-guided decimation [11], Memory BP (MBP) [12], Generalized BP (GBP) [13], and many others [1, 14, 15]. Moreover, although many of the above decoders achieve good empirical performance on specific codes, there is still very little convincing numerical evidence that these MP decoders with realistic complexity constraints can sustain reliable decoding as the system size increases, with surface codes beyond distance 20 often appearing as a canonical barrier. This 
+
+> 1Here, we use the term message-passing decoder to denote decoding schemes whose computational dynamics are dominated by local iterative message updates on the decoding graph. Any auxiliary non-message-passing steps are assumed to incur only near constant ( O(1) ) overhead with respect to system size and do not affect the overall complexity scaling.
+
+1
+
+> arXiv:2605.24177v1 [quant-ph] 22 May 2026
+
+stands in contrast to other non-MP decoders such as MWPM [16] and Union-Find [17], whose behavior is more interpretable and whose performance can scale robustly with system size [18, 19]. For this reason, MP algorithms have been difficult to fully trust as standalone decoders, particularly in critical settings where algorithmic interpretability and conceptual clarity are essential. Furthermore, even when combined with post-processors such as Ordered Statistics Decoding (OSD) [20] or Local Statistics Decoding (LSD) [21], evidence suggests that BP-OSD decoding performance still degrades with increasing code size [22]. As the BP stage becomes increasingly fragile on larger decoding graphs, decoders with global post-processing may still face similar scalability limitations. Together, these motivate the central question of this work: 
+
+In quantum error correction, can MP decoders achieve an asymptotic threshold with controlled iteration growth 2 (scalability)? If so, can their effectiveness be explained by established MP theory (interpretability)? 
+
+Here, we emphasize the asymptotic scaling not because practical systems require extremely large codes, but to ensure that the underlying MP mechanism is reliable and can, in principle, be sustained on large-scale decoding graphs. This question has been framed pessimistically because the Tanner graphs of quantum LDPC codes appear incompatible with the assumptions underlying established MP theory in statistical physics and spin glasses [7, 23]. However, in this work, we show that there is room for optimism. Many quantum LDPC codes, including surface codes, can be viewed as arising from two classical tree-like codes coupled through a deterministic global operation, most notably via the topological product construction [8]. From this viewpoint, the challenging features of their Tanner graphs can be seen as combinatorially induced by the deterministic product construction. Motivated by this perspective, we aim to incorporate the underlying product structure into the MP decoding process. On the simplest surface-code model, we propose a dilution method that first constructs a sequence of progressively diluted Tanner graphs. Each graph is structurally sparsified in a way that respects the product structure of the code and the symmetry between X- and Z-type stabilizer generators. The resulting decoder then runs a standard quaternary Min-Sum (MS) algorithm over this sequence of progressively diluted Tanner graphs. At each stage, message-passing dynamics are interleaved with collective decimation steps that freeze the qubit variables removed in the next graph. Numerically, this 
+
+MS decoder under dilution , with worst-case complexity O(N · log 2 d), achieves a depolarizing threshold of approximately 16% up to distance 20 , outperforming both MWPM and BP-OSD in this finite-length regime. As with many improved BP-based approaches, however, this threshold and finite-length advantage cannot persist for much larger systems without further modification. In contrast, for pure X-noise, simulations up to distance d = 65 show no sign of performance degradation. Strong numerical evidence therefore suggests that the observed ∼ 9% threshold may reflect an asymptotic threshold. This provides evidence that an MP decoding algorithm alone could sustain effective performance across the entire family of surface codes while retaining its complexity advantage. This work also provides a framework that interprets MP decoding behavior through graph dilution. Our interpretation is built on two main conceptual components. First, we re-examine the conventional view that inevitable short cycles constitute a fundamental limitation of (quaternary) message passing, showing that this view might be incomplete without accounting for the correlation structure of the underlying error distribution and the strength of X-Z coupling. Second, degeneracy in quantum LDPC codes renders the decoding Tanner graph locally redundant and, especially for surface codes, gives rise to a natural multiscale structure. Combining the two perspectives, the dilution method can be interpreted as a carefully designed "renormalization step" for message passing. It coarse-grains the decoding graph, effectively zooming out to larger (sparser) scales, and induces a renormalization of the effective error through collective decimation. As a result, each diluted graph targets the renormalized error clusters at its characteristic scale, progressively correcting them all from small to large sizes. In Section 3 and 5, we provide both a rigorous combinatorial analysis of the diluted graphs and a complementary heuristic interpretation of the resulting dynamics on a 1D toy model. Together, these results provide both analytical and conceptual justification for the effectiveness of the dilution method. Overall, using the surface code as a testbed, the main contribution of this work is to show that by exploiting the structure of the code and its decoding graph, graph dilution yields a fully deterministic message-passing decoder with O(N log 2 d) worst-case complexity. The resulting MP decoder provides strong numerical evidence for a true asymptotic threshold and admits a conceptual interpretation.                  
+
+> 2By controlled iteration growth , we mean that the maximum message-passing iteration count I(N)does not grow so rapidly with Nas to compromise the near-linear complexity O N·I(N).Classical LDPC theory predicts I(N) = O(log N)below threshold, though such scaling may be overly optimistic for general quantum LDPC codes.
+
+22 Background 
+
+The goal of this section is to establish a graphical model for quaternary message-passing decoding of Calderbank-Shor-Steane (CSS) codes [24, 25]. While quaternary BP has been implemented and discussed in previous works [26–28], we aim to develop a more systematic and principled formalization in this section. 
+
+## 2.1 Quantum Decoding Problem and Graphical Models 
+
+In quantum error correction, an [[ n, k ]] quantum code protects k logical qubits by encoding them into n
+
+physical qubits that live in a subspace HC of the Hilbert space H⊗n. For stabilizer codes, the code space HC
+
+is defined as the common +1 eigenspace of all stabilizers in the stabilizer group S [29]. The stabilizer group 
+
+S is an abelian subgroup of the n-fold Pauli group Pn with −I⊗n̸ ∈ S , where Pn is generated by tensor products of single-qubit Pauli operators {I, X, Y, Z }⊗n. The distance d of a stabilizer code C is defined to be the minimum weight of all Pauli operators in N (S)\S , where N (S) denotes the normalizer group of S in 
+
+Pn. A stabilizer code C is called degenerate if d is larger than the minimum weight of a nontrivial stabilizer. A CSS code is a special stabilizer code whose stabilizer generators can be chosen to be either purely X-type or Z-type Pauli operators. The surface code, introduced by Alexei Kitaev [30], forms a family of simple yet highly degenerate CSS codes and is widely regarded as a promising architecture for fault-tolerant quantum computation. A distance-d surface code encodes a single logical qubit using d2 + ( d − 1) 2 physical qubits. The quantum most-likely-error decoding problem for a stabilizer code C = [[ n, k ]] is the problem of infer-ring the underlying physical Pauli error from the observed syndrome. Let E = ( E1, . . . , E n) ∈ { I, X, Y, Z }n
+
+denote the random physical Pauli error configuration, where for each qubit index i ∈ { 1, . . . , n }, the random variable Ei specifies the Pauli error acting on the physical qubit i. Let e ∈ { I, X, Y, Z }n denote a generic realization of E, and let σ = ( σ1, . . . , σ m) denote the syndrome obtained from the m stabilizer measurements. Most-likely-error decoding then corresponds to the following maximum-a-posteriori (MAP) inference over Pauli error configurations: 
+
+e∗(σ) ∈ arg max  
+
+> e
+
+p(e | σ) = arg max  
+
+> e
+
+p(e, σ ) = arg max  
+
+> e
+
+p(σ | e) pE (e). (1) where pE (e) denotes the prior probability of the error configuration e under the physical noise model, and 
+
+e∗(σ) denotes a MAP-optimal estimated error, which is a maximizer of the posterior distribution p(e | σ)
+
+conditioned on the observed syndrome σ. Identifying each Pauli error e ∈ { I, X, Y, Z } with its binary representation (x, z ) ∈ { 0, 1}2, where x = 1 for e ∈ { X, Y } and z = 1 for e ∈ { Z, Y }, the error configuration 
+
+e can equivalently be represented as (x, z ) ∈ (F2 × F2)n, and the error distribution pE (e) as pE (x, z ).A Tanner graph T = ( V, F, E) of a given stabilizer code is a factor graph [1, 6], where variable nodes 
+
+i ∈ V represent physical qubits, factor nodes a ∈ F correspond to chosen stabilizer generators, and an edge 
+
+(i, a ) ∈ E is present if and only if qubit i lies in the support of stabilizer a [6,7]. For CSS codes, the factor nodes are naturally partitioned into X-type nodes aX and Z-type nodes aZ , corresponding to the chosen X- and Z-stabilizer generators, respectively. For each factor node a, let ∂a ⊆ V denote the set of neighboring variable nodes. The associated local function ψa(·) enforces the syndrome constraint of the corresponding stabilizer. Specifically, for a Z-type factor aZ , the syndrome σaZ depends only on the neighboring X-components 
+
+x∂a Z , and the corresponding local function is ψaZ (x∂a Z , σ aZ ) = I L  
+
+> i∈∂a Z
+
+xi = σaZ
+
+. Analogously, for an X-type factor aX , the syndrome σaX depends only on the neighboring Z-components z∂a X , and the corresponding local function is ψaX (z∂a X , σ aX ) = I L  
+
+> i∈∂a X
+
+zi = σaX
+
+. On each variable node i, we also associate a prior factor ψi(ei) = ψi(xi, z i), which encodes the prior Pauli error distribution on qubit i. Given a syndrome configuration σ, the Tanner graph T , together with factors ψa and ψi, defines the following posterior distribution μT (e | σ) over error configurations e = {ei = ( xi, z i) : i ∈ V }, where each ei ∈ { 0, 1}2.
+
+μT (e | σ) = μT (x, z | σ) ∝
+
+ Y 
+
+> aX∈F
+
+ψaX (z∂a X , σ aX )
+
+
+
+·
+
+ Y 
+
+> aZ∈F
+
+ψaZ (x∂a Z , σ aZ )
+
+
+
+·
+
+ Y
+
+> i∈V
+
+ψi(xi, z i)
+
+
+
+. (2) It should be noted that, even under the code-capacity model, the distribution μT (e | σ) defined on the Tanner graph does not necessarily coincide with the true posterior p(e | σ) in Eq. (1), unless the physical error model has no spatial correlations and the single-qubit prior satisfies pEi (xi, z i) ∝ ψi(xi, z i).For surface codes, a canonical graphical representation of the Tanner graph T is shown in Fig. 1. The graph T naturally decomposes into two component lattices , GX and GZ , obtained by removing the Z-type 3and X-type factor nodes, respectively. In this work, we treat the Tanner graph and these component lattices as being in one-to-one correspondence: any modification of the Tanner graph is reflected in the associated lattice structure, and conversely, any structural change of the lattice induces a corresponding modified Tanner graph. This correspondence allows us to study structural dilution directly at the lattice level while retaining an equivalent representation in terms of the diluted Tanner graph. 
+
+Figure 1. Illustration of the canonical Tanner graph T of the distance-5 surface code (left) and the corresponding component lattices GX (blue) and GZ (red) (right). In T , black variable nodes represent physical qubits, blue and red factor nodes correspond to X- and Z-type stabilizers, respectively. This Tanner graph decomposes into two canonical lattices in which qubits lie on edges and blue (resp. red) vertices represent X-type (resp. Z-type) stabilizers. 
+
+## 2.2 Quaternary Message Passing for CSS Codes 
+
+After introducing the graphical model for CSS codes, we now present a quaternary message-passing decoding framework on their Tanner graphs. Given the posterior distribution μT (e | σ) = μT (x, z | σ) defined on the given graph T , the MP algorithms considered in this work iteratively exchange local messages along the edges of the graph to approximate the single-qubit posterior marginals μT 
+
+> i
+
+(ei | σ) for each qubit i, and then construct a bitwise maximizer e∗T ,i (σ) ∈ arg max ei μT 
+
+> i
+
+(ei | σ).In the quaternary BP algorithm, given a syndrome configuration σ, factor-to-variable message passing is employed in the Sum-Product form [6]. Along each edge (i, a ) ∈ E , the factor-to-variable message ˆν(t) 
+
+> a→i
+
+at iteration t is obtained by marginalizing the local factor ψa over its neighboring variables ∂a \ i. Owing to the CSS structure, this yields X-messages ˆν(t) 
+
+> aZ→i
+
+(xi) and Z-messages ˆν(t) 
+
+> aX→i
+
+(zi), corresponding to constraints on the X- and Z-components of ei = ( xi, z i), respectively. As shown on the left of Fig. 2, the update rules are: 
+
+ˆν(t) 
+
+> aZ→i
+
+(xi) ∝ X 
+
+> x∂a Z\i
+
+ψaZ (x∂a Z , σ aZ ) Y 
+
+> j∈∂a Z\i
+
+ν(t) 
+
+> j→aZ
+
+(xj ), ˆν(t) 
+
+> aX→i
+
+(zi) ∝ X 
+
+> z∂a X\i
+
+ψaX (z∂a X , σ aX ) Y 
+
+> j∈∂a X\i
+
+ν(t) 
+
+> j→aX
+
+(zj ).
+
+(3) Since our goal is to identify a posterior maximizer, it is natural to replace the above marginalization step in the factor-to-variable updates by maximization. This yields the following Max–Product form [6]: 
+
+ˆν(t) 
+
+> aZ→i
+
+(xi) ∝ max 
+
+> x∂a Z\i
+
+n
+
+ψaZ (x∂a Z , σ aZ ) Y
+
+> j∈∂a Z\i
+
+ν(t) 
+
+> j→aZ
+
+(xj )
+
+o
+
+, ˆν(t) 
+
+> aX→i
+
+(zi) ∝ max 
+
+> z∂a X\i
+
+n
+
+ψaX (z∂a X , σ aX ) Y
+
+> j∈∂a X\i
+
+ν(t) 
+
+> j→aX
+
+(zj )
+
+o
+
+.
+
+(4) Note that although the above update involves both X and Z components, the factor-to-variable updates treat the corresponding X- and Z-messages separately. In this step, since the variables xi and zi are binary, the updates for quaternary MP retain the standard binary Sum-Product (or Max-Product) form. As shown on the right of Fig. 2, the distinction arises in the variable-to-factor message passing. For each edge (i, a ) ∈ E , the message ν(t)
+
+> i→a
+
+(·) is the belief at variable node i obtained by aggregating all incoming messages from neighboring factor nodes in ∂i \ a at iteration t. Here, the incoming X- and Z-messages are coupled through what we refer to as an XZ -correlation message ϕ(t) 
+
+> X
+
+(xi) and ϕ(t) 
+
+> Z
+
+(zi), which is induced by 4its initial prior ψi(xi, z i). Thus, the quaternary variable-to-factor updates take the form: 
+
+ν(t+1)  
+
+> i→aZ
+
+(xi) ∝
+
+ Y 
+
+> bZ∈∂i \aZ
+
+ˆν(t) 
+
+> bZ→i
+
+(xi)
+
+
+
+· ϕ(t) 
+
+> X
+
+(xi), ν(t+1)  
+
+> i→aX
+
+(zi) ∝
+
+ Y 
+
+> bX∈∂i \aX
+
+ˆν(t) 
+
+> bX→i
+
+(zi)
+
+
+
+· ϕ(t) 
+
+> Z
+
+(zi). (5) where the two specific XZ -correlation messages ϕ(t) 
+
+> X
+
+(xi) and ϕ(t) 
+
+> Z
+
+(zi) are defined as follows: 
+
+ϕ(t) 
+
+> X
+
+(xi) = X
+
+> zi∈{ 0,1}
+
+Y 
+
+> aX∈∂i
+
+ˆν(t) 
+
+> aX→i
+
+(zi)
+
+!
+
+ψi(xi, z i), ϕ(t) 
+
+> Z
+
+(zi) = X
+
+> xi∈{ 0,1}
+
+Y 
+
+> aZ∈∂i
+
+ˆν(t) 
+
+> aZ→i
+
+(xi)
+
+!
+
+ψi(xi, z i). (6) 
+
+Figure 2. Illustration of quaternary message passing for CSS codes. The left panel shows the Z- (resp. X-) factor-to-variable update ˆν(t) 
+
+> aZ→i
+
+(xi) (resp. ˆμ(t) 
+
+> aX→i
+
+(zi) ) from aZ (resp. aX ) to variable node i, which proceeds independently and is not coupled. The right panel shows the variable-to-factor ( Z- and X-factor) update ν(t+1)  
+
+> i→aZ
+
+(xi) and μ(t+1)  
+
+> i→aX
+
+(zi),where the messages become coupled through the XZ -correlation messages ϕ(t) 
+
+> X
+
+(·) and ϕ(t) 
+
+> Z
+
+(·).
+
+After t iterations, the MP estimated marginal ν(t) 
+
+> i
+
+(ei) = ν(t) 
+
+> i
+
+(xi, z i) of qubit i are obtained by combining all incoming X- and Z-messages with the initial error prior ψ(ei). Then, the MP estimated error on qubit i at iteration t is ˆe(t) 
+
+> i
+
+∈ arg max ei ν(t) 
+
+> i
+
+(ei), where ν(t) 
+
+> i
+
+(ei) is: 
+
+ν(t) 
+
+> i
+
+(ei) = ν(t) 
+
+> i
+
+(xi, z i) = 
+
+ Y 
+
+> aZ∈∂i
+
+ˆν(t−1)  
+
+> aZ→i
+
+(xi)
+
+
+
+·
+
+ Y 
+
+> aX∈∂i
+
+ˆν(t−1)  
+
+> aX→i
+
+(zi)
+
+
+
+· ψ(xi, z i). (7) In practice, message-passing decoding is implemented in the log domain for computational efficiency. Passing to the log domain transforms products of messages into sums, and the Max–Product updates into equivalent Min–Sum (MS) updates [7]. Compared to standard BP, MS message passing is more numerically stable [20]. In the log domain, the marginal beliefs in Eq. 7 can be conveniently parameterized by effective fields , defined as the log-likelihood ratios of the corresponding binary variables: 
+
+h(t) 
+
+> i,X
+
+= log ν(t) 
+
+> i
+
+(xi = 0) 
+
+ν(t) 
+
+> i
+
+(xi = 1) , h(t) 
+
+> i,Z
+
+= log ν(t) 
+
+> i
+
+(zi = 0) 
+
+ν(t) 
+
+> i
+
+(zi = 1) . (8) These effective fields serve as sufficient statistics for the binary variables and provide a convenient represen-tation of the marginals in the log domain. It is well known that on tree-structured graphs, Belief Propagation and Max-Product yield exact marginals and max-marginals. On graphs with loops, such as the Tanner graphs of stabilizer codes, these algorithms are generally no longer guaranteed to be exact or even converge. Nevertheless, a widely adopted empirical modification, with a long history in the literature [31], is to introduce a memory (or damping) factor ϵ
+
+into the message updates, as described below. This approach often improves convergence behavior without increasing the algorithmic complexity [2, 12, 32, 33]. 
+
+ν(t+1)  
+
+> i→aZ
+
+(xi) ∝ Y 
+
+> bZ∈∂i \aZ
+
+ˆν(t) 
+
+> bZ→i
+
+(xi) ·
+
+
+
+ϕX (xi)
+
+1−ϵ
+
+·
+
+
+
+ν(t) 
+
+> i
+
+(xi)
+
+ϵ
+
+. (9) The corresponding update for ν(t+1)  
+
+> i→aX
+
+(zi) follows by symmetry, with the same damping parameter ϵ.53 Graph Sparsification and Dilution 
+
+This section introduces the core recipe of the dilution method. As the name suggests, the method oper-ates by progressively diluting the decoding graph through a structured sparsification of the physical-qubit representation. In what follows, we define and focus on two important dilution patterns and highlight the distinct roles they play. We also introduce the notion of the effective error on the diluted lattice, which will be crucial for the interpretation of the resulting message-passing dynamics in Section 5. 
+
+## 3.1 Sparsification and Effective Error 
+
+Informally, an s-sparsification removes s consecutive layers of edges and retains the (s + 1) -th layer. For surface codes, such layers can be defined in a canonical way using the coordinates of the underlying 2D lattice. Throughout this work, we refer to the parameter s as the sparsification ratio . We introduce two sparsification patterns— Diagonal and Cartesian —suited for depolarizing noise and pure X-noise, respectively. 
+
+Definition 1 (Diagonal s-Sparsification) . Let {Dk}k∈Z denote the ordered family of diagonal lines of lattice 
+
+G. The diagonal s-sparsification retains those diagonals satisfying k ≡ 0 (mod s + 1) , and removes either all vertical or all horizontal edges from the remaining diagonals. The resulting graph is called the DsV -diluted lattice, denoted by GsDV , or DsH -diluted lattice, denoted by GsDH , depending on whether vertical or horizontal edges are removed. 𝐷 !"# 𝐷 !"$ 𝐷 !"% 𝐷 !
+
+> 𝐷 !&%
+> 𝐷 !&$
+> 𝐷 !&#
+> 𝐷 !&'
+
+Figure 3. Examples of diluted graphs obtained by diagonal s-sparsification. From left to right: the D1 
+
+> V
+
+-diluted lattice G1 
+
+> DV
+
+, the D1 
+
+> H
+
+-diluted lattice G1 
+
+> DH
+
+, and the D3 
+
+> V
+
+-diluted lattice G3 
+
+> DV
+
+.
+
+Definition 2 (Cartesian s-Sparsification) . Let {Ck}k∈Z denote the ordered family of Cartesian grid lines, either all horizontal or all vertical grid lines, in a lattice G. The Cartesian s-sparsification retains only those grid lines satisfying k ≡ 1 (mod s + 1) , and removes the remaining grid lines of the same orientation. The resulting graph is called the CsV -diluted lattice, denoted by GsCV , or CsH -diluted lattice, denoted by GsCH ,depending on whether horizontal or vertical grid lines are sparsified. 𝐶 !"# 𝐶 !"$ 𝐶 ! 𝐶 !%$
+
+> 𝐶 !"#
+> 𝐶 !"$
+> 𝐶 !
+> 𝐶 !%$
+
+Figure 4. Examples of diluted graphs obtained by Cartesian s-sparsification. From left to right: the C1 
+
+> V
+
+-diluted lattice G1 
+
+> CV
+
+, the C1 
+
+> H
+
+-diluted lattice G1 
+
+> CH
+
+, and the C3 
+
+> V
+
+-diluted lattice G3 
+
+> CV
+
+.
+
+6As illustrated in Fig.3 and Fig.4, increasing the sparsification ratio s produces progressively more diluted decoding graphs. In principle, the sparsification ratio s can be any nonnegative integer less than the code distance d. It follows from Definitions 1 and 2 that the s-diluted lattice has girth 2s + 4 . However, as s
+
+increases, the error-correcting capability of the diluted graph inevitably degrades. It is therefore useful to establish a combinatorial guarantee that quantifies the error-correcting capability of an s-diluted graph. To quantify the error-correcting capability of a fixed diluted graph, we introduce the following definition. 
+
+Definition 3 (Error-Correcting Radius) . Given a (diluted) decoding graph Gs ⊆ G , an ideal decoder returns a minimum-weight correction supported on Gs for the observed syndrome. The error-correcting radius of diluted graph t(Gs) is the largest integer t such that, for every physical error e supported on at most t qubits on G, the correction returned by the ideal decoder operating on Gs is logically equivalent to e.
+
+For the surface code under single-X noise, the error-correcting radius of the original Z-decoding lattice is half the code distance, namely t(G) = ⌊(d − 1) /2⌋. For the diluted lattices, the following theorem establishes a lower bound on the corresponding error-correcting radius for both CsH - and DsH -diluted lattices. 
+
+Theorem 1. Fix a sparsification ratio s ≥ 1, s ∈ N, for any surface code of distance d, consider the diluted lattice GsDH and GsCH obtained from diagonal and Cartesian s-sparsification, respectively. Then the error-correcting radius satisfies 
+
+t(GsDH ) ≥
+
+j d − 12 · ⌊ s+1 2 ⌋ + 2 
+
+k
+
+, t(GsCH ) ≥
+
+ d − 1
+
+⌊ s−12 ⌋ + 2 
+
+
+
+. (10) 
+
+Proof. A detailed proof is given in Appendix A. From Theorem 1, we see that for single X errors, at the same sparsification ratio s, Cartesian s-sparsification gives a stronger lower bound on the error-correcting radius than diagonal s-sparsification, which is consistent with the numerical results in [34]. In particular, when s = 1 , the C1 
+
+> H
+
+-diluted lattice G1 
+
+> CH
+
+can still provably correct all errors of weight strictly below half the distance: t(G1 
+
+> CH
+
+) =  d−12
+
+ . Thus, in the worst-case sense, the C1 
+
+> H
+
+-diluted lattice incurs no loss in X-error-correcting capability. One justification for the diluted lattices comes from the intrinsic local stabilizer redundancy present in quantum LDPC codes. Specifically, the same syndrome pattern σ can admit multiple equivalent error configurations, allowing correction to be performed even on a suitably diluted decoding graph [34]. Amore illuminating perspective, which will be important for the interpretation in Section 5, comes from the viewpoint of the effective error configuration. The diluted lattice Gs provides a coarse-grained decoding geometry obtained by sparsifying the original lattice. On this coarse-grained lattice, and assuming we are in the correctable regime, local products of stabilizers renormalize physical error configurations e into effective errors es supported on the diluted lattice, as formalized in Definition 4 and illustrated in Fig. 5. 
+
+Definition 4 (Effective Error on the Diluted Lattice) . Let e be an error configuration on the original lattice 
+
+G with syndrome σ = σ(e). Given a diluted lattice Gs ⊆ G , the corresponding effective error es = Rs(e) is defined as a minimum-weight error configuration supported on Gs that reproduces the same syndrome pattern, namely, σ(es) = σ(e). We call Rs the global renormalization map.  
+
+> Figure 5. Illustration of effective errors on diluted lattices. The middle panels show physical errors (red strings) on the original lattice, and their corresponding effective errors on the diluted lattices are shown in purple. The effective errors on the right are stabilizer-equivalent to the physical error, while the one on the left differs by a logical operator.
+
+73.2 Diluted Tanner Graph and Graph-Dilution Sequence 
+
+The diluted lattice is a geometric construction, whereas the quaternary message-passing decoder developed in Sec 2.2 operates on a decoding Tanner graph. Thus, we first introduce a diluted Tanner graph that translates the previously defined diluted lattice into the graphical model used for decoding. 
+
+Definition 5 (Diluted Tanner Graph) . Consider a surface code with Tanner graph T . Given an s-sparsification that produces one of the diluted lattices GsDV , GsDH , GsCV , or GsCH , then the induced s-diluted Tanner graph 
+
+T s = ( V s, Es, F ) is obtained by removing from T all variable nodes corresponding to lattice edges deleted by the s-sparsification, together with their incident Tanner edges.                     
+
+> Figure 6. Examples of diluted Tanner graphs Tsinduced by the DsV-diluted lattice GsDVvia diagonal sparsification pattern DsV: a D1
+> V-diluted Tanner graph T1
+> DV(left panel), and a D3
+> V-diluted Tanner graph T3
+> DV(right panel).
+
+By making explicit the correspondence between the diluted Tanner graph and its component lattices, the error-correcting radius of the diluted Tanner graph admits a natural characterization in terms of the error-correcting radius of the corresponding diluted X- and Z-lattices, as shown in the following definition. 
+
+Definition 6 (Error-Correcting Radius of the Diluted Tanner Graph) . Let T s be a s-diluted Tanner graph and let GsX and GsZ be its corresponding diluted X- and Z-lattice, respectively. The corresponding error-correcting radius t(T s) is defined as 
+
+t(T s) = min 
+
+n
+
+t GsX
+
+, t  GsZ
+
+ o
+
+. (11) 
+
+where t GsX
+
+ and t GsZ
+
+ denote the error-correcting radius of X- and Z-lattice, respectively. 
+
+Previously, Theorem 1 showed that, under single X/Z noise, the Cartesian pattern CsH gives a stronger lattice-level lower bound on the error-correcting radius than the diagonal pattern DsH . However, the radius of the diluted Tanner graph, t(T s), depends on both component lattices; see Definition 6. Thus, although Cartesian sparsification performs well on one component, it disconnects the other, causing t(T s) to vanish. In contrast, diagonal sparsification preserves the X–Z stabilizer symmetry of the surface code and therefore maintains balanced error-correcting capability against both X- and Z-type errors, as shown in Proposition 1. 
+
+Proposition 1. Fix a sparsification ratio s ∈ N, for any surface code of distance d, the error-correcting radius of its diluted Tanner T s obtained from the diagonal s-sparsifications satisfies 
+
+t(T s) = t GsX
+
+ = t GsZ
+
+. (12) 
+
+Proof. Under the canonical embedding in Fig. 1, the X- and Z-decoding component lattices of surface code 
+
+GX and GZ are related by a diagonal reflection. This induces a bipartite graph isomorphism ϕ : GX
+
+> ∼=
+
+−→ G Z ,
+
+which maps qubits to qubits, swap X-check with Z-checks, and preserving adjacency. By Definition 1, a diagonal s-sparsification removes qubits lying on diagonal lines Dk that do not sat-isfy the congruence condition. Since the diagonal reflection ϕ naturally preserves each diagonal line, i.e., 8ϕ(Dk) = Dk, ∀k, the set of removed (and retained) subgraphs is invariant under ϕ. Hence, ϕ restricts to an isomorphism ϕ : G sX
+
+> ∼=
+
+−→ G sZ , and therefore 
+
+t(G sX ) = t(G sZ ).
+
+Finally, by Definition 6, we have t(T s) = min 
+
+n
+
+t GsX
+
+, t  GsZ
+
+ o
+
+= t(G sX ) = t(G sZ ) as claimed. From Theorem 1 and Proposition 1, we can see that when the sparsification ratio s is fixed, the error-correcting radius is lower bounded by a constant independent of distance d. However, as s increases, this lower bound eventually vanishes. This matches the intuition that the error-correcting capability degrades as the graph is further sparsified. Therefore, running BP or MS on a single static diluted graph is not expected to work. The dilution method instead applies message passing successively to a sequence of progressively diluted decoding graphs, together with collective decimation between stages. Here, we first define graph-dilution sequence , which produces the sequence of progressively diluted Tanner graphs induced by the corresponding diluted lattices. An illustrative example is shown in Fig. 7. 
+
+Definition 7 (Graph-Dilution Sequence) . Given a distance-d surface code and a fixed sparsification pattern, the corresponding graph-dilution sequence is the sequence of diluted Tanner graphs {T (k)}Kk=0 , where K =
+
+⌊log 2(d − 1) ⌋. At stage-k, the sparsification ratio sk = 2 k − 1, and the diluted graph is denoted by T (k) = T sk .𝒯 (") = 𝒯 $! 
+
+> "
+
+𝒯 (%) = 𝒯 $! 
+
+> %
+
+𝒯 (&) = 𝒯 $!           
+
+> '
+> Figure 7. An example of the graph-dilution sequence {T (0) ,T(1) ,T(2) }for a distance-5surface code. The sparsifi-cation pattern is the diagonal pattern DsV.
+
+In this section, given a distance-d surface code and a sparsification pattern ( DV , DH , CV or CH ), we show how the dilution method constructs the corresponding graph-dilution sequence {T (k)}Kk=0 . Furthermore, Proposition 1 and Theorem 1 also suggest a natural guideline for choosing the sparsification pattern under different noise models: diagonal patterns, corresponding to the DV - or DH -graph-dilution sequence, are better suited for quaternary MP decoding under balanced or correlated X-Z noise such as depolarizing noise; Cartesian patterns, corresponding to the CV - or CH -graph-dilution sequence, are more appropriate for single-type or highly biased X/Z noise. 
+
+# 4 Algorithms and Numerical Results 
+
+After introducing the construction of the graph-dilution sequence, we now describe the dilution method for a general class of quaternary message-passing decoders. The algorithmic core is simple and concrete: rather than running message passing directly on the original decoding graph, we run it on the progressively diluted Tanner graphs defined in the graph-dilution sequence, using Ik = 20 k + 20 iterations at stage k. Between successive dilution stages, we perform a global hard-decimation step: any qubit removed by the next dilution stage is frozen to {I, X, Y, Z } according to its current effective field h(t) 
+
+> i,X
+
+and h(t) 
+
+> i,Z
+
+estimated by the quaternary message passing. The specific graph-dilution sequence depends on the noise model: CsH - and CsV -dilution sequence for single X-noise, whereas DsH - and DsV -dilution sequence for depolarizing noise. In both cases, the algorithmic structure remains unchanged. 9Algorithm 1: Quaternary Message-Passing under Dilution 
+
+Input: Syndrome σ; surface-code distance d; chosen sparsification pattern ( DV , DH , CV , or CH ) 
+
+> 1
+
+Construct the corresponding graph dilution sequence {T (k)}K(d) 
+
+> k=0
+
+; 
+
+> 2
+
+for i = 0 , 1, . . . , K − 1 do  
+
+> 3
+
+Reset and run quaternary MP on diluted Tanner graph T (k) for Ik = 20 k + 20 iterations;  
+
+> 4
+
+Decimate and freeze the qubits supported on T si \T si+1 ;
+
+Output: Final hard decision in {I, X, Y, Z }n upon convergence 
+
+## 4.1 Simulation Results on the Surface-Code family 
+
+Since Min-Sum (MS) is more numerically stable than Sum-Product BP, we use quaternary MS decoding with fixed memory factor ϵ in practical simulation. We evaluate the method under two representative noise models. For the single-X noise model, each qubit undergoes an independent X error with probability p,yielding the uniform prior pEi (ei) = [1 − p, p, 0, 0] . For the depolarizing noise model, each qubit experiences an X, Y , or Z error with equal probability p/ 3, giving the prior pEi (ei) = [1 − p, p/ 3, p/ 3, p/ 3] . In both cases, the error prior is set according to the physical model, ψi(ei) = pEi (ei).We now turn to the numerical results for decoding performance under depolarizing noise, shown in Fig. 8. In the finite-length regime d < 20 , the quaternary Min-Sum decoder under dilution outperforms MWPM, as shown in the right panel of Fig. 8. The left panel shows an apparent threshold of approximately 16% over the range of distances. However, both the finite-length advantage and the apparent threshold weaken as the system size increases. In particular, at distance d = 33 , the logical error rate no longer decreases and instead begins to increase, as shown in the left panel of Fig. 8.             
+
+> 0.02 0.04 0.06 0.08 0.10 0.12 0.14 0.16
+> 10 −5
+> 10 −4
+> 10 −3
+> 10 −2
+> 10 −1
+> Total Error Rate
+> d=3
+> d=5
+> d=9
+> d=17
+> d=19
+> d=33
+> 0.04 0.06 0.08 0.10 0.12 0.14
+> 10 −5
+> 10 −4
+> 10 −3
+> 10 −2
+> 10 −1
+> d=9, MWPM
+> d=9, MS-Dilution
+> d=15, MWPM
+> d=15, MS-Dilution
+
+Figure 8. Performance of quaternary Min-Sum decoding with dilution under depolarizing noise (left), together with a finite-length comparison against the standard global decoder MWPM at distances 9 and 15 (right). For MS under dilution, the damping factor is ϵ = 0 .15 for all distances. 
+
+Under X-noise, the situation is different, as shown in Fig. 9. Message-passing algorithms like BP and MS have previously been applied to the surface codes, but existing studies have provided limited evidence for a true asymptotic threshold. Figure 9 shows that Min-Sum decoding under dilution continues to perform well up to d = 65 . The curves exhibit a clear threshold near 9% with no visible finite-size degradation. To our knowledge, this provides the first numerical evidence that a simple Min-Sum decoder can sustain threshold behavior on surface codes at large system sizes, e.g., d = 65 with N ≈ 8300 , while retaining the complexity advantages of local message-passing algorithms; see Sec. 4.2. These results give strong evidence that dilution can make message passing reliable across the surface-code family. The finite-length advantage is also visible in the right panel of Fig. 9. Since the dilution method makes message passing scalable, Min-Sum under dilution outperforms the global decoder MS-OSD at large system sizes, for example, at d = 65 .10 0.01 0.03 0.05 0.07 0.09     
+
+> 10 −5
+> 10 −4
+> 10 −3
+> 10 −2
+> 10 −1
+> Total Error Rate
+> d=3
+> d=5
+> d=9
+> d=17
+> d=33
+> d=65
+> 0.05 0.06 0.07 0.08 0.09
+> 10 −5
+> 10 −4
+> 10 −3
+> 10 −2
+> 10 −1
+> d=33, MS-OSD
+> d=33, MS-Dilution
+> d=65, MS-OSD
+> d=65, MS-Dilution
+
+Figure 9. Performance of Min-Sum decoding with dilution under X-noise (left), together with a finite-length comparison against the standard global decoders MS-OSD under X-noise at distances 33 and 65 (right). For MS-OSD, the number of Min-Sum iterations is set to 30 . For MS under dilution, the damping factor is ϵ = 0 .1 for d = 33 ,
+
+ϵ = 0 .05 for d = 65 , and ϵ = 0 .15 for all other distances. 
+
+## 4.2 Complexity and Convergence Discussion 
+
+In the classical literature, BP on sparse random graphs typically converges in O(log N ) iterations [6]. In this work, we choose Ik = 20 k + 20 . Hence the total number of message-passing iterations over all stages is 
+
+Imax =
+
+> K
+
+X
+
+> k=0
+
+Ik = 
+
+> ⌊log 2d⌋
+
+X
+
+> k=0
+
+(20 k + 20) = 10( K + 1)( K + 2) = O(log 2 d),
+
+where K = ⌊log 2 d⌋. The resulting worst-case complexity is O(N · Imax ) = O(N · log 2 d). In the average-case scenario, the number of iterations is often much smaller, especially in the low-error-rate regime, as shown in the left panel of Fig. 10. Thus, the average-case complexity remains close to linear in N .                                  
+
+> 10 20 30 40 50 60
+> 10
+> 50
+> 100
+> 150
+> Code Distance d
+> Number of Iterations  I
+> Typical I(p=0.03)
+> Typical I(p=0.06)
+> 323 43 63
+> 20
+> 220
+> 420 Max I
+> 0.01 0.02 0.03 0.04 0.05 0.06 0.07 0.08 0.09 0.10
+> 10 −4
+> 10 −3
+> 10 −2
+> 10 −1
+> 10 0
+> Depolarizing error rate p(d=17)
+> Non-Convergence Rate
+> No Dilution, ϵ= 0
+> No Dilution, ϵ= 0 .15
+> Dilution, ϵ= 0
+> Dilution, ϵ= 0 .15
+
+Figure 10. Left: Average decoding complexity, measured by the median number of iterations until convergence over 10 4 trials. The inset shows the maximum iteration budget Imax as a function of code distance. Right: Non-convergence rate with and without dilution and damping, where ϵ denotes the damping factor. 
+
+Next, we examine numerically how dilution affects the convergence behavior of the Min-Sum decoder. As shown in the right panel of Fig. 10, naive Min-Sum decoding on the original Tanner graph essentially fails to converge. Introducing a damping factor provides only marginal improvement and does not fundamentally resolve the issue. In contrast, combining dilution with damping robustly restores convergence for d = 17 .Fig. 11 shows histograms of the number of iterations until convergence at an error rate near threshold for distances d = 9 (left) and d = 65 (right). The histograms exhibit multiple peaks, each corresponding to convergence at a different dilution stage. This indicates that successive dilution stages unlock additional sets of instances for which Min-Sum converges. For the smaller code, d = 9 , naive Min-Sum can still converge, 11 but typically much more slowly; dilution substantially accelerates convergence. For the larger code, d = 65 ,the baseline decoder essentially fails. In this regime, dilution is not merely an acceleration mechanism but appears to be the decisive ingredient enabling convergence at all. Interestingly, for d = 65 , most convergent instances are resolved only at the later dilution stages. We discuss the origin of this behavior in Sec. 5. 20 60 120 200 250                          
+
+> Number of Iterations Until Convergence (d=9)
+> 10 0
+> 10 1
+> 10 2
+> 10 3
+> Number of Decoding Instances  Converged at k= 0
+> Converged at k= 1
+> Converged at k= 2
+> Converged at k= 3
+> Without dilution 20 60 120 200 300 420
+> Number of Iterations Until Convergence (d=65)
+> 10 0
+> 10 1
+> 10 2
+> Number of Decoding Instances  Converged at k= 0
+> Converged at k= 1
+> Converged at k= 2
+> Converged at k= 3
+> Converged at k= 4
+> Converged at k= 5
+> Without dilution
+
+Figure 11. Histograms of the number of iterations until convergence for the d = 9 (left) and d = 65 (right) surface code at threshold 9% . The black line shows the baseline without dilution. 
+
+# 5 Interpretation of Dilution Method 
+
+While many practical modifications have improved MP decoders for quantum LDPC codes, their behavior remains poorly understood. In this section, we use the dilution method as a lens to first revisit the common view that BP is limited by stabilizer degeneracy and the unavoidable short cycles in Tanner graphs [1, 3]. We suggest that this cycle-based perspective is more subtle than it first appears: the correlation structure of the (effective) error distribution also plays a central role. We then use a one-dimensional strip as a toy model to give a heuristic graph-dilution argument for how structure-aware dilution reshapes the effective error distribution across stages, thereby enabling scalable decoding. 
+
+## 5.1 From Cycle to Correlations: Loops in the Diluted Tanner Graph 
+
+A major algorithmic obstacle for BP is non-convergence. Conventional wisdom attributes this problem largely to short cycles in the decoding graph. The Tanner graphs of stabilizer codes are known to contain many short loops [3], especially the inevitable mixed-type 4-cycles formed by different stabilizer types. As shown in Fig. 6 and Fig. 7, dilution does not remove all such cycles: each diluted graph still contains many 4-and 8-cycles of the types shown on the left of Fig. 12. From a pure cycle-based viewpoint, one might suspect that the dilution method should not help quaternary BP under depolarizing noise. However, numerical results show that despite the presence of these short cycles, dilution substantially reduces non-convergence up to a distance of 20 . This suggests that the relation between cycles and BP convergence is more subtle than girth alone indicates. In this section, we examine this relation from a more first-principles perspective. To begin, we recall the implicit independence assumption underlying local message-passing updates. For an X-type factor node aX ∈ F (resp. a Z-type factor node), the factor-to-variable updates in Eqs. 3 and 4 combine incoming Z-messages (resp. X-messages) as if they were independent. From this viewpoint, the effect of cycles is not determined only by their presence, but by the correlations they induce among the incoming messages to a factor node. To make this idea more concrete, consider the short 4-cycle shown in Fig. 12. After two iterations, the incoming messages ν(2)  
+
+> i→aZ
+
+(xi) and ν(2)  
+
+> j→aZ
+
+(xj ) correspond to the single-site marginal μ\a(xi | σX ) and μ\a(xj | σX ), where μ\a(x | σ) is the cavity distribution obtained by removing factor node a. Thus, the harmfulness of the cycle can be quantified by the deviation between the joint cavity marginal μ\a(x∂a Z | σ) and the product of its single-site cavity marginals Q 
+
+> i∈∂a Z
+
+μ\a(xi | σX ). We denote 12 this deviation by δ(a | σ) and call it the cavity discrepancy . Taking ∥ · ∥ to be total variation distance, define 
+
+δ(aZ | σ) = μ\a(x∂a Z | σ) − Y
+
+> i∈∂a Z
+
+μ\a(xi | σ) , δ(aX | σ) = μ\a(z∂a X | σ) − Y
+
+> i∈∂a X
+
+μ\a(zi | σ) . (13) 𝑎 !
+
+𝑎 "𝑗 
+
+𝑖 𝑎 !
+
+𝑎 " 𝑗 
+
+𝑖                        
+
+> Figure 12. Left: Short 4-cycles and 8-cycles in the diluted graph formed by different stabilizer types. Right: The cavity picture of the mixed-type 4-cycle. For this cycle, we are interested in the correlation between the incoming messages ν(2)
+> i→aZ(xi)and ν(2)
+> j→aZ(xj), shown by the red arrows. After removing the Z-factor node aZ, these incoming messages correspond to the cavity marginals μ\a(xi|σX)and μ\a(xj|σX).
+
+To build intuition for the cavity discrepancy, consider a tree factor graph. Removing a factor node disconnects its neighboring variables, so the joint cavity marginal factorizes and δ(a | σ) = 0 for every factor node. At the opposite extreme, consider a short four-cycle consisting of two variable nodes and two stabilizer factors of the same type. Removing one factor leaves the two variables directly constrained by the other, and hence the cavity discrepancy is essentially maximal. Thus, single-type short cycles are indeed highly harmful. For mixed-type 4-cycles in Fig. 12, however, the cavity discrepancy δ(a | σ) also depends on the coupling between the X- and Z-components of the error prior ψi(ei) = ψi(xi, z i), as illustrated by Proposition 2. 
+
+Proposition 2. Consider the mixed-type 4-cycle consisting of two variable nodes i and j with error prior 
+
+ψi(xi, z i) = ψj (xj , z j ), and two factor nodes aX and aZ . Let pxi := P 
+
+> zi
+
+ψi(1 , z i), p zi := P 
+
+> xi
+
+ψi(xi, 1) , and define the X-Z coupling κ = κψj = κψi := ψi(1 , 1) − pxi pzi . We have 
+
+δ(aZ | σaX = 0) = 2( κ)2
+
+ (1 − pZ )2 + ( pZ )22 , δ(aZ | σaX = 1) = 2( κψi )2
+
+ 2pZ (1 − pZ )2 . (14) 
+
+In particular, the correlation vanishes if and only if κ = 0 , i.e., when the X- and Z-components of the single-qubit belief are independent. Proof. A detailed proof is given in Appendix B. Proposition 2 shows that, for a mixed-type 4-cycle, the cavity discrepancy scales as κ2. Under depolarizing noise, with ψi(ei) = pEi (ei) = (1 − p, p/ 3, p/ 3, p/ 3) , one has κ2 ≈ p2/9, which leads to small δ. Thus, when the error rate is not too large, the cavity discrepancy induced by each mixed-type 4-cycle is small. This helps explain why, at finite code lengths and with a bounded number of iterations, the correlations among incoming messages remain controlled, and the BP update equations can still provide a good approximation. The above discussion adopts a correlation-based perspective, explaining why mixed-type 4-cycles are much more benign than single-type short cycles for BP under depolarizing noise. Under single-X noise, the implication is that graph geometry alone might not be enough to assess BP effectiveness; what matters is the interplay between the (effective) error statistics and the graph geometry. This means that locally tree-like structure and large girth are not sufficient on their own: we should also ensure that the number of effective errors inside each cycle is much smaller than half the girth. 
+
+## 5.2 Interpretation of the Dynamics 
+
+In this section, we provide a heuristic explanation for why structure-aware dilution may enable BP to operate at large system sizes and sustain its threshold. To isolate the main mechanism, we consider the 13 simplified one-dimensional strip with periodic boundary conditions shown on the left of Fig. 13. The relevant logical operator is the non-contractible vertical loop of length d. Throughout this toy model, we consider a single X-noise with uniform physical error rate p. Similar to the graph dilution sequence in Definition 7, for a strip of length d, let G(0) , G(1) , ..., G(K) be the sequence of diluted strips with K = ⌊log 2 d⌋ and 
+
+G(k) = Gsk (sk = 2 k − 1). For the BP iterations schedule, we choose I′ 
+
+> k
+
+= min {2k, 20 k + 20 }. This gives 
+
+I′ 
+
+> k
+
+≤ 2k < g (k)/2 = 2 k + 1 , so the BP computation tree at each stage k is cycle-free. Hence, information cannot wrap around a cycle, and the incoming BP messages remain independent. It is clear from Fig. 13 that moving from stage k to stage k + 1 increases the girth of the underlying diluted strip from g(k) to g(k+1) .However, as discussed in Sec. 5.1, large girth alone is not sufficient to guarantee BP convergence or decoding performance. We must also control the effective error e(k) (see Definition 4) at each stage. Assuming that the initial physical error has weight less than d/ 2, a natural sufficient condition for both convergence and correctness is that the effective error weight remains below half the code distance throughout the dilution sequence: 
+
+n(k) = |e(k)| < d
+
+2 , ∀k = 0 , 1, . . . , K. (15) If this condition holds, the final correction is stabilizer-equivalent to the initial physical error e(0) . In the following, we give a heuristic argument that the condition is satisfied for all d whenever the initial error weight obeys n(0) = |e(0) | < d/ 4.𝒢 (") 𝒢 ($) 𝒢 (%) 𝒢 (&)
+
+𝑑 
+
+𝑒 (') 𝑒 ('($)𝑒 ̂)(')
+
+𝐃𝐞𝐜𝐢𝐦𝐚𝐭𝐢𝐨𝐧 𝐒𝐭𝐚𝐠𝐞 𝒌 𝐒𝐭𝐚𝐠𝐞 𝒌 + 𝟏 
+
+> 𝐵𝑃
+
+Figure 13. Schematic illustration of the dilution process on a one-dimensional strip. Left: The graph-dilution sequence G(0) , G(1) , G(2) , . . . . Right: One step in the evolution of the effective error from stage k to stage k + 1 .BP is first applied on G(k) to estimate the errors on the edges that will be removed. After decimation, diluting the corresponding qubits induces a renormalization of the residual error, described by Rk+1 , which produces the effective error e(k+1) on the diluted strip G(k+1) .
+
+To describe how the effective error evolves across dilution stages, start with an effective error e(k) on the current strip G(k). We run BP and decimate the edges removed in the transition from G(k) to G(k+1) ,producing an estimated error ˆe(k) 
+
+> s
+
+supported on G(k)\G (k+1) . After decimation, the residual error is e(k) ⊕ˆe(k) 
+
+> s
+
+.Since this residue is still defined on G(k), it is then renormalized to an effective error on the next strip G(k+1) ,as shown in the middle of Fig. 13. Thus, BP, decimation, and the global renormalization map R (see Definition 4) together define the stage-(k + 1) dilution map, denoted by π(k+1) :
+
+e(k+1) = π(k+1) (e(k)) = Rk+1 (e(k) ⊕ ˆe(k) 
+
+> s
+
+). (16) Having formalized the dilution map, we now argue that the effective error weight n(k) does not blow up under successive application of π(k) ◦ · · · ◦ π(1) . First, consider the ideal case where every decimation step is correct. Then, at each stage k, the effective error e(k) is simply the restriction of the initial error e(0) to the diluted strip G(k). Therefore, n(k) ≤ n(0) . In this best-case scenario, if the initial error satisfies n(0) < d/ 2,then n(k) < d/ 2 for all stages. In practice, however, wrong decimations are unavoidable, especially at early dilution stages. The key is that wrong decimation does not necessarily cause a large increase in the effective error weight. The intuition is that if the neighborhood of a decimated edge contains only small and well-separated errors, BP is likely to decimate it correctly. Therefore, wrong decimations mainly occur when the 14 local neighborhood already contains large error clusters. In this case, the residue error e(k) ⊕ ˆe(k) can often be renormalized, via stabilizer equivalence, into a lower-weight effective error on the next diluted graph, as illustrated by the example in the right of Fig. 13. We conduct a numerical experiment to test the above intuition. To describe the experiment, we first introduce cells and blocks . As shown on the left of Fig. 14, at stage k, the strip G(k) is partitioned into cells 
+
+{C(k) 
+
+> i
+
+}i∈C k , where the index set Ck depends on the dilution stage. A block B(k) 
+
+> j
+
+is defined as the union of two consecutive cells, B(k) 
+
+> j
+
+= C(k)2j ∪ C(k)2j+1 , j ∈ B k. Locally, at each dilution step, each block B(k) 
+
+> j
+
+is mapped to a cell C(k+1)  
+
+> j
+
+. The experiment is therefore performed on a single stage-k block B(k) 
+
+> j
+
+. For a fixed input block weight n(k) 
+
+> B
+
+, we sample many error configurations and compute the weighted average output weight 
+
+¯n(k+1)  
+
+> C
+
+(wcorr , w wrong ) after decimation and renormalization, where wcorr and wwrong are the weights assigned to samples with correct and wrong decimations. The goal is to test whether wrong decimations can make 
+
+¯n(k+1)  
+
+> C
+
+(wcorr , w wrong ) much larger than the input weight n(k) 
+
+> B
+
+. As shown in the right of Fig. 14, for each k,even under a strong bias toward wrong decimations, wc : ww = 1 : 100 , the average output weight remains close to the input weight. This supports the intuition that wrong decimations do not cause uncontrolled growth of the effective error weight. 𝐶 !
+
+𝐶 "
+
+𝐶 #
+
+𝐶 $
+
+𝐵 !
+
+𝐵 "
+
+𝐵 % 
+
+> (')
+
+𝐶 %
+
+> (')")
+
+𝒢 (')                        
+
+> 1357911 13 15
+> 1
+> 5
+> 9
+> 13
+> Input block error weight n(k)
+> B
+> Average output weight  ¯n(k+1)
+> C
+> Weight ratio wcorr :wwrong = 1 : 1
+> k= 0
+> k= 1
+> k= 2
+> k= 3
+> y=x
+> 15913
+> 1
+> 5
+> 9
+> 13
+> wcorr :wwrong = 1 : 100
+
+Figure 14. Numerical experiment for testing the evolution of effective error weight under dilution. The experiment is performed locally on one block B(k) at different stages k. Left: Illustration of cells and blocks, green regions denote cells, while red regions denote blocks. Each block consists of two neighboring cells. Middle: A stage-k block B(k) 
+
+> j
+
+,formed by two neighboring cells, is mapped to a stage-(k + 1) cell C(k+1)  
+
+> j
+
+. The red edge denotes the qubit that is decimated when passing to stage k + 1 . Right: Weighted average output error weight ¯n(k+1)  
+
+> C
+
+as a function of the input block error weight n(k) 
+
+> B
+
+. Each color represents a different dilution stage k. The main panel uses equal weights, 
+
+wcorr : wwrong = 1 : 1 , while the inset uses 1 : 100 , strongly biasing the average toward wrong decimations. The dashed line is y = x as a reference. 
+
+The numerical experiment suggests that the block-to-cell renormalization is non-expansive at the level of local effective weight. Although this experiment is performed locally on a single block, we use it as evidence for the following heuristic assumption on the true dilution dynamics: for sufficiently large d,
+
+X
+
+> i∈C k+1
+
+n(k+1)  
+
+> Ci
+
+≤ X
+
+> j∈B k
+
+n(k) 
+
+> Bj
+
+, (17) where n(k) 
+
+> Bj
+
+= |e(k)|Bj and n(k) 
+
+> Ci
+
+= |e(k)|Ci denote the effective error weight restricted to block B(k) 
+
+> j
+
+and cell 
+
+C(k) 
+
+> i
+
+, respectively. Since the Hamming weight is bounded by any covering count, and by the covering relation between blocks and cells at the same stage, we have n(k) = |e(k)| ≤ P 
+
+> j∈B k
+
+n(k) 
+
+> Bj
+
+≤ P 
+
+> i∈C k
+
+n(k) 
+
+> Ci
+
+. Using the heuristic non-expansion assumption in Eq. (17) recursively gives 
+
+n(k) ≤ X
+
+> i∈C k
+
+n(k) 
+
+> Ci
+
+≤ X
+
+> j∈B k−1
+
+n(k−1)  
+
+> Bj
+
+≤ X
+
+> i∈C k−1
+
+n(k−1)  
+
+> Ci
+
+≤ · · · ≤ 
+
+> d/ 2
+
+X
+
+> j=1
+
+n(0)  
+
+> Bj
+
+. (18) 15 Thus, the stage-wise condition is satisfied if the initial block-counting weight obeys Pd/ 2 
+
+> j=1
+
+n(0)  
+
+> Bj
+
+< d 
+
+> 2
+
+. Since each physical error is counted in at most two initial blocks, we have Pd/ 2 
+
+> j=1
+
+n(0)  
+
+> Bj
+
+≤ 2|e(0) |. Therefore, a sufficient condition in terms of the initial physical error weight is |e(0) | < d 
+
+> 4
+
+.
+
+# 6 Discussion and Conclusion 
+
+In summary, this work takes a step toward algorithmically scalable and interpretable MP-based decoding approaches for quantum error correction, seeking to reconcile the tension between practice and theory. Looking forward, a direction is to generalize the dilution method for broader families of quantum LDPC codes under a more realistic noise model. Ultimately, we hope to find a framework that enables message-passing decoding to work reliably for quantum LDPC codes, meaning that the method is robust and scalable, and its behavior can largely be understood and predicted by the message-passing theory. 
+
+# Acknowledgments 
+
+The authors would like to thank Di Wu and Eduardo Mucciolo for their insightful discussions. 16 References 
+
+[1] D. Poulin and Y. Chung, “On the iterative decoding of sparse quantum codes,” arXiv preprint arXiv:0801.1241 , 2008. [2] T. Müller, T. Alexander, M. E. Beverland, M. Bühler, B. R. Johnson, T. Maurer, and D. Vandeth, “Improved belief propagation is sufficient for real-time decoding of quantum memory,” arXiv preprint arXiv:2506.01779 , 2025. [3] Z. Babar, P. Botsinis, D. Alanis, S. X. Ng, and L. Hanzo, “Fifteen years of quantum ldpc coding and improved decoding strategies,” iEEE Access , vol. 3, pp. 2492–2519, 2015. [4] N. Raveendran and B. Vasić, “Trapping sets of quantum ldpc codes,” Quantum , vol. 5, p. 562, 2021. [5] P. Fuentes, J. E. Martinez, P. M. Crespo, and J. Garcia-Frías, “Degeneracy and its impact on the decoding of sparse quantum codes,” IEEE Access , vol. 9, pp. 89 093–89 119, 2021. [6] T. Richardson and R. Urbanke, Modern coding theory . Cambridge university press, 2008. [7] M. Mezard and A. Montanari, Information, physics, and computation . Oxford University Press, 2009. [8] J.-P. Tillich and G. Zémor, “Quantum ldpc codes with positive rate and minimum distance proportional to the square root of the blocklength,” IEEE Transactions on Information Theory , vol. 60, no. 2, pp. 1193–1202, 2013. [9] P. Panteleev and G. Kalachev, “Quantum ldpc codes with almost linear minimum distance,” IEEE Transactions on Information Theory , vol. 68, no. 1, pp. 213–229, 2021. [10] N. P. Breuckmann and J. N. Eberhardt, “Balanced product quantum codes,” IEEE Transactions on Information Theory , vol. 67, no. 10, pp. 6653–6674, 2021. [11] H. Yao, W. A. Laban, C. Häger, A. G. i Amat, and H. D. Pfister, “Belief propagation decoding of quantum ldpc codes with guided decimation,” in 2024 IEEE International Symposium on Information Theory (ISIT) . IEEE, 2024, pp. 2478–2483. [12] K.-Y. Kuo and C.-Y. Lai, “Exploiting degeneracy in belief propagation decoding of quantum codes,” 
+
+npj Quantum Information , vol. 8, no. 1, p. 111, 2022. [13] J. Old and M. Rispler, “Generalized belief propagation algorithms for decoding of surface codes,” Quan-tum , vol. 7, p. 1037, 2023. [14] Y.-J. Wang, B. C. Sanders, B.-M. Bai, and X.-M. Wang, “Enhanced feedback iterative decoding of sparse quantum codes,” IEEE transactions on information theory , vol. 58, no. 2, pp. 1231–1241, 2012. [15] J. Du Crest, M. Mhalla, and V. Savin, “Stabilizer inactivation for message-passing decoding of quantum ldpc codes,” in 2022 IEEE Information Theory Workshop (ITW) . IEEE, 2022, pp. 488–493. [16] E. Dennis, A. Kitaev, A. Landahl, and J. Preskill, “Topological quantum memory,” Journal of Mathe-matical Physics , vol. 43, no. 9, pp. 4452–4505, 2002. [17] N. Delfosse and N. H. Nickerson, “Almost-linear time decoding algorithm for topological codes,” Quan-tum , vol. 5, p. 595, 2021. [18] A. G. Fowler, “Proof of finite surface code threshold for matching,” Physical review letters , vol. 109, no. 18, p. 180502, 2012. [19] S. Yoshida, E. Lake, and H. Yamasaki, “Proof of a finite threshold for the union-find decoder,” arXiv preprint arXiv:2602.20238 , 2026. [20] P. Panteleev and G. Kalachev, “Degenerate quantum ldpc codes with good finite length performance,” 
+
+Quantum , vol. 5, p. 585, 2021. 17 [21] T. Hillmann, L. Berent, A. O. Quintavalle, J. Eisert, R. Wille, and J. Roffe, “Localized statistics decoding: A parallel decoding algorithm for quantum low-density parity-check codes,” arXiv preprint arXiv:2406.18655 , 2024. [22] O. Higgott and N. P. Breuckmann, “Improved single-shot decoding of higher-dimensional hypergraph-product codes,” PRX Quantum , vol. 4, no. 2, p. 020332, 2023. [23] L. Zdeborová and F. Krzakala, “Statistical physics of inference: Thresholds and algorithms,” Advances in Physics , vol. 65, no. 5, pp. 453–552, 2016. [24] A. R. Calderbank and P. W. Shor, “Good quantum error-correcting codes exist,” Phys. Rev. A , vol. 54, pp. 1098–1105, Aug 1996. [Online]. Available: https://link.aps.org/doi/10.1103/PhysRevA.54.1098 [25] A. Steane, “Multiple-particle interference and quantum error correction,” Proceedings of the Royal Society of London. Series A: Mathematical, Physical and Engineering Sciences , vol. 452, no. 1954, pp. 2551–2577, 1996. [Online]. Available: https://royalsocietypublishing.org/doi/abs/10.1098/rspa.1996.0136 [26] K.-Y. Kuo and C.-Y. Lai, “Refined belief propagation decoding of sparse-graph quantum codes,” IEEE Journal on Selected Areas in Information Theory , vol. 1, no. 2, pp. 487–498, 2020. [27] C.-Y. Lai and K.-Y. Kuo, “Log-domain decoding of quantum ldpc codes over binary finite fields,” IEEE Transactions on Quantum Engineering , vol. 2, pp. 1–15, 2021. [28] S. Miao, A. Schnerring, H. Li, and L. Schmalen, “Quaternary neural belief propagation decoding of quantum ldpc codes with overcomplete check matrices,” IEEE Access , 2025. [29] D. Gottesman, “Stabilizer codes and quantum error correction. caltech ph. d,” Ph.D. dissertation, Thesis, eprint: quant-ph/9705052, 1997. [30] A. Y. Kitaev, “Fault-tolerant quantum computation by anyons,” Annals of physics , vol. 303, no. 1, pp. 2–30, 2003. [31] M. Pretti, “A message-passing algorithm with damping,” Journal of Statistical Mechanics: Theory and Experiment , vol. 2005, no. 11, pp. P11 008–P11 008, 2005. [32] J. Mooij and H. Kappen, “Sufficient conditions for convergence of loopy belief propagation,” arXiv preprint arXiv:1207.1405 , 2012. [33] R. Zivan, O. Lev, and R. Galiki, “Beyond trees: Analysis and convergence of belief propagation in graphs with multiple cycles,” in Proceedings of the AAAI Conference on Artificial Intelligence , vol. 34, no. 05, 2020, pp. 7333–7340. [34] B. Zhang, H. Yao, and H. D. Pfister, “Belief propagation decoding on a sparsified graph ensemble of the surface code,” in 2025 IEEE International Symposium on Information Theory (ISIT) . IEEE, 2025, pp. 1–6. 18 A Proof of Theorem 1 
+
+We use two different local decompositions for the two sparsification patterns, as shown in the Fig. 15. For the diagonal pattern DsH , Di denotes a local vertical strip; its interior contains the vertical edges of the strip, and ∂D i denotes the retained horizontal edges on its boundary. These regions form an overlapping cover. For the Cartesian pattern CsH , Ci denotes a horizontal band extending across the lattice; its interior contains the vertical edges in the band, and ∂C i consists of the two retained horizontal boundary lines. These regions give a disjoint decomposition of the diluted lattice. 𝑠 + 1
+
+2               
+
+> Figure 15. Local regions and worst-case configurations used in Lemma 1. The first two panels define the local decompositions. For the diagonal pattern, Diis the green local region and ∂D iconsists of the red retained boundary edges. For the Cartesian pattern, Ciis the green horizontal band and ∂C iconsists of the two red retained boundary lines. The last two panels illustrate worst-case local configurations. In the diagonal region, an error placed midway between retained boundaries produces the largest local expansion, giving the factor 2⌊(s+ 1) /2⌋. In the Cartesian band, the worst-case imbalance between the effective correction and the competing logical representative is achieved by placing the errors midway between the two retained boundary lines, giving the factor ⌊(s−1) /2⌋.
+
+Lemma 1 (Local expansion bounds) . Fix a sparsification ratio s ≥ 1. For the diagonal pattern DsH , let Di
+
+denote the local vertical region shown in Fig. 15: its interior consists of the vertical edges inside the region, while ∂D i consists of the retained horizontal boundary edges. For the Cartesian pattern CsH , let Ci denote the horizontal band shown in Fig. 15: its interior consists of the vertical edges in the band, while ∂C i consists of the two retained horizontal boundary lines. Let e be a nonzero error configuration restricted to one such region, and let ˜e be the corresponding minimum-weight effective error supported on the diluted lattice. Let 
+
+˜ℓ(e) denote the minimum-weight effective representative in the opposite logical coset. Then the following local bounds hold: 
+
+max 
+
+> i,e
+
+˜e Di
+
+e Di
+
+= max 
+
+> e
+
+˜e D
+
+e D
+
+= 2 
+
+ s + 1 2
+
+
+
+, (19) 
+
+and 
+
+max 
+
+> i,e
+
+˜e Ci
+
+− ˜ℓ(e) Ci
+
+e Ci
+
+= max 
+
+> e
+
+˜e C − ˜ℓ(e) C
+
+e C
+
+=
+
+ s − 12
+
+
+
+. (20) 
+
+Here, the maximization is over all nonzero local error configurations, so the denominators are nonzero. Proof. The claim follows from the local geometries shown in Fig. 15. For the diagonal region Di, the worst case is obtained by placing a local error midway between two retained boundary edges. Its effective representative can extend to the nearest retained boundaries on both sides, giving at most 2⌊(s + 1) /2⌋
+
+effective edges per local error. By subadditivity of Hamming weight, the same bound holds for any local error configuration. For the Cartesian region Ci, the interior contribution compares the effective representative with the competing representative in the opposite logical coset. The largest possible difference occurs when the local errors are placed midway between the two retained boundary lines, as illustrated in Fig. 15. In this case, the correction returning to the same boundary line and the competing path crossing to the other boundary line differ by at most ⌊(s−1) /2⌋ per local error. Subadditivity again extends the bound to arbitrary local configurations. 
+
+Proof. Let e be an error configuration on original lattice G and ˜e be its effective error (see Definition 4) supported on diluted lattice Gs, and let ˜ℓ(e) denote the minimum-weight effective operator that induces a 19 logical failure (i.e., the minimum-weight representative in the corresponding logical coset). For any error e
+
+on the original lattice G with |e| ≤ ⌊ (d − 1) /2⌋, it is correctable on a given diluted lattice Gs if 
+
+∆Gs (e) = |˜e| − | ˜ℓ(e)| < 0. (21) Use the fact that the Hamming weight is subadditive under a cover and that S 
+
+> i
+
+∂D i ⊂ G sDH . For s-diluted lattice via Diagonal dilution GsDH , we obtain 
+
+˜e = 12 · X
+
+> i
+
+˜e Di + X
+
+> i
+
+˜e ∂D i , ˜ℓ(e) ≥ X
+
+> i
+
+˜ℓ(e) ∂D i (22) From (22), it follows that for the DsH -diluted lattice GsDH ,
+
+∆GsDH
+
+(e) = 12 · X
+
+> i
+
+˜e Di + X
+
+> i
+
+˜e ∂D i − X
+
+> i
+
+˜ℓ(e) ∂D i = 12 · X
+
+> i
+
+˜e Di
+
+| {z }
+
+> ∆|DH
+
++ X
+
+> i
+
+
+
+˜e ∂D i − ˜ℓ(e) ∂D i
+
+| {z }
+
+> ∆|∂D H
+
+(23) For an CsH -diluted lattice GsCH , since {Ci}i and {∂C i}i together form a partition of the lattice (i.e., they cover the lattice and are pairwise disjoint), the Hamming weight decomposes exactly as 
+
+˜e = X
+
+> i
+
+˜e Ci + X
+
+> i
+
+˜e ∂C i , ˜ℓ(e) = X
+
+> i
+
+˜ℓ(e) Ci + X
+
+> i
+
+˜ℓ(e) ∂C i , (24) Hence, for GsCH , we have 
+
+∆GsCH
+
+(e) = X
+
+> i
+
+˜e Ci −X
+
+> i
+
+˜ℓ(e) Ci +X
+
+> i
+
+˜e ∂C i −X
+
+> i
+
+˜ℓ(e) ∂C i = X
+
+> i
+
+
+
+˜e Ci − ˜ℓ(e) Ci
+
+| {z }
+
+> ∆|CH
+
++ X
+
+> i
+
+
+
+˜e ∂C i − ˜ℓ(e) ∂C i
+
+| {z }
+
+> ∆|∂C H
+
+(25) We refer to the first term ∆|D , ∆|C as the interior term and the second term ∆|∂D , ∆|∂C as the boundary term . For the interior term ∆|D and ∆|C , we have 
+
+∆|DH = 12 · X
+
+> i
+
+˜e Di
+
+= 12 · X
+
+> i
+
+ ˜e Di
+
+e Di
+
+· e Di
+
+
+
+≤
+
+
+
+max 
+
+> i, e
+
+˜e Di
+
+e Di
+
+
+
+·
+
+ 12 · X
+
+> i
+
+e Di
+
+
+
+(26) Similarly, 
+
+∆|CH = X
+
+> i
+
+
+
+˜e Ci
+
+− ˜ℓ(e) Ci
+
+
+
+= X
+
+> i
+
+ ˜e Ci − ˜ℓ(e) Ci
+
+e Ci
+
+· e Ci
+
+
+
+≤
+
+
+
+max 
+
+> i, e
+
+˜e Ci − ˜ℓ(e) Ci
+
+e Ci
+
+
+
+·
+
+ X
+
+> i
+
+e Ci
+
+
+
+(27) Since all blocks Di (resp. Ci) are identical by construction, we have the following inequality by Lemma 1, 
+
+max 
+
+> i, e
+
+˜e Di
+
+e Di
+
+= max ˜e Di
+
+e Di
+
+= 2 ·
+
+ s + 1 2
+
+
+
+. (28) Similarly, 
+
+max 
+
+> Ci, e
+
+˜e|Ci − ˜ℓ|Ci (e)
+
+e|Ci
+
+= max 
+
+˜e|C − ˜ℓ|C (e)
+
+e|C
+
+=
+
+ s − 12
+
+
+
+. (29) Since 12
+
+P 
+
+> i
+
+|e|Di ≤ | e| and P 
+
+> i
+
+|e|Ci ≤ | e|, the interior term are bounded by 
+
+∆|DH ≤ 2 ·
+
+j s + 1 2
+
+k
+
+· | e|, ∆|CH ≤
+
+j s − 12
+
+k
+
+· | e|. (30) 20 For the boundary term ∆|∂D H and ∆|∂C H , since 
+
+X
+
+> i
+
+˜e ∂D i + X
+
+> i
+
+˜ℓ( e ) ∂D i ≥ X
+
+> i
+
+˜e|∂D i ⊕ ˜ℓ|∂D i ( e ) ≥ X
+
+> i
+
+(˜ e ⊕ ˜ℓ)|∂D i ( e ) ≥ d. (31) Similarly, X
+
+> i
+
+˜e ∂C i + X
+
+> i
+
+˜ℓ( e ) ∂C i ≥ X
+
+> i
+
+˜e|∂C i ⊕ ˜ℓ|∂C i ( e ) ≥ X
+
+> i
+
+(˜ e ⊕ ˜ℓ)|∂C i ( e ) ≥ d. (32) Since P 
+
+> i
+
+˜e ∂D i ≤ e and P 
+
+> i
+
+˜e ∂C i ≤ e , we have 
+
+∆|∂C H = X
+
+> i
+
+
+
+˜e ∂C i − ˜ℓ(e) ∂C i
+
+
+
+≤ 2 e − d, ∆|∂D H = X
+
+> i
+
+
+
+˜e ∂D i − ˜ℓ(e) ∂D i
+
+
+
+≤ 2 e − d
+
+Therefore, 
+
+∆( GsDH ) = ∆ |DH + ∆ |∂D H ≤ 2·
+
+ s + 1 2
+
+
+
+· e + 2 e − d, ∆( GsCH ) = ∆ |CH + ∆ |∂C H ≤
+
+ s − 12
+
+
+
+· e + 2 e − d. t(GD ) ≥
+
+j d − 12 · ⌊ s+1 2 ⌋ + 2 
+
+k
+
+, t(GCH ) ≥
+
+ d − 1
+
+⌊ s−12 ⌋ + 2 
+
+
+
+.
+
+# B Proof of Proposition 2 
+
+Proof. Let (X, Z ) denote the pair of random variables representing the X- and Z-error components of a single-qubit error. For the two variable nodes i and j in the mixed-type 4-cycle, we write 
+
+(Xi, Z i) ≡ (xi, z i), (Xj , Z j ) ≡ (xj , z j ),
+
+for their associated random variables. Since the two qubits have the same single-qubit prior ψi(xi, z i) = 
+
+ψj (xj , z j ) = pEi (xi, z i), we denote 
+
+p10 := ψi(1 , 0) , p11 := ψi(1 , 1) , pZ := X
+
+> x∈{ 0,1}
+
+ψi(x, 1) .
+
+After removing the Z-factor node aZ , the remaining X-factor imposes the constraint Zi ⊕ Zj = σaX . Thus the cavity distribution of (Xi, X j ) is obtained by conditioning on either Zi = Zj or Zi̸ = Zj . First consider 
+
+σaX = 0 , i.e. Zi = Zj . We have 
+
+P(Xi = 1 , X j = 1 , Z i = Zj ) = X
+
+> i∈(0 ,1)
+
+P(X1 = 1 , Z 1 = i) · P(X2 = 1 , Z 2 = i) = p210 + p211 , (33) and 
+
+P(Zi = Zj ) = (1 − pZ )2 + ( pZ )2. (34) Hence 
+
+P(Xi = 1 , X j = 1 | Zi = Zj ) = p210 + p211 
+
+(1 − pZ )2 + ( pZ )2 . (35) Similarly, 
+
+P(Xi = 1 , Z i = Zj ) = p10 (1 − pZ ) + p11 · pZ , (36) and therefore 
+
+P(X1 = i | Zi = Zj ) = p10 (1 − pZ ) + p11 pZ
+
+(1 − pZ )2 + ( pZ )2 . (37) 21 By symmetry, this is also P(Xj = 1 | Zi = Zj ). Thus 
+
+Cov( Xi, X j | σaX = 0) = P(Xi = 1 , X j = 1 | Zi = Zj ) − P(X1 = 1 | Z1 = Z2)2
+
+= p210 (pZ )2 + p211 (1 − pZ )2 − 2p10 p11 pZ (1 − pZ )
+
+ (1 − pZ )2 + ( pZ )22
+
+=
+
+ p11 (1 − pZ ) − p10 pZ 2
+
+ (1 − pZ )2 + ( pZ )22 . (38) Next consider σaX = 1 , i.e. Zi̸ = Zj . We have 
+
+P(Xi = 1 , X j = 1 , Z i̸ = Zj ) = 2 p10 p11 , (39) and 
+
+P(Zi̸ = Zj ) = 2 pZ (1 − pZ ). (40) Therefore 
+
+P(X1 = i, X 2 = j | Zi̸ = Zj ) = p10 p11 
+
+pZ (1 − pZ ) . (41) Moreover, 
+
+P(Xi = 1 , Z i̸ = Zj ) = p10 pZ + p11 (1 − pZ ), (42) so 
+
+P(Xi = 1 | Zi̸ = Zj ) = p10 pZ + p11 (1 − pZ )2pZ (1 − pZ ) . (43) Again by symmetry, the same expression holds for X2. Hence 
+
+Cov( Xi, X j | σaX = 1) = P(Xi = 1 , X j = 1 | Zi̸ = Zj ) − P(Xi = 1 | Zi̸ = Zj )2
+
+= −
+
+ p11 (1 − pZ ) − p10 pZ 2
+
+ 2pZ (1 − pZ )2 . (44) Finally, by definition of the X-Z coupling κ := ψi(1 , 1) − P 
+
+> zi
+
+ψi(1 , z i) · P 
+
+> xi
+
+ψi(xi, 1) .,
+
+κ = Cov( X, Z )= P(X = 1 , Z = 1) − P(X = 1) P(Z = 1) = p11 − (p10 + p11 )pZ = p11 (1 − pZ ) − p10 pZ .
+
+Substituting this into Eqs. (38) and (44) gives 
+
+Cov( Xi, X j | σaX = 0) = κ2
+
+ (1 − pZ )2 + ( pZ )22 , (45) and 
+
+Cov( Xi, X j | σaX = 1) = − κ2
+
+ 2pZ (1 − pZ )2 . (46) Since the cavity discrepancy δ(a | σ) is defined using total variation distance, then for two binary variables with identical marginals, 
+
+∥μ(x1, x 2) − μ(x1)μ(x2)∥TV = 2 |Cov( X1, X 2)| .
+
+Therefore, 
+
+δ(aZ | σaX = 0) = 2κ2
+
+ (1 − pZ )2 + ( pZ )22 , (47) and 
+
+δ(aZ | σaX = 1) = 2κ2
+
+ 2pZ (1 − pZ )2 . (48) In particular, the cavity discrepancy vanishes if and only if κ = 0 , equivalently when the X- and Z-components of the single-qubit error prior are independent. 22

@@ -1,6 +1,9 @@
 * <a class="dpr-sidebar-root-link" href="#/">首页</a>
 * <a class="dpr-sidebar-root-link dpr-sidebar-noactive-link" href="javascript:void(0)" data-dpr-hash="#/tutorial/README">使用教程</a>
 * Daily Papers
+  * 2026-06-02 ~ 2026-06-11 <!--dpr-date:20260602-20260611-->
+    * 速读区
+      * <a class="dpr-sidebar-item-link dpr-sidebar-item-structured" href="#/20260602-20260611/2606.03582v1-fracton-topological-holography" data-sidebar-item="{&quot;title&quot;: &quot;Fracton Topological Holography&quot;, &quot;link&quot;: &quot;https://arxiv.org/abs/2606.03582v1-fracton-topological-holography&quot;, &quot;score&quot;: &quot;7.0&quot;, &quot;tags&quot;: [{&quot;kind&quot;: &quot;query&quot;, &quot;label&quot;: &quot;qec-code&quot;}], &quot;evidence&quot;: &quot;分形子稳定子码，将拓扑全息推广到稳定子码&quot;}">Fracton Topological Holography</a>
   * 2026-06-10 <!--dpr-date:20260610-->
     * 精读区
       * <a class="dpr-sidebar-item-link dpr-sidebar-item-structured" href="#/202606/10/2606.08771v1-algebra-of-bivariate-bicycle-surface-codes" data-sidebar-item="{&quot;title&quot;: &quot;Algebra of Bivariate-Bicycle Surface Codes&quot;, &quot;link&quot;: &quot;https://arxiv.org/abs/2606.08771v1-algebra-of-bivariate-bicycle-surface-codes&quot;, &quot;score&quot;: &quot;9.0&quot;, &quot;tags&quot;: [{&quot;kind&quot;: &quot;query&quot;, &quot;label&quot;: &quot;qec-decoding&quot;}], &quot;evidence&quot;: &quot;表面码的代数结构，用于解码优化&quot;}">Algebra of Bivariate-Bicycle Surface Codes</a>

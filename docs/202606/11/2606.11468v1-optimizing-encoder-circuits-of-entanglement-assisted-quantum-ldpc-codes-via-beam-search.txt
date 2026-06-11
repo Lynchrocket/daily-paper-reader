@@ -1,0 +1,664 @@
+Title: Optimizing Encoder Circuits of Entanglement-Assisted Quantum LDPC Codes via Beam Search
+
+URL Source: https://arxiv.org/pdf/2606.11468v1
+
+Published Time: Thu, 11 Jun 2026 00:16:25 GMT
+
+Number of Pages: 10
+
+Markdown Content:
+> 1
+
+# Optimizing Encoder Circuits of Entanglement-Assisted Quantum LDPC Codes via Beam Search 
+
+Aditya Sodhani, Member, IEEE, Pavan Kumar, Shayan Srinivasa Garani, Senior Member, IEEE, 
+
+and Keshab K. Parhi, Life Fellow, IEEE 
+
+Abstract —Entanglement-assisted (EA) quantum QC-LDPC codes offer strong error-correction capabilities with structured parity-check matrices, but their practical use depends on efficient encoder circuits and the availability of pre-shared Bell pairs (ebits). In all encoder implementations based on the stabilizer formalism, the dominant contribution to this complexity comes from the use of controlled gates. In this paper, we adopt the Sharma–Kumar–Garani (SKG) encoder construction. We formulate the encoder optimization as a search over GF(2) 
+
+row operations that decompose the binary matrix derived from its CNOT sub-sequence. We solve this problem using a beam search algorithm guided by a Hamming-distance heuristic. For the tested EA quantum QC-LDPC code families, the proposed method achieves CNOT-count reductions of 7.3–34.0% relative to the SKG baseline encoder. The optimized circuits also yield lower CNOT counts than Patel–Markov–Hayes synthesis on all tested instances and are verified by stabilizer-tableau simulation. These results show that substantial encoder simplification is possible for structured EA QC-LDPC codes. 
+
+Index Terms —Quantum error correction, CNOT optimization, entanglement-assisted codes, QC-LDPC codes, beam search, circuit synthesis. 
+
+I. I NTRODUCTION 
+
+Quantum computers are computational platforms that ex-ploit superposition and entanglement for information process-ing, with potential applications in combinatorial and global optimization, machine learning, and other computationally hard problems. However, quantum states are highly sensitive to decoherence, imperfect control, and measurement noise, which makes reliable large-scale quantum computation difficult [1], [2]. Quantum error-correcting codes (QECCs) based on stabi-lizers provide a framework for protecting quantum information against such errors [3], [4]. The QECC construction based on Calderbank–Shor–Steane (CSS) codes [5], [6] is useful for deriving quantum codes from pairs of classical codes satisfying a symplectic orthogonality condition. Entanglement-assisted (EA) quantum codes further broaden this framework by using pre-shared Bell pairs (ebits), thereby allowing constructions from classical codes that are not dual-containing [7]. Quasi-cyclic low-density parity-check (QC-LDPC) codes are attractive candidates for EA quantum code construction 
+
+A. Sodhani and K. K. Parhi are with the Department of Electrical and Computer Engineering, University of Minnesota, Minneapolis, MN 55455 USA (e-mail: sodha005@umn.edu; parhi@umn.edu). P. Kumar and S. S. Garani are with the Department of Electronic Systems Engineering, Indian Institute of Science, Bengaluru 560012, India (e-mail: pavankumar1@iisc.ac.in; shayangs@iisc.ac.in). 
+
+because their parity-check matrices have regular circulant structure and favorable error-correction properties [8]–[10]. Recent work by Sharma, Kumar, and Garani [11] introduced several families of EA quantum QC-LDPC codes with guar-anteed girth and minimum-distance properties. While code construction and decoding have been widely studied [12], [13], the complexity of the corresponding en-coder circuits has received less attention. For the CSS-type encoders considered here, the circuit is composed primarily of Hadamard and CNOT gates. Since the CNOT gate domi-nates the implementation cost and is typically more resource-intensive than single-qubit operations in current quantum hardware [14], reducing the CNOT count is important for improving encoder efficiency and circuit fidelity. Prior work on quantum encoder circuits has addressed both the derivation of valid encoders and the simplification of the resulting circuits. For stabilizer block codes, algebraic manipulation of stabilizer generators can be used to derive efficient encoding circuits [15]. Encoder constructions for entanglement-assisted quantum codes extend the stabilizer framework by incorporating shared ebits, while unified quan-tum convolutional coding frameworks can incorporate fresh ancillas, ebits, and gauge qubits and often lead to periodic encoding circuits [16]. Symplectic Gram–Schmidt orthogonal-ization and related symplectic methods provide algebraic tools for deriving logical operators and standard-form stabilizer descriptions that underlie such encoder constructions [17]. Circuit-level simplification and gate-count optimization of stabilizer encoders have also been studied [18]. With the non-CNOT Clifford layers held fixed, the remain-ing CNOT sub-sequence of the encoder can be represented by an invertible binary matrix over GF(2) . This places the CNOT-subsequence optimization within the setting of linear reversible circuit synthesis over GF(2) , for which Gaussian-elimination-based constructions and the Patel–Markov–Hayes (PMH) algo-rithm are standard approaches [19]. Related stabilizer and Clif-ford synthesis techniques include canonical-form reductions for stabilizer circuits and SAT-based CNOT-optimal Clifford synthesis [20], [21]. Encoder design for quantum LDPC codes has also been studied from a fault-tolerance perspective, where the goal is to limit error propagation [22]. Other related efforts include nearest-neighbor compliant encoder optimization for specific stabilizer codes [23] and encoder-circuit optimization for non-binary quantum error-correcting codes in prime di-mensions [24]. 
+
+> arXiv:2606.11468v1 [quant-ph] 9 Jun 2026 2
+
+These approaches provide useful tools for constructing or optimizing quantum encoders. However, to the best of our knowledge, they do not specifically target the row correlations that arise in the SKG-derived encoder matrix M from the QC-LDPC circulant structure of Hx and Hz . In this work, we consider CNOT count reduction for EA quantum QC-LDPC encoder circuits. We model the CNOT sub-sequence of the SKG encoder E = D† by an invertible binary matrix 
+
+M over GF(2) , where each CNOT gate corresponds to a row operation Ri ← Ri ⊕ Rj . The problem is to find the shortest sequence that decomposes M into elementary row-XOR factors. This formulation is related to linear reversible circuit synthesis over GF(2) [19], [20]. We address this prob-lem using beam search [25] guided by the Hamming-distance heuristic h(M ′) = wt( M ′ ⊕ I). This heuristic implicitly exploits row correlations in the SKG-derived matrix M by favoring row operations that reduce the number of non-zero non-diagonal entries by more than one in a single step. We apply the proposed method to the Theorem 1 EA quantum QC-LDPC code family in [11] together with two hand-specified EA codes, and compare with existing baseline encoders. This paper is organized as follows. Section II reviews EA quantum QC-LDPC codes and encoder representation. Section III presents the proposed method. Section IV presents the results. Section V concludes the paper. II. B ACKGROUND 
+
+A. EA CSS Codes and the SKG Decoder 
+
+An [[ n, k, d ; c]] EA quantum code encodes k logical qubits into n physical qubits with the help of c pre-shared Bell pairs (ebits); the total number of qubits in the encoder is 
+
+nt = n + c. Given binary parity-check matrices Hx (X-type) and Hz (Z-type), the EA CSS construction admits an entanglement-assisted code whose required ebit count satisfies 
+
+c = rank( HxHTz ) over GF(2) [11]. Augmenting the parity-check matrices with ebit columns Dx, D z ∈ GF(2) ρi×c
+
+satisfying DxDTz = HxHTz produces extended check matrices 
+
+Hex = [ Hx | Dx] and Hez = [ Hz | Dz ] with Hex HTez ≡ 0(mod 2) .Following the SKG construction [11], [22], we build a Clif-ford decoder D = D5D4D3D2D1D0 that brings any encoded state back to the product form |0⟩⊗(n−k−c) ⊗ | ψ⟩ ⊗ | Φ+⟩⊗c;the encoder is then E = D†. D0 is a column-permutation/row-reduction step on Hex ; D1–D4 are CNOT layers that bring 
+
+Hex and Hez to a standardized pivot form; D5 is a Hadamard layer. The per-layer details and block-role glossary are given in the supplementary material. Running the six layers in reverse time order yields the encoder E = D†, which produces the encoded codeword from |0⟩⊗(n−k−c) ⊗ | ψ⟩ ⊗ | Φ+⟩⊗c.
+
+B. QC-LDPC Parity-Check Matrices 
+
+Let P denote the p×p right circulant permutation matrix and 
+
+p be an odd prime. The parity-check matrices are constructed as arrays of circulant blocks: 
+
+Hx =
+
+
+
+P a0 P a1 · · · P ap−1
+
+... ... . . . ...
+
+P a(ℓ1−1) ·0 · · · · · · P a(ℓ1−1)( p−1) 
+
+ , (1) where each block row i has exponents {ki · j mod p : j =0, . . . , p −1} for some ki ∈ Fp, and ℓ1 denotes the number of block rows. The matrix Hz is constructed analogously with 
+
+ℓ2 block rows using distinct exponent generators [11]. For the two-code construction (Theorem 1), we assume ℓ1 = ℓ2
+
+and denote the per-matrix block row count as ℓ = ℓ1 = ℓ2.Larger ℓ produces a denser encoder matrix. The code family we optimize is stated below. 
+
+Theorem 1 (Two-code EA construction [11, Thm. 5]) . Let 
+
+C1 and C2 be two classical QC-LDPC codes with parity-check matrices Hx (ℓ1 block rows) and Hz (ℓ2 block rows), respectively, where 2 ≤ ℓ1, ℓ 2 ≤ p and ℓ1 + ℓ2 ≤ p. Assume all block rows across Hx and Hz are distinct. Then there exists an entanglement-assisted quantum QC-LDPC code with parameters [[ p2, p 2 − 2p − (p−1)( ℓ1 + ℓ2 − 2) + 1; 1]] 2. The overall Tanner graph of this EA code has girth greater than 4. C. Encoder Matrix Representation 
+
+The CNOT sub-sequence of the encoder E acts on nt qubits. Starting from the identity, applying CNOTs in order produces an invertible binary matrix M ∈ GL( nt, GF(2)) on the qubit-value register: each CNOT (j → i) realizes the row update 
+
+M [i] ← M [i] ⊕ M [j]. The Hadamard layer ( D5) acts only on the X-ancilla register and is invariant under our optimization. Let LSKG denote the number of CNOTs derived by the SKG construction; this sequence is a valid decomposition of M
+
+into elementary row-XOR operations (transvections). Since transvections are self-inverse, our objective is equivalent to finding a shorter sequence of row-XOR operations that reduces 
+
+M to the identity. III. P ROPOSED ENCODER OPTIMIZATION 
+
+A. Problem Formulation 
+
+Under the matrix representation of the encoder matrix M ,each CNOT gate with control qubit j and target qubit i
+
+corresponds to the row operation Ri ← Ri ⊕ Rj . Since CNOT gates are self-inverse, the encoder implementing M
+
+can be reversed by finding a sequence of row operations that transforms M to the identity I. The length of this sequence equals the optimized CNOT count. The optimization problem is therefore equivalent to decomposing the invertible binary matrix M into a product of elementary row-addition matrices with minimum factors. Given the encoder matrix M ∈ GF (2) nt×nt , we seek a minimum-length sequence of row operations 
+
+(i1, j 1), (i2, j 2), . . . , (iL, j L) such that applying 
+
+Rit ← Rit ⊕ Rjt for t = 1, . . . , L transforms M into 
+
+I. Each operation corresponds to one CNOT gate, so L is the optimized CNOT count. The total search space has nt(nt − 1) 
+
+possible operations per step. A small four-qubit example in the supplementary material illustrates two CNOT sequences of different lengths (5 vs. 3) that both produce the same M
+
+when applied to I, showing the matrix-level equivalence that the search exploits. 3SKG 
+
+encoder 
+
+ℰ = 𝒟 †
+
+Extract 
+
+CNOT 
+
+sub -
+
+sequence 
+
+Binary 
+
+matrix M 
+
+over GF(2) 
+
+Beam search    
+
+> (Algorithm 1)
+> score: h(M′) = wt (M′ ⊕I)
+
+Reconstruct 
+
+CNOT circuit 
+
+Stabilizer 
+
+tableau 
+
+verify       
+
+> M (nₜ ×nₜ) shorter seq
+> Setup Optimization Verification
+> Fig. 1. Architecture of the proposed CNOT-count optimization flow.
+
+B. Beam Search Algorithm 
+
+Fig. 1 summarizes the end-to-end optimization flow, from extracting the SKG CNOT sub-sequence and forming the binary matrix M , to beam-search optimization, CNOT re-construction, and stabilizer-tableau verification. We define the Hamming distance heuristic 
+
+h(M ′) = wt (M ′ ⊕ I), (2) which counts the number of positions where the current matrix 
+
+M ′ differs from the identity. This measures how far the current state is from the goal and serves as the evaluation function in our beam search. The beam search proceeds iteratively over depth levels d =1, 2, . . . , d max , where dmax = LSKG is a valid upper bound: the reversed SKG sequence already achieves LSKG row operations, so the optimum cannot exceed it. At each depth, all nt(nt −
+
+1) possible row operations are applied to every state in the current beam B, producing a candidate set C. Each candidate is scored by h(·), and only the top-w states with lowest Hamming distance are retained for the next depth level. If any candidate equals the identity matrix I, the search terminates and returns the corresponding operation sequence. The beam is initialized with B = {M }.Algorithm 1 summarizes the proposed search procedure. 
+
+Complexity : At each depth, we evaluate |B| · nt(nt − 1) 
+
+candidates. With beam width w and maximum depth dmax ,the worst-case complexity is O(w · n2 
+
+> t
+
+· dmax ) evaluations. In practice, the search converges well before dmax for codes with exploitable structure. 
+
+C. Baselines 
+
+We compare the proposed beam-search optimizer with two baselines. The first is the SKG encoder, whose CNOT count is LSKG . This encoder is a valid reference for the EA quantum codes considered here because it preserves the ebit-pair stabilizer structure and the fixed Hadamard layer on the 
+
+X-stabilizer ancillas. A naive Gaussian-elimination encoder applied directly to the classical parity-check matrices does not, in general, preserve this complete EA encoder structure. The second baseline is the Patel–Markov–Hayes (PMH) al-gorithm [19], applied to the binary matrix M induced by the SKG CNOT sub-sequence. PMH performs section-wise row reduction with sub-row pattern matching and achieves asymptotic CNOT count O(n2 
+
+> t
+
+/ log nt).
+
+Algorithm 1 Beam Search for Encoder CNOT Reduction 
+
+Require: Encoder matrix M , beam width w, maximum depth 
+
+dmax = LSKG 
+
+Ensure: Operation sequence S such that M → I, if found  
+
+> 1:
+
+B ← { (M, ∅)} 
+
+> 2:
+
+for d = 1 to dmax do  
+
+> 3:
+
+C ← ∅  
+
+> 4:
+
+for all (M ′, S′) ∈ B do  
+
+> 5:
+
+for all ordered pairs (i, j ) with i̸ = j do  
+
+> 6:
+
+fM ← M ′ with row update Ri ← Ri ⊕ Rj 
+
+> 7:
+
+eS ← S ′ appended with (i, j ) 
+
+> 8:
+
+if fM = I then  
+
+> 9:
+
+return eS 
+
+> 10:
+
+end if  
+
+> 11:
+
+score ← h( fM ) 
+
+> 12:
+
+add ( fM , eS, score ) to C 
+
+> 13:
+
+end for  
+
+> 14:
+
+end for  
+
+> 15:
+
+retain the top-w candidates from C with the lowest scores as the new beam B 
+
+> 16:
+
+end for  
+
+> 17:
+
+return failure IV. R ESULTS AND DISCUSSION 
+
+We evaluate the proposed beam-search optimizer on six EA QC-LDPC codes instantiated from Theorem 1 of [11]. To include shorter block-length examples, we also evaluate two additional small EA benchmark codes, [[6 , 2; 2]] and [[8 , 2; 2]] .Beam widths from w = 1 to w = 500 are tested depending on the code size, and the smallest verified CNOT count is reported for each code. Each optimized circuit is verified through three checks. First, the returned row operations are applied to the extracted matrix to confirm M → I. Second, the forward CNOT sequence is applied to the identity to reconstruct the original binary transformation M . Finally, the complete encoder circuit, formed by combining the fixed Hadamard layer with the optimized CNOT sub-sequence, is checked using the stabilizer-tableau test [20]. The test propagates the input stabilizer generators through the Clifford encoder in tableau form and verifies that the output generators span the target EA-CSS stabilizer group. All eight optimized circuits pass these checks. 4                                                                                            
+
+> TABLE I GATE -COUNT COMPARISON FOR EA QC-LDPC ENCODER CIRCUITS .
+> Code pℓntSKG PMH Beam Red.
+> [[9 ,4; 1]] 3110 17 16 13 23.5%
+> [[25 ,16; 1]] 5126 38 36 33 13.2%
+> [[25 ,8; 1]] 5226 89 89 60 32.6%
+> [[49 ,36; 1]] 7150 82 78 74 9.8%
+> [[49 ,12; 1]] 7350 338 340 223 34.0%
+> [[121 ,100; 1]] 11 1122 218 210 202 7.3%
+> [[6 ,2; 2]] ––811 18 918.2%
+> [[8 ,2; 2]] ––10 13 13 10 23.1% Z-anc
+> X-anc
+> Z-anc
+> Logic
+> Ebit -TX
+> Ebit -RX
+> q0 |0 ⟩
+> q1 |0 ⟩
+> q2 |0 ⟩
+> q3 |0 ⟩
+> q4 |ψ₁ ⟩
+> q5 |ψ₂ ⟩
+> q6 |ψ₃ ⟩
+> q7 |ψ₄ ⟩
+> q8 |e ⟩
+> q9 |e ⟩
+> H
+> H
+> 1
+> 2
+> 3
+> 4
+> 5
+> 6
+> 7
+> 8910
+> 11 12 13
+> 14
+> 15 16 17
+> Fig. 2. SKG encoder circuit (baseline) for [[9 ,4; 1]] : 2 H, 17 CNOTs.
+
+A. Gate-Count Comparison 
+
+Table I presents the CNOT gate counts and gate-reduction percentages across all methods. The “SKG” column is the SKG construction count LSKG . The “PMH” column shows the Patel–Markov–Hayes [19] result. The “Beam” column reports the best beam search result obtained over the tested beam widths. The reduction column is measured relative to the SKG encoder. The dependence on beam width is discussed separately in the Beam Width Sensitivity subsection. Several observations emerge from Table I. First, the PMH algorithm [19] produces only modest savings over the SKG count (0–4 CNOTs on most codes; PMH is even slightly worse than SKG on [[49 , 12; 1]] and [[6 , 2; 2]] because of the 3-CNOT row-swap overhead). These results indicate that the CNOT cost of the baseline is governed primarily by the row structure of the SKG-induced matrix M , rather than by a particular Gaussian-elimination ordering. The proposed beam search therefore provides a complementary improvement over standard linear-reversible matrix-decomposition methods by exploring alternative row-XOR sequences that exploit overlaps among the rows of M . Second, beam search yields gate reductions on every tested code, ranging from 7.3% on the largest code [[121 , 100; 1]] to 34.0% on [[49 , 12; 1]] , with the largest absolute saving of 115 CNOTs also on [[49 , 12; 1]] .Third, denser codes (larger ℓ) admit larger relative reductions, since the additional block rows produce correlated entries in 
+
+M that beam search exploits via row sharing. To illustrate the optimization concretely, Figs. 2 and 3 show the complete CNOT encoder circuits for the [[9 , 4; 1]] code (p = 3 , ℓ = 1 , nt = 10 ) under the SKG construction and beam search, respectively. The 10 qubits comprise two X-stabilizer ancillas ( q1, q2), two Z-stabilizer ancillas ( q0, q3), four logical qubits ( q4–q7), and one pre-shared ebit pair ( q8Z-anc                  
+
+> X-anc
+> Z-anc
+> Logic
+> Ebit -TX
+> Ebit -RX
+> q0 |0 ⟩
+> q1 |0 ⟩
+> q2 |0 ⟩
+> q3 |0 ⟩
+> q4 |ψ₁ ⟩
+> q5 |ψ₂ ⟩
+> q6 |ψ₃ ⟩
+> q7 |ψ₄ ⟩
+> q8 |e ⟩
+> q9 |e ⟩
+> H
+> H1
+> 2
+> 3
+> 45
+> 6
+> 7
+> 8
+> 910 11 12
+> 13
+> Fig. 3. Beam-search-optimized encoder circuit for [[9 ,4; 1]] : 2 H, 13 CNOTs.
+
+at the sender, q9 at the receiver). The SKG approach applies 17 CNOTs from D1–D4 in reverse order. The beam search discovers a 13-operation sequence by reordering operations to exploit dependencies between rows. For instance, performing 
+
+R6 ← R6 ⊕ R2 early (step 1) creates a modified q6 state that enables subsequent operations on q0 to each clear two matrix entries simultaneously rather than one. This “row sharing” is precisely the mechanism that the Hamming distance heuristic identifies: operations that reduce h(M ′) by more than one are preferred by the beam selection, leading to shorter overall sequences. 
+
+B. Effect of Block Row Count 
+
+Table I shows that the number of block rows ℓ is the dom-inant determinant of optimization potential. For ℓ = 1 codes the reductions are modest ( 7.3% –23 .5% ), with the smallest reduction on the largest code [[121 , 100; 1]] . For ℓ ≥ 2, the reduction is more substantial ( 32 .6% –34 .0% ). This difference is structural: when ℓ = 1 , the encoder matrix M has dispersed off-diagonal support, so most row operations remove at most one mismatch with the identity. When ℓ ≥ 2, the denser block structure creates correlated entries that allow one row operation to eliminate multiple terms. 
+
+C. Beam Width Sensitivity 
+
+Beam width w controls the trade-off between search quality and computational effort. For the small codes, increasing w
+
+from 1 to 10 or 50 can improve the result: for the [[9 , 4; 1]] 
+
+code, the CNOT count drops from 17 to 13, and for the 
+
+[[25 , 8; 1]] code, w = 50 attains the best result. For larger codes, the gains saturate quickly, and w = 1 already captures most of the available reduction. The reported value for each code is the minimum CNOT count among all verified solutions obtained with the tested beam widths. 
+
+D. Scaling Study 
+
+To examine how the CNOT-count reduction behaves as the block length increases, we also evaluate the [[121 , 100; 1]] code with nt = 122 , which is the largest instance in our test set. The SKG encoder requires 218 CNOTs for this code, whereas the proposed beam-search optimizer reduces the count to 202, giving a 7.3% reduction. This result is consistent with the trend in Table I: the available reduction is influenced primarily by 5
+
+Algorithm 2 ASAP two-qubit depth 
+
+Require: Ordered CNOT list G = ( g1, . . . , g L) with gi =(ci, t i); qubit count n
+
+Ensure: ASAP two-qubit depth d
+
+1: ready [q] ← 0 for q = 0 , . . . , n − 1
+
+2: d ← 0
+
+3: for i = 1 to L do 
+
+4: s ← max( ready [ci], ready [ti]) 
+
+5: e ← s + 1 
+
+6: ready [ci] ← e; ready [ti] ← e
+
+7: d ← max( d, e )
+
+8: end for 
+
+9: return d
+
+the block-row parameter ℓ, rather than by the circulant size 
+
+p alone. Under the SKG baseline used in this work, every tested ℓ = 1 instance yields a nonzero CNOT-count reduction, although the savings are smaller than in the denser ℓ ≥ 2
+
+cases. 
+
+E. Circuit Depth 
+
+Although the proposed objective is CNOT-count reduction, we also estimate the two-qubit depth of the optimized CNOT sub-sequences using as-soon-as-possible (ASAP) scheduling. The scheduler (Algorithm 2) walks the forward CNOT list in its given time order and assigns each gate to the earliest time step in which both of its qubits are free, so two CNOTs are placed in the same time step if and only if their qubit sets are disjoint; no commutation-based reordering is attempted. The results show a mixed count–depth behavior. On some codes the optimized circuits exhibit a clear depth reduction: 
+
+[[8 , 2; 2]] drops from a SKG depth of 9 to a beam depth of 6, and [[25 , 8; 1]] from 26 to 20—both reductions on the order of one third. The corresponding SKG and beam-optimized encoder circuits for both codes are provided in the supplementary material. On other codes the depth is preserved or slightly increased, because the beam search does not include scheduling constraints in its objective. V. C ONCLUSION 
+
+We presented a beam search method for reducing CNOT counts in EA QC-LDPC encoder circuits by viewing the CNOT sub-sequence of the SKG encoder E = D† as a GF(2) row-decomposition problem. The method achieves 7.3–
+
+34 .0% CNOT reduction across all eight tested codes, with the largest absolute saving of 115 CNOTs and the largest relative saving of 34 .0% , both on [[49 , 12; 1]] . Every optimized circuit is verified to preserve the encoded code-space by stabilizer-tableau simulation. The results indicate that the optimization potential is controlled primarily by the block-row structure of the SKG-derived encoder matrix, with denser ( ℓ ≥ 2) codes admitting larger relative reductions. Since the present method optimizes CNOT count alone, a natural direction is depth-aware optimization that jointly minimizes the CNOT count and the two-qubit circuit depth—and ultimately incorporates hard-ware connectivity constraints—to produce encoder circuits that are efficient in both gate count and execution time. REFERENCES [1] Q. Xu, J. P. Bonilla Ataides, C. A. Pattison, N. Raveendran, D. Bluvstein, J. Wurtz, B. Vasi´ c, M. D. Lukin, L. Jiang, and H. Zhou, “Constant-overhead fault-tolerant quantum computation with reconfigurable atom arrays,” Nature Physics , vol. 20, no. 7, pp. 1084–1090, 2024. [2] S. Bravyi, A. W. Cross, J. M. Gambetta, D. Maslov, P. Rall, and T. J. Yoder, “High-threshold and low-overhead fault-tolerant quantum memory,” Nature , vol. 627, no. 8005, pp. 778–782, 2024. [3] P. W. Shor, “Scheme for reducing decoherence in quantum computer memory,” Physical review A , vol. 52, no. 4, p. R2493, 1995. [4] D. Gottesman, Stabilizer codes and quantum error correction . Califor-nia Institute of Technology, 1997. [5] A. R. Calderbank and P. W. Shor, “Good quantum error-correcting codes exist,” Physical Review A , vol. 54, no. 2, p. 1098, 1996. [6] A. Steane, “Multiple-particle interference and quantum error correction,” 
+
+Proceedings of the Royal Society of London. Series A: Mathematical, Physical and Engineering Sciences , vol. 452, no. 1954, pp. 2551–2577, 1996. [7] T. Brun, I. Devetak, and M.-H. Hsieh, “Correcting quantum errors with entanglement,” science , vol. 314, no. 5798, pp. 436–439, 2006. [8] R. Gallager, “Low-density parity-check codes,” IRE Transactions on information theory , vol. 8, no. 1, pp. 21–28, 1962. [9] D. J. MacKay and R. M. Neal, “Near shannon limit performance of low density parity check codes,” Electronics letters , vol. 32, no. 18, pp. 1645–1646, 1996. [10] M. P. Fossorier, “Quasicyclic low-density parity-check codes from cir-culant permutation matrices,” IEEE transactions on information theory ,vol. 50, no. 8, pp. 1788–1793, 2004. [11] P. Kumar, A. K. Sharma, and S. S. Garani, “Entanglement-assisted quantum quasi-cyclic ldpc codes with transversal logical operators,” 
+
+arXiv preprint arXiv:2501.07363 , 2025. [12] S. Gu, E. Tang, L. Caha, S. H. Choe, Z. He, and A. Kubica, “Single-shot decoding of good quantum ldpc codes,” Communications in Mathemat-ical Physics , vol. 405, no. 3, p. 85, 2024. [13] T. Hillmann, L. Berent, A. O. Quintavalle, J. Eisert, R. Wille, and J. Roffe, “Localized statistics decoding for quantum low-density parity-check codes,” Nature Communications , vol. 16, no. 1, p. 8214, 2025. [14] D. Maslov, “Linear depth stabilizer and quantum fourier transformation circuits with no auxiliary qubits in finite-neighbor quantum architec-tures,” Physical Review A—Atomic, Molecular, and Optical Physics ,vol. 76, no. 5, p. 052310, 2007. [15] R. Cleve and D. Gottesman, “Efficient computations of encodings for quantum error correction,” Physical Review A , vol. 56, no. 1, p. 76, 1997. [16] M. M. Wilde and T. A. Brun, “Unified quantum convolutional coding,” in 2008 IEEE International Symposium on Information Theory . IEEE, 2008, pp. 359–363. [17] M. M. Wilde, “Logical operators of quantum codes,” Physical Review A—Atomic, Molecular, and Optical Physics , vol. 79, no. 6, p. 062322, 2009. [18] A. Mondal and K. K. Parhi, “Optimization of quantum circuits for stabilizer codes,” IEEE Transactions on Circuits and Systems I: Regular Papers , vol. 71, no. 8, pp. 3647–3657, 2024. [19] K. Markov, I. Patel, and J. Hayes, “Optimal synthesis of linear reversible circuits,” Quantum Information and Computation , vol. 8, no. 3&4, pp. 0282–0294, 2008. [20] S. Aaronson and D. Gottesman, “Improved simulation of stabilizer circuits,” Physical Review A—Atomic, Molecular, and Optical Physics ,vol. 70, no. 5, p. 052328, 2004. [21] I. Shaik and J. van de Pol, “Cnot-optimal clifford synthesis as sat,” arXiv preprint arXiv:2504.00634 , 2025. [22] A. K. Sharma and S. S. Garani, “Fault-tolerant quantum ldpc encoders,” in 2024 IEEE International Symposium on Information Theory Work-shops (ISIT-W) . IEEE, 2024, pp. 1–6. [23] A. Mondal and K. K. Parhi, “An optimized nearest neighbor compliant quantum circuit for 5-qubit code,” in 2024 58th Asilomar Conference on Signals, Systems, and Computers . IEEE, 2024, pp. 278–282. [24] A. Sodhani and K. K. Parhi, “Encoder circuit optimization for non-binary quantum error correction codes in prime dimensions: An algo-rithmic framework,” IEEE Transactions on Quantum Engineering , 2026. [25] P. S. Ow and T. E. Morton, “Filtered beam search in scheduling,” 
+
+International Journal of Production Research , vol. 26, no. 1, pp. 35–62, 1988. 6
+
+# Supplementary Information 
+
+Optimizing Encoder Circuits of Entanglement-Assisted Quantum LDPC Codes via Beam Search 
+
+SCOPE 
+
+This supplement provides the SKG-baseline and beam-search-optimized CNOT encoder circuits for the two EA codes for which the optimized two-qubit depth is strictly smaller than that of the SKG baseline, namely [[8 , 2; 2]] and [[25 , 8; 1]] . The Circuit Depth subsection in Section IV of the main paper reports the corresponding depth values: [[8 , 2; 2]] drops from a SKG depth of 9 to a beam depth of 6, and [[25 , 8; 1]] from 26 to 20. The circuits below are the sequences whose ASAP scheduling yields those depths; both have been verified by stabilizer-tableau simulation. The figures adopt the same visual conventions as Figs. 2 and 3 of the main paper: horizontal qubit wires labeled qi with the initial states immediately to the right, color-coded brackets identifying the post-decoder roles (Z-stabilizer ancilla, X-stabilizer ancilla, logical qubit, sender ebit half, receiver ebit half), single-qubit Hadamards drawn as boxed ‘ H’, and numbered CNOTs with a filled control dot, a vertical link, and an oplus target circle. SKG D ECODER CONSTRUCTION IN DETAIL 
+
+Section II of the main paper introduces the SKG decoder D = D5D4D3D2D1D0 and the encoder E = D† at a high level. Here we give the full per-layer description used in the implementation. We use the notation of Section II-A of the main paper: Hex = [ Hx | Dx ] and Hez = [ Hz | Dz ] are the extended X- and Z-parity-check matrices, with the ebit columns 
+
+Dx, D z ∈ GF(2) ρi×c chosen so that DxD⊤ 
+
+> z
+
+= HxH⊤ 
+
+> z
+
+; rB = rank( HxH⊤ 
+
+> z
+
+) is the EA-CSS entanglement deficiency ( rB ≤ c). 
+
+Block layout. We first reorder the nt = n + c qubits into four contiguous blocks, 
+
+[ X-anc | {z } 
+
+> ρ1
+
+| Ha
+
+|{z} 
+
+> na
+
+| ebit-TX | {z }
+
+> c
+
+| ebit-RX | {z }
+
+> c
+
+], na = n − ρ1 − c, 
+
+where the X-anc block carries the ρ1 X-stabilizer pivots, the Ha block holds the k logical qubits and the na − k Z-stabilizer keep ancillas, and the ebit-TX/ebit-RX blocks are the sender and receiver halves of the c pre-shared Bell pairs. With this layout fixed: 
+
+D0: reorder the nt qubits into the canonical block layout above (a column permutation of Hex and Hez ), then re-express the X-stabilizer generators so that the first ρ1 columns of Hex form the identity matrix Iρ1 . No Clifford gates are applied at this layer: the column permutation is absorbed into the qubit labeling, and the row reduction reflects a choice of stabilizer-generator basis; 
+
+D1: apply CNOTs with controls in the X-anc block (column XORs on Hex ) that set the Ha-block columns of Hex to all-zero (eliminating the X-stabilizer’s support on the Ha-block qubits) and bring its ebit-TX columns to match Dx; after this layer Hex = [ Iρ1 | 0 | Dx | Dx ], so each ebit pair contributes the symmetric Bell-pair XX stabilizer; 
+
+D2: apply CNOTs (column XORs on Hez ) that set the last ρ1 − rB X-anc-block columns of Hez to all-zero (eliminating the Z-stabilizer’s support on the X-only-pivot qubits); the surviving rank-rB sub-matrix in the first rB columns is the Z-pivot block B1 carried by the “rank-deficient” X-anc qubits (those that hold both an X- and a Z-stabilizer pivot); 
+
+D3: apply CNOTs (column XORs on Hez ) that align the ebit-TX columns of Hez with Dz , so on each ebit pair the Z-stabilizer acts as the symmetric ZZ Bell-pair stabilizer; 
+
+D4: apply CNOTs (column XORs on Hez ) that set the remaining Ha-block columns of Hez to all-zero (eliminating the Z-stabilizer’s support there), using B1 and the ebit-TX columns as control sources; after this layer Hez = [ B1 | 0 | 0 | Dz |
+
+Dz ];
+
+D5: apply Hadamards to the ρ1 − rB X-anc qubits that carry an X-stabilizer pivot but no Z-stabilizer pivot. This swaps their 
+
+Z and X stabilizers, so on the encoder side they are initialized as |0⟩ (Z-stabilized) rather than |+⟩ (X-stabilized). After D, every codeword factors as |0⟩⊗(n−k−c) on the Z-ancillas, |ψ⟩ on the k logical qubits, and |Φ+⟩⊗c on the ebit pairs. Running the six layers in reverse time order yields the encoder E = D†, which produces the encoded codeword from the same factored input. CIRCUIT EQUIVALENCE : A S MALL EXAMPLE 
+
+Different CNOT sequences can implement the same encoder matrix M ; the shortest is what our optimization targets. To illustrate, consider four qubits and the target M =
+
+ 1 0 0 1 0 1 0 1 0 0 1 1 0 0 0 1 
+
+
+
+. We compare two CNOT circuits (Fig. 4) and verify equivalence directly by tracking the cumulative matrix applied to I4, step by step. 7q0
+
+q1
+
+q2
+
+q3
+
+Sequence A: 5 CNOTs 
+
+1 2
+
+3
+
+4
+
+5 q0
+
+q1
+
+q2
+
+q3
+
+Sequence B: 3 CNOTs 
+
+1
+
+2
+
+3
+
+Fig. 4. Two CNOT circuits implementing the same encoder matrix M . Sequence A (left) uses 5 gates; Sequence B (right) uses 3. 
+
+Sequence A (5 CNOTs). Starting from M0 = I4:
+
+M0
+
+> R0←R0⊕R3
+
+−−−−−−−−→
+
+ 1 0 0 1 0 1 0 0 0 0 1 0 0 0 0 1 
+
+ R1←R1⊕R0
+
+−−−−−−−−→
+
+ 1 0 0 1 1 1 0 1 0 0 1 0 0 0 0 1 
+
+ R2←R2⊕R3
+
+−−−−−−−−→
+
+ 1 0 0 1 1 1 0 1 0 0 1 1 0 0 0 1 
+
+ R1←R1⊕R0
+
+−−−−−−−−→
+
+ 1 0 0 1 0 1 0 0 0 0 1 1 0 0 0 1 
+
+ R1←R1⊕R3
+
+−−−−−−−−→
+
+ 1 0 0 1 0 1 0 1 0 0 1 1 0 0 0 1 
+
+
+
+= M. 
+
+Sequence B (3 CNOTs). Starting from N0 = I4:
+
+N0
+
+R0←R0⊕R3
+
+−−−−−−−−→
+
+ 1 0 0 1 0 1 0 0 0 0 1 0 0 0 0 1 
+
+ R1←R1⊕R3
+
+−−−−−−−−→
+
+ 1 0 0 1 0 1 0 1 0 0 1 0 0 0 0 1 
+
+ R2←R2⊕R3
+
+−−−−−−−−→
+
+ 1 0 0 1 0 1 0 1 0 0 1 1 0 0 0 1 
+
+
+
+= M. 
+
+The two final matrices are the same, so Sequence A and Sequence B implement the same row-XOR map on GF(2) 4 and hence the same unitary on (C2)⊗4—despite using different gate counts and different qubit pairs at the intermediate steps. The beam search of Algorithm 1 of the main paper performs the analogous comparison over a much larger search space: on 
+
+[[9 , 4; 1]] it discovers a 13-CNOT sequence whose cumulative matrix matches that of the 17-CNOT SKG sequence. CODE [[8 , 2; 2]] 
+
+The encoder for [[8 , 2; 2]] acts on nt = 10 qubits. The SKG baseline uses 3 Hadamards and 13 CNOTs at ASAP depth 9 (Fig. 5); beam search reduces the CNOT count to 10 and the depth to 6 (Fig. 6). The reductions are 23% in count and 33% 
+
+in depth. Z-anc 
+
+X-anc 
+
+Logic 
+
+Ebit -TX 
+
+Ebit -RX 
+
+q0  |0 ⟩
+
+q1  |0 ⟩
+
+q2  |0 ⟩
+
+q3  |0 ⟩
+
+q4  |ψ₁ ⟩
+
+q5  |ψ₂ ⟩
+
+q6  |e ⟩
+
+q7  |e ⟩
+
+q8  |e ⟩
+
+q9  |e ⟩
+
+H
+
+H
+
+H
+
+1 2 3 4
+
+5 6
+
+7 8
+
+9 10  11 
+
+12  13 
+
+Fig. 5. SKG-baseline encoder for [[8 , 2; 2]] : 3 Hadamards, 13 CNOTs, ASAP two-qubit depth 9. 8Z-anc 
+
+X-anc 
+
+Logic 
+
+Ebit -TX 
+
+Ebit -RX 
+
+q0  |0 ⟩
+
+q1  |0 ⟩
+
+q2  |0 ⟩
+
+q3  |0 ⟩
+
+q4  |ψ₁ ⟩
+
+q5  |ψ₂ ⟩
+
+q6  |e ⟩
+
+q7  |e ⟩
+
+q8  |e ⟩
+
+q9  |e ⟩
+
+H
+
+H
+
+H
+
+1 2 3
+
+4 5 6
+
+7
+
+8
+
+9
+
+10    
+
+> Fig. 6. Beam-search-optimized encoder for [[8 ,2; 2]] : 3 Hadamards, 10 CNOTs, ASAP two-qubit depth 6.
+
+CODE [[25 , 8; 1]] 
+
+The encoder for [[25 , 8; 1]] acts on nt = 26 qubits. The SKG baseline uses 8 Hadamards and 89 CNOTs at ASAP depth 26 (Fig. 7); beam search reduces the CNOT count to 60 and the depth to 20 (Fig. 8). The reductions are 33% in count and 
+
+23% in depth. Because the circuits are too wide to render legibly in portrait orientation, the following two pages are rotated to landscape. 
+
+Qubit-role partition for [[25 , 8; 1]] . The SKG column permutation places the qubits in this order: q0 is the rank-rB Z-stabilizer pivot; q1–q8 are X-stabilizer ancillas (which receive the eight fixed Hadamards); q9–q15 are the seven Z-stabilizer “keep” ancillas in the H a block; q16 –q23 are the eight logical qubits, initialized as |ψ1⟩ , . . . , |ψ8⟩; q24 holds the sender’s half of the shared ebit pair; and q25 holds the receiver’s half (untouched by the encoder). Z-anc

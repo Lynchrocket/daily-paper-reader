@@ -1,0 +1,1371 @@
+Title: An iterative Ising decoder for quantum error correction codes
+
+URL Source: https://arxiv.org/pdf/2606.12301v1
+
+Published Time: Thu, 11 Jun 2026 01:27:04 GMT
+
+Number of Pages: 12
+
+Markdown Content:
+## An iterative Ising decoder for quantum error correction codes 
+
+Yuanqi Liu, Weilei Zeng, Peixiang Li, Yantong Liu, Guangyao Huang, Yingwen Liu, Dongyang Wang, Junjie Wu, and Lingling Lao ∗
+
+College of Computer Science and Technology, National University of Defense Technology, Changsha 410073, China 
+
+(Dated: June 11, 2026) The Ising framework maps the decoding problem in quantum error correction onto ground-state optimization of a classical Hamiltonian, in which X-Z error correlations enter as cross terms. Under phenomenological depolarizing noise, the exact joint formulation contains up to 8-body interactions for the toric code and 10-body for the 6.6.6 color code. These high-order terms degrade solver convergence, inflate runtime, and raise the auxiliary spin overhead when embedding into native 2-body Ising hardware. In this work, we propose the iterative low-order decoding (ILOD) algorithm, which alternates between X- and Z-type sub-Hamiltonians, approximating cross-type correlations through Bayesian priors that reweight each type’s couplings using the other type’s inferred error configuration. This halves the maximum body count of interaction terms in the Hamiltonian, accelerating the solver, restoring convergence at larger code distances, and reducing the total spin count for 2-body embedding by a factor of 2.5. For the toric code, ILOD attains a threshold of 4.73% versus 4.83% for the joint formulation, with the empirical runtime ratio scaling as (0 .81) d. For the 6.6.6 color code, their thresholds agree within statistical uncertainty for small code distances, and ILOD remains convergent for larger distances where the joint formulation fails to converge despite a larger annealing budget. 
+
+I. INTRODUCTION 
+
+In a fault-tolerant quantum computation architec-ture, the decoder determines recovery operations from syndrome measurements within the classical control stack [ 1, 2]. A practical decoder must balance three competing objectives: high accuracy (suppressing the log-ical error rate toward the optimal decoding limit), low latency (avoiding data backlog), and scalability (maintain-ing tractable computational and hardware overhead as the code distance grows) [ 1 , 3]. The Ising framework ap-proaches decoding through statistical mechanics [ 4– 7] and can achieve near-optimal logical error rates by naturally modeling complex error correlations and code topology. Specifically, it maps the decoding problem onto ground-state optimization of a classical random-bond Ising-type Hamiltonian, where syndrome information is encoded as quenched disorder in the couplings. The ground state identifies the single most probable error configuration, implementing minimum-weight decoding (MWD). For bit-flip noise on the toric code, this mapping yields a 2-body Hamiltonian directly solvable on dedicated Ising hardware, such as coherent Ising machines [ 8 , 9], quan-tum annealers [ 10 , 11 ], and digital annealers [ 12 ]. These platforms have scaled to 2-body instances of up to 10 5
+
+spins with sub-millisecond time-to-solution [ 13 ], motivat-ing native 2-body Ising hardware as a candidate substrate for latency-critical decoding. Beyond bit-flip errors, the Ising framework captures the X-Z error correlations induced by Y errors through cross terms in the Hamiltonian. Under code-capacity depolarizing noise, however, these cross terms increase the maximum body count of interaction terms from 2- to  
+
+> ∗laolinglingrolls@gmail.com
+
+4-body for the toric code [ 14 ] and from 3- to 6-body for the 
+
+6.6.6 color code [ 6, 7]. Extending the spacetime stabilizer parametrization [ 15 ] from phenomenological bit-flip noise to the depolarizing case further raises these body counts to 8 and 10, respectively. Such high-order interactions could create rugged energy landscapes that hinder heuristic ground-state searches, degrading solver convergence and inflating runtime. While the proliferation of metastable states is analytically established for fully connected spin-glass models [ 16 , 17 ], analogous bottlenecks are expected on the sparse topological graphs considered here. These solver bottlenecks are compounded by the embedding cost: because mainstream Ising hardware natively supports only 2-body interactions, deploying these high-order terms requires many auxiliary spins per 8- and 10-body term [ 18 –20 ], with the cumulative overhead growing rapidly in the interaction order and posing a scalability challenge as the code distance grows. To address these bottlenecks, we propose the iterative low-order decoding (ILOD) algorithm. Rather than opti-mizing the joint high-order Hamiltonian, ILOD separates the optimization into X- and Z-type sub-Hamiltonians solved in alternation, which halves the maximum body count of interaction terms from 8- and 10-body to 4- and 5-body for the toric and color codes, respectively. Cross-type correlations are approximately captured through Bayesian priors that reweight the X-type ( Z-type) cou-plings using the error configuration inferred from the Z
+
+type ( X type). This body-count reduction yields decoding gains in solver acceleration, restored convergence at larger code distances, and lower spin overhead after quadratiza-tion (the conversion of high-order interactions to 2-body terms via auxiliary spins). Numerical simulations under phenomenological depolarizing noise show that, for the toric code, ILOD attains a threshold of 4.73% versus 4.83% 
+
+for the joint formulation, both exceeding minimum-weight 
+
+> arXiv:2606.12301v1 [quant-ph] 10 Jun 2026
+
+2perfect matching (MWPM, 3.80% ) and its correlation-aware variant (Corr-MWPM, 4.65% ), with the empirical runtime ratio (ILOD/joint) scaling as (0 .81) d over the code distance d ∈ { 3, 5, 7, 9}. For the 6.6.6 color code, ILOD achieves a threshold of 4.41% , agreeing with the joint formulation’s 4.36% within statistical uncertainty, and additionally restores solver convergence at d = 9 ,where the joint formulation fails to converge despite a larger annealing budget. ILOD also enables a 2.5× reduc-tion in the total spin count for both codes after conversion to native 2-body forms, lowering the resource requirement on dedicated Ising hardware. The remainder of this paper is organized as follows. Section II reviews the stabilizer formalism and devel-ops the Ising mapping under bit-flip, depolarizing, and phenomenological noise. Section III presents the ILOD al-gorithm. Section IV reports numerical results. Section V discusses limitations and hardware deployment prospects, and concludes the paper.   
+
+> II. PRELIMINARIES A. Quantum error correction and stabilizer codes
+
+Stabilizer codes are defined by abelian subgroups 
+
+S ⊂ G n such that −I /∈ S , where Gn represents the 
+
+n-qubit Pauli group, consisting of n-fold tensor products of {I, X, Y, Z } with phases {± 1, ±i}. An [[ n, k, d ]] stabi-lizer code encodes k logical qubits into n physical qubits. Given r = n − k independent generators {g1, . . . , g r } of 
+
+S, the code space C is their simultaneous +1 eigenspace: 
+
+C = |ψ⟩ ∈ (C2)⊗n : gi|ψ⟩ = |ψ⟩, ∀i = 1 , . . . , r . (1) The code distance d is the minimum Pauli weight of an operator in N (S) \ S , where N (S) is the normalizer of 
+
+S in Gn. Operators in this set, termed logical operators, act non-trivially on C without stabilizing it; two such operators differing by an element of S act identically on C,so the cosets N (S)/S partition N (S) into logical classes 
+
+(equivalently, logical cosets). For a Pauli error E ∈ G n, measuring each generator gi
+
+yields a binary syndrome vector γ ∈ { 0, 1}r , where 
+
+γi =
+
+(
+
+0 if [gi, E ] = 0 ,
+
+1 if {gi, E } = 0 . (2) Since different error configurations can cause the same syndrome, the decoding task simplifies to identifying the most likely logical class rather than any specific represen-tative [ 21 ]. To formalize this equivalence class structure, we identify each Pauli error configuration E with its bi-nary symplectic representation e = ( eX , eZ ) ∈ { 0, 1}2n,where eXq , e Zq ∈ { 0, 1} encode the X and Z supports on qubit q. Let S ∈ { 0, 1}r×2n be the parity-check ma-trix of S, L ∈ { 0, 1}2k×2n the logical generator matrix, and D ∈ { 0, 1}r×2n the destabilizer matrix defined by 
+
+SΛDT = Ir (mod 2) , where Λ =   0 In 
+
+> In0
+
+ is the symplec-tic form [ 22 , 23 ]. The rows of D, S, and L together form a symplectic basis of F2n 
+
+> 2
+
+, so any error decomposes uniquely as 
+
+e = γD + αS + ℓL (mod 2) . (3) Each row of D anticommutes with exactly one stabilizer generator, so ϵ ≡ γD is a pure error consistent with the measured syndrome γ. The vector α ∈ { 0, 1}r parameter-izes the stabilizer degrees of freedom within an equivalence class, while ℓ ∈ L ≡ { 0, 1}2k labels the class itself. As α
+
+and ℓ vary, Eq. (3) enumerates all errors consistent with 
+
+γ; we write e(γ, α, ℓ) for this parametrization. Under minimum-weight decoding (MWD), the decoder selects the logical class containing the globally minimum-weight error: 
+
+ˆℓMWD = arg min 
+
+> ℓ∈L
+
+min  
+
+> α∈{ 0,1}r
+
+w e(γ, α, ℓ), (4) where w(·) denotes the symplectic Pauli weight, defined as the number of qubits on which the operator acts non-trivially: w(e) = q ∈ { 1, . . . , n } | eXq = 1 or eZq = 1 .Throughout this work, we focus on CSS codes [ 24 ,25 ], where the parity-check matrix decomposes as S =SX 00 SZ
+
+
+
+, with rX and rZ generators of X- and Z-type stabilizers, respectively ( r = rX + rZ ), yielding decoupled syndrome constraints. The class-by-class parametrization in Eq. (3) , specialized to the CSS structure, is the basis of the Ising mappings in Sec. II B.  
+
+> 1. Toric codes
+
+The toric code [ 5, 26 ] is a topological stabilizer code defined on an L × L square lattice with periodic boundary conditions. It encodes k = 2 logical qubits into n = 2 L2
+
+physical qubits with code distance d = L.As illustrated in Fig. 1, data qubits reside on the lat-tice edges. The stabilizer group is generated by vertex operators ( Av ) and face operators ( Bf ), which act on the four edges incident to a vertex v or bounding a face f ,respectively: 
+
+Av = Y
+
+> q∈δv
+
+Xq , Bf = Y
+
+> q∈∂f
+
+Zq , (5) where Xq and Zq denote Pauli operators on the q-th qubit, so that Av detects Z errors and Bf detects X errors. Because every data qubit resides on an edge incident to two vertices and shared by two faces, a single X (Z) error violates exactly two Z-type ( X-type) stabilizers. This connectivity yields a matching graph in which each data qubit corresponds to an edge connecting the two violated stabilizers. 3Z       
+
+> Z
+> ZZ
+> Bf=qf
+> Zq
+> XX
+> X
+> X
+> Av=qv
+> Xq
+
+FIG. 1. Geometry of the toric code. Data qubits (circles) reside on the lattice edges. Vertex operators Av (blue) and face operators Bf (orange) represent the two types of weight-4 stabilizer generators. SZf = v f    
+
+> ZvSXf=vf
+> Xv
+
+FIG. 2. Geometry of the 6.6.6 color code with a triangular boundary. Data qubits (circles) reside at the lattice vertices. Each bulk hexagonal face (red, green, or blue) defines weight-6 
+
+X- and Z-type stabilizer generators, while the truncated faces on the boundary define weight-4 generators. 
+
+2. Color codes 
+
+The color code is a family of topological stabilizer codes defined on trivalent, three-face-colorable lattices. An example is the 6.6.6 hexagonal lattice with a triangular boundary [ 27 ], encoding k = 1 logical qubit into n =(3 d2 + 1) /4 physical qubits for odd d, where d equals the boundary side length. As illustrated in Fig. 2, data qubits are located at the lattice vertices. Every face f defines two stabilizer generators acting on its boundary vertices ∂f :
+
+SXf = Y
+
+> v∈∂f
+
+Xv , SZf = Y
+
+> v∈∂f
+
+Zv . (6) Every bulk data qubit sits at a trivalent vertex incident to three faces, so a single X (Z) error violates three Z-type ( X-type) stabilizers (boundary qubits violate fewer). This connectivity induces a decoding hypergraph for the 
+
+X- and Z-type syndromes separately, in which data qubits correspond to hyperedges of size at most 3.
+
+B. Ising mapping for minimum-weight decoding 
+
+For the independent and identically distributed noise models considered in this work (bit-flip and depolariz-ing), the probability of an error configuration depends only on its symplectic Pauli weight w(e). Consequently, the negative log-likelihood − ln P (e) is linear in the er-ror weight w(e), and minimizing w in Eq. (4) is equiv-alent to minimizing − ln P (e). With H(e) ≡ − ln P (e)
+
+as a classical Hamiltonian, fixing the class ℓ in Eq. (3) parametrizes the error solely by the stabilizer variable 
+
+α, so that the inner minimization in Eq. (4) is reduced to a ground-state search of the class-conditional Hamil-tonian Hℓ(α) ≡ H(e(γ, α, ℓ)) in a disordered Ising model [ 4, 5, 28 , 29 ]. The MWD estimate ˆℓMWD then follows by comparing the ground-state energies across all |L| = 2 2k logical classes. For CSS codes, this splits into independent X- and Z-type comparisons over 2k
+
+classes each. The following subsections construct the class-conditional Hamiltonian Hℓ(α) explicitly for three noise models of increasing complexity: bit-flip, depolariz-ing, and phenomenological. 
+
+1. Bit-flip noise model 
+
+Under independent bit-flip noise, each qubit undergoes a Pauli-X error with probability p. Since only X errors oc-cur, we retain only the X-component eX ∈ { 0, 1}n of the symplectic representation ( eZ ≡ 0), and the distribution factorizes as 
+
+P (eX ) = 
+
+> n
+
+Y
+
+> q=1
+
+peXq (1 − p)1−eXq , (7) which takes the Boltzmann form P (τ ) ∝ e−βH 0(τ ) of a non-interacting paramagnet under the spin transformation 
+
+eXq = (1 − τq )/2 with τq ∈ {± 1},
+
+H0(τ ) = −J
+
+> n
+
+X
+
+> q=1
+
+τq , βJ = 12 ln 1 − pp , (8) where β is the inverse temperature and the Nishimori condition [28] fixes the product βJ in terms of p.The Boltzmann form thus reduces decoding to a ground-state search of H0(τ ) over X-errors consistent with the measured syndrome. Specializing Eq. (3) to a fixed logical class (the class label will be omitted in the following) and restricting to the X-type, we write eX = ϵX + αX SX
+
+( mod 2) , where ϵX is the X-component of the pure error 
+
+γD, and SX ∈ { 0, 1}rX ×n is the parity-check matrix of the X-type stabilizers. Substituting this parametrization into τq = ( −1) eXq yields 
+
+τq = ηqrX
+
+Y
+
+> j=1
+
+σSXj,q  
+
+> j
+
+, (9) 4where ηq ≡ (−1) ϵXq is the quenched disorder fixed by the pure error, σj ≡ (−1) αXj ∈ {± 1} is the gauge spin (representing the stabilizer degree of freedom) to be op-timized, and SXj,q ∈ { 0, 1} selects which X-stabilizers act non-trivially on qubit q.Substituting Eq. (9) into Eq. (8) transforms the para-magnet into a random-bond Ising model (RBIM), where each qubit contributes a product of the gauge spins of the stabilizers acting on it: 
+
+H(σ) = −J
+
+> n
+
+X
+
+> q=1
+
+ηqrX
+
+Y
+
+> j=1
+
+σSXj,q  
+
+> j
+
+. (10) Each gauge spin σj corresponds to an X-stabilizer, each term in the sum corresponds to the q-th data qubit, and the product is over the set N X (q) ≡ { j : SXj,q = 1 } of 
+
+X-stabilizers incident to qubit q. The syndrome enters as quenched disorder through η: a non-trivial pure-error component ( ηq = −1) flips the sign of the q-th interaction term. The decoding problem is thereby reduced to finding the ground state of Eq. (10). For the toric code, each qubit is incident to two X-type vertices; placing a gauge spin at each vertex maps them to the primal square lattice. Labeling these vertices by 
+
+i, j , the RBIM takes the two-body form 
+
+Htoric (σ) = −J X
+
+> {i,j }∈E
+
+ηij σiσj , (11) where E is the edge set of the lattice and each edge corresponds to one physical qubit. This reproduces the standard two-dimensional RBIM on the square lattice. For the 6.6.6 color code, each bulk qubit lies in the support of three X-type stabilizers, and Eq. (10) translates to a three-body interaction: 
+
+Hcolor (σ) = −J X
+
+> e∈E ∗
+
+ηe
+
+Y
+
+> v∈e
+
+σv , (12) where E∗ is the set of hyperedges corresponding to the physical data qubits. Geometrically, on the dual triangu-lar lattice, bulk qubits define three-body interactions on triangular faces ( |e| = 3 ), while boundary qubits reduce to two-body interactions on boundary edges ( |e| = 2 ). Under bit-flip noise, the maximum body count of interac-tion terms is therefore 2 for the toric code and 3 for the 
+
+6.6.6 color code.  
+
+> 2. Depolarizing noise model
+
+For depolarizing noise, each qubit independently un-dergoes an X, Y , or Z error with probability p/ 3 each (and no error with probability 1 − p). Because depolariz-ing noise produces both X and Z error components, the mapping now requires two sets of gauge spins, σj for the 
+
+X-stabilizers and μl for the Z-stabilizers, with Y errors entering both types. Following the same procedure, the error distribution 
+
+P (I) = 1 − p, P (X) = P (Y ) = P (Z) = p/ 3 yields a two-type paramagnet with an X-Z cross term [7, 30]: 
+
+H0(τ X , τ Z ) = −J
+
+> n
+
+X
+
+> q=1
+
+ τ Xq + τ Zq + τ Xq τ Zq
+
+ , (13) where τ Xq = (−1) eXq and τ Zq = (−1) eZq . The three terms assign energy −3J to the no-error configuration 
+
+(τ X , τ Z ) = (1 , 1) and +J to each of the three single-qubit Pauli errors: (−1, 1) for X, (1 , −1) for Z, and 
+
+(−1, −1) for Y . Each single-qubit error thus introduces a uniform energy penalty ∆E = 4J relative to the no-error ground configuration. The Boltzmann ratio 
+
+P (I)/P (X) = (1 − p)/(p/ 3) = eβ∆E then fixes the modi-fied Nishimori condition 
+
+βJ = 14 ln 3(1 − p)
+
+p . (14) Applying the gauge transformation separately to each channel as in Eq. (9), 
+
+τ Xq = ηXqrX
+
+Y
+
+> j=1
+
+σSXj,q  
+
+> j
+
+, τ Zq = ηZqrZ
+
+Y
+
+> l=1
+
+μSZl,q  
+
+> l
+
+, (15) where ηXq = ( −1) ϵXq and ηZq = ( −1) ϵZq are the quenched disorders set by the X- and Z-components of the pure error, and SX , SZ are the parity-check matrices of X-type and Z-type stabilizers, respectively. Substituting Eq. (15) into Eq. (13) yields the joint Hamiltonian. For the toric code it takes the explicit form 
+
+Htoric (σ, μ) = −J
+
+> n
+
+X
+
+> q=1
+
+h
+
+ηXq σi(q)σj(q)
+
+| {z } 
+
+> Xtype
+
++ ηZq μu(q)μv(q)
+
+| {z } 
+
+> Ztype
+
++ ηXq ηZq σi(q)σj(q)μu(q)μv(q)
+
+| {z } 
+
+> Ycross term
+
+i
+
+,
+
+(16) where {i(q), j (q)} label the two vertices ( X-type stabiliz-ers) adjacent to q, and {u(q), v (q)} label the two plaque-ttes ( Z-type stabilizers) adjacent to q. The gauge spins 
+
+{σ} and {μ} thus live on the primal and dual lattices, respectively. The X and Z types each take the form of the bit-flip RBIM in Eq. (11) , while the per-qubit four-body cross terms couple them. For the 6.6.6 color code, each bulk qubit lies in the support of three stabilizers per type, so each channel contributes a three-body term as in Eq. (12) (reduced to two-body for boundary qubits), and the Y cross term, as the product of the two channels, couples them through a six-body interaction in the bulk.  
+
+> 3. Phenomenological noise model
+
+The bit-flip and depolarizing formulations above cap-ture spatial error configurations under perfect syndrome 5measurements. In practice, syndrome extraction is itself faulty, and the phenomenological noise model therefore requires T consecutive rounds to separate data and mea-surement errors [ 3, 5 , 31 ]. Denoting the set of data qubits by Q and indexing Z-type and X-type stabilizer gener-ators by s ∈ S Z and s ∈ S X , we record the outcome of stabilizer s at round t as ms,t ∈ { 0, 1} and convert the raw record into detection events ds,t = ms,t ⊕ms,t −1, with the initial reference ms, −1 ≡ 0 given by code initialization in the +1 eigenspace of all stabilizers. In the resulting 3D spacetime detector graph, data errors form spatial edges (within a time layer), while measurement errors form temporal edges (connecting adjacent layers) [5, 29, 32]. To accommodate this 3D structure, the variables of Secs. II B 1 and II B 2 are extended, with t = 0 , . . . , T − 1
+
+throughout. The stabilizer gauge spins acquire a temporal index, 
+
+σs,t ∈ {± 1}, s ∈ S X ; μs,t ∈ {± 1}, s ∈ S Z . (17) To encode the propagation of data errors across time layers, we further adapt the time-like stabilizer gauge spins [15] to the codes considered here: 
+
+ξXq,t , ξ Zq,t ∈ {± 1}, q ∈ Q . (18) These couple to the space-like gauge spins so that a data error on qubit q between rounds t − 1 and t flips the sign of the gauge-invariant data-term product. The initial layer is fixed by ξXq, −1 = ξZq, −1 ≡ +1 , entering the t = 0 
+
+data terms as constants. Following the class-by-class framework defined by Eqs. (3) and (4) , the quenched disorder splits into data and measurement components. To ensure each Hamilto-nian corresponds to a single logical class, the label ℓ is absorbed into the data quenched disorder: 
+
+η(d) ,X q,t (ℓ) = ( −1) ϵ(d) ,X q,t ⊕δt, 0(ℓL)Xq , η(m)  
+
+> s,t
+
+= ( −1) ϵ(m)  
+
+> s,t
+
+,
+
+(19) where ϵ(d) ,X q,t and ϵ(m)  
+
+> s,t
+
+are the data and measurement pure errors consistent with the syndrome (any such pair suffices, as differences correspond to stabilizer elements absorbed by gauge spins), and (ℓL)Xq ∈ { 0, 1} is the X-type com-ponent of the logical operator at qubit q. Because the logical operator is time-independent, its contribution to the data-error configuration vanishes for t > 0, restricting it to the t = 0 boundary. For brevity, the ℓ dependence of η(d) ,X is omitted hereafter. We begin with phenomenological bit-flip noise, formu-lating the single-channel Hamiltonian for X errors (de-tected by Z-type stabilizers); the Z-channel follows by symmetry. The full Hamiltonian is assembled from three components: 
+
+HX 
+
+> phen
+
+= Hdata + Hmeas + Hfinal . (20) The data term penalizes data errors between adjacent time layers, 
+
+Hdata = − 
+
+> T−1
+
+X
+
+> t=0
+
+X
+
+> q∈Q
+
+Jd η(d) ,X q,t ξXq,t ξXq,t −1
+
+Y  
+
+> s∈NX(q)
+
+σs,t , (21) where N X (q) is as defined in Eq. (10). The measurement term compares the true stabilizer parity Q 
+
+> q∈∂s
+
+ξXq,t against the quenched disorder η(m)  
+
+> s,t
+
+from detection events, penalizing mismatches that correspond to measurement errors: 
+
+Hmeas = − 
+
+> T−1
+
+X
+
+> t=0
+
+X
+
+> s∈S Z
+
+Jm η(m) 
+
+> s,t
+
+Y
+
+> q∈∂s
+
+ξXq,t , (22) where ∂s is the support of stabilizer s.The final-round boundary term models a perfect final measurement round by pinning every stabilizer’s accumu-lated ξ-parity to +1 at the final layer, 
+
+Hfinal = −Js
+
+X
+
+> s∈S Z
+
+Y
+
+> q∈∂s
+
+ξXq,T −1 (Js ≫ Jd, J m), (23) where Js enforces a perfect final syndrome extraction that closes the detector graph at t = T − 1.Let p and pm denote the data error rate per qubit per round and the measurement error rate per stabilizer per round, respectively. The data and measurement couplings satisfy the standard Nishimori relations 
+
+βJ d = 12 ln 1 − pp , βJ m = 12 ln 1 − pm
+
+pm
+
+. (24) For this single-channel phenomenological model, each data term contributes mdata = 2 + |N X (q)| (4-body for the toric code, 5-body for the color code), while the measurement and boundary terms have body counts equal to the stabilizer weight. For joint depolarizing noise, the full Hamiltonian reads 
+
+Hjoint phen = eHX 
+
+> phen
+
++ eHZ 
+
+> phen
+
++ eHY
+
+> phen
+
+, (25) where eHX 
+
+> phen
+
+and eHZ 
+
+> phen
+
+retain the structural form of Eq. (20) but are evaluated under the joint-channel param-eters (measurement errors remain channel-independent), while data errors couple the two channels through a cross term: a Y error corresponds to simultaneous X and Z
+
+faults on the same qubit and time layer, 
+
+eHY 
+
+> phen
+
+= − 
+
+> T−1
+
+X
+
+> t=0
+
+X
+
+> q∈Q
+
+Jd η(d) ,X q,t η(d) ,Z q,t ξXq,t ξXq,t −1 ξZq,t ξZq,t −1
+
+× Y  
+
+> s∈NX(q)
+
+σs,t 
+
+Y  
+
+> s∈NZ(q)
+
+μs,t ,
+
+(26) where N Z (q) (N X (q)) is the set of Z-type ( X-type) stabi-lizers acting on qubit q, and η(d) ,X q,t (η(d) ,Z q,t ) is the quenched disorder on the X (Z) data type, derived from the Z-type (X-type) stabilizer syndromes. In the joint depolarizing model, the data coupling Jd across all terms in Eq. (25) follows the joint-channel Nishimori condition, Eq. (14) ,reflecting the uniform p/ 3 prior for each non-trivial Pauli error; the measurement coupling βJ m retains the form of Eq. (24). 6The cross-type Y interaction raises the data-term body count beyond the single-channel count: it involves four time-like stabilizer gauge spins ( ξXq,t , ξ Xq,t −1, ξ Zq,t , ξ Zq,t −1)plus |N X (q)| + |N Z (q)| space-like stabilizer gauge spins. This yields a local data-term body count of mY = 4 + 
+
+|N X (q)| + |N Z (q)|, raising the maximum data-term body count to 8-body for the toric code ( |N X | = |N Z | = 2 )and 10-body for the color code ( |N X | = |N Z | = 3 ). 
+
+III. ITERATIVE LOW-ORDER DECODING ALGORITHM A. Core mechanism under depolarizing noise 
+
+The joint Hamiltonian’s Y cross term under depolar-izing noise (Sec. II B 2) has body count 2m (m = 2 for the toric code, m = 3 for the color code), complicating both the energy landscape and the hardware embedding. To overcome these challenges, we propose an iterative low-order Ising decoding algorithm, which defines the X-and Z-type sub-Hamiltonians separately and solves them iteratively via a Gauss–Seidel serial schedule [ 33 ]. The 
+
+Y -type correlations in the joint Hamiltonian are approxi-mated through Bayesian priors that reweight X(Z)-type’s couplings using the Z(X)-type’s inferred error configura-tion. The sub-Hamiltonians at the iteration step ν are defined as follows: 
+
+H(ν) 
+
+> X
+
+(σ) = −
+
+> n
+
+X
+
+> q=1
+
+JX, (ν) 
+
+> q
+
+ηXqrX
+
+Y
+
+> j=1
+
+σSXj,q  
+
+> j
+
+,H(ν) 
+
+> Z
+
+(μ) = −
+
+> n
+
+X
+
+> q=1
+
+JZ, (ν) 
+
+> q
+
+ηZqrZ
+
+Y
+
+> l=1
+
+μSZl,q  
+
+> l
+
+,
+
+(27) which share the structure of the bit-flip RBIM in Eq. (10) but with qubit-dependent couplings JX, (ν) 
+
+> q
+
+, J Z, (ν)
+
+> q
+
+reweighted at each iteration. Because the X- and Z-type syndromes are determined by disjoint stabilizer subgroups, the two types carry independent class labels ℓX and ℓZ .Following the ℓ-absorption convention of Eq. (19) (spe-cialized to a single time layer), the quenched disorders 
+
+ηXq = ( −1) ϵXq ⊕(ℓL)Xq and ηZq = ( −1) ϵZq ⊕(ℓL)Zq therefore depend only on ℓX and ℓZ , respectively. Exploiting this independence, ILOD embeds the class selection directly within each type’s update step. In iteration ν, the X
+
+type independently evaluates its 2k logical classes (the 
+
+X-type projection of ℓ ∈ { 0, 1}2k) under the current cou-plings JX, (ν) 
+
+> q
+
+. It then selects the minimum-energy class to produce the optimal error estimate ˆe(ν) 
+
+> X
+
+, and uses this estimate to update the opposing couplings JZ, (ν) 
+
+> q
+
+before solving the Z type. For the initial iteration ( ν = 1 ), the algorithm uses the unconditioned marginal probability 
+
+pX, (1)  
+
+> q
+
+= P (X) + P (Y ) = 2 p/ 3 for every qubit, since no 
+
+ˆe(0)  
+
+> Z
+
+is available for Bayesian conditioning. Given the solver’s ground state σ(ν)opt of H(ν) 
+
+> X
+
+, the phys-ical error estimate is recovered by inverting the X-type gauge transformation in Eq. (15): 
+
+ˆe(ν) 
+
+> X,q
+
+= 12
+
+ 1 − ηXqrX
+
+Y
+
+> j=1
+
+(σ(ν)
+
+> j, opt
+
+)SXj,q 
+
+ ∈ { 0, 1}, (28) where ˆe(ν) 
+
+> X,q
+
+= 1 indicates that the solver infers a non-trivial 
+
+X-type symplectic component on qubit q (i.e., an X or 
+
+Y error), and 0 indicates its absence. The algorithm then updates the other type’s coupling strengths via Bayes’ rule. We take the ˆe(ν) 
+
+> X
+
+→ JZ, (ν) 
+
+> q
+
+update direction as an example (the reverse follows by X ↔ Z symmetry). Given ˆe(ν) 
+
+> X,q
+
+and treating it as a hard observation of the X-type component, Bayes’ rule determines the con-ditional probability that qubit q carries a Z component. If ˆe(ν) 
+
+> X,q
+
+= 1 , the error is restricted to {X, Y }; the equal priors P (X) = P (Y ) = p/ 3 then yield pZ, (ν) 
+
+> q
+
+= 1 /2.If ˆe(ν) 
+
+> X,q
+
+= 0 , the error belongs to {I, Z } with priors 
+
+P (I) = 1 − p and P (Z) = p/ 3; normalization yields 
+
+pZ, (ν) 
+
+> q
+
+= ( p/ 3) /(1 − p + p/ 3) = p/ (3 − 2p). Thus, 
+
+pZ, (ν) 
+
+> q
+
+=
+
+
+
+12 , ˆe(ν) 
+
+> X,q
+
+= 1 ,p
+
+3 − 2p , ˆe(ν) 
+
+> X,q
+
+= 0 .
+
+(29) We assign each JZ, (ν) 
+
+> q
+
+via the single-type Nishimori form of Eq. (8), applied locally to pZ, (ν) 
+
+> q
+
+:
+
+βJ Z, (ν) 
+
+> q
+
+= 12 ln 1 − pZ, (ν)
+
+> q
+
+pZ, (ν)
+
+> q
+
+. (30) The alternating optimization proceeds until the esti-mates ( ˆeX , ˆeZ ) remain unchanged between consecutive iterations, or until a maximum of Niter = 4 iterations is reached—an empirically determined limit beyond which no further reduction in the logical error rate is observed. The joint logical class ˆℓ = ( ˆℓX , ˆℓZ ) from the final iteration determines the decoding output. The dynamic and spatially inhomogeneous coupling strengths cause the sub-Hamiltonians to depart from the global Nishimori manifold, as the couplings J(ν) 
+
+> q
+
+are no longer determined by a single uniform error rate p. The alternating procedure is therefore a heuristic optimization guided by local Nishimori relations rather than direct MWD on the joint distribution. The two branches of Eq. (29) yield distinct local energy landscapes. When 
+
+ˆe(ν) 
+
+> X,q
+
+= 1 , the resulting pZ, (ν) 
+
+> q
+
+= 1 /2 gives JZ, (ν) 
+
+> q
+
+= 0 ,so the data term indexed by qubit q drops out of H(ν)
+
+> Z
+
+entirely. When ˆe(ν) 
+
+> X,q
+
+= 0 , the probability pZ, (ν) 
+
+> q
+
+≈ p/ 3 lies below the unconditioned marginal Z-error rate 2p/ 3 that a single-type decoder would use in the absence of Bayesian reweighting, yielding a larger JZ, (ν) 
+
+> q
+
+that strengthens the penalty against a spurious Z error on that qubit. 7The X-Z correlations induced by Y errors are thus approximately captured through the iterative propaga-tion of {J(ν) 
+
+> q
+
+}, rather than through the joint high-order terms (explicit 4-body and 6-body cross terms for the toric and color codes, respectively). This Bayesian-reweighting mechanism parallels belief-propagation–reweighted match-ing decoders [ 34 ], which propagate cross-type informa-tion through edge-weight updates in matching graphs; ILOD instead propagates correlations through the qubit-dependent couplings of each sub-Hamiltonian.  
+
+> B. Extension to phenomenological noise
+
+The alternating solve-and-update mechanism extends directly to the phenomenological depolarizing model (Sec. II B 3), promoting the qubit index q to a spacetime index (q, t ), with spacetime gauge spins σs,t , μ s,t , ξ Xq,t , ξ Zq,t 
+
+replacing their static counterparts. The single-type spacetime sub-Hamiltonian under phe-nomenological noise comprises data, measurement, and final-round boundary terms. For the X type, it reads 
+
+H(ν) 
+
+> X
+
+= − 
+
+> T−1
+
+X
+
+> t=0
+
+X
+
+> q∈Q
+
+JX, (ν) 
+
+> q,t
+
+η(d) ,X q,t ξXq,t ξXq,t −1
+
+Y  
+
+> s∈NX(q)
+
+σs,t 
+
+− 
+
+> T−1
+
+X
+
+> t=0
+
+X
+
+> s∈S Z
+
+Jm η(m) 
+
+> s,t
+
+Y
+
+> q∈∂s
+
+ξXq,t 
+
+− Js
+
+X
+
+> s∈S Z
+
+Y
+
+> q∈∂s
+
+ξXq,T −1,
+
+(31) where N X (q), ∂s , and η(m)  
+
+> s,t
+
+are as defined in Sec. II B 3 (the summation s ∈ SZ selects the stabilizer chan-nel that detects X-type errors), while the Z-type sub-Hamiltonian H(ν) 
+
+> Z
+
+follows by X ↔ Z symmetry using variables {μs,t , ξ Zq,t }.In the spacetime Bayesian update, only the data cou-plings JX, (ν) 
+
+> q,t
+
+and JZ, (ν) 
+
+> q,t
+
+are dynamically reweighted; the measurement coupling Jm and the final-round constraint 
+
+Js remain static across iterations. This asymmetry reflects the underlying physics, that is, measurement errors are independent classical bit-flips, lacking the cross-type cor-relations analogous to those produced by Pauli Y errors on data qubits. The Bayesian update rule of Sec. III A and the Nishi-mori mapping, Eq. (30) , apply unchanged at each space-time node (q, t ), yielding the dynamic couplings JX, (ν)
+
+> q,t
+
+and JZ, (ν) 
+
+> q,t
+
+. The inferred data error at each spacetime node is recovered by inverting the gauge-invariant data term 
+
+ˆe(ν) 
+
+> X,q,t
+
+= 12
+
+
+
+1 − η(d) ,X q,t ξX, (ν) 
+
+> q,t, opt
+
+ξX, (ν)
+
+> q,t −1,opt
+
+Y  
+
+> s∈NX(q)
+
+σ(ν)
+
+> s,t, opt
+
+
+
+.
+
+(32) The outer Gauss–Seidel iteration schedule and its con-vergence criterion remain identical to those in Sec. III A, applied over the entire spacetime lattice. The global space-time correlations are handled by the Ising solver within each optimization call, so the Niter = 4 iteration limit introduced above remains sufficient across the temporal extents examined in this work. The joint formulation’s Y cross term reaches 8- and 10-body for the toric and color codes, respectively, whereas the corresponding ILOD sub-Hamiltonians retain 4- and 5-body single-type forms. This halves the maximum data-term body count and approximately captures the cross-type correlations through Bayesian-reweighted couplings.  
+
+> C. Robust refinement under imperfect solvers
+
+The Bayesian derivation assumes that each solver call returns the exact ground state of its sub-Hamiltonian. In practice, the solver may converge to a suboptimal gauge configuration under a finite annealing budget, yielding an imperfect estimate ˆe that biases the Bayesian update of 
+
+{J(ν) 
+
+> q
+
+} and destabilizes the iterative process. To mitigate this, we generalize the hard assignment in Eq. (29) to a soft-decision formulation via two conditional probabilities reflecting solver reliability: 
+
+a = P (etrue  
+
+> X,q
+
+= 1 | ˆe(ν) 
+
+> X,q
+
+= 1) ,b = P (etrue  
+
+> X,q
+
+= 0 | ˆe(ν) 
+
+> X,q
+
+= 0) . (33) Marginalizing over etrue  
+
+> X,q
+
+via the law of total probability and substituting the ideal conditional probabilities from Eq. (29) yields 
+
+pZ, (ν) 
+
+> q
+
+=
+
+
+
+a · 12 + (1 − a) · p
+
+3 − 2p , ˆe(ν) 
+
+> X,q
+
+= 1 ,b · p
+
+3 − 2p + (1 − b) · 12 , ˆe(ν) 
+
+> X,q
+
+= 0 .
+
+(34) Setting a = b = 1 recovers the ideal-solver limit of Eq. (29) , while a = b = 1 /2 reduces pZ, (ν) 
+
+> q
+
+to a con-stant independent of ˆe(ν) 
+
+> X
+
+. For practical solvers with 
+
+a, b ∈ (1 /2, 1) , both branches of Eq. (34) lie strictly within the interval (p/ (3 − 2p), 1/2) . Consequently, neither the complete decoupling limit ( JZ, (ν) 
+
+> q
+
+= 0 for ˆeX,q = 1 ) nor the strong-penalty limit (for ˆeX,q = 0 ) is ever reached, preventing erroneous local estimates from propagating as rigid constraints into the opposing type. The parameters a and b are obtained via offline cali-bration: for each physical error rate p, the conditional probabilities in Eq. (33) are estimated as empirical fre-quencies on a calibration set of noise samples with known ground-truth errors, averaged over all qubits and samples. Although the solver reliability in principle varies with the iteration step ( a → a(ν), b → b(ν)), static parameters esti-mated from the initial iteration ( ν = 1 ) suffice to stabilize the updates for all code distances examined here. 8
+
+D. Efficiency analysis 
+
+Algorithm 1 summarizes the ILOD procedure, including the sub-Hamiltonian construction (Sec. III A), spacetime extension (Sec. III B), and robust refinement (Sec. III C). By decoupling the joint optimization into alternating types, ILOD reduces the search space, energy-landscape ruggedness, and hardware embedding cost, as analyzed below. 
+
+Search space reduction. Each joint solver call explores a gauge space of dimension 2rX +rZ
+
+and enumerates 4k
+
+logical classes. ILOD reduces both costs: 1) each ILOD solver call is restricted to a single type of dimension 2rZ
+
+or 
+
+2rX
+
+. For the rX = rZ codes considered here, this halves the gauge-space exponent, which constitutes the primary search-space saving for the small-k codes examined. 2) In terms of the logical-class enumeration, ILOD evaluates 2k
+
+classes per type ( 2k+1 total per iteration) compared to 4k
+
+classes in the joint implementation, yielding an additional reduction factor of ∼ 2k that would dominate for large-k
+
+codes. Beyond the solver calls, the Bayesian coupling updates only introduce linear overhead per iteration, a negligible cost relative to the solver itself. 
+
+Energy landscape smoothing. By separating the X- and 
+
+Z-type sub-Hamiltonians, ILOD lowers the order of lo-cal interactions in the Ising model, which is expected to mitigate the proliferation of metastable states and ease the heuristic ground-state search. Refs. [ 16 , 17 ] establish the analytical bounds of metastable-state proliferation for fully connected spin-glass models; our decoding re-sults on sparse topological graphs are consistent with this landscape-smoothing effect, where ILOD reduces the exponential scaling base of the decoding runtime on the toric code (Figs. 4 and 6) and restores convergence at 
+
+d = 9 on the color code (Fig. 7). 
+
+Hardware resource reduction. Mainstream Ising hard-ware natively supports only 2-body couplings; embedding an m-body interaction into quadratic form requires aux-iliary spins. Under Rosenberg quadratization [ 18 , 19 ], depending on the interaction sign and embedding gad-get, this decomposition introduces up to 2m − 4 auxiliary spins per term. ILOD’s body count reduction therefore lowers the auxiliary overhead: under phenomenological depolarizing noise, the joint 8-body (toric) and 10-body (color) terms require up to 12 and 16 auxiliary spins per term, while ILOD’s 4- and 5-body terms require only 4 and 6 spins per term, respectively. Combining the above analyses of search-space reduction and per-call solver cost, the total algorithmic cost of ILOD and joint decoding scales as 
+
+CILOD ≈ 2Niter · 2k · Cm, CJoint ≈ 4k · C2m, (35) where Cm is the cost of approximately finding the ground state of a single m-body ILOD sub-Hamiltonian over a gauge space of dimension 2rZ
+
+or 2rX
+
+, and C2m is the corresponding cost for the joint Hamiltonian with 2m-body interaction terms over a gauge space of dimension 
+
+Algorithm 1: Iterative low-order decoding 
+
+Input: Syndromes/detection events γX , γZ ; physical error rate p; number of logical qubits k; max iterations Niter ; reliability parameters (a, b )
+
+Output: Optimal logical class estimate ˆℓ 
+
+> 1
+
+Initialize pX, (1)  
+
+> q
+
+= 2 p/ 3 for all q // unconditioned initial X-marginal  
+
+> 2
+
+Derive JX, (1)  
+
+> q
+
+via Eq. (30)  
+
+> 3
+
+for ν = 1 to Niter do 
+
+// Phase 1: X-type optimization  
+
+> 4
+
+Construct H(ν) 
+
+> X
+
+(ℓX ) for ℓX ∈ { 0, 1}k using JX, (ν) 
+
+> q
+> 5
+
+ˆℓ(ν) 
+
+> X
+
+, σ(ν)opt , ˆe(ν) 
+
+> X
+
+← minimum-energy class and its gauge/error configuration  
+
+> 6
+
+Update {pZ, (ν) 
+
+> q
+
+} via Eq. (34) and derive {JZ, (ν) 
+
+> q
+
+}
+
+via Eq. (30) 
+
+// Phase 2: Z-type optimization  
+
+> 7
+
+Construct H(ν) 
+
+> Z
+
+(ℓZ ) for ℓZ ∈ { 0, 1}k using JZ, (ν) 
+
+> q
+> 8
+
+ˆℓ(ν) 
+
+> Z
+
+, μ(ν)opt , ˆe(ν) 
+
+> Z
+
+← minimum-energy class and its gauge/error configuration  
+
+> 9
+
+if ν ≥ 2 and (ˆ e(ν) 
+
+> X
+
+, ˆe(ν) 
+
+> Z
+
+) = (ˆ e(ν−1)  
+
+> X
+
+, ˆe(ν−1)  
+
+> Z
+
+) then  
+
+> 10
+
+break  
+
+> 11
+
+Update {pX, (ν+1)  
+
+> q
+
+} via Eq. (34) and derive 
+
+{JX, (ν+1)  
+
+> q
+
+} via Eq. (30)  
+
+> 12
+
+return ˆℓ = ( ˆℓ(ν) 
+
+> X
+
+, ˆℓ(ν) 
+
+> Z
+
+)
+
+2rX +rZ
+
+(with m identical across the two types of each code). At fixed Niter = 4 and the small k examined here, the prefactor ratio 2Niter /2k favors the joint formulation, so ILOD’s empirical advantage stems primarily from the reduced per-call solver cost ( Cm ≪ C2m). For larger k,the 2k-versus-4k class enumeration yields an exponential advantage for ILOD. 
+
+IV. NUMERICAL RESULTS 
+
+This section evaluates ILOD against joint Ising de-coding and MWPM in terms of decoding accuracy, run-time scaling, and hardware embedding overhead. For the matching decoders, we use PyMatching [ 35 ] for the toric code (standard MWPM and correlated MWPM [ 36 ], denoted Corr-MWPM) and the Chromobius decoder [ 37 ]for the 6.6.6 color code with X and Z syndromes decoded independently. For the phenomenological model, we set the measurement error rate equal to the data error rate (pm = p) and the number of measurement rounds equal to the code distance ( T = d) [ 31 ]. Both the joint and ILOD Hamiltonians are solved by simulated annealing (SA) us-ing the OpenJij library [ 38 ] with an exponential cooling schedule ( βmin = 0 .01 to βmax = 10 ). To ensure conver-gence, the sweep count for each (d, p ) pair is set to the minimum budget yielding stable logical error rate (LER) 90.14 0.15 0.16 0.17 0.18 0.19         
+
+> Physical Error Rate ( p)
+> 0.25
+> 0.30
+> 0.35
+> 0.40
+> 0.45
+> 0.50
+> 0.55
+> Logical Error Rate ( Pfail )
+> MWPM: 14.78 ±0.06%
+> Corr: 16.27 ±0.05%
+> ILOD: 17.13 ±0.07%
+> Joint: 17.69 ±0.06%
+> MWPM
+> d = 5
+> d = 7
+> d = 9
+> d=11
+> Corr
+> d = 5
+> d = 7
+> d = 9
+> d=11
+> ILOD
+> d = 5
+> d = 7
+> d = 9
+> d=11
+> Joint
+> d = 5
+> d = 7
+> d = 9
+> d=11
+
+(a) toric code (code-capacity depolarizing) 0.13 0.14 0.15 0.16 0.17 0.18 0.19        
+
+> Physical Error Rate ( p)
+> 0.150
+> 0.175
+> 0.200
+> 0.225
+> 0.250
+> 0.275
+> 0.300
+> 0.325
+> 0.350
+> Logical Error Rate ( Pfail )
+> MWPM: 13.45 ±0.09%
+> Joint: 17.29 ±0.07%
+> ILOD: 17.44 ±0.07%
+> MWPM
+> d = 9
+> d=11
+> d=13
+> d=15
+> Joint
+> d = 5
+> d = 7
+> d = 9
+> d=11
+> ILOD
+> d = 5
+> d = 7
+> d = 9
+> d=11
+
+(b) 6.6.6 color code (code-capacity depolarizing) FIG. 3. Logical error rates under code-capacity depolarizing noise for (a) the toric code and (b) the 6.6.6 color code. Thresholds are listed in Table I. 
+
+estimates within one bootstrap standard error. The ILOD reliability parameters (a, b ) (Eq. (33) ) are fixed by offline calibration at each error rate p. Each logical error rate is estimated from 2 × 10 4 Monte Carlo trials. Thresholds are extracted using the standard finite-size scaling ansatz 
+
+pL = A + Bx + Cx 2 with x = ( p − pth )d1/ν [ 31 ], via a joint fit across the crossing window. 
+
+Code Decoding Thresholds ( pth )MWPM Corr-MWPM Joint ILOD 
+
+Depolarizing Noise 
+
+toric 14 .78(6)% 16 .27(5)% 17 .69(6)% 17 .13(7)% 
+
+color 13 .45(9)% — 17 .29(7)% 17 .44(7)% 
+
+Phenomenological Noise 
+
+toric 3.80(2)% 4.65(2)% 4.83(2)% 4.73(2)% 
+
+color 3.35(5)% — 4.36(5)% 4.41(4)% 
+
+TABLE I. Decoding thresholds for the toric and the 6.6.6 color codes under code-capacity and phenomenological depolarizing error models. Parenthesized digits give the 1σ bootstrap uncertainty on the last digit. 
+
+A. Code-capacity depolarizing noise 
+
+We first evaluate ILOD under code-capacity depolar-izing noise. As shown in Fig. 3, the ILOD threshold for the toric code ( 17 .13% ) is slightly lower than that of the joint decoding ( 17 .69% ). This gap reflects ILOD’s approximation penalty, though ILOD still exceeds both MWPM ( 14 .78% ) and Corr-MWPM ( 16 .27% ), indicat-ing that the Ising formulation treats X-Z correlations more accurately than graph matching on these instances. This accuracy penalty is traded for an improved runtime scaling: at p = 0 .10 , the fitted base b of the runtime scaling Tsolve ∼ bd drops from b ≈ 1.49 (Joint) to b ≈ 1.31 
+
+(ILOD), as shown in Fig. 4. For the 6.6.6 color code, the accuracy penalty becomes statistically insignificant: the thresholds of ILOD ( 17 .44% )and the joint decoding ( 17 .29% ) agree within 1.5σ of the combined bootstrap uncertainty. The narrower accuracy gap (compared to 0.56% for the toric code) reflects a closer balance between two competing effects: ILOD’s approximation penalty suppresses its own threshold, while the higher body count of the joint Hamiltonian degrades SA convergence at finite sweep budgets and therefore suppresses the measured joint threshold. In comparison, MWPM yields a lower threshold ( 13 .45% ), indicating that independent matching of X and Z syndromes does not capture the X-Z correlations of depolarizing noise. 3 5 7 9 11 13 15 17 19 21 
+
+Code Distance ( d)     
+
+> 0.00
+> 0.02
+> 0.04
+> 0.06
+> 0.08
+> 0.10
+> 0.12
+> 0.14
+> 0.16
+> Logical Error Rate ( Pfail )
+> Joint
+> Joint Fit: T1.49 d
+> ILOD
+> ILOD Fit: T1.31 d
+> 10 1
+> 10 0
+> 10 1
+> Average Decoding Time (s)
+
+FIG. 4. Runtime scaling under code-capacity depolarizing noise for the toric code at p = 0 .10 , fitted as Tsolve ∼ bd.10 0.025 0.030 0.035 0.040 0.045 0.050 0.055 0.060         
+
+> Physical Error Rate ( p)
+> 0.0
+> 0.1
+> 0.2
+> 0.3
+> 0.4
+> 0.5
+> Logical Error Rate ( Pfail )
+> MWPM: 3.80 ±0.02%
+> Corr: 4.65 ±0.02%
+> ILOD: 4.73 ±0.02%
+> Joint: 4.83 ±0.02%
+> MWPM
+> d = 3
+> d = 5
+> d = 7
+> Corr
+> d = 3
+> d = 5
+> d = 7
+> ILOD
+> d = 3
+> d = 5
+> d = 7
+> Joint
+> d = 3
+> d = 5
+> d = 7
+
+(a) toric code (phenomenological depolarizing) 0.025 0.030 0.035 0.040 0.045 0.050 0.055        
+
+> Physical Error Rate ( p)
+> 0.05
+> 0.10
+> 0.15
+> 0.20
+> 0.25
+> Logical Error Rate ( Pfail )
+> MWPM: 3.35 ±0.05%
+> Joint: 4.36 ±0.05%
+> ILOD: 4.41 ±0.04%
+> MWPM
+> d = 3
+> d = 5
+> d = 7
+> Joint
+> d = 3
+> d = 5
+> d = 7
+> ILOD
+> d = 3
+> d = 5
+> d = 7
+
+(b) 6.6.6 color code (phenomenological depolarizing) FIG. 5. Logical error rates under phenomenological depolarizing noise ( pm = p, T = d) for (a) the toric code and (b) the 6.6.6
+
+color code. Thresholds are summarized in Table I. 
+
+B. Phenomenological depolarizing noise 
+
+Under phenomenological noise, measurement errors raise the joint Hamiltonian’s maximum body count from 4- to 8-body (toric code) and from 6- to 10-body (color code), further complicating the optimization landscape. The two codes behave differently: for the toric code, both Joint and ILOD converge reliably but exhibit different runtime scalings. For the color code, the joint solver converges at d ≤ 7 but fails to converge at d = 9 within the sweep budgets examined here, while ILOD remains convergent throughout. For the toric code shown in Fig. 5(a), the ILOD thresh-old ( 4.73% ) is slightly lower than that of the joint decoding (4.83% ); both exceed MWPM ( 3.80% ) and Corr-MWPM (4.65% ). This threshold gap ( 0.10% ) under phenomeno-logical noise is narrower than the gap ( 0.56% ) observed under code-capacity noise because the 8-body interactions in the joint Hamiltonian further degrade SA convergence, offsetting ILOD’s approximation penalty. As quantified in Fig. 6, the fitted base b of the runtime scaling Tsolve ∼ bd
+
+drops from b ≈ 3.34 (Joint) to b ≈ 2.70 (ILOD) over 
+
+d ∈ { 3, 5, 7, 9} at p = 0 .03 , yielding an exponentially shrinking runtime ratio with d.For the 6.6.6 color code shown in Fig. 5(b), the thresh-olds of ILOD ( 4.41% ) and the joint decoding ( 4.36% )agree within 0.8σ of the combined bootstrap uncertainty, outperforming MWPM ( 3.35% ). However, for larger dis-tances such as d = 9 at p = 0 .03 (Fig. 7), the 10-body joint Hamiltonian yields pL ≈ 0.5 even at 2 × 10 5 an-nealing sweeps per logical class, with the LER plateauing across the examined sweep range (i.e., SA fails to converge within the available budget). In contrast, ILOD achieves 
+
+pL ≈ 0.06 with only 2 × 10 4 sweeps per sub-Hamiltonian solver call, despite the overhead of Niter = 4 alternating rounds (two solver calls each). 3 5 7 9
+
+Code Distance ( d)    
+
+> 0.02
+> 0.03
+> 0.04
+> 0.05
+> 0.06
+> 0.07
+> 0.08
+> 0.09
+> 0.10
+> Logical Error Rate ( Pfail )
+> Joint
+> Joint Fit: T3.34 d
+> ILOD
+> ILOD Fit: T2.70 d
+> 10 0
+> 10 1
+> 10 2
+> Average Decoding Time (s)
+
+FIG. 6. Runtime scaling under phenomenological depolarizing noise for the toric code ( pm = p, T = d) at p = 0 .03 , fitted as 
+
+Tsolve ∼ bd.1 10 20 40 60 80 100 200 
+
+SA Step (k) 
+
+> 0.1
+> 0.2
+> 0.3
+> 0.4
+> 0.5
+> 0.6
+> 0.7
+> Logical Error Rate ( Pfail )
+> Joint
+> ILOD
+
+FIG. 7. Logical error rate versus SA sweeps per solver call for the 6.6.6 color code under phenomenological depolarizing noise (d = 9 , p = 0 .03 , pm = p, T = d). ILOD’s LER is reported after completing up to 2Niter = 8 sequential sub-Hamiltonian calls per logical class at each sweep budget. 11 3 5 7 9 11                 
+
+> Code Distance ( d)
+> 0
+> 10000
+> 20000
+> 30000
+> 40000
+> 50000
+> Total Spin Variables ( N)
+> Toric (Joint): N33.37 × d3.04
+> Toric (ILOD): N12.97 × d3.05
+> Color (Joint): N7.82 × d3.35
+> Color (ILOD): N3.03 × d3.32
+
+FIG. 8. Total spin count (base gauge spins plus auxiliary spins) after Rosenberg quadratization under phenomenological depolarizing noise. 
+
+C. Hardware embedding overhead 
+
+Beyond the accuracy and runtime gains above, ILOD’s body-count reduction also lowers the cost of embedding the Hamiltonian into native 2-body Ising hardware. Fig-ure 8 reports the total spin count (base gauge plus aux-iliary) under phenomenological depolarizing noise after converting the high-order interactions to quadratic form via Rosenberg quadratization [ 18 , 19 ]. This reduction arises from two effects. First, ILOD discards the high-order cross-terms that dominate the ancilla cost under quadratization. Second, sequential solving of the X and 
+
+Z sub-Hamiltonians lets the physical spin array be reused across iterations, so the ILOD count reflects the larger of the two type sub-Hamiltonians rather than their sum. The resulting spin-count ratio (joint to ILOD) remains nearly constant across the examined distances ( ≈ 2.59 ×
+
+for the toric code and ≈ 2.55 × for the color code). 
+
+V. CONCLUSION AND DISCUSSION 
+
+We have proposed ILOD, an iterative Ising decoder that decomposes the joint Hamiltonian under depolar-izing noise into single-type ( X or Z) sub-Hamiltonians, with cross-type information propagated through iterative coupling updates. The numerical results on code capac-ity and phenomenological noise demonstrate that ILOD approximates the threshold of the joint formulation while improving runtime scaling, restoring solver convergence at large code distances where the joint Ising decoder fails to converge, and reducing the total spin count for em-bedding into native 2-body Ising hardware. Both ILOD and the joint Ising decoder achieve higher thresholds than matching-based methods for the toric and color codes. Our approach provides an efficient framework for Ising-based decoding. It can be applied to other CSS codes such as quantum low-density parity-check (qLDPC) codes [ 39 –42 ] of which non-local connectivity and high stabilizer weights make the embedding overhead of the joint Ising mapping especially severe. We have considered phe-nomenological depolarizing noise and the per-qubit prior in ILOD can handle any independent Pauli channel through asymmetric rates px, p y , p z . Extending ILOD to circuit-level noise would require generalizing the per-qubit prior to one that captures inter-qubit correlations, which we leave for future work. We have used a CPU-based SA solver for numerical evaluation, so the reported runtimes reflect algorithmic scaling rather than the end-to-end latency of a deployed decoder. To achieve lower decoding latency, one can map the Ising Hamiltonians onto dedicated hardware platforms such as coherent Ising machines [ 8, 9], quantum annealers [ 10 , 11 ], and digital annealers [12]. 
+
+ACKNOWLEDGMENTS 
+
+We acknowledge the support from QUANTA (QU antum f AN s from I T A rea) group. This work has been supported by the National Key R&D Program of China (Grant No. 2024YFB4504001), the National Nat-ural Science Foundation of China (Grant No. 62302395, 62301505, and 62421002), the Fundamental and Interdis-ciplinary Disciplines Breakthrough Plan of the Ministry of Education of China (Grant No. JYB2025XDXM202), the Aid Program for Science and Technology Innovative Re-search Team in Higher Educational Institutions of Hunan Province. 
+
+[1] B. M. Terhal, Quantum error correction for quantum memories, Rev. Mod. Phys. 87 , 307 (2015). [2] F. Battistel, C. Chamberland, K. Johar, R. W. Overwa-ter, F. Sebastiano, L. Skoric, Y. Ueno, and M. Usman, Real-time decoding for fault-tolerant quantum computing: Progress, challenges and outlook, Nano Futures 7, 032003 (2023). [3] A. G. Fowler, M. Mariantoni, J. M. Martinis, and A. N. Cleland, Surface codes: Towards practical large-scale quantum computation, Phys. Rev. A 86 , 032324 (2012). [4] N. Sourlas, Spin-glass models as error-correcting codes, Nature 339 , 693 (1989). [5] E. Dennis, A. Kitaev, A. Landahl, and J. Preskill, Topo-logical quantum memory, J. Math. Phys. 43 , 4452 (2002). [6] H. G. Katzgraber, H. Bombin, and M. A. Martin-Delgado, Error threshold for color codes and random three-body Ising models, Phys. Rev. Lett. 103 , 090501 (2009). [7] H. Bombin, R. S. Andrist, M. Ohzeki, H. G. Katzgraber, and M. A. Martin-Delgado, Strong resilience of topological codes to depolarization, Phys. Rev. X 2, 021004 (2012). 12 
+
+[8] A. Marandi, Z. Wang, K. Takata, R. L. Byer, and Y. Ya-mamoto, Network of time-multiplexed optical parametric oscillators as a coherent Ising machine, Nat. Photonics 8,937 (2014). [9] T. Inagaki, Y. Haribara, K. Igarashi, T. Sonobe, S. Ta-mate, T. Honjo, A. Marandi, P. L. McMahon, T. Umeki, K. Enbutsu, et al. , A coherent Ising machine for 2000-node optimization problems, Science 354 , 603 (2016). [10] M. W. Johnson et al. , Quantum annealing with manufac-tured spins, Nature 473 , 194 (2011). [11] A. D. King et al. , Quantum critical dynamics in a 5,000-qubit programmable spin glass, Nature 617 , 61 (2023). [12] M. Aramon, G. Rosenberg, E. Valiante, T. Miyazawa, H. Tamura, and H. G. Katzgraber, Physics-inspired op-timization for quadratic unconstrained problems using a digital annealer, Front. Phys. 7, 48 (2019). [13] T. Honjo, T. Sonobe, K. Inaba, T. Inagaki, T. Ikuta, Y. Yamada, T. Kazama, K. Enbutsu, T. Umeki, R. Kasa-hara, K.-i. Kawarabayashi, and H. Takesue, 100,000-spin coherent Ising machine, Sci. Adv. 7, eabh0952 (2021). [14] Y. Takeuchi, Y. Takada, T. Sakashita, J. Fujisaki, H. Os-hima, S. Sato, and K. Fujii, Comparative study of de-coding the surface code using simulated annealing under depolarizing noise (2023), arXiv:2311.07973 [quant-ph]. [15] Y. Takada, Y. Takeuchi, and K. Fujii, Ising model formu-lation for highly accurate topological color codes decoding, Phys. Rev. Res. 6, 013092 (2024). [16] B. Derrida, Random-energy model: An exactly solvable model of disordered systems, Phys. Rev. B 24 , 2613 (1981). [17] D. J. Gross and M. Mézard, The simplest spin glass, Nucl. Phys. B 240 , 431 (1984). [18] I. G. Rosenberg, Reduction of bivalent maximization to the quadratic case, Cah. Cent. Étud. Rech. Opér. 17 , 71 (1975). [19] E. Boros and P. L. Hammer, Pseudo-boolean optimization, Discrete Appl. Math. 123 , 155 (2002). [20] N. Dattani, Quadratization in discrete optimization and quantum mechanics (2019), arXiv:1901.04405 [quant-ph]. [21] D. Poulin, Optimal and efficient decoding of concatenated quantum block codes, Phys. Rev. A 74 , 052333 (2006). [22] D. Gottesman, Stabilizer Codes and Quantum Error Cor-rection , Ph.D. thesis, California Institute of Technology (1997), arXiv:quant-ph/9705052 [quant-ph]. [23] S. Aaronson and D. Gottesman, Improved simulation of stabilizer circuits, Phys. Rev. A 70 , 052328 (2004). [24] A. R. Calderbank and P. W. Shor, Good quantum error-correcting codes exist, Phys. Rev. A 54 , 1098 (1996). [25] A. M. Steane, Error correcting codes in quantum theory, Phys. Rev. Lett. 77 , 793 (1996). [26] A. Y. Kitaev, Fault-tolerant quantum computation by anyons, Ann. Phys. 303 , 2 (2003). [27] H. Bombin and M. A. Martin-Delgado, Topological quan-tum distillation, Phys. Rev. Lett. 97 , 180501 (2006). [28] H. Nishimori, Internal energy, specific heat and correlation function of the bond-random Ising model, Prog. Theor. Phys. 66 , 1169 (1981). [29] A. A. Kovalev and L. P. Pryadko, Spin glass reflection of the decoding transition for quantum error correcting codes (2013), arXiv:1311.7688 [quant-ph]. [30] C. T. Chubb and S. T. Flammia, Statistical mechanical models for quantum codes with correlated noise, Ann. Inst. Henri Poincaré D 8, 269 (2021). [31] C. Wang, J. Harrington, and J. Preskill, Confinement-higgs transition in a disordered gauge theory and the accuracy threshold for quantum memory, Ann. Phys. 303 ,31 (2003). [32] M. Ohzeki, Accuracy thresholds of topological color codes on the hexagonal and square-octagonal lattices, Phys. Rev. E 80 , 011141 (2009). [33] Y. Saad, Iterative Methods for Sparse Linear Systems ,2nd ed. (SIAM, 2003). [34] B. Criger and I. Ashraf, Multi-path Summation for De-coding 2D Topological Codes, Quantum 2, 102 (2018). [35] O. Higgott and C. Gidney, Sparse blossom: correcting a million errors per core second with minimum-weight matching, Quantum 9, 1600 (2025). [36] A. G. Fowler, Optimal complexity correction of correlated errors in the surface code (2013), arXiv:1310.0863 [quant-ph]. [37] C. Gidney and C. Jones, New circuits and an open source decoder for the color code (2023), arXiv:2312.08813 [quant-ph]. [38] OpenJij Team, OpenJij: An open-source library for Ising models and QUBOs, https://github.com/OpenJij/ OpenJij (2023). [39] N. P. Breuckmann and J. N. Eberhardt, Quantum low-density parity-check codes, PRX Quantum 2, 040101 (2021). [40] P. Panteleev and G. Kalachev, Degenerate quantum LDPC codes with good parameters, Quantum 5, 585 (2021). [41] P. Panteleev and G. Kalachev, Asymptotically good quantum and locally testable classical LDPC codes, in 
+
+Proc. 54th Annu. ACM SIGACT Symp. Theory Comput. (STOC) (ACM, 2022) pp. 375–388. [42] S. Bravyi, A. W. Cross, J. M. Gambetta, D. Maslov, P. Rall, and T. J. Yoder, High-threshold and low-overhead fault-tolerant quantum memory, Nature 627 , 778 (2024).

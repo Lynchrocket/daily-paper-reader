@@ -1,6 +1,9 @@
 * <a class="dpr-sidebar-root-link" href="#/">首页</a>
 * <a class="dpr-sidebar-root-link dpr-sidebar-noactive-link" href="javascript:void(0)" data-dpr-hash="#/tutorial/README">使用教程</a>
 * Daily Papers
+  * 2026-06-12 <!--dpr-date:20260612-->
+    * 精读区
+      * <a class="dpr-sidebar-item-link dpr-sidebar-item-structured" href="#/202606/12/2606.11484v1-handbook-of-error-correcting-codes" data-sidebar-item="{&quot;title&quot;: &quot;Handbook of Error-Correcting Codes&quot;, &quot;link&quot;: &quot;https://arxiv.org/abs/2606.11484v1-handbook-of-error-correcting-codes&quot;, &quot;score&quot;: &quot;9.0&quot;, &quot;tags&quot;: [{&quot;kind&quot;: &quot;query&quot;, &quot;label&quot;: &quot;qec-code&quot;}], &quot;evidence&quot;: &quot;量子纠错编码综合手册&quot;}">Handbook of Error-Correcting Codes</a>
   * 2026-06-11 <!--dpr-date:20260611-->
     * 精读区
       * <a class="dpr-sidebar-item-link dpr-sidebar-item-structured" href="#/202606/11/2606.11468v1-optimizing-encoder-circuits-of-entanglement-assisted-quantum-ldpc-codes-via-beam-search" data-sidebar-item="{&quot;title&quot;: &quot;Optimizing Encoder Circuits of Entanglement-Assisted Quantum LDPC Codes via Beam Search&quot;, &quot;link&quot;: &quot;https://arxiv.org/abs/2606.11468v1-optimizing-encoder-circuits-of-entanglement-assisted-quantum-ldpc-codes-via-beam-search&quot;, &quot;score&quot;: &quot;9.0&quot;, &quot;tags&quot;: [{&quot;kind&quot;: &quot;query&quot;, &quot;label&quot;: &quot;qec-decoding&quot;}], &quot;evidence&quot;: &quot;纠缠辅助量子QC-LDPC码的编码器电路优化&quot;}">Optimizing Encoder Circuits of Entanglement-Assisted Quantum LDPC Codes via Beam Search</a>

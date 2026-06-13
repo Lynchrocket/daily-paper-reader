@@ -6,26 +6,27 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-06-12
-- 运行时间：2026-06-12 21:42:18 UTC
+- 最新运行日期：2026-06-13
+- 运行时间：2026-06-13 20:37:02 UTC
 - 运行状态：成功
-- 本次总论文数：1
-- 精读区：1
-- 速读区：0
+- 本次总论文数：2
+- 精读区：0
+- 速读区：2
 
 ### 今日简报（AI）
-今日精读高分经典《纠错码手册》，系统掌握核心编码理论。  
-最值得关注的是纠错码在通信与存储中的基础应用及关键设计原则。  
-建议从汉明码、循环码入手，结合实例理解纠错能力，逐步深入代数编码。
-- 详情：[/202606/12/README](/202606/12/README)
+今日速读两篇纠错码文献，涵盖可逆线性码在DNA编码中的应用与经典手册。建议优先阅读《On concatenation of matrices for reversible linear codes...》，论文关联有限环线性码到DNA代码的构造，适合对编码理论跨学科应用感兴趣的读者。下一步可对比两篇文献中纠错码的设计思路，以加深理解。
+- 详情：[/202606/13/README](/202606/13/README)
 
 ### 精读区论文标签
-1. [Handbook of Error-Correcting Codes](/202606/12/2606.11484v1-handbook-of-error-correcting-codes)  
-   标签：评分：9.0/10、query:qec-code
-   evidence：量子纠错编码综合手册
+- 本次无精读推荐。
 
 ### 速读区论文标签
-- 本次无速读推荐。
+1. [On concatenation of matrices for reversible linear codes over a finite commutative ring and applications to DNA codes](/202606/13/2606.10633v1-on-concatenation-of-matrices-for-reversible-linear-codes-over-a-finite-commutative-ring-and-applications-to-dna-codes)  
+   标签：评分：6.0/10、query:qec-code
+   evidence：从Z4上的循环码构造二进制量子码，与量子纠错编码相关
+2. [Handbook of Error-Correcting Codes](/202606/13/2606.11484v1-handbook-of-error-correcting-codes)  
+   标签：评分：6.0/10、query:qec-code
+   evidence：量子纠错码手册
 
 
 <div class="dpr-home-promo-card">

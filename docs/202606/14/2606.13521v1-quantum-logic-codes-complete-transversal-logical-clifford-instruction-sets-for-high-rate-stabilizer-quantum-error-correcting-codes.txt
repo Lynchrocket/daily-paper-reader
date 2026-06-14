@@ -1,0 +1,2466 @@
+Title: Quantum Logic Codes: Complete Transversal Logical Clifford Instruction Sets for High-Rate Stabilizer Quantum Error Correcting Codes
+
+URL Source: https://arxiv.org/pdf/2606.13521v1
+
+Published Time: Fri, 12 Jun 2026 01:21:02 GMT
+
+Number of Pages: 34
+
+Markdown Content:
+## Quantum Logic Codes: Complete Transversal Logical Clifford Instruction Sets for High-Rate Stabilizer Quantum Error Correcting Codes 
+
+Adam Holmes ∗
+
+NVIDIA (Dated: June 12, 2026) We study the structure and transversal logical capabilities of stabilizer quantum error correcting codes. Among our results, we identify universal lower bounds on circuit depth to generate a full logical Clifford algebra, and develop novel constructions of logical transversal gates including a new depth-one transversal phase S gate in the rotated surface code and a depth-one intra-block CZ gate in the 2D-toric code that generalizes to all odd distances and all lengths L ≥ 3, respectively. Finally, we construct a high-rate non-LDPC CSS code family with parameters [[ n, √n, Θ( nβ )]] where 
+
+β ≈ 0.2823 in one demonstrated case, that provably possesses a constant-depth complete 2-local transversal logical Clifford basis instruction set architecture (ISA) composed of all individually targeted S , SHS = √X, and CZ gates. This ISA is depth-one for certain subfamilies that we design and generally constant-depth under certain conditions. The code family is built from a small code with parameters [[ n0, 2, d 0]], and is tunable in the standard way: it tiles out to form utility-scale logical qubit counts, and it scales up through concatenation to achieve higher distances and error suppression. We show that this construction preserves the depth-one complete transversal logical Clifford basis ISA when composed with these commuting construction actions, inheriting structure from the core codes so that at scale the complete logical Clifford basis ISA remains depth-one up to depth-two addressable operations between tiled cores. We call these Quantum Logic Codes .
+
+CONTENTS 
+
+I. Introduction 2A. Background 2B. Summary of Results 3C. Related Work 5D. Framework 6II. Codespace-Preserving Transversal Circuit Depth Bounds 7III. CSS Transversality Theory 8A. 1-Local Transversality Theory 8B. 2-Local Transversality Theory 9C. W-Local and Permutation Automorphism Transversality Theory 10 IV. Novel Constructions 11 A. Rotated Surface Code Transversal Phase Gate 11 B. 2D-Toric Code Transversal Intra-block Controlled-Z Gate 12 C. Quantum Logic Codes 13 1. The complete logical Clifford basis ISA 13 2. Bounded-depth self-dual composition 14 3. The combined family 15 4. First concatenation level 16 V. Conclusion 18 References 18 VI. Supplementary Material 21  
+
+> ∗Corresponding author: adholmes@nvidia.com
+> arXiv:2606.13521v1 [quant-ph] 11 Jun 2026
+
+2 
+
+> I. INTRODUCTION
+
+Building a utility-scale quantum computer requires fault-tolerance techniques of one form or another, and the predominant designs today encode physical qubits into blocks and perform error correction through the use of quantum error correcting codes. A very useful family of codes is the stabilizer code family [1], in particular the codespaces formed by the joint eigenspace of an abelian subgroup of the Pauli group. Within this group, the Calderbank-Shor-Steane (CSS) code family is also very useful: those with a stabilizer group decomposable as a direct product of all-X
+
+type and all-Z type stabilizer generators. These codes are useful for many reasons, including their natural structure that admits many interesting construction methods to build new codes, clear designs for efficient syndrome extraction circuits, and the ability to perform certain types of transversal logic. We develop a theory of transversal Clifford logic in CSS codes including characterizing the capabilities of physical gates inside CSS codes, and identifying multi-layered constructions of the full logical Clifford group wherein each individual physical gate layer preserves the codespace. The intent with these designs is to enable fault-tolerant logic inside CSS codes in general. A utility-scale system with multi-layered codespace-preserving transversal gate constructions to perform all Clifford logic can avoid the overheads associated with ancillary system gadgetry [2]. This is intended to support full-scale fault tolerant system design along the lines originally posited by Gottesman [3], refined and partially realized by more recent architectures including [4], then modern [5] and [6]. To this end, we present a theory of transversal Clifford logic in stabilizer codes. Much prior work exists in this area that we build upon, most prominently the recent work establishing multi-layered transversal gate constructions for the entire logical Clifford group in quantum Reed-Muller (QRM) codes [7], followed by the observation by Chakraborty and Gottesman that transversal gates acting on groups of at least k-qubits ( k-local gates) are required to achieve the full logical Clifford group in codes that encode k logical qubits [8]. These results are in fact compatible: the former uses strict 1-local transversal gate layers composed with a subset of 2-local transversal gate layers (the so-called fold-transversal gates) and permutation automorphisms to build a generating set of the logical Clifford group for QRM codes; the latter can be interpreted as a statement about the power of single layers, specifically that there exist logical operators inside the full logical Clifford group of an [[ n, k, d ]] code that require at least k-local physical gates if they are synthesized in a single transversal layer. This is one way to view the result, and a useful one in that it motivates a unified view of transversality focusing on characterizing the logical reach of physical gate layers. We first use lower bounds on W -local transversal layer counts to study the general transversal logical power of stabilizer codes. We show that there are two elementary drivers of depth that are each dominant in distinct code regimes, information transfer from low-weight to high-weight Pauli operators, and Clifford group entropy. We further develop a theory characterizing the logical reach of local transversal gate layers in CSS codes, developing the theory for W -local physical gates that preserve the codespace as a single circuit layer, and detail the set of logical operators generated by such layers. Codespace preservation layer-by-layer is not strictly necessary, but it allows for a logical gate construction protocol that is fault tolerant up to some fault density (albeit relaxed from the traditional 1-local transversal gate constructions). A W -local gate will propagate a single qubit error into at most a W -qubit error, and if the layer preserves the codespace it can be followed by a round of error correction immediately afterward, used to diagnose and analyze these weight-≤ W error patterns which can produce good error suppression in large systems. Altogether, this work is a step toward understanding logic in high-rate stabilizer codes. This theory offers con-structive routes to synthesis as well by greatly reducing the search space in general, and offering pathways to scalable code families by establishing logical circuit preservation properties under composition and tiling. We make use of all of this in this work, building out the theory of [9] for two-locality enabling a fast SAT-solver search to find the logical 
+
+S gate in the rotated surface code closely inspired as well by [10], as well as the pre-existing work [11] inspiring the code construction for Quantum Logic Codes that concatenates with self-dual doubly-even codes.  
+
+> A. Background
+
+We approach the study of transversality in stabilizer codes from first principles by studying the space of circuits that can and cannot preserve the codespace, then studying the logical action of such circuits, and by developing a formalism allowing us to generally characterize the logical reach of transversal gate layers in general stabilizer codes, defined as the set of logical operations that is realizable with codespace-preserving transversal gates. We further use this formalism to design novel transversal gate constructions for important code families, and to design concrete CSS code families with constant-depth 2-local transversal logical Clifford generator operations. Our analysis focuses on stabilizer codes that are indecomposable . This means that the code cannot be written as a tensor product of smaller codes, or that the code is “non-splitting” in the terminology of [9]. Decomposable CSS codes are interesting objects themselves, and admit logical transversal blockwise CNOT gates between decomposed blocks. This theory underpins nearly all of the proposed architectures that exist today: a set of physical qubits is 3partitioned into a set of logical qubits, each encoded in a (perhaps different family of) quantum error correcting code, and logical gadgets are designed to enable logical operations between code blocks in the architecture [12–15] to name a few. Any such system can be written as one large quantum error correction code, with block-diagonal parity check matrices corresponding to each code. Indecomposable codes form the atoms of such a theory, and are the focus of our analysis in hopes that they can combine into useful molecules for quantum computing system architectures. To perform our analysis we study the effect of transversal gate layers on stabilizers and logical operators. We follow both [9] and [8] in their definition of transversality. Specifically, we use the following: 
+
+Definition 1 (single-layer transversal W-local gate) . A physical qubit circuit V is single-layer transversal W-local if it can be written as: 
+
+V = O
+
+> i
+
+Vi
+
+where each Vi is an operator on at most W physical qubits, the Vi operating on disjoint sets of at most W physical qubits that partition [ n]. We refer to this as a W -local transversal gate layer (Figure 1). Further, we study the action of multiple layers of codespace-preserving transversal gate layers. This allows us to synthesize logical operators that are not contained in the set of logical operations reachable in single layers. We characterize the logical capability that this creates. Throughout this work we refer to circuit depth , which we use to mean the number of distinct W -local transversal gate layers. This embeds an assumption that a W -qubit unitary operator is treated as a depth-one operation. For many real systems this is not the case, however in this work especially for the 2-local cases, this is a good approximation.                            
+
+> FIG. 1. Single-layer transversal W-local gate layers (Definition 1) on a shared grid of physical qubits. Such a layer V=N
+> iVi
+> partitions the qubits into disjoint blocks of at most Wqubits and applies one factor Viwithin each encircled block. Left
+> (W= 1): every qubit is its own block, so each Viis a single-qubit gate. Middle (W= 2): blocks of two qubits. Right (W≤7): blocks of up to seven qubits. Enlarging Wgrows the per-block gate space from Sp(2 ,F2) up to Sp(2 W, F2) while preserving the disjoint-block structure that underlies the layer-counting bound.
+> B. Summary of Results
+
+First, we show a set of results lower bounding the number of layers required to implement the full logical Clifford group in any CSS stabilizer code. In particular, we show a set of lower bounds on circuit depth D of 2-local gate layers required to implement the full logical Clifford group for a code Q with encoding density k = f (n). 4
+
+k = O(1) = ⇒ D = Ω(1) (1) 
+
+k = O(pn log n) = ⇒ D ≥ Ω
+
+
+
+log 
+
+ kd log n
+
+ 
+
+(2) 
+
+k = nα, 1/2 < α < 1 = ⇒ D ≥ Ω
+
+ n2α−1
+
+log n
+
+
+
+(3) 
+
+k = Θ( n) = ⇒ D ≥ Ω
+
+ n
+
+log n
+
+
+
+(4) These all turn out to be special parameter regimes of deeper structure of W -local physical gate layers: 
+
+D ≥ max 
+
+ 
+
+log W
+
+w⋆
+
+d
+
+
+
+,
+
+
+
+log Nn,W 
+
+| Sp(2 k, F2)||ρ(Aut perm (Q)) |
+
+ 
+
+(5) where each ceiling ⌈·⌉ is taken as its positive part ⌈·⌉ + := max {0, ⌈·⌉} (Corollary 1), w⋆ is the Pauli radius :the weight of the largest minimum-weight logical Pauli operator over all nontrivial logical classes of the code Q,
+
+|ρ(Aut perm (Q)) | is the size of the logical image of the permutation automorphism group (the number of distinct logical actions induced by physical permutation automorphisms), and Nn,W is the number of codespace-preserving 
+
+W -local gate layers on a code Q over n qubits. This relationship has two terms. The first of these expresses the relationship between the sizes of logical Pauli terms of the code, and captures the requirement that in general a logical Clifford needs to spread information from Paulis to Paulis. The second is an entropy argument calculating the number of bits required to implement all of the logical operators of the Clifford group reduced by the set of code automorphism freedom, and upper bounds the ability of W -local codespace preserving gates to supply these operations by counting the number of available layers. We note that an earlier observation was made by [7] where they calculated that k = ω(√n log n) =⇒ D ≥ Ω  k2  
+
+> nlog n
+
+. This is the general form of the scaling of depth lower bounds once k grows faster than √n log n, and is a succinct coarse-grained summary of the relationship shown in Equation 5 in the appropriate parameter regime. Next, we show a series of results classifying the capabilities of W -local transversal gate layers themselves in CSS codes. For an indecomposable quantum CSS code Q, and where addressable logical gates are precisely those that leave at least one logical qubit invariant under the action: – To perform a logically addressable gate with a single 1-local physical gate restricts the physical per-qubit gate operators to the set {I, S, SHS }. This was discovered in [9]. – The addressable 1-local single-layer logical reach already lies in the 2-local set G2L(K) below, with logical blocks 
+
+LX diag( ⃗c)L ⊤ 
+
+> X
+
+and LZ diag( ⃗b)L⊤ 
+
+> Z
+
+. They are symmetric but not necessarily diagonal, so even 1-local layers can realize entangling couplings such as CZ ij .– A logically addressable single 2-local layer cannot enact a global X ↔ Z sector exchange, and, under the confinement hypothesis below, its remaining non-trivial-diagonal freedom is a logical basis change (Lemmas 4– 5). The trivial-diagonal blocks ( AVp = DVp = I) form the phase/ CZ set Gdiag , built from the gate types I, S, SHS, CZ, CZ ♯, J (|G diag | = 18, Prop. 3), where J is the all-ones entangler and CZ ♯ = ( H ⊗ H)CZ (H ⊗
+
+H). – Up to code automorphisms, and under the confinement hypothesis of Proposition 4, the symplectic form of the logical addressable 2-local single-layer reach is contained in the 2-local set 
+
+G2L(K) := 
+
+  I BC I
+
+
+
+| B, C ∈ Sym K , BC = 0 
+
+
+
+.
+
+– The logical addressable 2-local single-layer reach is contained in GL( K, F2) · G 2L(K) under the same confine-ment hypothesis; when the basis changes are realized by permutation automorphisms it is contained in the set composed with the logical automorphism group Aut log perm (Q). The basis changes are contributed by the invertible (automorphism-type) blocks above, and the matching-realizable elements form the subset Sgen 2L+π (Q)(Definition 7) of the displayed set: 5
+
+G2L+π (Q) = 
+
+  A BA −T
+
+CA A−T
+
+
+
+| A ∈ Aut log perm (Q), B, C ∈ Sym K (F2), BC = 0 
+
+
+
+.
+
+– For any locality 2 ≤ W < n , the addressable single-layer W -local Clifford reach is, under the same hypothesis: 
+
+T W L  
+
+> addr
+
+(Q) ⊆ GL( K, F2) · G 2L(K), with G2L+π (Q) in place of the right-hand side when the basis changes are permutation-automorphism actions. Enlarging the physical locality to W increases the per-block parameter space, yields more physical circuits that can construct particular addressable logical operations, but does not enable physical circuits to reach new addressable logical operations outside of this set. – Algebraically, the multi-layer closure of the 2-local set is the full logical Clifford group: ⟨G 2L(K)⟩ = Sp(2 K, F2). Whether a given code physically attains this depends on which set generators it realizes as codespace-preserving 
+
+W ≤ 2 layers; the Quantum Logic Codes of Section IV C realize a complete such library. The final section of results focuses on novel constructions. In spite of the hardness of the problem in general, interesting code families and gate targets can be found with SAT-solvers. In particular, we present a novel single-layer 2-local transversal S gate in the rotated surface code and a single-layer 2-local transversal intracode CZ in the 2D-toric code. The surface code construction provably preserves code distance for every odd d and is single-fault-tolerant for d ≥ 5, and it generalizes to all odd distances. We also show CSS code instances that each have a concrete complete transversal logical Clifford Instruction Set Architecture (ISA) , defined as a set of transversal 2-local circuits implementing a full logical basis of the Clifford group. Here we focus on the basis {Si, SHS i, CZ i,j } for all 
+
+i̸ = j ∈ [k]. We design a family construction that produces codes of asymptotic parameters [[ n, √n, Θ( n0.2823 )]] built from self-dual cores ( n0, d 0) ∈ { (4 , 2) , (18 , 5) , (20 , 6) } by r-fold tiling and ℓ levels of concatenation with [[7 , 1, 3]] inner codes. The displayed asymptotic form takes the (4 , 2) core with r = 7 ℓ, and the other cores give k = Θ( √n) with the same exponent. This family provably possesses a complete transversal logical Clifford basis ISA at circuit depth independent of ℓ and bounded in r (Proposition 7), and so we call them Quantum Logic Codes . 
+
+> C. Related Work
+
+Much work has already been done in this area, and the closest related work is listed here first. To start, [8] proved a limitation on single-layer locality for transversal gates to be capable of producing the full logical Clifford group. This result combines with the earlier result of [7], wherein they prove that the Quantum Reed Muller code family has a logical Clifford transversal gate instruction set, with layer counts for addressable S gates scaling as O(√n). Another earlier work [9] studied the requirements of physical transversal gates within CSS codes. This work showed significant restrictions on the gate set of 1-local gates, and showed insightful bounds on encoding rate stemming from indecomposability. We directly build out these results to 2-local and W -local transversal layers, for codespace-preserving addressable logical operations. For hypergraph product (HGP) codes, earlier work [16] derived explicit symplectic generators of the logical Clifford group and synthesized these logical operators physically, though they are not fault tolerant. Prior work in this area is [17] which established the groundwork for symplectic synthesis as a whole, and greatly inspired this continuation work. Other work [18] pursued designing self-dual group-algebra two-block code families, specifically bivariate bicycle codes, and wrote out global, fault tolerant logical transversal operations for CNOT between code blocks, global H and S, but they do not provide addressability, so these gates cannot generate the full Sp(2 k, F2) group. Code automorphisms are studied in [19], which produces an algorithmic and computational tool that computes and emits the physical circuits and logical action of a code’s automorphism group. This result is constructive and quite useful; our sections on automorphisms are informed by their work, and on [20], who performed foundational work in studying code automorphism groups. There is also much prior work establishing no-go theorems, connecting to locality, and establishing bounds related to synthesis of operations in the Clifford hierarchy. First, the seminal result [21] establishes the non-existence of universal transversal gate sets for W = 1 local transversal gate sets, and [22] established the connection between circuit locality and the ability of circuits to reach logical gates at high levels of the Clifford hierarchy, which was later strengthened by [23] and extended to subsystem codes. Most directly relevant to our depth bounds, [24] introduced the 
+
+disjointness ∆( Q) of a stabilizer code and used it to bound the level of the Clifford hierarchy reachable by transversal and constant-depth circuits. Our information-transfer bound (Theorem 4) is a Clifford-level specialization connected to their support-spreading argument. Other works relevant to the study of logic in quantum error correcting codes include [25] wherein the connection between doubly-even codes supporting transversal phase gates, and self-dual codes supporting transversal Hadamard gates is established; [26] classifying the diagonal physical gates that yield transversal logical gates within which our bounds occupy a special case; [27] recently extend Bravyi-K¨ onig to product codes. 6On the code construction and logical operation design side, there has been a large body of work designing codes for logic. One of the most notable is the Subsystem Hypergraph Product Simplex codes [28] construction using gauge-fixed subsystem codes. A seminal result [29] reasoned about pieceable fault-tolerance , which is a concept that deeply inspires our approach to synthesize logical circuitry out of codespace-preserving logical layers. Recent work [30] provides a way to explicitly construct self-dual LDPC quantum codes by stacking non-self-dual codes, which adds a greatly enabling symmetry that often enhances logically accessible transversal gates. A sequence of papers starting with [31] studies the structure of cochain complex CSS code representations and derives logical operations within that structure. This is a way of revealing structure that our present work deals with both linear algebraically and through formulations amenable to numerical solvers. Further work [32] studies the general structure of fold-transversal gates and generalizes them to arbitrary CSS codes with ZX-dualities. A similar construction to our novel transversal phase gate in rotated surface codes is given in [10], who derives theirs via a folding of the surface code, while ours operates solely on data qubits of the code block. Concatenation for universality is studied in [11], and we design a Quantum Logic Code family in a similar fashion.  
+
+> D. Framework
+
+We will work with the set of n-qubit Pauli operators, denoted Pn. The set [ n] denotes the set {1, 2, · · · , n }. We follow [8] and work with the projective Clifford group on n qubits, defined as the Clifford group modulo phases and Paulis: Proj Cl n = Cl n/(U (1) , P(n)). This group is isomorphic to the classical symplectic group of degree 2 n, denoted Sp(2 n, F2). We will also work simultaneously in the group-theoretic and linear-algebraic representations for our analysis. Astabilizer code on n qubits is in this representation a joint +1 eigenspace of an abelian subgroup S of the n-qubit Pauli group Pn, and we refer to S as the stabilizer group of the code. In binary symplectic coordinates S is represented as an 
+
+isotropic subspace S ⊆ F2n 
+
+> 2
+
+. It is isotropic in the symplectic form, which reflects the fact that all stabilizers commute. If S has rank m, the code encodes k = n−m logical qubits, and its codespace C, the simultaneous +1 eigenspace inside (C2)⊗n, is a Hilbert subspace of complex dimension dim C C = 2 k. The code’s distance d is the minimum Pauli weight of a nontrivial logical operator, or the minimum weight of an element of N (S) \ S . Equivalently this is expressed in symplectic coordinates via S⊥ \ S, with S⊥ the symplectic dual of S.A CSS code Q = CSS( HX , H Z ) on n qubits with parity check matrices HX ∈ FmX ×n 
+
+> 2
+
+, H Z ∈ FmZ ×n 
+
+> 2
+
+satisfying 
+
+HX H⊤ 
+
+> Z
+
+= 0 encodes k = n − rank( HX ) − rank( HZ ) logical qubits. We refer to the rowspans of HX and HZ as SX
+
+and SZ , respectively, so that the stabilizer subspace splits in symplectic coordinates as S = SX ⊕ SZ (an X-type part and a Z-type part). The quantum codespace C ⊆ (C2)⊗n is the simultaneous +1 eigenspace of S, of complex dimension 2 k. The logical representatives LX ∈ Fk×n 
+
+> 2
+
+and LZ ∈ Fk×n 
+
+> 2
+
+are chosen as bases of ker HZ /rowspan( HX )and ker HX /rowspan( HZ ), respectively, with LX L⊤ 
+
+> Z
+
+= Ik, and they label the nontrivial logical X- and Z-classes. A W -local single-layer Clifford gate can be written as V = N 
+
+> m
+
+Vm, where Vm ∈ Sp(2 W, F2) act on disjoint physical qubit sets {qi1 , q i2 , · · · , q iW }, partitioning [ n]. The partition P = {(qi1 , q i2 , · · · , q iW )i} is a grouping of n qubits into sets of size at-most W . We will be focused on W = 2 primarily throughout our work, where partitions are matchings on data qubits of the code. A useful piece of framework we borrow from [9] is that we will assume that physical single-layer 1-local Clifford gates have been compiled down to only contain elements {I, H, S, SH , HS , SHS },followed by Pauli operators (which we mostly omit). We will be focused on physical Clifford layers V that are addressable .
+
+Definition 2 (Addressable layer) . A physical Clifford operator layer V is addressable on a code Q if V SV † = S
+
+(codespace preservation) and the induced logical action Φ( V ) ∈ Sp(2 k, F2) leaves at least one logical qubit fully invariant: there is an index i with Φ( V ) Xi = Xi and Φ( V ) Zi = Zi.
+
+Definition 3 (Targeted layer) . A physical Clifford operator layer is targeted if it is a single codespace-preserving physical Clifford layer V realizing a prescribed logical Clifford target (such as a single-qubit S i or a two-qubit CZ ij ), with no requirement that any logical qubit be left fully invariant. Throughout our analysis we will study the symplectic form of physical and logical gates. In particular, W -local physical gates Vp on partitioned blocks p of qubits with index sets p ⊆ [n] with |p| = W will have the general form: 
+
+Vp =
+
+A BC D
+
+
+
+,
+
+where each A, B, C, D are block-matrices of dimension W ×W . These combine in direct products over each partition block p of a partition P into full W -local gate layers as: 7
+
+V =
+
+> ℓ
+
+M
+
+> p=1
+
+gp =
+
+A = ⊕p Ap, B = ⊕p Bp
+
+C = ⊕p Cp, D = ⊕p Dp
+
+
+
+.
+
+The physical blocks Vp and joint layer V also satisfy the symplectic matrix conditions. Defining the following symplectic forms ω in the physical block dimension W and Ω in the full layer dimension n as: 
+
+ω =
+
+ 0 IW
+
+IW 0
+
+
+
+∈ F 2W ×2W 
+
+> 2
+
+, Ω = 
+
+> ℓ
+
+M
+
+> p=1
+
+ω = Iℓ ⊗ ω ∈ F 2n×2n 
+
+> 2
+
+.
+
+Here ω and Ω are written in per-block (interleaved XpZp) coordinates; the global X | Z ordering used for logical images from Section III C onward is obtained by a fixed sorting permutation Psort that conjugates Ω to   0 In 
+
+> In0
+
+ while preserving block-diagonality. We require then that the physical blocks satisfy: 
+
+Vp ∈ F 2W ×2W 
+
+> 2
+
+, V⊤ 
+
+> p
+
+ω V p = ω ⇐⇒ Vp ∈ Sp(2 W, F2), p = 1 , . . . , ℓ 
+
+and further that the full layer of physical blocks satisfies: 
+
+V⊤ Ω V =
+
+> ℓ
+
+M
+
+> p=1
+
+V⊤ 
+
+> p
+
+ω V p =
+
+> ℓ
+
+M
+
+> p=1
+
+ω = Ω =⇒ V ∈ Sp(2 n, F2).
+
+We will require that individual W -local layers are codespace-preserving . To satisfy this property, the physical operators must preserve the stabilizer subspace, which in this section is assumed to split into X-type and Z-type subspaces for CSS codes. Concretely then, we require that: for all a ∈ SX , b ∈ SZ : VXaZbV† = Xa′
+
+Zb′
+
+=⇒ a′ ∈ SX , b ′ ∈ SZ . 
+
+> II. CODESPACE-PRESERVING TRANSVERSAL CIRCUIT DEPTH BOUNDS
+
+We start by studying transversal logic information-theoretically by considering the requirements needed to perform the full logical Clifford operation set, and how the set of W -local physical gate layers can achieve these require-ments. We provide bounds on what can be done logically when any W -local physical Clifford operators are allowed. Throughout this section, log denotes the base-2 logarithm, so that log | Sp(2 k, F2)| counts the bits required to specify a logical Clifford. The following result is a Corollary formed by taking the maximum over two distinct pieces shown in Theorems 4 and 5: 
+
+Corollary 1 (W -Local Circuit Depth Bound for Stabilizer Codes) . Let Q denote an [[ n, k, d ]] stabilizer code with maximum logical Pauli operator weight w⋆ and permutation automorphism group Aut perm (Q), and let W ≥ 2. If the code Q is capable of synthesizing the full logical Clifford group using codespace-preserving W -local transversal gate layers, then the circuit depth D required is bounded from below by: 
+
+D ≥ max 
+
+ 
+
+log W
+
+w⋆
+
+d
+
+
+
+> +
+
+,
+
+
+
+log Nn,W 
+
+| Sp(2 k, F2)||ρ(Aut perm (Q)) |
+
+
+
+> +
+
+
+
+.
+
+where each term is taken as its positive part ⌈·⌉ + := max {0, ⌈·⌉} .
+
+Both of these terms show up for stabilizer codes in different regimes. The latter is a more well-known bound that counts the required specification bits needed to build the full logical Clifford group on k qubits out of W -local layers which increases dramatically as a function of k, while the former is a count of the size of a light-cone emanating from the 
+
+W -local layers and relates this to the spread of weights of logical operators. For high-rate codes with k = ω(√n log n), the latter bound dominates as D ≥ Ω  k2  
+
+> nlog n
+
+. For low rate codes though, for instance when k = O(1), this bound is vacuous, but the depth as a whole may still be bounded by the information transfer bound: D ≥ log W w⋆ 
+
+> d
+
+.8We can illustrate these situations with specific examples. Consider first a k = 1 highly asymmetric code such that 
+
+dx ≫ dz or dx = αd z for some α > 1. Concretely we can consider a rectangular patch of a rotated surface code, as would exist inside the bulk of a lattice surgery operation in a full quantum system. For these codes, the Clifford entropy bound is rendered trivial: D ≥ 1 taking the appropriate ceiling. The Pauli reach bound is active: with 
+
+dmin = min( dx, d z ) the code distance and w⋆ the maximum over all nontrivial logical classes (including the mixed 
+
+Y = XZ class) of the class’s minimum-weight representative, w⋆ ≥ max( dx, d z ), so D ≥ log W w⋆ 
+
+> dmin
+
+≥ log W α with 
+
+α = max( dx, d z )/ min( dx, d z ). For a rectangular rotated surface code of α = 2 m aspect ratio, using 2-local layers requires a circuit depth then of at least m layers (and more if the Y class is heavier). Conversely, consider a constant rate code with k = Θ( n) with linear distance d = Θ( n). Here, since w⋆ ≥ d always while w⋆ ≤ n and d = Θ( n), the ratio is bounded, w⋆/d = Θ(1), so the spread term log W (w⋆/d ) = O(1) contributes only a constant; the Clifford entropy bound far exceeds it and dominates as a depth bound at D ≥ Ω  n 
+
+> log n
+
+. We can see this as a spectrum, and organize a parameter regime scaling table: 
+
+Corollary 2 (W -Local Depth Bound Parameter-Regime Scaling Regimes) .
+
+D ≥ max 
+
+nlog W (w⋆/d )
+
+> +
+
+| {z }
+
+> spread
+
+,
+
+l
+
+log Nn,W 
+
+> |Sp(2 k, 2) ||ρ(Aut perm (Q)) |
+
+m
+
+> +
+
+| {z }
+
+> counting
+
+o
+
+(w⋆ = Pauli radius )
+
+k log W
+
+w⋆
+
+d log Nn,W 
+
+|Sp(2 k, 2) ||ρ(Aut perm (Q)) | Dominant scaling 
+
+O(1) O(log W n) Θ  1  
+
+> nlog n
+
+ → 0 O(log W n) (spread; counting vacuous) 
+
+Θ √n log n O(log W n) Θ(1) O(log W n) (spread; counting turns on) 
+
+nα, 12 < α < 1 O(log W n) Θ  n2α−1 
+
+> log n
+
+ Θ  n2α−1 
+
+> log n
+
+ (counting) 
+
+Θ( n) O(log W n) Θ  n 
+
+> log n
+
+ Θ  n 
+
+> log n
+
+ (counting) The counting term becomes non-vacuous once k = ω(√n log n), and overtakes the worst-case spread ceiling 
+
+O(log W n) only once k = ω(√n log n); between these thresholds the dominant term depends on the code’s w⋆/d 
+
+and |ρ(Aut perm (Q)) | at fixed W . Below √n log n, the spread of information into high-weight logical operators is the only potentially non-vacuous term in this regime.  
+
+> III. CSS TRANSVERSALITY THEORY
+
+In this section we study the power of W -local transversal gates on CSS codes. Throughout the structural results we write K := k for the number of logical qubits. We remain focused on indecomposable CSS codes, and now restrict our focus further to addressable gates (Def. 2), which requires that at least one logical qubit remain fully invariant under the logical action of the gate. Full proofs of propositions are deferred to the Supplementary Material section VI.  
+
+> A. 1-Local Transversality Theory
+
+A 1-local single-layer Clifford is a tensor product V = N 
+
+> i∈[n]
+
+Vi of per-qubit single-qubit Cliffords Vi ∈ Sp(2 , F2), drawn from the six-element set {I, H, S, SH, HS, SHS } (the compiled single-qubit Clifford set introduced in Sec. I A). The Guyot–Jaques addressability criterion restricts which V can be addressable on an indecomposable CSS code. 
+
+Proposition 1 (Admissible 1-local layers, Guyot–Jaques [9]) . Let Q = CSS( HX , H Z ) be an indecomposable CSS code and let V = N 
+
+> i
+
+Vi be a 1-local single-layer Clifford. Then V is addressable on Q only if every per-qubit factor lies in the set 
+
+G(1) diag := {I, S, SHS } ⊂ Sp(2 , F2).9
+
+Proposition 2 (1-local reach) . For an indecomposable CSS code Q encoding K logical qubits, every addressable 1-local single-layer Clifford is encoded by flag vectors ⃗ b,⃗ c ∈ F n 
+
+> 2
+
+(bq = 1 for a physical SHS q , cq = 1 for a physical Sq ,⃗b ∧⃗c = 0 by Proposition 1), and its symplectic image takes the form 
+
+Φ( V ) = IK LZ diag( ⃗b)L⊤
+
+> Z
+
+LX diag( ⃗c)L ⊤ 
+
+> X
+
+IK
+
+!
+
+,
+
+with both off-diagonal blocks symmetric and of product zero, i.e. an element of the 2-local set G2L(K) of Proposition 4. The blocks need not be diagonal: a 1-local layer can realize entangling couplings such as CZ ij . This is the 1-local specialization of the proof of Proposition 4 with B = diag( ⃗b), C = diag( ⃗c). 
+
+> B. 2-Local Transversality Theory
+
+A 2-local single-layer Clifford V = N 
+
+> p
+
+Vp has per-block factors Vp ∈ Sp(4 , F2) acting on disjoint pairs ( qi, q j ) that partition [ n]. Writing V ∈ Sp(4 , F2) in 2 × 2 blocks, 
+
+V = AV BV
+
+CV DV
+
+!
+
+,
+
+the symplectic condition is equivalent to the three identities 
+
+A⊤ 
+
+> V
+
+CV = C⊤ 
+
+> V
+
+AV
+
+B⊤ 
+
+> V
+
+DV = D⊤ 
+
+> V
+
+BV ,A⊤ 
+
+> V
+
+DV + C⊤ 
+
+> V
+
+BV = I2. (6) 
+
+Proposition 3 (Admissible per-block set Gdiag ). Let Q be an indecomposable CSS code and let V = N 
+
+> p
+
+Vp be a codespace-preserving, addressable (Def. 2) 2-local single-layer Clifford. Then the layer is not a global sector exchange (not every AVp is zero), and a block with trivial diagonal AVp = DVp = I2 lies in the phase/CZ set 
+
+Gdiag := 
+
+n
+
+V ∈ Sp(4 , F2) : AV = DV = I2, B V , C V ∈ Sym 2(F2), B V CV = 0 
+
+o
+
+, |G diag | = 18 .
+
+The eighteen algebraically allowed trivial-diagonal phase/CZ-type classes form Gdiag : eight C-only with Bg = 0, eight B-only with Cg = 0, three mixed rank-one with both Bg , C g nonzero, the identity counted in each subset. Codespace-preservation selects which of them is realizable as an actual layer on Q, and depends on the stabilizer structure of Q itself. A block with invertible AVp̸ = I2 or DVp̸ = I2 is a sector-preserving basis change (e.g. a SWAP): it contributes only to the logical GL( K, F2) basis-change factor of Proposition 4. In particular, if V induces no logical basis change then every Vp ∈ G diag . Singular diagonal blocks are controlled at the logical level by Lemma 4. 
+
+Proposition 4 (2-local Logical Reach) . For any codespace-preserving, addressable (Def. 2) 2-local single-layer Clifford 
+
+V on an indecomposable CSS code Q encoding K logical qubits, suppose that no nonzero element of ker HZ or of 
+
+ker HX is supported entirely within the union of the supports of the blocks with singular Ap or with A⊤ 
+
+> p
+
+Dp̸ = I2 (the 
+
+confinement hypothesis ; Lemmas 4 and 5). Then the symplectic image lies in A · G 2L(K) for a logical basis change 
+
+A ∈ GL( K, F2); when the basis change is realized by a permutation automorphism, A ∈ ρ(Aut perm (Q)) and the image lies in the automorphism-augmented set G2L+π (Q) = ρ(Aut perm (Q)) · G 2L(K). Here 
+
+G2L(K) := 
+
+ IK BC IK
+
+!
+
+B, C ∈ Sym K , BC = 0 
+
+
+
+is the 2-local set and ρ(Aut perm (Q)) ≤ GL( K, F2) is the logical automorphism action (Proposition 6). On a canonical basis LX , L Z , the set G2L(K) is composed of Cii = 1 ⇔ Si, Cij = 1 ⇔ CZ ij , and dually Bii ⇔ SHS i, Bij ⇔ CZ ♯ij .10  
+
+> C. W-Local and Permutation Automorphism Transversality Theory
+
+A W -local single-layer Clifford partitions qubits into subsets of size at most W , with per-block factors in Sp(2 W, F2). Raising the locality W enlarges the per-block parameter space, but it does not enlarge the addressable logical reach until W reaches n.
+
+Proposition 5 (W -invariance of logical reach, W ≥ 2) . Let Q be an indecomposable CSS code on n qubits encoding 
+
+K logical qubits, and let 2 ≤ W < n . Every codespace-preserving, addressable (Def. 2) W -local single-layer Clifford 
+
+V has logical image Φ( V ) given by 
+
+Φ( V ) ∈ A · G 2L(K), A ∈ GL( K, F2),
+
+under the confinement hypothesis of Proposition 4, applied to the layer’s blocks at width W ; when the basis change A
+
+is realized by a permutation automorphism, A ∈ ρ(Aut perm (Q)) and Φ( V ) ∈ G 2L+π (Q) = ρ(Aut perm (Q)) · G 2L(K).
+
+This is the 2-local set of Proposition 4 composed with the logical automorphism group ρ(Aut perm (Q)) ≤ GL( K, F2)of Proposition 6. The addressable W -local single-layer reach lies in GL( K, F2) · G 2L(K) for every W ≥ 2 (in G2L+π (Q)when the basis changes are permutation-automorphism actions): raising the locality enlarges the per-block parameter space and supplies more physical circuits for a given logical target, but reaches no logical operation outside this set. In case Alog = Dlog = IK one has Φ( V ) ∈ G 2L(K) exactly. So we see that a wider block can realize more set elements as physical matchings, enlarging the code-specific reach, but never an element outside the set already specified by 2-local gates. Strict enlargement beyond the set occurs only at W = n.Permutation automorphisms of Q provide another source of logical actions that is disjoint in character from the 2-Local logical reach of Proposition 4: a permutation cannot apply S, CZ, or any entangling action in a fixed basis, but can realize basis-changing GL( K, F2) elements on the logical block that jointly can realize entangling action. 
+
+Definition 4 (Permutation automorphism) . For a CSS code Q = CSS( HX , H Z ), a permutation π ∈ Sn is a permu-tation automorphism of Q if rowspan( HX ) Pπ = rowspan( HX ),
+
+rowspan( HZ ) Pπ = rowspan( HZ ),
+
+where Pπ is the n × n qubit-permutation matrix with entries ( Pπ )q,π (q) = 1, acting on the right by permuting physical-coordinate columns, consistent with the logical action LX Pπ of Proposition 6. The group of such permutations is denoted Aut phys perm (Q); we abbreviate Aut perm (Q) := Aut phys perm (Q) and write ρ(Aut perm (Q)) for its logical image (Proposition 6). 
+
+Proposition 6 (Logical action of π, [9]) . For every π ∈ Aut phys perm (Q) there is a unique Vπ ∈ GL( K, F2) such that 
+
+LX Pπ ≡ Vπ LX (mod rowspan( HX )) .
+
+The map π 7 → Vπ is a group homomorphism, and its image 
+
+Aut log perm (Q) := ρ  Aut phys perm (Q) = {Vπ : π ∈ Aut phys perm (Q)} ⊆ GL( K, F2)
+
+embeds into the symplectic group via 
+
+Φ( π) = Vπ 00 V −⊤ 
+
+> π
+
+!
+
+∈ Sp(2 K, F2).
+
+Lemma 1 (Generation Lemma) . For every K ≥ 1, the multi-layer closure of the 2-local set is the full logical Clifford group: 
+
+G2L(K) = Sp(2 K, F2).
+
+This is an algebraic identity in Sp(2 K, F2), independent of any particular code; physical attainability on a given Q
+
+is governed by Corollary 3. Constructive generators (the H i gadget has depth 3): H i = S i · SHS i · Si and CNOT ij =(Ii ⊗ Hj ) CZ ij (Ii ⊗ Hj ). 
+
+Proof. The identity H = S ·SHS ·S on a single logical qubit is verified directly in Sp(2 , F2) ∼= S3 (it expresses the Bruhat decomposition of H across the cell outside the set). Each factor S i, SHS i, CZ ij is a set element by Proposition 4. The Aaronson–Gottesman canonical form for stabilizer/symplectic operations [33] expresses any M ∈ Sp(2 K, F2) as a bounded sequence of H, phase (S), and CNOT layers, so {Si, SHS i, CZ ij }i̸=j generates Sp(2 K, F2); depth-3 access to H then upgrades any set-generated word to a Sp(2 K, F2) word at cost O(K2) depth. 11 
+
+Corollary 3 (Physical generation from a realized library) . Lemma 1 is algebraic. Its physical counterpart is condi-tional: if an indecomposable CSS code Q realizes every set generator Si, SHS i, and CZ ij (i̸ = j ∈ [K]) by at most D0
+
+codespace-preserving W ≤ 2 layers so that Hi = S i SHS i Si is available at depth ≤ 3D0, then these layers generate the full projective logical Clifford group Sp(2 K, F2). If only a subset of the set generators is realized as CSP layers, only the subgroup they generate is physically attained. The Quantum Logic Codes of Section IV C are codes that realize a complete such library.  
+
+> IV. NOVEL CONSTRUCTIONS
+
+In this section we detail several new results coming from this theory. First, we show a novel depth-1 2-local transversal S gate in the rotated surface code, only operating on data qubits, that is distance-preserving for every odd distance (a code automorphism) and is fault-tolerant for d ≥ 5, generalizing to all odd distances. The single-layer construction is a diagonal circuit composed of products of S and CZ gates that fixes every Z operator while performing the phase gate logically. Next, we construct a depth-1 2-local intra-block CZ gate in the 2D-toric code which generalizes to all code block sizes L > 2. Then, we show a code family that possesses a full logical Clifford instruction set using only codespace-preserving 2-local transversal gates and permutation automorphisms, with parameters scaling as [[ rn 07ℓ, 2r, d 03ℓ ]] for self-dual cores ( n0, d 0) ∈ { (4 , 2) , (18 , 5) , (20 , 6) }. We call these Quantum Logic Codes . 
+
+> A. Rotated Surface Code Transversal Phase Gate
+
+The first construction is a single-layer 2-local transversal S gate on the rotated surface code, defined for every odd distance d ≥ 3 (Fig. 2). This can be viewed in contrast to the construction in [34], wherein the mid-cycle state [35] of the surface code is used to land the logical S gate, leveraging the joint state formed with ancillary qubits during syndrome extraction. This construction only uses data qubits. Qubits of the d × d rotated surface code are indexed by q = rd + c for ( r, c ) ∈ { 0, 1, . . . , d − 1}2 with row r and column c (rows and columns 0-indexed).          
+
+> FIG. 2. Construction 1 at d= 5 (left) and d= 7 (right): the same closed-form ddiagonal phase gates and  d
+> 2
+> rotated-diagonal
+> CZ pairs scale to all odd distances.
+
+12 
+
+Construction 1 (Rotated-pair S on the d × d rotated surface code) . Take the standard logical representatives 
+
+X = {(r, 0) : 0 ≤ r < d } (the left column) and Z = {(0 , c ) : 0 ≤ c < d } (the top row), which meet only at the corner (0 , 0). For every odd d ≥ 3, apply (i) d phase gates Sq on the diagonal qubits ( r, r ) for 0 ≤ r ≤ d − 2 together with ( d − 2, d − 1); (ii)  d
+
+> 2
+
+ controlled-Z gates on the rotated pairs {(c, r ), (r, c + 1) } for 0 ≤ r ≤ c ≤ d − 2, i.e. each on/below-diagonal qubit ( c, r ) is paired with its reflection across the main diagonal shifted one column right. Total gate count d(d + 1) /2 ( d phase gates plus  d
+
+> 2
+
+ CZ pairs). The  d
+
+> 2
+
+ rotated pairs are pairwise disjoint, so the off-diagonal support is a matching and the layer is 2-local. 
+
+Theorem 1 (Closed-form rotated-surface S) . For every odd d ≥ 3, Construction 1 realizes the logical operator S
+
+exactly, as a single targeted 2-local Clifford layer on the d × d rotated surface code. The layer is CSS-preserving for every odd d and it preserves the code distance. As a depth-1 gadget its circuit-fault distance is at most d − 1 and at least ⌈d/ 2⌉ (exactly d − 1 for d = 3 , 5), making it single-fault-tolerant for d ≥ 5.
+
+B. 2D-Toric Code Transversal Intra-block Controlled-Z Gate 
+
+The second construction is a single-layer 2-local transversal intra-block CZ 0,1 on the L × L 2D toric code, defined for every L ≥ 3 (Fig. 3). Qubits sit on edges of the torus, indexed by ( r, c, t ) ∈ [L] × [L] × { 0, 1} with t = 0 horizontal and t = 1 vertical; total n = 2 L2. Standard logical operators are X0 = Q 
+
+> r
+
+h(r, 0), X1 = Q 
+
+> c
+
+v(0 , c ), and their Z-duals. L=3 toric code (n=18, 15 gates)                     
+
+> SSS
+> SSS
+> L=5 toric code (n=50, 35 gates)
+> SSSSS
+> SSSSS
+> bar-X support bar-Z support S gate Sgate CZ pair identity (singleton) kept-identity pair
+
+FIG. 3. Construction 2 at L = 3 (left) and L = 5 (right). Both layers have row-0 CZ pairs h(0 , c ) ↔ v(0 , c ) combined with row-0 S gates on the h(0 , c ) qubits, two cross-pair families per tier r = 1 , . . . , ⌊(L − 1) /2⌋ joining rows a = r and b = L − r, and inner-row S† gates on row s = ⌈L/ 2⌉. Total weights w(3) = 15 and w(5) = 35; the long diagonals visible in the L = 5 panel correspond to cross pairs wrapping across the torus boundary. 
+
+Construction 2 (Closed-form intra-block CZ 0,1 on the L × L toric code, L ≥ 3) . (i) Row 0: for every c, pair 
+
+h(0 , c ) ↔ v(0 , c ) with a CZ , and apply Sq on every h(0 , c ). 13 (ii) For each r = 1 , . . . , ⌊(L − 1) /2⌋, pair rows a = r and b = L − r by two cross-pair families: a skewed family 
+
+h(a, c ) ↔ v(b, (c + 1) mod L) and an aligned family v(a, c ) ↔ h(b, c ), for c ∈ [L]. (iii) For even L, on the middle row apply a self-pair h(L/ 2, c ) ↔ v(L/ 2, (c + 1) mod L). (iv) On the inner row s = ⌈L/ 2⌉, apply S† 
+
+> q
+
+on every h(s, c ) ( S† = ZS , the same symplectic action as S). Total gate count w(L) = L2 + 2 L.
+
+Theorem 2 (Closed-form toric CZ 0,1). For every L ≥ 3, Construction 2 realizes the logical operator CZ 0,1 exactly, as a single targeted 2-local Clifford layer on the L × L 2D toric code.  
+
+> C. Quantum Logic Codes
+
+The third construction is a constructive family of CSS codes, the Quantum Logic Codes , each of which carries a 
+
+complete transversal logical-Clifford basis instruction set: a fixed library of codespace-preserving (CSP) 2-local circuits together with permutation automorphisms whose logical symplectic images generate the entire logical Clifford group Sp(2 k, F2). The family is generated from three small self-dual core codes by two composition operations (Fig. 4): block tiling, which grows k, and concatenation with inner self-dual doubly-even codes which we choose to be the [[7 , 1, 3]] code following [11], which grows d. Each of these composition operations provably preserves the complete ISA, and in fact preserves the depth of the transversal gates that form the logical basis set. For two of the three core codes, the complete transversal logical Clifford basis ISA is depth-one, which is carried through the construction composition operations and remains depth-one up to addressable operations between tiled code cores, which become depth-two. Combining the two yields the code family of parameters [[ n0r7ℓ, 2r, d0 3ℓ ]] , (n0, d 0) ∈ { (4 , 2) , (18 , 5) , (20 , 6) }, r ≥ 1, ℓ ≥ 0, (7) with transversally achievable logical Clifford group Sp(4 r, F2) and rate 2 /(n0 7ℓ). Here r counts the tiled core copies and ℓ the concatenation levels; the base data ( n0, d 0) selects the core. We can fix parameters to fix subfamilies of this code construction. For example, set r = 7 ℓ, connecting the number of tiled code cores with the concatenation level, and focus on the [[4 , 2, 2]] core code. This then produces the following asymptotic parameters: [[4 · 49 ℓ, 2 · 7ℓ, 2 · 3ℓ ]] = [[ n, √n, Θ( n0.2823 )]] . (8) We first define the instruction set, then prove the composition theorem that generates the family, tabulate its members, and finally exhibit the complete logical Clifford basis ISA of the three cores and of their first concatenation level with explicit circuits. Each core is a single-block self-dual group-algebra code CSS( C, C ) whose check HX = HZ = H is a full-rank row basis of the rowspan of the |G| × | G| regular-representation matrix M (c) (entry conventions given in Constructions 4 and 5) of an element c ∈ F2[G] that is self-orthogonal ( cc ∗ = 0, so HX H⊤ 
+
+> Z
+
+= 0) and doubly-even; self-duality (SX = SZ ) is automatic from HX = HZ . The smallest, [[4 , 2, 2]], has G = Z4 and c = 1 + x + x2 + x3; its complete depth-1 ISA is given explicitly in Construction 3 and Fig. 5.  
+
+> 1. The complete logical Clifford basis ISA
+
+Definition 5 (Complete transversal logical Clifford basis ISA) . Let Q = CSS( HX , H Z ) encode k logical qubits with canonical representatives ( LX , L Z ), LX L⊤ 
+
+> Z
+
+= Ik, and stabilizer rowspans SX , S Z . A complete transversal logical Clifford basis ISA for Q is a finite library of circuits whose logical symplectic images generate Sp(2 k, F2), in which every layer is one of: (i) a 2 -local codespace-preserving layer : a tensor product of admissible per-block factors gp ∈ G diag (Prop. 3) on disjoint qubit pairs; (ii) a permutation automorphism π ∈ Sn with π(SX ) = SX and π(SZ ) = SZ , contributing its logical action 
+
+A ∈ Aut log perm (Q); (iii) the global transversal Hadamard H = H⊗n.We fix the generating set {Si, SHS i, CZ i,j }i̸=j∈[k] together with the logical H and the logical-qubit permutations. The ISA is depth-1 if every S i, SHS i, and CZ i,j is realized by a single layer of type (i), and more generally bounded-depth 
+
+D0 if every diagonal/ CZ generator S i, SHS i, CZ i,j is realized by at most D0 layers of type (i); the code is self-dual 
+
+when SX = SZ .14                   
+
+> FIG. 4. Construction intuition for the Quantum Logic Codes (schematic; the literal transversal gate layers are not shown). A small core code (left) carries a complete logical-Clifford basis ISA at low circuit depth. Two composition operations grow the code parameters while preserving that ISA: tiling (×r, top) places rcopies side by side, raising the logical-qubit count to 2 rat fixed distance and supplying inter-copy addressable CZ; concatenation with the Steane [[7 ,1,3]] code ( ×ℓ, bottom) replaces each physical qubit by an inner block, tripling the distance per level at fixed k. Combining the two yields the family [[ 7 ℓr n 0,2r, 3ℓd0]] with logical Clifford group Sp(4 r, F2) and rate 2 /(n07ℓ) (right). The fixed emblem (a bonded logical pair) marks the logical ISA: it is invariant under both operations, and so is the circuit depth that generates it (Theorem 3).
+> 2. Bounded-depth self-dual composition
+
+The family of Eq. (7) is generated by the following theorem, which gives sufficient conditions under which the two composition operations preserve a complete ISA. 
+
+Theorem 3 (Bounded-depth self-dual composition) . Let Q = [[ n, k, d ]] carry a complete transversal logical Clifford basis ISA (Def. 5) that is bounded-depth ( D0) and self-dual (SX = SZ ). The operations (i) tiling : r disjoint copies Q⊕r equipped with the permutation automorphisms and the inter-block transversal CZ ,and (ii) concatenation : Q as outer code with the inner Steane code [[7 , 1, 3]] or any self-dual doubly-even [[ ni, 1, d i]] 
+
+admitting transversal S, SHS , CZ , H, in which case the parameter map below becomes [[ n, k, d ]] 7 → [[ nin, k, d id]] ,each preserve the completeness of the ISA. Concatenation preserves every per-generator layer count exactly; tiling preserves the intra-copy layer counts and supplies the inter-copy generators at constant depth (Proposition 8), so the per-generator depth of the complete ISA is bounded by a constant independent of r and ℓ, equal to D0 for the intra-copy generators. Tiling gives [[ n, k, d ]] 7 → [[ rn, rk, d ]] with logical group Sp(2 rk, F2), and concatenation gives 
+
+[[ n, k, d ]] 7 → [[7 n, k, 3d]] . The two operations commute. Proof. Concatenation (sufficiency). Identify outer qubit p with the inner block Bp = {nip, . . . , n ip + ni − 1} where 
+
+ni is the number of qubits of the inner code. The inner code is assumed to be self-dual and doubly-even, and admits 15 transversal S, SHS , CZ and H, each a depth-1 CSP operation realizing the corresponding inner logical. Lift a single outer type-(i) layer generator-wise: replace each outer Sp (resp. SHS p) by inner transversal S (resp. SHS )on Bp, and each outer CZ pq (resp. CZ ♯pq ) by the inner transversal CZ (resp. CZ ♯) between Bp and Bq , i.e. the ni
+
+physical CZ matching qubit j of Bp to qubit j of Bq . Because the outer layer is a matching, its touched qubits are disjoint, so the touched inner blocks are disjoint and the lifted gates are again a matching with W ≤ 2. The lifted layer is codespace-preserving: the inner transversal gates fix every inner-block stabilizer, and they map the lifted outer stabilizers within SX ⊕ SZ precisely by the outer codespace-preserving property C S X ⊆ SZ , B S Z ⊆ SX of the outer physical C- and B-matrices. The encoded logical action equals the outer one, since each inner transversal gate realizes its inner logical up to a logical Pauli (e.g. transversal S on the Steane code realizes S † = Z S, the same symplectic element). Exact stabilizer signs are preserved as well: every inner logical X representative has odd weight, fixed mod 4 across representatives (inner stabilizers are doubly-even and meet each representative evenly), so each outer S gate contributes its phase of Lemma 6(i) with multiplicity of this odd weight, and each outer CZ pair with multiplicity of the overlap of the two blocks’ inner representatives, odd since the representatives have odd weight and meet inner stabilizers evenly; since a valid outer layer applies an even number of S gates to every stabilizer, the lifted phase equals the outer phase, and inner stabilizers acquire phase +1 because they are doubly-even and single-block. Thus each outer layer lifts to exactly one inner layer of equal width; applying this to each of the Dg
+
+layers of a generator realized in Dg layers preserves its layer count Dg exactly, so the per-generator depth bound 
+
+D0 = max g Dg is invariant. Completeness carries over, and the distance multiplies exactly: d(Q ◦ inner) ≥ d × dinner 
+
+by the standard concatenation bound, while replacing each qubit of a minimum-weight outer logical representative by a minimum-weight inner representative (self-duality supplies one of each type at weight dinner ) exhibits a nontrivial logical operator of weight d × dinner , so d(Q ◦ inner) = d × dinner .
+
+Tiling (sufficiency). As a code, the tiling is the r-fold direct sum Q⊕r : its checks are block-diagonal ( H⊕rX , H ⊕rZ ), it carries no cross-code stabilizers, and its codespace is the tensor product of the r copies. The tiling adds two transversal operations, both enabled by the multiplicity of identical copies. These are the permutation automorphisms Sr and the addressable inter-code transversal CZ . The per-copy ISA realizes Sp(2 k)×r . Each permutation τ ∈ Sr permutes identical stabilizer blocks and is a code automorphism. Its logical action permutes the r logical blocks accordingly. The full inter-block transversal CZ between copies a, b is the qubit-wise CZ across their identical supports, a W =2 matching whose logical image is the off-diagonal coupling C =   0 PP ⊤ 0
+
+ with P = LX (LX )⊤ so that qubit j of copy a
+
+paired with qubit j of copy b. By (12) the coupling is codespace-preserving, with exact phase +1 on every stabilizer (each tiled stabilizer is supported on a single copy, so no aggregate CZ pair lies inside its support, and the layer has no S gates), and self-duality ( SX = SZ ) makes the term P = LX L⊤ 
+
+> X
+
+invertible. Together these operations generate Sp(2 rk, F2) (Proposition 8 together with the Generation Lemma 1). We show in Proposition 7 that tiling also provides the addressable inter-block CZ gate at constant depth. 
+
+Commutativity. Both operations require and preserve the bounded-depth and self-dual properties and act on the copy index versus the inner block, so tile r ◦ concat ℓ = concat ℓ ◦ tile r , giving the two-parameter lattice of Eq. (7).  
+
+> 3. The combined family
+
+Theorem 3 generates Eq. (7) from each core: ℓ [[7 , 1, 3]] levels multiply ( n, d ) by (7 , 3) per level at fixed k and fixed depth, while r-fold tiling multiplies ( n, k ) by r at fixed d, so k = 2 r and d = d03ℓ are independently tunable and the rate 2 /(n07ℓ) depends only on the core and the concatenation depth. Table I lists representative members; every entry carries the complete logical Clifford basis ISA Sp(4 r, F2).                                                                     
+
+> core ( n0, d 0)group Gseed [[ n0,2, d 0]] tiled [[ rn 0,2r, d 0]] ◦[[7 ,1,3]] [[7 n0,2,3d0]] tiled ◦[[7 ,1,3]] (4 ,2) Z4[[4 ,2,2]] [[4 r, 2r, 2]] [[28 ,2,6]] [[28 r, 2r, 6]] (18 ,5) D9[[18 ,2,5]] [[18 r, 2r, 5]] [[126 ,2,15]] [[126 r, 2r, 15]] (20 ,6) AGL(1 ,5) [[20 ,2,6]] [[20 r, 2r, 6]] [[140 ,2,18]] [[140 r, 2r, 18]] TABLE I. Members of the Quantum Logic Code family [[ n0r7ℓ,2r, d 03ℓ]] at ℓ∈ { 0,1}.Concatenated distances are exact (Theorem 3). All carry the complete logical Clifford basis ISA and can achieve Sp(4 r, F2) transversally. They have rate = 2 /(n07ℓ).
+
+16 
+
+4. First concatenation level 
+
+By Theorem 3 the first [[7 , 1, 3]] level of each core, [[28 , 2, 6]] = [[4 , 2, 2]] ◦[[7 , 1, 3]], [[126 , 2, 15]] = [[18 , 2, 5]] ◦[[7 , 1, 3]], and [[140 , 2, 18]] = [[20 , 2, 6]] ◦ [[7 , 1, 3]] carries the complete logical-Clifford basis ISA at the same per-generator layer count as its core: each outer W ≤ 2 layer lifts to exactly one inner W ≤ 2 layer, so the distance triples while depth is unchanged. Table II records the depth-optimized layer counts. The depth-1 cores stay depth-1, and the D9 profile 
+
+{1, 2} carries to [[126 , 2, 15]]. Figure 8 shows the lifted S 0 on [[28 , 2, 6]] as a single depth-1 CSP layer: [[7 , 1, 3]] blocks 0 and 2 carry transversal S, joined by seven transversal CZ .
+
+generator [[4 , 2, 2]] → [[28 , 2, 6]] [[18 , 2, 5]] → [[126 , 2, 15]] [[20 , 2, 6]] → [[140 , 2, 18]] S0 1 → 1 2 → 2 1 → 1S1 1 → 1 2 → 2 1 → 1CZ 0,1 1 → 1 1 → 1 1 → 1SHS 0 1 → 1 2 → 2 1 → 1SHS 1 1 → 1 2 → 2 1 → 1H 2 → 2 1 → 1 2 → 2SWAP 1 → 1 1 → 1 1 → 1
+
+r=2 tiling (on [[2 n0, 4, d 0]] ): 
+
+inter-copy aggregate CZ a,b 1 → 1 1 → 1 1 → 1addressable inter-copy CZ i(a),j (b) 2 → 2 ≤ 18 →≤ 18 2 → 2block-shift σ 1 → 1 1 → 1 1 → 1TABLE II. Depth-optimized layer counts (core → first concatenation level). Concatenation is layer-by-layer, so every per-generator depth is preserved while ( n, d ) scales by (7 , 3). Tiling ( r-fold) preserves these intra-copy depths and adds the depth-1 aggregate inter-copy CZ a,b which couples all logicals of the two copies, and the copy-permutation automorphisms (every τ ∈ Sr
+
+is itself a depth-1 automorphism). The individually addressable inter-copy CZ i(a),j (b) is realized at small constant depth (Prop. 8): depth 2 for the depth-1 core families, and ≤ 18 layers for the D9 core family. 
+
+The two composition axes leave the per-generator circuit depth flat, and only the number of generators grows. We record this as a depth bound in r and ℓ.
+
+Proposition 7 (Depth bound for the Quantum Logic Code family) . Let Q0 = [[ n0, 2, d 0]] be a bounded-depth self-dual core whose diagonal/ CZ generators have maximum layer count D0 (so D0 = 1 for Z4 and AGL(1 , 5) , and D0 = 2 for 
+
+D9). Then every family member Qr,ℓ = [[ n0r7ℓ, 2r, d 03ℓ]] of Theorem 3 carries a complete logical Clifford basis ISA in which (i) every intra-copy diagonal generator Si, SHS i and intra-copy CZ ij is realized by at most D0 codespace-preserving 
+
+W ≤ 2 layers; the inter-copy coupling between two copies is realized by a single qubit-wise transversal CZ 
+
+of Theorem 3, whose logical image is the aggregate   0 PP ⊤ 0
+
+ with P = LX L⊤ 
+
+> X
+
+invertible, and each individual addressable cross-copy generator CZ i(a),j (b) is realized at constant depth: depth 2 for the Z4 and AGL(1 , 5) cores and a constant ≤ 18 for D9, synthesized from the diagonal generators, by Proposition 8, in all cases independent of r and ℓ; the global H and the permutation generators (every copy permutation τ ∈ Sr , and the in-core swap, is itself a depth-1 automorphism) have fixed depth ≤ 2, independent of both r and ℓ, while an arbitrary permutation of the 2r logical qubits requires O(r2) such generators; and (ii) an arbitrary logical Clifford in Sp(4 r, F2) is realized by O(r2) D0 = O(r2) such layers, again independent of ℓ.Proof. (i) Concatenation is layer-by-layer (Theorem 3): each outer W ≤ 2 layer lifts to exactly one inner W ≤ 2layer, so every generator’s layer count is unchanged under ℓ 7 → ℓ + 1. The depth is independent of ℓ while the distance triples. Tiling replicates the per-copy ISA Sp(4) ×r at the unchanged core depths and introduces exactly two new generator types: the inter-copy CZ a,b , a single W =2 matching of transversal CZ across the identical supports of copies a, b (depth 1), and the copy-permutation automorphisms (each τ ∈ Sr a qubit permutation, depth 1). Hence every diagonal/ CZ generator of Qr,ℓ has layer count ≤ D0, and the permutation generators ≤ 2, independent of r
+
+and ℓ.
+
+(ii) By the Generation Lemma 1 and the Aaronson–Gottesman normal form [33], any M ∈ Sp(4 r, F2) factors into O((2 r)2) = O(r2) generators from {Si, SHS i, CZ i,j , Hi}; substituting the realizations of (i) (each diagonal/ CZ 17 generator at ≤ D0 layers and H i = S i SHS i Si at ≤ 3D0 layers) yields a codespace-preserving circuit of depth O(r2) D0.The bound carries no dependence on ℓ, so arbitrarily large distance d03ℓ is obtained at fixed depth. 
+
+Proposition 8 (Addressable inter-copy entanglers are constant-depth) . Let Q0 = [[ n0, k, d 0]] be a self-dual core (SX = SZ , k ≥ 2) carrying a complete bounded-depth-D0 transversal logical Clifford basis ISA (Def. 5). On any tiled family member Qr,ℓ of Theorem 3, for every pair of copies a̸ = b and all i, j ∈ [k], the individually addressable CZ i(a),j (b)
+
+is realized by a codespace-preserving circuit that uses exactly two inter-copy aggregate-CZ matchings together with intra-copy ISA layers, of total depth at most 2 + 3 cGL (Q0). Here cGL (Q0) is the intra-copy ISA depth needed to synthesize a logical GL( k, F2) basis change; it is bounded by a function of (k, D 0) alone, so the depth is a constant independent of r and ℓ.Proof. The gate touches only the 2 k logical qubits of copies a, b ; index them 0 , . . . , k −1 (copy a) and k, . . . , 2k−1 (copy 
+
+b). By Lemma 6(ii) a codespace-preserving phase/ CZ (“ C-type”) layer has logical image   I 0 
+
+> CI
+
+ with C ∈ Sym 2k(F2), and such layers compose by addition of their C-blocks. Write C =   Ca XX⊤ Cb
+
+ with cross-block X ∈ F2k×k. The aggregate inter-copy CZ of Theorem 3 is the C-type layer Aagg with C =   0 PP ⊤ 0
+
+, P = LX L⊤ 
+
+> X
+
+invertible (self-duality), at depth 1; the target CZ i(a),j (b) is the C-type layer with cross-block Eij , i.e. C =   0 Eij  
+
+> Eji 0
+
+ (Lemma 6(ii)). 
+
+Step 1 (basis change acts by congruence). A per-copy logical basis change is an element g =   A 00 A−⊤ 
+
+, A ∈ GL( k, F2)(Prop. 6); it conjugates a C-type layer to a C-type layer, C 7 → A−⊤ C A−1. Taking g block-diagonal across the two copies, with copy-a part Aa and copy-b part Ab, sends the aggregate’s cross-block P 7 → A−⊤  
+
+> a
+
+P A −1 
+
+> b
+
+= U P V ⊤
+
+(U, V ∈ GL( k, F2)), leaving the intra-copy blocks zero. Completeness of the ISA (Cor. 3) places the entire subgroup GL( k, F2) ,→ Sp(2 k, F2) in the realized group, so each such g is a codespace-preserving circuit of depth ≤ cGL (Q0). As Sp(2 k, F2) is a fixed finite group, its diameter in the ISA generators is a function of k alone, and each generator costs 
+
+≤ 3D0 layers (Lem. 1); hence cGL (Q0) is bounded by a function of ( k, D 0), a synthesis cost on k logical qubits only. 
+
+When A ∈ ρ(Aut perm (Q0)) is a permutation automorphism, the conjugation is a relabeling of the matching wiring and adds no depth. Step 2 (every invertible cross-block is one aggregate). Each conjugated aggregate g A agg g−1 is C-type with cross-block U P V ⊤. Since P ∈ GL( k, F2), already {U P : U ∈ GL( k, F2)} = GL( k, F2): every invertible cross-block is realized by a single aggregate preceded by one copy-a basis change. 
+
+Step 3 (matrix units are sums of two invertibles). For k ≥ 2, every matrix unit Eij ∈ F2k×k is a sum of two invertibles. If i̸ = j, Eij = I + ( I + Eij ) and I + Eij is unipotent (det = 1). If i = j, fix a transposition τ = ( i i ′) with 
+
+i′̸ = i (possible as k ≥ 2); then Eii = τ + ( τ + Eii ), where τ + Eii restricts to   1 1 1 0 
+
+ on the {i, i ′} block and to the identity elsewhere, hence is invertible. (For k = 1, P is the scalar 1 and Aagg already is the addressable gate, depth 1.) 
+
+Step 4 (assembly). Write Eij = W1 + W2 with W1, W 2 ∈ GL( k, F2) (Step 3), and let gt be the copy-a basis change with Ut = WtP −1 (so the t-th conjugated aggregate has cross-block UtP = Wt). Composing the two, 
+
+ g1Aagg g−11
+
+  g2Aagg g−12
+
+ = I 0
+
+  0 W1+W2 
+
+> (W1+W2)⊤0
+
+ I
+
+!
+
+= I 0
+
+  0 Eij  
+
+> Eji 0
+
+ I
+
+!
+
+,
+
+which is exactly CZ i(a),j (b) . Every layer is codespace-preserving (the aggregates by Theorem 3, the gt as ISA circuits). Merging g−11 g2, the circuit is two aggregate matchings interleaved with three intra-copy basis-change blocks: total depth ≤ 2 + 3 cGL (Q0), independent of r and ℓ. (Independence of ℓ also follows because every layer used is itself concatenation-invariant by Theorem 3.) The constant cGL (Q0) is the only core-dependent quantity, and it specializes to the validated entries of Table II. For 
+
+Z4 ([[4 , 2, 2]]) and AGL(1 , 5) ([[20 , 2, 6]]) the cross-copy term P is the off-diagonal swap and the requisite basis changes are permutation automorphisms (Prop. 6): for [[4 , 2, 2]] the transposition (0 1) and for [[20 , 2, 6]] the permutation (0 4)(1 3)(5 10 6 15 7 17)(8 19 13)(9 11 16 18 14 12) (cycles mapping each entry to its successor) act logically as   1 0 1 1 
+
+ and   1 1 1 0 
+
+ respectively, which together with the swap (a transposition for [[4 , 2, 2]], right translation by (2 , 0) for [[20 , 2, 6]]) generate all of GL(2 , F2). So by the last sentence of Step 1 they are absorbed into the matching wiring and CZ i(a),j (b)
+
+is realized in depth 2, with two C-side matchings whose cross-blocks sum to Eij , the explicit witness for Step 3 being, e.g. E01 = I +   1 1 0 1 
+
+ (both summands invertible). For D9 ([[18 , 2, 5]]), P = I but the permutation automorphisms realize only {I, swap } logically: the coset weight enumerator of the class of X0X1 ({6:75 , 10:171 , 14:9 , 18:1 }) differs from that of X0 and X1 (both {5:36 , 9:184 , 13:36 }), automorphisms preserve coset weight enumerators, so none maps X0 to X0X1 which any subgroup of GL(2 , F2) larger than {I, swap } would require. So the GL(2 , F2) basis changes must be synthesized from the diagonal generators: the length-four word C =E11 , B =E01 +E10 , C =E11 ,
+
+B =E00 +E01 +E10 realizes the required transvection at layer cost 2 + 1 + 2 + 3, so cGL ≤ 8. Since P = I (or a free 18 swap) serves as one of the two summands of Step 3, only one basis change must be synthesized, giving the constant 
+
+≤ 2 + 2 cGL ≤ 18. In all cases the per-generator depth is independent of r and ℓ, and only the count of generators in a generic logical Clifford grows, as O(r2) (Prop. 7(ii)). This proof is perhaps best understood intuitively by an example. Consider two core codes (copies) a, b , each of parameters [[ n0, 2, d 0]], and label the four logical qubits a0, a 1, b 0, b 1. Suppose we wish to synthesize the addressable cross-block entangler CZ (a0, b 1). For clarity we illustrate with the aggregate coupling matched indices ( P = I); the same argument applies verbatim to the swap coupling realized by the depth-2 cores. First, perform the aggregate blockwise CZ , coupling the logical qubits as CZ (a0, b 0) · CZ (a1, b 1) and costing one layer of gate depth. Next, perform a logical basis change on copy a, sending a0 → a0 and a1 → a1 + a0; this is an element of GL(2 , F2), which the ISA realizes by Corollary 3 at constant depth cGL (Q0) and at zero depth, as a permutation automorphism, for the Z4 and AGL(1 , 5) cores. Apply one final aggregate cross-block entangling gate, now coupling the logical qubits as CZ (a0, b 0) · CZ (a1 + a0, b 1), followed by inversion of the basis change. The net entangling operation is then: 
+
+ CZ (a0, b 0) CZ (a1, b 1)  ·  CZ (a0, b 0) CZ (a1, b 1) CZ (a0, b 1)  = CZ (a0, b 1),
+
+where we expanded CZ (a1 + a0, b 1) = CZ (a1, b 1) · CZ (a0, b 1) so that each of CZ (a0, b 0) and CZ (a1, b 1) appears twice and cancels, synthesizing the proper gate. The two aggregate layers thus realize the addressable CZ (a0, b 1) at total depth ≤ 2 + 3 cGL (Q0) in general, and 2 + 2 cGL (Q0) here since the first aggregate needs no basis change, depth 2 exactly for the Z4 and AGL(1 , 5) cores. This sequence exists for all Quantum Logic Codes by the arguments above establishing the preservation of the logical ISA across tiling and concatenation composition operations.  
+
+> V. CONCLUSION
+
+This work presents a detailed theory of transversal logic in high-rate stabilizer codes and a refined analysis of such logic in CSS codes. It presents a unified lower bound on circuit depths required for any stabilizer code to reach the full logical Clifford group, combining bounds on information-transfer limitations with entropic operator-specification requirements. It further outlines the concrete requirements for W -local gates that preserve codespaces in CSS codes and that participate in addressable logic, which forms the basis for a ladder of logical reach. This theory allows us to construct novel gates more efficiently, and we present a novel construction in the rotated surface code that was found leveraging the reductions in search complexity given by these requirements. We also design and present a family of codes we call Quantum Logic Codes that is designed specifically to support fast transversal Clifford logic. The construction is relatively flexible, and incorporates the selection of an appropriate core 
+
+code, and composes via tiling and concatenation with a self-dual doubly-even inner code to produce large instances. The family has asymptotic parameters [[ n, √n, Θ( nβ )]] where β is shown in one instance to be β ≈ 0.2823. The code construction can expand to form large-scale encoded qubit systems while simultaneously able to reach high code distances, all while preserving a constant-depth 2-local transversal basis that generates the full logical Clifford group. It does this through tiling and concatenating a dense logical core code, and we prove how this family construction procedure preserves the logical ISA of any such core. 
+
+> ACKNOWLEDGMENTS
+
+We would like to thank Rui Chao for in-depth discussions and for encouraging the development of the 2D-toric code gates. We also want to thank many others in the NVIDIA quantum error correction group for collaborations. We thank Krysta Svore for creating a research environment that made this work possible. Throughout this work, AI tools were used to facilitate development, aid brainstorming, and mechanically verify and revise the proof structures. All of this work was completed while at NVIDIA, relying solely on information from the cited references and material learned during this affiliation.    
+
+> [1] Daniel Gottesman. Stabilizer codes and quantum error correction. arXiv , 1997. URL http://arxiv.org/abs/quant-ph/ 9705052v1 .[2] Paul Webster, Samuel C Smith, and Lawrence Z Cohen. Explicit construction of low-overhead gadgets for gates on quantum ldpc codes. arXiv preprint arXiv:2511.15989 , 2025.
+
+19 
+
+[3] Daniel Gottesman. Fault-tolerant quantum computation with constant overhead. Quantum Information and Computation ,14(15–16):1338–1372, 2014. [4] Adam Paetznick and Ben W. Reichardt. Universal fault-tolerant quantum computation with only transversal gates and error correction. Physical Review Letters , 111(9):090505, 2013. doi:10.1103/PhysRevLett.111.090505. [5] Sergey Bravyi, Andrew W. Cross, Jay M. Gambetta, Dmitri Maslov, Patrick Rall, and Theodore J. Yoder. High-threshold and low-overhead fault-tolerant quantum memory. Nature , 627:778–782, 2024. [6] Qian Xu, J. Pablo Bonilla Ataides, Christopher A. Pattison, Nithin Raveendran, Dolev Bluvstein, Jonathan Wurtz, Bane Vasi´ c, Mikhail D. Lukin, Liang Jiang, and Hengyun Zhou. Constant-overhead fault-tolerant quantum computation with reconfigurable atom arrays. Nature Physics , 20:1084–1090, 2024. [7] Theerapat Tansuwannont, Tim Chan, and Ryuji Takagi. Construction of the full logical clifford group for high-rate quantum reed-muller codes using only transversal and fold-transversal gates. arXiv preprint , 2026. [8] Aranya Chakraborty and Daniel Gottesman. No-go theorem on fault tolerant gadgets for multiple logical qubits. arXiv ,2026. URL http://arxiv.org/abs/2602.13395v2 .[9] J´ erˆ ome Guyot and Samuel Jaques. On the addressability problem on css codes. 2025. [10] Jonathan E. Moussa. Transversal clifford gates on folded surface codes. Physical Review A , 94(4):042316, 2016. doi: 10.1103/PhysRevA.94.042316. [11] Tomas Jochym-O’Connor and Raymond Laflamme. Using concatenated quantum codes for universal fault-tolerant quantum gates. Physical Review Letters , 112(1):010505, 2014. doi:10.1103/PhysRevLett.112.010505. [12] Madelyn Cain, Qian Xu, Robbie King, Lewis R. B. Picard, Harry Levine, Manuel Endres, John Preskill, Hsin-Yuan Huang, and Dolev Bluvstein. Shor’s algorithm is possible with as few as 10,000 reconfigurable atomic qubits. 2026. [13] Paul Webster, Lucas Berent, Omprakash Chandra, Evan T. Hockings, Nouedyn Baspin, Felix Thomsen, Samuel C. Smith, and Lawrence Z. Cohen. The pinnacle architecture: Reducing the cost of breaking rsa-2048 to 100,000 physical qubits using quantum ldpc codes. 2026. [14] Craig Gidney. How to factor 2048 bit rsa integers with less than a million noisy qubits. 2025. [15] Felix Tripier, Woo Chang Chung, Jacob Young, Safwan Alam, Bryce Bjork, Aharon Brodutch, Finn Lasse Buessen, Nolan J. Coble, Thomas Dellaert, Dmitri Maslov, Martin Roetteler, Edwin Tham, Mark Webster, Min Ye, John Gamble, Andrii Maksymov, J. P. Marceaux, and Nicolas Delfosse. Fault-tolerant quantum computing with trapped ions: The walking cat architecture. arXiv , 2026. URL http://arxiv.org/abs/2604.19481v1 .[16] Adway Patra and Alexander Barg. Targeted clifford logical gates for hypergraph product codes. Quantum , 9:1842, 2025. [17] Narayanan Rengaswamy, Robert Calderbank, Swanand Kadhe, and Henry D. Pfister. Synthesis of logical clifford operators via symplectic geometry. 2018. [18] Zijian Liang and Yu-An Chen. Self-dual bivariate bicycle codes with transversal clifford gates. arXiv preprint , 2025. [19] Hasan Sayginel, Stergios Koutsioumpas, Mark Webster, Abhishek Rajput, and Dan E. Browne. Fault-tolerant logical clifford gates from code automorphisms. PRX Quantum , 6:030343, 2025. [20] Markus Grassl and Martin R¨ otteler. Leveraging automorphisms of quantum codes for fault-tolerant quantum computation. In 2013 IEEE International Symposium on Information Theory (ISIT) , pages 534–538, 2013. [21] Bryan Eastin and Emanuel Knill. Restrictions on transversal encoded quantum gate sets. Physical Review Letters , 102 (11):110502, 2009. doi:10.1103/PhysRevLett.102.110502. [22] Sergey Bravyi and Robert K¨ onig. Classification of topologically protected gates for local stabilizer codes. Physical Review Letters , 110(17):170503, 2013. doi:10.1103/PhysRevLett.110.170503. [23] Fernando Pastawski and Beni Yoshida. Fault-tolerant logical gates in quantum error-correcting codes. Physical Review A ,91(1):012305, 2015. doi:10.1103/PhysRevA.91.012305. [24] Tomas Jochym-O’Connor, Aleksander Kubica, and Theodore J. Yoder. Disjointness of stabilizer codes and limitations on fault-tolerant logical gates. Physical Review X , 8(2):021047, 2018. doi:10.1103/PhysRevX.8.021047. [25] Bei Zeng, Andrew W. Cross, and Isaac L. Chuang. Transversality versus universality for additive quantum codes. IEEE Transactions on Information Theory , 57(9):6272–6284, 2011. [26] Jonas T. Anderson and Tomas Jochym-O’Connor. Classification of transversal gates in qubit stabilizer codes. Quantum Information and Computation , 16(9–10):771–802, 2016. [27] E. X. Fu, H. Zheng, Z. Li, and Zi-Wen Liu. No-go theorems for logical gates on product quantum codes. arXiv preprint ,2025. [28] Alexander J. Malcolm, Andrew N. Glaudell, Patricio Fuentes, Daryus Chandra, Alexis Schotte, Colby DeLisle, Rafael Haenel, Amir Ebrahimi, Joschka Roffe, Armanda O. Quintavalle, Stefanie J. Beale, Nicholas R. Lee-Hone, and Stephanie Simmons. Computing efficiently in qldpc codes. 2025. [29] Theodore J. Yoder, Ryuji Takagi, and Isaac L. Chuang. Universal fault-tolerant gates on concatenated stabilizer codes. 
+
+Physical Review X , 6(3), Sept 2016. ISSN 2160-3308. doi:10.1103/physrevx.6.031039. URL http://dx.doi.org/10.1103/ physrevx.6.031039 .[30] Ze-Chuan Liu, Chong-Yuan Xu, and Yong Xu. Self-dual stacked quantum low-density parity-check codes. arXiv preprint arXiv:2602.15372 , 2026. [31] Nikolas P. Breuckmann, Margarita Davydova, Jens N. Eberhardt, and Nathanan Tantivasadakarn. Cups and gates i: Cohomology invariants and logical quantum operations. Communications in Mathematical Physics , 407(5), Apr 2026. ISSN 1432-0916. doi:10.1007/s00220-026-05570-z. URL http://dx.doi.org/10.1007/s00220-026-05570-z .[32] Nikolas P. Breuckmann and Simon Burton. Fold-transversal clifford gates for quantum codes. Quantum , 8:1372, 2024. [33] Scott Aaronson and Daniel Gottesman. Improved simulation of stabilizer circuits. Physical Review A , 70(5):052328, 2004. doi:10.1103/PhysRevA.70.052328. 20 
+
+[34] Zi-Han Chen, Ming-Cheng Chen, Chao-Yang Lu, and Jian-Wei Pan. Transversal logical clifford gates on the rotated surface code with reconfigurable neutral atom arrays. Physical Review Letters , 136(13), Mar 2026. ISSN 1079-7114. doi:10.1103/m7tq-9v3g. URL http://dx.doi.org/10.1103/m7tq-9v3g .[35] Matt McEwen, Dave Bacon, and Craig Gidney. Relaxing hardware requirements for surface code circuits using time-dynamics. Quantum , 7:1172, Nov 2023. ISSN 2521-327X. doi:10.22331/q-2023-11-07-1172. URL http://dx.doi.org/10. 22331/q-2023-11-07-1172 .[36] Donald E. Taylor. The Geometry of the Classical Groups , volume 9 of Sigma Series in Pure Mathematics . Heldermann Verlag, 1992. [37] Leonard E. Dickson. Linear Groups with an Exposition of the Galois Field Theory . B. G. Teubner, Leipzig, 1901. 21  
+
+> VI. SUPPLEMENTARY MATERIAL
+
+In this Supplementary Material, we provide formal rigorous proofs of propositions, lemmas, theorems, and con-structions present in the main text. We go through this in a sequence matching the presentation of the main material, beginning with the scaling laws dictating minimum circuit depths for the synthesis of the full logical Clifford group in stabilizer codes. 
+
+> Stabilizer Code Transversal Clifford Circuit Depth Lower Bounds
+
+Lemma 2 (Pauli radius lower bound) . For a stabilizer code Q of parameters [[ n, k, d ]] , the Pauli radius w⋆ := max P̸ =I min P ∈P wt( P ), the largest, over all nontrivial logical Pauli classes P , of the class’s minimum-weight repre-sentative, satisfies 
+
+w⋆ ≥ Ω
+
+ k
+
+log n
+
+
+
+.
+
+Proof. By definition of w⋆ every one of the 2 2k logical Pauli classes has a representative of weight at most w⋆, and representatives of distinct classes are distinct Pauli operators. So the ball of Pauli operators of weight at most w⋆
+
+must hold at least 2 2k of them. There are exactly  nj
+
+3j Paulis of weight j, which we can see by first choosing the j
+
+nonidentity positions, then one of X, Y, Z on each. So: 
+
+> w⋆
+
+X
+
+> j=0
+
+nj
+
+
+
+3j ≥ 22k.
+
+Since 3 j ≤ 3w for 0 ≤ j ≤ w, and using the standard bound Pwj=0 
+
+ nj
+
+ ≤ (en/w )w (for 1 ≤ w ≤ n), we have 
+
+> w
+
+X
+
+> j=0
+
+nj
+
+
+
+3j ≤ 3wwX
+
+> j=0
+
+nj
+
+
+
+≤
+
+ 3en w
+
+w
+
+.
+
+At w = w⋆ this gives (3 en/w ⋆)w⋆
+
+≥ 22k, hence w⋆ log(3 en/w ⋆) ≥ 2k. Using log(3 en/w ⋆) ≤ log 3 en for w⋆ ≥ 1, 
+
+w⋆ ≥ 2k
+
+log 3 ne = Ω 
+
+ k
+
+log n
+
+
+
+.
+
+Now we use the heavy Pauli weights to prove a limit on the speed of information transfer through a stabilizer code. 
+
+Theorem 4 (Information Transfer Limit) . For a stabilizer code Q of parameters [[ n, k, d ]] , with Pauli radius w⋆ =Ω
+
+ 
+
+> k
+> log n
+
+
+
+, any W ≥ 2-local circuit implementing a logical Clifford that maps a minimum-weight logical Pauli class of weight d to a heaviest logical Pauli class with lightest representative weight w⋆ has depth: 
+
+D ≥ log W
+
+w⋆
+
+d .
+
+Proof. The projective logical Clifford group Sp(2 k, F2) acts transitively on the nonzero logical Pauli classes, so it contains an operation U carrying a minimum-weight d logical class to the heaviest logical class, whose lightest repre-sentative has weight w⋆ = Ω( k/ log n) by lemma 2. A depth-D layer of W -local gates acts by growing the support of any Pauli by a factor of at most W per layer, so it maps a weight-d representative to a representative of U ’s image of weight at most d · W D . Since every representative of the heaviest class has weight at least w⋆, realizing U forces 
+
+d · W D ≥ w⋆, i.e. 
+
+D ≥ log W
+
+w⋆
+
+d ≥ log W
+
+c k d log n ,
+
+the second inequality by Lemma 2 ( w⋆ ≥ c k/ log n). 22 The invariants in Theorem 4 coincide with the disjointness framework in [24]: the Pauli radius w⋆ = max P min {| g| :
+
+g ∈ P } is referred to in [24] as maximum distance d↑ (the largest, over logical classes P , of the class’s minimum-weight representative), and the code distance d is their minimum distance d↓. The bound above is the level-1 (Pauli-to-Pauli) specialization of their support-spreading lemma, and the ratio w⋆/d = d↑/d ↓ is precisely the quantity that governs which levels of the Clifford hierarchy a shallow transversal circuit can reach. Their disjointness ∆( Q) ≥ 1 obeys the structural bound ∆( Q) ≤ min 
+
+n
+
+d, nw⋆
+
+o
+
+,
+
+so w⋆ ≤ n/ ∆( Q) ≤ n and the spread term satisfies log W (w⋆/d ) ≤ log W (n/d ), a ceiling that is independent of k.This relationship captures one key element of the structure of logic inside stabilizer codes, albeit a relatively weak one. W -local layers have the ability to connect qubit blocks in size exponential in the layer count, which can then quickly cover all Pauli operators. This turns out to only be a bounding behavior in cases of low-rate codes, as another relationship begins to dominate once k = ω(√n log n). 
+
+Lemma 3 (Codespace-Preserving W -Local Layer Bound) . For any [[ n, k, d ]] stabilizer code, assuming W | n (padded otherwise), the number of codespace-preserving W -local layers is bounded above by the total number of W -local layers, 
+
+Nn,W ≤ Pn,W | Sp(2 W, F2)|n/W , Pn,W = n!(W !) n/W (n/W )! ,
+
+the number of partitions of the n qubits into n/W blocks of size W , times the number | Sp(2 W, F2)| of W -qubit Cliffords available in each block; layers whose blocks have fewer than W qubits contribute at most a further factor polynomial in n (one term per block-size profile), absorbed in the O(n) term below. In particular, 
+
+log Nn,W ≤ log Pn,W + nW log | Sp(2 W, F2)| = W − 1
+
+W n log n + O(n) = O(n log n).
+
+Proof. A W -local layer is specified by a partition of the n qubits into n/W blocks of size W , of which there are 
+
+Pn,W , together with one W -qubit Clifford modulo Pauli on each block, i.e. an element of Sp(2 W, F2). This gives 
+
+Pn,W | Sp(2 W, F2)|n/W layers in total; layers with smaller blocks are counted by the same expression for their block-size profile, each profile contributes less (per qubit, | Sp(2 j, F2)|1/j / (j!) 1/j increases with j), and there are only polynomially many profiles; the codespace-preserving layers are a subset, so their number is at most this product up to the stated polynomial factor. The entropy estimate follows from log Pn,W = W −1 
+
+> W
+
+n log n + O(n). 
+
+Theorem 5 (Clifford Entropy Bound) . For a stabilizer code Q with permutation automorphism group Aut perm (Q),write ρ(Aut perm (Q)) ≤ Sp(2 k, F2) for its logical image (the group of distinct logical Cliffords induced by physical permutation automorphisms. For CSS codes this is the embedding Vπ 7 → diag( Vπ , V −⊤  
+
+> π
+
+) of Proposition 6). Let Nn,W 
+
+denote the number of distinct codespace-preserving W -local gate layers for W ≥ 2 supported on the code. Then, for fixed W and codes with log |ρ(Aut perm (Q)) | = o(k2), the circuit depth D required to implement the full logical Clifford group with codespace-preserving layers is at least (for unrestricted layers the same bound holds with Nn,W replaced by the total layer count of Lemma 3, with the same leading order): 
+
+D ≥ log Nn,W 
+
+| Sp(2 k, F2)||ρ(Aut perm (Q)) | ≥ 2k2 + k + ck − log |ρ(Aut perm (Q)) |  
+
+> W−1
+> W
+
+n log n + 2 n  W + 12 + cW
+
+> 2W
+
+ − βW n + O(log n) = Ω 
+
+ k2
+
+n log n
+
+
+
+.
+
+Proof. The full Clifford group Sp(2 k, F2) has order | Sp(2 k, F2)| = 2 k2 Qki=1 (2 2i − 1) (the order of the finite symplectic group [36, 37]). This group then requires log | Sp(2 k, F2)| = 2 k2 + k + ck for ck = Pki=1 log(1 − 2−2i), a bounded negative constant ( ck → − 0.538 as k → ∞ ), total bits to represent. The logical image ρ(Aut perm (Q)), the set of distinct logical Cliffords induced by physical permutation automorphisms, reduces the number of bits required to specify all operations of the logical Clifford group by carving them into equivalence classes. Distinct physical automorphisms that induce the same logical action are counted only once. Each codespace-preserving W -local layer is one of at most Nn,W distinct choices (Lemma 3), so a depth-D circuit is a length-D word over an alphabet of size ≤ Nn,W : there are at most N Dn,W such circuits, hence at most N Dn,W distinct logical Cliffords reachable with D layers. We treat permutation automorphisms as having no W -local layer cost, as they are a relabeling of the physical qubits and can be absorbed into classical control. A permutation automorphism 
+
+π ∈ Aut perm (Q) preserves the stabilizer group and acts on the k logical qubits as some logical Clifford gπ ∈ Sp(2 k, F2); the set of all such gπ is exactly the logical image ρ(Aut perm (Q)). Composing a depth-D circuit realizing g with each 23 automorphism realizes gπ g at the same depth, so this free action enlarges the reachable set by at most a factor 
+
+|ρ(Aut perm (Q)) |. (Automorphisms interleaved between layers reduce to this case: conjugating a codespace-preserving 
+
+W -local layer by a permutation automorphism yields another such layer, so any interleaved word collapses to D layers followed by a single automorphism.) Synthesizing the entire logical Clifford group therefore requires 
+
+|ρ(Aut perm (Q)) | · N Dn,W ≥ | Sp(2 k, F2)|.
+
+Taking logarithms and solving for D gives 
+
+D ≥ log | Sp(2 k, F2)| − log |ρ(Aut perm (Q)) |
+
+log Nn,W 
+
+= log Nn,W 
+
+| Sp(2 k, F2)||ρ(Aut perm (Q)) | .
+
+For the explicit form, substitute the order count log | Sp(2 k, F2)| = 2 k2 + k + ck, and expand log Nn,W via Lemma 3: its leading W −1 
+
+> W
+
+n log n is the Stirling estimate of log Pn,W , while the linear terms collect the per-block Clifford factor  
+
+> nW
+
+log | Sp(2 W, F2)| = nW (2 W 2 + W + cW ) with cW = PWi=1 log(1 − 2−2i). Combine this together with the Stirling correction −βW n of log Pn,W . Under the hypothesis log |ρ(Aut perm (Q)) | = o(k2) we arrive at 
+
+D ≥ Ω
+
+ k2
+
+n log n
+
+
+
+.
+
+Corollary 1 follows by taking the maximum of the bounds of Theorems 4 and 5. 
+
+W -Layer Transversal Gate Theory 
+
+Now we proceed to the W -layer transversal gate theory. First we prove Proposition 3 
+
+Proposition 3 (Admissible per-block set Gdiag ). Let Q be an indecomposable CSS code and let V = N 
+
+> p
+
+Vp be a codespace-preserving, addressable (Def. 2) 2-local single-layer Clifford. Then the layer is not a global sector exchange (not every AVp is zero), and a block with trivial diagonal AVp = DVp = I2 lies in the phase/CZ set 
+
+Gdiag := 
+
+n
+
+V ∈ Sp(4 , F2) : AV = DV = I2, B V , C V ∈ Sym 2(F2), B V CV = 0 
+
+o
+
+, |G diag | = 18 .
+
+Proof of Proposition 3. Let 
+
+V = A BC D
+
+!
+
+∈ Sp(2 n, F2)be the block-diagonal symplectic matrix induced by the physical layer, where the pth diagonal block is 
+
+Vp = Ap Bp
+
+Cp Dp
+
+!
+
+∈ Sp(4 , F2).
+
+For a ∈ SX and b ∈ SZ , direct conjugation gives 
+
+VXaV† ∼ XA aZC a, (9) 
+
+VZbV† ∼ XB bZD b, (10) 
+
+VXaZbV† ∼ XA a+B bZC a+D b. (11) Since the code is CSS, the X and Z components of a stabilizer must lie in SX and SZ , respectively. Codespace preservation is equivalent to 
+
+A SX ⊆ SX , C SX ⊆ SZ , (12) 
+
+B SZ ⊆ SX , D SZ ⊆ SZ . (13) 24 Because the input Xa and Zb were already stabilizers, the diagonal conditions may be written in reduced form: (A −In)SX ⊆ SX , C SX ⊆ SZ , (14) 
+
+B SZ ⊆ SX , (D −In)SZ ⊆ SZ . (15) Blockwise then, for every a ∈ SX and b ∈ SZ , and where we write a(p) to be the restriction of vector a to the p-th block coordinates (and b likewise), we have: 
+
+M
+
+> p
+
+(Ap − I2)a(p) ∈ SX , M
+
+> p
+
+Cpa(p) ∈ SZ , (16) 
+
+M
+
+> p
+
+Bpb(p) ∈ SX , M
+
+> p
+
+(Dp − I2)b(p) ∈ SZ . (17) These are the two-local analog of the four Guyot–Jaques one-local support conditions: the reduced diagonal blocks 
+
+Ap − I2 and Dp − I2 are precisely the Hadamard-type part of the physical Clifford action. Singular diagonal blocks are excluded or controlled as follows. A layer in which every Ap = 0 (a genuine sector exchange on every block, e.g. the global Hadamard) is excluded by Def. 2: the image of Xx for any representative x
+
+of a fixed Xi has X-part A x = 0, so fixing Xi forces x ∈ SX , contradicting nontriviality. General singular blocks are controlled at the logical level by Lemma 4 below. For a block with trivial diagonal Ap = Dp = I2, substituting into the block symplectic identities (6) gives 
+
+Bp = B⊤ 
+
+> p
+
+, Cp = C⊤ 
+
+> p
+
+, BpCp = 0 . (18) Since Bp and Cp are symmetric, CpBp = 0 is equivalent to BpCp = 0. Therefore every trivial-diagonal admissible block lies in Gdiag .Finally, count the elements. A symmetric 2 × 2 matrix over F2 has the form 
+
+x y y z
+
+!
+
+, x, y, z ∈ F2,
+
+so there are 8 choices. If Bp = 0, then Cp is arbitrary, giving 8 classes. If rank Bp = 2, then BpCp = 0 forces Cp = 0, and there are 4 invertible symmetric choices for Bp. If rank Bp = 1, there are 3 choices for Bp, and for each such choice the condition BpCp = 0 permits Cp = 0 and exactly one nonzero rank-one symmetric Cp supported on ker Bp,giving 3 · 2 = 6 classes. Thus 
+
+|G diag | = 8 + 4 + 6 = 18 .
+
+A trivial-diagonal 2-local physical gate can be chosen from the following: a tensor product of single qubit gates I, S, 
+
+or SHS , a CZ gate composed with some product of I or S, a CZ ♯ = ( H ⊗ H) · CZ · (H ⊗ H) type entangler composed with some product of I or SHS , or the all-ones entangler J . These are the algebraically allowed trivial-diagonal blocks, and which of them preserve the codespace of a given CSS code Q is code-specific. These elements can be written as the set: {I, S, SHS }⊗2 ∪ CZ · { I, S }⊗2 ∪ CZ ♯ · { I, SHS }⊗2 ∪ {J } .Blocks with invertible Ap̸ = I2 are not exchanges but sector-preserving basis changes : the SWAP block Ap = Dp =  0 1 1 0 
+
+, Bp = Cp = 0 is admissible. On [[4 , 2, 2]] the layer SWAP(1 , 2) ⊗ I3,4 preserves the code, inducing a logical GL(2 , F2) relabeling of the two logical qubits. Such blocks supply the logical basis-change factor A of Proposition 4. The two lemmas below regarding singular diagonal blocks and blocks whose diagonals are not inverse-transposes of one another control the remaining freedom at the logical level, for any codespace-preserving W -local layer on a CSS code. Both rest on the support structure of block-diagonal maps: an operator built per block vanishes outside the blocks on which it is nontrivial. 
+
+Lemma 4 (Confinement of singular diagonal blocks) . Let V = L 
+
+> p
+
+Vp be a codespace-preserving W -local layer on a CSS code Q, and let H be the union of the supports of the blocks with singular Ap. If the logical block Alog = LZ A L⊤
+
+> X
+
+is singular, then some nonzero element of ker HZ is supported entirely within H. In particular Alog ∈ GL( K, F2)
+
+whenever no such element is confined to H.Proof. Codespace preservation gives A SX ⊆ SX , and conjugation carries normalizer elements to normalizer elements, so A ker HZ ⊆ ker HZ ; thus Alog is the induced map on ker HZ /S X , and it is singular exactly when some u ∈
+
+ker HZ \ SX has A u ∈ SX . The kernel ker A = L 
+
+> p
+
+ker Ap vanishes on every block with invertible Ap, so ker A ⊆ FH 
+
+> 2
+
+.25 If ker A ∩SX̸ = 0, a nonzero stabilizer element is confined to H and we are done. Otherwise A |SX is injective, so 
+
+A SX = SX by dimension count; choose s ∈ SX with A s = A u. Then u′ = u + s is nonzero (its logical class equals that of u), lies in ker HZ and in ker A ⊆ FH 
+
+> 2
+
+: a nontrivial logical X representative confined to H, of weight at least 
+
+d.
+
+Lemma 5 (Confinement of shear blocks) . Let V be as above and let H′ be the union of the supports of the blocks with 
+
+A⊤ 
+
+> p
+
+Dp̸ = I. Then 
+
+(Clog )⊤Blog = LX
+
+ A⊤ D +In
+
+ L⊤ 
+
+> Z
+
+,
+
+and if (Clog )⊤Blog ̸ = 0 then a nontrivial logical Z representative is supported entirely within H′; in particular |H′| ≥ d.Consequently (Clog )⊤Blog = 0 (equivalently Dlog = ( Alog )−⊤ when Alog is invertible) whenever no nontrivial logical 
+
+Z representative is confined to H′.Proof. The inverse layer V−1 is codespace-preserving and block-diagonal with blocks V −1 
+
+> p
+
+=   D⊤  
+
+> pB⊤
+> p
+> C⊤
+> pA⊤
+> p
+
+, so A⊤ SZ ⊆ SZ ;further A⊤ ker HX ⊆ ker HX follows from A SX ⊆ SX by duality, and D ker HX ⊆ ker HX is normalizer preservation. For the identity, ( Alog )⊤Dlog = LX A⊤ L⊤ 
+
+> Z
+
+LX D L⊤ 
+
+> Z
+
+= LX A⊤ D L⊤ 
+
+> Z
+
+: each column of D L⊤ 
+
+> Z
+
+lies in ker HX , on which 
+
+L⊤ 
+
+> Z
+
+LX acts as the identity modulo SZ , and LX A⊤ annihilates SZ (since A⊤ SZ ⊆ SZ and LX H⊤ 
+
+> Z
+
+= 0); the identity then follows from the logical symplectic identity ( Alog )⊤Dlog + ( Clog )⊤Blog = IK together with LX L⊤ 
+
+> Z
+
+= IK . Now suppose ( Clog )⊤Blog ̸ = 0. Then for some row z of LZ (a Z representative in ker HX ) the vector y := ( A⊤ D +I)z has 
+
+LX y̸ = 0, so y / ∈ SZ ; and y ∈ ker HX by the invariances above, so y is a nontrivial logical Z representative. Finally 
+
+A⊤ D +I = L
+
+> p
+
+(A⊤ 
+
+> p
+
+Dp + I) vanishes on every block with A⊤ 
+
+> p
+
+Dp = I, so y is supported within H′ and wt( y) ≥ d.We now prove Proposition 4, describing the logical actions reachable by admissible 2-local physical gates that can produce addressable logical gates. 
+
+Proposition 4 (2-local logical reach). For any codespace-preserving, addressable (Def. 2) 2-local single-layer Clifford V on an indecomposable CSS code Q encoding K logical qubits, suppose that no nonzero element of ker HZ or of ker HX is supported entirely within the union of the supports of the blocks with singular Ap or with A⊤ 
+
+> p
+
+Dp̸ = I2 (the 
+
+confinement hypothesis ; Lemmas 4 and 5). Then the symplectic image lies in A · G 2L(K) for a logical basis change 
+
+A ∈ GL( K, F2); when the basis change is realized by a permutation automorphism, A ∈ ρ(Aut perm (Q)) and the image lies in the automorphism-augmented set G2L+π (Q) = ρ(Aut perm (Q)) · G 2L(K). Here 
+
+G2L(K) := 
+
+ IK BC IK
+
+!
+
+B, C ∈ Sym K , BC = 0 
+
+
+
+is the 2-local set and ρ(Aut perm (Q)) ≤ GL( K, F2) is the logical automorphism action (Proposition 6). On a canonical basis LX , L Z , the set G2L(K) is composed of Cii = 1 ⇔ Si, Cij = 1 ⇔ CZ ij , and dually Bii ⇔ SHS i, Bij ⇔ CZ ♯ij .Proof of Proposition 4. Suppose first that every block has trivial physical diagonal Ap = Dp = I2, with Bp, C p ∈
+
+Sym 2(F2) (the phase/CZ blocks of Proposition 3). Then V induces no logical basis change ( Alog = Dlog = IK ). The general case is treated at the end of the proof via Lemmas 4 and 5. Assembling the blocks, the diagonal sectors collapse to the identity, L 
+
+> p
+
+Ap = L 
+
+> p
+
+Dp = In, so in symplectic form 
+
+V = In BC In
+
+!
+
+, B := M
+
+> p
+
+Bp, C := M
+
+> p
+
+Cp ∈ Sym n(F2),
+
+with B and C inheriting symmetry from the block decomposition. A logical operator with symplectic coordinates splitting as the X-part and Z-part (¯ u, ¯v) ∈ FK 
+
+> 2
+
+× FK 
+
+> 2
+
+has physical representative ( L⊤ 
+
+> X
+
+¯u, L ⊤ 
+
+> Z
+
+¯v), and the logical coordinates of any normalizer element ( a, b ) are read back by pairing against the dual representatives, ( a, b ) 7 → (LZ a, L X b). This readout annihilates the stabilizer ambiguity, since LZ H⊤ 
+
+> X
+
+=
+
+LX H⊤ 
+
+> Z
+
+= 0, and inverts the embedding, since LZ L⊤ 
+
+> X
+
+= LX L⊤ 
+
+> Z
+
+= IK . As V preserves the stabilizer group it carries normalizer elements to normalizer elements, so the induced logical action is the conjugation Φ( V) = LZ 00 LX
+
+!
+
+In BC In
+
+!
+
+L⊤ 
+
+> X
+
+00 L⊤
+
+> Z
+
+!
+
+= LZ L⊤ 
+
+> X
+
+LZ BL ⊤
+
+> Z
+
+LX CL ⊤ 
+
+> X
+
+LX L⊤
+
+> Z
+
+!
+
+= IK BC IK
+
+!
+
+,
+
+where B := LZ BL ⊤ 
+
+> Z
+
+and C := LX CL ⊤ 
+
+> X
+
+are the logical blocks. 26 Both blocks are symmetric: B⊤ = LZ B⊤L⊤ 
+
+> Z
+
+= B, and likewise C⊤ = C, since B and C are symmetric. Since V ∈ 
+
+Sp(2 n, F2) preserves the CSS code, its induced action preserves logical commutation relations, so Φ( V) ∈ Sp(2 K, F2). Reading the third symplectic identity of (6) in dimension 2 K, namely A⊤D+C⊤B = IK , and substituting A = D = IK
+
+gives C⊤B = 0; transposing and using symmetry, BC = ( C⊤B)⊤ = 0. Hence Φ( V) ∈ G 2L(K) in the no-basis-change case. In general, the confinement hypothesis gives Alog = LZ A L⊤ 
+
+> X
+
+∈ GL( K, F2) by Lemma 4, and ( Clog )⊤Blog = 0 by Lemma 5, hence Dlog = ( Alog )−⊤ by the symplectic identity. Factoring Φ( V) = diag( Alog , (Alog )−⊤ ) · M leaves 
+
+M symplectic with identity diagonal blocks, so M ∈ G 2L(K) by the same identities as in the trivial-diagonal case; the basis change is the automorphism action of Proposition 6 when it is realized by a permutation automorphism. Therefore Φ( V) ∈ A · G 2L(K), lying in G2L(K) modulo the basis change. The logical operation set is read off the off-diagonal blocks: a diagonal entry Cii = 1 sends Xi 7 → XiZi (S i); an off-diagonal pair Cij = Cji = 1 couples Xi ↔ Zj and Xj ↔ Zi (CZ ij ); and dually for B under X ↔ Z (SHS i and CZ ♯ij ). We now move to proving the invariance of the size of the set of logical operators with respect to transversal layer locality, Proposition 5. 
+
+Proposition 5 (W -invariance of logical reach, W ≥ 2) Let Q be an indecomposable CSS code on n qubits encoding 
+
+K logical qubits, and let 2 ≤ W < n . Every codespace-preserving, addressable (Def. 2) W -local single-layer Clifford 
+
+V has logical image Φ( V ) given by 
+
+Φ( V ) ∈ A · G 2L(K), A ∈ GL( K, F2),
+
+under the confinement hypothesis of Proposition 4, applied to the layer’s blocks at width W ; when the basis change A
+
+is realized by a permutation automorphism, Φ( V ) ∈ G 2L+π (Q) = ρ(Aut perm (Q)) · G 2L(K).Proof of Proposition 5. Write V = N 
+
+> k
+
+gk, for gk ∈ Sp(2 W, F2) acting on a disjoint block σk ⊆ [n] with |σk| ≤ W , and assemble the layer V =   A B C D 
+
+ with A = L 
+
+> k
+
+Agk and likewise for B, C, D.
+
+Step 1 (lifted block identities). Each gk obeys g⊤ 
+
+> k
+
+ω g k = ω in W × W blocks, giving A⊤ 
+
+> gk
+
+Cgk , B ⊤ 
+
+> gk
+
+Dgk ∈ Sym W and 
+
+A⊤ 
+
+> gk
+
+Dgk + C⊤ 
+
+> gk
+
+Bgk = IW . This is the dimension-W form of (6). These are the only constraints W -locality imposes, and their form is independent of W .
+
+Step 2 (trivial diagonal ⇒ set, independent of W ). By Proposition 4 the logical image is Φ( V ) =   Alog Blog  
+
+> Clog Dlog
+
+ ∈
+
+Sp(2 K, F2), with Alog = LZ A L⊤ 
+
+> X
+
+, Dlog = LX D L⊤ 
+
+> Z
+
+, Blog = LZ B L⊤ 
+
+> Z
+
+, Clog = LX C L⊤ 
+
+> X
+
+. If Agk = Dgk = IW for every block then A = D = In, so Alog = Dlog = LZ L⊤ 
+
+> X
+
+= IK . The dimension-2 K symplectic identity then forces 
+
+Clog ⊤Blog = 0, while Alog ⊤Clog , B log ⊤Dlog ∈ Sym K give Blog , C log ∈ Sym K , so Blog Clog = 0 and Φ( V ) ∈ G 2L(K). The set G2L(K) carries no dependence on W , and its generators S i, CZ ij , SHS i, CZ ♯ij are already realized by W =2 blocks. A wider block only re-factorises the same logical target. This is the W -invariance: the ambient set is the same at every locality 2 ≤ W < n .
+
+Step 3 (controlling the diagonal). It remains to bound Alog , D log . Lemmas 4 and 5 hold for blocks of any width: under the confinement hypothesis, Alog = LZ A L⊤ 
+
+> X
+
+∈ GL( K, F2) and ( Clog )⊤Blog = 0, so Dlog = ( Alog )−⊤ by the symplectic identity. Factoring Φ( V ) = diag( Alog , (Alog )−⊤ ) · M leaves M with identity diagonal blocks, which resides in G2L(K) by Step 2. The basis change lies in the GL( K, F2) automorphism action of Proposition 6 whenever it is realized by a permutation automorphism, giving Φ( V ) ∈ G 2L+π (Q). Finally W = n places the whole encoded Clifford in one block, so the single-layer reach enlarges strictly beyond the set and can hit all of Sp(2 K, F2). 
+
+The Ladder of Logical Reach 
+
+Combining 1-local, 2-local, W -local ( W > 2), code automorphisms, and multi-layer composition organises the reachable logical actions into a single nested ladder ordered by physical resource. Throughout, T W L  
+
+> addr
+
+(Q) := {Φ( V ) : 
+
+V a codespace-preserving addressable W -local single-layer Clifford on Q} denotes the code-specific single-layer logical reach at locality W . T 2L
+
+> addr
+
+(Q) is the W = 2 case. G1L
+
+> diag
+
+(Q) and T 1L+π 
+
+> addr
+
+(Q) denote the addressable 1-local diagonal reach and its enlargement by a permutation automorphism. The summit of the ladder is the full logical Clifford group, reached by multi-layer composition of 2-local set elements. We define two useful terms to study this comprehensively: a matching-realizable logical action, and the single-layer 2-local automorphism realizability set. The former captures a sufficient set of constraints required of any 2-local transversal gate layer to guarantee that it preserves the codespace, can perform required logical operations, and is a proper 2-local transversal gate. These constraints are useful for understanding the complexity of this problem: CSS preservation and Reach are both treatable as one linear system with an affine solution space, while the Matching 27 constraint introduces quadratic constraints that add combinatorial complexity to the problem space. The latter definition folds in the logical automorphisms to the reachable 2-local logical operations in a combined statement. 
+
+Definition 6 (Matching-realizable) . Fix a CSS code Q = CSS( HX , H Z ) with logical basis L = ( LX , L Z ). Encode a 2-local diagonal C-side layer by α = ( ⃗c,⃗ e) ∈ F n 
+
+> 2
+
+× F(n
+
+> 2
+
+) 
+
+> 2
+
+, with cp denoting a physical S on qubit p, and epq a physical 
+
+CZ on {p, q }. This corresponds to the symmetric matrix C(α) ∈ Sym n(F2), C(α)pp = cp, C(α)pq = epq . Encode the 
+
+X-dual ( B-side) layer dually by β = ( ⃗c ′,⃗ f ) with matrix C(β). A target ( B, C) ∈ Sym K × Sym K , optionally composed with A ∈ Aut log perm (Q), is matching-realizable on Q if there exist ( α, β, π ) with π ∈ Aut phys perm (Q) applied before the diagonal layer, and realizable on a single block partition, satisfying: 
+
+(A) Matching (M): the off-diagonal supports of ⃗e and ⃗ f are matchings on [ n] with each qubit in at most one CZ ,resp. CZ ♯;
+
+(B) CSS preservation (K): C(α) SX ⊆ SZ and C(β) SZ ⊆ SX ;
+
+(C) Reach (R): LX C(α) L⊤ 
+
+> X
+
+= C, LZ C(β) L⊤ 
+
+> Z
+
+= B, and Vπ = A (Prop. 6). 
+
+Definition 7 (Single-layer 2-local ⋊ automorphism realizability set) . For a CSS code Q with K logical qubits, the set of symplectic images reachable by one addressable 2-local single-layer Clifford V composed with one π ∈ Aut phys perm (Q)is 
+
+Sgen 2L+π (Q) := 
+
+ A B A−⊤ 
+
+C A A−⊤ 
+
+!
+
+A ∈ Aut log perm (Q), B, C ∈ Sym K (F2), BC = 0 , matching-realizable on Q
+
+
+
+.
+
+This is the matching-realizable subset of the automorphism-augmented set G2L+π (Q) of the summary of results. In particular Sgen 2L+π (Q) ⊆ G 2L+π (Q), and a single addressable 2-local layer is matching-realizable through its per-block structure (Proposition 3), so T 2L
+
+> addr
+
+(Q) ⊆ S gen 2L+π (Q), with equality to G2L+π (Q) when Aut log perm (Q) acts matching-realizably. 
+
+Theorem 6 (Ladder of reachable logical sets) . For an indecomposable CSS code Q encoding K logical qubits, and under the confinement hypothesis of Proposition 4, the reachable logical sets nest as 
+
+{I} ⊆ G 1L
+
+> diag
+
+(Q) ⊆ T 2L
+
+> addr
+
+(Q)
+
+⊆ T W L  
+
+> addr
+
+(Q) ⊆ GL( K, F2) · G 2L(K) (2 ≤ W < n )
+
+⊊ G2L(K) = Sp(2 K, F2),
+
+with T 1L+π 
+
+> addr
+
+(Q) ⊆ S gen 2L+π (Q) ⊆ G 2L+π (Q) ⊆ GL( K, F2) · G 2L(K) alongside. Proof sketch. A 1-local layer is a 2-local layer with empty matching, giving the first containments; by Proposition 2 the 1-local reach already includes entangling couplings on some codes, so this step need not be strict. The ⊊ is strict because H i never lies inside the set: every element of GL( K, F2) · G 2L(K) has invertible diagonal blocks. The middle containments T 2L
+
+> addr
+
+(Q) ⊆ T W L  
+
+> addr
+
+(Q) ⊆ GL( K, F2) · G 2L(K) are given by Proposition 5 and carry its confinement hypothesis. The single-layer-plus-automorphism realizable set Sgen 2L+π (Q) of Definition 7 sits between, 
+
+T 2L
+
+> addr
+
+(Q) ⊆ S gen 2L+π (Q) ⊆ G 2L+π (Q), and contains T 1L+π 
+
+> addr
+
+(Q); the final equality is the Generation Lemma 1. 
+
+Novel Construction Proofs 
+
+Now we move to the novel constructions. We perform the following analysis to prove the stated properties of the rotated surface code gadget. We make use of the following definition of a diagonal layer and the reach map to present a full proof of the construction validity. 
+
+Definition 8 (Diagonal layer and reach map) . Fix a CSS code Q with stabilizer rowspans SX = rowspan( HX ), 
+
+SZ = rowspan( HZ ) and canonical logical representatives LX , L Z such that LX L⊤ 
+
+> Z
+
+= IK . A diagonal 2-local layer is a circuit 
+
+V = Y   
+
+> q:cq=1
+
+Sq
+
+Y   
+
+> q<q ′:eqq ′=1
+
+CZ q,q ′ ,28 specified by a phase vector c ∈ Fn 
+
+> 2
+
+and a symmetric zero-diagonal e ∈ Fn×n 
+
+> 2
+
+whose support {{ q, q ′} : eqq ′ = 1 } is a 
+
+matching involving each qubit in at most one CZ . Its physical C-matrix is the symmetric matrix C = diag( c) + e ∈
+
+Sym n(F2), with the S gates on the diagonal and the CZ adjacency off it. Writing RXq ∈ FK 
+
+> 2
+
+for column q of LX to denote the X-signature of qubit q, recording which logical Xi contain q, the reach map of V is 
+
+C(V ) := LX C L ⊤ 
+
+> X
+
+= X
+
+> q
+
+cq RXq (RXq )⊤ + X   
+
+> q<q ′:eqq ′=1
+
+ RXq (RXq′ )⊤ + RXq′ (RXq )⊤ ∈ Sym K (F2). (19) 
+
+Lemma 6 (Action of a diagonal layer) . A diagonal 2-local layer V with physical C-matrix C fixes every Z operator and sends Xa 7 → XaZCa for all a ∈ Fn 
+
+> 2
+
+. These layers have the following properties: (i) (CSS preservation, projective.) V preserves the stabilizer group up to Pauli signs if and only if C a ∈ SZ for every a ∈ SX , i.e. C S X ⊆ SZ ; the Z-stabilizers are fixed automatically. This binary support condition is 
+
+necessary but not sufficient for exact +1 -codespace preservation: a diagonal layer carries the exact phase 
+
+V X aV † = iP   
+
+> qcqaq
+
+(−1) P    
+
+> q<q ′eqq ′aqaq′
+
+XaZCa ,
+
+so exact preservation additionally requires this phase to equal +1 on every a ∈ SX (e.g. S ⊗ S on the CSS code 
+
+⟨XX, ZZ ⟩ satisfies C S X ⊆ SZ yet sends XX 7 → − XX ZZ ). The phase is +1 for all explicit constructions in this work. (ii) (Logical action.) If V is CSS-preserving, its logical symplectic is 
+
+ IK 0  
+
+> C(V)IK
+
+
+
+: it fixes every Zi and sends Xi 7 →
+
+Xi
+
+Q 
+
+> j
+
+Z C(V )ji  
+
+> j
+
+. In particular V = S i ⇐⇒ C(V ) = Eii , and V = CZ ij ⇐⇒ C(V ) = Eij + Eji .Proof. Every gate is diagonal in the Z basis, so V Z bV † = Zb. The single-gate rules Sq Xq S† 
+
+> q
+
+= Xq Zq and 
+
+CZ q,q ′ Xq CZ q,q ′ = Xq Zq′ multiply over the layer to V X q V † = Xq ZCe q , with C = diag( c) + e symmetric, so we have V X aV † = XaZCa .(i) For a ∈ SX the operator Xa is already a stabilizer, so XaZCa is a stabilizer projectively (up to sign) iff ZCa is also a stabilizer up to sign. Exact +1 preservation further requires the diagonal-layer phase be trivial on a.(ii) When C S X ⊆ SZ , V normalizes the stabilizer group and is therefore a logical Clifford. Acting on the logical 
+
+Xi with representative ℓi (row i of LX ) gives V X iV † = XiZCℓ i . The Zj -content of the Z-string Cℓ i is its symplectic pairing with Xj , namely ℓj · (Cℓ i) = ( LX CL ⊤ 
+
+> X
+
+)ji = C(V )ji , where we used LX L⊤ 
+
+> Z
+
+= IK so that Xj reads off exactly the Zj -coefficient. The identifications follow from S i : Xi 7 → XiZi and CZ ij : Xi 7 → XiZj , Xj 7 → Xj Zi. The reach-map identity C(V ) = LX CL ⊤ 
+
+> X
+
+= P 
+
+> q
+
+cq RXq (RXq )⊤ + P 
+
+> q<q ′
+
+eqq ′ (RXq (RXq′ )⊤ + RXq′ (RXq )⊤) is the expansion of 
+
+LX CL ⊤ 
+
+> X
+
+into the diagonal ( cq ) and off-diagonal ( eqq ′ ) entries of C, since RXq = LX eq .With the diagonal layer action tool we now prove Theorem 1: that the construction has the right logical action, preserves the codespace, and has good circuit distance. 
+
+Proof of Theorem 1. Let V be the circuit shown in Construction 1. It is a diagonal 2-local layer with cq = 1 on the d
+
+phase qubits of (i) and eqq ′ = 1 on the rotated pairs of (ii). We apply Lemma 6. 
+
+Logical action. The rotated surface code has K = 1, so each X-signature RXq ∈ F12 is simply 1 if qubit q lies on the logical-X representative X and 0 otherwise. In the reach map, every off-diagonal term is RXq (RXq′ )⊤ + RXq′ (RXq )⊤ =2 RXq RXq′ = 0 over F2, so the CZ gates contribute nothing to the logical action, and 
+
+C(V ) = X
+
+> q
+
+cq RXq = # {phase gates lying on X} (mod 2) .
+
+The phase qubits are the diagonal ( r, r ) with 0 ≤ r ≤ d − 2 and the qubit ( d − 2, d − 1). Of these, the only one on the left column X = {(r, 0) } is the corner (0 , 0). Hence C(V ) = 1, and by Lemma 6(ii) V realizes S exactly. 
+
+CSS preservation. By Lemma 6(i) it suffices that C a ∈ SZ for every X-stabilizer. We use the standard [[ d2, 1, d ]] rotated-surface layout in which checks are indexed by a dual vertex (i, j ) centered at ( i − 12 , j − 12 ), touching the in-range data qubits among {(i−1, j −1) , (i−1, j ), (i, j −1) , (i, j )}: an X-stabilizer a(i,j ) sits at every ( i, j ) with i + j
+
+even, 0 ≤ i ≤ d and 1 ≤ j ≤ d − 1 (weight 4 in the bulk, weight 2 on the top/bottom rows i ∈ { 0, d }), and a 
+
+Z-plaquette Z(i,j ) at every ( i, j ) with i + j odd, 1 ≤ i ≤ d − 1 and 0 ≤ j ≤ d (weight 4 in the bulk, weight 2 on the left/right columns j ∈ { 0, d }); the left/right boundaries are X-rough, terminating the vertical X = {(r, 0) }, and the top/bottom are Z-rough, terminating the horizontal Z = {(0 , c )}. Using the closed forms of Construction 1, we have 29 the phase set ( r, c ) ∈ P ⇔ (r=c ≤ d−2) or ( r, c )=( d−2, d −1), and CZ -partner π(r, c ) = ( c, r +1) for c ≤ r ≤ d−2 and 
+
+π(r, c ) = ( c−1, r ) for r < c ≤ d−1. So the byproduct of each X-stabilizer is, exactly (pointwise over F2), 
+
+C a (i,j ) =
+
+
+
+Z(j−1, i ), i < j, Z(j, i +1) , i ≥ j, (i, j )̸ = ( d−1, d −1) , i ̸ = d, 
+
+0, (i, j ) = ( d − 1, d − 1) or i = d, 
+
+Each nonzero byproduct is a single Z-plaquette: the diagonal reflection ( i, j ) 7 → (j, i ), with the first coordinate decremented when i < j and the second incremented when i ≥ j (at i = j these agree, Z(j,i +1) = Z(i,j +1) ). For 
+
+d ≥ 5 the case i ≥ j supplies the weight-2 right-boundary plaquettes Z(j,d ) at i = d − 1, so no separate boundary case is needed. The two vanishing cases are genuinely 0: the bottom-row X-stabilizers i = d meet no phase qubit or 
+
+CZ -partner, and at the corner ( d−1, d −1) the two diagonal phase byproducts cancel through their mutual CZ . With the index range stated above ( i + j even, 0 ≤ i ≤ d, 1 ≤ j ≤ d − 1, so the corner (0 , 0) is a Z- not an X-vertex), these cases are mutually exclusive and exhaustive, and form a genuine partition of the X-stabilizers carrying no d-specific dependence, so C a ∈ SZ throughout and V preserves the codespace for all odd d ≥ 3. The exact phase of Lemma 6(i) is +1 on every X-stabilizer: the diagonal checks (including the corner ( d−1, d −1)) contain exactly two phase qubits and one CZ pair internal to their support, contributing i2 · (−1) = +1, and every other check contains neither. 
+
+Distance preservation. Since C a ∈ SZ for every X-stabilizer and V fixes every Z, we have V SV † = S exactly: V
+
+is a code automorphism , so the conjugated code equals Q and its static distance is exactly d for every odd d. For fault tolerance the relevant notion is the circuit-fault distance, so we analyze this here as well. Each gate fixes Z
+
+and spreads X to weight ≤ 2, and no single gate fault is undetectable as every S- or CZ -byproduct anticommutes with some X-stabilizer. The top-row Z representative is aligned with the logical operator representative, which meets exactly one CZ pair {(0 , 0) , (0 , 1) }. A single CZ fault there covers two of its d qubits, while the remaining d − 2each require a separate fault, giving dcirc ≤ d − 1. For the matching lower bound, an undetectable fault pattern on f gate or idle locations produces a nontrivial logical Pauli E whose support is covered by those locations, so 
+
+f ≥ wt( E) − P (E) with P (E) the number of CZ pairs contained in the support of E; since the pairs are disjoint, 
+
+f ≥ wt( E)/2 ≥ ⌈ d/ 2⌉ unconditionally, so the gadget is single-fault-tolerant for every d ≥ 5. The exact value is governed by P (E). A minimum-weight Z-class representative meets every column exactly once and changes row by at most one per column (else some X-check would overlap it oddly), so the quantity row-plus-column is nondecreasing along it, growing by at most two per column; a contained pair {(c, r ), (r, c + 1) } pins this quantity to c + r at column 
+
+r and to c + r + 1 at column c + 1. Two contained pairs are incompatible with these pins: disjoint column intervals would require the impossible growth ( c1 − r1) + ( c2 − r2) ≤ − 1, and overlapping intervals contradict either the pins or the parity rule selecting which unit steps the checks allow. Hence P (E) ≤ 1 on minimum-weight Z representatives. A minimum-weight X-class representative meets every row exactly once, and the same pinning runs against the monotone direction, so P (E) = 0 there. For the remaining cases (the mixed class and non-minimal representatives) we verify f ≥ d − 1 exhaustively for d = 3 , 5, giving dcirc = d − 1 there and dcirc ∈ [⌈d/ 2⌉, d − 1] in general. Thus V
+
+preserves the code distance as an automorphism for every odd d, and is single-fault-tolerant for d ≥ 5. 
+
+Proof of Theorem 2. Let V be the circuit shown in Construction 2. It is a diagonal 2-local layer (Def. 8), and we apply Lemma 6. The code has K = 2 with chosen representatives X0 = {h(r, 0) }r (column-0 horizontal edges) and 
+
+X1 = {v(0 , c )}c (row-0 vertical edges), so the X-signatures are 
+
+RXh(r, 0) = (1 , 0) ⊤, RXv(0 ,c ) = (0 , 1) ⊤, RXq = 0 otherwise. The target is the logical controlled-Z, C(V ) = E01 + E10 (Lemma 6). We sum the reach map of Def. 8 over the gate families of Construction 2. 
+
+Row-0 pairs h(0 , c ) ↔ v(0 , c ). Here RXv(0 ,c ) = (0 , 1) ⊤ for every c, while RXh(0 ,c ) = (1 , 0) ⊤ only for the corner c = 0 (which lies on X0) and is 0 otherwise. Hence only c = 0 contributes, giving E01 + E10 .
+
+Phase gates: row 0 on h(0 , c ), and inner row s = ⌈L/ 2⌉ on h(s, c ). A phase gate ( S† has the same C-matrix as 
+
+S) contributes the diagonal term RXq (RXq )⊤, nonzero only on the column-0 qubits h(0 , 0) and h(s, 0), each equal to (1 , 0)(1 , 0) ⊤ = E00 . The two families therefore contribute E00 + E00 = 0. 
+
+Cross pairs (tiers r = 1 , . . . , ⌊(L − 1) /2⌋) and, for even L, the middle-row pairs. Every endpoint lies in a row ≥ 1, hence off X1; and whenever one endpoint is a column-0 horizontal edge h(r, 0) ∈ X0, its partner has RX = 0. Each such pair contributes 0. Summing, C(V ) = ( E01 + E10 ) + 0 + 0 = E01 + E10 , so by Lemma 6(ii) V realizes the logical CZ 0,1 exactly. The construction is now transparent: the corner pair supplies the off-diagonal coupling, the two equal phase-gate families cancel the spurious diagonal S 0 that each would otherwise induce, and the cross- and middle-row pairs are logically inert. 30 
+
+CSS preservation. By Lemma 6(i) it suffices that C A ∈ SZ for every X-star A (the weight-4 X-stabilizers); we show the stronger fact that V sends each star to a single Z-plaquette. Write Ar,c for the star at vertex ( r, c ) and Br,c for the Z-plaquette. Each of the four edges of Ar,c is touched by at most one CZ (the off-diagonal support is a matching) and, on the two phase rows, possibly also by a diagonal S; the byproduct C A r,c collects both contributions. The cross-tier pairing reflects the row r 7 → (−r) mod L; the skewed family h(a, c ) ↔ v(b, (c+1) mod L) and the aligned family v(a, c ) ↔ h(b, c ) fix the plaquette column up to a shift of 0 or −1. The row-0 and inner-row ( s = ⌈L/ 2⌉) phase gates supply the two horizontal edges that complete the otherwise-broken plaquette on the two extremal reflected rows, the same cancellation that, at the logical level, kills the spurious S 0. (For even L the middle-row self-pair handles the fixed row L/ 2 with no column shift.) Tracing these, the byproduct is exactly one plaquette, 
+
+C A r,c = Br′,c ′ ∈ SZ , r′ = ( −r) mod L, c′ ∈ { c, c − 1} (mod L),
+
+the column shift being −1 exactly when the reflected row r′ lies in the first half {0, . . . , ⌊(L−1) /2⌋} . The row reflection 
+
+r 7 → r′ is a bijection of rows, and for each image row the column map c 7 → c′ is a bijection of ZL; hence Ar,c 7 → Br′,c ′
+
+is a bijection of the L2 stabilizers, C S X = SZ exactly, and the layer is CSS-preserving for every L ≥ 3. 
+
+Phases. By the exact phase of Lemma 6(i), with an S† contributing −i per supported qubit where an S contributes 
+
+i, a star on the row-0 (inner) phase row contains exactly two S (S†) qubits and one CZ pair internal to its support, contributing i2 · (−1) = +1 (( −i)2 · (−1) = +1); every other star contains neither, so the phase is +1 throughout and the stabilizer group is preserved exactly. The logical signs are exact as well: the representative of X0 meets one S (at 
+
+h(0 , 0)) and one S† (at h(s, 0)), contributing i · (−i) = +1, while X1 meets no phase gate and no internal pair. With 
+
+S on both phase rows the layer would instead realize CZ 0,1 · Z0, the same symplectic element; the S† row removes the logical Pauli byproduct. 
+
+A. The Core Codes and their Logical ISA 
+
+Throughout this subsection each listed layer realizes its stated generator at the symplectic level with exact +1 stabilizer signs; logical Pauli byproducts (e.g. S versus S †) may remain and are tracked in the Pauli frame. 
+
+Construction 3 ([[4 , 2, 2]] depth-1 logical-Clifford basis ISA) . With HX = HZ = (1 1 1 1) and canonical logicals 
+
+X0 = X0X1, X1 = X0X2, Z0 = Z0Z2, Z1 = Z0Z1, the generators are the single CSP 2-local layers S0 : S0S2, CZ 0,2; S1 : S0S1, CZ 0,1; CZ 0,1 : CZ 0,1, CZ 2,3;SHS 0 : √X0
+
+√X1, CZ ♯
+
+> 0,1
+
+; SHS 1 : √X0
+
+√X2, CZ ♯
+
+> 0,2
+
+;together with the logical SWAP = π with π = (1 2), and the H = π · H⊗4 (depth 2). 
+
+Construction 4 ([[20 , 2, 6]] depth-1 logical-Clifford basis ISA, G = AGL(1 , 5)) . The self-dual core CSS( C, C ) with 
+
+c = {0, 1, 2, 4, 6, 7, 10 , 16 } ∈ F2[Z5 ⋊Z 4] (elements ( a, b ) : x 7 → ax + b indexed 4 b + j with a = 2 j mod 5; M (c)g,h =1 iff gh −1 ∈ c; HX = HZ = H, the 9 × 20 full-rank row basis of rowspan M (c)) and canonical logicals LX =( 1 0 1 0 0 1 1 0 1 0 1 0 0 0 0 0 0 0 0 0 0 1 0 1 1 1 0 0 0 1 0 1 0 0 0 0 0 0 0 0 ), LZ = ( 0 1 0 1 1 1 0 0 0 1 0 1 0 0 0 0 0 0 0 0 1 0 1 0 0 1 1 0 1 0 1 0 0 0 0 0 0 0 0 0 ) carries every generator as a single depth-1 CSP 2-local layer (qubits 0-indexed): S0 : S{0,1,4,6,9,10 ,11 ,12 ,13 ,15 ,16 ,17 ,18 ,19 }, CZ 0,1CZ 4,6CZ 9,16 CZ 10 ,12 CZ 11 ,17 CZ 13 ,19 CZ 15 ,18 ;S1 : S{2,3,4,5,8,9,10 ,11 ,12 ,13 ,14 ,15 ,16 ,19 }, CZ 2,3CZ 4,5CZ 8,9CZ 10 ,15 CZ 11 ,12 CZ 13 ,14 CZ 16 ,19 ;CZ 0,1 : S{0,1,..., 19 } (transversal S, no CZ ); SHS 0 : √X{0,1,2,3,4,5,6,7,8,9,10 ,15 ,17 ,18 }, CZ ♯
+
+> 0,4
+
+CZ ♯
+
+> 1,18
+
+CZ ♯
+
+> 2,8
+
+CZ ♯
+
+> 3,9
+
+CZ ♯
+
+> 5,17
+
+CZ ♯
+
+> 6,15
+
+CZ ♯
+
+> 7,10
+
+;SHS 1 : √X{0,1,2,3,4,5,6,7,9,10 ,11 ,12 ,18 ,19 }, CZ ♯
+
+> 0,10
+
+CZ ♯
+
+> 1,5
+
+CZ ♯
+
+> 2,19
+
+CZ ♯
+
+> 3,9
+
+CZ ♯
+
+> 4,11
+
+CZ ♯
+
+> 6,18
+
+CZ ♯
+
+> 7,12
+
+.
+
+The H = π · H⊗20 is depth 2, with π the right translation by the group element ( a, b ) = (2 , 0), whose logical action is the swap. All five C/B -side generators are depth-1; with H they generate Sp(4 , F2). 
+
+Construction 5 ([[18 , 2, 5]] logical-Clifford basis ISA, G = D9). The self-dual core CSS( C, C ) with c = {0, 2, 5, 7, 11 , 12 , 13 , 17 } ∈ 
+
+F2[D9] (elements ordered r0, . . . , r 8, sr 0, . . . , sr 8 for D9 = ⟨r, s | r9 = s2 = 1 , srs = r−1⟩; M (c)g,h = 1 iff 
+
+h−1g ∈ c; HX = HZ = H, the 8 × 18 full-rank row basis of rowspan M (c)) and canonical logicals LX = LZ =31 ( 1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 1 0 0 1 1 0 1 0 1 0 0 0 0 0 0 0 0 ) carries CZ 0,1 as a single depth-1 CSP layer and S i (hence by the X ↔ Z mirror SHS i)as depth-2 sequences (qubits 0-indexed): CZ 0,1 : S{2,5,9,12 }, CZ 0,1CZ 3,4CZ 6,16 CZ 7,17 CZ 8,15 CZ 10 ,11 CZ 13 ,14 ;S0 : L1 : S{5,8,9,15 }, CZ 0,13 CZ 1,14 CZ 2,12 CZ 3,16 CZ 4,17 CZ 6,10 CZ 7,11 ;L2 : S{2,5,8,9,11 ,12 ,14 ,15 ,17 }, CZ 0,17 CZ 1,15 CZ 2,4CZ 3,14 CZ 5,16 CZ 6,11 CZ 7,9CZ 8,13 CZ 10 ,12 ;S1 : L1 : S{5,8,9,15 }, CZ 0,13 CZ 1,14 CZ 2,12 CZ 3,16 CZ 4,17 CZ 6,10 CZ 7,11 ;L2 : S{1,2,4,8,9,11 ,14 ,16 ,17 }, CZ 0,11 CZ 1,10 CZ 2,15 CZ 3,17 CZ 4,7CZ 5,8CZ 6,14 CZ 9,12 CZ 13 ,16 .
+
+Each L j is a codespace-preserving W ≤ 2 matching, and the composite realizes the diagonal target in Sp(4 , F2); the SHS i use the same patterns with S → √X, CZ → CZ ♯. An exhaustive SAT search over a complete encoding of the matching, CSS-preservation, and reach constraints of Definition 6 found no depth-one solution (UNSAT), so depth-two is optimal for these generators. The H is depth-1 on this core. The D9 core attains d = 5 at the cost of 
+
+≤ 2 layers per generator. 
+
+Proposition 9 (Cores carry Sp(4 , F2)) . Each of [[4 , 2, 2]] , [[18 , 2, 5]] (G = D9) and [[20 , 2, 6]] (G = AGL(1 , 5) )carries a complete logical Clifford basis ISA realizing Sp(4 , F2) (order 720 ). The ISAs of [[4 , 2, 2]] (Construction 3) and [[20 , 2, 6]] (Construction 4) are depth-1 (the H being depth 2); on [[18 , 2, 5]] (Construction 5) CZ 0,1 is depth-1 and the diagonal generators Si, SHS i use 2 layers (depth-1 is SAT-infeasible for them, so depth-2 is optimal). Proof. We verify the [[4 , 2, 2]] generator S 0 by Eq. (19); the rest follow by the same computation. The columns of 
+
+LX =   1 1 0 0 1 0 1 0 
+
+ are RX 
+
+> 0
+
+= (1 , 1) ⊤, RX 
+
+> 1
+
+= (1 , 0) ⊤, RX 
+
+> 2
+
+= (0 , 1) ⊤, RX 
+
+> 3
+
+= 0. The layer S0S2, CZ 0,2 has c0 = c2 = 1, 
+
+e0,2 = 1, so 
+
+C = RX 
+
+> 0
+
+(RX 
+
+> 0
+
+)⊤ + RX 
+
+> 2
+
+(RX 
+
+> 2
+
+)⊤ +  RX 
+
+> 0
+
+(RX 
+
+> 2
+
+)⊤ + RX 
+
+> 2
+
+(RX 
+
+> 0
+
+)⊤ = ( 1 1 1 1 ) + ( 0 0 0 1 ) + ( 0 1 1 0 ) = ( 1 0 0 0 ) = E00 ,
+
+the rank-1 target of S 0, and B = 0. Codespace preservation: conjugating the single X-stabilizer a = (1 1 1 1) produces the Z-string Ca with ( Ca )q = cq aq + P 
+
+> q′
+
+eqq ′ aq′ ; the S gates contribute Z0Z2 and CZ 0,2 contributes Z0Z2, summing to 0 ∈ SZ , while the Z-stabilizer is fixed by the diagonal layer. The diagonal-layer phase (Lemma 6) on a = (1 1 1 1) is i2(−1) 1 = +1, so the stabilizer group is preserved exactly (sign included). By self-duality the X ↔ Z mirror gives SHS 0 with B = E00 , and the seven generators close to Sp(4 , F2). For [[18 , 2, 5]] and [[20 , 2, 6]] (Constructions 5,4; Figs. 7,6) the layer sequences are validated mechanically in the same fashion. 32 q0 
+
+q1 
+
+q2 
+
+q3 
+
+# S0 (depth 1) 
+
+# S
+
+# S
+
+q0 
+
+q1 
+
+q2 
+
+q3 
+
+# S1 (depth 1) 
+
+# S
+
+# S
+
+q0 
+
+q1 
+
+q2 
+
+q3 
+
+# CZ 01 (depth 1) 
+
+q0 
+
+q1 
+
+q2 
+
+q3 
+
+# SHS 0 (depth 1) 
+
+X
+
+X
+
+q0 
+
+q1 
+
+q2 
+
+q3 
+
+# SHS 1 (depth 1) 
+
+X
+
+X
+
+q0 
+
+q1 
+
+q2 
+
+q3 
+
+# SWAP (depth 1)  
+
+> L1 L2
+
+q0 
+
+q1 
+
+q2 
+
+q3 
+
+# H-fold (depth 2) 
+
+# H
+
+# H
+
+# H
+
+# H
+
+# [[4, 2, 2]] depth-1 logical-Clifford ISA 
+
+FIG. 5. Complete logical-Clifford basis ISA of the [[4 , 2, 2]] core (Construction 3), with green S boxes and CZ connectors, hollow-green √X (= SHS ) and dual CZ ♯, qubit permutations as crossing wires. Every S i, CZ i,j , SHS i is a single codespace-preserving W ≤ 2 layer (depth 1); the H is a routing permutation followed by transversal H (depth 2). 33 q0 
+
+> q1
+> q2
+> q3
+> q4
+> q5
+> q6
+> q7
+> q8
+> q9
+> q10
+> q11
+> q12
+> q13
+> q14
+> q15
+> q16
+> q17
+> q18
+> q19
+
+S0 (depth 1) 
+
+> S
+> S
+> S
+> S
+> S
+> S
+> S
+> S
+> S
+> S
+> S
+> S
+> S
+> S
+> q0
+> q1
+> q2
+> q3
+> q4
+> q5
+> q6
+> q7
+> q8
+> q9
+> q10
+> q11
+> q12
+> q13
+> q14
+> q15
+> q16
+> q17
+> q18
+> q19
+
+S1 (depth 1) 
+
+> S
+> S
+> S
+> S
+> S
+> S
+> S
+> S
+> S
+> S
+> S
+> S
+> S
+> S
+> q0
+> q1
+> q2
+> q3
+> q4
+> q5
+> q6
+> q7
+> q8
+> q9
+> q10
+> q11
+> q12
+> q13
+> q14
+> q15
+> q16
+> q17
+> q18
+> q19
+
+CZ 0, 1 (depth 1) 
+
+> S
+> S
+> S
+> S
+> S
+> S
+> S
+> S
+> S
+> S
+> S
+> S
+> S
+> S
+> S
+> S
+> S
+> S
+> S
+> S
+
+[[20,2,6]] (AGL(1,5)): single-layer C-side generators 
+
+FIG. 6. Single-layer (depth-1) C-side generators of the [[20 , 2, 6]] core ( G = AGL(1 , 5)): S 0, S 1, CZ 0,1. Each is one codespace-preserving W ≤ 2 matching of S gates and CZ pairs (shaded band); the SHS i are the X-duals. Same palette as Fig. 5. L1 L2 
+
+> q0
+> q1
+> q2
+> q3
+> q4
+> q5
+> q6
+> q7
+> q8
+> q9
+> q10
+> q11
+> q12
+> q13
+> q14
+> q15
+> q16
+> q17
+
+S0 (depth 2) 
+
+S
+
+S
+
+S
+
+S
+
+S
+
+S
+
+S
+
+S
+
+S
+
+S
+
+S
+
+S
+
+S 
+
+> L1 L2
+> q0
+> q1
+> q2
+> q3
+> q4
+> q5
+> q6
+> q7
+> q8
+> q9
+> q10
+> q11
+> q12
+> q13
+> q14
+> q15
+> q16
+> q17
+
+S1 (depth 2) 
+
+S
+
+S
+
+S
+
+S
+
+S
+
+S
+
+S
+
+S
+
+S
+
+S
+
+S
+
+S
+
+S
+
+[[18, 2, 5]] (D9): multi-layer Si (shaded = one CSP layer) 
+
+FIG. 7. Multi-layer S 0 and S 1 (each depth 2) of the [[18 , 2, 5]] core ( G = D9). Each shaded band L j is one codespace-preserving 
+
+W ≤ 2 layer; the composition realizes the diagonal target in Sp(4 , F2). The D9 core attains d = 5 at the cost of ≤ 2 layers per generator (vs. depth-1 for [[4 , 2, 2]] and [[20 , 2, 6]]). 34 q0 
+
+> q1
+> q2
+> q3
+> q4
+> q5
+> q6
+> q7
+> q8
+> q9
+> q10
+> q11
+> q12
+> q13
+> q14
+> q15
+> q16
+> q17
+> q18
+> q19
+> q20
+> q21
+> q22
+> q23
+> q24
+> q25
+> q26
+> q27
+
+[[28, 2, 6]] = [[4, 2, 2]] Steane: S0 (depth 1) 
+
+S
+
+S
+
+S
+
+S
+
+S
+
+S
+
+S
+
+S
+
+S
+
+S
+
+S
+
+S
+
+S
+
+S
+
+shaded bands = Steane blocks of 7; blocks 0 and 2 carry transversal S, joined by 7 transversal CZ 
+
+FIG. 8. The lifted S 0 on [[28 , 2, 6]] = [[4 , 2, 2]] ◦Steane as a single depth-1 codespace-preserving layer. Shaded bands are [[7 , 1, 3]] blocks of seven qubits; blocks 0 and 2 carry transversal S (the lift of S0S2), joined by seven transversal CZ (the lift of CZ 0,2), exactly as in Fig. 5’s S 0 but with the distance raised from 2 to 6.

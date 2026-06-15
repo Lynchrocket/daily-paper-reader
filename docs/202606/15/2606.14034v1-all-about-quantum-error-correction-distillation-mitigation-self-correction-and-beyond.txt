@@ -1,0 +1,254 @@
+Title: All about quantum error correction: distillation, mitigation, self-correction and beyond
+
+URL Source: https://arxiv.org/pdf/2606.14034v1
+
+Published Time: Mon, 15 Jun 2026 00:23:29 GMT
+
+Number of Pages: 10
+
+Markdown Content:
+# All about quantum error correction: distillation, mitigation, self-correction and beyond 
+
+Dong-Sheng Wang 
+
+Institute of Theoretical Physics, Chinese Academy of Sciences, Beijing 100190, China School of Physical Sciences, University of Chinese Academy of Sciences, Beijing 100049, China 
+
+(Dated: June 15, 2026) In this work, it is shown that many quantum error-manipulating techniques, such as distillation, error mitigation, and dynamical decoupling, are special cases of the most general framework for quantum error correction. This unifying perspective is achieved by extending quantum error correc-tion to include state-adaptive and channel-adaptive settings, as well as multi-stage coding scenarios. Based on this insight, a model of self-correcting quantum memory is also proposed. This work clarifies the relationship among these techniques and illustrates, through explicit constructions, how the unified perspective can guide the design of reliable quantum information systems. 
+
+I. INTRODUCTION 
+
+As quantum information is inherently fragile, quan-tum error correction (QEC) is indispensable for any large-scale quantum information processor [1]. The stan-dard QEC framework exhibits several key features: it is composable, meaning that error-correction cycles can be freely interleaved with logical gates; it applies uni-versally across different modalities of quantum informa-tion processing, including computing, communication, and metrology; and it is, in principle, efficient, or at least effective in practice, in order to be useful. Most importantly, QEC is the central part of quantum Shan-non theory for information protection [2–4]. Despite this generality, a variety of other error-manipulating techniques, such as state distillation, error mitigation, and dynamical decoupling, have been devel-oped largely in parallel with QEC [5]. These methods are often motivated by near-term constraints and are typ-ically not framed as instances of QEC, partly because their focus is not on constructing a good code or an op-timal decoder. However, this fragmentation of the field tends to obscure the fundamental principle underlying all such protocols. In this work, we adopt a unifying per-spective grounded in quantum Shannon theory and show that QEC, in its most general formulation, serves as the underlying language for all these tasks. Specifically, we demonstrate that distillation, error mitigation, and dy-namical decoupling can each be understood as special cases of state-adaptive or channel-adaptive QEC. Although standard QEC is asymptotically efficient, the overhead required for fault-tolerant implementation can be prohibitive for near-term devices [6]. Consequently, several relaxed forms of QEC have been proposed that scale less favorably but can still be effective in practice [7– 10]. Understanding these practical variations within the unified QEC framework is one of the central goals of this paper, as it provides a systematic way to assess their resource trade-offs and design principles. This paper is organized as follows. In Sec. II, we re-view the framework of quantum error correction, em-phasizing its state-adaptive and channel-adaptive exten-sions as well as the Petz recovery map [11] as a uni-versal decoder. Section III then recasts several well-known quantum techniques including state distillation, stabilizer codes, passive Hamiltonian protection, and er-ror mitigation as special cases of QEC, thereby demon-strating the breadth of the unifying perspective. Sec-tion IV develops a concrete model of self-correcting quan-tum memory based on state-adaptive repetition codes and AKLT-type systems [12]. Finally, Sec. V concludes with a summary and an outlook on future directions. 
+
+II. QUANTUM ERROR CORRECTION 
+
+In this section, we present the theoretical framework of quantum error correction (QEC). A seminal result is that for a logical space that carries the quantum information, called a QEC code which is specified by a projector P , a set of error operators {Ei} acting on it is correctable iff the following condition is satisfied 
+
+P E † 
+
+> i
+
+Ej P = cij P. (1) Meanwhile, the set {E† 
+
+> i
+
+Ej } is said to be detectable [1]. If one chooses an orthonormal basis {| ψa⟩} for the code space, the condition above reads 
+
+⟨ψa|E† 
+
+> i
+
+Ej |ψb⟩ = cij δab . (2) 
+
+> arXiv:2606.14034v1 [quant-ph] 12 Jun 2026
+
+2It means the operators E† 
+
+> i
+
+Ej do not carry any informa-tion of a state |ψa⟩. An operator that is not detectable will make a logical action on the code, and the logical action may not be unitary. By definition, a unitary op-erator U is a logical gate iff [ U, P ] = 0. How to detect a set of errors? It is from the QEC con-ditions above. A detection scheme can be constructed as the measurement with P and its complement Q = 1 − P .If the code starts from a logical state ρ, disturbed by some error E or not, this can be detected: if an error oc-curs, there will be some probabilities to realize Q, if not, 
+
+P occurs with unit probability. This basically reveals the direct-sum division of the whole Hilbert space H = C ⊕C ′
+
+into the code space C and the ‘syndrome’ space C′. Any leakage into C′ makes an error detectable. For error correction, the operation is more involved. A basic scheme starts from the diagonalization of the condition (1) as 
+
+P F † 
+
+> k
+
+FlP = δkl dkP, (3) for dk as the eigenvalues of the matrix [ cij ], which is in-terpreted as the state of the environment that induces the errors. Then a recovery channel D is constructed includ-ing the operators Rk = 1√dk
+
+P F † 
+
+> k
+
+: given the error set {Fl},which represents the same map as {Ei}, the recovery can restore the original state with probability p = P 
+
+> k
+
+dk. It is 1 if the set {Ei} is a channel, namely, completely pos-itive and trace preserving [13]. Closer analysis reveals that the effective action of a correctable error is unitary 
+
+> 1√dk
+
+P F † 
+
+> k
+
+= P U † 
+
+> k
+
+, and they are orthogonal 
+
+P U † 
+
+> k
+
+UlP = δkl P. (4) However, the unitary operators Uk may not be local any-more even if Ei are.  
+
+> A. State-adaptive QEC
+
+If the protected state is known, a state-adaptive (SA) scenario is possible [14]. Here we briefly recall its impli-cation for error detection and correction. For error de-tection, if an initial state is known, say a pure state |ψ⟩,then a more fine-grained measurement can be used which is a projective measurement including |ψ⟩: any non-zero probability on states other than |ψ⟩ indicates an error or even a logical gate, the latter would constrain the proba-bility within the code space C. For error correction, one also replaces the projector P by the more fine-grained projectors Pa for each basis state |ψa⟩, and the recovery operators are Rak = PaU † 
+
+> k
+
+instead of Rk. This would be modified if approximation is inevitable. A primary feature of the state-adaptive setting is that the recovery operation becomes inherently nonlinear, as it depends explicitly on the initial state. This nonlin-earity is not a drawback; it arises naturally in many quantum information processing scenarios. For instance, in quantum computing one often starts from a known state and applies a predetermined sequence of gates, a task best understood as state generation. Although the knowledge of the state may not always be easy to exploit, admitting this dependence allows us to encompass state distillation and other protocols within the framework of state-adaptive QEC.  
+
+> B. Channel-adaptive QEC
+
+Besides the linear condition of the input state, there is also a linear condition of the error set, usually known as the linear Kraus-span (LKS) property [13]. It is clear to see from the condition (1) any other set of operators with each as a linear combination of Ei also satisfies the condi-tion. For instance, one often considers local on-site Pauli errors on physical qubits, and if they are correctable, then any other form of on-site errors is also correctable. The seminal Shannon theory for error correction is channel-adaptive, however [2–4]. This would violate the LKS property. On the other hand, the benefit is also ap-parent: it can enhance the error-correction performance. This also naturally leads to approximate QEC which fits into practical settings. Namely, some errors cannot be corrected, and the exact condition (1) is normally satis-fied only approximately. Using superchannel [15, 16], a QEC task can be de-fined as a superchannel ˆS acting on n parallel action of a channel Φ so that 
+
+F (ω⊗k, ( ˆS(Φ ⊗n) ⊗ 1⊗k)( ω⊗k)) ≥ 1 − ϵ, (5) with ϵ ∈ [0 , 1] and the state fidelity function between ebits ω⊗k (Bell states) and the Choi state of ˆS(Φ ⊗n) [17], for F (ρ, σ ) := ∥√ρ√σ∥21, with ∥ · ∥ 1 denoting the trace norm. In order to make a code useful, one has to re-quire ϵ to be as small as possible, and such approximate code is called ‘quasi-exact’ code [7]. The supremum of all achievable coding rate α := k/n is known as the quan-3tum capacity of the channel. Many types are possible by considering different types of coding ˆS and even the fidelity function [2–4]. A central result is that in this setting a near-optimal universal recovery scheme is the Petz map [3, 11, 18–20]. It also includes the exact setting above as a special case. Given a channel Φ with its Kraus operators Ki, and also a state σ, the standard Petz map Pσ, Φ is defined by a set of Kraus operators 
+
+Ri = σ1/2K† 
+
+> i
+
+Σ, (6) for Σ := Φ( σ)−1/2, so that Pσ, Φ can be the optimal re-covery on Φ( ρ). The map itself is not trace preserving but it indeed is on the support of Φ( ρ). Special forms of it are often used in error correc-tion, including the pretty-good measurement and trans-pose channel which uses a code projector P instead of 
+
+σ for its Kraus operators [18, 19]. Actually, the Petz map Pρ, Φ can fully recover a known input state ρ with 
+
+Pρ, ΦΦ( ρ) = ρ, and this has been used to define the SA quantum channel capacity [14].  
+
+> C. Multi-stage QEC
+
+The noise channel may not occur in parallel, and this scenario can be described by the quantum comb frame-work, which is an extension of superchannel [15]. By abuse of notation, denote such usage of channels amor-tized in spacetime as Φ n and the coding comb still as ˆS,and then the fidelity condition becomes 
+
+F (ω⊗k, ( ˆS(Φ n) ⊗ 1⊗k)( ω⊗k)) ≥ 1 − ϵ. (7) It is largely unknown how this can be used for better QEC, however. It turns out the early strategy of dynamical decou-pling (DD) [21] can be viewed as a special case of this. Namely, the corrected noises are just Pauli errors, and the ‘comb’ is formed by unitary operators on the system itself induced by external control field. As no spatial overhead is used, the efficiency of DD is also seriously constrained. Improved DD with error-correction codes has also be studied [5]. Quantum comb has found applications in other tasks such as channel discrimination and estimation [22]. These tasks also relate to QEC. For instance, the swap-test [23] can discriminate between states, and it is re-cently found that it can also be used for QEC [24, 25], as we will see in Sec. IV.  
+
+> III. SPECIAL CASES OF QEC
+
+In this section, some special cases of QEC are studied. In order to properly interpret them, we first use quan-tum resource theory (QRT) to sharpen the framework of QEC, hence also quantum Shannon theory. Briefly, a QRT divides a set of objects into a free set F and a re-source set R, and F is defined by free operations O that preserve it [26]. A QRT framework for QEC has been developed recently [16] by considering the set of coding superchannels, with a channel capacity as the maximal resource measure of a code. Resourceful codings are those that can increase the coding fidelity (5). Codings act on channels, and a level lower is the QRT of channels, which further act on states. An example is to consider local operations with clsssical communication (LOCC) as the free set, and any entanglement-generating channel becomes resourceful. For resources of states, a seminal example is entanglement, with separable states as the free set and LOCC as free operations, and the resource is entanglement [27]. A primary task in a QRT is the resource preparation task. For QEC, this becomes logical state preparation. While in literature QEC is often viewed as the channel distillation of 1⊗k from Φ ⊗n by free operations [28, 29]. It is easy to see the two point of views are actually equiv-alent. As coding acts on channels, a resourceful code can be viewed as the yield of a free code acting on a resource-ful channel. Similarly, a resourceful state can be viewed as the yield of a free channel acting on a resource state. Therefore, a resource generation task can be viewed as a resource conversion task on a lower level, and vice versa. The resource distillation is a seminal example of resource conversion. Below we analyze a few examples of QEC. One is the usual state distillation task, and the goal is to make clear that it aligns with the SA QEC; and the second is the QEC with stabilizer codes, and the goal is to show that the way we use stabilizer codes is only part of the whole paradigm of QEC. It also includes passive QEC with Hamiltonian protection, which is relatively less explored and relates to self-correcting quantum memory. Finally, we show that error mitigation is a special case of QEC. 4 
+
+> A. State distillation
+
+A seminal example is entanglement distillation which is to distill ebits from copies of a state 
+
+ρ⊗n → ω⊗k, (8) only allowing free LOCC. The rate r = k/n is known as the distillation rate [30, 31]. Another example is magic-state distillation [32] which is to distill ‘mabit’ 
+
+|t⟩ = T H |0⟩ from copies of a state with Clifford oper-ations [33]. It is well known that QEC codes can be used for state distillation, and it is easy to see these are SA QEC. There is no channel in the usual distillation task, yet a state ρ
+
+can be viewed as the output from a channel Φ acting on a fiducial state. For a known state, multiple copies of it can be prepared as a semi-classical repetition code, which is impossible if the state is unknown, consistent with the no-cloning theorem. The usage of copies of states is also widely used in other tasks such as error mitigation and tomography [13].  
+
+> B. Stabilizer codes
+
+An important class of QEC codes is the class of stabi-lizer codes [13, 34], and due to its success, it is somehow often viewed as the synonym of QEC codes. A stabi-lizer code is defined by a set of commuting stabilizers, which can be used for the encoding and decoding of the code. It can also be slightly extended to subsystem codes with non-commuting gauge operators, but still commut-ing stabilizers [35]. Often qubit stabilizer codes are em-ployed with each stabilizer as a tensor-product of Pauli operators and only with eigenvalues ±1. Stabilizer codes are often designed as exact codes for Pauli errors. Given stabilizers Si, the QEC with a stabi-lizer code often uses projective measurements 
+
+Pi = ( 1 ± Si)/2. (9) A Pauli error can only commute or anti-commute with a stabilizer, so that a correction operator PiUk from (4) becomes UkPj , wherein a stabilizer projector Pj can be performed first, and then a Pauli correction Uk is ap-plied. For error detection, one can simply measure some stabilizers without applying Pauli correction. Stabilizers are often local, making then easy to be measured. Stabilizer codes used as above are neither state adap-tive, nor channel adaptive. However, they still can be used in these ways. If a codeword is known to be a sta-bilizer state, stabilizers of it can be used to correct more errors than merely using the stabilizers of the code [14]. One can also consider the correction of other errors with stabilizer codes, for instance erasure errors and ampli-tude damping channels [13]. It is often easier to correct erasure errors than Pauli errors, and correcting two era-sures is equivalent to correcting one Pauli error [36, 37]. In the condition (1), the matrix [ cij ] needs to be diago-nalized, and the effective operators Fk may not be local anymore. This is the case for amplitude damping. Away to avoid the nonlocal correction is to first use the encoding |0⟩ = |01 ⟩, |1⟩ = |10 ⟩, which converts ampli-tude damping into erasure [14], and then use a stabilizer code to correct erasure. Other types of codes are also known to correct them such as the permutation-invariant codes [38].  
+
+> C. Passive protection
+
+A code can be viewed as the ground subspace of a quantum Hamiltonian. The seminal example is Kitaev’s toric code [39], which can be viewed as a code with active QEC, or a ground-space code. The passive protection is due to the finite gap to excited states, and cooling the system effectively realizes QEC. As a ground subspace, the encoding can use the uni-versal feature of a phase of matter. Namely, for a param-eterized model H(λ), a gapped phase of matter could exist for some values of λ. The topological codes (includ-ing the toric code) and symmetry-protected topological (SPT) codes are such examples [40]. The code space C
+
+contains a ‘gauge’ part that specifies a particular state and a logical part that is universal for a phase. The gauge part does not matter for the logical actions. The QEC condition (1) now reads as a correlation func-tion. The correction can be described as the cooling e−βH 
+
+together with thermal jump operators for very low tem-perature 1 /β [41]. The temperature controls the average number of excitations, i.e. errors, and by maintaining a low temperature, there is no need to annihilate them all. However, logical gates could create more excitations as they do not commute in general. Therefore, cooling is necessary between logical gates to maintain a small number of excitations. 5 
+
+> D. Error mitigation
+
+Quantum error mitigation (QEM) has been developed recently as an effective set of techniques to reduce errors, and can also be combined with QEC codes [8, 42]. In this section, we will show that QEM, in the most general sense of it, is a special type of QEC, just as other examples shown above. Instead of operators, QEM focuses on classical values, namely, expectation value of observable. This violates the composability of usual QEC since a state after mea-surement cannot be used further. Yet, mathematically, a state ρ can be reduced to a set of classical values as 
+
+ρ = X
+
+> i
+
+A† 
+
+> i
+
+tr( Aiρ), (10) if {Ai} forms an operator basis. Each classical value tr( Aiρ) is further reduced to the estimation of measure-ment probabilities. Computing expectation value rather than preparing a state would not reduce the computa-tional complexity [43] if the observable is arbitrary as this can be used to reconstruct the state. A general framework of QEM and its cost have been studied lately [44]. Here it will be presented as a type of SA QEC. As the initial state ρ is known, multiple copies can be prepared. A noise channel Φ to be corrected acting on ρ is also known, and can be manipulated to other forms. The goal is to find the effective inverse of Φ restricted onto ρ. While the SA QEC achieves this goal with Petz map as the general decoding scheme, here QEM is a restricted inefficient way since it does not use entangling encoding. In some QEM the observable A is also not arbitrary, but here we assume it is. First of all, without noise the sampling cost M scales exponentially with the accuracy ν for M ∼ 1 
+
+> δ2
+
+, and 
+
+δ ∼ 2−ν according to the standard Hoeffding’s inequal-ity [4]. This can only be quadratically better if the quan-tum amplitude estimation algorithm is used [45]. Often, this cost is not a major concern in practice. With noise, a ( Q, K ) mitigation scheme is able to per-form joint measurement on Q copies of samples, forming a cluster, and use K clusters each with a different modu-lated noisy channel other than Φ itself, and post-process the measurement outcomes. The mitigation cost is as-sessed by a maximum bias parameter b and a maximum spread ∆ which is the difference between the maximum and minimum possible estimated expectation values for all possible A and ρ. It is found that the sampling cost is 
+
+O(∆ 2/δ 2), and ∆ is lower bounded by a value based on distance between states [44]. The reason is that quantum channel would reduce the difference between states [13], therefore, mitigation needs to slow information blurring due to noise. For specific QEM, ∆ would scale exponen-tially with the circuit size, e.g., the number of qubits or the circuit depth, rendering it inefficient. Despite being inefficient, it can be effective in practice for small circuits. This has been obvious from the de-velopment of DD, which has been a seminal module in quantum control of errors [5]. In order to reduce the cost of standard QEC codes and increase the accuracy of DD, concatenation between them can be employed. There are two primary schemes: 
+
+• Inner DD with outer code: each physical qubit can be manipulated by DD to reduce a certain type of noises, e.g., phase-flip errors, and the outer layer code is used to correct bit-flip errors. 
+
+• Inner code with outer DD: use a small code that only corrects some noises, and use DD sequence of error-correction cycles to correct the rest. As the case of DD, QEM and SA QEC in general, can be concatenated with QEC codes. Here we layout the two primary types of concatenation. It is straightforward to use a QEC code as the inner code and SA QEC code as the outer code. For this set-ting, small QEC codes are sufficient as otherwise there is no need to use the outer code. The outer code is respon-sible for the leftover errors from the inner codes. Also non-composable QEM schemes can be used if all the log-ical gates has been done in the inner code. If a SA QEC code is taken as the inner code, it has to be composable, meaning that a protected state has to be available for further quantum processing. There shall be an advantage for using it instead of a usual QEC code, e.g., regarding encoding cost or noise type. An example is to use distillation or mitigation for the magic state [8], injected to a stabilizer code. Compared with the coding switching [46], a full even assessment of their advantages would depend on many factors.  
+
+> IV. SA QEC CODES
+
+In this section, we study SA QEC codes and the con-structions of them are far from clear at present. Despite this, from very primary SA QEC codes we propose a 6class of SA self-correcting quantum memory based on an ensemble code.  
+
+> A. General features
+
+We first analyze general features of SA QEC codes. Due to the COPY operation, such codes can be nonlinear, and we would denote a SA QEC code as 
+
+{n, k, d } (11) for encoding k qubits into n qubits, with code distance 
+
+d = 2 t + 1, for t as the maximal number of correctable noise of a certain type. Entangling operations at the en-coding as well as the decoding are allowed. If local parity checks are available, the fault-tolerance of the decoding can be achieved by measuring them repeatedly. There are interesting interplay with usual QEC codes. A SA code, as a manifold, can be embedded into a lin-ear QEC code, hence constructed from it. Meanwhile, a usual QEC code can also be used in a SA fashion, as shown in Sec. III B. Moreover, SA QEC codes do not obey the usual condition (1), so they could violate quan-tum coding bounds but still obey the classical bounds. For instance, they obey the Singleton bound 
+
+d − 1 ≤ n − k, (12) instead of the quantum version 2( d − 1) ≤ n − k. Below it is shown that the smallest such code has size n = 3 instead of 5. It is expected that SA type LDPC codes can be con-structed by specifying a set of parity checks. Recall that a LDPC code is defined with a finite set of commuting parity checks, with each check only acting on a finite number of bits, and each bit only acted upon by a fi-nite number of checks [47]. The stabilizer LDPC codes employ Pauli stabilizers as commuting checks, and errors collapse to Pauli errors that commute or anti-commute with a stabilizer. For the SA case, the checks may not commute. For instance, SWAP operations, as elements of the permutation group Sn, can serve as checks yet they do not commute.  
+
+> B. SA quantum repetition codes
+
+The simplest type of classical code may be the repeti-tion codes. A basic example is to encode a bit value 0 as 000, and 1 as 111. It only has a single logical gate, the Pauli bit-flip gate XL = XXX . It easily extends to a code [ n, 1, n ] with a large code distance d = n. Yet there are two basic types of decoding: one is based on parity check, which is to find the values of the parities ZZ on each nearest neighbor pair, and use majority vote to find the bit-flip errors and correct them; the other is based on a global ‘order check’, which is to find the value of 
+
+P 
+
+> i
+
+Zi, and then use a global field to polarize this value. Namely, it does not identify each error, instead, it reduces the number of errors on average. There are two primary settings where classical repe-tition codes apply. One is in communication, and one is in memory (storage drive). The magnetic hard drive, which is described by the Ising model and in which a bit is represented by a spin, uses the classical repetition code. It inherently poses the parity checks as its Hamiltonian 
+
+H = − P 
+
+> i
+
+ZiZi+1 , so that only the global order check is needed. Actually, this system is self-correcting , i.e., no active error correction is needed as long as the sys-tem remains in the ferromagnetic phase below the phase transition temperature [48]. The encoding rate can be larger by using more magnetic domains instead of the ground states. The code is also expanded to a subsystem code, with 0 or 1 as the total magnetic order of a domain, rather than a single configuration within it. Any thermal fluctuation below phase transition would not matter.  
+
+> 1. Self-correcting SA quantum memory
+
+We now construct the SA quantum repetition codes, named as ‘ensemble codes’ for short. The key point is to realize that the analog of a bit is a qubit at a known state. A simple ensemble code just maps a state |ψ⟩ into a few copies of it |ψ⟩⊗n. Here, the COPY is a valid operation since the state is assumed to be known, consistent with the no-cloning theorem. We assume the state is pure but can also be a mixed state, and a codeword is denoted as ψ⊗n. The code has to be SU(2) covariant to store any state ψ. In order to enable a nontrivial Hamiltonian protection, we have to consider systems with SU(2) sym-metry, which are nothing but the AKLT systems [12]. In this system, a state ψ is not stored as a qubit, in-stead, it is stored as a Choi state [17]. Namely, ψ is firstly identified with a qubit unitary gate U , which is then stored as its Choi state 
+
+|U ⟩ = ( U ⊗ 1)|ω⟩, (13) 7and |ω⟩ = ( |00 ⟩ + |11 ⟩)/√2 is the ebit. Such a storage can also be viewed as the storage of the parameters in a gate U instead of a qubit. An AKLT model can be defined on any dimension or lattice, while the common element is the ‘valence-bond’ picture. A valence bond is the singlet state ( |01 ⟩ − | 10 ⟩)/√2, which is just the ebit up to a Pauli correction. Given a collection of valence bonds ω⊗n, a ground state is constructed by applying local projectors to spin sectors. A parent Hamiltonian that takes this state as the unique ground state can be found, and importantly, this system has SU(2) (or SO(3) equivalently) SPT order [40], and it has been used to define a family of QEC codes [49]. Instead of the ground state, we now use domain walls to encode qubits. Note, rather than domains it uses do-main walls, which is a manifest of the holographic bulk-edge duality, and the dilute antiferromagnetic order of the system. The ‘domain wall’ here is at the valence bond. We apply a global gate of the form 
+
+U ⊗l1 
+
+> 1
+
+U ⊗l2 
+
+> 2
+
+· · · U ⊗lk 
+
+> k
+
+(14) with each Ui ∈ SU(2) and li as the length of a ‘symme-try twist’. Due to the global symmetry, there will be a nontrivial gate on each domain wall, creating excitations known as spinon or soliton. This can be seen based on the matrix-product state representation of the state [50]. In order to increase the size of the domain wall, one can consider 2D or 3D systems, and a domain wall will be the shape of a circle or surface, respectively. We illus-trate the code with the top of a 3D system, shown in Fig. 1. Each arrow for a gate Ui lives only on the surface of a 3D domain. If using the Bloch vector of qubit, an intuitive picture of the code is to view it as a collection of vectors each pointing to an arbitrary direction. Note the vectors live in the ‘virtual’ valence-bond picture, but they effectively behave as real spins. To ensure fault-tolerance, finite-digit precision can be enforced on the continuous parameters to be stored. In comparison, the classical case only allows two directions: up and down. Such a system, although simple enough, could be self-correcting. Similar with the Ising model, there is no self-correction in 1D since a domain wall is of zero dimension and a domain can grow without energy cost. But in 2D and 3D, a domain wall has a size. For Ising model, the growth of its size will cause energy so it is confined, leading to the finite-temperature 2nd order phase tran-sition from a random paramagnetic phase. For the cho-sen AKLT models, as the domain-wall gates do not com- 
+
+> Figure 1. An illustration of the ensemble code using 3D AKLT system. The picture is the top of such a system with each vector encoding a SU(2) gate, as a generalization of the Ising model as classical repetition code which only encodes two log-ical vector directions.
+
+mute with the Hamiltonian terms at the domain wall, the change of domain wall size also causes energy. Besides, each spin vector in a domain cannot easily deviate from its logical direction since that will violate the symmetry. At high-enough temperature, thermal fluctuations would randomize each logical vector, erasing logical informa-tion. A self-correcting QEC code is the hypothetical 4D toric code [51], for which the two types of excitations are both size-confined. By poking holes it can store more qubits, but storing multi-qubit entangled states are challenging as that requires applying entangling logical gates, simi-lar with our AKLT ensemble code. There are no-go theo-rems [48] regarding the self-correction of quantum LDPC stabilizer codes, and these codes in principle are expected to store entangled states. However, as a memory this may be unnecessary and storing qubit states could be sufficient in practice. Realizing our ensemble code is challenging, though. First of all, AKLT models, although mathematically con-cise and with almost half a century history, have seldom been realized in quantum materials. They are strongly correlated systems and have strict requirements on sym-metry. Secondly, whether a AKLT model is gapped or not is a hard problem as it depends not only on the di-mension, but also on the geometry and spin values. Fi-nally, the read/write operation on the code could be hard. The magnetic direction of each domain has to be read-able and writable. This process also has to be accurate and fast.  
+
+> 2. Parity check
+
+In this section, we study ensemble code further, but instead of using global order check, we study how to use local parity check. First of all, we have to figure out what is the ‘parity’ in this setting. For AKLT systems, 8the local parity is nothing but the local Hamiltonian in-teraction terms, which are well defined yet not easy to measure. Here, we study the setting when a state ψ is directly encoded as ψ⊗n.It is clear to see its parity check is nearest-neighbor swap gates. A noise channel Φ may induce error on some of the local ψs. A parity check is just the well-known swap-test [23]: it requires a qubit ancilla to perform the projectors P± = ( 1 ± SWAP) /2, the outcome + means no error, and − means the two states are not the same, hence error occurs. Yet, the location of the error has to be found, therefore, one needs n ≥ 3 to achieve this, and there are n − 1 parity checks, and this is a code 
+
+{n, 1, n }. This is very similar with the classical repetition code [ n, 1, n ] by treating ψ as the analog of bit value 0. How to correct the errors? In the classical setting, one applies bit-flips X and sometimes there is even no need to do the correction. By majority-vote and omitting these erroneous bits below the error threshold, the correct logical value can be decoded. In the quantum setting, it is similar. To actively correct the error, the channel Φ has to be known, which is much more complicated than Pauli operators. For this purpose, one can find the pseudo-inverse of it, D, such that DΦ( ψ) ≈ ψ [52]. The map D can depend both on ψ and Φ. Another setting is that each qubit is affected by the same noise. This also applies to the classical case, say, a configuration of a repetition code would be ρ⊗n, for ρ as the random variable which is a diagonal state diag( p, 1 −
+
+p), for p as the bit-flip rate. The quantum case merely adds a transversal rotation on it. In this setting, it is recently found that [24] upon two copies of a mixed state 
+
+ρ ⊗ ρ, the swap-test post-selected on the P+ outcome can increase the purity of ρ against the noiseless state ψ for 
+
+ρ = pψ + (1 − p)σ, for σ as the noisy part. A sequence of 
+
+P+ will drive the state to the pure fixed point ψ ⊗ ψ, as a type of Zeno effect. For any n, measuring a n-element permutation operator in Sn can also suppress the noisy part [25]. The similar scheme for the classical case is to repeat the parity checks ZZ . The post-selection is not efficient but could be effective in practice. For n = 3, one can measure two swap operators which has four outcomes. The local qubit state is one of the following forms: (5 + f )ρ + 2 ρ2, (1 − f )ρ, (1 + f )ρ − 2ρ2,for f = tr( ρ2) as the purity of ρ, modular normalization. The first one is the good case with an enhanced purity and can be reused, the second one with no state change can also be reused, while the last one requires a correction 
+
+D, which depends on ρ. For instance, if |ψ⟩ = U |0⟩ and the error is a rotated bit-flip U XU †, then the correction is simply XU †. In general, the correction D may not be unitary but can be easily found when the dimension of ρ
+
+is small.  
+
+> V. CONCLUSION
+
+In this work, we have theoretically explored a unifying picture of quantum error correction (QEC), showing that other techniques such as error mitigation and state distil-lation can be understood as special cases of QEC, partic-ularly within the state-adaptive (SA) framework devel-oped recently. As a concrete example, we proposed a SA quantum memory that is expected to be self-correcting, based on encoding logical information in the polarization directions of spinon excitations in AKLT-type systems. It is worth noting that both AKLT systems and cluster-state systems are known to provide universal re-sources for quantum computing [53]. We have previ-ously shown that cluster states are suitable for construct-ing quantum transistors that serve as quantum internal memory or processing unit [54]. Here, we demonstrate that AKLT systems are naturally suited to serve as quan-tum external memory. This external memory, which we term the “ensemble code,” can be viewed as semi-classical and analog in nature, as it stores continuous parameters rather than discrete bit values. Importantly, this scheme does not violate the no-cloning theorem or the Holevo bound: it encodes a known qubit state as multiple copies, and the global state can be read out from macroscopic features. Our work also highlights the potential advantages of SA QEC codes and their intricate interplay with con-ventional QEC codes. The overhead of current stabilizer codes is substantial, largely due to the frequent refresh-ing of stabilizer measurements. We expect that SA codes can reduce this overhead by exploiting knowledge of the initial states, the noise channels, or the overall algorith-mic function, while maintaining practical efficiency and efficacy.  
+
+> VI. ACKNOWLEDGEMENT
+
+This work has been funded by the National Natural Science Foundation of China under Grants 12447101 and 12105343. 9
+
+[1] E. Knill, R. Laflamme, Theory of quantum error-correcting codes, Phys. Rev. A 55 (1997) 900–911. [2] J. Watrous, The Theory of Quantum Information, Cam-bridge University Press, 2018. [3] M. Wilde, Quantum Information Theory, Cambridge University Press, 2017. [4] M. Hayashi, Quantum Information Theory: Mathemati-cal Foundation, 2nd edition, Springer, 2017. [5] D. Lidar, T. A. Brun (Eds.), Quantum error correction, Cambridge University Press, 2013. [6] J. Preskill, Quantum computing in the NISQ era and beyond, Quantum 2 (2018) 79. [7] D.-S. Wang, G. Zhu, C. Okay, R. Laflamme, Quasi-exact quantum computation, Phys. Rev. Res. 2 (2020) 033116. [8] C. Piveteau, D. Sutter, S. Bravyi, J. M. Gambetta, K. Temme, Error mitigation for universal gates on en-coded qubits, Phys. Rev. Lett. 127 (2021) 200505. [9] Y. Akahoshi, K. Maruyama, H. Oshima, S. Sato, K. Fujii, Partially fault-tolerant quantum computing architecture with error-corrected clifford gates and space-time efficient analog rotations, PRX Quantum 5 (2024) 010337. [10] A. Katabarwa, K. Gratsea, A. Caesura, P. D. Johnson, Early fault-tolerant quantum computing, PRX Quantum 5 (2024) 020101. [11] M. Ohya, D. Petz, Quantum entropy and its use, Springer-Verlag, Berlin, Heidelberg, 1993. [12] I. Affleck, T. Kennedy, E. H. Lieb, H. Tasaki, Rigorous results on valence-bond ground states in antiferromag-nets, Phys. Rev. Lett. 59 (1987) 799–802. [13] M. A. Nielsen, I. L. Chuang, Quantum Computation and Quantum Information, Cambridge University Press, Cambridge U.K., 2000. [14] D.-S. Wang, State-adaptive quantum error correction and fault-tolerant quantum computing, Phys. Rev. A 113 (2026) 012438. [15] G. Chiribella, G. M. D’Ariano, P. Perinotti, Transform-ing quantum operations: Quantum supermaps, Euro-phys. Lett. 83 (2008) 30004. [16] D.-S. Wang, Y.-D. Liu, Y.-J. Wang, S. Luo, Quantum resource theory of coding for error correction, Phys. Rev. A 110 (2024) 032413. [17] M.-D. Choi, Completely positive linear maps on complex matrices, Linear Algebra Appl. 10 (1975) 285–290. [18] H. Barnum, E. Knill, Reversing quantum dynamics with near-optimal quantum and classical fidelity, J. Math. Phys. 43 (2002) 2097. [19] H. K. Ng, P. Mandayam, Simple approach to approxi-mate quantum error correction based on the transpose channel, Phys. Rev. A 81 (2010) 062342. [20] S. Beigi, N. Datta, F. Leditzky, Decoding quantum in-formation via the Petz recovery map, J. Math. Phys. 57 (2016) 082203. [21] L. Viola, E. Knill, S. Lloyd, Dynamical decoupling of open quantum systems, Phys. Rev. Lett. 82 (1999) 2417– 2421. [22] G. Chiribella, G. M. D’Ariano, P. Perinotti, Memory effects in quantum channel discrimination, Phys. Rev. Lett. 101 (2008) 180501. [23] H. Buhrman, R. Cleve, J. Watrous, R. de Wolf, Quantum fingerprinting, Phys. Rev. Lett. 87 (2001) 167902. [24] A. M. Childs, H. Fu, D. Leung, Z. Li, M. Ozols, V. Vyas, Streaming quantum state purification, Quantum 9 (2025) 1603. [25] B. Koczor, Exponential error suppression for near-term quantum devices, Phys. Rev. X 11 (2021) 031057. [26] E. Chitambar, G. Gour, Quantum resource theories, Rev. Mod. Phys. 91 (2019) 025001. [27] R. Horodecki, P. Horodecki, M. Horodecki, K. Horodecki, Quantum entanglement, Rev. Mod. Phys. 81 (2009) 865– 942. [28] I. Devetak, A. W. Harrow, A. Winter, A resource frame-work for quantum shannon theory, IEEE Trans. Inf. Th. 54 (2008) 4587–4618. [29] A. Abeyesinghe, I. Devetak, P. Hayden, A. Winter, The mother of all protocols: Restructuring quantum informa-tion’s family tree, Proc. R. Soc. A 465 (2009) 2537–2563. [30] I. Devetak, A. Winter, Relating quantum privacy and quantum coherence: an operational approach, Phys. Rev. Lett. 93 (2004) 080501. [31] I. Devetak, A. Winter, Distillation of secret key and en-tanglement from quantum states, Proc. R. Soc. A 461 (2005) 207–235. [32] S. Bravyi, A. Kitaev, Universal quantum computation with ideal clifford gates and noisy ancillas, Phys. Rev. A 71 (2005) 022316. [33] D. Gottesman, I. L. Chuang, Demonstrating the viabil-ity of universal quantum computation using teleportation and single-qubit operations, Nature 402 (6760) (1999) 390–393. [34] D. Gottesman, Theory of fault-tolerant quantum compu-tation, Phys. Rev. A 57 (1998) 127–137. [35] D. Poulin, Stabilizer formalism for operator quantum er-ror correction, Phys. Rev. Lett. 95 (2005) 230504. [36] M. Grassl, T. Beth, T. Pellizzari, Codes for the quantum erasure channel, Phys. Rev. A 56 (1997) 33–38. [37] C. H. Bennett, D. P. DiVincenzo, J. A. Smolin, Capac-ities of quantum erasure channels, Phys. Rev. Lett. 78 (1997) 3217–3220. [38] Y. Ouyang, R. Chao, Permutation-invariant constant-excitation quantum codes for amplitude damping, IEEE Trans. Inf. Theory 66 (2020) 2921. [39] A. Y. Kitaev, Fault-tolerant quantum computation by anyons, Annals of Physics 303 (1) (2003) 2–30. [40] B. Zeng, X. Chen, D.-L. Zhou, X.-G. Wen, Quantum In-formation Meets Quantum Matter, Springer-Verlag New York, 2019. [41] H.-P. Breuer, F. Petruccione, The Theory of Open Quan-tum System, Oxford University Press, Oxford, U.K., 2003. [42] Y. Suzuki, S. Endo, K. Fujii, Y. Tokunaga, Quantum error mitigation as a universal error reduction technique: Applications from the nisq to the fault-tolerant quantum computing eras, PRX Quantum 3 (2022) 010345. [43] D.-S. Wang, Weak, strong, and uniform quantum simu-lations, Phys. Rev. A 91 (2015) 012334. [44] R. Takagi, S. Endo, S. Minagawa, M. Gu, Fundamental limits of quantum error mitigation, npj Quantum Inf. 91 (2022) 114. [45] G. Brassard, P. Hoyer, M. Mosca, A. Tapp, Quantum amplitude amplification and estimation, Contem. Math-emat. 305 (2002) 53–74. [46] M. E. Beverland, A. Kubica, K. M. Svore, Cost of uni-10 
+
+versality: A comparative study of the overhead of state distillation and code switching with color codes, PRX Quantum 2 (2021) 020341. [47] W. E. Ryan, S. Lin, Channel Codes: Classical and Mod-ern, Cambridge University Press, 2009. [48] B. J. Brown, D. Loss, J. K. Pachos, C. N. Self, J. R. Wootton, Quantum memories at finite temperature, Rev. Mod. Phys. 88 (2016) 045005. [49] D.-S. Wang, I. Affleck, R. Raussendorf, Topological qubits from valence bond solids, Phys. Rev. Lett. 120 (2018) 200503. [50] D.-S. Wang, Classes of topological qubits from low-dimensional quantum spin systems, Ann. Phys. 412 (2020). [51] E. Dennis, A. Kitaev, A. Landahl, J. Preskill, Topological quantum memory, J. Math. Phys. 43 (9) (2002) 4452– 4505. [52] N. Cao, J. Lin, D. Kribs, Y.-T. Poon, B. Zeng, R. Laflamme, NISQ: Error Correction, Mitigation, and Noise Simulation, arXiv preprint arXiv:2111.02345 (2021). [53] H. J. Briegel, D. E. Browne, W. D¨ ur, R. Raussendorf, M. Van den Nest, Measurement-based quantum compu-tation, Nat. Phys. 5 (1) (2009) 19–26. [54] Y.-D. Liu, X. Xu, Q.-R. Wang, D.-S. Wang, Towards transistor-based quantum computing, arXiv preprint arXiv:2605.21045 (2026).

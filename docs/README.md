@@ -6,34 +6,29 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-06-15
-- 运行时间：2026-06-15 23:03:35 UTC
+- 最新运行日期：2026-06-16
+- 运行时间：2026-06-16 23:00:48 UTC
 - 运行状态：成功
-- 本次总论文数：4
-- 精读区：3
+- 本次总论文数：3
+- 精读区：2
 - 速读区：1
 
 ### 今日简报（AI）
-今日精选4篇论文，聚焦量子纠错前沿。
-重点关注《Quantum Logic Codes》和《All about quantum error correction》，前者实现了完全横向逻辑克利福德门，后者全面综述了蒸馏、缓解与自纠错技术。
-建议优先精读这两篇高评分论文，快速掌握量子纠错核心方法。
-- 详情：[/202606/15/README](/202606/15/README)
+今天精读了两篇量子纠错论文，速读了一篇综述，主题高度集中。最值得关注的是《Handbook of Error-Correcting Codes》和《Reconstruction of detector error model》，均为8.0分精读佳作。建议先阅读速读的《All about quantum error correction》综述，建立全景认知。
+- 详情：[/202606/16/README](/202606/16/README)
 
 ### 精读区论文标签
-1. [Quantum Logic Codes: Complete Transversal Logical Clifford Instruction Sets for High-Rate Stabilizer Quantum Error Correcting Codes](/202606/15/2606.13521v1-quantum-logic-codes-complete-transversal-logical-clifford-instruction-sets-for-high-rate-stabilizer-quantum-error-correcting-codes)  
-   标签：评分：9.0/10、query:qec-code
-   evidence：表面码和环面码的横向门，稳定子纠错进展
-2. [All about quantum error correction: distillation, mitigation, self-correction and beyond](/202606/15/2606.14034v1-all-about-quantum-error-correction-distillation-mitigation-self-correction-and-beyond)  
-   标签：评分：9.0/10、query:qec-decoding
-   evidence：统一量子纠错技术的综述，涵盖蒸馏、缓解、自纠正等
-3. [Handbook of Error-Correcting Codes](/202606/15/2606.11484v1-handbook-of-error-correcting-codes)  
+1. [Handbook of Error-Correcting Codes](/202606/16/2606.11484v1-handbook-of-error-correcting-codes)  
    标签：评分：8.0/10、query:qec-code
-   evidence：涵盖量子纠错码，包括表面码和qLDPC码
+   evidence：手册涵盖量子纠错码，包括表面码、qLDPC码等
+2. [Reconstruction of detector error model for quantum error correction](/202606/16/2606.16288v1-reconstruction-of-detector-error-model-for-quantum-error-correction)  
+   标签：评分：8.0/10、query:qec-decoding
+   evidence：从症候统计重构探测器误差模型以优化量子纠错解码算法
 
 ### 速读区论文标签
-1. [Quasilinear Equivalence Checking for Detector Error Models](/202606/15/2606.14677v1-quasilinear-equivalence-checking-for-detector-error-models)  
+1. [All about quantum error correction: distillation, mitigation, self-correction and beyond](/202606/16/2606.14034v1-all-about-quantum-error-correction-distillation-mitigation-self-correction-and-beyond)  
    标签：评分：7.0/10、query:qec-decoding
-   evidence：用于容错量子电路的探测器误差模型
+   evidence：从统一视角整合了量子纠错技术，包括蒸馏、缓解等
 
 
 <div class="dpr-home-promo-card">

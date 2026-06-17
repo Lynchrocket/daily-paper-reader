@@ -1,0 +1,1702 @@
+Title: Breaking the bicycle frame: Coset-based quantum LDPC codes
+
+URL Source: https://arxiv.org/pdf/2606.17268v1
+
+Published Time: Wed, 17 Jun 2026 00:12:15 GMT
+
+Number of Pages: 24
+
+Markdown Content:
+## Breaking the bicycle frame: Coset-based quantum LDPC codes 
+
+Arda Aydin, 1, * Itzhak Tamo, 2, † and Alexander Barg 1, 3, ‡
+
+> 1
+
+ISR and Department of ECE, University of Maryland, College Park, MD 20742 
+
+> 2
+
+Department of Electrical Engineering - Systems, Tel Aviv University, Tel Aviv 6997801, Israel 
+
+> 3
+
+Joint Center for Quantum Information and Computer Science, NIST/University of Maryland, College Park, MD 20742 
+
+Generalizing the construction of two-block group algebra (2BGA) codes, we introduce a family of two-block quantum LDPC codes constructed using the action of a group on the cosets of its subgroup. This replaces the regular group actions of the earlier two-block constructions and sig-nificantly expands the search space, yielding new quantum LDPC codes outside the 2BGA family. Through a computer search, we identify several new quantum LDPC codes, including weight-6 codes with parameters [[48 , 8, 6]], [[96 , 8, 10]], and [[224 , 12 , 16]], as well as weight-8 codes with parameters [[84 , 16 , 8]], [[112 , 16 , 10]], [[128 , 16 , 12]], and [[168 , 16 , 15]]. Furthermore, we introduce a maximally packed syndrome extraction schedule of depth 𝑤 +2, including initialization and measurement steps, for any code with a maximum stabilizer weight of 𝑤 from our family. Under a standard circuit-level noise model, our codes, when decoded using BP-OSD, perform competitively with BB codes, achiev-ing thresholds of ≈ 0.65% for the weight-6 family and ≈ 0.35% for the weight-8 family. Finally, we introduce a group-theoretic framework to generate sequences of graph-based covers of 2BGA codes, recovering and extending recent results on code constructions of this type. 
+
+I. INTRODUCTION 
+
+Quantum low-density parity-check (LDPC) codes are among the leading approaches to realizing fault-tolerant quantum computation. Surface codes [1–3] form one of the earliest examples of quantum LDPC codes. These codes provide strong error suppression but incur a large qubit overhead, requiring many physical qubits. Specifi-cally, to encode 𝑘 logical qubits with a distance 𝑑 , the sur-face code requires Θ( 𝑘𝑑 2) physical qubits. To reduce this overhead, researchers have studied quantum LDPC codes with more complex structures, aiming at constructing codes that simultaneously achieve a high encoding rate and large distance. The first advances toward achieving this goal were made about 15 years ago [4], followed by further developments in [5, 6], and culminating in the construction of asymptotically good families of quantum LDPC codes [7, 8]. Asymptotically good codes are essential for the real-ization of a large-scale, fault-tolerant quantum compu-tation. However, for near-term practical considerations, finite-length quantum codes with specific structural prop-erties play a critical role. For instance, despite its large qubit overhead, the surface code is one of the primary choices of quantum LDPC code for practical implementa-tions because of its advantageous geometrical properties. Its structure is embeddable in a 2D grid, requiring only local connections. Due to these characteristics, along with its high threshold and robust error suppression un-der circuit-level noise, surface codes have attracted sus-tained attention in recent years.    
+
+> *aaydin@umd.edu
+> †tamo@tauex.tau.ac.il
+> ‡abarg@umd.edu
+
+Another promising class of finite-length quantum LDPC codes is the family of bivariate bicycle (BB) codes, introduced in Ref. [9]. Rather than embedding qubits exclusively in a planar 2D grid, the authors of [9] consid-ered a bi-planar structure. By incorporating a few long-range connections alongside the local connections utilized by the toric code, they successfully constructed quan-tum LDPC codes with a significantly lower qubit over-head than the surface code, while maintaining compa-rable thresholds and error suppression capabilities. The building blocks of BB codes are permutation matrices representing the regular action of the finite abelian group 
+
+Z𝑙 × Z𝑚 , where 𝑙, 𝑚 ≥ 2 are integers. BB codes belong to a broader family of codes known as two-block group algebra (2BGA) codes [10]. These codes are constructed using permutation matrices that repre-sent the left and right regular actions of a finite group, which is not limited to being abelian. Since the left and right regular actions commute with each other, the CSS orthogonality condition is automatically satisfied owing to the general construction method known as two-block CSS codes [14]. One of the primary reasons for the interest in 2BGA codes is the well-defined structure that they imply for the resulting Tanner graph. Namely, the edges of the graph that connect the qubits correspond to the actions of the underlying finite group, which makes it possible to design an efficient CNOT gate schedule that com-plies with the constraints imposed by the hardware ar-chitecture. For instance, the structure of the underly-ing group Z𝑙 × Z𝑚 , along with the structure of the con-stituent matrices, enables one to map BB codes onto a 2D bi-planar layout, which is highly desirable for super-conducting hardware architectures. Furthermore, it has been demonstrated that BB codes are suitable for im-plementation in trapped-ion architectures [17, 18] and cold-atom platforms [19]. 
+
+> arXiv:2606.17268v1 [quant-ph] 15 Jun 2026
+
+2
+
+## This work 
+
+## Two-Block CSS Codes 
+
+> 2BGA Code[10]
+> ”ZSZ” Code [11]
+> Abelian 2BGA
+> BB Code [9]
+> Generalized toric code [12]
+> Cyclic HGP [13]
+> GB Code [14]
+> TB code [15]
+> Cubic code [16]
+
+FIG. 1: Various quantum LDPC codes and their relationship with each other. TABLE I: Mapping existing quantum LDPC codes to our generalized framework.                                                              
+
+> Code Family Subgroup Condition Quotient Group (𝐺/𝐻 )Reference Coset-based codes Arbitrary 𝐻 ≤𝐺 Coset space 𝐺/𝐻 this work 2BGA Normal 𝐻 General finite group Lin-Pryadko [10] “ZSZ” Code Normal 𝐻 Z𝑙 ⋊ Z 𝑚 Guo e.a. [11] Abelian 2BGA Normal 𝐻 Abelian finite group Lin-Pryadko [10] Trivariate Bicycle (TB) Normal 𝐻 Z𝑘 ×Z𝑙 ×Z𝑚 Voss e.a. [15] Cubic Code Normal 𝐻 Z𝑙 ×Z𝑙 ×Z𝑙 Haah [16] Bivariate Bicycle (BB) Normal 𝐻 Z𝑙 ×Z𝑚 Bravyi e.a. [9] Generalized Toric Normal 𝐻 Z𝑙 ×Z𝑚 Liang e.a. [12] Cyclic HGP Normal 𝐻 Z𝑙 ×Z𝑚 Aydin-Delfosse-Tham[13] Generalized Bicycle (GB) Normal 𝐻 Z𝑟 Kovalev-Pryadko [14]
+
+Another example of 2BGA codes is a class of hyper-graph product (HGP) codes known as cyclic HGP codes [13], which form a special case of BB codes and admit an efficient layout for trapped-ion platforms. General-ized bicycle (GB) codes [14] form yet another example of 2BGA codes that relies on the group Z𝑟 for its con-struction. Note that GB codes are equivalent to BB codes when 𝑙 and 𝑚 are coprime, due to the group isomorphism 
+
+Z𝑙𝑚 ∼= Z𝑙 × Z𝑚 . Furthermore, Ref. [20] introduced sev-eral examples of finite-length GB codes that feature both good parameters and high thresholds. More recently, the authors of [21] proposed a blueprint for a fault-tolerant trapped-ion quantum computer architecture. The au-thors defined a three-ring framework based on the “mov-ing qubits” model (a fully connected trapped-ion ar-chitecture where qubits can physically move) and in-troduced an efficient quantum memory utilizing 2BGA codes, including the cyclic HGP, BB, and GB code fam-ilies. 2BGA codes based on non-abelian groups have also been investigated for the construction of self-correcting quantum memories in neutral-atom arrays [11]. In the same work, the authors specifically studied 2BGA codes with the underlying group formed as a semidirect prod-uct of two cyclic groups Z𝑙 ⋊ Z 𝑚 . Several other code families in the class of 2BGA codes are trivariate bicy-cle codes [15] with the underlying group Z𝑘 × Z𝑙 × Z𝑚 
+
+and Haah’s cubic code [16], which is a special case of the former relying on the underlying group Z𝑙 × Z𝑙 × Z𝑙 .These examples are listed in Table I and their rela-tionships are visualized in Figure 1. Collectively, they demonstrate the potential of 2BGA codes for near-term fault-tolerant quantum memories. An extensive analysis of 2BGA codes for both abelian and non-abelian groups, including a computer search for codes with underlying groups up to a certain order, has been conducted by Lin and Pryadko in Ref. [10]. In this work, we introduce a general family of quan-3tum LDPC codes that contains and extends 2BGA codes and hence also their subfamilies listed in Table I. Specif-ically, we present a construction of two-block CSS codes based on group actions on cosets rather than the reg-ular group actions utilized in 2BGA codes. While for certain group-subgroup pairs, our approach is equivalent to the 2BGA construction, generally speaking, it yields new, previously unknown quantum LDPC codes. While there is a limited number of finite groups of a given order, there are many more group-subgroup pairs that yield a coset space of that same size. Consequently, for a fixed code length, our construction provides a much wider va-riety of Tanner graph structures and an expanded search space for discovering new quantum codes. Aided by computer search, we identify several new quantum LDPC codes with competitive parameters (see Tables II and VI). We also design an explicit, maximally packed syndrome extraction circuit for our codes. Any weight-𝑤 code from our family admits a depth-( 𝑤 + 2) syndrome extraction circuit, including state initialization and measurement operations. We further analyze the structure of the Tanner graph of our codes and provide an upper bound for its thickness. By construction, our results apply to all 2BGA codes, such as BB and GB codes. In simulations, we observe that our codes per-form comparably to BB codes under circuit-level noise (see Table III), while extending the set of possible code parameters. As another set of results, we present a group-theoretic framework for generating larger quantum LDPC codes by lifting a small base 2BGA code. In particular, this con-struction recovers and generalizes the results of Symons et al. [22], in which the authors studied families of BB codes from covering graphs. Additionally, we provide several notable examples of quantum LDPC codes that are graph-based covers of previously known 2BGA codes. The paper is organized as follows: In Section II, we provide a brief overview of group actions on cosets. We describe our code construction in Section III and intro-duce our search strategy for finding new codes in Section IV. Section V presents an explicit syndrome extraction algorithm for our code family alongside the results of our circuit-level memory experiments. Finally, we conclude by describing how to generate a sequence of our codes using covering graphs in Section VII.  
+
+> II. GROUPS ACTING ON COSETS
+
+Our code construction relies on the action of a finite group 𝐺 on the cosets of its subgroup 𝐻 . In this section, we list the main properties of this action. For a subgroup 
+
+𝐻 ≤ 𝐺 , let 𝑁 𝐺 (𝐻 ) := {𝑔 ∈ 𝐺 : 𝑔𝐻 = 𝐻𝑔 } the normal-izer of 𝐻 in 𝐺 . Let 𝑆 𝐺/𝐻 be the group of permutations of the left cosets of 𝐻 in 𝐺 . We define the standard left action of 𝐺 and right action of 𝑁 𝐺 (𝐻 ) on the left cosets as follows: 
+
+𝐿 : 𝐺 → 𝑆 𝐺/𝐻 , (1) where 
+
+𝐿 (𝑔 ) : 𝐺/𝐻 → 𝐺/𝐻 𝑥𝐻 ↦ → (𝑔𝑥 )𝐻. 
+
+Similarly, 
+
+𝑅 : 𝑁 𝐺 (𝐻 ) → 𝑆 𝐺/𝐻 , (2) where 
+
+𝑅 (𝑔 ) : 𝐺/𝐻 → 𝐺/𝐻 𝑥𝐻 ↦ → (𝑥𝑔 )𝐻. 
+
+In this section we list standard properties of these ac-tions [23, Sec.4.2], including their proofs in Appendix A for completeness. Recall that a group homomorphism (anti-homomorphism) is a map 𝐺 1
+
+> 𝜑
+
+→ 𝐺 2 such that 
+
+𝜑 (𝑔 1𝑔 2) = 𝜑 (𝑔 1)𝜑 (𝑔 2) (resp., 𝜑 (𝑔 1𝑔 2) = 𝜑 (𝑔 2)𝜑 (𝑔 1)). In the particular case when 𝐺 2 is a permutation group of a finite set, 𝜑 is called a permutation (anti)-representation of 𝐺 1.
+
+Proposition II.1. 𝐿 is a homomorphism and 𝑅 is an anti-homomorphism. 
+
+Crucially, the left action of 𝐺 and the right action of 
+
+𝑁 𝐺 (𝐻 ) on the left cosets of 𝐻 in 𝐺 commute with each other. Using this property in our code construction, we immediately establish the orthogonality requirement im-posed by the CSS code family. We formalize this property in the following proposition: 
+
+Proposition II.2. Let 𝐺 be a finite group and let 𝐻 ≤ 𝐺 
+
+be a subgroup. Let 𝐿 and 𝑅 be the maps defined in (1) 
+
+and (2) . Let 𝑔 1 ∈ 𝐺 and 𝑔 2 ∈ 𝑁 𝐺 (𝐻 ). Then, 
+
+𝐿 (𝑔 1) ∘ 𝑅 (𝑔 2) = 𝑅 (𝑔 2) ∘ 𝐿 (𝑔 1).
+
+Recall that the core of 𝐻 in 𝐺 is the largest normal subgroup of 𝐺 contained in 𝐻 :Core 𝐺 (𝐻 ) = ⋂︁ 
+
+> 𝑔 ∈𝐺
+
+𝑔𝐻𝑔 −1.
+
+The number of distinct left actions on the left cosets is given by |𝐺 |/| Core 𝐺 (𝐻 )|, while the number of distinct right actions is |𝑁 𝐺 (𝐻 )|/|𝐻 |. This follows directly from the following proposition: 
+
+Proposition II.3. Let 𝐺 be a finite group and 𝐻 ≤ 𝐺 
+
+be a subgroup. Then ker 𝐿 ∼= Core 𝐺 (𝐻 ) and ker 𝑅 ∼= 𝐻 .Consequently, 
+
+Im( 𝐿 ) ∼= 𝐺/ Core 𝐺 (𝐻 ) and Im( 𝑅 ) ∼= 𝑁 𝐺 (𝐻 )/𝐻. 
+
+We will make extensive use of the permutation matri-ces that encode this action. 4
+
+Definition II.1. Let 𝐺 be a finite group and 𝐻 ≤ 𝐺 be a subgroup. Let 𝐺/𝐻 = {𝑥 1𝐻, 𝑥 2𝐻, . . . , 𝑥 𝑚 𝐻 }, where (𝑥 𝑖 )𝑖 is a fixed set of coset representatives and 𝑚 := [ 𝐺 :
+
+𝐻 ] is the index of 𝐻 in 𝐺 . For each 𝑔 ∈ 𝐺 , define an 
+
+𝑚 × 𝑚 permutation matrix 𝐿 (𝑔 ) by setting 
+
+𝐿 (𝑔 )𝑖,𝑗 = 1{𝐿 (𝑔 )( 𝑥 𝑗 𝐻 )= 𝑥 𝑖 𝐻 }.
+
+Similarly, for each 𝑔 ∈ 𝑁 𝐺 (𝐻 ), define the 𝑚 × 𝑚 permu-tation matrix 𝑅 (𝑔 ) as: 
+
+𝑅 (𝑔 )𝑖,𝑗 = 1{𝑅 (𝑔 )( 𝑥 𝑗 𝐻 )= 𝑥 𝑖 𝐻 }.
+
+Switching from permutations to permutation matrices, we also use a new notation for the permutation (anti-) representation, writing 
+
+𝐿 : 𝐺 → 𝐺𝐿 𝑚 (C)and 
+
+𝑅 : 𝑁 𝐺 (𝐻 ) → 𝐺𝐿 𝑚 (C).
+
+for the left and right action on the cosets. The following example illustrates the construction of permutation matrices representing left and right group actions on cosets. 
+
+Example 1. Let 𝐺 = ⟨𝑟, 𝑠 | 𝑟 4 = 𝑠 2 = ( 𝑠𝑟 )2 = 1 ⟩ be the dihedral group of order 8 and 𝐻 = ⟨𝑠 ⟩ = {𝑒, 𝑠 } be a subgroup. Let us fix the representatives as 𝑥 1 = 𝑒, 𝑥 2 =
+
+𝑟, 𝑥 3 = 𝑟 2 and write the cosets as follows: 
+
+𝐺/𝐻 = {𝐻, 𝑟𝐻, 𝑟 2𝐻, 𝑟 3𝐻 }
+
+Since Core 𝐺 (𝐻 ) = {𝑒 }, we have 𝐺/ Core G(H) ∼= 𝐺 . By Proposition II.3, we have | Im( 𝐿 )| = 8, so there are 8 unique permutation matrices in the image of 𝐿 . Let us illustrate how these entries are computed from Definition II.1. Since 
+
+𝐿 (𝑟 )( 𝑥 1𝐻 ) = 𝑟 (𝑒𝐻 ) = 𝑟𝐻 = 𝑥 2𝐻, 
+
+we find that 𝐿 (𝑟 )2,1 = 1. Similarly, for the generator 𝑠 ,we have 
+
+𝐿 (𝑠 )( 𝑥 2𝐻 ) = 𝑠 (𝑟𝐻 ) = 𝑠𝑟𝐻 = 𝑟 3𝑠𝐻 = 𝑟 3𝐻 = 𝑥 4𝐻, 
+
+which gives 𝐿 (𝑠 )4,2 = 1. Continuing in the same manner, we obtain 
+
+𝐿 (𝑟 ) = 
+
+⎡⎢⎣
+
+0 0 0 11 0 0 00 1 0 00 0 1 0
+
+⎤⎥⎦ , 𝐿 (𝑠 ) = 
+
+⎡⎢⎣
+
+1 0 0 00 0 0 10 0 1 00 1 0 0
+
+⎤⎥⎦
+
+The remaining left action matrices can be constructed using the property of the representation: 
+
+𝐿 (𝑒 ) = 𝐿 (𝑟 )4 = 𝐿 (𝑠 )2 = 𝐼 , 𝐿 (𝑟𝑠 ) = 𝐿 (𝑟 )𝐿 (𝑠 ),
+
+etc. Next, the normalizer is 𝑁 𝐺 (𝐻 ) = {𝑒, 𝑠, 𝑟 2, 𝑟 2𝑠 } and we find 
+
+𝑁 𝐺 (𝐻 )/𝐻 = {𝐻, 𝑟 2𝐻 }.
+
+Again, by Proposition II.3, there are 2 unique right ac-tion permutation matrices, namely, 𝑅 (𝑒 ) = 𝑅 (𝑠 ) and 
+
+𝑅 (𝑟 2) = 𝑅 (𝑟 2𝑠 ). Explicitly, 
+
+𝑅 (𝑒 ) = 𝑅 (𝑠 ) = 𝐼 ; 𝑅 (𝑟 2) = 𝑅 (𝑟 2𝑠 ) = 
+
+⎡⎢⎣
+
+0 0 1 00 0 0 11 0 0 00 1 0 0
+
+⎤⎥⎦
+
+▷
+
+For a finite field 𝐹 and a finite group 𝐺 , the group algebra 𝐹 [𝐺 ] is a set of formal linear combinations 
+
+𝐹 [𝐺 ] = {︁∑︁ 
+
+> 𝑔 ∈𝐺
+
+𝜆 𝑔 𝑔 : 𝜆 𝑔 ∈ 𝐹 }︁ .
+
+Elements a =∑︀ 𝑔 ∈𝐺 𝛼 𝑔 𝑔 and b =∑︀ 𝑔 ∈𝐺 𝛽 𝑔 𝑔 can be added and multiplied according to 
+
+a + b =∑︁ 
+
+> 𝑔 ∈𝐺
+
+(𝛼 𝑔 + 𝛽 𝑔 )𝑔 
+
+a * b =∑︁ 
+
+> 𝑔,ℎ ∈𝐺
+
+(𝛼 ℎ𝛽 ℎ−1𝑔 )𝑔, 
+
+Let 𝐻 ≤ 𝐺 be a subgroup and let 
+
+a =∑︁ 
+
+> 𝑔 ∈𝐺
+
+𝛼 𝑔 𝑔, b =∑︁ 
+
+> 𝑔 ∈𝑁 𝐺 (𝐻 )
+
+𝛽 𝑔 𝑔. 
+
+The maps 𝐿 and 𝑅 define a natural action on 𝐹 [𝐺 ] anf 
+
+𝐹 [𝑁 𝐺 (𝐻 )], respectively, according to 
+
+𝐿 (a) = ∑︁ 
+
+> 𝑔 ∈𝐺
+
+𝛼 𝑔 𝐿 (𝑔 ), 𝑅 (b) = ∑︁ 
+
+> 𝑔 ∈𝑁 𝐺 (𝐻 )
+
+𝛽 𝑔 𝑅 (𝑔 ).
+
+Note that 𝐿 (a1 * a2) = 𝐿 (a1)𝐿 (a2), 𝑅 (b1 * b2) =
+
+𝑅 (b2)𝑅 (b1), and [ 𝐿 (a), 𝑅 (b)] = 0 by Proposition II.2. 
+
+III. CODE CONSTRUCTION 
+
+In this section, we present our code construction, which is based on the framework of two-block CSS codes. Orig-inally introduced by Kovalev and Pryadko [14], these codes can be viewed as a generalization of an early pa-per on bicycle codes, proposed by MacKay et al. [24]. A 
+
+two-block CSS code is defined by parity-check matrices of the form 
+
+𝐻 𝑋 = [ 𝐴 | 𝐵 ] and 𝐻 𝑍 = [ −𝐵 𝑇 | 𝐴 𝑇 ],
+
+where 𝐴 and 𝐵 are square commuting matrices over a finite field. Using the matrices 𝐻 𝑋 and 𝐻 𝑍 in this form enables one to fulfill effortlessly the CSS commutativ-ity condition: indeed, 𝐻 𝑋 𝐻 𝑇 𝑍 = −𝐴𝐵 + 𝐵𝐴 = 0. Our construction belongs to two-block CSS codes and can be described as follows: 5
+
+Construction 1. Let 𝐹 be a finite field, let 𝐺 be a finite group, let 𝐻 ≤ 𝐺 , and let 𝑁 = 𝑁 𝐺 (𝐻 ) be the normalizer of 𝐻 in 𝐺 . For a given a ∈ 𝐹 [𝐺 ] and b ∈ 𝐹 [𝑁 ], define a two-block CSS code 𝑄 𝐻 𝐺 (a, b) via the parity-check matri-ces 
+
+𝐻 𝑋 = [ 𝐿 (a) | 𝑅 (b)] and 𝐻 𝑍 = [ −𝑅 (b)𝑇 | 𝐿 (a)𝑇 ].
+
+We call the code 𝑄 𝐻 𝐺 binary if 𝐹 = F2.Before analyzing this construction, we comment on its relation to existing work. Two-block group algebra (2BGA) codes [10] form a large family of qLDPC codes, including many well-known families, such as Generalized Bicycle (GB) codes [14] and Bivariate Bicycle (BB) codes [9]. The code family 𝑄 𝐻 𝐺 (a, b) generalizes the 2BGA con-struction: indeed if 𝐻 ▷𝐺 is normal, then Core 𝐺 (𝐻 ) = 𝐻 .By Proposition II.3, in this case, the matrices 𝐿 are the permutation matrices representing the left regular action of the quotient group 𝐺/𝐻 on itself. Similarly, because 
+
+𝑁 𝐺 (𝐻 ) = 𝐺 when 𝐻 is a normal subgroup, the matri-ces 𝑅 describe the right regular action of 𝐺/𝐻 , and thus, the code 𝑄 𝐻 𝐺 (a, b) reduces to the 2BGA code defined over the group 𝐺/𝐻 . Further specializing 𝐺 , we obtain most families of BB-related codes known in the literature. The precise reductions are summarized in Table I, and Fig-ure 1 presents a visual illustration of the interrelations between these code families. Let us define the support sets of the group algebra elements as supp( a) := {𝑔 ∈ 𝐺 : 𝛼 𝑔 ̸ = 0 },
+
+supp( b) := {𝑔 ∈ 𝑁 𝐺 (𝐻 ) : 𝛽 𝑔 ̸ = 0 },
+
+and refer to the number of non-zero terms as their re-spective weights denoted by 𝑤 a = | supp( a)| and 𝑤 b =
+
+| supp( b)|. In the following proposition, we record the parameters provides an upper bound on the stabilizer weights of 𝑄 𝐻 𝐺 (a, b). 
+
+Proposition III.1. Let 𝑄 𝐻 𝐺 (a, b) be the code defined in Construction 1 and let 𝑚 = [ 𝐺 : 𝐻 ] Then 𝑄 𝐻 𝐺 (a, b) has the parameters 
+
+𝑛 = 2 𝑚, 𝑘 = 𝑛 − rank( 𝐻 𝑋 ) − rank( 𝐻 𝑍 ),𝑑 = min( 𝑑 𝑋 , 𝑑 𝑍 ),
+
+where the 𝑋 - and 𝑍 -distances are given by 
+
+𝑑 𝑋 = min {wt( 𝑣 ) : 𝑣 ∈ ker 𝐻 𝑋 ∖ Im 𝐻 𝑇 𝑍 },𝑑 𝑍 = min {wt( 𝑣 ) : 𝑣 ∈ ker 𝐻 𝑍 ∖ Im 𝐻 𝑇 𝑋 }.
+
+The weight of the stabilizer generators of the code 
+
+𝑄 𝐻 𝐺 (a, b) satisfies 𝑤 ≤ 𝑤 a + 𝑤 b.Proof. The matrices 𝐿 and 𝑅 each have dimension 𝑚 ×𝑚 ,making the code length 𝑛 equal to 2 𝑚 . The dimension and distance follow since the code 𝑄 𝐻 𝐺 (a, b) is a CSS code. The statement about the stabilizer weight is immediate. We say that the code 𝑄 𝐻 𝐺 (a, b) has regular stabilizer weight if the weights of all stabilizer generators in the matrices 𝐻 𝑋 and 𝐻 𝑍 satisfy 𝑤 = 𝑤 a + 𝑤 b.
+
+Remark 1. By Proposition II.3, choosing the support of the group algebra elements a and b from the representa-tives of the cosets 𝐺/ Core 𝐺 (𝐻 ) and 𝑁 𝐺 (𝐻 )/𝐻 ensures that the underlying permutation matrices composing the sums 𝐿 (a) and 𝑅 (b) remain completely distinct  
+
+> A. Planar connectivity and code thickness
+
+In addition to the code parameters and noise tolerance, implementations call for CSS codes with planar or close-to-planar Tanner graphs, which simplify connectivity and design of syndrome extraction circuits. Code thickness, which, roughly speaking, measures how close the Tanner graph is to being planar, is one way to quantify this re-quirement. In this section, we analyze the thickness of our code construction. To define the Tanner graph of an [[ 𝑛, 𝑘, 𝑑 ]] CSS code 𝒬 , recall that it is described by a set of data qubits 𝑉 𝐷 = {𝑞 1, 𝑞 2, . . . , 𝑞 𝑛 }, a set of 𝑋 -checks 
+
+𝑉 𝑋 = {𝑋 1, 𝑋 2, . . . , 𝑋 𝑟 𝑋 }, and a set of 𝑍 -checks 𝑉 𝑍 =
+
+{𝑍 1, 𝑍 2, . . . , 𝑍 𝑟 𝑍 }. Each 𝑋 - or 𝑍 -check corresponds to an 𝑋 - or 𝑍 -stabilizer generator of the code 𝒬 . If the sta-bilizer generators are independent, then 𝑛 = 𝑘 + 𝑟 𝑋 + 𝑟 𝑍 .
+
+Definition III.1 (Tanner graph) . The 𝑋 -Tanner graph 
+
+𝜏 𝑋 = ( 𝑉 𝐷 ∪ 𝑉 𝑋 , 𝐸 𝑋 ) of the code 𝒬 is the bipartite graph whose vertex set is 𝑉 𝐷 ∪ 𝑉 𝑋 and the connections 𝐸 𝑋 are given by the matrix 𝐻 𝑋 . Similarly, the 𝑍 -Tanner graph 
+
+has vertices 𝑉 𝐷 ∪ 𝑉 𝑍 and connections 𝐸 𝑍 defined by the matrix 𝐻 𝑍 . Finally, the full Tanner graph of the code 𝒬 
+
+is defined as the union 𝜏 = 𝜏 𝑋 ∪ 𝜏 𝑍 , with the vertex set 
+
+𝑉 = 𝑉 𝐷 ∪ 𝑉 𝑋 ∪ 𝑉 𝑍 and the edge set 𝐸 = 𝐸 𝑋 ∪ 𝐸 𝑍 .The planarity of the Tanner graph of a quantum code can be an important consideration for certain hardware architectures, since crossing connections between qubits can induce additional crosstalk noise. Therefore, planar codes, such as surface codes, are favorable due to these practical considerations. When planarity is not achiev-able, a solution can be codes whose Tanner graphs can be decomposed into a small number of planar subgraphs. This approach can be quantified using the concept called graph thickness. Formally, the thickness of a graph, de-noted 𝜃 below, is defined as the minimum number of pla-nar subgraphs into which its edges can be partitioned. CSS codes with low thickness were recently studied in [25]. By a classic result from graph theory [26], CSS codes whose Tanner graph has maximal degree 𝛿 , can be implemented in ⌈𝛿/ 2⌉ planar layers. Using this result for the code 𝑄 𝐻 𝐺 (a, b), we obtain a bound 𝜃 ≤ ⌈ (𝑤 a +𝑤 b)/2⌉.Our main result in this section states that, relying on the highly structured Tanner graph of 𝑄 𝐻 𝐺 (a, b), this bound can be improved as follows. 
+
+Lemma III.2. Let 𝑄 𝐻 𝐺 (a, b) be the code of length 𝑛 
+
+defined in Construction 1 constructed over the binary 6
+
+field. Assume the code has regular stabilizer weight of 
+
+𝑤 = 𝑤 a + 𝑤 b, where 𝑤 a and 𝑤 b are the weights of the group algebra elements a ∈ F2[𝐺 ] and b ∈ F2[𝑁 𝐺 (𝐻 )] .III.1 Then the thickenss of the Tanner graph of 𝑄 𝐻 𝐺 (a, b)
+
+satisfies the inequalities ⌈︁ 
+
+𝑛𝑤 
+
+4( 𝑛 − 1) ⌉︁ ≤ 𝜃 ≤ max (︁⌈︁ 𝑤 a
+
+2⌉︁ ,⌈︁ 𝑤 b
+
+2⌉︁ ,⌈︁ 𝑤 
+
+3⌉︁)︁ .
+
+In particular, if 𝑤 a = 𝑤 b, then the thickness of a code 
+
+𝑄 𝐻 𝐺 (a, b) of length 𝑛 ≥ 4( ⌊𝑤/ 4⌋ + 1) /(4 − (𝑤 mod 4)) 
+
+satisfies ⌊︁ 
+
+𝑤 
+
+4⌋︁ + 1 ≤ 𝜃 ≤⌈︁ 𝑤 
+
+3⌉︁ .
+
+Proof. The proof for the upper bound is a straightforward generalization of Lemma 2 in [9]. Let 𝒯 = 𝒯 1 ∪𝒯 2 ∪. . . ∪𝒯 𝜃 
+
+be an edge-partition of the Tanner graph of 𝑄 𝐻 𝐺 (a, b) into planar subgraphs Let each subgraph 𝒯 𝑖 be a bipartite graph defined by the parity-check matrices 𝐻 (𝑖 ) 
+
+> 𝑋
+
+and 𝐻 (𝑖 ) 
+
+> 𝑍
+
+.We claim that any such subgraph defined by the matrices of the form 
+
+𝐻 (𝑖 ) 
+
+> 𝑋
+
+= [ 𝐿 (𝑔 𝑟 ) + 𝐿 (𝑔 𝑠 ) | 𝑅 (𝑔 𝑡 )] , (3) 
+
+𝐻 (𝑖 ) 
+
+> 𝑍
+
+= [ 𝑅 (𝑔 −1 
+
+> 𝑡
+
+) | 𝐿 (𝑔 −1 
+
+> 𝑟
+
+) + 𝐿 (𝑔 −1 
+
+> 𝑠
+
+)] (4) or 
+
+𝐻 (𝑖 ) 
+
+> 𝑋
+
+= [ 𝐿 (𝑔 𝑟 ) | 𝑅 (𝑔 𝑡 ) + 𝑅 (𝑔 𝑞 )] , (5) 
+
+𝐻 (𝑖 ) 
+
+> 𝑍
+
+= [ 𝑅 (𝑔 −1 
+
+> 𝑡
+
+) + 𝑅 (𝑔 −1 
+
+> 𝑞
+
+) | 𝐿 (𝑔 −1 
+
+> 𝑠
+
+)] (6) is planar for every 𝑔 𝑟 , 𝑔 𝑠 ∈ 𝐺 and 𝑔 𝑞 , 𝑔 𝑡 ∈ 𝑁 𝐺 (𝐻 ). For the case of BB codes, this is proved in [9]; see the proof of their Lemma 2, where 𝐺 = Z𝑙 × Z𝑚 and 𝐻 = {𝑒 }.However, their result affords a straightforward extension to any 𝑄 𝐻 𝐺 (a, b) code. Namely, following the argument in [9], one can show that each subgraph 𝒯 𝑖 is composed of disconnected wheel graphs. Each wheel graph consists of an inner cycle connected to an outer cycle of the same length. The length of both cycles is 𝑙 , which is an integer given by ( 𝑔 𝑟 𝑔 −1 
+
+> 𝑠
+
+)𝑙 = 𝐼 (or ( 𝑔 𝑡 𝑔 −1 
+
+> 𝑞
+
+)𝑙 = 𝐼 ). There are 𝑙 
+
+radial edges equally spaced from each other. A detailed description of the wheel graph is given in the Appendix B. Proposition II.2 implies that such a graph is well de-fined, and since each individual wheel graph is planar, the subgraph 𝒯 𝑖 corresponding to the 𝑖 -th layer must be planar. Therefore, an upper bound on the thickness can be found by partitioning the 𝐿 and 𝑅 matrices into differ-ent layers obeying the forms in (3) and (5). Let 𝑤 (𝑖 )
+
+> a
+
+and 𝑤 (𝑖 ) 
+
+> b
+
+be the number of 𝐿 and 𝑅 matrices assigned to the 𝑖 -th layer. For the subgraphs to take the planar forms described above, we must simultaneously satisfy 
+
+𝑤 (𝑖 ) 
+
+> a
+
+, 𝑤 (𝑖 ) 
+
+> b
+
+≤ 2 and 𝑤 (𝑖 ) 
+
+> a
+
++ 𝑤 (𝑖 ) 
+
+> b
+
+≤ 3 for each layer. Parti-tioning the 𝑤 a total 𝐿 matrices and 𝑤 b total 𝑅 matrices under these constraints directly yields the upper bound stated in the lemma. The proof for the lower bound follows from the foun-dational corollary of Euler’s formula for bipartite graphs: Any simple, planar bipartite graph with 𝑉 ≥ 3 vertices must satisfy 𝐸 ≤ 2𝑉 − 4, where 𝐸 is the number of edges [27, Thm.6.1.23]. This corollary yields a lower bound on the thickness, that is ⌈︂ 
+
+𝐸 
+
+2𝑉 − 4⌉︂ ≤ 𝜃. 
+
+Note that we have 𝑛/ 2 Z checks, 𝑛/ 2 X checks, and 𝑛 
+
+data qubits, making the total number of vertices 𝑉 =2𝑛 . Since we assume the code attains the exact regular stabilizer weight 𝑤 = 𝑤 a + 𝑤 b, we have exactly 𝐸 = 𝑛𝑤 
+
+edges, yielding the bound ⌈︂(︂ 
+
+𝑛 𝑛 − 1)︂ 
+
+𝑤 
+
+4⌉︂ ≤ 𝜃. 
+
+Note that if the code length satisfies 𝑛 ≥ 4( ⌊𝑤/ 4⌋ +1) /(4 − (𝑤 mod 4)), then ⌈︂(︂ 
+
+𝑛 𝑛 − 1)︂ 
+
+𝑤 
+
+4⌉︂ =⌊︁ 𝑤 
+
+4⌋︁ + 1 ,
+
+completing the proof. Note that any weight-6 code 𝑄 𝐻 𝐺 (ˆ 𝑎, ˆ𝑏 ) with 𝑤 a = 𝑤 b =3 has thickness exactly 𝜃 = 2. Indeed, the upper bound in Lemma III.2 gives 𝜃 ≤ 2, while the Euler lower bound gives 𝜃 ≥ 2 for all 𝑛 ≥ 4. This condition is automatically satisfied here: since the block R(^b) has row weight 3 and has [ 𝐺 : 𝐻 ] columns, we must have [ 𝐺 : 𝐻 ] ≥ 3, and hence the code length 𝑛 = 2[ 𝐺 : 𝐻 ] satisfies 𝑛 ≥ 6. Similarly, any weight-8 𝑄 𝐻 𝐺 (a, b) code with 𝑤 a = 𝑤 b = 4 must have a thickness of exactly 𝜃 = 3 by Lemma III.2.  
+
+> IV. CODE SEARCH
+
+To find codes with good parameters, we performed a computer search in the set of quantum LDPC codes intro-duced in this paper, examining binary codes with com-ponent weights 𝑤 a = 𝑤 b = 3 and 4. We limited ourselves to non-Abelian groups and their non-normal subgroups to expand our search space beyond the 2BGA code fam-ily. To improve the efficiency of the search process, it is important to eliminate equivalent codes in advance, which raises the question of characterizing equivalences between the codes in the family 𝑄 𝐻 𝐺 (a, b).  
+
+> A. Code Equivalences
+
+We say that two quantum error correction codes are equivalent if one is obtained from the other by perform-ing some set of single-qubit unitaries and qubit permuta-tions [28]. Such equivalent codes share the same logical parameters. In the context of CSS codes, code equiva-lence corresponds to applying certain column operations 7to the parity-check matrices, i.e., permutations and non-zero scalar multiplications. Identifying equivalent codes saves computational re-sources and enables one to examine larger code sets, increasing the chances of finding good codes. For this purpose, the authors of [10] studied equivalent codes for 2BGA codes (see Theorem 6 in [10]). As discussed ear-lier, their results apply to the codes 𝑄 𝐻 𝐺 (a, b) when 𝐻 is a normal subgroup of 𝐺 . Since we focus on non-normal subgroups, we modify the argument of [10] to show that acting on the code 𝑄 𝐻 𝐺 (a, b) by group elements and con-stant multiplication results in an equivalent code. 
+
+Lemma IV.1. Let 𝑄 𝐻 𝐺 (a, b) be a CSS code defined in Construction 1. Let 𝑔 𝑎 ∈ 𝐺 , 𝑔 𝑏 ∈ 𝑁 𝐺 (𝐻 ), and 𝛼, 𝛽 ∈
+
+𝐹 ∖ { 0}. Then the code 𝑄 𝐻 𝐺 (a, b) is equivalent to the code 
+
+𝑄 𝐻 𝐺 (a * (𝛼𝑔 𝑎 ), (𝛽𝑔 𝑏 ) * b).Proof. Let 𝐻 𝑋 , 𝐻 𝑍 be the parity-check matrices of the code 𝑄 𝐻 𝐺 (a, b) and 𝐻 ′ 
+
+> 𝑋
+
+, 𝐻 ′ 
+
+> 𝑍
+
+be the parity-check matrices of the code 𝑄 𝐻 𝐺 (a * (𝛼𝑔 𝑎 ), (𝛽𝑔 𝑏 ) * b). We need to show that 𝐻 ′ 
+
+> 𝑋
+
+and 𝐻 ′ 
+
+> 𝑍
+
+can be obtained by permuting and scal-ing the columns and/or row operations on 𝐻 𝑋 and 𝐻 𝑍 ,respectively. Let us define the matrix 
+
+𝑃 𝑋 =[︂ 𝐿 (𝛼𝑔 𝑎 ) 00 𝑅 (𝛽𝑔 𝑏 )]︂ .
+
+Using the relations 
+
+𝐿 (a * (𝛼𝑔 𝑎 )) = 𝐿 (a)𝐿 (𝛼𝑔 𝑎 )
+
+𝑅 (( 𝛽𝑔 𝑏 ) * b) = 𝑅 (b)𝑅 (𝛽𝑔 𝑏 ),
+
+we observe that 𝐻 ′ 
+
+> 𝑋
+
+= 𝐻 𝑋 𝑃 𝑋 . In other words, 𝐻 ′ 
+
+> 𝑋
+
+is obtained by applying column operations (permutations and scaling) to 𝐻 𝑋 . Applying the transform 𝑃 𝑋 to the data qubits requires us to perform a corresponding trans-formation 𝑃 𝑍 = ( 𝑃 −1 
+
+> 𝑋
+
+)𝑇 of the 𝑍 stabilizers to preserve the CSS orthogonality property. Now, let us define the invertible row-operation matrix 
+
+𝑀 = 𝛼𝛽 𝑅 (𝑔 𝑏 )𝑇 𝐿 (𝑔 𝑎 )𝑇 .
+
+Performing matrix multiplication, we observe that 𝐻 ′ 
+
+> 𝑍
+
+=
+
+𝑀 (𝐻 𝑍 𝑃 𝑍 ), This matrix can be obtained by applying the corresponding column operations to 𝐻 𝑍 , followed by a set of valid row operations. This completes the proof. Lemma IV.1 suggests the possibility of reducing the search space. Namely, suppose we search for codes with a fixed weight 𝑤 = 𝑤 a +𝑤 b, where 𝑤 a and 𝑤 b are defined as in Proposition III.1. Choose 𝑤 a distinct elements from 
+
+𝐺 that are coset representatives for the quotient group 
+
+𝐺/ Core 𝐺 (𝐻 ) and 𝑤 b distinct elements from 𝑁 𝐺 (𝐻 ) that are coset representatives for 𝑁 𝐺 (𝐻 )/𝐻 . Lemma IV.1 im-plies that we can fix one element in each of a and b with-out loss of generality to the equivalence claim. Therefore, it is sufficient to choose 𝑤 a − 1 (resp. 𝑤 b − 1) elements instead of 𝑤 a (resp. 𝑤 b), which significantly reduces the size of the search space depending on the group size. Additionally, reducing the size of the search space can be accomplished by excluding certain redundant sub-groups. In practice, computer algebra systems such as GAP return exhaustive lists of subgroups that include many conjugate copies. Searching over all such conju-gates would needlessly duplicate the same code struc-tures, increasing the computational load. To prevent this, in the following lemma, we show that codes con-structed using conjugate subgroups are equivalent to each other. To state the lemma, we first relate conjugation and normalizers. Let 𝐻 1 < 𝐺 be a group-subgroup pair and let 𝐻 2 = 𝑔 −1𝐻 1𝑔 be a subgroup conjugate to 𝐻 1
+
+for some 𝑔 ∈ 𝐺 . Then 𝑁 𝐺 (𝐻 2) = 𝑔 −1𝑁 𝐺 (𝐻 1)𝑔 and so 
+
+𝑔 −1 * b * 𝑔 ∈ 𝐹 [𝑁 𝐺 (𝐻 2)]. 
+
+Lemma IV.2. Let 𝐻 1 < 𝐺, 𝐻 2 = 𝑔 −1𝐻 1𝑔 for 𝑔 ∈ 𝐺 .Then the codes 𝑄 𝐻 1 
+
+> 𝐺
+
+(a, b) and 𝑄 𝐻 2 
+
+> 𝐺
+
+(a, 𝑔 −1 *b*𝑔 ) are equiv-alent. Proof. Let us define the map 
+
+𝜎 𝑔 : 𝐺/𝐻 1 → 𝐺/𝐻 2
+
+𝑥𝐻 1 ↦ → (𝑥𝑔 )𝐻 2.
+
+We have the chain of relationships: 
+
+𝑥𝐻 1 = 𝑦𝐻 1 ⇔ 𝑥 −1𝑦 ∈ 𝐻 1
+
+⇔ 𝑔 −1𝑥 −1𝑦𝑔 ∈ 𝑔 −1𝐻 1𝑔 
+
+⇔ (𝑥𝑔 )−1(𝑦𝑔 ) ∈ 𝐻 2
+
+⇔ (𝑥𝑔 )𝐻 2 = ( 𝑦𝑔 )𝐻 2 ⇔ 𝜎 𝑔 (𝑥𝐻 1) = 𝜎 𝑔 (𝑦𝐻 1)By reading this chain of relationships both ways, we note that 𝜎 𝑔 is well defined and injective. Since [ 𝐺 : 𝐻 1] = [ 𝐺 :
+
+𝐻 2] and 𝐺 is finite, it must also be surjective, showing that 𝜎 𝑔 is a well-defined bijection for all 𝑔 ∈ 𝐺 . Let 
+
+𝐿 1 (𝐿 2) be the homomorphism as in (1) defined for the subgroup 𝐻 1 (𝐻 2). Then (𝐿 2(ℎ) ∘ 𝜎 𝑔 )( 𝑥𝐻 1) = 𝐿 2(ℎ)(( 𝑥𝑔 )𝐻 2)= ( ℎ(𝑥𝑔 )) 𝐻 2
+
+= (( ℎ𝑥 )𝑔 )𝐻 2
+
+= 𝜎 𝑔 (( ℎ𝑥 )𝐻 1) = ( 𝜎 𝑔 ∘ 𝐿 1(ℎ))( 𝑥𝐻 1).
+
+Hence, for any ℎ ∈ 𝐺 we have 
+
+𝐿 2(ℎ) = 𝜎 𝑔 ∘ 𝐿 1(ℎ) ∘ 𝜎 −1
+
+> 𝑔
+
+Let 𝑃 𝜎 𝑔 be the permutation matrix representing the bi-jection 𝜎 𝑔 . Then we have 
+
+𝐿 2(a) = 𝑃 𝜎 𝑔 𝐿 1(a)𝑃 𝑇 𝜎 𝑔 . (7) Below we write 𝑁 𝑖 := 𝑁 𝐺 (𝐻 𝑖 ), 𝑖 = 1 , 2. Similarly, let 
+
+𝑅 𝑖 , 𝑖 = 1 , 2 be the homomorphism in (2). Note that for any ℎ ∈ 𝑁 1, 𝑔 −1ℎ𝑔 ∈ 𝑁 2 since 𝐻 2 = 𝑔 −1𝐻 1𝑔 . Then, (𝑅 2(𝑔 −1ℎ𝑔 ) ∘ 𝜎 𝑔 )( 𝑥𝐻 1) = 𝑅 2(𝑔 −1ℎ𝑔 )(( 𝑥𝑔 )𝐻 2)= (( 𝑥𝑔 )𝑔 −1ℎ𝑔 )𝐻 28= (( 𝑥ℎ )𝑔 )𝐻 2
+
+= 𝜎 𝑔 (( 𝑥ℎ )𝐻 1)= ( 𝜎 𝑔 ∘ 𝑅 1(ℎ))( 𝑥𝐻 1).
+
+Therefore, for any ℎ ∈ 𝑁 1, we have 
+
+𝑅 2(𝑔 −1ℎ𝑔 ) = 𝜎 𝑔 ∘ 𝑅 1(ℎ) ∘ 𝜎 −1
+
+> 𝑔
+
+Extending this by linearity to the group algebra, for every 
+
+b ∈ 𝐹 (𝑁 1), we obtain 
+
+𝑅 2(𝑔 −1 * b * 𝑔 ) = 𝑃 𝜎 𝑔 𝑅 1(b)𝑃 𝑇 𝜎 𝑔 . (8) Let 𝐻 𝑋 and 𝐻 𝑍 be the parity-check matrices of the code 
+
+𝑄 𝐻 1 
+
+> 𝐺
+
+(a, b). Then the parity-check matrices of the code 
+
+𝑄 𝐻 2 
+
+> 𝐺
+
+(a, 𝑔 −1 * b * 𝑔 ) have the form 
+
+𝐻 ′ 
+
+> 𝑋
+
+= [ 𝑃 𝜎 𝑔 𝐿 1(a)𝑃 𝑇 𝜎 𝑔 | 𝑃 𝜎 𝑔 𝑅 1(b)𝑃 𝑇 𝜎 𝑔 ]= 𝑃 𝜎 𝑔 𝐻 𝑋 [︂ 𝑃 𝑇 𝜎 𝑔 00 𝑃 𝑇 𝜎 𝑔 ]︂ 
+
+and 
+
+𝐻 ′ 
+
+> 𝑍
+
+= [ −𝑃 𝜎 𝑔 𝑅 1(b)𝑇 𝑃 𝑇 𝜎 𝑔 | 𝑃 𝜎 𝑔 𝐿 1(a)𝑇 𝑃 𝑇 𝜎 𝑔 ]= 𝑃 𝜎 𝑔 𝐻 𝑍 [︂ 𝑃 𝑇 𝜎 𝑔 00 𝑃 𝑇 𝜎 𝑔 ]︂ ,
+
+and they are obtained by applying the same row and column permutations to the parity-check matrices of the code 𝑄 𝐻 1 
+
+> 𝐺
+
+(a, b). This lemma shows that it suffices to perform the code search only for a single subgroup from each conjugacy class.  
+
+> B. Search Results
+
+To implement the search, we relied on the Small Groups library in GAP [29] to identify and enumerate all groups and their subgroups up to a certain order, limit-ing ourselves to non-abelian groups and their non-normal subgroups (the case of normal subgroups was previously covered in [10]). To find 2BGA codes of a given code length 𝑛 , it is suf-ficient to search over all groups of order 𝑙 = 𝑛/ 2. How-ever, in our generalized construction, the number of al-gebraic structures that yield quantum codes of length 𝑛 
+
+is much higher. For instance, consider a quantum code of length 𝑛 = 16. While there are only 5 groups of or-der 𝑙 = 8, there are many more options for group and subgroup pairs ( 𝐺, 𝐻 ) satisfying the index requirement [𝐺 : 𝐻 ] = 𝑙 . Therefore, while it is possible to enumerate all low-weight 2BGA codes over groups of a certain or-der, it is not computationally feasible to search over all group–subgroup pairs ( 𝐺, 𝐻 ) that yield a quantum code of a given length. For this reason, we restricted our code search to a se-lected subset of ( 𝐺, 𝐻 ) pairs using a heuristic designed to filter out overly constrained algebraic structures. Recall that the building blocks of our codes are the left and right action matrices, as defined in Proposition II.1. By Propo-sition II.3, there are |𝐺 |/| Core 𝐺 (𝐻 )| unique left action matrices 𝐿 , and |𝑁 𝐺 (𝐻 )|/|𝐻 | unique right action matri-ces 𝑅 for a given pair ( 𝐺, 𝐻 ). For the case of 2BGA codes (when 𝐻 is a normal subgroup), these building blocks are regular left and right group action matrices, and there are exactly 𝑙 = [ 𝐺 : 𝐻 ] of each for a quotient group 𝐺/𝐻 of order 𝑙 . However, for the general case where 𝐻 is not nor-mal, the normalizer 𝑁 𝐺 (𝐻 ) can be restrictive if the order of the quotient group 𝑁 𝐺 (𝐻 )/𝐻 is not large enough. In-deed, for certain group and subgroup pairs, the order of this quotient group is much lower than 𝑙 , and the codes constructed using these matrices yield only trivial pa-rameters with high probability On the other hand, the number of unique left action matrices can be significantly larger than the index 𝑙 = [ 𝐺 : 𝐻 ]. Consequently, we ex-clude group-subgroup pairs ( 𝐺, 𝐻 ) where the quotient order |𝑁 𝐺 (𝐻 )|/|𝐻 | is too small, as such pairs are highly likely to yield only trivial codes. We performed an exhaustive search over promising (𝐺, 𝐻 ) pairs, i.e., pairs for which the number of unique left action matrices, |𝐺 |/| Core 𝐺 (𝐻 )|, is larger than [ 𝐺 :
+
+𝐻 ], and the number of unique right action matrices, 
+
+|𝑁 𝐺 (𝐻 )|/|𝐻 |, is not too small. More specifically, we fo-cused mostly on ( 𝐺, 𝐻 ) pairs such that |𝑁 𝐺 (𝐻 )|/|𝐻 | =[𝐺 : 𝐻 ]/2 or [ 𝐺 : 𝐻 ]/3 and |𝐺 |/| Core 𝐺 (𝐻 )| = 2[ 𝐺 : 𝐻 ] or (3 /2[ 𝐺 : 𝐻 ]. Our goal was to find binary codes 𝑄 𝐻 𝐺 (ˆ 𝑎, ˆ𝑏 )with stabilizer weights 𝑤 ^𝑎 = 𝑤 ^𝑏 = 3 and 𝑤 ^𝑎 = 𝑤 ^𝑏 = 4. Equivalent codes were excluded based on Lemmas IV.1 and IV.2. Since 𝐹 is the binary field, the search process is equivalent to enumerating all possible subsets of the quo-tient groups 𝐺/ Core 𝐺 (𝐻 ) and 𝑁 𝐺 (𝐻 )/𝐻 of size 𝑤 a − 1and 𝑤 b − 1, respectively (recall that we can deduct 1 by the argument in Lemma IV.1). Therefore, for a given pair ( 𝐺, 𝐻 ), the size of the search space is given by 
+
+𝑁 T =(︂ |𝐺 |/| Core 𝐺 (𝐻 )| − 1
+
+𝑤 a − 1)︂(︂ 
+
+|𝑁 𝐺 (𝐻 )|/|𝐻 | − 1
+
+𝑤 b − 1)︂ . (9) We had to impose further restrictions on the search space because for certain pairs ( 𝐺, 𝐻 ), particularly for 
+
+𝑤 a = 𝑤 b = 4, exhaustive search proves computationally infeasible. In such cases, we employ a randomized search strategy to cull the entire set of possible codes. Instead of examining each of them, we evaluate only a fraction of candidates selected with probability 𝑝 , chosen as follows. First, we choose a count 𝑁 target of codes to be exam-ined, which we set to be between 10 4 to 10 7 depending on the group size, and then analyze or discard the code candidates with probability 𝑝 = 𝑁 target /𝑁 T.Finding the code distance is a computationally inten-sive procedure, which we handled as follows. We used the GAP package QDistRnd [30], which provides an up-per bound on the minimum distance, as a quick proxy to filter out poor candidates and identify codes with poten-tially good parameters. If the returned upper bound was high enough, we used the integer programming approach 9TABLE II: Parameters of the new qLDPC codes with notable parameters. The underlying group 𝐺 is identified by its order ℓ and GAP index 𝑚 via SmallGroup( ℓ, 𝑚 ). The structure is the output of the GAP function 
+
+StructureDescription(G) . For exact reproducibility, 𝑠 denotes the integer index of the subgroup 𝐻 within the list of non-normal subgroups, generated in GAP 4.14.0 via Filtered(AllSubgroups(G), H -> not IsNormal(G,H)) 
+
+The generating group algebra elements a and b are reported as integer arrays; these integers correspond to the indices of the respective coset representatives in the lists LeftCosets(G, Core(G,H)) and 
+
+LeftCosets(Normalizer(G,H), H) . All the distance values in this table are exact.                                                                                                                                                       
+
+> Code Parameters Group Descriptions Group Algebra GAP Identifiers
+> 𝑛 𝑘 𝑑 𝐺 Structure 𝐻 Structure abℓ𝑚 𝑠
+> 48 86𝐶 3×(( 𝐶 16 ⋊𝐶 2)⋊𝐶 4)𝐶 16 [1 ,34 ,48] [1 ,6,12] 384 512 53 96 810 𝐶 3×(( 𝐶 16 ⋊𝐶 2)⋊𝐶 4)𝐶 8[1 ,9,87] [1 ,21 ,23] 384 512 27 224 12 16 𝐶 7×(( 𝐶 4×𝐶 4)⋊𝐶 2)𝐶 2[1 ,81 ,186] [1 ,16 ,47] 224 53 184 16 8𝐶 21 ×(𝐶 3⋊𝐶 4)𝐶 6[1 ,14 ,71 ,89] [1 ,6,8,19] 252 21 6112 16 10 𝐶 7×(( 𝐶 4×𝐶 4)⋊𝐶 2)𝐶 4[1 ,11 ,59 ,81] [1 ,15 ,23 ,25] 224 53 9128 16 12 (𝐶 8⋊𝐶 2)⋊𝐶 8𝐶 2[1 ,47 ,75 ,88] [1 ,8,12 ,19] 128 10 1168 16 15 𝐶 7×(( 𝐶 6×𝐶 2)⋊𝐶 2)𝐶 2[1 ,72 ,106 ,109] [1 ,11 ,18 ,26] 168 33 1
+
+suggested in [31] to compute exact minimum distances. Throughout the paper, codes with exactly computed dis-tances are denoted by [[ 𝑛, 𝑘, 𝑑 ]], whereas codes with only a known upper bound on the distance are denoted by [[ 𝑛, 𝑘, ≤ 𝑑 ]]. We list some of the codes we found in Tables II and VI. For the codes in Table II, we performed a deeper analysis, including an evaluation of their circuit-level performance. A code of weight 𝑤 = 8 with parameters [[84 , 16 , 8]] that appears in this table was previously reported in previ-ous works [10] and [21]. We do not know whether these codes are equivalent because testing equivalence of codes (classical or quantum) is computationally hard. The re-maining parameter sets in Table II do not appear in earlier literature; in particular, the weight-6 codes with parameters [[48 , 8, 6]] and [[96 , 8, 10]] are not among the codes found by exhaustively examining all 2BGA codes of length ≤ 100 with stabilizer weight 6 in [10] (a [[48 , 8, 6]] code mentioned there has stabilizer weight 8). This find-ing supports the claim that the proposed construction method goes beyond the general 2BGA formalism, giv-ing rise to new quantum LDPC codes. To the best of our knowledge, the remaining codes listed in Table II do not appear anywhere in the literature. However, 2BGA codes of length over 100 have not been systematically enumer-ated, and it is possible that 2BGA codes with the same parameters, or even equivalent codes, might exist. Ad-ditionally,Table VI lists several other high-rate 𝑄 𝐻 𝐺 (a, b)codes with a potential to perform well in simulations.  
+
+> V. SYNDROME EXTRACTION CIRCUIT
+
+In this section, we introduce a maximally packed syn-drome extraction circuit for the code 𝑄 𝐻 𝐺 (a, b). In Ref. [9], the authors presented an algorithm yielding a syndrome extraction cycle for bivariate bicycle (BB) codes of weight 6. Their circuit minimizes the number of idle qubits and achieves a total depth of 8, includ-ing state initializations and measurements. To accom-plish this, they interleaved the 𝑋 - and 𝑍 -type checks such that no single qubit is operated on twice within a single time step, all while ensuring that this interleav-ing preserves the validity of the syndrome extraction. In this work, we generalize this construction to any 𝑄 𝐻 𝐺 (a, b)code with an arbitrary stabilizer weight less than or equal to 𝑤 = 𝑤 a + 𝑤 b.Let 𝑄 𝐻 𝐺 (a, b) be a code as defined in Construction 1 with block length 𝑛 = 2[ 𝐺 : 𝐻 ]. As in the previous sec-tion, here we study binary 𝑄 𝐻 𝐺 (a, b) codes. With this assumption, the matrices 𝐿 (a) and 𝑅 (b) from Construc-tion 1 can be decomposed as 
+
+𝐿 (a) = ∑︁ 
+
+> 𝑔 ∈supp( a)
+
+𝐿 (𝑔 ), and 𝑅 (b) = ∑︁ 
+
+> 𝑔 ∈supp( b)
+
+𝑅 (𝑔 ).
+
+Denote by 𝐿 (𝑔 )( 𝑖 ) (resp., 𝑅 (𝑔 )( 𝑖 )) the index 𝑗 such that the ( 𝑖, 𝑗 )-th entry of the permutation matrix 𝐿 (𝑔 )(resp., 𝑅 (𝑔 )) is 1. This notation corresponds to the in-verse permutation convention, identifying the column 𝑗 
+
+for a given row 𝑖 . Recall that the code 𝑄 𝐻 𝐺 (a, b) com-prises 𝑛/ 2 𝑋 -type checks, 𝑛/ 2 𝑍 -type checks, and 𝑛 data qubits. Let us label the 𝑋 and 𝑍 checks as 𝑋 [𝑖 ] and 
+
+𝑍 [𝑖 ], respectively, for 𝑖 = 1 , 2, . . . , 𝑛/ 2. We partition the data qubits into two blocks, labeled 𝐷 𝐿 [𝑖 ] and 𝐷 𝑅 [𝑖 ] for 
+
+𝑖 = 1 , 2, . . . , 𝑛/ 2, such that each check 𝑋 [𝑖 ] is connected to 𝐷 𝐿 [𝐿 (𝑔 )( 𝑖 )] for all 𝑔 ∈ supp( a) and to 𝐷 𝑅 [𝑅 (𝑔 )( 𝑖 )] for all 𝑔 ∈ supp( b). Because the transpose of a per-mutation matrix corresponds to the group inverse (i.e., 
+
+𝐿 (𝑔 )𝑇 = 𝐿 (𝑔 −1) and −𝑅 (𝑔 )𝑇 = 𝑅 (𝑔 −1)), it follows that each check 𝑍 [𝑖 ] is connected to 𝐷 𝐿 [𝑅 (𝑔 −1)( 𝑖 )] for all 𝑔 ∈ supp( b) and to 𝐷 𝑅 [𝐿 (𝑔 −1)( 𝑖 )] for all 𝑔 ∈ supp( a). For each edge incident to an 𝑋 -type check in the Tan-ner graph, the syndrome computation includes perform-ing a CNOT gate controlled by the check qubit and tar-geting the data qubit at the other end of the edge. Sim-ilarly, for each edge incident to a 𝑍 -type check, we need to perform a CNOT gate controlled by the correspond-ing data qubit and targeting the 𝑍 check. For the valid 10 syndrome extraction, these CNOT gates must be care-fully scheduled to follow each other. A straightforward approach is to perform all 𝑋 -type CNOT operations be-fore all 𝑍 -type CNOT operations, or vice versa. For optimized scheduling, we can interleave 𝑋 - and 𝑍 -type CNOT gates to reduce the overall circuit depth, thereby minimizing the idle time of the qubits. In Algorithm 1, we introduce a subroutine for scheduling interleaved 𝑋 -type and 𝑍 -type CNOT gates. This function pairs each 
+
+𝑋 -type CNOT round with a compatible 𝑍 -type CNOT round, ensuring that no single data qubit is targeted by multiple gates within a single time step. Ultimately, this subroutine will play a role in the algorithm defining the syndrome cycle of a 𝑄 𝐻 𝐺 (a, b) code. 
+
+Algorithm1 Subroutine for CNOT Scheduling 
+
+Input: Physical data block 𝐷 𝑝 ∈ { 𝐷 𝐿 , 𝐷 𝑅 }.Permutation matrix type 𝑀 p ∈ { 𝐿 , 𝑅 }.Equal-length sequence pairs ( ⃗𝑔 𝑋 ,⃗ ℎ 𝑋 ) and ( ⃗𝑔 𝑍 ,⃗ ℎ 𝑍 )of elements from a group 𝐺 𝑝 .Sequences ⃗ 𝑓 𝑋 ,⃗ 𝑓 𝑍 containing the same elements from a group 𝐺 𝑢 where 𝐺 𝑢 ≤ 𝐺 𝑝 or 𝐺 𝑝 ≤ 𝐺 𝑢 .
+
+Output: Updated quantum states of 𝐷 𝑝 , 𝐷 𝑢 , 𝑋, and 𝑍 . 
+
+> 1:
+
+function CnotSchedule (𝐷 𝑝 , 𝑀 p,⃗ 𝑔 𝑋 ,⃗ ℎ 𝑋 ,⃗ 𝑔 𝑍 ,⃗ ℎ 𝑍 ,⃗ 𝑓 𝑋 ,⃗ 𝑓 𝑍 ) 
+
+> 2:
+
+𝐷 𝑢 ← { 𝐷 𝐿 , 𝐷 𝑅 } ∖ { 𝐷 𝑝 } 
+
+> 3:
+
+𝑀 u ← { 𝐿 , 𝑅 } ∖ { 𝑀 p} 
+
+> 4:
+
+Let 𝑁 be the dimension (row/column size) of 𝑀 u 
+
+> 5:
+
+for 𝑘 = 1 to |⃗𝑔 𝑋 | do  
+
+> 6:
+
+Simultaneously for 𝑖 = 1 to 𝑁 : 
+
+> 7:
+
+CNOT( 𝑋 [𝑖 ], 𝐷 𝑝 [𝑀 p(𝑔 𝑋,𝑘 )( 𝑖 )])  
+
+> 8:
+
+CNOT( 𝐷 𝑢 [𝑖 ], 𝑍 [𝑀 p(𝑔 𝑍,𝑘 )( 𝑖 )])  
+
+> 9:
+
+for 𝑘 = 1 to |⃗𝑓 𝑋 | do  
+
+> 10:
+
+Simultaneously for 𝑖 = 1 to 𝑁 : 
+
+> 11:
+
+CNOT( 𝑋 [𝑖 ], 𝐷 𝑢 [𝑀 u(𝑓 𝑋,𝑘 )( 𝑖 )])  
+
+> 12:
+
+CNOT( 𝐷 𝑝 [𝑖 ], 𝑍 [𝑀 u(𝑓 𝑍,𝑘 )( 𝑖 )])  
+
+> 13:
+
+for 𝑘 = 1 to |⃗ℎ𝑋 | do  
+
+> 14:
+
+Simultaneously for 𝑖 = 1 to 𝑁 : 
+
+> 15:
+
+CNOT( 𝑋 [𝑖 ], 𝐷 𝑝 [𝑀 p(ℎ𝑋,𝑘 )( 𝑖 )])  
+
+> 16:
+
+CNOT( 𝐷 𝑢 [𝑖 ], 𝑍 [𝑀 p(ℎ𝑍,𝑘 )( 𝑖 )]) 
+
+In Algorithm 2, we describe a syndrome extraction circuit for an arbitrary code 𝑄 𝐻 𝐺 (a, b). Before present-ing this algorithm, let us introduce the notation and the scheduling strategies used in it. Since the CnotSched-ule subroutine is asymmetric with respect to its inputs, we assign one of the group algebra elements as the pri-mary block, denoted p ∈ { a, b}, and the other as the aux-iliary block, denoted u. Swapping the assignments of a
+
+and b yields distinct, valid scheduling cycles, which allows the algorithm to cover both possible syndrome extrac-tion schedules. Furthermore, in the case of odd stabilizer weights 𝑤 p, we were unable to identify a perfectly sym-metric syndrome extraction cycle. To address this, the al-gorithm introduces a symmetry-breaking step by assign-ing a primary syndrome measurement basis, 𝑆 ∈ { 𝑋, 𝑍 },and a complementary basis 𝑈 . Alternating the initial-izations, specific CNOT gates, and measurements of 𝑆 
+
+and 𝑈 supports the design of a valid CNOT scheduling with minimum circuit depth. An example of an explicit input configuration for the case of 𝑤 a = 𝑤 b = 3 and 
+
+𝑤 a = 𝑤 b = 4 in Algorithm 2 is presented in Section VI. 
+
+Algorithm2 Syndrome Extraction Circuit for 𝑑 
+
+Rounds 
+
+Input: A 𝑄 𝐻 𝐺 (a, b) code. An integer 𝑑 specifying the number of rounds. 
+
+Output: 𝑋 and 𝑍 syndromes for 𝑑 rounds.  
+
+> 1:
+
+Choose an ordering ( p, u) ∈ { (a, b), (b, a)}. 
+
+> 2:
+
+If p = a, then ( 𝐷 𝑝 , 𝐷 𝑢 , 𝑀 p, 𝑀 u) ← (𝐷 𝐿 , 𝐷 𝑅 , 𝐿 , 𝑅 ), 
+
+else (𝐷 𝑝 , 𝐷 𝑢 , 𝑀 p, 𝑀 u) ← (𝐷 𝑅 , 𝐷 𝐿 , 𝑅 , 𝐿 ) 
+
+> 3:
+
+Let 𝑤 p = | supp( p)|.
+
+> 4:
+
+⃗ 𝑓 𝑋 ,⃗ 𝑓 𝑍 ← any permutations of supp( u) 
+
+> 5:
+
+𝑁 ← [𝐺 : 𝐻 ] 
+
+> 6:
+
+if 𝑤 p is odd then  
+
+> 7:
+
+Choose an ordering ( 𝑆, 𝑈 ) ∈ { (𝑋, 𝑍 ), (𝑍, 𝑋 )}.
+
+> 8:
+
+⃗ 𝑔 𝑆 ,⃗ ℎ 𝑆 ← sequences partitioning supp( p) with 
+
+|⃗𝑔 𝑆 | = |⃗ℎ𝑆 | + 1 
+
+> 9:
+
+⃗ 𝑔 𝑈 ,⃗ ℎ 𝑈 ← sequences partitioning supp( p) with ⃗ ℎ𝑈 
+
+containing the same elements as ⃗𝑔 𝑆  
+
+> 10:
+
+Let 𝑔 𝑠 0 and ℎ𝑢 0 be the first elements of ⃗𝑔 𝑆 and ⃗ ℎ𝑈 .
+
+> 11:
+
+⃗ 𝑔 𝑆 ←⃗𝑔 𝑆 ∖ { 𝑔 𝑠 0 } and ⃗ ℎ𝑈 ←⃗ ℎ𝑈 ∖ { ℎ𝑢 0 } 
+
+> 12:
+
+Let 𝐶 𝑋 (𝑖 ) ≡ CNOT( 𝑋 [𝑖 ], 𝐷 𝑝 [𝑀 p(𝑒 𝑋 )( 𝑖 )]) and 
+
+𝐶 𝑍 (𝑖 ) ≡ CNOT( 𝐷 𝑢 [𝑖 ], 𝑍 [𝑀 p(𝑒 𝑍 )( 𝑖 )]), where 𝑒 𝑆 = 𝑔 𝑠 0
+
+and 𝑒 𝑈 = ℎ𝑢 0 
+
+> 13:
+
+∀𝑖 ∈ [𝑁 ]: 𝑅 𝑆 (𝑆 [𝑖 ])  
+
+> 14:
+
+for 𝑟 = 1 to 𝑑 do  
+
+> 15:
+
+∀𝑖 ∈ [𝑁 ]: 𝑅 𝑈 (𝑈 [𝑖 ]), 𝐶 𝑆 (𝑖 ) 
+
+> 16:
+
+CnotSchedule (𝐷 𝑝 , 𝑀 p,⃗ 𝑔 𝑋 ,⃗ ℎ 𝑋 ,⃗ 𝑔 𝑍 ,⃗ ℎ 𝑍 ,⃗ 𝑓 𝑋 ,⃗ 𝑓 𝑍 ) 
+
+> 17:
+
+∀𝑖 ∈ [𝑁 ]: 𝐶 𝑈 (𝑖 ), 𝑀 𝑆 (𝑆 [𝑖 ])  
+
+> 18:
+
+∀𝑖 ∈ [𝑁 ]: 𝑀 𝑈 (𝑈 [𝑖 ]), 𝑅 𝑆 (𝑆 [𝑖 ])  
+
+> 19:
+
+else 
+
+> 20:
+
+⃗ 𝑔 𝑋 ,⃗ ℎ 𝑋 ← any equal-length sequences partitioning supp( p)
+
+> 21:
+
+⃗ 𝑔 𝑍 ,⃗ ℎ 𝑍 ← any equal-length sequences partitioning supp( p) with ⃗ ℎ𝑍 containing the same elements as ⃗𝑔 𝑋  
+
+> 22:
+
+for 𝑟 = 1 to 𝑑 do  
+
+> 23:
+
+∀𝑖 ∈ [𝑁 ]: 𝑅 𝑋 (𝑋 [𝑖 ]), 𝑅 𝑍 (𝑍 [𝑖 ])  
+
+> 24:
+
+CnotSchedule (𝐷 𝑝 , 𝑀 p,⃗ 𝑔 𝑋 ,⃗ ℎ 𝑋 ,⃗ 𝑔 𝑍 ,⃗ ℎ 𝑍 ,⃗ 𝑓 𝑋 ,⃗ 𝑓 𝑍 ) 
+
+> 25:
+
+∀𝑖 ∈ [𝑁 ]: 𝑀 𝑋 (𝑋 [𝑖 ]), 𝑀 𝑍 (𝑍 [𝑖 ]) 
+
+To verify the correctness of this extraction cycle, one must ensure that the following three conditions are sat-isfied: (1) every required CNOT gate appears exactly once, (2) no qubit is acted upon twice within the same time step, and (3) the interleaving of 𝑋 - and 𝑍 -type oper-ations does not alter the final measured syndrome. They are verified in the following proposition whose proof ap-pears in Appendix C. 
+
+Proposition V.1. For any binary 𝑄 𝐻 𝐺 (a, b) code, Al-gorithm 2 yields a syndrome extraction circuit of depth 
+
+𝑤 a + 𝑤 b + 2 per cycle, including state initializations and measurements. 11 When executing 𝑑 consecutive cycles, in the case that both 𝑤 a and 𝑤 b are odd, our circuit requires one addi-tional time step, yielding a total depth of 𝑑 (𝑤 a + 𝑤 b +2) + 1. The authors of [32] introduced a generalized syndrome extraction protocol for any CSS code, while a packed syndrome extraction circuit specifically for the family of cyclic HGP codes was proposed in [13]. The circuit de-signs in these works rely on a non-interleaved approach, where all 𝑍 -type CNOT gates precede all 𝑋 -type CNOT gates within the same syndrome round. We note that the Tanner graph of the code 𝑄 𝐻 𝐺 (a, b) accommodates both of these non-interleaved approaches, which would yield a total depth of min( 𝑤 a, 𝑤 b) + 𝑑 (𝑤 + 2) for 𝑑 rounds. In-terleaving the 𝑋 -type and 𝑍 -type CNOTs and leveraging the specific algebraic structure of the code 𝑄 𝐻 𝐺 (a, b), we can reduce the depth to 𝑑 (𝑤 + 2) + 1 when both 𝑤 a and 
+
+𝑤 b are odd and to 𝑑 (𝑤 + 2) when at least one of them is even. We further note that our syndrome extraction circuit is maximally packed in the sense that there are no idle qubits during any CNOT round for the case when at least one of 𝑤 a and 𝑤 b is even. When both 𝑤 a and 𝑤 b are odd, only half of the data qubits are idle, and this occurs only in the first and last CNOT rounds. We conclude this section with a remark on the num-ber of distinct syndrome extraction cycles that can be generated using Algorithm 2. A simple combinatorial ar-gument, detailed in Appendix D, yields the number of distinct sequence configurations in the form (𝑤 a!𝑤 b!) 2(︃ 𝜈 (𝑤 a)(︀ 
+
+> 𝑤 a
+> ⌊𝑤 a/2⌋
+
+)︀ 
+
++ 𝜈 (𝑤 b)(︀ 
+
+> 𝑤 b
+> ⌊𝑤 b/2⌋
+
+)︀)︃ 
+
+, (10) where 𝜈 (𝑤 ) = 1 if 𝑤 is even and 𝜈 (𝑤 ) = 2 if 𝑤 is odd. This count gives an upper bound on the number of unique physical circuits since different sequences may yield identical circuits due to code symmetries. Note that even though our algorithm provides an explicit de-scription of maximally packed syndrome extraction cy-cles for a broad class of LDPC codes with any stabilizer weight, it does not necessarily cover all possible valid syndrome cycles. However, it generates a large family of scheduling options. For example, for a weight-6 code with 𝑤 a = 𝑤 b = 3, it generates 1728 distinct configura-tions. All of these configurations apply to a broad class of LDPC codes, including all weight-6 BB codes of [9]. For any weight-8 code with 𝑤 a = 𝑤 b = 4, Algorithm 2 yields 110,592 distinct configurations. For a given code, it is possible to iterate over these different configurations to minimize hook errors.  
+
+> VI. CIRCUIT-LEVEL SIMULATIONS
+
+We evaluated the performance of selected 𝑄 𝐻 𝐺 (a, b)codes under a standard circuit-level noise model. In this model, the noise is parameterized by a single physical er-ror rate 𝑝 and is applied according to the following rules: 
+
+• State preparation: Qubits initialized in the 𝑋 -or 𝑍 -basis experience a 𝑍 - or 𝑋 -type error, respec-tively, with probability 𝑝 immediately following ini-tialization. 
+
+• Gate operations: Every CNOT gate is followed by a two-qubit depolarizing channel, which applies an error with probability 𝑝 (choosing one of the 15 non-trivial two-qubit Pauli errors uniformly at random) and acts as identity with probability 1 −𝑝 .
+
+• Idle qubits: Any qubit remaining idle during a given time step is acted upon by a single-qubit de-polarizing channel with probability 𝑝 , which acts by a single-qubit Pauli, choosing 𝑋 , 𝑌 , or 𝑍 uniformly at random. 
+
+• Measurements: Ancilla qubits measured in the 
+
+𝑋 - or 𝑍 -basis experience a 𝑍 - or 𝑋 -type error, re-spectively, with probability 𝑝 immediately prior to the measurement. For a 𝑄 𝐻 𝐺 (a, b) code with distance 𝑑 , we ran Algorithm 2 for 𝑑 rounds. For group algebra elements of the form 
+
+a = 𝑎 1 + 𝑎 2 + . . . + 𝑎 𝑤 a and b = 𝑏 1 + 𝑏 2 + . . . + 𝑏 𝑤 b ,we used the configuration ( p, u) = ( a, b), ⃗ ℎ𝑍 =⃗𝑔 𝑋 =(𝑎 2, 𝑎 3), ⃗ ℎ𝑋 =⃗𝑔 𝑍 = ( 𝑎 1, 𝑎 4), ⃗ 𝑓 𝑋 = ( 𝑏 1, 𝑏 2, 𝑏 3, 𝑏 4), and ⃗𝑓 𝑍 = ( 𝑏 2, 𝑏 1, 𝑏 4, 𝑏 3) for our weight-8 code simulations. Similarly, for our weight-6 codes with 𝑤 a = 𝑤 b = 3, we used the configuration ( p, u) = ( a, b), ( 𝑆, 𝑈 ) = ( 𝑍, 𝑋 ), ⃗𝑔 𝑍 = ( 𝑎 1, 𝑎 3), ⃗ ℎ𝑍 = ( 𝑎 2), ⃗ 𝑔 𝑋 = ( 𝑎 2), ⃗ ℎ𝑋 = ( 𝑎 1, 𝑎 3), ⃗𝑓 𝑋 = ( 𝑏 2, 𝑏 1, 𝑏 3), and ⃗ 𝑓 𝑍 = ( 𝑏 1, 𝑏 2, 𝑏 3). While we fixed the orderings for our simulations across all codes, one can iterate over the extensive set of configurations provided by Algorithm 2 to achieve even greater circuit-level error suppression. We performed our circuit-level simulations using Stim 
+
+[33] and qLDPC [34] packages. Following the current stan-dard for benchmarking qLDPC codes in the literature, we used the Belief Propagation with Ordered Statistics Decoding (BP-OSD) algorithm [20, 35]. Specifically, we utilized the stimbposd [36] implementation with 10 , 000 BP iterations and a combination sweep depth of 10. We numerically computed the logical error rates for 𝑍 -and 𝑋 -type observables separately. Let 𝑁 𝑒,𝑑,𝑊 (𝑝 ) be the number of 𝑊 -type logical errors observed in 𝑁 𝑠,𝑑,𝑊 (𝑝 )Monte Carlo samples after 𝑑 rounds of syndrome extrac-tion at a physical error probability 𝑝 , where 𝑊 ∈ { 𝑋, 𝑍 }.We define the logical error rate per cycle for each basis as follows: 
+
+𝑝 𝐿,𝑊 (𝑝 ) = 1 −(︂ 1 − 𝑁 𝑒,𝑑,𝑊 (𝑝 )
+
+𝑁 𝑠,𝑑,𝑊 (𝑝 ))︂ 
+
+> 1/𝑑
+
+, 𝑊 ∈ { 𝑋, 𝑍 },
+
+which is the complement to the success probability per syndrome cycle. Throughout the paper, we report the logical error rate per cycle, given by 
+
+𝑝 𝐿 (𝑝 ) = 1 − (1 − 𝑝 𝐿,𝑋 (𝑝 ))(1 − 𝑝 𝐿,𝑍 (𝑝 )) ,12 representing the complement of the probability of suc-cess in both bases simultaneously. The pseudo-threshold reported for each code is defined as the solution of the break-even condition: 
+
+𝑝 𝐿 (𝑝 𝑡ℎ ) = 1 − (1 − 𝑝 𝑡ℎ )𝑘 .
+
+Here 1 −(1 −𝑝 )𝑘 represents the probability of at least one error occurring in 𝑘 qubits. In Figures 2a and 2b, we plot the logical error rates versus physical error rates of the codes listed in Table II, decoded using the BP-OSD de-coder under the standard circuit-level noise model. The curves in these figures are obtained by fitting the nu-merical data points in the sub-threshold regime to the heuristic fitting formula ˜ 𝑝 𝐿 (𝑝 ) = 𝑝 𝑑 circ /2𝑒 𝛼 +𝛽𝑝 +𝛾𝑝 2
+
+. The parameter 𝑑 circ , which appears in the exponent of 𝑝 , rep-resents circuit-level distance of the code. This is defined as the minimum number of faulty operations required to cause an undetectable error during a syndrome extraction cycle. An upper bound on this parameter is obtained by solving the optimization problem introduced in [9, Sup-plemental Sec. 2]. For each code, we set the number of trials to at least 50 ,000 to obtain these upper bounds. The fitting parameters, as well as the upper bounds on the circuit-level distance, are provided in the Appendix E. The weight-6 𝑄 𝐻 𝐺 (a, b) codes introduced in this work are competitive with BB codes. We estimated the thresh-old for the weight-6 code family to be 0 .0065. For the weight-8 codes, the threshold decreases to 0 .0035. How-ever, the weight-8 codes allow for higher rates and larger distances. Consequently, their logical error rates remain competitive, particularly at lower physical error rates, as the higher distances result in a steeper suppression of errors in the sub-threshold regime. 
+
+A. Performance under various decoders 
+
+We also evaluated a subset of codes using recently in-troduced decoders such as the beam search decoder [37] and the relay-BP decoder [38]. In our simulations, we used a beam width of 32 for the beam search decoder. As noted in Ref. [37], this decoder is a promising candidate for trapped-ion architectures due to its fast 99.9th per-centile execution time. We note that the configuration we used is designed for real-time fast decoding, and better error suppression is possible with a more aggressive con-figuration for this decoder. For the Relay-BP decoder, we utilized the configuration referred to as ’Relay-BP-5’ in Ref. [38]. We also chose the memory strengths match-ing those used for Gross code in the same paper. We note that further optimization of these parameters could yield improvements in both accuracy and decoding time. In Figure 3, we plot the logical error rate as a function of physical error rate for the decoders discussed above. Specifically, we present results for the weight-6 codes [[48 , 8, 6]], [[96 , 8, 10]] and the weight-8 code [[128 , 16 , 12]]. 10 4 10 3       
+
+> Physical Error Rate ( p)
+> 10 13
+> 10 11
+> 10 9
+> 10 7
+> 10 5
+> 10 3
+> 10 1
+> Logical Error Rate per Syndrome Cycle ( pL)
+> Circuit Level Performance - Weight-6 Codes
+> [[48, 8, 6]]
+> [[96, 8, 10]]
+> [[224, 12, 16]]
+
+(a) Weight-6 codes 10 34 × 10 4 6 × 10 4 2 × 10 3 3 × 10 3 4 × 10 3         
+
+> Physical Error Rate ( p)
+> 10 9
+> 10 8
+> 10 7
+> 10 6
+> 10 5
+> 10 4
+> 10 3
+> 10 2
+> 10 1
+> Logical Error Rate per Syndrome Cycle ( pL)
+> Circuit Level Performance - Weight-8 Codes
+> [[84, 16, 8]]
+> [[112, 16, 10]]
+> [[128, 16, 12]]
+> [[168, 16, 15]]
+
+(b) Weight-8 codes 
+
+FIG. 2: Logical error rate 𝑝 𝐿 as a function of the physical error rate 𝑝 for (a) weight-6 and (b) weight-8 
+
+𝑄 𝐻 𝐺 (a, b) codes under the standard circuit-level noise model. The numerical data points represent Monte Carlo simulations, while the solid curves are obtained using the fitting formula ˜ 𝑝 𝐿 (𝑝 ) = 𝑝 𝑑 circ /2𝑒 𝛼 +𝛽𝑝 +𝛾𝑝 2
+
+. All codes were decoded using the BP-OSD decoder. As can be seen from these figures, our codes per-formed better under both Relay-BP and beam search de-coder than under BP-OSD. For the [[48 , 8, 6]] code, the pseudo-threshold increases from 0 .0036 to 0 .0046 for the beam search decoder and to 0 .0054 for the Relay-BP de-coder. For the [[96 , 8, 10]] code, the pseudo-threshold in-creases from 0 .0047 to 0 .0063 for Relay-BP decoder. Sim-ilarly, for the [[128 , 16 , 12]] code, the pseudo-threshold increases from 0 .0036 to 0 .0045 using the Relay-BP de-coder. At a physical error rate of 2 × 10 −3, the beam search decoder achieves a 2 .4× reduction, and the relay-BP decoder achieves a 3 .1× reduction in the logical er-ror rate compared to BP-OSD for the [[48 , 8, 6]] code. 13 TABLE III: Summary of simulation results for selected 𝑄 𝐻 𝐺 (a, b) codes under the standard circuit-level noise model. All logical error rates ( 𝑝 𝐿 ) and pseudo-thresholds are reported for the BP-OSD decoder. The net encoding rate is defined as 1 /⌈2𝑛/𝑘 ⌉ to account for both data and ancilla qubits. 
+
+Code Weight Net Encoding Rate Pseudo-threshold 𝑝 𝐿 (10 −3) 𝑝 𝐿 (10 −4) 𝑘𝑑 2/𝑛 
+
+[[48 , 8, 6]] 6 1/12 0.36% 2 × 10 −4 3 × 10 −7 6.00 [[96 , 8, 10]] 6 1/24 0.47% 2 × 10 −6 8 × 10 −12 8.33 [[224 , 12 , 16]] 6 1/38 0.54% 7 × 10 −11 2 × 10 −19 13.71 [[84 , 16 , 8]] 8 1/11 0.35% 6 × 10 −5 3 × 10 −9 12.19 [[112 , 16 , 10]] 8 1/14 0.34% 1 × 10 −5 9 × 10 −11 14.29 [[128 , 16 , 12]] 8 1/16 0.36% 6 × 10 −6 9 × 10 −12 18.00 [[168 , 16 , 15]] 8 1/21 0.36% 2 × 10 −6 2 × 10 −13 21.43 10 3 2 × 10 3 3 × 10 3 4 × 10 3    
+
+> Physical Error Rate ( p)
+> 10 4
+> 10 3
+> 10 2
+> 10 1
+> Logical Error Rate per Syndrome Cycle ( pL)
+> Decoder Performance: [[48,8,6]] Code
+> BP10000+OSD+CS10
+> Beam32_340iters
+> Relay-BP-5
+
+(a) 10 3 2 × 10 3 3 × 10 3 4 × 10 3        
+
+> Physical Error Rate ( p)
+> 10 7
+> 10 6
+> 10 5
+> 10 4
+> 10 3
+> 10 2
+> 10 1
+> Logical Error Rate per Syndrome Cycle ( pL)
+> Decoder Performance: [[96,8,10]] Code
+> BP10000+OSD+CS10
+> Beam32_340iters
+> Relay-BP-5
+
+(b) 10 3 2 × 10 3 3 × 10 3 4 × 10 3       
+
+> Physical Error Rate ( p)
+> 10 6
+> 10 5
+> 10 4
+> 10 3
+> 10 2
+> 10 1
+> Logical Error Rate per Syndrome Cycle ( pL)
+> Decoder Performance: [[128,16,12]] Code
+> BP10000+OSD+CS10
+> Beam32_340iters
+> Relay-BP-5
+
+(c) 
+
+FIG. 3: Logical error rate 𝑝 𝐿 as a function of physical error rate 𝑝 for various 𝑄 𝐻 𝐺 (a, b) codes under different decoders: (a) the [[48 , 8, 6]] code, (b) the [[96 , 8, 10]] code, and (c) the [[128 , 16 , 12]] code. For the [[96 , 8, 10]] code, the beam search and relay-BP decoders yield 5 .88 × and 34 .63 × reductions, respec-tively. We observe a particularly significant improvement with the relay-BP decoder over BP-OSD for the weight-8 [[128 , 16 , 12]] code: while the beam search decoder pro-vides a 3 .8× reduction, the relay-BP decoder achieves 327 .6× reduction in the logical error rate. Note that while the relay-BP decoder shows strong error suppres-sion capabilities, especially for the weight-8 [[128 , 16 , 12]] code, the beam search decoder (even in the fast, non-aggressive configuration used here) outperforms the BP-OSD baseline while maintaining the fast 99.9th percentile execution time, which is critical for real-time decoding architectures. These observations strongly suggest that our codes also perform well under alternative decoding strategies. The real-time decodability of our codes, even with their re-quirement for all-to-all connectivity, makes them attrac-tive candidates for architectures supporting long-range interactions. 
+
+VII. SEQUENCES OF CODES FROM COVERING GRAPHS 
+
+In this section, we study sequences of codes con-structed from covering graphs of 2BGA codes, a con-struction that is conceptually distinct from the coset-based methods discussed throughout the previous sec-tions. In classical coding theory, lifting a small base graph to a larger covering graph is a standard and pow-erful technique for constructing high-performing families of LDPC codes. In practice, this derived graph is com-monly constructed by applying ‘copy-and-permute’ op-erations to a small structural blueprint known as a pro-tograph [39]. Beyond protographs, other graph-covering techniques used for constructing classical codes include unwrapping block codes into LDPC convolutional codes [40], using topological voltage graphs to construct block codes [41], and optimizing voltage assignments to maxi-mize the girth of tailbiting codes [42]. An important sub-class of graph-cover constructions arises when the lifting voltages are assigned from a cyclic group. This approach yields quasi-cyclic LDPC (QC-LDPC) codes, which al-gebraically map the lifting operations to shifts of circu-lant matrices [43, 44]. Since the covering graph is lo-14 cally isomorphic to the base graph, a sequence of codes constructed from a well-designed base code is expected to perform well under belief propagation (BP) since BP structurally is a local message-passing algorithm. Extending these graph-cover techniques to quantum codes is significantly more challenging due to the orthogo-nality constraint required by the CSS construction. How-ever, by utilizing constructions based on the product of two classical codes such as hypergraph product (HGP) codes [21] or lifted product (LP) [7] codes, these classi-cal lifting techniques can be extended to the quantum setting. Moving beyond product-based constructions, a more general framework for lifting arbitrary quantum CSS codes was recently developed in Ref. [45]. More recently, by studying voltage assignments on the Tan-ner graphs of BB codes, Symons, Rajput, and Browne [22] established conditions guaranteeing that the code de-scribed by the covering Tanner graph is also a BB code. Building on these concepts, in this section, we for-mally define graph-cover-based sequences of 2BGA codes, translating the topological structure into a purely group-theoretic language. We begin by recalling the concept of a covering graph. Given a graph 𝜏 = ( 𝑉, 𝐸 ), let 
+
+N(𝑣 ) := {𝑤 ∈ 𝑉 : 𝑣𝑤 ∈ 𝐸 }
+
+be the neighborhood of a vertex 𝑣 ∈ 𝑉 .
+
+Definition VII.1 (Covering Graph) . Let 𝜏 = ( 𝑉, 𝐸 )and ˜ 𝜏 = ( ˜𝑉 , ˜𝐸 ) be two graphs, and let 𝑓 : ˜𝑉 → 𝑉 be a surjection. If for every vertex ˜ 𝑣 ∈ ˜𝑉 , 𝑓 maps bijectively 
+
+N(˜ 𝑣 ) onto N(𝑓 (˜ 𝑣 )), then ˜ 𝜏 is called a covering graph of the base graph 𝜏 . Furthermore, if |𝑓 −1(𝑣 )| = ℎ for every 
+
+𝑣 ∈ 𝑉 , then ˜ 𝜏 is called an ℎ-fold cover of 𝜏 .Intuitively, an ℎ-fold cover can be understood as re-placing each vertex of the base graph with a set of ℎ
+
+vertices, while preserving the local neighborhood struc-ture. Our main result in this section is the construction of sequences of 2BGA codes from covering graphs. 
+
+Theorem VII.1. Let 𝑄 𝐺 (a, b) ≜ 𝑄 {𝑒 } 
+
+> 𝐺
+
+(a, b) be a bi-nary 2BGA code of length 𝑛 . Let (𝐺 𝑖 )𝑖 ≥1 be a se-quence of groups containing normal subgroups 𝐻 𝑖 ⊴ 𝐺 𝑖 
+
+such that for all 𝑖 ≥ 1, there exist group isomorphisms 
+
+𝜑 𝑖 : 𝐺 𝑖 /𝐻 𝑖 → 𝐺 , which we extend to algebra isomor-phisms 𝜑 𝑖 : F2[𝐺 𝑖 /𝐻 𝑖 ] → F2[𝐺 ] by linearity . Let us define the canonical projection homomorphism 
+
+𝜋 𝑖 : F2[𝐺 𝑖 ] → F2[𝐺 𝑖 /𝐻 𝑖 ]∑︁ 
+
+> 𝑔 ∈𝐺 𝑖
+
+𝛼 𝑔 𝑔 ↦ →∑︁ 
+
+> 𝑔 ∈𝐺 𝑖
+
+𝛼 𝑔 (𝑔𝐻 𝑖 ).
+
+If the group-algebra elements a𝑖 , b𝑖 ∈ F2[𝐺 𝑖 ] are cho-sen such that | supp( a𝑖 )| = | supp( a)| and | supp( b𝑖 )| =
+
+| supp( b)| and they satisfy 
+
+𝜑 𝑖 (︀ 𝜋 𝑖 (a𝑖 ))︀ = a and 𝜑 𝑖 (︀ 𝜋 𝑖 (b𝑖 ))︀ = b,
+
+then the Tanner graph of the code 𝑄 𝐺 𝑖 (a𝑖 , b𝑖 ) is an ℎ𝑖 -fold covering graph of the Tanner graph of the code 𝑄 𝐺 (a, b),where ℎ𝑖 = |𝐻 𝑖 |.
+
+We say that the code 𝑄 𝐺 𝑖 (a𝑖 , b𝑖 ) of length 𝑛 ℎ𝑖 = ℎ𝑖 𝑛 
+
+is an ℎ𝑖 -fold cover of the base code 𝑄 𝐺 (a, b). Before proceeding to the proof, we clarify that the conditions 
+
+| supp( a𝑖 )| = | supp( a)| and | supp( b𝑖 )| = | supp( b)| in Theorem VII.1 ensure that each element in supp( a) has exactly one chosen lift in supp( a𝑖 ), and similarly for b.
+
+Proof. (of Theorem VII.1) Let 𝜏 = 𝜏 𝑋 ∪ 𝜏 𝑍 be the Tan-ner graph of the binary code 𝑄 𝐺 (a, b), where 𝜏 𝑋 and 𝜏 𝑍 
+
+are the bipartite graphs defined by the parity-check ma-trices 𝐻 𝑋 = [ 𝐿 (a) | 𝑅 (b)] and 𝐻 𝑍 = [ 𝑅 (b)𝑇 | 𝐿 (a)𝑇 ], respectively. For 2BGA codes, the blocks 𝐿 (·) and 𝑅 (·)are linear combinations of the permutation matrices rep-resenting the left and right regular actions of 𝐺 on itself. Hence, the rows and columns of the parity-check matri-ces can be naturally labeled by the elements of the group 
+
+𝐺 .Consider first the graph 𝜏 𝑋 = ( 𝑉 𝑋 ∪ 𝑉 𝐷 𝐿 ∪ 𝑉 𝐷 𝑅 , 𝐸 𝑋 ). Here, 𝑉 𝑋 = {𝑋 (ℎ) | ℎ ∈ 𝐺 } is the set of 𝑋 -checks corre-sponding to the rows in 𝐻 𝑋 , and 𝑉 𝐷 𝑘 = {𝐷 𝑘 (ℎ) | ℎ ∈ 𝐺 }
+
+for 𝑘 ∈ { 𝐿, 𝑅 } represent the sets of data qubits corre-sponding to the first and second halves of the columns in 𝐻 𝑋 . For every check 𝑋 (ℎ) where ℎ ∈ 𝐺 , there is an edge connecting 𝑋 (ℎ) to the data qubit 𝐷 𝐿 (ℎ−1 
+
+> 𝑎
+
+ℎ) for each ℎ𝑎 ∈ supp( a), and another edge connecting 𝑋 (ℎ) to the data qubit 𝐷 𝑅 (ℎℎ −1 
+
+> 𝑏
+
+) for each ℎ𝑏 ∈ supp( b). Similarly, we define the Tanner graph ˜ 𝜏 = ˜ 𝜏 𝑋 ∪ ˜𝜏 𝑍 for the code 𝑄 𝐺 𝑖 (a𝑖 , b𝑖 ). The 𝑋 -Tanner graph ˜ 𝜏 𝑋 = ( ˜𝑉 𝑋 ∪
+
+˜𝑉 𝐷 𝐿 ∪ ˜𝑉 𝐷 𝑅 , ˜𝐸 𝑋 ) is defined such that the vertex sets are ˜𝑉 𝑋 = { ˜𝑋 (𝑔 ) | 𝑔 ∈ 𝐺 𝑖 } and ˜𝑉 𝐷 𝑘 = { ˜𝐷 𝑘 (𝑔 ) | 𝑔 ∈ 𝐺 𝑖 } for 
+
+𝑘 ∈ { 𝐿, 𝑅 }.Define a surjective mapping 
+
+𝑓 : ˜𝑉 𝑋 ∪ ˜𝑉 𝑍 ∪ ˜𝑉 𝐷 𝐿 ∪ ˜𝑉 𝐷 𝑅 → 𝑉 𝑋 ∪ 𝑉 𝑍 ∪ 𝑉 𝐷 𝐿 ∪ 𝑉 𝐷 𝑅 
+
+˜𝑊 (𝑔 ) ↦ → 𝑊 (𝜑 𝑖 (𝜋 𝑖 (𝑔 ))) ,
+
+where 𝑊 ∈ { 𝑋, 𝑍, 𝐷 𝐿 , 𝐷 𝑅 }. Note that 
+
+N( ˜𝑋 (𝑔 )) = { ˜𝐷 𝐿 (𝑔 −1 
+
+> 𝑎
+
+𝑔 ) | 𝑔 𝑎 ∈ supp( a𝑖 )}∪ { ˜𝐷 𝑅 (𝑔𝑔 −1 
+
+> 𝑏
+
+) | 𝑔 𝑏 ∈ supp( b𝑖 )}, 𝑔 ∈ 𝐺 𝑖 .
+
+Let ℎ(𝑔 ) = 𝜑 𝑖 (𝜋 𝑖 (𝑔 )) for all 𝑔 ∈ 𝐺 𝑖 . By the conditions of the code construction, for any 𝑔 𝑎 ∈ supp( a𝑖 ) and 𝑔 𝑏 ∈
+
+supp( b𝑖 ), we have ℎ(𝑔 𝑎 ) ∈ supp( a) and ℎ(𝑔 𝑏 ) ∈ supp( b). For the vertex 𝑓 ( ˜𝑋 (𝑔 )) = 𝑋 (ℎ(𝑔 )), the neighborhood in the base graph is given as 
+
+N(𝑋 (ℎ(𝑔 ))) = {𝐷 𝐿 (ℎ(𝑔 𝑎 )−1ℎ(𝑔 )) | ℎ(𝑔 𝑎 ) ∈ supp( a)}∪ { 𝐷 𝑅 (ℎ(𝑔 )ℎ(𝑔 𝑏 )−1) | ℎ(𝑔 𝑏 ) ∈ supp( b)}.
+
+Let 𝑓 |N( ˜𝑋 (𝑔 )) be the restriction of 𝑓 to 
+
+N( ˜𝑋 (𝑔 )). By definition, we have 𝑓 ( ˜𝐷 𝐿 (𝑔 −1 
+
+> 𝑎
+
+𝑔 )) =
+
+𝐷 𝐿 (ℎ(𝑔 −1 
+
+> 𝑎
+
+𝑔 )) = 𝐷 𝐿 (ℎ(𝑔 −1 
+
+> 𝑎
+
+)ℎ(𝑔 )) = 𝐷 𝐿 (ℎ(𝑔 𝑎 )−1ℎ(𝑔 )) and 𝑓 ( ˜𝐷 𝑅 (𝑔𝑔 −1 
+
+> 𝑏
+
+)) = 𝐷 𝑅 (ℎ(𝑔𝑔 −1 
+
+> 𝑏
+
+)) = 𝐷 𝑅 (ℎ(𝑔 )ℎ(𝑔 −1 
+
+> 𝑏
+
+)) = 15 
+
+𝐷 𝑅 (ℎ(𝑔 )ℎ(𝑔 𝑏 )−1). Because the code construc-tion requires that | supp( a𝑖 )| = | supp( a)| and 
+
+| supp( b𝑖 )| = | supp( b)|, the mappings 𝑔 𝑎 ↦ → ℎ(𝑔 𝑎 )and 𝑔 𝑏 ↦ → ℎ(𝑔 𝑏 ) are bijections between their respective supports. Consequently, 𝑓 |N( ˜𝑋 (𝑔 )) maps the distinct elements of N( ˜𝑋 (𝑔 )) one-to-one and onto the distinct elements of N(𝑓 ( ˜𝑋 (𝑔 ))) for all 𝑔 ∈ 𝐺 𝑖 . An identical argument establishes that this local bijection also holds for the neighborhoods of the data vertices ˜𝐷 𝐿 (𝑔 ) and ˜𝐷 𝑅 (𝑔 ). Finally, since |𝑓 −1(𝑋 (ℎ′)) | = |𝐻 𝑖 | = ℎ𝑖 for all 
+
+ℎ′ ∈ 𝐺 , the graph ˜ 𝜏 𝑋 is the ℎ𝑖 -fold cover of the graph 
+
+𝜏 𝑋 .The claims for the 𝑍 -Tanner graph are proved by fol-lowing a similar sequence of steps. We remark that Theorem VII.1 recovers the combined results of Theorems 3.1, 3.3, and 3.4 in [22] as a particular case. Namely, their results correspond to the case of the base group to 𝐺 = Z𝑙 ×Z𝑚 , the covering group ˜𝐺 = Z𝑢𝑙 ×
+
+Z𝑡𝑚 , and the normal subgroup 𝐻 ∼= Z𝑢 × Z𝑡 . In contrast, our theorem applies to any group extension of 𝐺 by 𝐻 𝑖 ,including non-abelian ones. Thus, setting the covering argument in a group-theoretic framework, we describe a substantially broader class of LDPC codes compared to the earlier work. The following example illustrates this algebraic lifting construction in action. 
+
+Example 2. Let 𝑉 4 = {1, 𝑥, 𝑦, 𝑥𝑦 } be the Klein four-group, and let 𝑄 𝑉 4 (abase , bbase ) be a 2BGA base code defined by abase = 1 + 𝑥 and bbase = 1 + 𝑦 . Consider the dihedral group of order 8 given by the presentation 
+
+𝐷 4 = ⟨𝑟, 𝑠 | 𝑟 4 = 𝑠 2 = ( 𝑠𝑟 )2 = 1 ⟩, and a normal subgroup 
+
+𝐻 = {1, 𝑟 2}. The quotient group 𝐷 4/𝐻 consists of the cosets 𝐻 = {1, 𝑟 2}, 𝑟𝐻 = {𝑟, 𝑟 3}, 𝑠𝐻 = {𝑠, 𝑠𝑟 2}, and 
+
+𝑠𝑟𝐻 = {𝑠𝑟, 𝑠𝑟 3}.Define a group isomorphism 𝜑 : 𝐷 4/𝐻 ∼
+
+−→ 𝑉 4 via the mappings: 
+
+𝐻 ↦ → 1, 𝑠𝐻 ↦ → 𝑦, 𝑟𝐻 ↦ → 𝑥, 𝑠𝑟𝐻 ↦ → 𝑥𝑦. 
+
+To construct a valid lift acover such that 𝜑 (𝜋 (acover )) = 
+
+abase while preserving the support size, we must select one element from 𝐻 and one element from 𝑟𝐻 . This yields four valid choices for the first group algebra ele-ment acover :
+
+acover ∈ { 1 + 𝑟, 1 + 𝑟 3, 𝑟 2 + 𝑟, 𝑟 2 + 𝑟 3}.
+
+Similarly, lifting bbase = 1 + 𝑦 requires choosing one ele-ment from 𝐻 and one from 𝑠𝐻 , yielding four valid choices for the second group algebra element bcover :
+
+bcover ∈ { 1 + 𝑠, 1 + 𝑠𝑟 2, 𝑟 2 + 𝑠, 𝑟 2 + 𝑠𝑟 2}.
+
+Selecting any pair ( acover , bcover ) from these two sets sat-isfies the conditions of Theorem VII.1. Consequently, this specific assignment yields 16 valid pairs of ( acover , bcover )that form 2-fold covers of the base code 𝑄 𝑉 4 (1 + 𝑥, 1 + 𝑦 ). However, as will be formalized by the equivalence princi-ples in Proposition VII.2, the number of strictly unique codes up to isomorphism is considerably less than 16. ▷ 
+
+> A. Constructing and Searching for Cover Codes
+
+To construct an ℎ-fold cover code from the base code over a group 𝐺 , we begin by identifying a suitable cov-ering group ˜𝐺 . Specifically, we systematically search the GAP Small Groups library for a group ˜𝐺 of order 
+
+| ˜𝐺 | = ℎ|𝐺 | with a normal subgroup 𝐻 ⊴ ˜𝐺 such that ˜𝐺/𝐻 ∼= 𝐺 . To reduce the size of the search space for cover codes, we can first assume that the base group al-gebra elements contain the identity 𝑒 𝐺 ∈ 𝐺 by Lemma IV.1. Consequently, by the following proposition, we can assume without loss of generality that the lifted group algebra elements contain the identity 𝑒 ˜𝐺 ∈ ˜𝐺 .
+
+Proposition VII.2. Let 𝑄 ˜𝐺 (acover , bcover ) be any valid cover code for a binary base code 𝑄 𝐺 (abase , bbase ) over the group-subgroup pair ( ˜𝐺, 𝐻 ) with the isomorphism 𝜑 :˜𝐺/𝐻 → 𝐺 . Let 𝜋 : F2[ ˜𝐺 ] → F2[ ˜𝐺/𝐻 ] be the canonical projection homomorphism. For any elements ˜𝑔 𝑎 , ˜𝑔 𝑏 ∈ ˜𝐺 ,the shifted code 𝑄 ˜𝐺 (acover * ˜𝑔 𝑎 , ˜𝑔 𝑏 *bcover ) is an equivalent cover code. Furthermore, this shifted cover code covers the base code 𝑄 𝐺 (abase *𝑔 𝑎 , 𝑔 𝑏 *bbase ), which is equivalent to the original base code, where 𝑔 𝑎 = 𝜑 (𝜋 (˜ 𝑔 𝑎 )) and 𝑔 𝑏 =
+
+𝜑 (𝜋 (˜ 𝑔 𝑏 )) .Proof. By Lemma IV.1 applied to the group ˜𝐺 , multi-plying the polynomials by any group elements ˜ 𝑔 𝑎 and ˜ 𝑔 𝑏 
+
+yields the equivalent code 𝑄 ˜𝐺 (acover * ˜𝑔 𝑎 , ˜𝑔 𝑏 * bcover ). To determine the base code covered by this new equivalent code, we use the assumptions in Theorem VII.1: 
+
+𝜑 (𝜋 (acover * ˜𝑔 𝑎 )) = 𝜑 (𝜋 (acover )) · 𝜑 (𝜋 (˜ 𝑔 𝑎 )) = abase * 𝑔 𝑎 ,𝜑 (𝜋 (˜ 𝑔 𝑏 * bcover )) = 𝜑 (𝜋 (˜ 𝑔 𝑏 )) · 𝜑 (𝜋 (bcover )) = 𝑔 𝑏 * bbase .
+
+Now Lemma IV.1 used for the base group 𝐺 implies that the new base code 𝑄 𝐺 (abase * 𝑔 𝑎 , 𝑔 𝑏 * bbase ) is equivalent to the original base code 𝑄 𝐺 (abase , bbase ). To minimize the computational search space for cover codes, we can directly apply Proposition VII.2 to assume, without loss of generality, that the identity element be-longs to the support of both lifted elements acover ∈ F2[ ˜𝐺 ]and bcover ∈ F2[ ˜𝐺 ]. If a valid cover code does not contain the identity element, we can simply choose any elements ˜𝑥 ∈ supp( acover ) and ˜ 𝑦 ∈ supp( bcover ) and multiply the group algebra elements by the inverses, ˜ 𝑥 −1 and ˜ 𝑦 −1.This multiplication guarantees that the identity of the cover group is in the support of the new equivalent cover code, which covers an equivalent base code containing the identity of the base group. Thus, fixing the identity element during the search does not omit any unique cover codes up to isomorphism. Consequently, by fixing one element in both lifted group algebra elements, the search space for an ℎ-fold 16 cover of a base code 𝑄 𝐺 (a, b) is reduced to exactly 
+
+ℎ𝑤 a+𝑤 b−2 possible codes, once the cover group, the nor-mal subgroup, and the isomorphism ˜𝐺/𝐻 ∼= 𝐺 are fixed. As observed in [22], this represents a significant reduction from set of all possible normalized codes over ˜𝐺 with the same weights, whose size is (︀ | ˜𝐺 |− 1
+
+> 𝑤 a−1
+
+)︀(︀ | ˜𝐺 |− 1
+
+> 𝑤 b−1
+
+)︀ .Using the strategy explained above, we performed a search for the cover codes of certain previously known 2BGA base codes over various groups, including non-abelian ones. We note that our choice of base codes serves to illustrate the construction rather than exhaust most possibilities. Table IV presents these results, highlight-ing several cover codes with notable parameters. For example, the [[204 , 22 , ≤ 17]] code is a double cover of the [[102 , 22 , 9]] GB code mentioned in [21], while the [[306 , 22 , ≤ 24]] code is its triple cover. This illus-trates the computational advantage of the cover-graph-based method: while an unconstrained search for the [[204 , 22 , ≤ 17]] code would require enumerating 1 .8 ×
+
+10 12 code instances, the search space for the double cover is reduced to only 64 combinations (calculated as 
+
+ℎ𝑤 a+𝑤 b−2 = 2 4+4 −2 = 64) once the cover group and the lift subgroup are fixed. We further note that our group-theoretic approach pro-vides a foundation for analytically studying the lifted log-ical operators, offering a pathway to explicitly relate the parameters of the base code and cover codes.  
+
+> VIII. CONCLUSION AND FUTURE DIRECTIONS
+
+In this paper, we introduced a family of quantum LDPC codes constructed using group actions on the cosets of a finite group. Our construction generalizes the previously known 2BGA family of quantum LDPC codes, which includes BB codes and GB codes. Through targeted computer searches, we identified new weight-6 and weight-8 quantum LDPC codes whose parameters are on par with the state of the art. We developed a maximally packed syndrome extraction schedule that uti-lizes a circuit depth of 𝑤 + 2 for a code with stabilizer weight at most 𝑤 . We evaluated the circuit-level perfor-mance of our codes using various decoders and demon-strated that they achieve logical error rates comparable to those of previously known, high-performing quantum LDPC codes under the standard noise models. Further-more, we presented a framework to generate sequences of 2BGA codes from covering graphs. Our work opens several new directions for future re-search: 
+
+• Hardware-specific implementation: While our syndrome extraction schedule is maximally packed and optimizes time-domain depth, further investi-gation into the physical layout and qubit connec-tivity requirements for specific quantum hardware architectures is a natural next step. For instance, exploring coset spaces that admit a bi-planar toric layout (similar to BB codes) but whose long-range connections extend beyond a single cyclic shift is an interesting new direction for superconduct-ing platforms. Similarly, identifying coset spaces that admit efficient scheduling tailored for neutral-atom or trapped-ion architectures represents an-other promising direction. 
+
+• Exploring logical operators: While our work fo-cuses on the construction and syndrome extraction of these codes, a detailed investigation of their log-ical operators remains an open problem. Explicitly constructing logical bases and finding minimum-weight logical operators is a natural next step to-ward practical implementation. 
+
+• Distance bounds on graph cover codes: An-other interesting direction is to study bounds on the distances of cover codes, given the base code pa-rameters, by restricting the base and cover groups from Section VII to specific, highly structured fam-ilies like cyclic groups. While this problem was par-tially addressed in [22] for BB codes, we believe that our generalized group-theoretic framework could be leveraged to extend these results.  
+
+> IX. DATA AVAILABILITY
+
+The scripts and source code to reproduce the data gen-erated in this paper are publicly available at [46]. 
+
+> ACKNOWLEDGMENTS
+
+We are grateful to Nicolas Delfosse, Leonid Pryadko, and Min Ye for stimulating discussions. The research of A.A. and A.B. was partially supported by NSF grants CCF2330909 and CCF2526035. We also acknowledge the University of Maryland supercomputing resources (http://hpcc.umd.edu) made available for conducting the research reported in this paper. 17 TABLE IV: Base codes and their cover codes. The sequences ( acover , bcover , a𝑏𝑎𝑠𝑒 , b𝑏𝑎𝑠𝑒 ) are given as integer indices corresponding to the ordered list generated by the GAP 4.14.0 function Elements(G) for their respective groups. The Base GAP Identifier is given as ( 𝑙, 𝑚 ) via the command SmallGroup(l, m) . The Cover GAP Identifier is given as a tuple ( 𝑙, 𝑚, 𝑠 ), where 𝑙 and 𝑚 define the cover group ˜𝐺 , and 𝑠 represents the index of the specific normal lifted subgroup 𝐻 chosen from the ordered list produced by the command Filtered(AllSubgroups(G), h -> IsNormal(G,h))[s] . Distances reported with a ≤ symbol represent upper bounds obtained using QDistRnd with 10 6 iterations. All other distances are exact. 
+
+Base Code Cover Code [[ 𝑛, 𝑘, 𝑑 ]] Structure a𝑏𝑎𝑠𝑒 b𝑏𝑎𝑠𝑒 GAP Id. [𝑛, 𝑘, 𝑑 ] Structure Lift 𝐻 a𝑐𝑜𝑣𝑒𝑟 b𝑐𝑜𝑣𝑒𝑟 GAP Id. (𝑙, 𝑚 ) (𝑙, 𝑚, 𝑠 )[[40 , 8, 5]] 𝐶 5 ⋊ 𝐶 4 [1, 2, 4, 10] [1, 3, 4, 11] 20, 1 [[80 , 8, 10]] 𝐶 5 ⋊ 𝐶 8 𝐶 2 [1, 2, 5, 23] [1, 9, 11, 25] 40, 1, 2 [[80 , 10 , 8]] 𝐶 2 × (𝐶 5 ⋊ 𝐶 4) 𝐶 2 [1, 2, 10, 22] [1, 4, 10, 25] 40, 7, 3 [[120 , 16 , 10]] 𝐶 3 × (𝐶 5 ⋊ 𝐶 4) 𝐶 3 [1, 6, 20, 28] [1, 10, 5, 43] 60, 2, 3 [[160 , 10 , ≤ 16]] 𝐶 2 × (𝐶 5 ⋊ 𝐶 8) 𝐶 2 × 𝐶 2 [1, 2, 13, 39] [1, 4, 16, 42] 80, 9, 6 [[62 , 12 , 7]] 𝐶 31 [1, 2, 3, 7] [1, 2, 13, 18] 31, 1 [[124 , 12 , 14]] 𝐶 62 𝐶 2 [1, 3, 5, 14] [1, 4, 26, 36] 62, 2, 2 [[124 , 14 , 12]] 𝐶 62 𝐶 2 [1, 4, 6, 13] [1, 3, 26, 36] 62, 2, 2 [[186 , 12 , ≤ 19]] 𝐶 93 𝐶 3 [1, 5, 8, 22] [1, 7, 40, 55] 93, 2, 2 [[248 , 18 , ≤ 19]] 𝐶 124 𝐶 4 [1, 10, 14, 23] [1, 5, 49, 67] 124, 2, 3 [[248 , 16 , ≤ 21]] 𝐶 62 × 𝐶 2 𝐶 2 × 𝐶 2 [1, 6, 13, 27] [1, 6, 50, 68] 124, 4, 5 [[56 , 12 , 4]] 𝐶 14 × 𝐶 2 [1, 4, 12] [1, 6, 15] 28, 4 [[112 , 12 , 8]] 𝐶 28 × 𝐶 2 𝐶 2 [1, 12, 28] [1, 7, 25] 56, 8, 2 [[168 , 16 , 10]] 𝐶 14 × 𝑆 3 𝐶 3 [1, 12, 48] [1, 7, 44] 84, 13, 3 [[280 , 12 , 16]] 𝐶 14 × 𝐷 10 𝐶 5 [1, 4, 38] [1, 7, 52] 140, 9, 3 [[48 , 6, 6]] 𝐶 3 ⋊ 𝐶 8 [1, 2, 3, 14] [1, 2, 14, 17] 24, 1 [[96 , 12 , 10]] 𝐶 2 × (𝐶 3 ⋊ 𝐶 8) 𝐶 2 [1, 2, 11, 22] [1, 2, 33, 29] 48, 9, 3 [[192 , 14 , ≤ 16]] 𝐶 3 ⋊ (( 𝐶 8 × 𝐶 2) ⋊ 𝐶 2) 𝐶 2 × 𝐶 2 [1, 2, 36, 30] [1, 2, 57, 64] 96, 37, 9 [[36 , 4, 6]] (𝐶 3 × 𝐶 3) ⋊ 𝐶 2 [1, 2, 3, 6] [1, 2, 8, 15] 18, 4 [[72 , 8, 9]] (𝐶 3 × 𝐶 3) ⋊ 𝐶 4 𝐶 2 [1, 2, 4, 8] [1, 2, 12, 27] 36, 7, 2 [[108 , 12 , 9]] 𝐶 3 × (( 𝐶 3 × 𝐶 3) ⋊ 𝐶 2) 𝐶 3 [1, 6, 4, 17] [1, 15, 13, 50] 54, 13, 6 [[144 , 10 , 14]] (𝐶 3 × 𝐶 3) ⋊ 𝐶 8 𝐶 4 [1, 2, 14, 23] [1, 8, 33, 45] 72, 13, 7 [[70 , 16 , 6]] 𝐶 35 [1, 3, 9, 19] [1, 3, 13, 23] 35, 1 [[140 , 16 , 12]] 𝐶 70 𝐶 2 [1, 4, 15, 39] [1, 6, 23, 43] 70, 4, 2 [[210 , 20 , ≤ 16]] 𝐶 105 𝐶 3 [1, 7, 18, 54] [1, 12, 29, 77] 105, 2, 2 [[280 , 22 , ≤ 18]] 𝐶 70 × 𝐶 2 𝐶 2 × 𝐶 2 [1, 8, 31, 74] [1, 10, 63, 93] 140, 11, 5 [[84 , 16 , 8]] 𝐶 7 × 𝑆 3 [1, 2, 3, 29] [1, 4, 15, 27] 42, 3 [[168 , 20 , 14]] 𝐶 7 × (𝐶 3 ⋊ 𝐶 4) 𝐶 2 [1, 2, 3, 51] [1, 5, 36, 60] 84, 3, 2 [[252 , 16 , ≤ 21]] 𝐶 21 × 𝑆 3 𝐶 3 [1, 6, 21, 71] [1, 11, 57, 78] 126, 12, 3 [[252 , 20 , ≤ 18]] 𝐶 21 × 𝑆 3 𝐶 3 [1, 15, 21, 71] [1, 22, 57, 63] 126, 12, 3 [[252 , 24 , ≤ 17]] 𝐶 7 × (( 𝐶 3 × 𝐶 3) ⋊ 𝐶 2) 𝐶 3 [1, 2, 11, 65] [1, 4, 43, 98] 126, 14, 2 [[42 , 8, 6]] 𝐶 21 [1, 3, 6, 14] [1, 3, 8, 12] 21, 2 [[84 , 8, 12]] 𝐶 42 𝐶 2 [1, 6, 12, 29] [1, 6, 14, 21] 42, 6, 2 [[126 , 8, 15]] 𝐶 21 × 𝐶 3 𝐶 3 [1, 4, 15, 35] [1, 12, 23, 33] 63, 4, 2 [[126 , 20 , 9]] 𝐶 63 𝐶 3 [1, 18, 8, 31] [1, 3, 23, 45] 63, 2, 2 [[168 , 10 , ≤ 18]] 𝐶 84 𝐶 4 [1, 4, 24, 45] [1, 7, 27, 48] 84, 6, 4 [[168 , 12 , ≤ 17]] 𝐶 84 𝐶 4 [1, 7, 24, 64] [1, 13, 21, 48] 84, 6, 4 [[168 , 14 , ≤ 16]] 𝐶 42 × 𝐶 2 𝐶 2 × 𝐶 2 [1, 10, 27, 56] [1, 15, 23, 42] 84, 15, 6 [[62 , 10 , 7]] 𝐶 31 [1, 2, 13] [1, 2, 3, 28] 31, 1 [[124 , 10 , 12]] 𝐶 62 𝐶 2 [1, 3, 26] [1, 4, 5, 56] 62, 2, 2 [[186 , 10 , ≤ 17]] 𝐶 93 𝐶 3 [1, 5, 38] [1, 3, 10, 83] 93, 2, 2 [[248 , 10 , ≤ 21]] 𝐶 62 × 𝐶 2 𝐶 2 × 𝐶 2 [1, 6, 51] [1, 9, 10, 113] 124, 4, 5 [[42 , 10 , 5]] 𝐶 21 [1, 5, 13] [1, 3, 10, 19] 21, 2 [[84 , 10 , 9]] 𝐶 42 𝐶 2 [1, 8, 28] [1, 6, 22, 37] 42, 6, 2 [[126 , 10 , 13]] 𝐶 63 𝐶 3 [1, 6, 38] [1, 3, 29, 46] 63, 2, 2 [[210 , 10 , ≤ 19]] 𝐶 105 𝐶 5 [1, 14, 76] [1, 41, 34, 102] 105, 2, 3 [[102 , 22 , 9]] 𝐶 51 [1, 14, 45, 35] [1, 27, 32, 50] 51, 1 [[204 , 22 , ≤ 17]] 𝐶 102 𝐶 2 [1, 26, 87, 71] [1, 51, 65, 100] 102, 4, 2 [[204 , 24 , 15]] 𝐶 102 𝐶 2 [1, 26, 87, 68] [1, 54, 62, 100] 102, 4, 2 [[204 , 28 , 12]] 𝐶 102 𝐶 2 [1, 26, 87, 68] [1, 51, 65, 100] 102, 4, 2 [[306 , 22 , ≤ 24]] 𝐶 153 𝐶 3 [1, 31, 134, 104] [1, 80, 105, 139] 153, 1, 2 [[306 , 26 , ≤ 18]] 𝐶 51 × 𝐶 3 𝐶 3 [1, 35, 138, 110] [1, 84, 89, 151] 153, 2, 2 [[126 , 20 , 11]] 𝐶 63 [1, 6, 26, 60] [1, 22, 53, 35] 63, 2 [[252 , 20 , ≤ 21]] 𝐶 126 𝐶 2 [1, 10, 53, 122] [1, 40, 98, 71] 126, 6, 2 [[252 , 22 , ≤ 18]] 𝐶 126 𝐶 2 [1, 16, 44, 122] [1, 40, 106, 71] 126, 6, 2 
+
+[1] A. Kitaev, Fault-tolerant quantum computation by anyons, Annals of Physics 303 , 2 (2003). [2] A. Y. Kitaev, Quantum computations: algorithms and error correction, Russian Mathematical Surveys 52 , 1191 (1997). [3] S. B. Bravyi and A. Y. Kitaev, Quantum codes on a lattice with boundary (1998), arXiv:quant-ph/9811052 [quant-ph]. [4] J.-P. Tillich and G. Zemor, Quantum LDPC codes with positive rate and minimum distance proportional to 𝑛 12 ,in 2009 IEEE International Symposium on Information Theory (2009) pp. 799–803. [5] M. B. Hastings, J. Haah, and R. O’Donnell, Fiber bundle codes: breaking the 𝑛 1/2polylog( 𝑛 ) barrier for quantum LDPC codes, in Proceedings of the 53rd Annual ACM SIGACT Symposium on Theory of Computing , STOC 18 
+
+2021 (Association for Computing Machinery, New York, NY, USA, 2021) p. 1276–1288. [6] N. P. Breuckmann and J. N. Eberhardt, Balanced prod-uct quantum codes, IEEE Transactions on Information Theory 67 , 6653 (2021). [7] P. Panteleev and G. Kalachev, Asymptotically good quantum and locally testable classical LDPC codes, in 
+
+Proceedings of the 54th Annual ACM SIGACT Sympo-sium on Theory of Computing , STOC 2022 (Association for Computing Machinery, New York, NY, USA, 2022) p. 375–388. [8] A. Leverrier and G. Zemor, Quantum Tanner codes, in 
+
+2022 IEEE 63rd Annual Symposium on Foundations of Computer Science (FOCS) (IEEE Computer Society, Los Alamitos, CA, USA, 2022) pp. 872–883. [9] S. Bravyi, A. W. Cross, J. M. Gambetta, D. Maslov, P. Rall, and T. J. Yoder, High-threshold and low-overhead fault-tolerant quantum memory, Nature 627 ,778 (2024). [10] H.-K. Lin and L. P. Pryadko, Quantum two-block group algebra codes, Phys. Rev. A 109 , 022407 (2024). [11] J. Guo, Y. Hong, A. Kaufman, and A. Lucas, Toward self-correcting quantum codes for neutral atom arrays, PRX Quantum 7, 010301 (2026). [12] Z. Liang, K. Liu, H. Song, and Y.-A. Chen, Generalized toric codes on twisted tori for quantum error correction, PRX Quantum 6, 020357 (2025). [13] A. Aydin, N. Delfosse, and E. Tham, Cyclic hypergraph product code (2026), arXiv:2511.09683 [quant-ph]. [14] A. A. Kovalev and L. P. Pryadko, Quantum Kronecker sum-product low-density parity-check codes with finite rate, Phys. Rev. A 88 , 012311 (2013). [15] L. Voss, S. J. Xian, T. Haug, and K. Bharti, Multivariate bicycle codes, Phys. Rev. A 111 , L060401 (2025). [16] J. Haah, Local stabilizer codes in three dimensions with-out string logical operators, Physical Review A 83 ,042330 (2011). [17] M. Ye and N. Delfosse, Quantum error correction for long chains of trapped ions, Quantum 9, 1920 (2025). [18] E. Tham, M. Ye, I. Khait, J. Gamble, and N. Delfosse, Distributed fault-tolerant quantum memories over a 2 ×𝐿 
+
+array of qubit modules (2025), arXiv:2508.01879 [quant-ph]. [19] M. Wang and F. Mueller, Coprime bivariate bicycle codes and their layouts on cold atoms, Quantum 10 , 2009 (2026). [20] P. Panteleev and G. Kalachev, Degenerate quantum LDPC codes with good finite-length performance, Quan-tum 5, 585 (2021). [21] F. Tripier, W. C. Chung, J. Young, S. Alam, B. Bjork, A. Brodutch, F. L. Buessen, N. J. Coble, T. Del-laert, D. Maslov, M. Roetteler, E. Tham, M. Web-ster, M. Ye, J. Gamble, A. Maksymov, J. P. Marceaux, and N. Delfosse, Fault-tolerant quantum computing with trapped ions: The walking cat architecture (2026), arXiv:2604.19481 [quant-ph]. [22] B. C. B. Symons, A. Rajput, and D. E. Browne, Se-quences of bivariate bicycle codes from covering graphs (2025), arXiv:2511.13560 [quant-ph]. [23] D. S. Dummit and R. M. Foote, Abstract algebra , 3rd ed. (John Wiley & Sons, Inc., Hoboken, NJ, 2004). [24] D. MacKay, G. Mitchison, and P. McFadden, Sparse-graph codes for quantum error correction, IEEE Trans-actions on Information Theory 50 , 2315 (2004). [25] M. A. Tremblay, N. Delfosse, and M. E. Beverland, Constant-overhead quantum error correction with thin planar connectivity, Phys. Rev. Lett. 129 , 050504 (2022). [26] J. H. Halton, On the thickness of graphs of given degree, Information Sciences 54 , 219 (1991). [27] D. West, Introduction to Graph Theory , 2nd ed. (Pearson Education, 2001). [28] D. Gottesman, Surviving as a quantum computer in a classical world (2024), textbook manuscript. [29] GAP – Groups, Algorithms, and Programming, Version 4.13.0 , The GAP Group (2024). [30] L. P. Pryadko, V. A. Shabashov, and V. K. Kozin, QDis-tRnd : A GAP package for computing the distance of quantum error-correcting codes, Journal of Open Source Software 7, 4120 (2022). [31] A. J. Landahl, J. T. Anderson, and P. R. Rice, Fault-tolerant quantum computing with color codes (2011), arXiv:1108.5738 [quant-ph]. [32] A. Strikis, D. E. Browne, and M. E. Beverland, High-performance syndrome extraction circuits for quantum codes (2026), arXiv:2603.05481 [quant-ph]. [33] C. Gidney, Stim: a fast stabilizer circuit simulator, Quan-tum 5, 497 (2021). [34] M. A. Perlin, qLDPC, https://github.com/qLDPCOrg/ qLDPC (2023). [35] J. Roffe, D. R. White, S. Burton, and E. Campbell, De-coding across the quantum low-density parity-check code landscape, Phys. Rev. Res. 2, 043423 (2020). [36] O. Higgott, stimbposd: BP+OSD decoding for Stim cir-cuits, https://github.com/oscarhiggott/stimbposd 
+
+(2022), accessed: 2026-04-27. [37] M. Ye, D. Wecker, and N. Delfosse, Beam search de-coder for quantum LDPC codes (2025), arXiv:2512.07057 [quant-ph]. [38] T. M¨ uller, T. Alexander, M. E. Beverland, M. B¨ uhler, B. R. Johnson, T. Maurer, and D. Vandeth, Improved belief propagation is sufficient for real-time decoding of quantum memory (2025), arXiv:2506.01779 [quant-ph]. [39] J. Thorpe, Low-density parity-check (ldpc) codes con-structed from protographs, Interplanetary Network Progress Report 42-154 , 1 (2003). [40] A. E. Pusane, R. Smarandache, P. O. Vontobel, and D. J. Costello, Deriving good LDPC convolutional codes from ldpc block codes, IEEE Transactions on Information The-ory 57 , 835 (2011). [41] C. A. Kelley and J. L. Walker, LDPC codes from volt-age graphs, in 2008 IEEE International Symposium on Information Theory (2008) pp. 792–796. [42] I. E. Bocharova, F. Hug, R. Johannesson, B. D. Kudryashov, and R. V. Satyukov, Searching for volt-age graph-based LDPC tailbiting codes with large girth, IEEE Transactions on Information Theory 58 , 2265 (2012). [43] M. Fossorier, Quasicyclic low-density parity-check codes from circulant permutation matrices, IEEE Transactions on Information Theory 50 , 1788 (2004). [44] R. Tanner, D. Sridhara, A. Sridharan, T. Fuja, and D. Costello, LDPC block and convolutional codes based on circulant matrices, IEEE Transactions on Information Theory 50 , 2966 (2004). [45] V. Guemard, Lifts of quantum CSS codes, IEEE Trans-actions on Information Theory 71 , 5418 (2025). [46] A. Aydin, I. Tamo, and A. Barg, Coset2BGACodes, 
+
+https://github.com/aaydinnnn/Coset2BGACodes/ 19    
+
+> tree/main (2026). [47] S. Aaronson and D. Gottesman, Improved simulation of stabilizer circuits, Phys. Rev. A 70 , 052328 (2004).
+> Appendix A: Additional Proofs 1. Proof of Proposition II.1
+
+First, let us prove that 𝐿 (𝑔 ) permutes the cosets in 
+
+𝐺/𝐻 for all 𝑔 ∈ 𝐺 . Let 𝑔 ∈ 𝐺 . The following chain of relationships 
+
+𝑥𝐻 = 𝑦𝐻 ⇐⇒ 𝑥 −1𝑦 ∈ 𝐻 
+
+⇐⇒ 𝑥 −1𝑦 = 𝑥 −1𝑔 −1𝑔𝑦 = ( 𝑔𝑥 )−1(𝑔𝑦 ) ∈ 𝐻 
+
+⇐⇒ (𝑔𝑥 )𝐻 = ( 𝑔𝑦 )𝐻 
+
+⇐⇒ 𝐿 (𝑔 )( 𝑥𝐻 ) = 𝐿 (𝑔 )( 𝑦𝐻 ),
+
+shows that 𝐿 (𝑔 ) is well defined by reading it from left to right, and it is an injection by reading it from right to left. Hence, 𝐿 (𝑔 ) is a well-defined left action of 𝑔 ∈ 𝐺 
+
+on 𝐺/𝐻 . It remains to show that 𝐿 commutes with the group product. For 𝑔 1, 𝑔 2 ∈ 𝐺 , we have 
+
+𝐿 (𝑔 1) ∘ 𝐿 (𝑔 2)( 𝑥𝐻 ) = 𝐿 (𝑔 1)(( 𝑔 2𝑥 )𝐻 )= ( 𝑔 1(𝑔 2𝑥 )) 𝐻 
+
+= (( 𝑔 1𝑔 2)𝑥 )𝐻 
+
+= 𝐿 (𝑔 1𝑔 2)( 𝑥𝐻 ),
+
+as required. We repeat a similar sequence of steps for 𝑅 . Let 𝑔 ∈
+
+𝑁 𝐺 (𝐻 ), then 
+
+𝑥𝐻 = 𝑦𝐻 ⇐⇒ 𝑥 −1𝑦 ∈ 𝐻 
+
+⇐⇒ 𝑔 −1𝑥 −1𝑦𝑔 ∈ 𝑔 −1𝐻𝑔 = 𝐻 
+
+⇐⇒ (𝑥𝑔 )−1(𝑦𝑔 ) ∈ 𝐻 
+
+⇐⇒ (𝑥𝑔 )𝐻 = ( 𝑦𝑔 )𝐻 
+
+⇐⇒ 𝑅 (𝑔 )( 𝑥𝐻 ) = 𝑅 (𝑔 )( 𝑦𝐻 ),
+
+where we used 𝑔 −1𝐻𝑔 = 𝐻 since 𝑔 ∈ 𝑁 𝐺 (𝐻 ). This proves that 𝑅 (𝑔 ) is a well-defined right action on left cosets of 𝐻 in 𝐺 . Furthermore, taking 𝑔 1, 𝑔 2 ∈ 𝑁 𝐺 (𝐻 ), 
+
+𝑅 (𝑔 1) ∘ 𝑅 (𝑔 2)( 𝑥𝐻 ) = 𝑅 (𝑔 1)(( 𝑥𝑔 2)𝐻 )= (( 𝑥𝑔 2)𝑔 1)𝐻 
+
+= ( 𝑥 (𝑔 2𝑔 1)) 𝐻 
+
+= 𝑅 (𝑔 2𝑔 1)( 𝑥𝐻 ),
+
+proving that 𝑅 (𝑔 1) ∘ 𝑅 (𝑔 2) = 𝑅 (𝑔 2𝑔 1).  
+
+> 2. Proof of Proposition II.2
+
+Let 𝑥𝐻 be any left coset of 𝐻 in 𝐺 . Then 
+
+𝐿 (𝑔 1) ∘ 𝑅 (𝑔 2)( 𝑥𝐻 ) = 𝐿 (𝑔 1)(( 𝑥𝑔 2)𝐻 )= ( 𝑔 1(𝑥𝑔 2)) 𝐻 
+
+= (( 𝑔 1𝑥 )𝑔 2)𝐻 
+
+= 𝑅 (𝑔 2)(( 𝑔 1𝑥 )𝐻 )= 𝑅 (𝑔 2) ∘ 𝐿 (𝑔 1)( 𝑥𝐻 ) 
+
+> 3. Proof of Proposition II.3
+
+[23, Thm.4.2.3] Once we show that ker 𝐿 = Core 𝐺 (𝐻 ), the claim Im 𝐿 ∼= 𝐺/ ker 𝐿 will follow by the first isomorphism the-orem. We have, for all 𝑥 ∈ 𝐺 ,
+
+𝑔 ∈ ker 𝐿 ⇐⇒ 𝐿 (𝑔 )( 𝑥𝐻 ) = 𝑥𝐻 
+
+⇐⇒ (𝑔𝑥 )𝐻 = 𝑥𝐻 
+
+⇐⇒ 𝑥 −1(𝑔𝑥 ) ∈ 𝐻 
+
+⇐⇒ 𝑔 ∈ 𝑥𝐻𝑥 −1
+
+⇐⇒ 𝑔 ∈⋂︁ 
+
+> 𝑥 ∈𝐺
+
+𝑥𝐻𝑥 −1
+
+⇐⇒ 𝑔 ∈ Core 𝐺 (𝐻 ).
+
+Similarly, ker 𝑅 = 𝐻 since 
+
+𝑔 ∈ ker 𝑅 ⇐⇒ 𝑅 (𝑔 )( 𝑥𝐻 ) = 𝑥𝐻 
+
+⇐⇒ (𝑥𝑔 )𝐻 = 𝑥𝐻 
+
+⇐⇒ 𝑥 −1(𝑥𝑔 ) ∈ 𝐻 
+
+⇐⇒ 𝑔 ∈ 𝐻. 
+
+> Appendix B: Description of the Wheel Graph in Lemma III.2
+
+Let 𝒯 𝑖 be the bipartite subgraph defined in Lemma III.2 by the parity-check matrices 
+
+𝐻 (𝑖 ) 
+
+> 𝑋
+
+= [ 𝐿 (𝑔 𝑟 ) + 𝐿 (𝑔 𝑠 ) | 𝑅 (𝑔 𝑡 )] ,𝐻 (𝑖 ) 
+
+> 𝑍
+
+= [ 𝑅 (𝑔 −1 
+
+> 𝑡
+
+) | 𝐿 (𝑔 −1 
+
+> 𝑟
+
+) + 𝐿 (𝑔 −1 
+
+> 𝑠
+
+)] For a code of even length 𝑛 , let 𝑙 = 𝑛/ 2. We assume that the assignments of the data qubits 𝐷 𝐿 [𝑖 ], 𝐷 𝑅 [𝑖 ] and the ancilla qubits 𝑋 [𝑖 ], 𝑍 [𝑖 ] for 𝑖 = 1 , 2, . . . , 𝑙 are those described in Section V. Let 𝑀 be a permutation matrix, and define the mapping 𝑀 (𝑖 ) = 𝑗 if 𝑀 𝑖,𝑗 = 1. Note that for any two permutation matrices 𝑀 and 𝑃 of the same size, if 𝑀 and 𝑃 commute, then 𝑀 (𝑃 (𝑖 )) = 𝑃 (𝑀 (𝑖 )). For better readability, we write 𝑀 𝑃 (𝑖 ) for 𝑀 (𝑃 (𝑖 )). Us-ing this notation and the fact that all 𝐿 matrices com-mute with all 𝑅 matrices, it follows that every check qubit 𝑋 [𝑖 ] belongs to the connected planar component shown in Figure 4. Following [9], we call such graphs ’wheel graphs.’ 
+
+> Appendix C: Proof of Proposition V.1
+
+We first establish that each syndrome extraction cy-cle in Algorithm 2 requires exactly 𝑤 a + 𝑤 b + 2 time 20 FIG. 4: The description of the wheel graph in Lemma III.2.                    
+
+> 𝑋 [𝑖 ]
+> 𝑅 (𝑔 𝑡 )
+> 𝐷 𝑅 [𝑅 (𝑔 𝑡 )( 𝑖 )]
+> 𝐿 (𝑔 𝑟 )
+> 𝐿 (𝑔 −1
+> 𝑟 )
+> 𝐷 𝐿 [𝐿 (𝑔 𝑟 )( 𝑖 )]
+> 𝑅 (𝑔 −1
+> 𝑡 )
+> 𝑍 [𝐿 (𝑔 𝑟 )𝑅 (𝑔 𝑡 )( 𝑖 )]
+> 𝐿 (𝑔 𝑠 )
+> 𝐿 (𝑔 −1
+> 𝑠 )
+> 𝑋 [𝐿 (𝑔 −1
+> 𝑠 𝑔 𝑟 )( 𝑖 )]
+> 𝑅 (𝑔 𝑡 )
+> 𝐷 𝑅 [𝐿 (𝑔 −1
+> 𝑠 𝑔 𝑟 )𝑅 (𝑔 𝑡 )( 𝑖 )]
+> 𝐿 (𝑔 𝑟 )
+> 𝐿 (𝑔 −1
+> 𝑟 )
+> 𝐷 𝐿 [𝐿 (𝑔 𝑟 𝑔 −1
+> 𝑠 𝑔 𝑟 )( 𝑖 )]
+> 𝑅 (𝑔 −1
+> 𝑡 )
+> 𝑍 [𝐿 (𝑔 𝑟 𝑔 −1
+> 𝑠 𝑔 𝑟 )𝑅 (𝑔 𝑡 )( 𝑖 )]
+
+steps for any code 𝑄 𝐻 𝐺 (a, b). To this end, observe that 
+
+CnotSchedule produces a circuit consisting of |⃗𝑔 𝑋 | +
+
+|⃗ℎ𝑋 | + |⃗𝑓 𝑋 | CNOT rounds, corresponding to its three sequential loops. The proof depends on the parity of 𝑤 p.We will start with the even case. Then the state ini-tializations at Line 23 occupy a single time step. The call to CnotSchedule then requires 𝑤 p + 𝑤 u CNOT rounds, since |⃗𝑔 𝑋 | + |⃗ ℎ𝑋 | = 𝑤 p and |⃗𝑓 | = 𝑤 u by con-struction. Finally, the ancilla measurements contribute one additional time step, yielding a total cycle depth of 
+
+𝑤 p + 𝑤 u + 2 = 𝑤 a + 𝑤 b + 2 = 𝑤 + 2. Now suppose that 𝑤 p is odd, then the state initializations on Line 15 again occupy a single time step. The subsequent call to CnotSchedule requires 𝑤 p + 𝑤 u − 1 CNOT rounds, since |⃗𝑔 𝑋 | + |⃗ ℎ𝑋 | = 𝑤 p − 1 and |⃗ 𝑓 | = 𝑤 u by construc-tion. As shown in Lines 17–18, the CNOT associated with the isolated element 𝑒 𝑥 (resp. 𝑒 𝑧 ) is executed concur-rently with the initialization (resp. measurement) step, contributing two time step, yielding a total cycle depth of ( 𝑤 p + 𝑤 u − 1) + 3 = 𝑤 a + 𝑤 b + 2 = 𝑤 + 2. To prove correctness of the syndrome extraction cycle, we employ the stabilizer tableau formalism [47], following the approach of Ref. [9]. Recall that the action of the CNOT gate on Pauli operators is given by 
+
+𝑋 ⊗ 𝐼 → 𝑋 ⊗ 𝑋, 𝐼 ⊗ 𝑋 → 𝐼 ⊗ 𝑋, 𝑍 ⊗ 𝐼 → 𝑍 ⊗ 𝐼, 𝐼 ⊗ 𝑍 → 𝑍 ⊗ 𝑍. 
+
+Since this action does not mix 𝑋 -type and 𝑍 -type Pauli operators, the evolution of 𝑋 -type and 𝑍 -type stabilizers can be tracked independently. Let us first examine the evolution of 𝑋 -type stabilizers. Suppose that 𝑄 𝐻 𝐺 (a, b) is the CSS code given by Construction 1 and let 𝑙 = [ 𝐺 :
+
+𝐻 ] = 𝑛/ 2, where 𝑛 is the code length. To introduce the stabilizer tableau, we define a 2 𝑙 ×4𝑙 binary matrix whose 
+
+𝑗 -th column represents the qubit 
+
+𝑄 [𝑗 ] = 
+
+⎧⎪⎪⎪⎨⎪⎪⎪⎩
+
+𝑋 [𝑗 ] if 1 ≤ 𝑗 ≤ 𝑙, 𝐷 𝐿 [𝑗 − 𝑙 ] if 𝑙 < 𝑗 ≤ 2𝑙, 𝐷 𝑅 [𝑗 − 2𝑙 ] if 2 𝑙 < 𝑗 ≤ 3𝑙, 𝑍 [𝑗 − 3𝑙 ] if 3 𝑙 < 𝑗 ≤ 4𝑙. 
+
+The first 𝑙 rows track the single-weight check operators acting on the ancilla qubits 𝑋 [𝑖 ] for 𝑖 = 1 , 2, . . . , 𝑙 . Since these qubits are initialized to the |+⟩ state, the first 𝑙 rows of the stabilizer tableau take the block form ( 𝐼, 0, 0, 0), where 𝐼 := 𝐼 𝑙 denotes the 𝑙 × 𝑙 identity matrix. The remaining 𝑙 rows track the 𝑋 -type stabilizer generators of the CSS code 𝑄 𝐻 𝐺 (a, b). Therefore, at the beginning of each syndrome extraction cycle, the stabilizer tableau takes the following block form: [︂ 
+
+𝐼 0 0 00 𝐿 (a) 𝑅 (b) 0 ]︂ .
+
+A valid syndrome extraction cycle must leave the 𝑋 -type stabilizer generators of the code invariant, while updat-ing the ancilla stabilizers to reflect the 𝑋 -type check operators, so that measuring the ancilla qubits in the 
+
+𝑋 -basis yields the syndrome. In terms of the stabilizer tableau, this requires the bottom 𝑙 rows to remain un-changed, while the top 𝑙 rows evolve from ( 𝐼, 0, 0, 0) to (𝐼, 𝐿 (a), 𝑅 (b), 0). To systematically track the algebraic propagation of operators throughout the circuit, it is helpful to formalize 21 how simultaneously applied CNOT gates transform these binary blocks. Let 𝐶 and 𝑇 be 𝑙 × 𝑙 binary matrices over 
+
+F2, where each row denotes an 𝑋 -type Pauli operator on 𝑙 
+
+qubits, mapping 0 to the identity operator 𝐼 and 1 to the Pauli 𝑋 operator. Let 𝑀 be an 𝑙 × 𝑙 permutation matrix that defines CNOT gates applied within a single time step. Specifically, if 𝑀 𝑖,𝑗 = 1, a CNOT gate is executed with the 𝑖 -th qubit of the block ( 𝐶 ) as the control and the 
+
+𝑗 -th qubit of the block ( 𝑇 ) as the target. Recalling that the CNOT gate acts on 𝑋 -type operators as 𝑋 ⊗ 𝐼 →
+
+𝑋 ⊗ 𝑋 and 𝐼 ⊗ 𝑋 → 𝐼 ⊗ 𝑋 , the collective action of these parallel gates updates the stabilizer blocks according to the matrix transformation: (𝐶 , 𝑇 ) 𝑀 
+
+−−→ (𝐶 , 𝑇 + 𝐶𝑀 ).
+
+Recall that Algorithm 2 admits two possible dynamic assignments. If p = a, then (𝐷 𝑝 , 𝐷 𝑢 , 𝑀 p, 𝑀 u) ←
+
+(𝐷 𝐿 , 𝐷 𝑅 , 𝐿 , 𝑅 ), and if p = b, then ( 𝐷 𝑝 , 𝐷 𝑢 , 𝑀 p, 𝑀 u) ←
+
+(𝐷 𝑅 , 𝐷 𝐿 , 𝑅 , 𝐿 ). In either case, the 𝑋 -type check opera-tors act on the data qubits in block 𝐷 𝑝 via the permuta-tion matrices 𝑀 p(p), and act on the data qubits in block 
+
+𝐷 𝑢 via the permutation matrices 𝑀 u(u). Similarly, the 
+
+𝑍 -type check operators act on block 𝐷 𝑝 via 𝑀 u(u)𝑇 and on block 𝐷 𝑢 via 𝑀 p(p)𝑇 . Therefore, it suffices to show that Algorithm 2 yields the tableau transformation [︂ 
+
+𝐼 0 0 00 𝑀 p(p) 𝑀 u(u) 0 ]︂ −→ [︂ 𝐼 𝑀 p(p) 𝑀 u(u) 00 𝑀 p(p) 𝑀 u(u) 0]︂ .
+
+In the calculations that follow, for any sequence ⃗𝑣 of elements from a group 𝐺 𝑣 , we define the corresponding group algebra element over F2(𝐺 𝑣 ) as v =∑︀ 𝑔 ∈⃗𝑣 𝑔 . Fur-thermore, we omit the index variable 𝑖 when an opera-tion is performed simultaneously for all 𝑖 = 1 , . . . , 𝑁 . We first establish how the sequence of CNOT operations de-scribed in Algorithm 1 transforms the stabilizer tableau. To determine the transformation matrix 𝑇 enacted by the 
+
+CnotSchedule subroutine on an arbitrary input basis [𝑋, 𝐷 𝑝 , 𝐷 𝑢 , 𝑍 ], we track the evolution of each operator starting from the identity: 
+
+⎡⎢⎣
+
+𝐼 0 0 00 𝐼 0 00 0 𝐼 00 0 0 𝐼 
+
+⎤⎥⎦ .
+
+After the loop at Lines 5–8 (for 𝑘 = 1 to |⃗𝑔 𝑋 |):  
+
+> CNOT( 𝑋, 𝐷 𝑝 [𝑀 p(𝑔 𝑋,𝑘 )])
+
+−−−−−−−−−−−−−−−−→
+
+⎡⎢⎣
+
+𝐼 𝑀 p(g𝑋 ) 0 00 𝐼 0 00 0 𝐼 00 0 0 𝐼 
+
+⎤⎥⎦ CNOT( 𝐷 𝑢 , 𝑍 [𝑀 p(𝑔 𝑍,𝑘 )]) 
+
+−−−−−−−−−−−−−−−−→
+
+⎡⎢⎣
+
+𝐼 𝑀 p(g𝑋 ) 0 00 𝐼 0 00 0 𝐼 𝑀 p(g𝑍 )0 0 0 𝐼 
+
+⎤⎥⎦ .
+
+After the updated loop at Lines 9–12 (for 𝑘 = 1 to |⃗𝑓 𝑋 |):  
+
+> CNOT( 𝑋, 𝐷 𝑢 [𝑀 u(𝑓 𝑋,𝑘 )])
+
+−−−−−−−−−−−−−−−−→
+
+⎡⎢⎣
+
+𝐼 𝑀 p(g𝑋 ) 𝑀 u(f𝑋 ) 00 𝐼 0 00 0 𝐼 𝑀 p(g𝑍 )0 0 0 𝐼 
+
+⎤⎥⎦ 
+
+> CNOT( 𝐷 𝑝 , 𝑍 [𝑀 u(𝑓 𝑍,𝑘 )])
+
+−−−−−−−−−−−−−−−−→
+
+⎡⎢⎣
+
+𝐼 𝑀 p(g𝑋 ) 𝑀 u(f𝑋 ) 𝑀 p(g𝑋 )𝑀 u(f𝑍 )0 𝐼 0 𝑀 u(f𝑍 )0 0 𝐼 𝑀 p(g𝑍 )0 0 0 𝐼 
+
+⎤⎥⎦ .
+
+After the loop at Lines 13–16 (for 𝑘 = 1 to |⃗ℎ𝑋 |):  
+
+> CNOT( 𝑋, 𝐷 𝑝 [𝑀 p(ℎ𝑋,𝑘 )])
+
+−−−−−−−−−−−−−−−−→
+
+⎡⎢⎣
+
+𝐼 𝑀 p(g𝑋 + h𝑋 ) 𝑀 u(f𝑋 ) 𝑀 p(g𝑋 )𝑀 u(f𝑍 )0 𝐼 0 𝑀 u(f𝑍 )0 0 𝐼 𝑀 p(g𝑍 )0 0 0 𝐼 
+
+⎤⎥⎦ 
+
+> CNOT( 𝐷 𝑢 , 𝑍 [𝑀 p(ℎ𝑍,𝑘 )])
+
+−−−−−−−−−−−−−−−−→
+
+⎡⎢⎣
+
+𝐼 𝑀 p(g𝑋 + h𝑋 ) 𝑀 u(f𝑋 ) 𝑀 p(g𝑋 )𝑀 u(f𝑍 ) + 𝑀 u(f𝑋 )𝑀 p(h𝑍 )0 𝐼 0 𝑀 u(f𝑍 )0 0 𝐼 𝑀 p(g𝑍 + h𝑍 )0 0 0 𝐼 
+
+⎤⎥⎦ .
+
+Since ⃗ 𝑓 𝑋 and ⃗ 𝑓 𝑍 are both sequence orderings of the identical support set (f𝑋 = f𝑍 ), we can simplify the top-right matrix entry as 𝑀 u(f𝑋 )𝑀 p(g𝑋 + h𝑍 ). Thus, the transformation matrix 𝑇 corresponding to 22 
+
+CnotSchedule (𝐷 𝑝 , 𝑀 p,⃗𝑔 𝑋 ,⃗ ℎ 𝑋 ,⃗𝑔 𝑍 ,⃗ ℎ 𝑍 ,⃗ 𝑓 𝑋 ,⃗ 𝑓 𝑍 ) reduces to the block form: 
+
+𝑇 =
+
+⎡⎢⎣
+
+𝐼 𝑀 p(g𝑋 + h𝑋 ) 𝑀 u(f𝑋 ) 𝑀 u(f𝑋 )𝑀 p(g𝑋 + h𝑍 )0 𝐼 0 𝑀 u(f)0 0 𝐼 𝑀 p(g𝑍 + h𝑍 )0 0 0 𝐼 
+
+⎤⎥⎦ .
+
+We now analyze Algorithm 2 in each of the two cases. 
+
+Case 1: 𝑤 p odd. The CNOT operation at Line 15 acts on the initial tableau as follows: If ( 𝑆, 𝑈 ) = ( 𝑍, 𝑋 ), then:  
+
+> CNOT( 𝐷 𝑢 , 𝑍 [𝑀 p(𝑔 𝑧 0)])
+
+−−−−−−−−−−−−−−−→[︂ 𝐼 0 0 00 𝑀 p(p) 𝑀 u(u) 𝑀 u(u)𝑀 p(𝑔 𝑧 0 )]︂ .
+
+Applying the transformation 𝑇 then yields: 
+
+> 𝑇
+
+−→[︂ 𝐼 𝑀 p(g𝑋 + h𝑋 ) 𝑀 u(u) 𝑀 u(u)𝑀 p(2 g𝑋 )0 𝑀 p(p) 𝑀 u(u) 2𝑀 p(p)𝑀 u(u)]︂ ,
+
+where we have used p = g𝑍 + h𝑍 + 𝑔 𝑧 0 , u = f, and g𝑋 =
+
+h𝑍 . Finally, the CNOT operation at Line 17 gives:  
+
+> CNOT( 𝑋, 𝐷 𝑝 [𝑀 p(ℎ𝑥 0)])
+
+−−−−−−−−−−−−−−−−→[︂ 𝐼 𝑀 p(p) 𝑀 u(u) 00 𝑀 p(p) 𝑀 u(u) 0]︂ ,
+
+where we have used p = g𝑋 + h𝑋 + ℎ𝑥 0 , together with 2𝑀 p(p)𝑀 u(u) = 0 and 𝑀 u(u)𝑀 p(2 g𝑋 ) = 0, since all computations are performed over the binary field F2.If ( 𝑆, 𝑈 ) = ( 𝑋, 𝑍 ), then:  
+
+> CNOT( 𝑋,𝐷 𝑝 [𝑀 p(𝑔 𝑥 0)])
+
+−−−−−−−−−−−−−−−→[︂ 𝐼 𝑀 p(𝑔 𝑥 0 ) 0 00 𝑀 p(p) 𝑀 u(u) 0 ]︂ .
+
+Applying the transformation 𝑇 then yields: 
+
+> 𝑇
+
+−→[︂ 𝐼 𝑀 p(p) 𝑀 u(u) 𝑀 u(u)𝑀 p(g𝑋 + h𝑍 + 𝑔 𝑥 0 )0 𝑀 p(p) 𝑀 u(u) 𝑀 u(u)𝑀 p(p + g𝑍 + h𝑍 )]︂ ,
+
+where we have used p = g𝑋 + h𝑋 + 𝑔 𝑥 0 . Finally, the CNOT operation at Line 17 gives:  
+
+> CNOT( 𝐷 𝑢 , 𝑍 [𝑀 p(ℎ𝑧 0)])
+
+−−−−−−−−−−−−−−−−→[︂ 𝐼 𝑀 p(p) 𝑀 u(u) 00 𝑀 p(p) 𝑀 u(u) 0]︂ ,
+
+where we have used p = g𝑍 + h𝑍 + ℎ𝑧 0 and g𝑋 + 𝑔 𝑥 0 =
+
+h𝑍 + ℎ𝑧 0 .
+
+Case 2: 𝑤 p even. In this case, p = g𝑋 + h𝑋 = g𝑍 + h𝑍 
+
+and u = f by construction. Applying 𝑇 directly to the initial tableau yields: 
+
+> 𝑇
+
+−→[︂ 𝐼 𝑀 p(p) 𝑀 u(u) 00 𝑀 p(p) 𝑀 u(u) 0]︂ .
+
+In all the cases, the desired tableau transformation is achieved. Now we will show that the action of our syndrome extraction circuit on logical qubits is trivial. Let us con-sider a logical operator containing 𝑋 Paulis with the form (0 , 𝑑 𝑝 , 𝑑 𝑢 , 0). Let us track this logical operator through our chain of transformations. For the case where 𝑤 p
+
+is even, applying the general transformation matrix 𝑇 
+
+yields a new vector: (0 , 𝑑 𝑝 , 𝑑 𝑢 , 0) 𝑇 = (0 , 𝑑 𝑝 , 𝑑 𝑢 , 𝑑 𝑝 𝑀 u(f) + 𝑑 𝑢 𝑀 p(g𝑍 + h𝑍 )) .
+
+Note that the commutativity between 𝑋 -type logicals and 𝑍 -type stabilizers implies: 
+
+𝑑 𝑝 𝑀 u(u) + 𝑑 𝑢 𝑀 p(p) = 0 .
+
+Combining this with the fact that u = f and p = g𝑍 + h𝑍 ,we find: (0 , 𝑑 𝑝 , 𝑑 𝑢 , 0) 𝑇 = (0 , 𝑑 𝑝 , 𝑑 𝑢 , 0) .
+
+For the case where 𝑤 p is odd and ( 𝑆, 𝑈 ) = ( 𝑍, 𝑋 ), the initial CNOT( 𝐷 𝑢 , 𝑍 [𝑀 p(𝑔 𝑧 0 )]) transforms the initial vector to (0 , 𝑑 𝑝 , 𝑑 𝑢 , 𝑑 𝑢 𝑀 p(𝑔 𝑧 0 )). Applying the transfor-mation matrix 𝑇 to this intermediate state yields: (0 , 𝑑 𝑝 , 𝑑 𝑢 , 𝑑 𝑢 𝑀 p(𝑔 𝑧 0 )) 𝑇 = (0 , 𝑑 𝑝 , 𝑑 𝑢 , 𝑡 ),
+
+where 
+
+𝑡 = 𝑑 𝑢 𝑀 p(𝑔 𝑧 0 ) + 𝑑 𝑝 𝑀 u(f) + 𝑑 𝑢 𝑀 p(g𝑍 + h𝑍 )= 𝑑 𝑝 𝑀 u(u) + 𝑑 𝑢 𝑀 p(g𝑍 + h𝑍 + 𝑔 𝑧 0 )= 𝑑 𝑝 𝑀 u(u) + 𝑑 𝑢 𝑀 p(p) = 0 .
+
+The final operation in the odd-weight schedule is CNOT( 𝑋, 𝐷 𝑝 [𝑀 p(ℎ𝑥 0 )]). Because this operation relies on the 𝑋 ancilla as the control, and the 𝑋 register has remained identically 0, this operation has a trivial action, and the state remains (0 , 𝑑 𝑝 , 𝑑 𝑢 , 0). One can conclude the same for the case 𝑤 p is odd and ( 𝑆, 𝑈 ) = ( 𝑋, 𝑍 ) by fol-lowing the same sequence of steps. In all the cases, we have shown that the SC circuit maps the vector (0 , 𝑑 𝑝 , 𝑑 𝑢 , 0) to itself. Hence, the circuit acts trivially on 𝑋 -type logical operators. The correctness of the 𝑍 -type syndrome extraction and its trivial action on 𝑍 -type logical operators follows by symmetry. To verify this, one must simply update the propagation rule and the initial tableau to track 𝑍 -type Pauli operators. For 𝑍 -type stabilizers, the collective action of parallel CNOT gates defined by 𝑀 on 𝑍 -type blocks transforms as (𝐶 , 𝑇 ) 𝑀 
+
+−−→ (𝐶 + 𝑇 𝑀 𝑇 , 𝑇 )23 due to CNOT actions on 𝐼 ⊗𝑍 → 𝑍 ⊗𝑍 and 𝑍 ⊗𝐼 → 𝑍 ⊗𝐼 .Following a similar sequence of steps, one can show the required tableau transformation: [︂ 
+
+0 0 0 𝐼 
+
+0 𝑀 u(u)𝑇 𝑀 p(p)𝑇 0]︂ −→ [︂ 0 𝑀 u(u)𝑇 𝑀 p(p)𝑇 𝐼 
+
+0 𝑀 u(u)𝑇 𝑀 p(p)𝑇 0]︂ ,
+
+completing the proof of Proposition V.1 
+
+Appendix D: Counting Argument Regarding the Sequence Configurations 
+
+The elements of supp( u) are arranged into two inde-pendent sequences, ⃗ 𝑓 𝑋 and ⃗ 𝑓 𝑍 . Since there are no con-straints on u, there are 𝑤 u! valid orderings for each se-quence, yielding ( 𝑤 u!) 2 configurations. The partitioning of supp( p) depend on the parity of 𝑤 p:
+
+Case 1: 𝑤 p is even. The sequences ⃗𝑔 𝑋 and ⃗ ℎ𝑋 par-tition supp( p) into two equal-length ordered sequences. The total number of such ordered pairs equals 𝑤 p!. The sequences ⃗𝑔 𝑍 and ⃗ ℎ𝑍 must partition the same support such that ⃗ ℎ𝑍 contains the same elements as ⃗𝑔 𝑋 . Because these subsets are uniquely fixed by the 𝑋 -partition, we only choose their internal orderings. There are ( 𝑤 p/2)! ways to order each, yielding (( 𝑤 p/2)!) 2 configurations. Noting the identity (︀ 𝑤 p
+
+> 𝑤 p/2
+
+)︀ = 𝑤 p!/(( 𝑤 p/2)!) 2, the number of 𝑍 -sequence choices simplifies to 𝑤 p!/(︀ 𝑤 p
+
+> 𝑤 p/2
+
+)︀ . Multiply-ing the 𝑋 and 𝑍 choices gives the total sequence pairs for p:(𝑤 p!) 2(︀ 
+
+> 𝑤 p
+> 𝑤 p/2
+
+)︀ 
+
+Case 2: 𝑤 p is odd. The algorithm first selects a basis 
+
+𝑆 ∈ { 𝑋, 𝑍 }. The sequences ⃗𝑔 𝑆 and ⃗ ℎ𝑆 partition supp( p)such that |⃗𝑔 𝑆 | = ⌊𝑤 p/2⌋ + 1 and |⃗ ℎ𝑆 | = ⌊𝑤 p/2⌋. The number of such ordered pairs is 𝑤 p!. The sequences ⃗𝑔 𝑈 
+
+and ⃗ ℎ𝑈 are constrained such that ⃗ ℎ𝑈 contains the exact elements of ⃗𝑔 𝑆 . The internal orderings for these fixed subsets yield ( ⌊𝑤 p/2⌋ + 1)! ⌊𝑤 p/2⌋! choices, which equals to 𝑤 p!/(︀ 𝑤 p
+
+> ⌊𝑤 p/2⌋
+
+)︀ . Multiplying these choices gives the total sequence pairs for p:2 (𝑤 p!) 2(︀ 
+
+> 𝑤 p
+> ⌊𝑤 p/2⌋
+
+)︀ 
+
+,
+
+where the factor 2 arises from the different cases of the variable 𝑆 . Therefore, combining the independent choices for u and p for a given p yields: (𝑤 u!) 2 × 𝜈 (𝑤 p) (𝑤 p!) 2(︀ 
+
+> 𝑤 p
+> ⌊𝑤 p/2⌋
+
+)︀ 
+
+= ( 𝑤 u!𝑤 p!) 2 𝜈 (𝑤 p)(︀ 
+
+> 𝑤 p
+> ⌊𝑤 p/2⌋
+
+)︀ 
+
+Finally, summing this expression over two cases where, 
+
+p = a and p = b, yields the total number of configura-tions: (𝑤 a!𝑤 b!) 2(︃ 𝜈 (𝑤 a)(︀ 
+
+> 𝑤 a
+> ⌊𝑤 a/2⌋
+
+)︀ 
+
++ 𝜈 (𝑤 b)(︀ 
+
+> 𝑤 b
+> ⌊𝑤 b/2⌋
+
+)︀)︃ 
+
+Appendix E: Fit Parameters 
+
+In Table V, we report the fit parameters used in the heuristic formula ˜ 𝑝 𝐿 (𝑝 ) = 𝑝 𝑑 circ /2𝑒 𝛼 +𝛽𝑝 +𝛾𝑝 2
+
+for each code listed in Table II. TABLE V: Fit Parameters of the codes listed in Table II 
+
+Codes 𝑑 circ 𝛼 𝛽 𝛾 
+
+[[48 , 8, 6]] ≤ 5 7.69 1363 -125961 [[96 , 8, 10]] ≤ 9 15.71 2259 -241331 [[224 , 12 , 16]] ≤ 14 21.18 4129 -327354 [[84 , 16 , 8]] ≤ 7 12.53 2252 -250402 [[112 , 16 , 10]] ≤ 8 13.38 3263 -377805 [[128 , 16 , 12]] ≤ 10 20.37 2308 -241828 [[168 , 16 , 15]] ≤ 13 30.34 932 24829 
+
+Appendix F: Additional Code Examples 
+
+We present additional examples of codes in Table VI below. 24 TABLE VI: Additional examples of codes. Distances reported with a ≤ symbol represent upper bounds obtained using QDistRnd with 10 6 iterations. All other distances are exact. 
+
+Code Params Group Descriptions Group Algebra GAP Identifiers 
+
+𝑛 𝑘 𝑑 𝐺 Structure 𝐻 Structure a b ℓ 𝑚 𝑠 
+
+Weight-6 codes 
+
+36 4 6 𝐶 9 × 𝐷 18 𝐶 9 [1 , 15 , 36] [1 , 4, 8] 162 3 24 48 4 8 𝐶 3 × (𝐶 9 ⋊ 𝐶 8) 𝐶 9 [1 , 26 , 69] [1 , 8, 9] 216 12 14 54 8 6 𝐶 36 × 𝑆 3 𝐶 4 × 𝐶 2 [1 , 13 , 27] [1 , 4, 5] 216 47 23 56 6 8 𝐶 7 × 𝐷 8 𝐶 2 [1 , 5, 56] [1 , 2, 9] 56 9 160 16 4 𝐶 15 × 𝐷 10 𝐶 5 [1 , 11 , 31] [1 , 10 , 12] 150 8 672 4 10 𝐶 3 × (( 𝐶 6 × 𝐶 2) ⋊ 𝐶 2) 𝐶 2 [1 , 12 , 50] [1 , 4, 17] 72 30 172 8 8 𝐶 36 × 𝑆 3 𝐶 6 [1 , 6, 31] [1 , 7, 10] 216 47 17 84 6 10 𝐶 21 × (𝐶 3 ⋊ 𝐶 4) 𝐶 6 [1 , 24 , 34] [1 , 10 , 20] 252 21 690 8 10 𝐶 15 × (( 𝐶 6 × 𝐶 2) ⋊ 𝐶 2) 𝐷 8 [1 , 39 , 41] [1 , 4, 14] 360 99 35 96 4 12 (𝐶 3 × 𝐶 3) ⋊ (( 𝐶 4 × 𝐶 4) ⋊ 𝐶 2) 𝑆 3 [1 , 19 , 52] [1 , 14 , 24] 288 489 93 108 8 10 𝐶 36 × 𝑆 3 𝐶 4 [1 , 13 , 67] [1 , 8, 18] 216 47 12 112 6 12 𝐶 7 × 𝐷 8 × 𝑆 3 𝑆 3 [1 , 76 , 107] [1 , 13 , 14] 336 188 59 112 12 8 𝐶 7 × 𝐷 8 × 𝑆 3 𝑆 3 [1 , 44 , 106] [1 , 12 , 27] 336 188 59 120 8 12 𝐶 15 × (( 𝐶 6 × 𝐶 2) ⋊ 𝐶 2) 𝐶 6 [1 , 162 , 211] [1 , 7, 11] 360 99 18 126 10 10 𝑆 3 × (𝐶 7 ⋊ 𝐶 3) 𝐶 2 [1 , 10 , 81] [1 , 5, 19] 126 8 1144 4 16 𝐶 3 × (𝐶 9 ⋊ 𝐶 8) 𝐶 3 [1 , 26 , 179] [1 , 22 , 33] 216 12 1150 16 8 𝐶 15 × 𝐷 10 𝐶 2 [1 , 4, 55] [1 , 7, 15] 150 8 1168 16 10 𝐶 7 × (( 𝐶 6 × 𝐶 2) ⋊ 𝐶 2) 𝐶 2 [1 , 92 , 118] [1 , 14 , 30] 168 33 1180 8 16 𝐶 15 × (( 𝐶 6 × 𝐶 2) ⋊ 𝐶 2) 𝐶 4 [1 , 84 , 128] [1 , 5, 22] 360 99 14 186 10 14 𝐶 31 × 𝑆 3 𝐶 2 [1 , 74 , 183] [1 , 21 , 29] 186 3 1192 8 16 𝐶 3 × (( 𝐶 16 ⋊ 𝐶 2) ⋊ 𝐶 4) 𝐶 4 [1 , 226 , 283] [1 , 9, 21] 384 512 8248 10 ≤ 18 𝐶 31 × 𝐷 8 𝐶 2 [1 , 122 , 235] [1 , 15 , 30] 248 9 1
+
+Weight-8 codes 
+
+48 10 6 𝐶 3 × (( 𝐶 6 × 𝐶 2) ⋊ 𝐶 2) 𝐶 3 [1 , 16 , 57 , 58] [1 , 2, 3, 9] 72 30 972 16 6 𝐶 3 × (( 𝐶 6 × 𝐶 2) ⋊ 𝐶 2) 𝐶 2 [1 , 3, 43 , 47] [1 , 6, 8, 12] 72 30 180 8 10 (𝐶 5 ⋊ 𝐶 8) ⋊ 𝐶 2 𝐶 2 [1 , 3, 43 , 49] [1 , 9, 16 , 18] 80 10 180 10 8 (𝐶 5 ⋊ 𝐶 8) ⋊ 𝐶 2 𝐶 2 [1 , 10 , 52 , 58] [1 , 3, 9, 14] 80 10 184 10 9 𝐶 21 × (𝐶 3 ⋊ 𝐶 4) 𝐶 6 [1 , 82 , 101 , 120] [1 , 8, 13 , 16] 252 21 690 18 7 𝐶 5 × (( 𝐶 3 × 𝐶 3) ⋊ 𝐶 3) 𝐶 3 [1 , 78 , 111 , 112] [1 , 4, 6, 7] 135 3 196 10 12 (𝐶 3 × 𝐶 3) ⋊ (( 𝐶 4 × 𝐶 4) ⋊ 𝐶 2) 𝑆 3 [1 , 18 , 28 , 84] [1 , 20 , 22 , 23] 288 489 93 96 12 10 (𝐶 3 × 𝐶 3) ⋊ (( 𝐶 4 × 𝐶 4) ⋊ 𝐶 2) 𝐶 6 [1 , 77 , 85 , 136] [1 , 13 , 18 , 21] 288 489 103 96 18 8 (𝐶 3 × 𝐶 3) ⋊ (( 𝐶 4 × 𝐶 4) ⋊ 𝐶 2) 𝑆 3 [1 , 19 , 31 , 82] [1 , 2, 18 , 24] 288 489 93 108 12 10 (( 𝐶 9 × 𝐶 3) ⋊ 𝐶 3) ⋊ 𝐶 2 𝐶 3 [1 , 29 , 92 , 97] [1 , 2, 12 , 17] 162 4 13 112 12 12 𝐶 7 × (( 𝐶 4 × 𝐶 4) ⋊ 𝐶 2) 𝐶 4 [1 , 46 , 82 , 107] [1 , 17 , 20 , 25] 224 53 8120 14 12 𝐶 15 × 𝐷 8 𝐶 2 [1 , 13 , 47 , 100] [1 , 13 , 16 , 19] 120 32 3120 16 11 𝐶 15 × 𝐷 8 𝐶 2 [1 , 9, 93 , 101] [1 , 2, 15 , 30] 120 32 3120 24 7 𝐶 5 × (( 𝐶 3 × 𝐶 3) ⋊ 𝐶 4) 𝐶 3 [1 , 32 , 69 , 73] [1 , 9, 20 , 23] 180 23 12 128 10 14 (𝐶 8 ⋊ 𝐶 2) ⋊ 𝐶 8 𝐶 2 [1 , 33 , 92 , 120] [1 , 18 , 28 , 30] 128 10 1128 18 10 (𝐶 8 ⋊ 𝐶 2) ⋊ 𝐶 8 𝐶 2 [1 , 40 , 75 , 107] [1 , 8, 12 , 19] 128 10 1128 30 8 (𝐶 2 × (𝐶 4 ⋊ 𝐶 4)) ⋊ 𝐶 4 𝐶 2 [1 , 21 , 78 , 82] [1 , 12 , 22 , 27] 128 26 7136 8 15 𝐶 17 × 𝐷 8 𝐶 2 [1 , 11 , 55 , 61] [1 , 12 , 15 , 29] 136 10 1144 10 15 𝐶 3 × (𝐶 9 ⋊ 𝐶 8) 𝐶 3 [1 , 17 , 173 , 200] [1 , 8, 33 , 35] 216 12 1144 18 12 (𝐶 3 × 𝐶 3) ⋊ (( 𝐶 4 × 𝐶 2 × 𝐶 2) ⋊ 𝐶 2) 𝐶 4 [1 , 87 , 88 , 117] [1 , 7, 29 , 35] 288 498 141 144 24 8 (𝐶 3 × 𝐶 3) ⋊ (( 𝐶 4 × 𝐶 4) ⋊ 𝐶 2) 𝐶 4 [1 , 112 , 129 , 134] [1 , 12 , 17 , 20] 288 489 15 160 8 ≤ 18 𝐶 5 ⋊ (( 𝐶 8 × 𝐶 4) ⋊ 𝐶 2) 𝐶 4 [1 , 28 , 108 , 113] [1 , 13 , 17 , 38] 320 17 61 160 12 16 𝐶 5 ⋊ (( 𝐶 4 ⋊ 𝐶 4) ⋊ 𝐶 4) 𝐶 2 × 𝐶 2 [1 , 65 , 105 , 128] [1 , 14 , 28 , 31] 320 10 59 168 10 ≤ 17 𝐶 7 × (( 𝐶 6 × 𝐶 2) ⋊ 𝐶 2) 𝐶 2 [1 , 60 , 71 , 108] [1 , 7, 19 , 36] 168 33 1168 24 10 𝐷 8 × (𝐶 7 ⋊ 𝐶 3) 𝐶 2 [1 , 10 , 48 , 49] [1 , 12 , 15 , 25] 168 20 3186 22 12 𝐶 31 × 𝑆 3 𝐶 2 [1 , 23 , 90 , 180] [1 , 2, 9, 26] 186 3 1186 36 7 𝐶 31 × 𝑆 3 𝐶 2 [1 , 4, 19 , 67] [1 , 6, 13 , 19] 186 3 1200 28 10 𝐶 5 × 𝐶 5 × 𝐷 8 𝐶 2 [1 , 25 , 157 , 172] [1 , 14 , 16 , 33] 200 38 3208 10 ≤ 20 𝐶 13 × (( 𝐶 4 × 𝐶 2) ⋊ 𝐶 2) 𝐶 2 [1 , 8, 172 , 193] [1 , 24 , 30 , 50] 208 21 1216 14 ≤ 18 𝐶 9 × (( 𝐶 6 × 𝐶 2) ⋊ 𝐶 2) 𝐶 2 [1 , 104 , 196 , 215] [1 , 6, 19 , 35] 216 58 7240 16 ≤ 20 𝐶 3 × (( 𝐶 5 ⋊ 𝐶 8) ⋊ 𝐶 2) 𝐶 2 [1 , 37 , 136 , 228] [1 , 11 , 35 , 52] 240 39 1

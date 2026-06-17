@@ -1,0 +1,2088 @@
+Title: Projected logical ensembles in surface codes via the random-matrix theory of quantum dots
+
+URL Source: https://arxiv.org/pdf/2606.17140v1
+
+Published Time: Wed, 17 Jun 2026 00:05:30 GMT
+
+Number of Pages: 24
+
+Markdown Content:
+Projected logical ensembles in surface codes via the random-matrix theory of quantum dots 
+
+Mircea Bejan, 1, 2, ∗ Jan Behrends, 2, 3, ∗ Max McGinley, 2 and Benjamin B´ eri 2, 4 
+
+> 1
+
+Department of Physics, King’s College London, Strand WC2R 2LS, UK 
+
+> 2
+
+TCM Group, Cavendish Laboratory, University of Cambridge, J. J. Thomson Avenue, Cambridge CB3 0US, UK 
+
+> 3
+
+Quantinuum, Terrington House, 13-15 Hills Rd, Cambridge, CB2 1NL, UK 
+
+> 4
+
+DAMTP, University of Cambridge, Wilberforce Road, Cambridge, CB3 0WA, UK 
+
+(Dated: June 2026) Measurements underpin active quantum error correction (QEC) and have been recognized as a source of novel measurement-induced many-body phenomena. Here, we study the statistical properties of post-measurement logical states arising in QEC on topological codes subject to deterministic transversal unitary gates. Upon syndrome extraction followed by maximum-likelihood decoding, a Born-weighted ensemble arises which we dub the “projected logical ensemble” (PLE). Focusing on surface codes subject to uniform single-qubit Pauli-X rotations, we characterize the measurement-induced randomness of the PLE. To this end, we show that for a code with a single logical qubit, the PLE is isomorphic to an ensemble of scattering matrices describing mesoscopic quantum dots obtained from a 2D Majorana network model with suitable boundary conditions. We uncover regimes where these quantum dots are chaotic such that their scattering matrices are well-described by random matrix theory. In these regimes, the PLE approaches a universal ensemble that is maximally random up to symmetry and decoder-induced constraints. The symmetry constraints, set by stabilizer and logical operator weights, realize Altland-Zirnbauer classes D or DIII, which we both illustrate. Our results establish a fundamental connection between emergent universality concepts in mesoscopic physics, quantum many-body systems, and QEC. 
+
+I. INTRODUCTION 
+
+Quantum error correcting (QEC) codes encode logical quantum information in the state of a large number of physical degrees of freedom, and form the basis of schemes for storing and manipulating quantum information in a way that is protected against hardware-level noise [ 1–13 ]. While there exist many different choices of code and various modes of operation, any successful implementation of quantum computation is likely to need some form of QEC for scalability. The most prevalent QEC paradigm is active QEC [ 1– 20 ]. Here, “syndrome” measurements are performed on the physical degrees of freedom in a targeted way, aiming to detect noise-induced errors that have previously occurred, to then compensate these via a feedback operation. For example, in the surface code (and more general topological codes), the encoded states can be interpreted as degener-ate ground states of a local many-body Hamiltonian, and the measurements reveal the presence of noise-generated excitations above this ground state [ 7 –9]. In addition to their role in stabilizing quantum memories, measurements can also be used to deliberately manipulate the encoded logical information [ 21 – 24 ], e.g., via lattice surgery [ 24 ], thereby enabling certain logical gates. While the usefulness of measurements in QEC has long been appreciated, recently a distinct direction has emerged focusing on the effect of measurements on many-body quantum states relevant to condensed matter [ 25 –32 ]. Upon measuring some subset of degrees of free-dom, the state of rest of the system will be disturbed  
+
+> ∗These authors contributed equally to this work.
+
+in a non-deterministic way due to measurement back-action, thereby inducing a random ensemble of post-measurement states referred to as the projected ensem-ble . Through studying different statistical properties of this ensemble, several novel measurement-induced many-body phenomena have been discovered, including deep thermalization [ 33 –49 ], long-range measurement-induced entanglement [ 50 – 56 ], and measurement-induced and measurement-altered criticality [57–66]. The physical interpretation of topological code states as many-body ground states and the importance of mea-surements in active QEC raise intriguing questions: how do projected ensembles fit within the landscape of QEC? Conversely, what novel aspects of the projected ensem-ble—and other measurement-induced phenomena—can be revealed or realized by QEC codes, which are now under intense experimental investigation [14–20]? In this work, by leveraging these connections between many-body physics and QEC, we study the statistical properties of post-measurement logical states that arise in surface codes subject to onsite unitary evolution. In QEC terms, we consider deterministic transversal gates, i.e., gates that apply a fixed unitary to each physical qubit. Subsequent syndrome measurements produce random post-measurement states with probabilities determined by Born’s rule. These states can each be subsequently brought back to the code space via a maximum-likelihood Pauli recovery. We call the resulting ensemble of logical states the “projected logical ensemble” (PLE). We study the statistical properties of the PLE as a function of the distance of the unitary gates from the identity, focusing on codes with a single logical qubit. When the gates are near the identity, typical syndromes are correctable, and thus the recovery operation always brings the sys-
+
+> arXiv:2606.17140v1 [quant-ph] 15 Jun 2026
+
+2tem back near the same, deterministic logical state. By contrast, once the gates deviate from identity beyond a threshold, the net process of applying unitaries, measuring syndromes, and applying the correction has a nontriv-ial, non-deterministic impact on the logical information. Above threshold, states in the PLE become highly ran-dom, and we analyze how this distribution depends on the underlying physical parameters. One of our key contributions is a universal physical picture that captures the properties of the PLE. To for-mulate this picture, we establish a surprising connection to mesoscopic physics: Conditioned on measurement out-comes, we find that the expectation values of the final logical state can be mapped to scattering amplitudes of a quantum dot constructed from a random single-particle scattering network. The randomness in this system is generated solely by the measurement outcomes, i.e., the Born rule. For the codes studied here, this network and dot belong to Altland-Zirnbauer symmetry classes [ 67 ]DIII or D, as determined by the properties of the code’s stabilizers and logical operators. We identify regimes where this quantum dot is chaotic, which results in scattering amplitudes that are governed by random matrix theory (RMT). Via our mapping, these RMT predictions can be used to characterize the PLE. For class DIII, RMT predicts that the PLE should ap-proximate the Haar ensemble (the maximally random ensemble of pure quantum states), which resembles the phenomenon of deep thermalization studied in many-body physics. In class D, the ensemble is instead randomly distributed on a submanifold of states. Using direct numerical simulations of the PLE, and by computing properties of the associated network model, we corroborate this picture in a number of different settings. As well as offering a new perspective on the effect of mea-surements on code states, our connection to mesoscopic physics also provides a new explanation for some of the numerical observations of Refs. [ 68 , 69 ] (albeit in a slightly different setup). Overall, our study highlights the fruitful relationship between QEC codes, mesoscopic physics, and the landscape of measurement-induced phenomena.  
+
+> II. OVERVIEW
+
+We begin by summarizing our main results, explain-ing their relation to previous work, and describing the structure of the paper.  
+
+> A. Setup and summary of results
+
+We consider an n-qubit system initialized in a code state of a surface code (SC). The code is assumed to have a single logical qubit, but otherwise the geometry of the code can be any planar 2D graph; some examples are shown in Fig. 1(a). To each physical qubit j ∈ { 1, . . . , n },a gate exp (iϕX j ) is applied, where the rotation angle 
+
+ϕ ∈ [0 , π/ 4] is deterministic. The code stabilizers are measured, the outcomes of which define a (Born-random) syndrome. Subsequently, a Pauli correction is applied based on a maximum likelihood decoder, which brings the system back into the code space. These final logical states, along with their corresponding Born probabilities, form the “projected logical ensemble” (PLE) [Sec. III B], which is the main object of our study. The combined application of unitary gates and sta-bilizer measurements on SC states is known to exhibit two phases, corresponding to whether or not the original logical information can be recovered via Pauli correc-tion [ 70 – 78 ]. Below threshold (i.e., for angles ϕ below some critical value ϕth ), correction succeeds, and the final logical state is with high probability close to the initial logical state. Thus, in this correctable phase, the PLE has a simple structure, with most states close to the same fixed state. Above threshold ( ϕ > ϕ th ), correction fails and the initial and final logical states differ in a non-deterministic way. Our interest is in the full distribution of final logical states in this non-correctable phase. As shown in Refs. 70 and 73 , the correctability of logical information in our setting can be analyzed via a mapping to a 2D network model whose geometry is determined by that of the physical qubits [Fig. 1(b); Sec. IV]. This net-work arises from a transfer matrix that can be interpreted as a (1+1)D nonunitary Gaussian quantum circuit [ 73 – 78 ]. This reflects a more general principle that relates measure-ments on isometric tensor network states (a class of states to which the SC state belongs [ 79 ]) to monitored circuits [Sec. VII A in Ref. 56 ]. An important property of the net-work model is its symmetry. As we show, depending on the properties of stabilizer generators and logical opera-tors, the network belongs to Altland-Zirnbauer symmetry class D or DIII [Sec. V C]. The breakdown of correctability at the threshold manifests through a diverging localiza-tion length ξloc in the network. Specifically, for class DIII models, the transition separates an insulating phase for 
+
+ϕ < ϕ th from a diffusive metal for ϕ > ϕ th [77, 78]. We show that the network model can be used to probe properties of the PLE beyond the question of correctability. In particular, we derive an explicit mapping between the states in the PLE and the scattering matrix S of the network model with suitable boundary conditions [Sec. V]. The mapping arises from the concatenation of the scattering network and that of boundaries with single-mode contacts, thus leaving 4 incoming and 4 outgoing Majorana modes, see Fig. 1(b). This turns the network into a quantum dot of linear size L proportional to the code distance. Each state in the PLE maps—through a fixed isomorphism—to S,the dot’s scattering matrix. Naturally, S inherits the symmetries of the network model. More significantly, the distribution of S, which has been extensively studied in mesoscopic physics [ 80 , 81 ], including in classes D and DIII [ 67 , 82 ], dictates the statistical properties of the PLE. This correspondence is the basis of the physical picture announced in the Introduction. 3(c)                                       
+
+> FIG. 1. Overview of results. (a): Surface code on honeycomb, square, and triangular lattices with qubits (black disks) on edges (black lines), SXvstabilizers (light gray) on vertices, and SZfstabilizers (dark gray) on faces. The logical Z(blue) and X
+> (red) are also shown. The medial lattice has qubits on its vertices and the faces form a checkerboard pattern of SXvand SZf
+> stabilizers. (b): The code subject to coherent X-rotations and syndrome measurements can be mapped to a quantum circuit (cf. Sec. IV), which further maps to a charge-conserving network model [32, 70] with scattering matrix S[ ˆMs] (light gray shaded). Concatenating S[ˆMs] with scattering matrices SLand SR(dark gray) describing boundaries with two single-mode contacts each yields S[˜Ms]. (c,d): We interpret S[˜Ms] as the scattering matrix of a quantum dot and find a mapping between the ensembles of S[˜Ms] and the final logical states |ψs⟩, i.e., the PLE. For chaotic quantum dots, S[˜Ms] is distributed according to a symmetry-dependent ensemble of random matrices. This random-matrix regime can set in for ϕ > ϕ th (with ϕth the Pauli-recoverability threshold), and when it does, it implies that the PLE also approaches a universal distribution. For lattices with only even-weight SXv(e.g., square or triangular), the quantum dot is in class D; for lattices that include odd-weight SXv
+> (e.g., honeycomb) the symmetry class is DIII. Using maximum likelihood decoding, an initial logical |0⟩gets distributed over the highlighted green Bloch line (class D, for odd-weight X) or hemisphere (class DIII).
+
+A dot with L ≪ ξloc , and L much larger than the mean free path, is a diffusive metallic grain. In our setting, the system is in this regime for ϕ > ϕ th , both for class DIII where it belongs to a metallic phase [ 77 , 78 ] and class D where above the numerically observed ϕth the behavior is consistent with such a metallic-grain regime [ 69 , 70 ]. For such diffusive metallic grains, once the escape time much exceeds a timescale inversely proportional to the finite-size scaling of the bulk conductivity g(L) [ 83 – 88 ], transport through the quantum dot is expected to become chaotic, i.e., the dot to act like a random scatterer with no spatial locality [Fig. 1(c)]. In this case, the distribution of 
+
+S is described by random matrix theory [ 80 , 81 ]. Via our mapping, this yields the prediction that the PLE should approach, in a manner controlled by g(L), a maximally random ensemble, subject to symmetry and decoding-induced restrictions [Fig. 1(d)]. For class DIII this is the uniform (Haar) ensemble over all logical states on the upper Bloch hemisphere; for class D, the distribution is uniform over the upper meridian of the Bloch sphere (in both cases we took |0⟩ as the initial logical state). We corroborate these predictions with direct numerical simu-lations of the PLE, alongside simulations of the network models [Sec. VI B, VI C, App. G, H].  
+
+> B. Relation to previous work
+
+Our work fits into a growing body of literature on QEC codes under coherent noise [ 51 , 68 – 78 , 89 – 110 ], and is related to recent studies of SCs under coherent rotations and local measurements that discuss state ensembles, thermodynamic phases, or symmetry classes in related settings [ 68 , 69 , 77 , 78 , 108 – 110 ]. We next describe the relationship between our results and these works. In Ref. [ 68 ], Cheng et al. study Haar-random local uni-tary rotations on a random subset of physical qubits of an SC with even-weight stabilizers, followed by syndrome measurement and error correction. Under some condi-tions, this induces unitary logical designs. By contrast, we rotate each qubit by a fixed deterministic single-axis unitary, thus focusing on the Born rule as the only “source” of randomness. Furthermore, in our settings, a SC with odd-weight stabilizers is essential for approaching a maxi-mally random PLE. Our quantum dot mapping provides novel physical insights into this emergent universality. In Ref. [69], Eckstein et al. study a state ensemble ob-tained by entangling a reference qubit with a SC logical qubit, uniformly rotating each SC physical qubit about a single axis, then measuring each physical qubit along another axis. The SC has even-weight stabilizers. This procedure consumes the SC, and leaves a logical qubit snapshot in the reference. Ref. [ 69 ] finds numerical results consistent with this logical ensemble approaching Haar distribution in certain regimes they identify as a class DIII Majorana metal. They also identify a “ring distribution” analogous to that shown in Fig. 1(d). Refs. [ 108 – 110 ]show how boundary conditions in a dual statistical me-chanical description encode logical states. By contrast, we measure stabilizers and apply a recovery operation, thereby preserving a SC. We also find class DIII metallic network models, but our construction hinges on the SC having odd-weight stabilizers. Furthermore, we provide a theoretical picture for the emergent universal PLE by mapping it to the RMT of quantum dot scattering. 4In Ref. [ 77 ], which appeared during the completion of this manuscript, Yan et al. consider a decoding problem for the SC under single-qubit coherent errors. For a bipartite SC lattice and i.i.d. Gaussian rotation angles ϕ
+
+near π/ 4, they derive a class D non-linear sigma model (NL σM) as an effective model of the decoding problem, and find an insulating phase under MLD. They argue that for uniform ϕ this phase persists, albeit likely with 
+
+ξloc ≫ L for numerically accessible system sizes L. For systems where syndromes reside on non-bipartite lattices, they note that a class DIII NL σM can arise, and suggest that these can host a thermal metal phase. We consider SC on distinct lattices with uniform ϕ, which we show are described by a class D or DIII network models. Focusing on the honeycomb SC, our numerics suggest that its disordered network exhibits a class DIII Majorana metal whose transport properties are consistent with a class DIII NL σM in the Born-rule replica limit. In Ref. [ 78 ], which also appeared during the comple-tion of this manuscript, Yang et al. study decodability phase transitions for the SC on lattices with different stabilizer-weight parities under single-qubit coherent ro-tations. They map this problem to (1+1)D nonunitary Gaussian fermion circuits in classes D and DIII, as well as corresponding NL σMs, and identify decodability tran-sitions with entanglement transitions. (For entangle-ment transition perspectives on decodability, see also Refs. [ 68 , 73 –77 ].) They find thermodynamic phases con-sistent with those of Yan et al. [77 ], and new decodability transitions for non-uniform ϕ. We consider the SC on similar lattices with uniform rotations, which we map to class D and DIII nonunitary circuits and to Majorana scattering networks. We identify a similar QEC transition for the honeycomb lattice, and find a class DIII metallic phase above threshold. Our results are consistent with Refs. [ 77 , 78 ]. However, our main focus is the PLE, for which we provide a unified physical picture through a quantum dot mapping.  
+
+> C. Outline
+
+The remainder of this work is organized as follows. In Sec. III, we present our SC setup and introduce the PLE. In Sec. IV, we outline the mapping to (1+1)D Gaussian quantum circuits, and how the final logical state is embedded in the final states of such a circuit. In Sec. V, we discuss the associated 2D scattering network model, explain the quantum dot mapping, and how the quantum dot scattering matrices are related to the final logical states. In Sec. VI, we provide numerical evidence for an emergent chaotic class DIII quantum dot and the emergent PLE. The Appendices contain details of our derivations and additional numerics, including numerics consistent with a chaotic class D dot [App. H].  
+
+> III. PROJECTED LOGICAL ENSEMBLE OF THE SURFACE CODE UNDER COHERENT ROTATIONS
+
+In this Section, we introduce the SC protocol and en-semble of logical states studied in this work.  
+
+> A. Surface code setup
+
+The surface code [ 7– 9] is an experimentally relevant [ 14 –20 ] quantum Calderbank-Shor-Steane stabilizer code [ 2, 3]. Here we describe its construction on a two-dimensional (2D) planar lattice, with n qubits on its edges, X-type sta-bilizers SXv = Q 
+
+> j∈v
+
+Xj on vertices, and Z-type stabilizers 
+
+SZf = Q 
+
+> j∈f
+
+Zj on faces, where j ∈ v and j ∈ f denote the edges j neighboring the vertex v and enclosing the face f ,respectively. Since the SXv stabilizers are defined on the vertices of a lattice, the X-type stabilizers form the direct lattice, the Z-stabilizers the dual lattice, and the physical qubits form an auxiliary lattice, the medial lattice. We focus on the case where one logical qubit is encoded in the SC via the logical X = Q 
+
+> j∈γ
+
+Xj and Z = Q 
+
+> j∈γ′
+
+Zj . We choose a minimum-weight representation of the logical operators and consider geometries where X has support on qubits on a string from the left to the right of the lattice, and Z from top to bottom [Fig. 1(a)]. While often defined on square lattices, the SC can also be defined on other lattices, with benefits for biased noise [ 72 , 111 , 112 ]. A primary example used in this work is the SC on a honeycomb lattice, as shown in Fig. 1(a). We now describe the effect of single-qubit coherent ro-tations followed by stabilizer measurements and Pauli corrections [ 71 , 72 ]. For concreteness, we focus on ro-tations about the X-axis. (Rotations about Z can also be described in the same framework, but the relevant lattice then is that of Z-type stabilizers, i.e., the dual lattice [ 72 ].) Although we shall be more interested in preparing specific initial logical states ( |0⟩ or |1⟩ for X
+
+rotations), it is instructive to specialize to these only later. Consider the application of U = Q 
+
+> j
+
+exp (iϕX j ) to an initial logical state ρ = |ψ⟩⟨ ψ|, followed by a noiseless syndrome measurement that yields the syndrome s; hence, the X syndrome is always trivial (i.e., all SXv measure-ments return +1) and only the Z syndrome is nontrivial. To return to the logical subspace after a syndrome mea-surement, we apply a Pauli correction Cs = Q 
+
+> j
+
+X(1 −ηj )/2
+
+> j
+
+(with ηj = ±1), which is a string of Xj operators that connects SZf = −1 syndromes, either in pairs or to a condensing boundary. The correction Cs shall be cho-sen using the maximum-likelihood decoder [ 70 , 72 ], to be specified later. For a syndrome s, there are two inequivalent correc-tion operations, Cs and CsX. Cs can be deformed by 
+
+X stabilizer configurations as Cs 7 → C′ 
+
+> s
+
+= Cs
+
+Q 
+
+> v
+
+(SXv )nv
+
+with some configuration {nv = 0 , 1}; since all stabilizers commute, such a deformed C′ 
+
+> s
+
+corresponds to the same 5syndrome. Cs can also be deformed by a logical X op-erator, Cs 7 → CsX. Again, since the final state after the correction operation is within the logical subspace, the deformation by an X stabilizer configuration has no effect, as any logical state is in the +1 eigenspace of all 
+
+SXv . However, deforming Cs by X changes the final state by a logical X, thus making Cs and CsX inequivalent. The application of U to an initial state ρ, followed by a projection onto the syndrome s and the Pauli correction 
+
+Cs can be described by the effective logical channel [ 71 , 72 ]
+
+ρ 7 → ρs = CsΠsU ρU †ΠsCs
+
+p(s|ρ) = DsρD †
+
+> s
+
+Tr[ DsρD †
+
+> s
+
+] , (1) where Π s is the projection onto syndrome s which occurs with probability p(s|ρ) = Tr [Π sU ρU †Πs] = Tr [DsρD †
+
+> s
+
+], and where we defined the operator Ds := Π 0CsU Π0 via the projector Π 0 onto the logical subspace. Note that Πs = CsΠ0Cs because Cs maps states from the syndrome 
+
+s subspace to the logical subspace [ 71 , 72 ]. Since we con-sider only X rotations and accordingly only X corrections, 
+
+Ds is diagonal in the X basis and we thus have [71, 72] 
+
+Ds = ( Z0,s 1 + Z1,s X)Π 0, (2) with complex coefficients Zq,s . While the probability 
+
+p(s|ρ) to measure s generally depends on the initial state, it will be useful to consider its average over the Bloch sphere p(s) = R 
+
+> Ω
+
+dρ p (s|ρ)p(ρ) = P 
+
+> q
+
+|Z q,s |2 [72]. A key question of this work concerns the statistical properties of this effective logical operation Ds/pp(s|ρ).Specifically, we are interested in the distribution of fi-nal logical states |ψs⟩ = Ds |ψ⟩ /pp(s|ρ) over the logical Bloch sphere. To draw conclusions about these effective logical operations, we choose the convenient parametriza-tion in terms of two angles θs ∈ [0 , π ] and φs ∈ [0 , 2π), 
+
+Z0,s = pp(s)eiζ s cos( θs/2) , (3) 
+
+Z1,s = pp(s)ei(ζs+φs) sin( θs/2) (4) such that 
+
+Ds = pp(s) cos( θs/2) 1 + eiφ s sin( θs/2) X Π0, (5) where we ignored the overall inconsequential phase ζs.In the remainder of this work, we consider initial logical states |ψ⟩ that are eigenstates of the logical Z operator; that is, we can take |ψ⟩ = |0⟩ or |ψ⟩ = |1⟩, but focus on |ψ⟩ = |0⟩ for clarity. Using this initial state, we can extract the angles of the effective logical operation ∝ Ds
+
+from the final logical state 
+
+|ψs⟩ = cos( θs/2) |0⟩ + eiφ s sin( θs/2) |1⟩ . (6) Note that p(s) = p(s|ρ = |0⟩⟨ 0|) [72].  
+
+> B. Projected logical ensemble
+
+To characterize the statistical properties of the effective logical operations [Eq. (2) ], we collect the final logical states from Eq. (6) in the projected logical ensemble (PLE) 
+
+E := {p(s|ρ), |ψs⟩} , (7) with the Born probabilities p(s|ρ) with ρ = |0⟩⟨ 0|, and states labeled by the syndrome s. E is a discrete distribu-tion of points on the Bloch sphere, and we are interested in their statistical properties. We can gain some intuition by viewing our setup as a QEC problem, where eiϕX j act as coherent errors and |ψs⟩
+
+are post-QEC states. Below the code’s decoder-dependent error threshold, the correction succeeds with high prob-ability; hence, we expect E to be tightly concentrated (increasingly so with increasing L) on the Bloch sphere around the initial state |ψ⟩. Conversely, above the error threshold, the correction fails, and the states in E may be anywhere on the Bloch sphere, perhaps even uniformly distributed. In this work, we are interested in the randomness of the PLE E in the above threshold regime. The states in the PLE are constrained to lie within a subspace of the Bloch sphere. Before briefly discussing two such constraints (see also App. A), let us note that there exists a universal ensemble that is maximally random up to constraints, which shall serve as a reference for the maximum ran-domness that E may achieve. This is the constrained Haar ensemble E∗ 
+
+> H
+
+[ 113 ], which is a continuous, uniform distribution of pure states over a constraint-dependent Bloch-sphere subspace. As we find in Sec. VI C, the nu-merical data suggests that E can approach E∗
+
+> H
+
+; we discuss how to quantify this approach in Sec. VI C and App. B. First, the decoder with which we choose a recovery op-eration from the two inequivalent classes can constrain E.Concretely, for the maximum likelihood decoder (MLD) used in this work, the states |ψs⟩ may only lie within the upper Bloch hemisphere (given the initial state |0⟩ at the North Pole). Denoting two inequivalent corrections by 
+
+Cq,s = Xq Cs with q = 0 , 1 and the probability of each class by pq,s = | ⟨ ψ|Xq CsΠsU |ψ⟩ | 2 = |Z q,s |2, the MLD selects the class which results in |ψs⟩ closest to |ψ⟩ by picking Cq∗,s with q∗ = arg max q pq,s . To simplify nota-tions, we use that for a given s we have a given pure state ΠsU |ψ⟩ and hence define Cs such that q∗ = 0. Therefore, for the MLD, |Z 0,s |2 ≥ |Z 1,s |2 by definition, implying that |ψs⟩ must lie in the northern Bloch hemisphere. Second, the parity of the weights of SXv stabilizers can induce a fixed phase relation between the amplitudes Z0,s 
+
+and Z1,s [71 , 72 ]. While we review these considerations in more detail in App. A, we note that the key insight comes from expanding U and Ds as sums of X-Pauli strings, e.g., 
+
+U = P 
+
+> {xj}
+
+( cos ϕ)N (i sin ϕ)N −| x| Q 
+
+> j
+
+Xxj 
+
+> j
+
+with xj = 0 , 1and Hamming weight |x|, and then identifying which X-strings contribute to each correction class. One finds that, for codes with even-weight SXv stabilizers [such as the square-lattice SC, cf. Fig. 1(a)], there is a fixed phase relation arg (Z0,s /Z1,s ) = φs ∈ { φ, φ + π} ∀ s with φ = 0 for an even-weight X, and φ = π/ 2 for an odd-weight 
+
+X; this implies that the logical states |ψs⟩ may only lie 6on a one-dimensional circle subspace of the Bloch sphere. Conversely, for codes with some odd-weight SXv stabilizers [including the honeycomb SC, cf. Fig. 1(a)], the relative phase φs between Z0,s and Z1,s can take an arbitrary value; thus, in this case, the stabilizer weights do not constrain the PLE. 
+
+IV. QUANTUM CIRCUIT 
+
+Here, we relate the amplitudes Zq,s [Eq. (2) ] to (1+1)D quantum circuits and discuss how a final 2-qubit pro-jected state of such a circuit encodes the final logical state [Fig. 2]. 
+
+A. From surface code to (1+1)D quantum circuit 
+
+The coefficients Zq,s [Eq. (2) ] can be efficiently com-puted using a Gaussian tensor network (TN), which can also be used to efficiently sample syndromes [ 71 ]. For com-pleteness, in this section we describe the TN contraction and error-string sampling, largely following Ref. [ 70 ]. The starting point is the partition function of a random-bond Ising model (RBIM) 
+
+Zq,s = X 
+
+> {σv}
+
+enK +Hq,s ({σv }), H q,s = J X
+
+> ⟨v,v ′⟩
+
+η(q,s ) 
+
+> vv ′
+
+σv σv′ , (8) with complex couplings [70] 
+
+K = ln(cos ϕ sin ϕ)2 + iπ 
+
+4 , J = − ln(tan ϕ)2 − iπ 
+
+4 . (9) Ising variables σv = ±1 on the vertices of the graph with vertices at SXv locations and edges on qubits, and n is the total number of qubits. The signs η(q,s ) 
+
+> vv ′
+
+= ±1 can be sampled from a quantum circuit [ 71 , 72 ]; in App. C, we describe a slight variation of the sampling algorithm introduced in Ref. 71 . The form of the partition function arises from the expansion of the product CsU into Pauli strings: these Pauli string can contribute to Ds [Eq. 2] only when they form products of stabilizers (contributing to Z0,s ) or products of stabilizers times X (contributing to 
+
+Z1,s ). The sum over all possible stabilizer configurations can be expressed as a sum over spin configuration, which, using the right choice of the coefficients, gives the partition function (8); cf. Ref. 70 for more details. The partition function Zq,s equals the contraction of a TN consisting of two-leg tensors ˆTη |σσ ′ = eK+ησσ ′J , i.e., ˆT1 =
+
+ cos ϕ i sin ϕi sin ϕ cos ϕ
+
+ , ˆT−1 =
+
+i sin ϕ cos ϕ
+
+cos ϕ i sin ϕ
+
+ (10) on all qubit sites, i.e., on the edges of the graph. The two legs of ˆTη connect to SXv stabilizers on the vertices. Con-tracting all legs emanating from a vertex thus corresponds to summing over the two possible stabilizer configurations. We now describe the tensor network as a nonunitary (1 + 1)D quantum circuit [ 71 , 73 ], i.e., we contract it from left to right. In Fig. 2(a), we show the TN of a honey-comb SC of dimension ( L, M ) to visualize the network and quantum circuit. Here we use ( L, M ) as the lattice dimensions, which do not necessarily equal the code dis-tance; for the honeycomb lattice, while dZ = M equals the minimum weight of Z, dX = ( L + 1) /2 is smaller, as illustrated in Fig. 1(a). The (unnormalized) initial state of the quantum circuit |ϕ(i) ⟩ = ⊗M +1 
+
+> m=1
+
+√2 |+⟩m (not to be confused with |ψ⟩) encodes the boundaries while ensuring the corresponding stabilizer configurations are summed over [ 70 ]; note that we inserted two ancilla qubits, 1 and 
+
+M + 1, for later convenience (these will encode |ψs⟩, see Sec. IV C). All tensors ˆTη are located on vertical bonds, and contracting the index to the left of ˆTη in the lth layer at the mth vertical site corresponds to acting with the operator ˆV (l,m ) = eK+η(l,m )Jτ zmτ zm+1 , where the Pauli ma-trices τ μm act in the transfer matrix space of the evolved 1D state; note that ˆV (l,m ) is not unitary. For the honey-comb lattice, the even and odd layers contain a different number of qubits and hence a different number of indi-vidual ˆV (l,m ) gates; for odd l, ˆV (l) = QMm=1 ˆV (l,m ) and for even l, ˆV (l) = Q(M +1) /2 
+
+> m=1
+
+ˆV (l, 2m−1) . After applying a full layer ˆV (l), we apply a layer of horizontal gates that also depends on the choice of the lattice. For the honeycomb lattice, the horizontal layer consists of alter-nating identity gates and projections on the |+⟩m state times a normalization; after odd-l ˆV (l) layers, we apply ˆH = 2 (M −1) /2 Q(M −1) /2 
+
+> m=1
+
+|+⟩⟨ +|2m, and after even-l lay-ers, ˆH′ = 2 (M −1) /2 Q(M −1) /2 
+
+> m=1
+
+|+⟩⟨ +|2m+1 . The product of all layers defines the nonunitary quantum circuit [70] ˆMs = ˆV (L) · · · ˆH ˆV (3) ˆH′ ˆV (2) ˆH ˆV (1) , (11) which is a central object of this study. Contracting the circuit ˆMs with the initial state |ϕ(i) ⟩
+
+and one of the unnormalized final states 
+
+|ϕ(f)  
+
+> q
+
+⟩ =
+
+(√2M −1 |0 + + · · · + 0 ⟩ , q = 0 ,
+
+√2M −1 |0 + + · · · + 1 ⟩ , q = 1 , (12) yields the coefficient 
+
+Zq,s = ⟨ϕ(f)  
+
+> q
+
+| ˆMs|ϕ(i) ⟩ . (13) The states of the first and last qubits in Eq. (12) are chosen to fix the couplings on the top and bottom rows of qubits; choosing |0⟩ fixes them to the configuration en-coded in η(l,m ), while choosing |1⟩ swaps all bonds in the corresponding row, η(l,m ) → − η(l,m ), which in turn corre-sponds to inserting a logical X that would swap the same bonds. Since inserting the same logical operator twice cancels it, we could have equivalently chosen | ˜ϕ(f) 
+
+> q=0
+
+⟩ =
+
+√2M −1 |1 + · · · + 1 ⟩ and | ˜ϕ(f) 
+
+> q=1
+
+⟩ = √2M −1 |1 + · · · + 0 ⟩.7(a) (b) 
+
+> (c)
+
+FIG. 2. (a): Mapping the sum over stabilizer configurations to a quantum circuit for the honeycomb surface code [ 8, 70 ]. Each SXv stabilizer is replaced by a Kronecker δ tensor that can be split up into several δ tensors (white disks), as shown in panel (b), to ensure a brickwork-structured quantum circuit. Combining the tensor ˆTη (black disks, one example highlighted in green) with neighboring δ tensors yields the nonunitary gate ˆV (l,m ) (red box). The white triangles denote √2 |+⟩ states necessary to ensure summing over all stabilizer configurations. Red crosses denote uncontracted legs, resulting in the final state |ϕs⟩ from Eq. (20) , which encodes the logical state |ψs⟩.(c): The resulting quantum circuit is Gaussian. After map-ping to Majorana operators (black wires), ˆV (l,m ) acts on two neighboring Majorana operators (ocher boxes) that define a quantum circuit ˆMs (light gray) acting on an initial Gaussian state |ϕ(i)⟩ (dark gray). After partial contraction with ⟨ϕ(f ) 
+
+> ∂
+
+|
+
+(dark gray), the four dangling Majorana modes correspond to 
+
+|ϕs⟩ (see also Ref. [71] for a TN perspective). 
+
+B. Gaussian (1+1)D quantum circuit 
+
+We next show the circuit ˆMs is a fermionic Gaussian circuit following Ref. [ 70 – 72 ], and hence, we can effi-ciently evaluate it classically, i.e., in polynomial time [ 114 ]. To this end, we map the operators τ μm acting in trans-fer matrix space to Majorana operators using the Jor-dan Wigner transformation γ2m−1 = ( Q 
+
+> k<m
+
+τ xk )τ zm and 
+
+γ2m = ( Q 
+
+> k<m
+
+τ xk )τ ym, such that iγ 2m−1γ2m = τ xm and 
+
+iγ 2mγ2m+1 = τ zmτ zm+1 . Hence, the gates on vertical bonds are ˆV (l,m ) = eK+iη (l,m )Jγ 2mγ2m+1 , and the |+⟩m states cor-respond to the empty |0F⟩m with iγ 2m−1γ2m |0F⟩m =
+
+|0F⟩m. The projectors onto |+⟩m thus transform to 
+
+|0F⟩⟨ 0F|m = (1 + iγ 2m−1γ2m)/2, and the unnormalized initial state is |ϕ(i) ⟩⟨ ϕ(i) | = Q
+
+> m
+
+(1 + iγ 2m−1γ2m). While the final states |ϕ(f)  
+
+> q
+
+⟩ [Eq. (12) ] are not Gaussian, we use 
+
+|Z q,s |2 = ⟨ϕ(i) | ˆM†
+
+> s
+
+|ϕ(f)  
+
+> q
+
+⟩ ⟨ ϕ(f)  
+
+> q
+
+| + | ˜ϕ(f)  
+
+> q
+
+⟩ ⟨ ˜ϕ(f)  
+
+> q
+
+|
+
+2| {z }
+
+> =: ρ(f)
+> q
+
+ˆMs |ϕ(i) ⟩ ,
+
+(14) where | ˜ϕ(f)  
+
+> q
+
+⟩ are the alternative final states, and 
+
+ρ(f)  
+
+> q
+
+= 12
+
+1 + i(−1) q γ1γ2( M +1) P ρ(f)  
+
+> ∂
+
+(15) with the parity operator P = iM +1 Q2( M +1)  
+
+> m=1
+
+γm and the unnormalized density matrix ρ(f)  
+
+> ∂
+
+= QMm=2 (1+ iγ 2m−1γ2m)acting on Majoranas 3 , . . . , 2M . We defined ρ(f)  
+
+> ∂
+
+since the notion of a partial contraction on certain legs will be useful when discussing the interpretation as a quantum dot in Sec. V. Although ρ(f)  
+
+> q
+
+is not a Gaussian operator since it contains P, we always contract it with the even-parity state ˆMs |ϕ(i) ⟩, hence, we can simply replace P 7 → 1. While the phase of Zq,s cannot be directly obtained from Eq. (14) , we can get the relative phase between Z0,s 
+
+and Z1,s by choosing different final states 
+
+ρ(f) + = (1 + iγ 2M +1 γ2M +2 )ρ(f)  
+
+> ∂
+
+, (16) 
+
+ρ(f)  
+
+> y
+
+= (1 − iγ 1γ2M +1 P)ρ(f)  
+
+> ∂
+
+(17) such that 
+
+⟨ϕ(i) | ˆM†
+
+> s
+
+ρ(f) + ˆMs |ϕ(i) ⟩ = p(s)2 (1 + sin θs cos φs) (18) 
+
+⟨ϕ(i) | ˆM†
+
+> s
+
+ρ(f)  
+
+> y
+
+ˆMs |ϕ(i) ⟩ = p(s)2 (1 + sin θs sin φs) (19) with the parametrization from Eqs. (3) and (4) . Using this method, we can compute p(s), φs ∈ [0 , 2π), and 
+
+θs ∈ [0 , π/ 2]; recall that θs is restricted since we employ maximum-likelihood decoding, which implies |Z 0,s | ≥ |Z 1,s | and hence θs ≤ π/ 2. To sample Pauli error-strings η and hence the syn-dromes s, we employ a variation of the algorithm by Bravyi et al. [71 ] (also cf. Ref. 72 ) that is suitable for the construction of the network model described here. We describe the algorithm in App. C and provide more details on the Gaussian circuit in App. D. 
+
+C. Embedding the logical state 
+
+In Ref. 71 , Bravyi et al. showed that the logical infor-mation of the final states of a square-lattice SC, under similar error and recovery channels, is encoded in the state of 4 “dangling” Majorana modes of a Gaussian TN; see also Ref. 72 . Here, by bending the legs corresponding to these Majoranas [Fig. 2(c)], we explicitly construct a 4-Majorana state using the (1+1)D circuit above. We hence show that the logical states are encoded into the (1+1)D circuits from the previous section. To this end, instead of contracting the evolved state ˆMs |ϕ(i) ⟩
+
+with one of the final states |ϕ(f)  
+
+> q
+
+⟩, we contract it only with the state |ϕ(f)  
+
+> ∂
+
+⟩ = √2M −1 NMm=2 |+⟩m. The outgoing legs (or Majorana lines) of qubits m = 2 , . . . , M are contracted with |+⟩m, whereas legs of qubits 1 and M + 1 are left uncontracted, leading to the 2-qubit state [see Fig. 2(c)] 
+
+|ϕs⟩ =
+
+
+
+11 ⊗ ⟨ ϕ(f)  
+
+> ∂
+
+| ⊗ 1M +1 
+
+ ˆMs |ϕ(i) ⟩ . (20) This (unnormalized) state |ϕs⟩ encodes the final logical state of the SC. Due to parity conservation, |ϕs⟩ is a +1 eigenstate of S = τ x ⊗τ x; hence, |ϕs⟩ is a two-qubit phase-flip code state. Recalling that choosing |00 ⟩ (or |11 ⟩) and 8(a) (b) 
+
+FIG. 3. (a): The full quantum circuit ˆMs acts on 2 M Majo-ranas (wires) and leaves the first and last modes untouched before being contracted with |ϕ(f ) 
+
+> ∂
+
+⟩, giving the four-Majorana state |ϕs⟩. This Gaussian state |ϕs⟩ is equivalently obtained by acting with a Gaussian gate ˜Ms on a 4-Majorana state. (b): The ensemble of correlation matrices Γ( |ϕs⟩) is isomorphic to that of the scattering matrices S[ ˜Ms] of a quantum dot, with incoming and outgoing Majorana modes indicated by arrows. 
+
+|01 ⟩ (or |10 ⟩) for qubits 1 and M + 1 leads to amplitudes 
+
+Z0,s and Z1,s , respectively, we identify ˜Z = τ z ⊗ τ z as the logical operator with eigenstates |˜0⟩ = ( |00 ⟩ + |11 ⟩)/√2and |˜1⟩ = ( |01 ⟩ + |10 ⟩)/√2. The other logicals can be chosen ˜X = τ x ⊗ 1 and ˜Y = τ y ⊗ τ z ; there also exist equivalent logicals ˜σS for ˜σ = ˜X, ˜Y , ˜Z. In terms of this two-qubit code, we thus have 
+
+|ϕs⟩ = Z0,s |˜0⟩ + Z1,s |˜1⟩ . (21) This demonstrates the embedding of the SC logical state 
+
+|ψs⟩ ∝ Z 0,s |0⟩ + Z1,s |1⟩ [Eq. (6) ] into the quantum cir-cuit’s Hilbert space. Since |ϕs⟩ and the initial state |++ ⟩ on the ancilla qubits 1 and M + 1 are (unnormalized) Gaussian states, it is instructive to view the net effect of Eq. (20) as a Gaussian operation via [see Fig. 3(a) for a depiction] 
+
+|ϕs⟩
+
+p⟨ϕs|ϕs⟩ =: ˜Ms |++ ⟩ , (22) with the 2-Majorana gate ˜Ms(γ1, γ 2) reading ˜Ms = cos θs 
+
+> 2
+
+(1 + iγ 1γ2) + sin θs 
+
+> 2
+
+eiφ s (1 − iγ 1γ2)
+
+√2 . (23) This effective gate ˜Ms also encodes the final logical state of the SC, but it moreover enables us to construct a quantum dot scattering problem, as we next explain. 
+
+V. LOGICAL STATE VIA SYMMETRIC QUANTUM DOT 
+
+In this Section, we explain how the projected logical ensemble corresponds to an ensemble of scattering ma-trices of a symmetric quantum dot. To construct this dot, in Sec. V A, we map the bulk of the quantum circuit from Fig. 2 to a Majorana scattering network, which we identify with the internal fabric of the dot [Fig. 1(b)]. In Sec. V B, by interpreting the uncontracted modes from Fig. 3 as the leads of the dot, we then find the dot’s scattering matrix [see also Fig. 1(b)]. In Sec. V C, we discuss the symmetry classes of the network model, and thus the quantum dot, based on the surface code lattice. Finally, in Sec. V D, we examine the implications of a chaotic quantum dot on the PLE. 
+
+A. Fabric of quantum dot: Bulk scattering network 
+
+Here we largely follow Ref. [ 32 ] to construct a charge-conserving network model. We start by noting that the operators ˆV (l,m ) [Sec. IV A] that comprise the Gaussian circuit ˆMs transform single Majorana operators linearly ˆV (l,m ) γ [ ˆV (l,m )]−1 = γT
+
+− i
+
+> tan(2 ϕ)
+> η(l,m )
+> sin(2 ϕ)
+
+− η(l,m ) 
+
+> sin(2 ϕ)
+
+− i
+
+> tan(2 ϕ)
+
+| {z }
+
+> tv
+
+(24) where γ = ( γ2m, γ 2m+1 )T , and where tv can be written as an exponential of an anti-symmetric (but generally complex-valued) matrix; hence it satisfies tTv = t−1 
+
+> v
+
+. We now introduce the time-reversed copy t∗ 
+
+> v
+
+and the doubled transfer matrices [ 32 ] (the doubling is necessary for lattices with odd coordination number [ 32 , 70 ]; see also Sec. V C) 
+
+t′[v] = 
+
+tv 00 t∗
+
+> v
+
+ , (25) which is pseudo-unitary since it satisfies ( t′[v]) −1 =Σx(t′[v]) †Σx, where Σ x = ( 0 11 0 ) acts on the outer grading of time-reversed copies; hence, we can interpret t′[v] as a transfer matrix [80]. It helps to work in a rotated basis 
+
+t[v] = 12 (1 + iΣx) t′[v] (1 − iΣx) (26) = 12
+
+ tv + t∗ 
+
+> v
+
+−i (tv − t∗ 
+
+> v
+
+)
+
+i (tv − t∗ 
+
+> v
+
+) tv + t∗
+
+> v
+
+ , (27) which satisfies t−1 = Σ z t†Σz .In this basis, we can relate the 2 × 2 blocks of the transfer matrix to transmission and reflection matrices of a scattering matrix S[ ˆV ] =   r t ′
+
+> t r ′
+
+ [80 ], i.e., identify the blocks [32] 
+
+t[v] ≡
+
+ t†−1 r′t′− 1
+
+−t′− 1r t′− 1
+
+ =
+
+ 
+
+> iη
+> sin(2 ϕ)
+
+τ y −1tan(2 ϕ) 1 
+
+> 1tan(2 ϕ)
+
+1 iη  
+
+> sin(2 ϕ)
+
+τ y
+
+ (28) hence t = iη sin (2 ϕ)τ y , t′ = −iη sin (2 ϕ)τ y and r =
+
+r′ = iη cos (2 ϕ)τ y , with Pauli τ μ acting on the space spanned by Majoranas (2 m, 2m + 1). One can verify that S is unitary S†S = 1 and real S = S∗, and thus is a Majorana scattering matrix. One can also show that this scattering problem is in class DIII by check-ing [ 32 ]: ( i) time-reversal symmetry Σ †
+
+> TR
+
+t∗ΣTR = t with ΣTR =   0 −11 0
+
+ and Σ 2TR = −1, ( ii ) particle-hole symme-try Σ †
+
+> PH
+
+t∗ΣPH = t with Σ PH = ( 0 11 0 ) and Σ 2PH = 1, and 9(iii ) chiral symmetry Σ †
+
+> C
+
+tΣC = t with Σ C =   1 00 −1
+
+ and Σ2C = 1. (Class DIII can also be identified from S being antisymmetric besides being real and unitary [ 115 – 117 ].) The resulting bulk scattering network is shown in Fig. 1(b); its scattering matrix S[ ˆMs] can be constructed from the single scattering center matrices S[ ˆV ], cf. [ 32 , 70 ]. We next identify this bulk network as the internal fabric of a synthetic quantum dot.  
+
+> B. Scattering matrix of quantum dot
+
+We now connect the effective gate ˜Ms [Eq. (23) , Fig. 3] with the scattering matrix of a quantum dot. We proceed analogously to Sec. V A, focusing on ˜Ms instead of ˆV (l,m );however, here, as we discuss below, the scattering modes are associated with the leads of a quantum dot instead of modes of the bulk network [cf. Fig. 1(b)]. By considering the single-particle action of ˜Ms, we find (as detailed in App. E 1) 
+
+S[ ˜Ms] = 
+
+rs t′
+
+> s
+
+ts r′
+
+> s
+
+ , (29) with rs = r′ 
+
+> s
+
+= cos θsei(π/ 2) τ y
+
+and ts = t′Ts = sin θseiφ sτ y
+
+for Pauli τ y . As done in Sec. V A, we can show that S[ ˜Ms]is a real scattering matrix in class DIII. Moreover, S[ ˜Ms]is isomorphic to the correlation matrix of the final state Γ( |ϕs⟩) through a fixed (i.e., s-independent) isomorphism [as detailed in App. E 2 and shown in Fig. 3(b)] 
+
+S[ ˜Ms] ∼= Γ( |ϕs⟩). (30) This a key result of our work: The projected logical ensemble of final states of the SC E = {p(s|ρ), |ψs⟩} 
+
+[Eq. (7) , with ρ = |0⟩⟨ 0| such that p(s|ρ) = p(s)] is in a one-to-one correspondence to this ensemble of scattering matrices {p(s), S [ ˜Ms]} [Eq. (29) ]. The Altland-Zirnbauer symmetry class of S[ ˜Ms] is determined by the SC and coherent rotation model; here, for the honeycomb SC with single-qubit X rotations, this is class DIII, as explicitly shown above. Thus far we have interpreted S[ ˜Ms] as a 4 × 4 class DIII scattering matrix. We next show that S[ ˜Ms] is the scattering matrix of a quantum dot with the scattering network as its fabric. To this end, we relate transport in the network model to the overall transport through the dot. We consider three scattering regions as shown in Fig. 1(b): The left and right leads are described by the scattering matrices SL and SR, respectively, with 
+
+SL =
+
+O2 T T
+
+T R
+
+ , SR =
+
+ R TT T O2
+
+ , (31) where Od is a d × d matrix filled with zeros, with the 2M × 2M matrix R = O1
+
+⊕M −1
+
+> i=1
+
+  0 1
+
+> −1 0
+
+ ⊕ O1, and the (a) (b) (c)              
+
+> FIG. 4. (a): The gates ˆV(l,m )act unitarily along the edges of the SXvstabilizer lattice, which is indicated by the arrows that denote one of two possible choices for the direction of a unitary evolution. For lattices with only even-weight SXv, the lattice of ˆV(l,m )gates can be directly interpreted as a charge-conserving network model in symmetry class D, as shown in Ref. 70 . (b): For lattices with odd-weight SXv, such a construction leads to a contradiction, as indicated by the red cross: incoming and outgoing modes cannot be connected. Following Ref. 32 ,we add a time-reversed copy to obtain a charge-conserving network in symmetry class DIII (see also Ref. [78]).
+
+2M ×2 matrix T whose entries are Tij = δi, 1δj, 1+δi, 2M δj, 2;
+
+R and T follow from the Majorana representation of the single-qubit initial |ϕ(i) ⟩m and final |ϕ(f)  
+
+> ∂
+
+⟩m states. The left leads are perfectly transmissive for the two incoming modes from the left, and reflect all other modes coming from the right. The right leads reflect all but two modes from the left, and are perfectly transmissive for the other two modes. Concatenating [ 118 ] the boundary scattering matrices with the bulk scattering matrix yields 
+
+S[ ˜Ms] = SR ◦ S[ ˆMs] ◦ SL, (32) recovering the same S[ ˜Ms] as in Eq. (29).  
+
+> C. Symmetry classes and surface code lattices
+
+For lattices with only even-weight SXv stabilizers, i.e., surface codes defined on lattices with even coordination number, the quantum circuit ˆMs can be readily inter-preted as a class D network model for transport [ 70 ]. Crucial for this identification is that the single-particle matrix tv defined in Eq. (24) satisfies τ xt† 
+
+> v
+
+τ x = −t−1 
+
+> v
+
+, i.e., 
+
+tv is pseudo-unitary [ 80 ] up to a minus sign [ 70 ]. This is equivalent to being unitary up to permuting indices, such that the top modes become the incoming modes and the bottom modes the outgoing modes of a corresponding unitary matrix; incoming and outgoing modes can also be exchanged in this picture. (Such a reshuffling of indices is commonly used in dual-unitary circuits [ 119 ] where operators that are unitary before and after the reshuffling are considered.) We visualize this in Fig. 4(a): the arrows indicate the direction of the unitary evolution, which is always along the lattice of SXv stabilizers. As indicated in Fig. 4(a), for lattices with even coordination number, the arrows in a whole network can be consistently matched, such that a direct construction of a charge-conserving network model is possible without the doubling described in Sec. V A. If one were to do the doubling anyway, one 10 would find that the scattering matrix splits into two un-coupled blocks, which follows from the fixed phases φs;in App. E, we give such an example. For lattices with odd coordination number, however, doubling the degrees of freedom is necessary for a suc-cessful identification with a current-conserving network model [ 32 ]. We show an example for a vertex of such a lattice in Fig. 4(b): again viewing tv as a unitary matrix along the direction of the SXv stabilizer lattice, we find that the arrows cannot be matched up consistently, always leading to a contradiction as indicated by the cross in Fig. 4. (One can understand this in terms of frustration: each edge carries arrows pointing towards or away from the node. For charge-conserving models, for each node the number of arrows pointing towards and away from it must be equal, which is not possible for odd coordination numbers.) Doubling the degrees of freedom, as in Ref. [ 32 ], is thus necessary for a charge-conserving model. We show an example for a degree-three vertex in Fig. 4(c). The difference between the symmetry classes for lattices with only even-weight SXv stabilizers and odd-weight stabilizers has also been noted in recent works [77, 78]. The symmetry class determines the large-scale trans-port properties of the corresponding scattering network. In the metallic regime, a NL σM [ 120 – 123 ] is the effective long-wavelength field theory for transport [ 123 ]. As ef-fective theories, NL σMs depend only on the symmetric space in which they are defined, which in turn reflects the symmetry class of an underlying Hamiltonian or net-work model [ 123 ]. Originally derived using the replica trick [ 120 ], the limit where the number of replicas N
+
+goes to zero is taken when the disorder is distributed independently from the system (e.g., Gaussian disorder). For the network model describing coherent errors, a sub-tlety arises [ 77 , 78 ]: disorder realizations {η} correspond to syndromes sampled according to their measurement probabilities, which in turn can be understood as a Born-rule sampling of nonunitary gates in the corresponding quantum circuit; cf. App. C. As shown in Refs. 124 – 126 ,such Born-rule sampling necessitates taking a different replica limit, namely N → 1. For coherent errors, sam-pling Pauli strings (and hence η) according to their proba-bilty thus corresponds to the N → 1 replica limit [ 77 , 78 ], whereas sampling η uniformly [ 73 ] (or according to a sub-optimal decoder [ 77 ]) is described by the N → 0 limit. In Sec. VI A and App. G, we shall compare the predictions of these NL σMs with the numerically observed transport properties of the scattering network.  
+
+> D. Chaotic quantum dot implications on the projected logical ensemble
+
+Chaotic quantum dots can exhibit universal behavior, wherein their scattering matrices are distributed according to symmetry-dependent ensembles from RMT [ 80 , 81 ]. For disordered quantum dots, this regime requires the dot to be a diffusive metallic grain, i.e., its linear size L to exceed the mean free path, and L ≪ ξloc to hold, where 
+
+ξloc is the localization length. For quantum transport to be chaotic, tdw /t erg ≫ 1 should furthermore hold for the ratio of the dwell time tdw over which a particle escapes the dot and the ergodic time terg needed for a particle to explore the dot. For few-mode contacts, as in our settings, 
+
+tdw /t erg ∼ g(L), where g(L) is the finite-size scaling of the bulk conductivity [ 80 , 81 , 127 –130 ]. The corrections to the RMT behavior decay polynomially in g(L), as was shown for various quantities using supersymmetric NL σMtechniques [83–88]. In our setting, the relevant dots belong to classes D and DIII, corresponding respectively to lattices with only even-weight and those that include odd-weight SXv stabi-lizers. Above the QEC threshold, the associated network model is expected to enter its delocalized phase for class DIII and was shown to have ξloc ≫ L for class D (cf. Ref. 70 for the square-lattice SC and App. H for the triangular-lattice SC). In the diffusive regime, we thus ex-pect convergence to a chaotic quantum dot with emergent RMT universality. This is a phenomenological expecta-tion that is natural based on a diffusive metallic grain. (Mathematically, this amounts to the assumption that the diffusive metal phenomenology allows the results from the previous paragraph, which describe the N → 0 replica limit, to carry over to N → 1.) This emergent universality enables us, via the dot to logical states correspondence S[ ˜Ms] ↔ | ψs⟩, to predict an emergent universality for the PLE. Since S[ ˜Ms] and Γs are isomorphic through a fixed ( s-independent) iso-morphism, RMT universality implies that S[ ˜Ms] and Γ( |ϕs⟩) are uniformly distributed in isomorphic symmet-ric spaces [ 67 ]. Focusing on Γ( |ϕs⟩), the symmetric spaces in class D and DIII are O(2) \ SO (2) and SO(4) U(2) , respec-tively [ 67 ]; hence, the probability density of the logical angles is p(θs, φ s) ∝ [δ(φs−φ0)+ δ(φs−φ0−π)]Θ( π/ 2−θs)for class D ( φ0 ∈ { 0, π/ 2}, cf. Sec. III B), and p(θs, φ s) ∝
+
+sin θsΘ( π/ 2 − θs) for class DIII, with Heaviside func-tion Θ. These imply that |ψs⟩ is uniformly distributed over a Bloch (semi)circle and hemisphere for class D and DIII, respectively. As discussed in the next section (class DIII) and App. H (class D), we numerically find results consistent with this RMT and PLE universality being approached for SC in a regime above the QEC threshold.  
+
+> VI. SYMMETRY CLASS DIII NUMERICS
+
+In this Section, we discuss numerical results for a sur-face code in symmetry class DIII, while we present results for class D in App. H. For the simulations, we focus on the honeycomb SC with length L, width M = L, rotation an-gle ϕ, and initial state |ψ⟩ = |0⟩ [Sec. III A, Fig. 1(a)]. We use free-fermion-based algorithms to efficiently contract the various (1+1)D Gaussian circuits [Sec. IV B, App. D]. Using this, we first sample syndromes s according to their probability p(s|ρ), and then compute the overlaps via 11 0.08 0.10 0.12 0.14 0.16 
+
+φ/π             
+
+> 0.075 0.100 0.125 0.150 0.175 0.200 0.225 0.250
+> Logical error rate  PL
+> L= 21
+> L= 31
+> L= 41
+> L= 51
+> L= 61
+> L= 71
+> L= 81
+> L= 91 0.085 0.090 0.095 0.14 0.16 0.18 0.20
+> φth ≈0.09 π
+
+FIG. 5. Logical error rate PL vs coherent error angle ϕ for the honeycomb surface code with length L. PL decays with L
+
+below the error threshold ϕth (vertical dashed red line). The inset shows data closer to the QEC transition. For ϕ > ϕ th ,
+
+PL initially increases with L, after which it becomes weakly dependent on L for the accessible system sizes. The horizontal dotted black line shows the minimum average infidelity for post-QEC states Haar-distributed over a Bloch hemisphere. Error bars show the standard error of the mean (SE). Data averaged over 10 5 to 10 6 syndromes. 
+
+Eqs. (14), (18), and (19), 
+
+p0,s = ⟨0|CsU |0⟩ 2 = |Z 0,s |2 = p(s)2 (1 + cos θs), (33) 
+
+p1,s = ⟨1|CsU |0⟩ 2 = |Z 1,s |2 = p(s)2 (1 − cos θs), (34) 
+
+⟨+X|CsU |0⟩ 2 = p(s)2 (1 + sin θs cos φs), (35) 
+
+⟨+Y |CsU |0⟩ 2 = p(s)2 (1 + sin θs sin φs), (36) where |+X⟩ = ( |0⟩ + |1⟩)/√2 and |+Y ⟩ = ( |0⟩ + i |1⟩)/√2 .Using the MLD, we reconstruct the logical state |ψs⟩ =cos (θs/2) |0⟩ + eiφ s sin (θs/2) |1⟩ [cf. Eq. (6) ], with angles 
+
+θs ∈ [0 , π 
+
+> 2
+
+] and φs ∈ [0 , 2π). We also compute the bulk conductivity of the network model. Altogether, we can estimate the logical error rate, the bulk conductivity, the quantum dot conductance (including its Wasserstein-1 distance), and the distances between finite moments of the logical and Haar ensembles, as we discuss next. 
+
+A. QEC threshold and insulator-to-metal transition 
+
+To estimate the QEC threshold of this code, we consider the logical error rate 
+
+PL := X
+
+> s
+
+p(s) min 
+
+> q
+
+pq,s 
+
+p(s) = X
+
+> s
+
+min  
+
+> q
+
+pq,s , (37) which quantifies how distinct the two correction classes are on average, with probabilities pq,s = |Z q,s |2, and using 0.0 2.5 5.0 7.5 10 .0 12 .5 15 .0 17 .5
+
+ln[ L/` (φ)]   
+
+> 0.51.01.52.02.5
+> Bulk conductivity  g NL σM class DIII, N= 1
+> 0.08 0.09 0.10 0.11 0.12 0.13 0.14
+> φ/π
+
+FIG. 6. Bulk conductivity g for the network model of the honeycomb surface code under coherent rotations. The system length and width are 21 ≤ L = M ≤ 91 with data averaged over 10 5 to 10 6 syndrome realizations. Error bars (SE) are imperceptible. g scales with a ϕ-dependent length ℓ(ϕ). For the insulator ϕ < ϕ th , g(L/ℓ (ϕ)) decreases with L, with ϕth =(0 .089 ± 0.002) π. For the metal ϕ > ϕ th , g increases and, for large L, is consistent with the scaling g ∝ (2 π)−1 ln [L/ℓ (ϕ)] of a nonlinear sigma model in class DIII in the replica limit 
+
+N → 1 (dashed black line), see also [77, 78]. 
+
+the maximum-likelihood decoder [Sec. III A], reduces to 
+
+PL = P 
+
+> s
+
+p(s) sin 2(θs/2). For coherent errors, PL sets the minimal average infidelity between pre- |ψ0⟩ and post-QEC |ψs⟩ states [ 72 ]. For ϕ below the error threshold 
+
+ϕ < ϕ th , p0,s ≫ p1,s for sufficiently large code distances 
+
+d, and applying the correction Cs yields |ψs⟩ close to 
+
+|ψ0⟩ with high probability; an error-correcting phase can be defined as a regime where PL decays exponentially with the code distance d. By contrast, the post-QEC 
+
+|ψs⟩ is often far from |ψ0⟩ for ϕ > ϕ th ; one thus generally does not expect PL to decay with the code distance in such phases. We numerically find, using the logical error rate, that 
+
+ϕth = (0 .09 ± 0.001) π for the honeycomb SC [Fig. 5]. We observe that, for ϕ < ϕ th , PL decreases exponentially with the code distance d ∝ L (not shown), whereas for 
+
+ϕ > ϕ th , data is consistent with PL increasing with L for a while after which it appears to become weakly-dependent on L, at least for the largest numerically accessible L.This weakly-L-dependent value approaches PL ≃ 0.25, corresponding to post-QEC states uniformly distributed over the Bloch hemisphere (and initial state |0⟩) [ 72 ]. The data thus suggests that, for ϕ > ϕ th , the PLE might approach the Haar ensemble over a Bloch hemisphere. While indicative of a QEC threshold, the weak depen-dence of PL on the code distance for large ϕ suggests that another method to pinpoint the transition could be useful. We next discuss a method based on the network model’s bulk conductivity and argue that the QEC transition corresponds to an insulator-to-metal transition. We numerically find, using the bulk conductivity g
+
+of the network model, that the honeycomb SC has an insulator-to-metal transition at ϕth = (0 .089 ± 0.002) π
+
+[Fig. 6]. To quantify the transport through the bulk network, we write its scattering matrix in terms of M ×M12 0.00 0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00 
+
+Quantum dot conductance G 
+
+> 0.00.51.01.52.02.53.0
+> Empirical PDF ˆ p(G)
+> L= 91
+
+(a) class DIII: p(G) = 1√8(2 −G)    
+
+> 0.08 0.10 0.12 0.14 0.16
+
+φ/π  
+
+> 10 −2
+> 10 −1
+> 10 0
+> W (G)1 (φ, L )
+> R= 10 4
+
+(b)                  
+
+> L= 21
+> L= 31
+> L= 41
+> L= 51
+> L= 61
+> L= 71
+> L= 81
+> L= 91 Diffusive Ballistic
+> L= 21
+> L= 31
+> L= 41
+> L= 51
+> L= 61
+> L= 71
+> L= 81
+> L= 91 Diffusive Ballistic
+> 10 010 1
+
+Bulk conductivity g 
+
+> R= 10 4
+
+(c) ∝ 1/g                  
+
+> ∝1/g α
+> (α= 0 .67 ±0.03) Emp. threshold Diffusive Ballistic
+> 0.08 0.09 0.1 0.11 0.12 0.13 0.14 0.15 0.16
+> φ/π
+> 0.00.2
+> L1/ν (φ−φc)
+> 0.00.51.0
+> Lβ/ν  W (G)1
+> φc/π = 0 .089 ±0.001
+> ν= 3 .04 ±0.01
+> β= 0 .16 ±0.03
+
+FIG. 7. Emergent chaotic quantum dot and projected logical ensemble of the honeycomb surface code under coherent rotations. Data averaged over 10 5 to 10 6 syndrome realizations for length and width 21 ≤ L = M ≤ 91. Error bars show SE. (a): Empirical probability density function ˆp(G) of the quantum dot’s conductance G for L = 91. Above the error threshold ϕ > ϕ th ≈ 0.089 π
+
+[vertical dashed red line in (b)], the empirical PDF approaches the random matrix theory prediction given by a dot made of a Majorana metal in symmetry class DIII (dashed green line). (b): Wasserstein-1 distance W (G)1 (ϕ, L ) vs ϕ between quantum dot’s and RMT distributions, or equivalently, the distributions of G = 2 sin 2 θ in the projected logical and Haar-hemisphere ensembles. Parameters ( L, ϕ ) that allow for a diffusive (ballistic) metal are shown as circles (crosses). Above threshold, in the diffusive regime, W (G)1 (ϕ, L ) decreases systematically with L towards a value set by the number R = 10 4 of syndromes per empirical CDF [horizontal dashed gray line in (b) and (c)]. Inset: Finite-size scaling collapse suggestive of a continuous phase transition detecting a critical angle ϕc consistent with the threshold ϕth . (c): W (G)1 (ϕ, L ) vs bulk conductivity g of the network model. In the metallic phase, W (G)1 (ϕ, L ) decays algebraically with g; the dashed green (black) line shows a linear (algebraic) fit. 
+
+reflection and transmission matrices (see also Sec. V A) 
+
+S[ ˆMs] = 
+
+Rs T ′
+
+> s
+
+Ts R′
+
+> s
+
+ . (38) The bulk conductivity is thus g = ( L/ 2M ) ⟨Tr[ T † 
+
+> s
+
+Ts]⟩,where the average is over syndrome (i.e., disorder) re-alizations. For sufficiently large L, we observe one-parameter scaling [ 131 ], i.e., that the dimensionless g
+
+scales with the ratio L/ℓ (ϕ) of the length L and a ϕ-dependent length scale ℓ(ϕ) [ 70 ]: for ϕ < ϕ th , g(L/ℓ (ϕ)) decreases exponentially with the code distance d ∝ L,thus indicating that the network model localizes [ 132 ]; for ϕ > ϕ th , g(L/ℓ (ϕ)) increases and approaches the pre-diction g ∝ (2 π)−1 ln [L/ℓ (ϕ)] (cf. Ref. [ 123 ]) given by a diffusive metal described by a NL σM in symmetry class DIII in replica limit N → 1 [Fig. 6], as expected from Sec. V C. For ϕ ≳ 0.12 π in the metallic phase, since the mean free path can increase significantly, it is reasonable to expect a crossover from a diffusive to a ballistic metal for finite-L systems [ 123 , 133 – 135 ]; we indeed find that only the largest L (L ≥ 71) data agrees well with the NL σM prediction in this regime [cf. Fig. 6]. This transi-tion yields an estimate ϕth = (0 .089 ± 0.002) π of the QEC threshold consistent with the one based on the logical error rate [(0 .09 ± 0.001) π]; however, we note that the decrease and increase of g with L at a fixed ϕ provides a clearer way to identify the threshold. 
+
+B. Emergent chaotic quantum dot 
+
+Having established results suggesting that the network model transitions into a metallic phase above the QEC threshold, we now consider the effects of this bulk metal on the associated quantum dot [cf. Sec. V]. We focus on the dot’s syndrome-dependent conductance [cf. Eq. (29) ]
+
+Gs = Tr[ t†
+
+> s
+
+ts] = 2 sin 2(θs) ∈ [0 , 2] . (39) We shall compare the statistics of Gs with the RMT prediction for a chaotic quantum dot in symmetry class DIII. For two transmission channels, as our setting can be viewed, RMT respectively predicts the probability and cumulative density function (PDF and CDF) ˜p(G) = 1/p8(2 − G) and ˜P (G) = 1 − p(2 − G)/2, cf. Ref. [82]. We find that, in the bulk metallic phase, the syndrome-averaged data for the quantum dot agrees remarkably well with this RMT prediction [Fig. 7]. By sampling Rtot 
+
+syndromes {s(i)}Rtot  
+
+> i=1
+
+, we construct an empirical distribu-tion ˆp(G); Fig. 7(a) shows such normalized histograms. Our data is consistent with ˆp(G) approaching the PDF ˜p(G) from RMT above the error threshold ϕ > ϕ th .To probe this approach more carefully, we consider the Wasserstein-1 distance (which we review in App. B) W (G)1
+
+between the quantum dot’s and the RMT conductance probability distributions [Fig. 7(b,c), where we approxi-mately identify parameters that allow for a diffusive or ballistic metal by L > ℓ (ϕ) and L < ℓ (ϕ), respectively 1]. To estimate W (G)1 , we first construct an empirical CDF ˆP (G) from R sampled syndromes s(1) , . . . , s (R). Using  
+
+> 1
+
+It might be appealing to increase the angle ϕ to access data with larger bulk conductivity g(L, ϕ ). However, to avoid a crossover from diffusive to a ballistic metal [ 123 , 133 – 135 ], it would also be necessary to increase the system size L since the mean free path is expected to increase with ϕ [similar to, but distinct from, ℓ(ϕ)]. 13 this ˆP (G) and the CDF ˜P (G) from RMT, we compute 
+
+W (G)1 ( ˆP , ˜P ) via Eq. (B4) , which we then average over 
+
+≈ Rtot /R empirical CDFs, each constructed from R syn-dromes, to estimate W (G)1 (P, ˜P ). In the metallic phase 
+
+ϕ > ϕ th , our data is consistent with W (G)1 (ϕ, L ) decay-ing algebraically with the bulk conductivity g [Fig. 7(c)] towards a statistical threshold ∝ 1/√R for an empiri-cal CDF built from R syndromes [ 136 ]. (In App. F, we process the same data but with a smaller R; there, the approach to this empirical threshold is more transparent.) While we expected this in the diffusive regime, it appears to be a broader trend. Together with the other results in this section, this is suggestive of an emergent chaotic quantum dot above the code’s error threshold, bringing us back to the question of how random might the PLE be. 
+
+C. Emergent logical ensemble 
+
+1. Wasserstein-1 distance 
+
+Here, we compare the logical ensemble E [Eq. (7) ] with the Haar ensemble over the upper Bloch hemisphere E∗
+
+> H
+
+,which is the appropriate “maximally entropic” ensemble within the constraints given by symmetry class DIII, max-imum likelihood decoder, and initial state |0⟩ [Sec. V D]. For convenience, we compare, using the Wasserstein-1 distance, the probability distributions of the variable 
+
+ϑ = 2 sin 2 θs in E and E∗
+
+> H
+
+, which is equal to the conduc-tance Gs of the quantum dot. Since states |ψ⟩ distributed according to |ψ⟩ ∼ E ∗ 
+
+> H
+
+have pH(G(|ψ⟩)) = ˜p(G), we have 
+
+W (G)1 (p, ˜p) = W (G)1 (p, p H), and we can thus simply rein-terpret the data from the previous subsection. We observe that W (G)1 (ϕ, L ) increases with L below a critical angle ϕ < ϕ c, consistent with the expectation that below threshold the PLE concentrates at the initial logical state. For ϕ > ϕ c, in the diffusive regime [shown with dots in Fig. 7(b)], W (G)1 (ϕ, L ) decays systematically with 
+
+L as expected from Sec. V D. This decay is relatively slow, which is not surprising because the corrections to RMT are expected to scale as ∝ 1/poly [g(L, ϕ )] ∼ 1/poly ( log L)for fixed ϕ, cf. Sec. V D and Sec. VI B (and App. G for nu-merics on systems described by the N → 0 replica limit). For ϕ ≳ 0.12 π, where a crossover from a diffusive to ballis-tic metal is plausible (going beyond our current analytical expectations), W (G)1 (ϕ, L ) broadly decays with ϕ again to-wards the empirical threshold set by the number R of syn-dromes per CDF. By performing a finite-size scaling anal-ysis on the Wasserstein-1 distance W (G)1 (ϕ, L ) [ 137 , 138 ], we find a critical angle ϕc = (0 .089 ± 0.001) π consistent with the QEC threshold ϕth ≈ 0.089 π [Figs. 5 and 6]. This suggests that, when the quantum dot is chaotic (i.e., above threshold ϕ > ϕ th ), the PLE E approaches the class-DIII-constrained Haar ensemble E∗
+
+> H
+
+.While the distribution of G is a metric that can indicate how the PLE behaves, one would ideally like to consider 0.08 0.10 0.12 0.14 0.16                          
+
+> φ/π
+> 10 −2
+> 10 −1
+> 10 0
+> ∆(k)
+> k= 2
+> L= 21
+> L= 31
+> L= 41
+> L= 51
+> L= 61
+> L= 71
+> L= 81
+> L= 91
+> 0.08 0.10 0.12 0.14 0.16
+> φ/π
+> k= 3
+> 0.08 0.10 0.12 0.14 0.16
+> φ/π
+> k= 4
+> 0.08 0.09 0.10
+> φ/π
+> 0.08 0.09 0.10
+> φ/π
+> 0.08 0.09 0.10
+> φ/π
+
+FIG. 8. Projected logical ensemble E′, assessed via trace distances ∆ (k) between the kth moments of E′ and the Haar ensemble. We show data for the honeycomb surface code with rotation angle ϕ, length L and width M = L. Data averaged over 10 5 to 10 6 syndrome realizations. Error bars show SE. Above threshold (vertical dashed red line), ∆ (k) appears to approach with ϕ a statistical threshold set by the number 
+
+R = 10 4 of syndromes per empirical E′ (horizontal dashed gray line). For ( L, ϕ ) that allow for a diffusive metal (see inset), the approach is also systematic with L.
+
+the distribution of the states themselves. Although one may, in principle, numerically estimate the W1 distance between the logical and Haar-hemisphere ensembles, eval-uating such a W1 is a formidable task. To this end, we instead consider finite moments of an PLE, thus assessing whether this forms state k-designs. 
+
+2. Logical state designs 
+
+Here, we consider a closely related logical ensemble E′.To construct E′, after applying the correction operation 
+
+Cs according to the maximum likelihood decoder [cf. Sec. III A], we apply with probability 1 /2 a logical X.Hence, the states in E′ can be anywhere on the Bloch sphere for symmetry class DIII, unlike those in E, which are constrained due to the MLD. The appropriate “max-imally entropic” ensemble to compare with is thus the Haar ensemble over the full Bloch sphere EH.An ensemble of pure states whose first k statistical moments are (approximately) equal to those of the Haar ensemble EH is called to form (approximate) quantum state k-designs. These moments of the Haar ensemble 
+
+ρ(k)H = R 
+
+> |ψ⟩∼E H
+
+dμ(|ψ⟩) (|ψ⟩⟨ ψ|)⊗k have well-established closed form expressions [ 113 ], which enable direct numer-ical comparisons between an ensemble and EH.To examine whether E′ forms quantum state k-designs, we thus compare its kth moments 
+
+ρ(k) 
+
+> E′
+
+= X
+
+> s
+
+p(s|ρ) ( |ψs⟩⟨ ψs|)⊗k (40) with those of the Haar ensemble ρ(k)H , where ρ = |0⟩⟨ 0|.Specifically, we shall compute their trace distance ∆(k) := ρ(k) 
+
+> E′
+
+− ρ(k)H 1
+
+, (41) 14 where ∥X∥1 = Tr [√X†X] is the trace norm. Such dis-tances ∆ (k) not only indicate how (dis)similar two en-sembles are, but they also imply, for example, that any strategy to distinguish these ensembles using k copies of the state has success probability psucc ≤ 12 + ∆ (k) [ 139 ], which approaches that of a random guess if ∆ (k) → 0. Numerically, we reconstruct the state |ψs⟩ using Eqs. (33–36), and thus estimate the moments ρ(k) 
+
+> E′
+
+by averaging over R sampled syndromes. Using the analyti-cally known ρ(k)H moments [ 113 ], we then estimate ∆ (k).The k = 1 moments trivially agree within statistical errors due to the randomly applied X in the construction of E′.For k > 1, our data suggests that ∆ (k) decreases with 
+
+ϕ, and above the critical angle ϕth , approaches a value set by the number R of syndromes averaged over [Fig. 8]. This value represents the trace distance between the kth moments of the true and an empirical Haar ensemble, the latter containing R states. Moreover, in the insets of Fig. 8, we focus on the data points that allow for a diffusive metal [ L > ℓ (ϕ)]; these suggest that ∆ (k) sys-tematically increases (decreases) above (below) threshold. Hence, our data is consistent with E′ approaching the Haar ensemble in the diffusive regime.  
+
+> VII. DISCUSSION AND OUTLOOK
+
+We have studied the measurement-induced randomness of the PLE in surface codes subject to uniform determin-istic single-qubit Pauli X rotations, syndrome measure-ments, and maximum-likelihood Pauli corrections. To shed light on this randomness, using that the states in the PLE are encoded in partially contracted 2D Gaussian fermionic tensor networks, we demonstrated that these are also encoded in the final states of (1+1)D Gaussian quantum circuits. By recasting these circuits as Majo-rana scattering networks, we have established a one-to-one correspondence between the final states and scattering matrices of a disordered quantum dot. Via this map-ping, we have shown that the emergent universal RMT description of this synthetic quantum dot translates into an emergent universality of the PLE. The PLE that we describe may prove useful for de-signing schemes to inject non-stabilizer states into the code space using transversal operations. (See also Ref. [ 102 , 103 ] for a related construction, focusing on 
+
+ϕ < ϕ th .) The case ϕ = π/ 8, which lies above the honey-comb SC threshold ϕth ≈ 0.09 π, is particularly interesting because the transversal physical rotations are HT H , with single-qubit Hadamard H and T ∝ ei π  
+
+> 8Z
+
+gates. These can be implemented using standard fault-tolerant Clifford+ T
+
+gadgets [ 13 , 21 , 23 ]. The PLE is a heralded ensemble of states that are generically non-stabilizer, i.e., magic states. Furthermore, the logical-level operation Ds is known, and the syndrome-resolved angles ( φs, θ s) form a highly random heralded ensemble. Analogously to the setting discussed in Ref. [ 69 ], this may enable shadow-style logical-state tomography using Pauli measurements. Whether the PLE can be converted into useful magic-state inputs, or otherwise exploited computationally or tomographically, remains an important direction for fu-ture work and will require extending the analysis be-yond perfect syndrome measurements and ultimately to a circuit-level framework that includes stochastic noise. We mostly focused on the diffusive regime (which we could access for ϕ ≳ ϕth ), where the onset of the univer-sal PLE is expected to be controlled by the finite-size scaling of the bulk conductivity g(L). This is an intuitive expectation that is mathematically further motivated by supersymmetric NL σM results that capture the universal (i.e., RMT) regime; however, these results describe sys-tems corresponding to the N → 0 replica limit [ 83 – 88 ]. It is an interesting question whether the emergence of, e.g., conductance moments or distribution consistent with the universal PLE can be established analytically for our 
+
+N → 1 setting. This may motivate the development of a supersymmetric Born-rule NL σM, given the known dif-ficulties in accessing the nonperturbative RMT regime using fermionic replica techniques [140–144]. In the honeycomb SC with larger ϕ, we see evidence of a crossover to a ballistic regime, akin to when the mean free path exceeds the system size, which seems distinct from the ϕ = π/ 4 ballistic metal, and which exhibits a closer approach of the PLE to the Haar ensemble (albeit in a manner less systematic with L). This raises a natural open question of whether there is an appropriate ana-lytical model that can describe this mesoscopic regime, which may be particularly relevant to experiments with moderate-size codes. It would also be interesting to extend our approach to surface codes with multiple logical qubits, and to settings with more general unitaries, beyond Pauli-X rotations. Since the surface code states are isometric tensor network states, applying local gates followed by measurements will always map to a (1+1)D nonunitary circuit [ 56 ], but gener-ically this will not be Gaussian [ 74 , 75 , 92 , 102 ]. While the description of the PLE in terms of the scattering matrix relies on Gaussian operations through its underly-ing scattering network, our embedding of the SC logical space in quantum circuit space, and its relation to ten-sor network descriptions have natural generalizations. In non-Gaussian cases, the entanglement phases of the long-time state of the circuit [ 32 , 73 – 75 ] subsume transport properties (e.g., diffusive conduction), and we expect that logarithmic- and volume-law [ 74 , 76 ] entanglement phases may also imply convergence to RMT behavior [ 145 ] and a corresponding universal PLE [ 68 ]. Establishing this, and potential links to mesoscopics would be very interesting. In a similar vein, it would be interesting to generalize beyond the Z2 surface codes, for instance, to string-net models, which also admit an isometric tensor network rep-resentation [ 146 ], and hence can be mapped to (1+1)D nonunitary circuits. Viewing the transversal unitary evo-lution of the code as a particular case of wavefunction deformation furthermore suggests studying the PLE for 15 more general states and deformations [ 147 – 154 ]. How do the algebraic properties of these states imprint them-selves on the associated circuit, and is there a similar interpretation of the PLE in terms of mesoscopic physics? The PLE, furthermore, may be viewed as arising from a mixed-state ρ′ = P 
+
+> s
+
+p(s|ρ) |ψs⟩ ⟨ ψs| obtained from U |ψ⟩
+
+(with ρ = |ψ⟩ ⟨ ψ|) upon non-selective syndrome measure-ment. This links the PLE to the classification of mixed-state quantum phases and their relation to QEC [ 155 – 170 ]. From this perspective, a natural question is how the sta-tistical properties of the PLE, along with the many-body properties of |ψs⟩, may help characterise the correspond-ing mixed-state phases, and what the implications of the approach to the Haar ensemble are [171]. Finally, the new insights provided by our results could be used to shed light on other measurement-induced phe-nomena. While most studies of projected ensembles do not explicitly involve QEC codes, it is possible that code-related concepts could offer a complementary perspective on more generic kinds of measurement-induced dynamics. Indeed, the measurement-induced phase transition that arises in monitored quantum circuits can be interpreted as a coding transition [ 28 , 29 ], suggesting that these ideas could also be explored in that setting. 
+
+Note added. Upon completion of this manuscript, we became aware of two independent works that discuss how different lattices of topological codes affect the associ-ated symmetry class [ 77 , 78 ]. We discussed the relation between these and our work in Sec. II B. 
+
+> ACKNOWLEDGMENTS
+
+We thank Ehud Altman, Yimu Bao, Michael Gullans, Timothy Hsieh, Chao-Ming Jian, Andreas W. W. Ludwig, Amir-Reza Negari, Subhayan Sahu, Simon Trebst, Sagar Vijay, Stephen Yan, Zhou Yang, and Guo-Yi Zhu for helpful discussions and collaboration on related topics. We also thank Chris Self and David Amaro for their feedback on the manuscript. This work was supported by EPSRC PhD studentship 2606484, CPS studentship RS2025/005, UKRI FLF grant MR/Z000297/1 (MB); a Leverhulme Early Career Fellowship and the Newton Trust of the University of Cambridge (JB); Trinity College, Cambridge (MM); EPSRC grant EP/V062654/1 (JB, BB); and in part by the U.S. DOE’s Office of Science, Office of Nuclear Physics, InQubator for Quantum Simulation under Award No. DE-SC0020970, and grant NSF PHY-2309135 to the Kavli Institute for Theoretical Physics (BB). Our simulations used resources at the Cambridge Service for Data Driven Discovery operated by the University of Cambridge Research Computing Service (www.csd3.cam.ac.uk), provided by Dell EMC and Intel using EPSRC Tier-2 funding via grant EP/T022159/1, and STFC DiRAC funding (www.dirac.ac.uk). 
+
+> Appendix A: Stabilizer graph constraints on the logical ensemble
+
+Here we review how the parity of the weights of SXv
+
+stabilizers can constrain |ψs⟩ [ 71 , 72 ], as mentioned in Sec. III B. We expand UU =
+
+> N
+
+Y
+
+> j=1
+
+exp( iϕX j ) = X
+
+> x∈{ 0,1}N
+
+cxi|x|X(x), (A1) where |x| is the Hamming weight of bitstring x, and with Pauli string X(x) = Q 
+
+> j
+
+Xxj 
+
+> j
+
+, and real coefficients cx ∈ R.Note that Cs = X(us) for a bitstring us. Consider next 
+
+Ds = X
+
+> x∈{ 0,1}N
+
+cxi|x|Π0X(x ⊕ us)Π 0, (A2) where ⊕ denotes bitwise addition. Using Eq. (2) , we find 
+
+Z0,s = X
+
+> x∈X ⊕ us
+
+cxi|x|, Z1,s = X
+
+> x∈X ⊕ us⊕ℓ
+
+cxi|x|, (A3) where X collects all bitstrings compatible SXv stabilizers 
+
+X := {x ∈ { 0, 1}n | X(x) ∈ ⟨{ SXv }⟩} , the bitstring ℓ gives 
+
+X(ℓ) = X, and the set X ⊕ y = {x ⊕ y | x ∈ X } . Hence, we recast Eq. (A3) as 
+
+Z0,s = X
+
+> x∈X
+
+cx⊕us i|x⊕us|, (A4) 
+
+Z1,s = X
+
+> x∈X
+
+cx⊕us⊕ℓ i|x⊕us⊕ℓ|. (A5) The parity dependence is finally apparent from Eqs. (A4) and (A5) . If some SXv stabilizers have odd weight (i.e., |x| is odd for some x ∈ X ), the relative phase between Z0,s and Z1,s can take an arbitrary value. Con-versely, if all SXv stabilizers have even weight ( |x| even 
+
+∀x ∈ X ), we have arg (Z0,s /Z1,s ) = φs ∈ { φ, φ + π} ∀ s
+
+with φ = 0 for |ℓ| even, and φ = π/ 2 for |ℓ| odd. To see this, one can use cx ∈ R and the relation |x ⊕ y| mod 2 = (|x| + |y|) mod 2. 
+
+> Appendix B: Quantifying the randomness of the logical ensemble via the Wasserstein-1 distance
+
+In this Appendix, we discuss how to compare the logical ensemble E [Sec. III B] with a constrained Haar ensemble 
+
+E∗ 
+
+> H
+
+using the Wasserstein-1 distance. Statistical distances between E and E∗
+
+> H
+
+, viewed as prob-ability distributions on the upper Bloch hemisphere, are a natural way to compare E with E∗ 
+
+> H
+
+[ 172 ]. In choosing such a distance, one crucially needs to accommodate for 
+
+E and E∗ 
+
+> H
+
+being discrete and continuous, respectively. In particular, although the total variation distance and the Kullback-Leibler divergence are appropriate choices of sta-tistical distances in many probability-theoretic settings, 16 these are not amenable here because they attain maximal values when comparing a discrete with a continuous dis-tribution. Instead, the Wasserstein-1 distance has been recently proposed as a suitable metric to compare discrete and continuous ensembles of quantum states [45]. The Wasserstein-1 distance is formally defined, for two probability measures μ and ν on a space M endowed with a metric d, as [172] 
+
+W1(μ, ν ) = inf 
+
+> γ∈Π( μ,ν )
+
+ E(x,y )∼γ d(x, y ) (B1) where the set Π( μ, ν ) collects all couplings of μ with ν,i.e., probability measures γ over M × M ∋ (x, y ) such that the marginals on each copy of M are μ and ν, re-spectively. This highly general definition is related to the mathematical problem of optimal transport, in which the optimal distribution γ represents the most efficient way to transport probability mass between different regions of 
+
+M, with the distance that each mass element is moved quantifying the efficiency [ 172 ]. For our purpose, it will be more convenient to use the Kantorovich-Rubinstein duality to represent the Wasserstein metric as [173] 
+
+W1(μ, ν ) = sup   
+
+> f:M→ R
+> Lip( f)≤1
+
+Ex∼μ[f (x)] − Ex∼ν [f (x)] , (B2) with the expectation of f over the distribution μ de-noted by Ex∼μ[f (x)], and analogously for ν, and Lips-chitz constant Lip (f ) = sup x ∥∇ f (x)∥2, with Frobenius norm ∥X∥2 = pTr[ X†X] . To probe the discrepancies between the distributions μ and ν, one uses the optimal test function f (x), which is chosen over all sufficiently smooth functions to maximize the discrepancy. Here, these smooth functions are c-Lipschitz with c ≤ 1
+
+|f (x1) − f (x2)| ≤ c d (x1, x 2) ∀x1, x 2 ∈ M , (B3) The specific distributions that we compare here are μ = E
+
+and ν = E(∗)H [Sec. III B], and the space M is (a subspace of) the upper hemisphere of the logical Bloch sphere. Computing the Wasserstein-1 distance between E and 
+
+E∗ 
+
+> H
+
+is a tremendous task due to the need to optimize over functions f in Eq. (B2) . While this W1(E, E∗
+
+> H
+
+) may be numerically approximated using linear programming [ 174 ], here we instead consider the distribution of a specific scalar quantity ϑ : M → X ⊆ R. This enables us to exactly compute the Wasserstein-1 distance of the two univariate distributions induced by E and E∗
+
+> H
+
+, and which can be represented by their density functions q(ϑ) and 
+
+q′(ϑ) over the domain X, respectively. Eq. (B2) then simplifies significantly to [175] 
+
+W (ϑ)1 ≡ W1
+
+ q(ϑ), q ′(ϑ) =
+
+Z
+
+> ϑ∈X
+
+dϑ|Q(ϑ) − Q′(ϑ)|,
+
+(B4) with Q(ϑ) and Q′(ϑ) being the cumulative distribution functions (CDFs) of q(ϑ) and q′(ϑ), respectively, i.e., one takes the unsigned area between the CDFs. This will allow us to numerically compute W (ϑ)1 in certain instances. These scalar functions ϑ encompass various physically-relevant quantities, such as the subsystem entanglement entropies, purity, n-point correlation functions (see, for example, Ref. [ 45 ]), as well as QEC-relevant quantities, including the ratio min q [pq,s /p (s)] and the conductance 
+
+G of a quantum dot associated with the code of interest [Sec. V]. In Sec. VI B, we focus on the distribution of the conductance ϑ = G. Thus, by considering W (G)1 ,we shall compare the empirical distribution built from 
+
+Gs ≡ G(|ψs⟩) with that of G(|ϕ⟩), where |ψs⟩ and |ϕ⟩ are distributed according to E and E∗
+
+> H
+
+, respectively. Using estimates of such Wasserstein-1 distances, we assess the randomness of the PLE in Sec. VI C 1. 
+
+> Appendix C: Sampling algorithm
+
+For coherent errors, sampling of syndromes is nontriv-ial: error strings Cs that define {ηj } cannot be sampled independently on each site, as it is the case for Pauli noise, but need to be drawn from a correlated probability distribution. The algorithm described in Ref. 71 solves this problem via a mapping of qubits to fermions [ 176 ]and thereby introduces a Gaussian tensor network, which can be generalized to other planar graphs [ 72 ]. Here we describe a variation of the algorithm that ties in more closely with the conventions used in this paper, and can be generalized to more generic error channels [74]. Starting point is Eq. (14) , which gives the probabil-ity of an error string CsXq . The quantum circuit ˆMs
+
+consists of N tensors ˆTη , where N is the number of qubits. As described in the main text, the ˆTη can be reshaped as two-qubit gates ˆV (l,m ) → ˆV (ηj ) 
+
+> j
+
+alternat-ing with layers ˆH and ˆH′, where we introduced a label 
+
+j = 1 , . . . , n for convenience, assuming gate ordering ˆMs = V (ηn) 
+
+> N
+
+. . . V (η2)2 V (η1)1 , and explicitly retained the labels ηj that define the error string Cs = Q 
+
+> j
+
+X(1 −ηj )/2 
+
+> j
+
+.Using this notation, the probability of Cs is 
+
+pη = ⟨ϕ(i) |[ ˆV (η1)1 ]† · · · [ ˆV (ηn) 
+
+> n
+
+]†ω(n) 
+
+> ϕ
+
+ˆV (ηn) 
+
+> n
+
+· · · ˆV (η1)1 |ϕ(i) ⟩ ,
+
+(C1) where ω(n) 
+
+> ϕ
+
+≡ ρ(f )0 is the density matrix of the final state. Now suppose the signs η1, . . . , η n−1 are already sam-pled, and that we want to sample ηn. Its conditional probability p(ηn|ηn−1, . . . , η 1) equals pη divided by the marginal probability of the first n − 1 qubits 
+
+pn−1(ηn−1, . . . , η 1) = ⟨ϕ{η}
+
+> n−1
+
+|ω(n−1)  
+
+> ϕ
+
+|ϕ{η}
+
+> n−1
+
+⟩ , (C2) where |ϕ{η}
+
+> n−1
+
+⟩ = ˆV (ηn−1) 
+
+> n−1
+
+. . . ˆV (η1)1 |ϕ(i) ⟩ is the initial state 
+
+|ϕ(i) ⟩ evolved by the gate sequence up to the penultimate gate and ω(n−1)  
+
+> ϕ
+
+= P 
+
+> ηn
+
+[ ˆV (ηn) 
+
+> n
+
+]†ω(n) 
+
+> ϕ
+
+ˆV (ηn) 
+
+> n
+
+is the sum over the two choices for ηn. Generally, the conditional proba-bility of the jth qubit is the ratio of marginal probabilities 17 
+
+p(ηj |ηj−1, . . . , η 1) = pj (ηj , . . . , η 1)/p j−1(ηj−1, . . . , η 1) for all j = 1 , . . . , n , with [74] 
+
+pj (ηj , . . . , η 1) = ⟨ϕ{η} 
+
+> j
+
+|ω(j) 
+
+> ϕ
+
+|ϕ{η} 
+
+> j
+
+⟩ , (C3) where ω(j) 
+
+> ϕ
+
+can be iteratively obtained from ω(n) 
+
+> ϕ
+
+.We have used in the main text that |ϕ{η} 
+
+> j
+
+⟩⟨ ϕ{η} 
+
+> j
+
+|, when projected onto a fixed-parity sector, is Gaussian. Here we show that ω(j) 
+
+> ϕ
+
+is also Gaussian, which means we can efficiently sample error strings using this approach. To this end, consider the gate ˆV (ηj ) 
+
+> j
+
+= eK+iJγ mj γmj +1 ,where ( mj , m j + 1) denotes the pair of Majorana indices that ˆV (ηj ) 
+
+> j
+
+acts on. The transformation ω(j) 
+
+> ϕ
+
+7 → ω(j−1) 
+
+> ϕ
+
+simplifies to 
+
+ω(j−1)  
+
+> ϕ
+
+= Φ j [ω(j) 
+
+> ϕ
+
+] = X
+
+> ηj
+
+[ ˆV (ηj ) 
+
+> j
+
+]†ω(j) 
+
+> ϕ
+
+ˆV (ηj ) 
+
+> j
+
+(C4) = 12
+
+
+
+ω(j) 
+
+> ϕ
+
++ γmj γmj +1 ω(j) 
+
+> ϕ
+
+γmj +1 γmj
+
+
+
+,
+
+where we have defined the channel Φ j [. . . ] and used that e2 Re K cosh J cosh J∗ = e2 Re K sinh J sinh J∗ = 1 /4, where K, J are defined in Eq. (9) . The channel Φ j is a Gaussian transformation: following Ref. 114 , we consider the operator ρΦj = (Φ j ⊗f 1)[ ρI ] dual to Φ j , where ⊗f
+
+is the fermionic tensor product [ 114 ], and where the den-sity matrix ρI = 14M
+
+Q2Mj=1 (1 + iγ j γj+2 M ) is defined in a doubled Hilbert space. Since 
+
+ρΦj = Φ j [ρI ] = 14M
+
+Y   
+
+> j̸={mj,m j+1 }
+
+(1 + iγ j γj+2 M ) (C5) remains Gaussian (albeit not pure), Φ j must be a Gaus-sian map. The effect on the previous state ω(j) 
+
+> ϕ
+
+can be understood as effectively removing the pair ( mj , m j + 1) from ω(j) 
+
+> ϕ
+
+.After applying all gates ˆV (ηj ) 
+
+> j
+
+within one layer of the quantum circuit, we need to apply either ˆH or ˆH′. Since these consists only of projectors 12 (1 + iγ 2mγ2m+1 ), they are also Gaussian. Hence, all pj (ηj . . . η 1) can be efficiently computed in polynomial time. Since each gate Φ j effectively removes a pair of Ma-joranas, the initial ω(N ) 
+
+> ϕ
+
+will have Majoranas gradually removed until only a term ∝ (1 + iγ 1γ2( M +1) ) remains; cf. Eq. (12) . Th This implies that the marginal probabilities [Eq. (C3) ] will gradually involve fewer Majoranas in ω(j)
+
+> ϕ
+
+and thereby slowly evolve (but never reach) towards the identity operator. (Each ˆH and ˆH′ layer again changes this to a projector with elements 12 (1 + iγ 2mγ2m+1 ) and hence resets this tendency towards the identity 1.) This property is basis for the “Born-rule” argument in the main text: it is largely the norm of the state |ϕ{η} 
+
+> j
+
+⟩ for both values of ηj that determines the probability for each 
+
+ηj = ±1 [78]. 
+
+Appendix D: Fermionic linear optics representation 
+
+Here we provide more details on the Gaussian tensor network used in the main text and show how to contract it in polynomial time [ 114 ]. Key for the polynomial-time contraction is that all information about interme-diate contraction steps, described by the state |ϕ{η} 
+
+> j
+
+⟩ =ˆV (ηj ) 
+
+> j
+
+· · · ˆV (η1)1 |ϕ(i) ⟩ (using the notation from App. C), is fully contained in its norm and the correlation matrix Γ (j)
+
+with elements Γ(j) 
+
+> kl
+
+= i
+
+2
+
+⟨ϕ{η} 
+
+> j
+
+|[γk, γ l]|ϕ{η} 
+
+> j
+
+⟩⟨ϕ{η} 
+
+> j
+
+|ϕ{η} 
+
+> j
+
+⟩ . (D1) We now compute the fermionic linear optics representa-tion of the transformation via ˆV (ηj ) 
+
+> j
+
+[73 , 114 ] that is neces-sary to describe the evolution of Γ (j−1) 7 → Γ(j) during the contraction process. The operator ˆV (ηj ) 
+
+> j
+
+= eK+iη j Jγ mj γmj
+
+transforms the correlation matrix Γ (j−1) of a Gaussian state as [114] Γ(j−1) 7 → Γ(j) = B(1 − Γ(j−1) A)−1Γ(j−1) BT + A (D2) where B equals the identity matrix apart from the 2 × 2sector spanned by the indices ( mj , m j + 1), where it equals Bmj ,m j = Bmj +1 ,m j +1 = 0 and Bmj ,m j +1 =
+
+−Bmj +1 ,m j = sin (2 ϕ). The elements of A equal zero apart from the 2 × 2 sector spanned by the indices (mj , m j + 1) with Amj ,m j = Amj +1 ,m j +1 = 0 and 
+
+Amj ,m j +1 = −Amj +1 ,m +1 = cos (2 ϕ). The norm of the new density matrix is [114] 
+
+⟨ϕ{η}
+
+> j−1
+
+|[ ˆV (ηj ) 
+
+> j
+
+]† ˆV (ηj ) 
+
+> j
+
+|ϕ{η}
+
+> j−1
+
+⟩ = 1 + ηj cos ϕΓ(j−1)   
+
+> mj,m j+1
+
+2 (D3) 
+
+Appendix E: Details on the scattering matrix of the quantum dot 
+
+In this Appendix, we explicitly construct the scattering matrix of the synthetic quantum dot S[ ˜Ms] and show that this is isomorphic to the correlation matrix of the final 2-qubit state |ϕs⟩.
+
+1. Construction from the effective Gaussian tensor 
+
+Here, we derive in more detail the scattering matrix of the quantum dot discussed in Sec. V B [see Eq. (29) ]. By considering the single-particle action of ˜Ms [Eq. (23) ], which we reproduce here for convenience ˜Ms = cos θs 
+
+> 2
+
+(1 + iγ 1γ2) + sin θs 
+
+> 2
+
+eiφ s (1 − iγ 1γ2)
+
+√2 , (E1) we first construct the transfer matrix tp[ ˜Ms] in the parti-cle sector via [32] (see also Sec. V A) ˜Msγ ˜M−1 
+
+> s
+
+= γT tp[ ˜Ms], (E2) 18 with γ = ( γ1, γ 2)T and tp[ ˜Ms] =   As Bs 
+
+> −BsAs
+
+ where 
+
+As = 1sin θs
+
+
+
+cos 2
+
+ θs
+
+2
+
+
+
+e−iφ s + sin 2
+
+ θs
+
+2
+
+
+
+eiφ s
+
+
+
+, (E3) 
+
+Bs = i
+
+sin θs
+
+
+
+cos 2
+
+ θs
+
+2
+
+
+
+e−iφ s − sin 2
+
+ θs
+
+2
+
+
+
+eiφ s
+
+
+
+. (E4) Note that since ˜Ms = a1 + bX for Pauli X and a, b ∈ C,its inverse is ˜M−1 
+
+> s
+
+= a1−bX a2−b2 , which exists for a2̸ = b2.Using the time-reversed th[ ˜Ms] = t∗
+
+> p
+
+[ ˜Ms] [ 32 ], we form the doubled transfer matrix t′[ ˜Ms] = tp[ ˜Ms] ⊕ t∗
+
+> p
+
+[ ˜Ms]. Then, working in the rotated basis t[ ˜Ms] = U t′[ ˜Ms]U †,
+
+with U = ei π  
+
+> 4Σx
+
+yields t satisfying t−1 = Σ z t†Σz . Finally, we can relate the blocks of t[ ˜Ms] to transmission and reflection matrices of a scattering matrix using 
+
+S[ ˜Ms] := 
+
+rs t′
+
+> s
+
+ts r′
+
+> s
+
+ , t[ ˜Ms] ≡
+
+ t† 
+
+> s
+> −1
+
+r′
+
+> s
+
+t′
+
+> s
+> −1
+
+−t′
+
+> s
+> −1
+
+rs t′
+
+> s
+> −1
+
+ . (E5) Hence, we find the transmission matrices 
+
+ts = t′Ts = sin θs
+
+ cos φs sin φs    
+
+> −sin φscos φs
+
+
+
+(E6) and reflection matrices 
+
+rs = r′ 
+
+> s
+
+= cos θs( 1 0 0 1 ). (E7) 
+
+2. Isomorphism with the final state correlation matrix 
+
+Since |ϕs⟩ [Eq. (20) ] is an unnormalized Gaussian state, it is instructive to consider its correlation matrix. Again switching to Majoranas via χ2j−1 = ( Q 
+
+> k<j
+
+τ xk )τ zj ,
+
+χ2j = ( Q 
+
+> k<j
+
+τ xk )τ yj for j = 1 , . . . , 4, the corresponding cor-relation matrix Γ (χ) 
+
+> s,jk
+
+= i 
+
+> 2
+
+⟨ϕs|[χj , χ k]|ϕs⟩ / ⟨ϕs|ϕs⟩ reads Γ(χ) 
+
+> s
+
+=                                              
+
+> 0cos φssin θs−sin φssin θscos θs
+> −cos φssin θs0cos θssin φssin θs
+> sin φssin θs−cos θs0cos φssin θs
+> −cos θs−sin φssin θs−cos φssin θs0
+
+!
+
+.
+
+(E8) Two limiting cases are transparent in this formulation: For no errors ( ϕ = 0), we have θs = 0. 2 For coherent rotations with ϕ = π/ 4, we have θs = π/ 2 and a fixed phase φs ∈ { π/ 2, 3π/ 2}. Furthermore, for the limit to a class D model such that φs ∈ { 0, π } or φs ∈ { π/ 2, 3π/ 2}
+
+(see App. A), one can readily see that Γ (χ) 
+
+> s
+
+decouples into two 2 × 2 correlation matrices; this showcases that the doubling of fermionic modes is not necessary in class D, as discussed in Sec. V C.        
+
+> 2Assuming maximum likelihood decoding, which for no errors implies |Z 0,s |2=p(s) and |Z 1,s |2=p(s).
+
+(a) (b) 
+
+FIG. 9. (a) Majorana mode (black cross) acting on an empty fermionic state |0F⟩m that satisfies χ2m |0F⟩m = iχ 2m−1 |0F⟩m,meaning a factor of i needs to be included when swapping Majorana modes as indicated. (b) The final-state correlation matrix Γ of the state |ϕs⟩ is related to the correlation of the operator ˜Ms by the process shown in panel (a) and hence to the scattering matrix S[ ˜Ms]. 
+
+We now interpret the correlation matrix as the correla-tion matrix of the Gaussian operator ˜Ms acting on only one fermion (i.e., two Majoranas), cf. also Ref. 32 . We vi-sualize this in Fig. 9. First note that χ1 |0F⟩1 = iχ 2 |0F⟩1
+
+and χ4 |0F⟩2 = −iχ 3 |0F⟩2, where |0F⟩m denotes an un-occupied fermionic mode on site m, equivalent to |+⟩m
+
+in the τ μm transfer matrix space. Now using the parity-conserving transformation χ1 → i ˜χL 
+
+> 1
+
+, χ2 → ˜χR 
+
+> 1
+
+, χ3 → ˜χR 
+
+> 2
+
+,and χ4 → − i ˜χL 
+
+> 2
+
+, where the imaginary units arise from the aforementioned back-bending of modes via the unoc-cupied |0F⟩m [also cf. Fig. 9(a)], we identify the blocks of the newly defined transformed correlation matrix 3
+
+Γ( ˜ χ) 
+
+> s
+
+=
+
+ ΓLL s −iΓLR s
+
+iΓRL s ΓRR s
+
+ (E9) with the blocks ΓRR s = Γ LL s = cos θsei(π/ 2) τ y
+
+, (E10) ΓRL s = [Γ LR s ]T = sin θseiφ sτ y
+
+. (E11) and the Pauli matrix τ y . These blocks also correspond to ΓLL s,ij = i
+
+2 Tr 
+
+
+
+[χi, χ j ] ˜Ms ˜M†
+
+> s
+
+
+
+, (E12) ΓRR s,ij = i
+
+2 Tr 
+
+
+
+[χi, χ j ] ˜M† 
+
+> s
+
+˜Ms
+
+
+
+, (E13) ΓRL s,ij = Tr 
+
+
+
+χi ˜Msχj ˜M†
+
+> s
+
+
+
+, (E14) ΓLR s,ij = Tr 
+
+
+
+χi ˜M†
+
+> s
+
+χj ˜Ms
+
+
+
+, (E15) highlighting that they are another way to represent the op-erator ˜Ms. This correspondence goes further as we note that Γ LL s = Γ RR s = rs = r′ 
+
+> s
+
+and ts = t′Ts = Γ RL s = [Γ LR s ]T ,cf. Eqs. (E6) , (E7) , (E10) , and (E11) . Hence, by iden-tifying these blocks, we readily find that the covariance matrix Γ (χ) 
+
+> s
+
+= Γ( |ϕs⟩) is isomorphic to the scattering matrix S[ ˜Ms], as claimed in Eq. (30).     
+
+> 3Note that Γ ( ˜ χ)is complex since not all the operators ˜χjare Hermitian.
+
+19 10 0 10 1  
+
+> Bulk conductivity g
+> 10 −1
+> 10 0
+> W (G)1 (φ, L )
+> R= 10 2
+> Emp. threshold
+> 0.08 0.09 0.1 0.11 0.12 0.13 0.14 0.15 0.16
+> φ/π
+
+FIG. 10. Wasserstein-1 distance W (G)1 (ϕ, L ) for the quantum dot conductance G between the logical and hemisphere-Haar ensembles vs bulk conductivity g for the honeycomb surface code with rotation angle ϕ. Data averaged over 10 5 to 10 6
+
+syndrome realizations for length and width 21 ≤ L = M ≤
+
+91, split into R = 10 2 syndromes per empirical CDF. Error bars show SE. Above the error threshold ϕ > ϕ th ≈ 0.089 π,
+
+W (G)1 (ϕ, L ) decreases and then approaches an R-dependent statistical threshold value (horizontal dashed gray line). 
+
+Appendix F: Additional class DIII Wasserstein distance numerics 
+
+In this Appendix, we discuss further the dependence of the Wasserstein distance W (G)1 (ϕ, L ) on the number R of syndromes per empirical CDF in the metallic phase of the honeycomb surface code. As discussed in Sec. VI B [see also Fig. 7(c)], we expect that W (G)1 (ϕ > ϕ th , L → ∞ )approaches an R-dependent empirical threshold ∝ 1/√R.In Sec. VI B [Fig. 7(c)], we considered a large R = 10 4
+
+for which the saturation to the empirical threshold is beyond the reach of numerically-accessible system sizes 
+
+L. Here, we instead examine such saturation by consid-ering R = 10 2 syndromes per CDF, thereby yielding a higher empirical threshold. While full saturation is not reached by the data shown in Fig. 10, W (G)1 (ϕ, L ) seems to approach the empirical threshold slowly but more closely. 
+
+Appendix G: Partial Pauli twirl class DIII numerics 
+
+In this Appendix, we present numerical results for a simplified model of the surface code under coherent rota-tions: the surface code under “partial Pauli twirling”, as discussed in Ref. 73 . The key distinction between these two models is how the syndromes, and thus realizations of the corresponding network model, are sampled. Apart from this, they are qualitatively similar: For example, both have a finite error threshold but these differ quanti-tatively. Focusing on the honeycomb surface code, both of their corresponding scattering networks, and thus NL σM, are in symmetry class DIII; however, these correspond to replica limits N → 1 (coherent rotations) and N → 0(partial Pauli twirl) [ 32 , 70 , 73 ]; see also Sec. V D and 0.07 0.08 0.09 0.10 0.11 0.12 0.13 0.14 0.15 
+
+φ/π               
+
+> 0.025 0.050 0.075 0.100 0.125 0.150 0.175 0.200
+> Logical error rate  PL
+> L= 21
+> L= 31
+> L= 41
+> L= 51
+> L= 61
+> L= 71
+> L= 81
+> L= 91 0.070 0.075 0.080 0.085 0.10 0.12 0.14 0.16 0.18 0.20
+> φth ≈0.079 π
+
+FIG. 11. Logical error rate PL vs coherent error angle ϕ for the honeycomb surface code under partial Pauli twirl with length and width 21 ≤ L = M ≤ 91. PL decays with L
+
+below the error threshold ϕth (vertical dashed red line). The inset shows data closer to the QEC transition. For ϕ > ϕ th ,
+
+PL initially increases with L, after which it becomes weakly dependent on L for the accessible system sizes. Error bars show SE. Data averaged over 10 5 to 10 6 syndromes. 
+
+Ref. [ 77 , 78 ]. Therefore, their quantum dots are expected to have similar phenomenology since, above the error threshold, their internal fabrics (network models) are met-als in class DIII. In the remainder of this Appendix, we spell out the model and then present numerics for the er-ror threshold, insulator-to-metal transition, and emergent RMT behavior of the quantum dot. The key difference between partial Pauli twirl and co-herent errors is how the couplings ηvv ′ in the complex RBIM Hamiltonian are sampled, cf. Eq. (8) . For coherent errors, η(q,s ) 
+
+> vv ′
+
+are sampled according to the Born probabil-ity p(s|ρ) for syndrome s [see Sec. III]. For partial Pauli twirl, η(q,s ) 
+
+> vv ′
+
+≡ η(q) 
+
+> vv ′
+
+are sampled as −1 with probability 
+
+p = sin 2 ϕ and +1 with probability 1 − p = cos 2 ϕ, leading to the partition functions and RBIM Hamiltonians 
+
+Z′ 
+
+> q,s
+
+= X 
+
+> {σv}
+
+enK +H′ 
+
+> q,s
+
+, H′ 
+
+> q,s
+
+= J X
+
+> ⟨v,v ′⟩
+
+η(q) 
+
+> vv ′
+
+σv σv′ , (G1) with the same complex couplings K = 12 ln ( cos ϕ sin ϕ) + 
+
+i π 
+
+> 4
+
+and J = − 12 ln ( tan ϕ) − i π 
+
+> 4
+
+. Notably, the partition function Z′ 
+
+> q,s
+
+captures the coherent sums over X-strings contributions, which is an essential feature differentiating coherent and incoherent errors. Before presenting our numerics, we note that how vortex realizations ( ηvv ′ = −1) are sampled does not affect the network model’s symmetry class; however, it changes the replica limit of the NL σM, and it may change the disorder averages. We first extract the QEC threshold of the honeycomb surface code under partial Pauli twirl using both the logi-cal error rate PL and bulk conductivity g of the associated scattering network; see Sec. VI A for the analog discus-sion for coherent rotations. Using the complex partition 20 0 2 4 6
+
+ln[ L/` (φ)]                                            
+
+> 0.00.51.01.52.0
+> Bulk conductivity  g NL σM class DIII, N= 0 NL σM class DIII, N= 1
+> 0.07 0.08 0.09 0.10 0.11
+> φ/π
+> FIG. 12. Bulk conductivity gfor the coherent rotations network model of the honeycomb surface code under par-tial Pauli twirl with length and width 21 ≤L=M≤91. Data averaged over 10 5to 10 6syndrome realizations. Error bars (SE) are imperceptible. gscales with a ϕ-dependent length ℓ(ϕ). For the insulator ϕ < ϕ th ,g(L/ℓ (ϕ)) decreases with L, with ϕth = (0 .079 ±0.002) π. For the metal ϕ > ϕ th ,
+> gincreases and, for large L, is consistent with the scaling
+> g∝π−1ln [L/ℓ (ϕ)] of a nonlinear sigma model in symmetry class DIII with replica limit N→0 (dashed gray line), see also [ 77 ,78 ]. The dashed black line shows the N→1 limit of the NL σMg∝(2 π)−1ln[ L/ℓ (ϕ)].
+
+functions Z′ 
+
+> q,s
+
+[Eq. (G1)], we can numerically estimate 
+
+PL = X
+
+> s
+
+min 
+
+> q
+
+Z′
+
+> q,s
+> 2
+
+Z′ 
+
+> 0,s
+> 2
+
++ Z′ 
+
+> 1,s
+> 2
+
+(G2) by sampling η(q) 
+
+> vv ′
+
+accordingly. We numerically find that 
+
+PL (not) decreases with the code distance d ∝ L below (above) an error threshold ϕth = (0 .079 ±0.001) π [Fig. 11], distinct from the QEC threshold from Sec. VI A. Using the bulk conductivity g, our data is consistent with an insulator-to-metal transition at a critical angle ϕth =(0 .079 ± 0.002) π compatible with the observed threshold 
+
+ϕth [Fig. 12]. As in the Born-rule case [Fig. 6], g scales with L/ℓ (ϕ) for some length ℓ(ϕ): for ϕ < ϕ th , g(L/ℓ (ϕ)) monotonically decreases, signaling that the network model localizes (insulator); conversely for ϕ > ϕ th , g(L/ℓ (ϕ)) increases as g ∝ π−1 ln [L/ℓ (ϕ)], which is consistent with a metal in symmetry class DIII [ 123 ]; however, the scaling of the conductivity in the metallic phase seems to follow the prediction of a class DIII NL σM in the replica limit 
+
+N → 0 [Fig. 12] (see also [ 77 , 78 ]). This is distinct from the Born-rule case, where g seems to follow the expected 
+
+N → 1 replica limit in the diffusive regime [cf. Fig. 6]. We now turn to the conductance G of the quantum dot. The analysis mirrors that from Sec. VI B. As in the Born-rule case, we find that, in the bulk metallic phase ϕ > ϕ th ,the data for the quantum dot agrees remarkably well with the RMT prediction [Fig. 13]. The empirical distribution ˆp(G) approaches the PDF ˜p(G) predicted by RMT re-markably well [Fig. 13(a)]. Moreover, the Wasserstein-1 distance W (G)1 ( ˆp, ˜p) between the distribution of G in the quantum dot and from RMT seems to decay with g in the metallic phase [Figs. 13(b) and (c)]. In fact, for the largest numerically-accessible g, we find that these decay algebraically ∝ g−α as in the Born-rule case; however, the exponent α seems to be different. 
+
+> Appendix H: Symmetry class D numerics
+
+In this Appendix, we discuss numerical results for a surface code in symmetry class D with Born-sampled disorder, in addition to the class DIII case discussed in Sec. VI. Here, we focus on the behavior of the associated class D quantum dot and the projected logical ensemble. For the simulations, we focus on the triangular-lattice SC with length and width L = 2 M − 1, rotation angle 
+
+ϕ, and initial state |ψ⟩ = |0⟩ [Sec. III A, Fig. 1(a)]. We use the same methods based on Gaussian (1+1)D circuits as for the honeycomb SC [Sec. IV B, App. D]. We choose the code distance dX to be odd such that the final states take the form |ψs⟩ = cos (θs/2) |0⟩ + eiφ s sin (θs/2) |1⟩ with 
+
+φs ∈ { π/ 2, 3π/ 2} and θs ∈ [0 , π/ 2], cf. App. A, and we numerically reconstruct θs and φs. Using these and the corresponding network model, we estimate the bulk conductivity g and the syndrome-dependent conductance 
+
+Gs of the quantum dot [cf. Sec. VI]. Our simulations are consistent with a class D chaotic quantum dot for large enough ϕ [Fig. 14(a)]. For two trans-mission modes, the expected PDF for the dot’s conduc-tance in class D is ˜p(G) = 1 /π pG(2 − G) , cf. [82 ], lead-ing to the CDF ˜P (G) = π−1 arccos (1 − G) for G ∈ [0 , 2]. The data shown in Fig. 14(a) suggests that the empiri-cal distribution of G approaches this RMT prediction for 
+
+ϕ ≳ 0.16 π.4 Corroborated with the results in Sec. VI, this observation suggests that RMT universality can emerge in SC setups for both classes D and DIII. To probe this approach more thoroughly and its rela-tion with the statistical properties of the PLE, we now turn to the Wasserstein-1 distance W (G)1 between the quantum dot’s and the RMT probability distributions, p
+
+and ˜p, respectively [App. B]. Note that this distribution ˜p(G) with ϑ := Gs = 2 sin 2 θs is identical to the distribu-tion pH(G) of ϑ(|ψ⟩) for |ψ⟩ distributed uniformly on the Bloch sphere subspace spanned by φs ∈ { π/ 2, 3π/ 2} and 
+
+θs ∈ [0 , π/ 2]. We observe that W (G)1 (ϕ, L ) increases with 
+
+L for ϕ ≲ 0.16 π, whereas for larger ϕ, it seems to approach a value set by the number of syndromes R per empirical CDF [Fig. 14(b)]. As in Sec. VI B, the saturation value is 
+
+W (G)1 ( ˆpH, p H) [shown as the horizontal dashed gray line in Fig. 14(b) and (c)], where the empirical ˆpH is built by sampling R times from pH(G). This observation fur-ther suggests that the quantum dot approaches a chaotic regime for large ϕ, and that, in this chaotic regime, the PLE approaches a class-D-constrained Haar ensemble.     
+
+> 4This is consistent with ξloc ≫L, i.e., a metallic grain for the triangular-lattice SC in this regime.
+
+21 0.00 0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00 
+
+Quantum dot conductance G 
+
+> 0.00.51.01.52.02.53.0
+> Empirical PDF ˆ p(G) L= 91
+
+(a) class DIII: p(G) = 1√8(2 −G)        
+
+> 0.07 0.08 0.09 0.10 0.11 0.12 0.13 0.14 0.15
+
+φ/π  
+
+> 10 −2
+> 10 −1
+> 10 0
+> W (G)1 (φ, L )
+> R= 10 4
+
+(b) L = 21                  
+
+> L= 31
+> L= 41
+> L= 51
+> L= 61
+> L= 71
+> L= 81
+> L= 91 Diffusive Ballistic
+> L= 21
+> L= 31
+> L= 41
+> L= 51
+> L= 61
+> L= 71
+> L= 81
+> L= 91 Diffusive Ballistic
+> 10 −110 010 1
+
+Bulk conductivity g 
+
+> R= 10 4
+
+(c)      
+
+> ∝1/g
+> ∝1/g α
+> (α= 1 .33 ±0.06) Emp. threshold Diffusive Ballistic
+> 0.07 0.08 0.09 0.1 0.11 0.12 0.13 0.14
+> φ/π
+
+FIG. 13. Emergent chaotic quantum dot and projected logical ensemble of the honeycomb surface code under partial Pauli twirl. Data averaged over 10 5 to 10 6 syndrome realizations for length and width 21 ≤ L = M ≤ 91. Error bars show SE. (a): Empirical probability density function ˆp(G) of the quantum dot’s conductance G for L = 91. Above the error threshold 
+
+ϕ > ϕ th ≈ 0.079 π [vertical dashed red line in (b)], the empirical PDF approaches the random matrix theory prediction given by a dot made of a Majorana metal in symmetry class DIII (dashed green line). (b): Wasserstein-1 distance W (G)1 (ϕ, L ) vs 
+
+ϕ between quantum dot’s and RMT distributions, or equivalently, the distributions of G = 2 sin 2 θ in the projected logical and Haar-hemisphere ensembles. Parameters ( L, ϕ ) that allow for a diffusive (ballistic) metal are shown as circles (crosses). 
+
+W (G)1 (ϕ, L ) seems to drop (systematically for the diffusive metal) from a finite value for ϕ < ϕ th towards a value set by the number R = 10 4 of syndromes per empirical CDF for ϕ > ϕ th [horizontal dashed gray line in (b) and (c)]. (c): W (G)1 (ϕ, L ) vs bulk conductivity g of the network model. W (G)1 (ϕ, L ) seems to follow a one-parameter scaling W (G)1 (g). In the metallic phase, 
+
+W (G)1 (ϕ, L ) decays algebraically with g; the dashed green (black) line shows a linear (algebraic) fit. 0.00 0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00 
+
+Quantum dot conductance G 
+
+> 0.00 0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00
+> Empirical PDF ˆ p(G) L= 47
+
+(a) class D: p(G) = 1      
+
+> π√G(2 −G)
+> 0.12 0.13 0.14 0.15 0.16 0.17 0.18
+
+φ/π  
+
+> 10 −1
+> 10 0
+> W (G)1 (φ, L )
+> R= 10 3
+
+(b) L = 11           
+
+> L= 15
+> L= 19
+> L= 23
+> L= 27
+> L= 31
+> L= 35
+> L= 39
+> L= 43
+> L= 47
+> 10 010 1
+
+Bulk conductivity g 
+
+> R= 10 3
+
+(c) 
+
+> 0.12 0.13 0.14 0.15 0.16 0.17 0.18
+> φ/π
+
+FIG. 14. Emergent chaotic quantum dot and projected logical ensemble of the triangular surface code under coherent rotations. Data averaged over 2 × 10 4 syndrome realizations for length 11 ≤ L ≤ 47 and width M = 2 L − 1. Error bars show SE. (a): Empirical probability density function ˆp(G) of the quantum dot’s conductance G for L = 47. For ϕ > ϕ th ≈ 0.16 π, the empirical PDF approaches the random matrix theory prediction given by a dot made of a Majorana metal in symmetry class D (dashed green line). (b): Wasserstein-1 distance W (G)1 (ϕ, L ) vs ϕ between quantum dot’s and RMT distributions, or equivalently, the distributions of G = 2 sin 2 θ in the projected logical and Haar-hemisphere ensembles. W (G)1 (ϕ, L ) drops from a finite value for 
+
+ϕ < ϕ th towards a value set by the number R = 10 2 of syndromes per empirical CDF for ϕ > ϕ th [horizontal dashed gray line in (b) and (c)]. (c): W (G)1 (ϕ, L ) vs bulk conductivity g of the network model. For ϕ > ϕ th and large g, W (G)1 (g) seems to approach the empirical threshold. 
+
+While this approach seems to continue with increasing bulk conductivity [cf. Fig. 14(c)], we note that a con-siderably larger number of sampled syndromes would be necessary to resolve the precise scaling of W (G)1 (L, ϕ ) for large ϕ and g.
+
+[1] P. W. Shor, Phys. Rev. A 52 , R2493 (1995). [2] A. R. Calderbank and P. W. Shor, Phys. Rev. A 54 ,1098 (1996). [3] A. M. Steane, Phys. Rev. Lett. 77 , 793 (1996). [4] D. Gottesman, arXiv:quant-ph/9705052 (1997). [5] D. Aharonov and M. Ben-Or, SIAM J. Comp. 38 , 1207 (2008). [6] E. Knill, R. Laflamme, and W. H. Zurek, Proc. R. Soc. A 454 , 365–384 (1998). [7] S. B. Bravyi and A. Y. Kitaev, arXiv:quant-ph/9811052 (1998). [8] E. Dennis, A. Kitaev, A. Landahl, and J. Preskill, J. Math. Phys. 43 , 4452 (2002). [9] A. Kitaev, Ann. Phys. 303 , 2 (2003). 22 
+
+[10] D. Gottesman, A. Kitaev, and J. Preskill, Phys. Rev. A 
+
+64 , 012310 (2001). [11] N. P. Breuckmann and J. N. Eberhardt, PRX Quantum 
+
+2, 040101 (2021). [12] B. M. Terhal, Rev. Mod. Phys. 87 , 307 (2015). [13] M. A. Nielsen and I. L. Chuang, Quantum Computa-tion and Quantum Information (CUP, Cambridge, U.K., 2010). [14] C. Ryan-Anderson et al. , Phys. Rev. X 11 , 041058 (2021). [15] S. Krinner et al. , Nature 605 , 669–674 (2022). [16] G. Q. AI, Nature 614 , 676 (2023). [17] D. Bluvstein et al. , Nature 626 , 58–65 (2023). [18] R. Acharya et al. , Nature 638 , 920–926 (2024). [19] D. Bluvstein et al. , Nature 649 , 39 (2026), [Erratum: Nature 650, E3 (2026)]. [20] S. Dasu et al. , arXiv:2602.22211 (2026). [21] D. Gottesman and I. L. Chuang, Nature 402 , 390–393 (1999). [22] R. Raussendorf and H. J. Briegel, Phys. Rev. Lett. 86 ,5188 (2001). [23] S. Bravyi and A. Kitaev, Phys. Rev. A 71 , 022316 (2005). [24] D. Horsman, A. G. Fowler, S. Devitt, and R. V. Meter, New J. Phys. 14 , 123011 (2012). [25] B. Skinner, J. Ruhman, and A. Nahum, Phys. Rev. X 9,031009 (2019). [26] Y. Li, X. Chen, and M. P. A. Fisher, Phys. Rev. B 98 ,205136 (2018). [27] Y. Li, X. Chen, and M. P. A. Fisher, Phys. Rev. B 100 ,134306 (2019). [28] S. Choi, Y. Bao, X.-L. Qi, and E. Altman, Phys. Rev. Lett. 125 , 030505 (2020). [29] M. J. Gullans and D. A. Huse, Phys. Rev. X 10 , 041020 (2020). [30] M. Ippoliti, M. J. Gullans, S. Gopalakrishnan, D. A. Huse, and V. Khemani, Phys. Rev. X 11 , 011030 (2021). [31] M. P. A. Fisher, V. Khemani, A. Nahum, and S. Vijay, Ann. Rev. Condens. Matter Phys. 14 , 1 (2023). [32] C.-M. Jian, B. Bauer, A. Keselman, and A. W. W. Lud-wig, Phys. Rev. B 106 , 134206 (2022). [33] J. S. Cotler, D. K. Mark, H.-Y. Huang, F. Hern´ andez, J. Choi, A. L. Shaw, M. Endres, and S. Choi, PRX Quantum 4, 010311 (2023). [34] J. Choi et al. , Nature 613 , 468–473 (2023). [35] W. W. Ho and S. Choi, Phys. Rev. Lett. 128 , 060601 (2022). [36] M. Ippoliti and W. W. Ho, Quantum 6, 886 (2022). [37] P. W. Claeys and A. Lamacraft, Quantum 6, 738 (2022). [38] M. McGinley and M. Fava, Phys. Rev. Lett. 131 , 160601 (2023). [39] T. Bhore, J.-Y. Desaules, and Z. Papi´ c, Phys. Rev. B 
+
+108 , 104317 (2023). [40] M. Ippoliti and W. W. Ho, PRX Quantum 4, 030322 (2023). [41] M. Lucas, L. Piroli, J. De Nardis, and A. De Luca, Phys. Rev. A 107 , 032215 (2023). [42] D. K. Mark, F. Surace, A. Elben, A. L. Shaw, J. Choi, G. Refael, M. Endres, and S. Choi, Phys. Rev. X 14 ,041051 (2024). [43] C. Liu, Q. C. Huang, and W. W. Ho, Phys. Rev. Lett. 
+
+133 , 260401 (2024). [44] R.-A. Chang, H. Shrotriya, W. W. Ho, and M. Ippoliti, PRX Quantum 6, 020343 (2025). [45] M. Bejan, B. B´ eri, and M. McGinley, Phys. Rev. Lett. 
+
+135 , 1 (2025). [46] X.-H. Yu, W. W. Ho, and P. Kos, Phys. Rev. Lett. 135 ,260402 (2025). [47] M. McGinley and T. Schuster, arXiv:2511.17172 (2025). [48] W.-K. Mok, T. Haug, W. W. Ho, and J. Preskill, arXiv:2601.00266 (2026). [49] C. Liu, M. Ippoliti, and W. W. Ho, Phys. Rev. Lett. 
+
+136 , 100404 (2026). [50] T.-C. Lu, L. A. Lessa, I. H. Kim, and T. H. Hsieh, PRX Quantum 3, 040337 (2022). [51] G.-Y. Zhu, N. Tantivasadakarn, A. Vishwanath, S. Trebst, and R. Verresen, Phys. Rev. Lett. 131 , 200201 (2023). [52] J. C. Hoke et al. , Nature 622 , 481–486 (2023). [53] A.-R. Negari, S. Sahu, and T. H. Hsieh, Phys. Rev. B 
+
+109 , 125148 (2024). [54] M. Iqbal et al. , Nature 626 , 505–511 (2024). [55] N. Tantivasadakarn, R. Thorngren, A. Vishwanath, and R. Verresen, Phys. Rev. X 14 , 021040 (2024). [56] M. McGinley, W. W. Ho, and D. Malz, Phys. Rev. X 
+
+15 , 021059 (2025). [57] S. J. Garratt, Z. Weinstein, and E. Altman, Phys. Rev. X 13 , 021026 (2023). [58] S. Murciano, P. Sala, Y. Liu, R. S. K. Mong, and J. Al-icea, Phys. Rev. X 13 , 041042 (2023). [59] J. Y. Lee, C.-M. Jian, and C. Xu, PRX Quantum 4,030317 (2023). [60] Z. Yang, D. Mao, and C.-M. Jian, Phys. Rev. B 108 ,165120 (2023). [61] K. Khanna and R. Vasseur, Phys. Rev. Lett. 136 , 160402 (2026). [62] C.-M. Jian, Y.-Z. You, R. Vasseur, and A. W. W. Ludwig, Phys. Rev. B 101 , 104302 (2020). [63] Y. Fuji and Y. Ashida, Phys. Rev. B 102 , 054302 (2020). [64] X. Turkeshi, R. Fazio, and M. Dalmonte, Phys. Rev. B 
+
+102 , 014315 (2020). [65] M. J. Gullans and D. A. Huse, Phys. Rev. Lett. 125 ,070606 (2020). [66] A.-R. Negari, S. Sahu, J. Behrends, B. B´ eri, and T. H. Hsieh, arXiv:2601.10792 (2026). [67] A. Altland and M. R. Zirnbauer, Phys. Rev. B 55 , 1142 (1997). [68] Z. Cheng, E. Huang, V. Khemani, M. J. Gullans, and M. Ippoliti, PRX Quantum 6, 030333 (2025). [69] F. Eckstein, B. Han, S. Trebst, and G.-Y. Zhu, arXiv:2512.19786 (2025). [70] F. Venn, J. Behrends, and B. B´ eri, Phys. Rev. Lett. 131 ,060603 (2023). [71] S. Bravyi, M. Englbrecht, R. K¨ onig, and N. Peard, npj Quantum Inf. 4, 55 (2018). [72] F. Venn and B. B´ eri, Phys. Rev. Res. 2, 043412 (2020). [73] J. Behrends, F. Venn, and B. B´ eri, Phys. Rev. Res. 6,013137 (2024). [74] J. Behrends and B. B´ eri, PRX Quantum 6, 040305 (2025). [75] J. Behrends and B. B´ eri, PRX Quantum 6, 040350 (2025). [76] Y. Bao and S. Anand, arXiv:2411.05785 (2024). [77] S. W. Yan, Y. Bao, and S. Vijay, arXiv:2603.25665 (2026). [78] Z. Yang, A. W. W. Ludwig, and C.-M. Jian, arXiv:2604.08650 (2026). [79] M. P. Zaletel and F. Pollmann, Phys. Rev. Lett. 124 ,037201 (2020). 23 
+
+[80] C. W. J. Beenakker, Rev. Mod. Phys. 69 , 731 (1997). [81] Y. Alhassid, Rev. Mod. Phys. 72 , 895 (2000). [82] J. P. Dahlhaus, B. B´ eri, and C. W. J. Beenakker, Phys. Rev. B 82 , 014536 (2010). [83] B. Altshuler and B. Shklovskii, JETP 91 , 220 (1986). [84] K. Efetov, Adv. Phys. 32 , 53 (1983). [85] Y. V. Fyodorov and A. D. Mirlin, Phys. Rev. B 51 ,13403 (1995). [86] K. Efetov, Supersymmetry in disorder and chaos (CUP, Cambridge, U.K., 2012). [87] A. Mirlin, Phys. Rep. 326 , 259–382 (2000). [88] M. Bocquet, D. Serban, and M. Zirnbauer, Nucl. Phys. B 578 , 628–680 (2000). [89] J. J. Wallman and S. T. Flammia, New J. Phys. 16 ,103032 (2014). [90] J. Wallman, C. Granade, R. Harper, and S. T. Flammia, New J. Phys. 17 , 113020 (2015). [91] J. J. Wallman and J. Emerson, Phys. Rev. A 94 , 052325 (2016). [92] A. S. Darmawan and D. Poulin, Phys. Rev. Lett. 119 ,040502 (2017). [93] D. Greenbaum and Z. Dutton, Quantum Sci. Technol. 
+
+3, 015007 (2018). [94] D. Gottesman, arXiv:1907.05950 (2019). [95] J. K. Iverson and J. Preskill, New J. Phys. 22 , 073066 (2020). [96] S. J. Beale, J. J. Wallman, M. Guti´ errez, K. R. Brown, and R. Laflamme, Phys. Rev. Lett. 121 , 190501 (2018). [97] S. Lee and E.-G. Moon, PRX Quantum 6, 030355 (2025). [98] A. S. Darmawan, Phys. Rev. A 112 , 042431 (2025). [99] X. Turkeshi and P. Sierant, Phys. Rev. Lett. 132 , 140401 (2024). [100] A. Lavasani and S. Vijay, Phys. Rev. Res. 7, 023166 (2025). [101] B. Pato, J. W. Staples, and K. R. Brown, Phys. Rev. A 
+
+111 , 032424 (2025). [102] E. Huang, P.-G. Rozon, A. Dua, S. Gopalakrishnan, and M. J. Gullans, arXiv:2510.01319 (2025). [103] N. Yoshioka, A. Seif, A. Cross, and A. Javadi-Abhari, arXiv:2510.08290 (2025). [104] P. Sierant and X. Turkeshi, arXiv:2603.00235 (2026). [105] Q. Wang, R. Vasseur, S. Trebst, A. W. W. Ludwig, and G.-Y. Zhu, arXiv:2502.14034 (2025). [106] T. LeBlond, P. Groszkowski, J. G. Lietz, C. M. Seck, and R. S. Bennink, Phys. Rev. Res. 7, 043184 (2025). [107] W. M. Witzel, A. Ganti, and T. S. Metodi, arXiv:2602.21076 (2026). [108] F. Eckstein, B. Han, S. Trebst, and G.-Y. Zhu, PRX Quantum 5, 040313 (2024). [109] M. P¨ utz, R. Vasseur, A. W. Ludwig, S. Trebst, and G.-Y. Zhu, arXiv:2505.22720 (2025). [110] M. P¨ utz, S. J. Garratt, H. Nishimori, S. Trebst, and G.-Y. Zhu, Phys. Rev. Lett. 136 , 190402 (2026). [111] K. Fujii and Y. Tokunaga, Phys. Rev. A 86 , 020303 (2012). [112] B. R¨ othlisberger, J. R. Wootton, R. M. Heath, J. K. Pachos, and D. Loss, Phys. Rev. A 85 , 022313 (2012). [113] A. W. Harrow, arXiv:1308.6595 (2013). [114] S. Bravyi, Quantum Inf. Comput. 5, 216 (2005). [115] J. H. Bardarson, J. Phys. A 41 , 405203 (2008). [116] I. C. Fulga, F. Hassler, A. R. Akhmerov, and C. W. J. Beenakker, Phys. Rev. B 83 , 155429 (2011). [117] I. C. Fulga, A. R. Akhmerov, J. Tworzydlo, B. B´ eri, and C. W. J. Beenakker, Phys. Rev. B 86 , 054505 (2012). [118] H. Tamura and T. Ando, Phys. Rev. B 44 , 1792 (1991). [119] B. Bertini, P. Kos, and T. Prosen, Phys. Rev. Lett. 123 ,210601 (2019). [120] F. Wegner, Z. Physik B 35 , 207 (1979). [121] K. Efetov, A. Larkin, and D. Kheml’Nitskiˇ ı, JETP 52 ,568 (1980). [122] N. Read and A. W. W. Ludwig, Phys. Rev. B 63 , 024404 (2000). [123] F. Evers and A. D. Mirlin, Rev. Mod. Phys. 80 , 1355 (2008). [124] C.-M. Jian, H. Shapourian, B. Bauer, and A. W. W. Ludwig, arXiv:2302.09094 (2023). [125] M. Fava, L. Piroli, T. Swann, D. Bernard, and A. Nahum, Phys. Rev. X 13 , 041045 (2023). [126] I. Poboiko, P. P¨ opperl, I. V. Gornyi, and A. D. Mirlin, Phys. Rev. X 13 , 041046 (2023). [127] J. T. Edwards and D. J. Thouless, J. Phys. C 5, 807 (1972). [128] D. J. Thouless, Phys. Rev. Lett. 39 , 1167 (1977). [129] E. Abrahams, P. W. Anderson, D. C. Licciardello, and T. V. Ramakrishnan, Phys. Rev. Lett. 42 , 673 (1979). [130] E. Akkermans and G. Montambaux, Mesoscopic Physics of Electrons and Photons (CUP, Cambridge, U.K., 2007). [131] P. A. Lee and T. V. Ramakrishnan, Rev. Mod. Phys. 57 ,287 (1985). [132] J. T. Chalker, N. Read, V. Kagalovsky, B. Horovitz, Y. Avishai, and A. W. W. Ludwig, Phys. Rev. B 65 ,012506 (2001). [133] T. Senthil and M. P. A. Fisher, Phys. Rev. B 61 , 9690 (2000). [134] M. V. Medvedyeva, J. Tworzydlo, and C. W. J. Beenakker, Phys. Rev. B 81 , 214203 (2010). [135] C. Beenakker, Annu. Rev. Condens. Matt. Phys. 4,113–136 (2013). [136] N. Fournier and A. Guillin, Probab. Theory Relat. Fields 
+
+162 , 707 (2015). [137] J. Cardy, Finite-Size Scaling, Volume 2 (North Holland, Amsterdam, 1988). [138] A. Sorge, pyfssa 0.7.6 (2015). [139] C. W. Helstrom, J. Stat. Phys. 1, 231 (1969). [140] I. V. Yurkevich and I. V. Lerner, Phys. Rev. B 60 , 3955 (1999). [141] A. Kamenev and M. M´ ezard, Phys. Rev. B 60 , 3944 (1999). [142] A. Kamenev and M. M´ ezard, J. Phys. A 32 , 4373 (1999). [143] J. J. M. Verbaarschot and M. R. Zirnbauer, J. Phys. A 
+
+18 , 1093 (1985). [144] M. R. Zirnbauer, arXiv:cond-mat/9903338 (1999). [145] Y.-C. Wang, S. J. Garratt, and E. Altman, arXiv:2605.04026 (2026). [146] T. Soejima, K. Siva, N. Bultinck, S. Chatterjee, F. Poll-mann, and M. P. Zaletel, Phys. Rev. B 101 , 085117 (2020). [147] E. Ardonne, P. Fendley, and E. Fradkin, Ann. Phys. 310 ,493–551 (2004). [148] M. Freedman, C. Nayak, K. Shtengel, K. Walker, and Z. Wang, Ann. Phys. 310 , 428–492 (2004). [149] P. Fendley, Ann. Phys. 323 , 3113–3136 (2008). [150] C. Castelnovo and C. Chamon, Phys. Rev. B 77 , 054433 (2008). [151] P. Fendley, S. V. Isakov, and M. Troyer, Phys. Rev. Lett. 
+
+110 , 260408 (2013). [152] G.-Y. Zhu and G.-M. Zhang, Phys. Rev. Lett. 122 ,176401 (2019). 24 
+
+[153] Y.-J. Liu, W.-T. Xu, F. Pollmann, and M. Knap, arXiv:2502.17572 (2025). [154] R. Sahay, C. von Keyserlingk, R. Verresen, and C. Zhang, arXiv:2503.01977 (2025). [155] A. Coser and D. P´ erez-Garc´ ıa, Quantum 3, 174 (2019). [156] Y. Bao, R. Fan, A. Vishwanath, and E. Altman, arXiv:2301.05687 (2023). [157] R. Fan, Y. Bao, E. Altman, and A. Vishwanath, PRX Quantum 5, 020343 (2024). [158] T. Rakovszky, S. Gopalakrishnan, and C. von Keyser-lingk, Phys. Rev. X 14 , 041031 (2024). [159] Y.-H. Chen and T. Grover, Phys. Rev. Lett. 132 , 170602 (2024). [160] Y.-H. Chen and T. Grover, Phys. Rev. B 110 , 125152 (2024). [161] Y. Li, F. Pollmann, N. Read, and P. Sala, Phys. Rev. X 
+
+15 , 011068 (2025). [162] S. Sang and T. H. Hsieh, Phys. Rev. Lett. 134 , 070403 (2025). [163] S. Sang, Y. Zou, and T. H. Hsieh, Phys. Rev. X 14 ,031044 (2024). [164] L. A. Lessa, R. Ma, J.-H. Zhang, Z. Bi, M. Cheng, and C. Wang, PRX Quantum 6, 010344 (2025). [165] P. Sala, S. Gopalakrishnan, M. Oshikawa, and Y. You, Phys. Rev. B 110 , 155150 (2024). [166] L. S´ a and B. B´ eri, Phys. Rev. B 112 , 144311 (2025). [167] A.-R. Negari, T. D. Ellison, and T. H. Hsieh, arXiv:2412.00193 (2024). [168] A.-R. Negari, L. A. Lessa, and S. Sahu, arXiv:2508.20166 (2025). [169] A.-R. Negari, S. Sahu, J. Behrends, B. B´ eri, and T. H. Hsieh, arXiv:2601.10792 (2026). [170] J. Hauser, K. Su, H. Ha, J. Lloyd, T. G. Kiely, R. Vasseur, S. Gopalakrishnan, C. Xu, and M. P. A. Fisher, arXiv:2602.16045 (2026). [171] A.-R. Negari, S. Sahu, J. Behrends, B. B´ eri, and T. H. Hsieh (Forthcoming). [172] C. Villani, Optimal Transport: Old and New (Springer, Berlin, Heidelberg, 2009). [173] L. Kantorovich and G. S. Rubinstein, Vestnik Leningrad. Univ 13 , 52 (1958). [174] G. Peyr´ e and M. Cuturi, Found. Trends Mach. Learn. 
+
+11 , 355 (2019). [175] S. S. Vallender, Theory Probab. Applications 18 , 784 (1974). [176] A. Kitaev, Ann. Phys. 321 , 2–111 (2006).

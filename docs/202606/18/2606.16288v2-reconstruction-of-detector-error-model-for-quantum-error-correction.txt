@@ -1,0 +1,495 @@
+Title: Reconstruction of detector error model for quantum error correction
+
+URL Source: https://arxiv.org/pdf/2606.16288v2
+
+Published Time: Thu, 18 Jun 2026 01:06:48 GMT
+
+Number of Pages: 12
+
+Markdown Content:
+## Reconstruction of detector error model for quantum error correction 
+
+Cheng Ye 1, 2 and Pan Zhang 1, 2, 3, 4, ∗
+
+> 1
+
+CAS Key Laboratory for Theoretical Physics, Institute of Theoretical Physics, Chinese Academy of Sciences, Beijing 100190, China 
+
+> 2
+
+School of Physical Sciences, University of Chinese Academy of Sciences, Beijing 100049, China 
+
+> 3
+
+School of Fundamental Physics and Mathematical Sciences, Hangzhou Institute for Advanced Study, UCAS, Hangzhou 310024, China 
+
+> 4
+
+Beijing Academy of Quantum Information Sciences, Beijing 100193, China 
+
+(Dated: June 15, 2026) Fault-tolerant quantum computing fundamentally relies on the accurate characterization of circuit-level noise to optimize decoding algorithms. However, extracting complex multi-body error correlations remains challeng-ing. Contemporary greedy inference algorithms can su ff er from statistical distortion, discarding true physical mechanisms while introducing many unphysical false positives. Here, we introduce the Correlation-Analysis-based Hypergraph Reconstruction (CAHR) algorithm, a globally consistent framework to invert experimental syndrome statistics directly into discrete physical hypergraphs. By coupling exact algebraic correlation equa-tions with a top-down concurrent-pruning strategy, CAHR recovers the fault topology without false positives for both d = 5 rotated surface codes and dense 8-body 2D color codes in our benchmark settings. Furthermore, we show that exact continuous parameter extraction in dense codes is limited by a variance cascade , where abso-lute statistical variance accumulates linearly from high- to low-degree mechanisms. This motivates a two-stage inference paradigm: utilizing CAHR to extract the fault topology, followed by continuous probability optimiza-tion. This provides a practical approach for characterizing and decoding highly correlated noise in realistic quantum hardware. 
+
+# 1. Introduction 
+
+The realization of fault-tolerant quantum computing relies on Quantum Error Correction (QEC) to actively protect quan-tum information from environmental decoherence and opera-tional imperfections [1–3]. A central bottleneck in this pur-suit is the precise characterization of complex, circuit-level noise to provide high-quality prior information for decoding algorithms [4]. To formalize these intricate dynamics, the Detector Error Model (DEM) provides a concise probabilis-tic hypergraph representation [5]. While standard two-point graph representations su ffi ce for simple noise, realistic extrac-tion protocols and advanced topological codes—such as sur-face codes [6, 7] and 2D color codes [8]—inherently generate complex, multi-body error correlations [9]. These manifest as high-order hyperedges within the DEM, representing single physical faults that simultaneously trigger multiple detectors [10]. Systematically reconstructing arbitrary-order hypergraphs directly from experimental syndrome statistics remains a formidable challenge. Recent works have already estab-lished exact correlation equations and algebraic inversion routes for DEM estimation [11–13]. Among them, [13] pro-vides the most direct empirical reference for DEM reconstruc-tion, while [11, 12] primarily supply on correlation analy-sis and algebraic inversion. However, practical topology dis-covery still faces a severe combinatorial bottleneck. Exist-ing workflows often rely on order-by-order (greedy) infer-ence or computationally expensive maximum-likelihood op-timization, and sequential greedy paradigms are particularly vulnerable to finite-sample contamination: when lower-order  
+
+> ∗panzhang@itp.ac.cn
+
+correlations are fitted before higher-order mechanisms are re-solved, unmodeled high-order physical errors pollute the sta-tistical estimators, distort residual correlations, and can simul-taneously generate false positives and suppress genuine hy-peredges. Distinct from these topological failures, extracting exact continuous probabilities is further limited by a variance cascade —a phenomenon where statistical variance accumu-lates from high-order parent hyperedges down to low-order child faults, making precise probability calibration increas-ingly fragile in dense hypergraphs. In this work, we address this topology-discovery bottleneck by introducing the Correlation-Analysis-based Hypergraph Reconstruction (CAHR) algorithm. The mathematical foun-dation of CAHR relies on the exact analytical equations of arbitrary-order syndrome correlations that have already been derived in the recent literature [11–13]. CAHR is a top-down workflow that combines permissive candidate generation with concurrent pruning, allowing the discrete hypergraph topol-ogy to be identified before pursuing high-accuracy continu-ous parameter fitting. An alternative derivation of the same correlation equations within a Tensor Network Detector Er-ror Model (TNDEM) formalism is provided in the Appendix where TNDEM serves as a structured derivational framework that interfaces naturally with tensor-network contraction. We validate CAHR on both d = 5 rotated surface codes and the denser 8-body d = 5 2D color codes. The latter is useful because directly comparable DEM-reconstruction results for dense color-code settings remain scarce. Within these bench-marks, CAHR attains exact topology reconstruction with zero false at 5 × 10 6 and 1 .5 × 10 7 shots, respectively. We fur-ther show that supplying the reconstructed topology to Be-lief Propagation with Ordered Statistic Decoding (BP-OSD) [14, 15] restores convergence toward the ideal logical error rate (LER). By isolating discrete geometric structure from cascaded 
+
+> arXiv:2606.16288v2 [quant-ph] 17 Jun 2026
+
+2probability errors, we therefore advocate a two-stage decou-pled inference paradigm. In this view, CAHR is best under-stood as a Stage-1 topology-discovery tool that resolves the discrete hypergraph, while high-accuracy continuous param-eter refinement can be delegated to downstream statistical or learning-based methods on the fixed topology [4, 16, 17]. This division of labor is useful in dense correlated-noise settings, where topology identification and parameter calibration ex-hibit di ff erent statistical di ffi culties. The paper is organized as follows. Section II details the our algorithm construction, derives the exact analytical rela-tionships, and introduces the top-down double-pruning algo-rithm. Section III investigates the impact of finite-sample fluc-tuations and the variance cascade, demonstrating end-to-end LER validation on distinct topological codes. Finally, Section IV discusses the physical implications of our findings and for-mally outlines the two-stage decoupled inference paradigm. 
+
+# 2. Methodology 
+
+In realistic fault-tolerant quantum computing, conventional qubit-level Pauli error models are often insu ffi cient to capture the intricate, correlated fault dynamics introduced by noisy syndrome extraction circuits. To accurately characterize these processes, the Detector Error Model (DEM) is widely adopted [5, 18, 19]. A DEM formalizes the probabilistic relationship between physical error mechanisms and the triggered detec-tors across the spacetime circuit. Mathematically, a DEM is represented as a hypergraph G = (V, E), where the vertex set 
+
+V corresponds to the detectors, and a hyperedge e in set E
+
+represents independent physical error mechanisms that simul-taneously flip all detectors in set e.
+
+2.1. Analytical Solution for Arbitrary-Order Correla-tions 
+
+Building upon a Tensor Network (TN) formalism of the DEM (with the complete derivation provided in the Ap-pendix), we establish an exact algebraic mapping between ex-perimental observables and physical error probabilities. We define the observable variable σi = 1 − 2si, where si ∈ { 0, 1} is the binary syndrome of detector i. The correlation of a subset of detectors α is governed by the moment equation: 
+
+Mα = ⟨
+
+Y
+
+> i∈α
+
+σi⟩ =
+
+Y 
+
+> |e∩α|≡ 1(mod 2)
+
+(1 − 2pe). (1) This system consists of 2 |V| − 1 equations corresponding to all possible error mechanisms. Rather than relying on log-arithmic transformations used in prior heuristic approaches, we preserve the multiplicative structure and introduce a set of recursive helper functions, fβ, to achieve a compact, closed-form inversion: 
+
+fβ =
+
+Y
+
+> α⊆β
+
+M(−1) |α|− 1 
+
+> α
+
+. (2) Using these helper functions, the exact probability of an arbitrary-order hyperedge α is analytically resolved as: 
+
+pα = 12
+
+"
+
+1 − ( fα)1/Cα
+
+Qβ⊋α(1 − 2pβ)
+
+#
+
+, (3) where the scaling exponent is Cα = 2|α|− 1. This closed-form solution is exact for arbitrary-order hyperedges within this for-malism, avoiding the need for complex optimization loops and the associated local-minimum issues of numerical fitting pro-cedures. It is important to note that equivalent systems of equations and their algebraic inversions have already been derived in several recent works [11–13]. Our TN-based treatment is used here as an alternative structured derivation, which is conve-nient for organizing the correlation equations and connecting them to tensor-network contraction. 
+
+2.2. Inference with Finite Statistics and Structural Pri-ors 
+
+While the original full-rank system yields a unique solu-tion corresponding to the ideal case, practical QEC circuits are constrained by finite sample sizes ( Nshots ) and possess hyper-graphs of limited orders where the physical error rates of non-existent hyperedges are zero. Finite sampling introduces sta-tistical fluctuations, causing the analytical solutions for these non-existent edges to manifest as small, non-zero values. To address this discrepancy, we modify the solution to maintain consistency with a given topological prior (a candi-date hypergraph set E). We compute only the necessary equa-tions for existing edges α ∈ E and remove the terms of non-existing edges in the denominator by enforcing a zero proba-bility: 
+
+pα = 12 − 12( fα)1/Cα
+
+Qβ⊋α,β ∈E (1 − 2pβ) . (4) Note that the helper function still consists of Mα for all α
+
+whether in E or not. In previous work, the instance constrain-ing the correlation in pair order has been proved to be consis-tent with the classical pair correlation analysis[4]. 
+
+2.3. Correlation-Analysis-based Hypergraph Recon-struction 
+
+In experimental scenarios, the true set of active physical er-ror mechanisms E is a priori unknown and must be directly inferred from the measured syndrome data. To systematically reconstruct the discrete hypergraph and suppress the combina-torial explosion of high-order candidates without human bias, we propose Correlation-Analysis-based Hypergraph Recon-struction (CAHR) algorithm, via global necessary-condition search and concurrent pruning. Before detailing the procedure, it is important to clarify our departure from the sequential, order-by-order greedy growth 3strategies prevalent in recent literature. While the theoreti-cal foundation of greedy hyperedge growth is mathematically rigorous, its layer-by-layer statistical filtering is ultimately ex-cessive for our primary objective. The fundamental bottleneck in arbitrary-order correlation analysis is the combinatorial ex-plosion of potential hyperedges, which scales strongly with the number of detectors |V| and the hyperedge degree k. By enforcing the simple geometric necessary condition of pair-correlation cliques under a reasonable finite-sample regime (where initial false-positive pairs are su ffi ciently suppressed), we already achieve our core goal: compressing the large com-binatorial search space down to a computationally tractable candidate pool. At this stage, further heuristic structural filter-ing o ff ers only marginal benefits. Furthermore, given the complex and often unpredictable propagation of finite-sample statistical noise across di ff er-ent correlation orders, we argue that the explicitly calculated physical error probability, pα, serves as the most reliable met-ric for hyperedge validation within this framework. As dic-tated by our exact analytical solution in Eq. (4), the accurate computation of pα requires the prior knowledge of all its par-ent hyperedges ( β ⊋ α). This algebraic dependency neces-sitates a top-down evaluation sequence. Consequently, our framework deliberately adopts a permissive candidate genera-tion strategy—allowing all potential hyperedges identified by the pair-clique prior to exist initially—and defers the elimi-nation of fluctuation-induced false positives to a concurrent 
+
+pruning executed during the global, top-down probability cal-culation. The complete reconstruction protocol proceeds as follows: 1. Pair-Correlation Analysis with Initial Pruning: If high-order hyperedges exist in the underlying DEM, they inevitably project onto the pair-correlation space, yielding an apparent 2-body probability ˜ pi j = 12 − 12
+
+p fi j .In the physically relevant regime ( p ≪ 1), this mapping is approximated as ˜ pi j ≈ pi j +P{i, j}⊊α pα. This leads to a simple geometric necessary condition: any valid high-order hyperedge α must project onto a fully connected clique of positive apparent correlations among its sub-pairs ( ˜ pi j > 0). However, finite-sample statistical fluc-tuations inevitably generate false-positive pair corre-lations. Without pruning, these noise-induced edges can interlink and produce a large number of unphysical “ghost cliques.” To suppress this e ff ect, we calculate the pair correlations directly from the data and apply a conservative initial pruning threshold ϵpair , removing any edge ( i, j) for which ˜ pi j < ϵ pair .2. Maximal Plausible DEM Formulation: Treating the pruned ˜ pi j elements as an adjacency matrix, we then identify fully connected cliques up to a predefined max-imum topological order ( kmax ) using standard network-processing algorithms. Here kmax is chosen from prior knowledge of the syndrome-extraction circuit and code structure, namely the highest detector-correlation order that a single fault mechanism can generate. For ex-ample, we use kmax = 4 for the rotated surface code and kmax = 8 for the 2D color code. In settings with less prior knowledge, one may choose a more con-servative larger kmax , at the cost of a larger candidate space and more expensive clique search. The global candidate hypergraph Gcandidate is then constructed by including all sub-hyperedges contained within these bounded cliques. This structurally redundant yet geo-metrically constrained topology rules out regions where high-order hyperedges cannot exist, thereby reducing the combinatorial search space. 3. Global Correlation Analysis with Instant Pruning: 
+
+Finally, we execute the modified global correlation analysis over this candidate hypergraph Gcandidate . The deliberately loose and redundant conditions of the pre-vious step preserve topological completeness, but they also introduce many non-physical candidate hyper-edges. Due to statistical fluctuations, the exact ana-lytical inversion may assign small positive values to such dummy hyperedges, thereby producing false posi-tives. We therefore apply a global pruning rule: imme-diately after calculating pα, the hyperedge is discarded if pα < ϵ global . As a result, finite-sample pruning in-evitably carries a false-negative risk whenever the in-ferred probability of a genuine mechanism is pushed below zero or below the chosen non-negative threshold. Two remarks are important for interpreting this procedure. First, because the pair signal in Step 1 represents the projec-tion of higher-order mechanisms, the initial screening should follow the signal scale of the higher-order mechanisms rather than that of genuine pair mechanisms. In the current imple-mentation, if the projection of a genuine hyperedge is pruned at this stage, then that hyperedge will still be removed in Step 3 even if it is retained in the candidate topology. Second, statistical fluctuations a ff ect not only dummy hy-peredges but also genuine weak mechanisms. In addition to producing small positive probabilities for non-physical can-didates, finite sampling may also drive the inferred probabil-ities of genuine weak mechanisms to negative values when the sample size is insu ffi cient. Since physical error rates re-quire non-negative probabilities, only positive pruning thresh-olds are meaningful in practice. The operational significance of integrating this pruning di-rectly into the recursive evaluation process is that it maintains algebraic consistency. By resolving the analytical equations in descending order of hyperedge degree, this concurrent trun-cation ensures that once a spurious high-order hyperedge is identified and pruned, its unphysical probability contribution is set to zero before it can propagate further down the hierar-chy. In this way, the procedure decouples statistical artifacts from the underlying equation system and mitigates the down-ward propagation of finite-sample noise into the probability estimates of lower-order constituent edges. 4
+
+# 3. Results 
+
+3.1. Global Topological Reconstruction via Correlation Analysis 
+
+To establish the structural exactness of our framework, we first evaluate its capacity to reconstruct the complete phys-ical hypergraphs of distinct topological codes from raw ex-perimental statistics, which are e ffi ciently generated using the high-performance stabilizer simulator Stim [5]. Table I summarizes the topological discovery performance. In these experiments, rather than applying a single uniform cuto ff ,we implement a mechanism-specific dual-threshold strategy: 
+
+ϵsingle for single-detector errors (boundary edges) and ϵmulti for multi-detector errors (correlating hyperedges). This distinc-tion is critical because the anticipated physical error rates in-herently di ff er across these two fundamental classes of fault mechanisms. Grounded in statistical signal detection theory, both thresh-olds are set to approximately half of their respective minimum anticipated rates ( psingle min /2 and pmulti min /2). Under finite-sample conditions, the inferred correlation ˜ pα behaves as a random variable sampled from a Gaussian-like distribution centered around its true underlying value, pIdeal  
+
+> α
+
+. Because pIdeal  
+
+> α
+
+is con-strained to be either 0 (false edges) or a genuine probabil-ity p ≥ pmin (true physical error mechanisms), the midpoint 
+
+ϵ ≈ pmin /2 serves as a natural maximum-likelihood decision boundary for each respective error class when the two local hypotheses have comparable finite-sample widths. This practical choice is further informed by an explicit threshold-sensitivity check. In addition to the working choice 
+
+ϵ ≈ pmin /2, we also tested the lower and higher cuto ff s pmin /4and 3 pmin /4 for both the rotated surface-code and color-code benchmarks; the detailed results are summarized in Tables III and IV. These data show that exact reconstruction is not tied to a single finely tuned threshold. At finite statistics, pmin /4admits more false positives, whereas 3 pmin /4 generally gives slightly better overall results than pmin /2. The reason is that the rule pmin /2 is anchored to the weakest physical mecha-nism; for most hyperedges, this choice is therefore conserva-tive. Nevertheless, in the main text we retain pmin /2 as the reference threshold because it provides a simple, uniform pre-scription across the full candidate set. Applying these optimal boundaries to the d = 5, r = 5 ro-tated surface code (Table I, upper half) under a physical er-ror rate (PER) of p = 0.001, we observe the direct impact of finite-sample suppression. The inherently sparse and lo-calized nature of the surface code’s syndrome extraction cir-cuits yields a manageable combinatorial space. With lower statistics (5 × 10 4 and 5 × 10 5 shots), statistical noise distribu-tions are broad, inevitably causing the noise floor to cross the decision boundaries and admit false positives. However, by scaling the analysis to 5 × 10 6 shots, the noise variance is suf-ficiently compressed. Consequently, our method successfully infers the exact hypergraph topology without false positives, and in this benchmark the 50% safety margin is su ffi cient to avoid truncating genuine weak mechanisms. Pushing the algorithm to more demanding structures, we analyze the d = 5, r = 4 2D color code at the same PER (Ta-ble I, lower half). The lowest intrinsic probability of the true multi-detector physical hyperedges in the color code is of the same order of magnitude as that in the surface code, allowing us to utilize the identical threshold ϵmulti = 3 × 10 −5. However, its highly non-local extraction circuits generate a dense en-tanglement structure featuring up to 8-body hyperedges. Due to this combinatorial growth, the resulting baseline statistical noise is significantly elevated. Separating this 8-body topol-ogy from the noise floor requires three times the sample vol-ume. It requires 1 .5×10 7 shots (compared against the 1 .5×10 5
+
+and 1 .5×10 6 baselines) to ensure that the noises causing false-positive edges and false-negative errors are compressed below the decision boundaries, yielding accurate topological recon-struction. For context, color-code correlation-analysis studies have reported sample counts as high as 5 × 10 7 [10], which is consistent with the statistical demands of this setting. Our evaluations reveal that the requisite sample complex-ity for exact topological reconstruction is predominantly gov-erned by the local topological density, exhibiting sub-linear scaling with respect to the extensive spacetime volume. For instance, while a baseline of 5 × 10 6 shots reconstructs the topology of the d = 5, r = 5 surface code without false pos-itives, scaling the memory circuit to d = 5, r = 15 demands only a modest increase to 7 × 10 6 shots to maintain the same criterion. Pushing the temporal depth further to d = 5, r = 25 requires only a continued marginal statistical adjustment to 9 × 10 6 shots. This mild incremental increase is a natural sta-tistical consequence: while the local variance cascade depth remains topologically invariant, the expanded global candi-date pool in deeper circuits marginally elevates the probabil-ity of rare statistical tail events crossing the decision bound-ary, thereby necessitating a slightly tighter suppression of the global noise floor. This near-constant temporal scaling behav-ior, further detailed in the Appendix, supports the tractability of our framework for deep-circuit quantum hardware. The computational cost of the clique-search stage follows the same mechanism. As already discussed in the Method sec-tion, insu ffi cient statistics generate spurious pair correlations, which in turn induce numerous ghost cliques and enlarge the candidate search space. A dedicated CPU-time benchmark for the r = 5 rotated surface code across distances d = 5, 7, 9, 11 is summarized in Table V. The data shows that clique search becomes a noticeable bottleneck only in the severely under-sampled regime, where fluctuation-induced candidates prolif-erate rapidly with system size. Once the shot count is su ffi -ciently large, however, the clique-search time becomes very short and increases only relatively slowly with code distance. This confirms that the expensive regime is driven primarily by noise-induced candidate proliferation rather than by code distance alone. 5
+
+Topological Code Analysis Shots Total Edges ( |E|) False Pos. False Neg. CPU Time (s) GPU Time (s) Rotated Surface ( d = 5, r = 5)
+
+5 × 10 4 5262 3944 361 8.76 4.01 5 × 10 5 2219 542 2 4.73 0.54 5 × 10 6 1679 0 0 7.37 3.17 
+
+2D Color ( d = 5, r = 4)
+
+1.5 × 10 5 1106 422 159 2.97 2.97 1.5 × 10 6 860 31 14 1.26 1.26 1.5 × 10 7 843 0 0 7.79 7.79 TABLE I. Exact Global Hypergraph Reconstruction via DEM Inference. This table demonstrates the performance of our algorithm on a d = 5, r = 5 rotated surface code and a highly dense d = 5, r = 4 2D color code (both at a physical error rate of p = 0.001) across varying finite-sample regimes. To accurately isolate genuine correlations from finite-sample statistical noise, the topologies are evaluated using mechanism-specific pruning thresholds (e.g., ϵmulti = 3 × 10 −5 for multi-detector correlations), anchored at ≈ pmin /2 of their respective error classes. For the surface code, finite-sample fluctuations are su ffi ciently suppressed at 5 × 10 6 shots, causing both false-positive and false-negative artifacts to vanish and recovering the ideal topology. For the highly dense 2D color code, which features hyperedges up to degree 8, the same criterion is reached at 1 .5 × 10 7 shots. The execution time is decoupled into CPU core time (for graph generation and clique search) and GPU time (for batched tensor inversion). 4 3 2 1                     
+
+> Hyperedge Degree (Hierarchical Order)
+> 0
+> 10
+> 20
+> 30
+> 40
+> 50
+> 60
+> 70
+> 80
+> Absolute Inference Error ( ×10 −6)
+> (a) Surface Code: Absolute Error ( 5 × 10 6Shots)
+> 87654321
+> Hyperedge Degree (Hierarchical Order)
+> 0
+> 10
+> 20
+> 30
+> 40
+> 50
+> 60
+> Absolute Inference Error ( ×10 −6)
+> (b) Color Code: Absolute Error ( 1.5 × 10 7Shots)
+> 4321
+> Hyperedge Degree (Hierarchical Order)
+> 0
+> 5
+> 10
+> 15
+> 20
+> 25
+> 30
+> Relative Inference Error (%)
+> (c) Surface Code: Relative Error ( 5 × 10 6Shots)
+> 87654321
+> Hyperedge Degree (Hierarchical Order)
+> 0
+> 5
+> 10
+> 15
+> 20
+> 25
+> 30
+> Relative Inference Error (%)
+> (d) Color Code: Relative Error ( 1.5 × 10 7Shots)
+
+FIG. 1. Hierarchical accumulation of absolute and relative inference errors (the variance cascade). Data is shown at the sample sizes required for zero-false-positive topological reconstruction. (a) Surface code (5 × 10 6 shots) and (b) color code (1 .5 × 10 7 shots) show a clear inflation of absolute error as hyperedge degree decreases due to algebraic downward subtraction. The horizontal dash-dotted lines denote the multi-body correlation truncation threshold ( ϵmulti ). (c) In the surface code, the relative error is strongly suppressed at lower degrees (degrees 1 and 2) because the intrinsic error probabilities in the denominator are comparatively large. (d) In the color code, the large number of high-degree parent hyperedges drives a pronounced variance cascade; consequently, the relative errors at degrees 1 and 2 remain substantially higher than those of the surface code, with outliers exceeding 20%. 
+
+3.2. The Variance Cascade and Hierarchical Error Ac-cumulation 
+
+While our inference method serves as a topological prior solver, analyzing the inferred continuous error probabilities reveals a marked statistical divergence driven by the underly-6ing code density. To achieve zero-false-positive hypergraph reconstruction under identical physical error rates and prun-ing thresholds, the d = 5 rotated surface code requires 5 × 10 6
+
+analysis shots. In contrast, the highly entangled d = 5 color code demands 1 .5 × 10 7 shots, three times the statistical vol-ume for surface code. We interpret this sample-complexity disparity through the lens of a variance cascade , a phe-nomenon rooted in our recursive algebraic formulation, as il-lustrated in Fig. 1. Because the exact probability extraction relies on a hier-archical, downward algebraic subtraction, statistical fluctua-tions originating from finite sampling inherently cascade from parent to child hyperedges. Under a Gaussian approximation for the finite-sample statistics, the absolute variance σ2 of a child hyperedge additively absorbs the fluctuations of all its encompassing parent hyperedges, scaling approximately as 
+
+σ2child ≈ σ2isolated +
+
+X
+
+> parent
+
+σ2parent . (5) Governed by this additive accumulation, the observed abso-lute error for both the surface code (Fig. 1a) and the color code (Fig. 1b) visibly inflates as the hyperedge degree de-creases. Beyond the physically existing hyperedges, this cas-cading variance also accumulates onto the analytically in-ferred probabilities of non-existing candidate edges. Conse-quently, the densely entangled color code demands a substan-tially larger statistical ensemble to compress this magnified cascaded noise floor, thereby reliably di ff erentiating unphysi-cal artifacts from genuine multi-body correlations. The same mechanism also increases the chance that analytically inferred probabilities of genuine weak mechanisms become negative at insu ffi cient shot counts, which in turn raises the false-negative rate once physical non-negativity is enforced. Despite possessing comparable mean absolute errors at lower degrees, the surface code exhibits a substantial popu-lation of degree-2 edges whose absolute errors significantly exceed the multi-body noise truncation threshold ( ϵmulti , de-noted by the horizontal dash-dotted lines). By comparison, the absolute errors of multi-degree edges in the color code are almost entirely confined below this threshold. Nevertheless, at the shot count used in Fig. 1a, the surface code still re-constructs the exact fault model. This observation points to a stronger topological robustness in the surface code and, cor-respondingly, a greater fragility of the color-code error model under statistical fluctuations. Analyzing the relative error provides a clearer view of this contrast. Although degree-2 edges in the surface code endure large absolute fluctuations, their relative errors remain signifi-cantly lower than those in the color code (Fig. 1c and 1d). This discrepancy is driven by the variance cascade. By the Gaus-sian approximation, the absolute variance of high-order parent hyperedges cascades additively down to their constituent child edges. Consequently, multi-degree child edges, which possess smaller intrinsic physical error rates ( pα) in denser topolo-gies, have weaker noise resilience. The large absolute vari-ance inherited from their densely entangled parent hyperedges increases the probability that their analytically inferred er-ror rates are artificially suppressed into the background noise regime or even pushed to negative values. This mechanism in-dicates that the densely connected color code is more vulnera-ble to false-negative issues than the surface code, thereby ne-cessitating a larger sample volume to reduce such inferences. This observation is consistent with Table I, wherein, when constrained to 1% and 10% of the ideal sample sizes, the false negatives among the erroneous inferences are markedly higher in the color code than in the surface code. In other words, the variance cascade implies a larger e ff ective variance in the color-code setting and, therefore, a higher probability of neg-ative inferred rates under insu ffi cient statistics; this may also be one reason why direct correlation analysis was not adopted in the Willow color-code experiment [17]. 
+
+3.3. Operational Decoding and the Primacy of Topology 
+
+Subsequently, to evaluate the operational impact of these statistical phenomena, we perform Monte Carlo decoding simulations using Belief Propagation and Ordered Statistics Decoding (BP-OSD) [20]. To ensure rigorous statistical con-fidence, we collect 200 logical errors for the surface code and 400 logical errors for the color code. We track decoding per-formance across three scaling regimes: the required shots for perfect reconstruction (100%), alongside 10% and 1% sparse-sampling baselines. We employ a crucial ablation control—the “Given DEM Topology”. In this setup, instead of utilizing the heuristically generated candidate hypergraph, the exact ideal DEM topol-ogy is fed directly into the third step of our algorithm (Global Correlation Analysis). To isolate the impact of parameter fluc-tuations, the global pruning threshold is set to zero ( ϵ = 0). This zero-threshold e ff ectively bypasses structural truncation, solely clipping unphysical negative probabilities to zero to prevent the BP message-passing decoder from crashing. Thus, finite statistics are used exclusively to infer the heavily fluctu-ating continuous error rates over a perfect topological prior. The decoding results, depicted in Fig. 2, reveal a consistent operational trend across both code families: within the cor-relation analysis framework, structural exactness (topology) is more important than continuous parameter precision (error rates). For both the surface code (Fig. 2a) and the color code (Fig. 2b), the Inference DEM su ff ers substantial Logical Error Rate (LER) inflation at low sampling regimes (1% and 10%). This failure is primarily driven by dense false-positive hyper-edges injecting many unphysical short cycles into the Tanner graph and degrading the BP message-passing phase. By contrast, the Given DEM Topology remains compara-tively resilient. Even at the minimal 1% sample size—where the inferred parameters su ff er from large finite-sample fluc-tuations and cascaded relative errors frequently exceeding 200%—the Given DEM Topology LER stays close to the ideal theoretical baseline. For both codes, supplying the decoder with the exact topology paired with highly distorted, 1%-sampled parameters yields a much better LER than utilizing the Inference DEM derived from 10 × more data (which still harbors false-positive structural artifacts). Both the Inference DEM and Given DEM Topology LER curves improve mono-710 5 10 6       
+
+> Analysis Sample Size ( Nshots )
+> 10 −4
+> 10 −3
+> Logical Error Rate ( pL)
+> (a) Rotated Surface Code ( d= 5, r= 5 )
+> Ideal DEM Limit
+> Inference DEM
+> Given DEM Topology
+> 10 610 7
+> Analysis Sample Size ( Nshots )
+> 10 −3
+> Logical Error Rate ( pL)
+> (b) 2D Color Code ( d= 5, r= 4 )
+> Ideal DEM Limit
+> Inference DEM
+> Given DEM Topology
+
+FIG. 2. End-to-end BP-OSD decoding performance and ablation analysis isolating topological vs. parameter sensitivity. Logical error rates ( pL) are evaluated by collecting 200 (surface code) and 400 (color code) logical errors per point. Data spans three regimes corresponding to 1%, 10%, and 100% of the statistics required for DEM reconstruction without false positives. For both the (a) surface code and (b) color code, the unpruned Inference DEM fails at low statistics due to dense false-positive short cycles. By contrast, the Given DEM Topology (where the exact ideal topology is fed directly into the global correlation analysis with the pruning threshold set to zero, ϵ = 0, solely clipping unphysical negative probabilities) remains much more stable. All curves approach the Ideal DEM limit at the corresponding shot threshold (5 × 10 6 and 1 .5 × 10 7 shots, respectively), indicating that structural exactness is more important for decoder performance than high-precision parameter estimation in this setting. 
+
+tonically as statistics scale and meet the ideal limit once the 100% shot threshold resolves the exact hypergraph structure. 
+
+# 4. Discussion 
+
+In this work, we use a Tensor Network Detector Er-ror Model (TNDEM) representation as a structured frame-work for organizing DEM correlation equations and intro-duce the Correlation-Analysis-based Hypergraph Reconstruc-tion (CAHR) algorithm for topology discovery, which is a top-down workflow that combines permissive candidate gen-eration with concurrent pruning. Unlike sequential greedy growth methods that prematurely truncate signals and fre-quently conflate statistical noise with genuine physical corre-lations, this workflow suppresses unphysical artifacts before they propagate downward and bias lower-order constituent edges. We validated this framework through end-to-end topologi-cal reconstruction and BP-OSD decoding simulations on both 
+
+d = 5 rotated surface codes and highly dense d = 5 color codes. Relative to the recent DEM-estimation literature, the surface-code experiments provide a direct comparison point to reconstruction-oriented studies such as [13], while the dense color-code setting addresses a regime where closely matched DEM-reconstruction references remain limited. Our results show that the required sample complexity is governed pre-dominantly by local topological density rather than exten-sive spacetime volume, with mild growth from r = 5 to 
+
+r = 25. The decoding ablation, comparing the Inference DEM topology against the exact ideal topology, further shows that within this correlation-analysis framework, structural ex-actness of the topology is operationally more important than high-precision continuous parameter estimation when finite-sample noise is present. In the preceding experiments, we used ϵ ≈ pmin /2 as the working threshold. However, pmin need not be known exactly for the method to remain useful. As shown by the threshold-sensitivity results in Tables III and IV, varying the cuto ff from 
+
+pmin /4 to 3 pmin /4 does not qualitatively change the recon-struction behavior: thresholds in the neighborhood of pmin ,especially slightly larger ones, remain acceptable in practice. Therefore, in blind experimental settings where pmin is not di-rectly available, a reasonable estimate can still serve as a use-ful threshold scale. In practice, if reliable circuit and noise-model priors are available, the compiled DEM can provide such an estimate. Otherwise, data-driven procedures such as subsampling-based estimation of the smallest stably resolved nonzero mechanism or conservative noise-floor diagnostics, as used in [13], can serve as fallback strategies. However, our comparative investigation also exposes a fun-damental boundary for purely correlation-analytical inver-sions. In densely entangled systems like the 2D color code, the downward hierarchical subtraction inevitably drives a pro-nounced variance cascade, making exact analytical param-eter estimation highly susceptible to statistical fluctuations and therefore less suitable as a standalone continuous esti-mator. This observation clarifies the methodological role of CAHR in a two-stage decoupled inference paradigm : CAHR 8is most naturally used as a Stage-1 topology-discovery tool that resolves the discrete hypergraph and compresses the com-binatorial search space, after which Stage-2 methods—such as machine-learning-based decoders, reinforcement learning, or maximum-likelihood estimation—can optimize continuous parameters on the fixed structure. Finally, we acknowledge the current theoretical boundaries of our framework, which is fundamentally built upon the Pauli error assumption. The present formulation does not provide a controlled, explicit model for general non-Pauli noise, and we have not carried out a quantitative CAHR benchmark un-der explicit non-Pauli noise models; accordingly, we do not claim quantitative performance conclusions for that setting. Non-Pauli mechanisms—such as leakage [21] or coherent er-rors [22]—therefore require further theoretical generalization for direct modeling within this tensor-network formalism. At the same time, if non-Pauli contributions are present in data without being deliberately separated out, their syndrome-level signatures may still be partially captured by correlation anal-ysis and reflected in the inferred DEM parameters. From the tensor-network perspective, extending TNDEM to faith-fully include non-Cli ff ord processes or leakage, and obtain-ing similar correlation equations, remains an important open problem. Looking ahead, exploring the tensor-network rep-resentation for computational and memory optimization, dy-namic noise environments, and integration with complemen-tary techniques such as process tomography would further broaden the scope of the framework. 
+
+# Acknowledgments 
+
+A Python implementation of our algorithm is available at [23]. We are grateful to Dong-Yang Feng, Han-Yan Cao and Feng Pan for helpful discussions. The work is supported by Projects 12325501 and 12447101 of the National Natural Science Foundation of China. 
+
+# A. Tensor Network Detector Error Model 
+
+The appendix maps the circuit-level DEM into a tensor-network formalism, which we refer to as the Tensor Network Detector Error Model (TNDEM). The purpose of this con-struction is to provide a structured derivation of the correlation equations used in the main text and to make their connection to tensor-network contraction explicit. While the application of tensor networks to quantum decoding has been explored in contexts such as maximum-likelihood decoding [24], we use TNDEM here primarily as a derivational and organizational framework for circuit-level noise characterization. To construct the TNDEM from a general DEM hypergraph 
+
+G = (V, E), we have two fundamental types of local tensors: 
+
+• Detector Tensors (XOR): Each detector di ∈ V is rep-resented by a k-index XOR tensor, where k is the num-ber of incident error mechanisms. Physically, this ten-sor enforces the local parity-check constraint, perform-ing a modulo-2 sum (XOR) over all incoming error sig-nals to determine the final classical parity of the de-tector. Within standard tensor network literature, this is mathematically equivalent to a COPY tensor conju-gated by Walsh-Hadamard transforms on all its legs. 
+
+• Error Tensors (Diagonal): Each physical error mech-anism e ∈ E is represented by a diagonal probability tensor. This tensor encodes the binary prior distribution of the fault: the error mechanism triggers all its inci-dent detectors simultaneously with probability pe, and remains dormant with probability 1 − pe.The complete TNDEM is assembled by contracting the shared indices between the Error Tensors and the Detector Tensors, following the topology of the DEM hypergraph. s e(a) (b)       
+
+> XOR tensor Error tensor
+> FIG. 3. Tensor network formulation of the Detector Error Model.
+> (a) Graphical representation of the TNDEM architecture. Each de-tector corresponds to an XOR tensor, which enforces a logical parity constraint for propagating Pauli errors. Independent physical error mechanisms are represented by diagonal tensors, parameterized by their fault probability peand identity probability 1 −pe. (b) Visu-alization of the exact tensor contraction corresponding to Eq. (B1). By projecting the detector indices onto specific boundary conditions, the global network contraction naturally decouples into a product of independent scalar contributions.
+
+# B. Derivation of Moment Equations from the TNDEM 
+
+Unlike phenomenological approaches that construct statis-tical observables heuristically, the analytical power of the TN-DEM framework is deeply rooted in its native tensor algebraic properties. In this section, we demonstrate that the exact sys-tem of equations governing the hypergraph inference emerges naturally from the fundamental topological rules of the net-work, specifically, the phase-copying property of XOR ten-sors. The statistical physics interpretation of these equations is then revealed a posteriori .9To extract physical error parameters from experimental syn-drome data, one must establish correlation equations linking these microscopic parameters to the expectation values of the macroscopic syndromes. The topological structure of the TN-DEM naturally yields a highly structured system of equations amenable to exact analytical inversion. Exploiting the COPY property of the XOR tensor in the dual basis, projecting a de-tector index onto either the sum state Σ = (1 , 1) or the di ff er-ence state m = (1 , −1) completely factorizes the tensor into a product of independent vectors. Consequently, for an N-detector system, enumerating all 2 N possible combinations of Σ and m boundary projections on the TNDEM yields a complete set of 2 N linearly independent equations. Denot-ing α ⊆ V as the subset of detectors projected onto m, with the remaining V \ α projected onto Σ, the network contraction strictly evaluates to: 
+
+Y
+
+> i∈α
+
+mi
+
+Y
+
+> j∈V\α
+
+Σ jT =
+
+Y
+
+> e∈E
+
+Y
+
+> i∈α∩e
+
+mi
+
+Y
+
+> j∈e\α
+
+Σ jEe
+
+
+
+=
+
+Y
+
+> e∈E
+
+h1 − pe + (−1) |e∩α| pe
+
+i
+
+=
+
+Y 
+
+> |e∩α|mod 2 =1
+
+(1 − 2pe).
+
+(B1) This multiplicative system of equations can be rigor-ously linearized by taking the logarithm, rendering it highly tractable. Before proceeding to the analytical solution, we must elucidate the physical significance of contracting the boundary indices with these specific projectors. The pro-jection state Σ eff ectively traces out (marginalizes) the cor-responding detector index. Conversely, the projection state 
+
+m = (1 , −1) assigns a statistical weight of +1 to the False 
+
+(0) syndrome state and −1 to the True (1) syndrome state. This motivates the definition of a spin-like syndrome variable 
+
+σi = 1 − 2si, where si ∈ { 0, 1} is the binary value of detec-tor di. Under this algebraic mapping, projecting the subset of detectors α onto m mathematically corresponds to computing the physical expectation value of the multi-detector parity ob-servable Qi∈α σi. Denoting this exact multi-body correlation moment as Mα = ⟨Qi∈α σi⟩, the tensor contraction rigorous reduces to: 
+
+Mα =
+
+Y 
+
+> |e∩α|mod 2 =1
+
+(1 − 2pe). (B2) The empty set trivially yields M∅ = ⟨1⟩ = 1. The remaining 2N −1 independent equations fully constrain all 2 N −1 possible hyperedge configurations within the fully connected DEM. 
+
+# C. Exact Analytical Solution of the Moment Equations 
+
+In this section, we provide the exact algebraic derivation demonstrating how the helper function fβ = Qα⊆β M(−1) |α|− 1
+
+> α
+
+systematically isolates the physical probability of specific multi-body error mechanisms. Substituting the expression for Mα into the definition of fβ
+
+yields: 
+
+fβ =
+
+Y
+
+> α⊆β
+
+Y  
+
+> e∈E,|α∩e|mod 2 =1
+
+(1 − 2pe)(−1) |α|− 1
+
+=
+
+Y
+
+> e∈E
+
+(1 − 2pe)Pα⊆β(|α∩e| mod 2)( −1) |α|− 1
+
+.
+
+(C1) We denote the exponent of the term (1 − 2pe) as Cβ, e. By replacing the modulo-2 condition with an algebraic indicator function based on powers of −1, the exponent can be elegantly rewritten as: 
+
+Cβ, e =
+
+X
+
+> α⊆β
+
+(|α ∩ e| mod 2)( −1) |α|− 1
+
+=
+
+X
+
+> α⊆β
+
+1 − (−1) |α∩e|
+
+2 (−1) |α∩e|− 1(−1) |α\e|
+
+=
+
+X
+
+> α⊆β
+
+1 − (−1) |α∩e|
+
+2 (−1) |α\e|.
+
+(C2) This expression can be strategically reshaped by partitioning the subset enumeration into detectors that belong to the error mechanism e and those that do not: 
+
+Cβ, e =
+
+> n
+
+X
+
+> i=0
+
+ni
+
+! 1 − (−1) i
+
+2
+
+> m
+
+X
+
+> j=0
+
+mj
+
+!
+
+(−1) j, (C3) where n = |β∩e| and m = |β\e| denote the number of detectors in β that are respectively included in e or not. By the bino-mial theorem, the trailing sum evaluates to Pmj=0
+
+mj
+
+(−1) j =
+
+(1 − 1) m. This summation is identically zero except when 
+
+m = 0, which eliminates the summation entirely. Therefore, a non-zero exponent strictly requires |β\e| = 0, imposing the ge-ometric condition β ⊆ e. Consequently, we have n = |β| > 0. Furthermore, the alternating binomial sum within the remain-ing part, Pni=0
+
+ni
+
+(−1) i, also evaluates to zero. As a result, the non-zero exponent reduces to: 
+
+Cβ, e = 12
+
+> n
+
+X
+
+> i=0
+
+ni
+
+!
+
+= 2n−1.
+
+(C4) Remarkably, the resulting exponent depends exclusively on the cardinality of the subset |β|, entirely independent of the specific geometric structure of e. Thus, denoting the expo-nent simply as Cβ, we arrive at the exact analytical inversion formula: 
+
+fβ =
+
+Y
+
+> e∈E,β ⊆e
+
+(1 − 2pe)Cβ (C5) 
+
+Cβ = 2|β|− 1. (C6) 10 
+
+# D. Scalability with Temporal Depth and Constant Sample Complexity 
+
+A critical requirement for any practical fault-tolerant noise characterization protocol is its scalability with respect to the temporal depth (number of QEC rounds, r) of the quantum cir-cuit. A naive expectation might assume that as the spacetime volume of the circuit expands, the required sample size for exact topological reconstruction must scale proportionally to suppress the increasing combinatorial space of potential false-positive mechanisms. However, the Correlation-Analysis-based Hypergraph Re-construction exhibits favorable sub-linear scaling with respect to the temporal depth of the code. As demonstrated in Ta-ble II, we evaluate the d = 5 rotated surface code across dif-ferent temporal depths: r = 5, r = 15, and r = 25. While the baseline r = 5 circuit achieves zero-false topological recon-struction utilizing 5 × 10 6 shots, scaling the memory circuit to 
+
+r = 25, which contains nearly six times the total number of true physical hyperedges, requires only a marginal statistical adjustment to 9 ×10 6 shots under identical pruning thresholds. This mild, sub-linear scaling behavior with respect to r is a direct consequence of the localized nature of the variance cascade . As established in Section III, statistical variance ac-cumulates strictly downwards from high-degree parent hyper-edges to their constituent sub-edges. Extending the number of measurement rounds merely replicates the local extraction circuit topology along the time axis; it increases the extensive volume of the hypergraph but strictly preserves the intensive local topological density (i.e., the maximum hyperedge degree remains 4). Consequently, the maximal length of the hierar-chical downward subtraction chain remains constant, render-ing the local variance cascade depth topologically invariant with r. The slight increase in required statistics (from 5 × 10 6
+
+to 9 × 10 6 shots) is purely a natural statistical consequence of the extensive scaling: the expanded global candidate pool in deeper circuits marginally elevates the probability of rare statistical tail events crossing the decision boundary, thereby necessitating a slightly tighter suppression of the global noise floor. This confirms that the CAHR is highly scalable and uniquely suited for characterizing the deep-circuit architec-tures required for practical quantum memory. 
+
+Round r Shots |E| CPU Time (s) GPU Time (s) 
+
+5 5 × 10 6 1679 8.76 4.01 15 7 × 10 6 5759 20.07 14.20 25 9 × 10 6 9839 34.29 31.58 TABLE II. Scaling of sample complexity for perfect reconstruc-tion with temporal depth. Perfect reconstruction performance on the d = 5 rotated surface code across varying QEC rounds ( r). |E|
+
+denotes the total number of physical hyperedges, while no false-positive and false-negative appears. Pruning thresholds are fixed at 
+
+ϵsingle = 1.6 × 10 −4 and ϵmulti = 3 × 10 −5 that ≈ pmin /2 across all depths. 
+
+# E. Threshold Sensitivity of the Practi-cal Pruning Rule 
+
+To complement the concise discussion in the main text, we provide here the detailed threshold-sensitivity data used to assess the practical robustness of the rule ϵ ≈ pmin /2. We evaluate three representative thresholds, pmin /4, pmin /2, and 3pmin /4, for both the d = 5, r = 5 rotated surface code and the d = 5, r = 4 2D color code. The purpose of these tables is not to identify a unique optimal cuto ff , but rather to show how the false-positive /false-negative trade-o ff shifts under fi-nite statistics when the threshold is varied around the practical reference scale. In each table, the two axes correspond to shot count and threshold choice, and each entry is reported as an ordered pair (FN , FP). 
+
+Shots pmin /4 pmin /2 3pmin /45 × 10 4 (546 , 13270) (361 , 3944) (323 , 2071) 5 × 10 5 (3 , 1716) (2 , 542) (30 , 170) 5 × 10 6 (0 , 114) (0 , 0) (0 , 0) TABLE III. Threshold sensitivity for the d = 5, r = 5 rotated surface code. The two axes correspond to shot count and threshold choice, and each entry is reported as (FN , FP). Lower thresholds sup-press FN more aggressively but admit substantially more FP, while higher thresholds reduce FP at the cost of larger FN at intermediate shot counts. 
+
+Shots pmin /4 pmin /2 3pmin /41.5 × 10 5 (164 , 1122) (156 , 600) (172 , 375) 1.5 × 10 6 (8 , 228) (11 , 47) (23 , 25) 1.5 × 10 7 (0 , 20) (0 , 0) (0 , 0) TABLE IV. Threshold sensitivity for the d = 5, r = 4 2D color code. The same threshold sweep as in Table III, now for the denser color-code benchmark. Each entry is reported as (FN , FP). The data shows the same qualitative trade-o ff , but with a sharper sensitivity to finite statistics due to the denser correlated-noise structure. 
+
+Several trends are immediate from Tables III and IV. First, 
+
+pmin /4 consistently amplifies false positives in both bench-marks, especially in the low- and intermediate-shot regimes, because the weaker cuto ff admits a larger fraction of the finite-sample noise floor. Second, 3 pmin /4 more strongly suppresses false positives, but at intermediate shot counts it more read-ily truncates genuine weak mechanisms and therefore raises the false-negative count. Third, pmin /2 provides the most bal-anced FN /FP trade-o ff under finite statistics, which is why we adopt it as the practical threshold in the main text. At su ffi -ciently large shot counts, both pmin /2 and 3 pmin /4 reach zero FN and zero FP, whereas pmin /4 can still retain residual false positives because its decision boundary remains too close to the finite-sample noise floor. 11 
+
+# F. Clique-Search CPU Time at Di ff er-ent Code Distances 
+
+We next quantify the computational cost of the clique-search stage discussed qualitatively in the Method section. Table V reports the CPU core time of the clique-search step for the rotated surface code at r = 5, across code distances 
+
+d = 5, 7, 9, 11 and shot counts 5 × 10 4, 5 × 10 5, and 5 × 10 6.All times are reported in seconds and correspond to the av-erage CPU core time over 5 independent runs on cores of an AMD EPYC 9654 96-Core Processor. 
+
+Shots d = 5 d = 7 d = 9 d = 11 5 × 10 4 1.011428 9.504719 53.575279 255.009007 5 × 10 5 0.143893 0.216576 0.810720 2.085380 5 × 10 6 0.018353 0.074927 0.146087 0.234581 TABLE V. CPU time of clique search for the rotated surface code at di ff erent distances. The table reports the average CPU core time (in seconds) of the clique-search stage over 5 runs, for r = 5 cir-cuits at di ff erent code distances and shot counts. The strong low-shot growth reflects the proliferation of ghost cliques induced by fluctuation-generated pair correlations. 
+
+The table supports two main conclusions. First, clique search becomes a noticeable computational bottleneck only when the shot count is severely insu ffi cient. In that regime, fluctuation-induced pair correlations create many ghost cliques, and the candidate search space expands rapidly with system size. This is precisely the quantitative manifes-tation of the qualitative mechanism already described in the Method section. Second, once the shot count is large enough to suppress most spurious pair correlations, the clique-search time becomes very short and grows only relatively slowly with code distance. 
+
+[1] M. A. Nielsen and I. L. Chuang, Quantum Computation and Quantum Information , 10th ed. (Cambridge University Press, 2010). [2] B. M. Terhal, Rev. Mod. Phys. 87 , 307 (2015). [3] E. T. Campbell, B. M. Terhal, and C. Vuillot, Nature 549 , 172 (2017). [4] S. T. Spitz, B. Tarasinski, C. W. J. Beenakker, and T. E. O’Brien, Advanced Quantum Technologies 1, 1800012 (2018). [5] C. Gidney, Quantum 5, 497 (2021). [6] E. Dennis, A. Kitaev, A. Landahl, and J. Preskill, Journal of Mathematical Physics 43 , 4452 (2002). [7] A. G. Fowler, M. Mariantoni, J. M. Martinis, and A. N. Cleland, Phys. Rev. A 86 , 032324 (2012). [8] H. Bombin and M. A. Martin-Delgado, Phys. Rev. Lett. 97 ,180501 (2006). [9] R. Harper, S. T. Flammia, and J. J. Wallman, Nature Physics 16 ,1184 (2020). [10] E. Takou and K. R. Brown, Phys. Rev. A 112 , 052414 (2025). [11] A. Remm, N. Lacroix, L. B¨ odeker, E. Genois, C. Hellings, F. m. c. Swiadek, G. J. Norris, C. Eichler, A. Blais, M. M¨ uller, S. Krinner, and A. Wallra ff , Phys. Rev. Res. 8, 013044 (2026). [12] R. Blume-Kohout and K. C. Young, arXiv preprint (2025), arXiv:2504.14643 [quant-ph]. [13] K. E. Arms, M. J. McHugh, J. E. Nyhan, W. F. Reus, and J. L. Ulrich, arXiv preprint (2026), arXiv:2512.10814 [quant-ph]. [14] P. Panteleev and G. Kalachev, Quantum 5, 585 (2021). [15] J. Ro ff e, D. R. White, S. Burton, and E. Campbell, Phys. Rev. Res. 2, 043423 (2020). [16] T. Wagner, H. Kampermann, D. Bruß, and M. Kliesch, Phys. Rev. Lett. 130 , 200601 (2023). [17] V. Sivak, A. Morvan, M. Broughton, R. G. Corti˜ nas, J. Bausch, A. W. Senior, M. Neeley, A. Eickbusch, N. Shutty, L. A. Beni, J. S. Spencer, F. J. H. Heras, T. Edlich, D. Abanin, A. Abbas, R. Acharya, G. Aigeldinger, R. Alcaraz, S. Alcaraz, T. I. Ander-sen, M. Ansmann, F. Arute, K. Arya, W. Askew, N. Astrakhant-sev, J. Atalaya, B. Ballard, J. C. Bardin, H. Bates, A. Bengtsson, M. B. Karimi, A. Bilmes, S. Bilodeau, F. Borjans, A. Bourassa, J. Bovaird, D. Bowers, L. Brill, P. Brooks, D. A. Browne, B. Buchea, B. B. Buckley, T. Burger, B. Burkett, N. Bushnell, J. Busnaina, A. Cabrera, J. Campero, H.-S. Chang, S. Chen, B. Chiaro, L.-Y. Chih, A. Y. Cleland, B. Cochrane, M. Cock-rell, J. Cogan, R. Collins, P. Conner, H. Cook, W. Court-ney, A. L. Crook, B. Curtin, M. Damyanov, S. Das, D. M. Debroy, S. Demura, P. Donohoe, I. Drozdov, A. Dunsworth, V. Ehimhen, A. M. Elbag, L. Ella, M. Elzouka, D. Enriquez, C. Erickson, V. S. Ferreira, M. Flores, L. F. Burgos, E. Fo-rati, J. Ford, A. G. Fowler, B. Foxen, M. Fukami, A. W. L. Fung, L. Fuste, S. Ganjam, G. Garcia, C. Garrick, R. Gasca, H. Gehring, R. Geiger, ´ Elie Genois, W. Giang, D. Gilboa, J. E. Goeders, E. C. Gonzales, R. Gosula, S. J. de Graaf, A. G. Dau, D. Graumann, J. Grebel, A. Greene, J. A. Gross, J. Guer-rero, L. L. Guevel, T. Ha, S. Habegger, T. Hadick, A. Had-jikhani, M. C. Hamilton, M. P. Harrigan, S. D. Harrington, J. Hartshorn, S. Heslin, P. Heu, O. Higgott, R. Hiltermann, H.-Y. Huang, M. Hucka, C. Hudspeth, A. Hu ff , W. J. Huggins, E. Je ff rey, S. Jevons, Z. Jiang, X. Jin, C. Joshi, P. Juhas, A. Ka-bel, D. Kafri, H. Kang, K. Kang, A. H. Karamlou, R. Kauf-man, K. Kechedzhi, T. Khattar, M. Khezri, S. Kim, C. M. Knaut, B. Kobrin, F. Kostritsa, J. M. Kreikebaum, R. Kudo, B. Kue ffl er, A. Kumar, V. D. Kurilovich, V. Kutsko, N. Lacroix, D. Landhuis, T. Lange-Dei, B. W. Langley, P. Laptev, K.-M. Lau, J. Ledford, J. Lee, K. Lee, B. J. Lester, W. Leung, L. Li, W. Y. Li, M. Li, A. T. Lill, W. P. Livingston, M. T. Lloyd, A. Locharla, L. D. Lorenzo, D. Lundahl, A. Lunt, S. Mad-huk, A. Maiti, A. Maloney, S. Mandr` a, L. S. Martin, O. Mar-tin, E. Mascot, P. M. Das, D. Maslov, M. Mathews, C. Max-field, J. R. McClean, M. McEwen, S. Meeks, K. C. Miao, Z. K. Minev, R. Molavi, S. Molina, S. Montazeri, C. Neill, M. New-12 
+
+man, A. Nguyen, M. Nguyen, C.-H. Ni, M. Y. Niu, L. Oas, R. Orosco, K. Ottosson, A. Pagano, A. D. Paolo, S. Peek, D. Pe-terson, A. Pizzuto, E. Portoles, R. Potter, O. Pritchard, M. Qian, C. Quintana, A. Ranadive, M. J. Reagor, R. Resnick, D. M. Rhodes, D. Riley, G. Roberts, R. Rodriguez, E. Ropes, L. B. D. Rose, E. Rosenberg, E. Rosenfeld, D. Rosenstock, E. Rossi, P. Roushan, D. A. Rower, R. Salazar, K. Sankaragomathi, M. C. Sarihan, K. J. Satzinger, M. Schaefer, S. Schroeder, H. F. Schurkus, A. Shahingohar, M. J. Shearn, A. Shorter, V. Shvarts, S. Small, W. C. Smith, D. A. Sobel, B. Spells, S. Springer, G. Sterling, J. Suchard, A. Szasz, A. Sztein, M. Taylor, J. P. Thiruraman, D. Thor, D. Timucin, E. Tomita, A. Torres, M. M. Torunbalci, H. Tran, A. Vaishnav, J. Vargas, S. Vdovichev, G. Vidal, C. V. Heidweiller, M. Voorhees, S. Waltman, J. Waltz, S. X. Wang, B. Ware, J. D. Watson, Y. Wei, T. Weidel, T. White, K. Wong, B. W. K. Woo, C. J. Wood, M. Woodson, C. Xing, Z. J. Yao, P. Yeh, B. Ying, J. Yoo, N. Yosri, E. Young, G. Young, A. Zalcman, R. Zhang, Y. Zhang, N. Zhu, N. Zobrist, Z. Zou, R. Babbush, D. Bacon, S. Boixo, Y. Chen, Z. Chen, M. De-voret, M. Hansen, J. Hilton, C. Jones, J. Kelly, A. N. Korotkov, E. Lucero, A. Megrant, H. Neven, W. D. Oliver, G. Ramachan-dran, V. Smelyanskiy, and P. V. Klimov, arXiv preprint (2026), arXiv:2511.08493 [quant-ph]. [18] O. Higgott and C. Gidney, Quantum 9, 1600 (2025). [19] M. McEwen, D. Bacon, and C. Gidney, Quantum 7, 1172 (2023). [20] O. Higgott, stimbposd (2024). [21] M. McEwen, D. Kafri, Z. Chen, J. Atalaya, K. J. Satzinger, C. Quintana, P. V. Klimov, D. Sank, C. Gidney, A. G. Fowler, F. Arute, K. Arya, B. Buckley, B. Burkett, N. Bushnell, B. Chiaro, R. Collins, S. Demura, A. Dunsworth, C. Erickson, B. Foxen, M. Giustina, T. Huang, S. Hong, E. Je ff rey, S. Kim, K. Kechedzhi, F. Kostritsa, P. Laptev, A. Megrant, X. Mi, J. Mu-tus, O. Naaman, M. Neeley, C. Neill, M. Niu, A. Paler, N. Redd, P. Roushan, T. C. White, J. Yao, P. Yeh, A. Zalcman, Y. Chen, V. N. Smelyanskiy, J. M. Martinis, H. Neven, J. Kelly, A. N. Korotkov, A. G. Petukhov, and R. Barends, Nature Communi-cations 12 , 1761 (2021). [22] A. S. Darmawan and D. Poulin, Phys. Rev. Lett. 119 , 040502 (2017). [23] C. Ye, Source code for Correlation-Analysis-based Hypergraph Reconstruction (CAHR) (2026). [24] C. Piveteau, C. T. Chubb, and J. M. Renes, PRX Quantum 5,040303 (2024).

@@ -1,6 +1,11 @@
 * <a class="dpr-sidebar-root-link" href="#/">首页</a>
 * <a class="dpr-sidebar-root-link dpr-sidebar-noactive-link" href="javascript:void(0)" data-dpr-hash="#/tutorial/README">使用教程</a>
 * Daily Papers
+  * 2026-06-18 <!--dpr-date:20260618-->
+    * 精读区
+      * <a class="dpr-sidebar-item-link dpr-sidebar-item-structured" href="#/202606/18/2606.16288v2-reconstruction-of-detector-error-model-for-quantum-error-correction" data-sidebar-item="{&quot;title&quot;: &quot;Reconstruction of detector error model for quantum error correction&quot;, &quot;link&quot;: &quot;https://arxiv.org/abs/2606.16288v2-reconstruction-of-detector-error-model-for-quantum-error-correction&quot;, &quot;score&quot;: &quot;9.0&quot;, &quot;tags&quot;: [{&quot;kind&quot;: &quot;query&quot;, &quot;label&quot;: &quot;qec-decoding&quot;}], &quot;evidence&quot;: &quot;CAHR算法重建探测器误差模型以优化QEC解码&quot;}">Reconstruction of detector error model for quantum error correction</a>
+    * 速读区
+      * <a class="dpr-sidebar-item-link dpr-sidebar-item-structured" href="#/202606/18/2606.11484v1-handbook-of-error-correcting-codes" data-sidebar-item="{&quot;title&quot;: &quot;Handbook of Error-Correcting Codes&quot;, &quot;link&quot;: &quot;https://arxiv.org/abs/2606.11484v1-handbook-of-error-correcting-codes&quot;, &quot;score&quot;: &quot;7.0&quot;, &quot;tags&quot;: [{&quot;kind&quot;: &quot;query&quot;, &quot;label&quot;: &quot;qec-code&quot;}], &quot;evidence&quot;: &quot;包含表面码和qLDPC码在内量子纠错码的全面参考&quot;}">Handbook of Error-Correcting Codes</a>
   * 2026-06-17 <!--dpr-date:20260617-->
     * 精读区
       * <a class="dpr-sidebar-item-link dpr-sidebar-item-structured" href="#/202606/17/2606.17140v1-projected-logical-ensembles-in-surface-codes-via-the-random-matrix-theory-of-quantum-dots" data-sidebar-item="{&quot;title&quot;: &quot;Projected logical ensembles in surface codes via the random-matrix theory of quantum dots&quot;, &quot;link&quot;: &quot;https://arxiv.org/abs/2606.17140v1-projected-logical-ensembles-in-surface-codes-via-the-random-matrix-theory-of-quantum-dots&quot;, &quot;score&quot;: &quot;9.0&quot;, &quot;tags&quot;: [{&quot;kind&quot;: &quot;query&quot;, &quot;label&quot;: &quot;qec-decoding&quot;}], &quot;evidence&quot;: &quot;表面码最大似然解码后的投影逻辑系综&quot;}">Projected logical ensembles in surface codes via the random-matrix theory of quantum dots</a>

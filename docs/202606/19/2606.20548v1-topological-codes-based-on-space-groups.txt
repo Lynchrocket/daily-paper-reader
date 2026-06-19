@@ -1,0 +1,1501 @@
+Title: Topological Codes Based on Space Groups
+
+URL Source: https://arxiv.org/pdf/2606.20548v1
+
+Published Time: Fri, 19 Jun 2026 01:22:07 GMT
+
+Number of Pages: 19
+
+Markdown Content:
+## Topological Codes Based on Space Groups 
+
+Chong-Yuan Xu 1, Ze-Chuan Liu 1, and Yong Xu 1,2*
+
+> 1
+
+Center for Quantum Information, IIIS, Tsinghua University, Beijing 100084, People’s Republic of China and 
+
+> 2
+
+Hefei National Laboratory, Hefei 230088, People’s Republic of China 
+
+Topological codes form one of the most important classes of stabilizer codes. Most existing al-gebraic constructions and analyses of topological codes assume translation invariance. Here we show that topological codes can arise in more general settings by incorporating point group opera-tions. The central construction is a class of Calderbank-Shor-Steane (CSS) codes called space-group codes, whose check operators are built from group-algebra templates over space groups that combine translations with point-group operations. We develop methods for analyzing topological properties of space-group codes using ring-modules and their invariant theory. At first glance, space-group codes might appear to complicate practical implementation; however, we find that they can exhibit greater locality than previous codes based purely on translations. Our framework thus extends the landscape of topological codes and opens up a broader design space for the co-design of topological codes with quantum computing platforms. 
+
+I. INTRODUCTION 
+
+Topological codes have long been central to fault-tolerant quantum computation [1–5]. They store logical information in global homology sectors and are robust against local noise [4, 5]. By increasing the code-block size, one can obtain topological codes with arbitrarily large code distance and thereby suppress the logical fail-ure rate exponentially [1, 2]. Concepts from topologi-cal quantum field theory [6–8], including anyons, fusion, and braiding, also have natural realizations in topological codes. For these reasons, topological codes are one of the natural routes toward scalable fault-tolerant quantum computation. The traditional surface-code paradigm usually encodes only one logical qubit in a code block, which creates a substantial qubit-overhead challenge [9– 12]. Recent work on bivariate bicycle (BB) codes has shown that many finite-size topological codes can reduce the qubit overhead to roughly one tenth of that of surface-code implementations [13–18]. These developments sig-nificantly alleviate the overhead difficulty. Another trend in quantum error correction (QEC) is the co-design of stabilizer codes and quantum comput-ing platforms [19–23]. It is increasingly important to match code structure with implementation constraints and thereby search for better Pareto frontiers among rate, distance, and hardware cost [19]. Reconfigurable atom arrays provide a concrete example of this shift [24– 31]. These platforms use acousto-optic deflectors (AODs) to move atoms, relaxing the restriction of a fixed cou-pling range [24]. However, movement itself consumes coherent evolution time [24]. If the check operators of a stabilizer code are well aligned with the AOD move-ment model, syndrome extraction can save valuable time and effectively extend the available coherent budget [19]. Previous work has developed parallel movement proto-cols for hypergraph-product and lifted-product codes on  
+
+> *yongxuphy@tsinghua.edu.cn
+
+AOD architectures [32], and more recent protocols cover BB-code variants and Kasai-type codes based on affine permutation matrices [19, 33]. A common feature of these directions is that one must search within a space of stabilizer codes for objects compatible with a target implementation. BB codes are translation-invariant, and this constraint strongly limits the design space [34, 35]. Kasai-type constructions use more general permutation matrices, but there is no evidence that they can carry topological order [36]. The present situation therefore reveals a theoretical gap: we need a broader design space that contains more topological codes. In this work, we construct the space-group codes that include topological ones, as shown in Fig. 1. The con-struction begins with a general framework based on sym-metric groups. When we pass to topological codes, we restrict the permutation group to space groups that com-bine both translations and point group operations. The CSS codes obtained from this spatial specialization are called space-group codes. We describe how space-group codes can be embedded into a folded Euclidean geometry so that point-group actions are realized as local opera-tions, as required for topological codes. Based on Lau-rent polynomial rings and invariant theory, we then de-velop an algebraic framework for analyzing the topologi-cal properties of space-group codes in infinite space. The framework gives an algebraic criterion equivalent to the topological-order condition for space-group codes. It also extends the Gröbner-basis method from rings to modules, allowing one to compute the anyon-sector data of a topo-logical space-group code. The same module Gröbner-basis method is descended to finite-size space-group codes to compute the number of logical qubits. BB codes ap-pear as the special case in which 𝑃 is trivial (see Fig. 1). Finally, we demonstrate that reflection codes are particu-larly amenable to implementation in reconfigurable atom arrays employing AODs. The paper is organized as follows: In Sec. II, we review the CSS codes and algebraic preliminaries. In Sec. III, we construct codes from a set and its permutation group, providing the general form used by space-group codes. 
+
+> arXiv:2606.20548v1 [quant-ph] 18 Jun 2026
+
+2Topological codes Space-group codes 
+
+Topological space-group codes Topological BB codes 
+
+BB codes Reconfigurable atom array Optimized circuit Co-designing 
+
+FIG. 1. Overview and significance of the construction. The left side represents the construction of CSS codes from group-algebra templates, which brings more topological codes. The right side shows the design-space implication: space-group codes allow additional point-group operations and therefore form a larger design space for searches for topological codes adapted to a specific platform or task. 
+
+Section IV presents the locality and topological theory of space-group codes. Section IV H demonstrates the im-plementation of reflection codes in reconfigurable atom arrays. Finally, we summarize the results and discuss future directions in Sec. V. 
+
+II. BACKGROUND AND NOTATION 
+
+The central mathematical framework underlying this work is a correspondence between CSS codes and alge-braic objects such as groups, rings, and modules. In this section, we provide a brief review of the CSS stabi-lizer formalism and the requisite algebraic preliminaries. For a more detailed introduction, we refer the readers to Refs. [37, 38]. 
+
+A. CSS codes 
+
+CSS codes are a special class of stabilizer codes with a stabilizer group 𝒮 generated by a set 𝑆 𝑋 of 𝑋 -type stabilizer generators and a set 𝑆 𝑍 of 𝑍 -type stabilizer generators [37, 39, 40]. Such a code is determined by the chain complex [41–43] 
+
+F𝑛 𝑋  
+
+> 2
+
+F𝑛  
+
+> 2
+
+F𝑛 𝑍   
+
+> 2
+> 𝐻 𝑇 𝑋 𝐻 𝑍
+
+, (1) together with its dual in Eq. (2). Here, 𝐻 𝑋 and 𝐻 𝑍 
+
+are 𝑋 - and 𝑍 -type check matrices, respectively, 𝑛 𝑋 (𝑛 𝑍 )denotes the number of 𝑋 -type ( 𝑍 -type) stabilizer gen-erators, and 𝑛 is the number of physical qubits. Note that the rows in 𝐻 𝑋 and 𝐻 𝑍 are not necessarily linearly independent. In addition, the requirement that every 𝑋 -type generator commutes with every 𝑍 -type generator is equivalent to the chain-complex condition 𝐻 𝑍 𝐻 𝑇 𝑋 = 0 .A binary vector in F𝑛  
+
+> 2
+
+represents an 𝑋 -type Pauli string operator, while a vector in F𝑛 𝑋  
+
+> 2
+
+(F𝑛 𝑍  
+
+> 2
+
+) corresponds to a product of 𝑋 -type ( 𝑍 -type) stabilizer generators. Let 
+
+𝐻 𝑇 𝑋 =(︀ 𝑢 1 𝑢 2 . . . 𝑢 𝑛 𝑋 )︀ , where each column 𝑢 𝑖 in F𝑛 
+
+> 2
+
+is the binary representation of the 𝑖 th 𝑋 -type generator. Then a vector 𝑣 𝑋 in F𝑛 𝑋  
+
+> 2
+
+is mapped to an 𝑋 -type Pauli operator ∑︀ 𝑛 𝑋 
+
+> 𝑖 =1
+
+[𝑣 𝑋 ]𝑖 𝑢 𝑖 , so the image im( 𝐻 𝑇 𝑋 ) is exactly the group of 𝑋 -type stabilizers generated by 𝑆 𝑋 . The syndrome of an 𝑋 -type Pauli operator 𝑣 in F𝑛  
+
+> 2
+
+is obtained by applying the check matrix 𝐻 𝑍 , yielding 𝐻 𝑍 𝑣 ∈ F𝑛 𝑍  
+
+> 2
+
+;the support of this syndrome indicates precisely which 𝑍 -type stabilizer generators are violated. Consequently, the kernal ker( 𝐻 𝑍 ) consists of all 𝑋 -type Pauli operators that commute with every 𝑍 -type stabilizer. This subspace contains 𝑋 -type stabilizers and 𝑋 -type logical operators. The dual of the chain complex in Eq. (1) is given by 
+
+F𝑛 𝑋  
+
+> 2
+
+F𝑛  
+
+> 2
+
+F𝑛 𝑍   
+
+> 2
+> 𝐻 𝑋 𝐻 𝑇 𝑍
+
+. (2) The preceding analysis carries over directly upon inter-changing the roles of 𝑋 and 𝑍 .For an infinite system, a CSS code is topological in the algebraic sense if its chain complex and dual satisfy the middle exactness conditions [44]: 
+
+im( 𝐻 𝑇 𝑋 ) = ker( 𝐻 𝑍 ),
+
+im( 𝐻 𝑇 𝑍 ) = ker( 𝐻 𝑋 ). (3) They indicate that every finite-support Pauli operator that commutes with all check operators is itself gener-ated by finite-support stabilizers. In other words, the stabilizer generators must be local in the relevant physi-cal or geometric metric, whereas all logical operators are 3nonlocal. Recently, the conditions are used as the start-ing point for classification of anyons in generalized toric codes and BB codes [14]. 
+
+B. Algebra 
+
+In this subsection, we briefly review the algebraic lan-guage used repeatedly in this paper: free modules and group algebras [45, 46]. Unless stated otherwise, all vec-tor spaces are over F2.Given a ring ℛ and a positive integer 𝑛 , we use ℛ𝑛 to denote a free ℛ-module of rank 𝑛 [46]: 
+
+ℛ𝑛 = {(𝑟 1, . . . , 𝑟 𝑛 )𝑇 | 𝑟 𝑖 ∈ ℛ} . (4) Scalar multiplication and addition for 𝑅 -vectors in the module are defined as follows: 
+
+𝑟 (. . . , 𝑟 𝑖 , . . . )𝑇 = ( . . . , 𝑟𝑟 𝑖 , . . . )𝑇 ,
+
+(. . . , 𝑟 𝑖 , . . . )𝑇 + ( . . . , 𝑟 ′
+
+> 𝑖
+
+, . . . )𝑇 = ( . . . , 𝑟 𝑖 + 𝑟 ′
+
+> 𝑖
+
+, . . . )𝑇 , (5) which are the same as the operations on vectors in a vector space with entries in a field. For a group 𝐺 , the group algebra F2[𝐺 ] is defined as [45]: 
+
+F2[𝐺 ] = {︂∑︁ 
+
+> 𝑔 ∈𝐺
+
+𝜇 𝑔 𝑔 ⃒⃒⃒⃒ 𝜇 𝑔 ∈ F2}︂ . (6) It is a vector space with a basis 𝐺 if only scalar mul-tiplication and addition are considered. For the group algebra, multiplication for any two elements 
+
+𝑓 1 =∑︁ 
+
+> 𝑔 ∈𝐺
+
+𝜇 𝑔 𝑔, 𝑓 2 =∑︁ 
+
+> 𝑔 ′∈𝐺
+
+𝜆 𝑔 ′ 𝑔 ′, (7) is defined as 
+
+𝑓 1𝑓 2 =∑︁ 
+
+> 𝑔,𝑔 ′∈𝐺
+
+(𝜇 𝑔 𝜆 𝑔 ′ )( 𝑔𝑔 ′). (8) Given an element 𝑓 ∈ F2[𝐺 ], its formal transpose is de-fined as 
+
+𝑓 𝑇 =∑︁ 
+
+> 𝑔 ∈𝐺
+
+𝜇 𝑔 𝑔 −1, (9) which constitutes the inversion anti-involution of the group algebra: 
+
+(𝑓 1𝑓 2)𝑇 = 𝑓 𝑇  
+
+> 2
+
+𝑓 𝑇  
+
+> 1
+
+, (𝑓 𝑇 )𝑇 = 𝑓. (10) 
+
+III. CODE CONSTRUCTION FROM SYMMETRIC GROUPS 
+
+In this section, we present how to construct CSS codes based on symmetric groups. 
+
+A. A guiding example 
+
+Let us first consider a simple example for illustra-tion. Consider a symmetric group 𝑆 4 over a set 𝐴 4 =
+
+{𝑎 1, 𝑎 2, 𝑎 3, 𝑎 4} with four elements. Acting a permutation operation 𝑔 in 𝑆 4 on an element 𝑎 𝑖 leads to 𝑔𝑎 𝑖 = 𝑎 𝑗 so that the matrix representation Γ( 𝑔 ) of 𝑔 is given by 
+
+Γ( 𝑔 )𝑖 ′𝑖 = 𝛿 𝑖 ′𝑗 . (11) Choose two permutation elements from 𝑆 4, e.g., 
+
+𝑔 1 = (3 , 4, 1, 2) , 𝑔 2 = (2 , 1, 4, 3) , (12) whose matrix representations are given by 
+
+Γ( 𝑔 1) = 
+
+⎛⎜⎝
+
+0 0 1 0 0 0 0 1 1 0 0 0 0 1 0 0 
+
+⎞⎟⎠ , Γ( 𝑔 2) = 
+
+⎛⎜⎝
+
+0 1 0 01 0 0 00 0 0 10 0 1 0
+
+⎞⎟⎠ , (13) respectively. Setting 𝐶 = Γ( 𝑔 1) + Γ( 𝑔 2), we define the check matrices as 
+
+𝐻 𝑋 = 𝐻 𝑍 = ( 𝐶 | 𝐶 ) = 
+
+⎛⎜⎝
+
+0 1 1 0 0 1 1 01 0 0 1 1 0 0 11 0 0 1 1 0 0 10 1 1 0 0 1 1 0
+
+⎞⎟⎠ . (14) We clearly see that 𝐻 𝑋 𝐻 𝑇 𝑍 = 0, and equivalently, 
+
+𝐻 𝑍 𝐻 𝑇 𝑋 = 0 , so it defines a CSS code. 
+
+B. General case 
+
+Let 𝑆 𝑛 be a symmetric group on a set 𝐴 𝑛 =
+
+{𝑎 1, 𝑎 2, . . . , 𝑎 𝑛 } (see Appendix A using cosets of a group for code construction). To construct a CSS code, we choose four group-algebra elements 𝑓 𝑋 , ℎ 𝑋 , 𝑓 𝑍 , ℎ 𝑍 ∈
+
+F2[𝑆 𝑛 ] and define the check matrices as 
+
+𝐻 𝑋 =(︀ Γ( 𝑓 𝑋 ) | Γ( ℎ𝑋 ))︀ ,𝐻 𝑍 =(︀ Γ( 𝑓 𝑍 ) | Γ( ℎ𝑍 ))︀ . (15) 
+
+Lemma III.1. The transpose of the check matrices in Eqs. (15) are given by 
+
+𝐻 𝑇 𝑋 =(︀ Γ( 𝑓 𝑇 𝑋 ) | Γ( ℎ𝑇 𝑋 ))︀ 𝑇 ,𝐻 𝑇 𝑍 =(︀ Γ( 𝑓 𝑇 𝑍 ) | Γ( ℎ𝑇 𝑍 ))︀ 𝑇 .
+
+(16) 
+
+Proof. For any group element 𝑔 ∈ 𝑆 𝑛 , Γ( 𝑔 ) is a permuta-tion matrix, so 
+
+Γ( 𝑔 −1) = Γ( 𝑔 )𝑇 . (17) We thus have 
+
+Γ( 𝑓 𝑇 ) = Γ( 𝑓 )𝑇 , Γ( ℎ𝑇 ) = Γ( ℎ)𝑇 . (18) Therefore, Eqs. (15) hold. 4The CSS commutation condition imposes the con-straints on the group-algebra elements: 
+
+Theorem III.2. Assume that the permutation matrices of 𝑆 𝑛 on 𝐴 𝑛 form a faithful representation of the group algebra F2[𝑆 𝑛 ]. Then 
+
+𝑓 𝑋 𝑓 𝑇 𝑍 + ℎ𝑋 ℎ𝑇 𝑍 = 0 (19) 
+
+if and only if 𝐻 𝑋 𝐻 𝑇 𝑍 = 0 .
+
+Proof. For any group elements 𝑔, 𝑘 ∈ 𝑆 𝑛 , we have 
+
+Γ( 𝑘 )𝑇 = Γ( 𝑘 −1), Γ( 𝑔 )Γ( 𝑘 ) = Γ( 𝑔𝑘 ), (20) and thus 
+
+Γ( 𝑔 )Γ( 𝑘 )𝑇 = Γ( 𝑔𝑘 −1). (21) Based on these equations, we obtain that 
+
+𝐻 𝑋 𝐻 𝑇 𝑍 = Γ( 𝑓 𝑋 )Γ( 𝑓 𝑍 )𝑇 + Γ( ℎ𝑋 )Γ( ℎ𝑍 )𝑇 
+
+= Γ( 𝑓 𝑋 𝑓 𝑇 𝑍 + ℎ𝑋 ℎ𝑇 𝑍 ). (22) If 𝑓 𝑋 𝑓 𝑇 𝑍 + ℎ𝑋 ℎ𝑇 𝑍 = 0 , then 𝐻 𝑋 𝐻 𝑇 𝑍 = 0 . Conversely, faithfulness means that Γ( 𝑓 ) = 0 implies 𝑓 = 0 , so if 
+
+𝐻 𝑋 𝐻 𝑇 𝑍 = 0 , faithfulness of Γ gives 𝑓 𝑋 𝑓 𝑇 𝑍 +ℎ𝑋 ℎ𝑇 𝑍 = 0 .As an illustrative example, consider the toric code with 
+
+𝑓 𝑋 = 1+ 𝑡 𝑥 , ℎ𝑋 = 1+ 𝑡 𝑦 , 𝑓 𝑍 = 1+ 𝑡 −1 
+
+> 𝑦
+
+, and ℎ𝑍 = 1+ 𝑡 −1 
+
+> 𝑥
+
+,where 𝑡 𝑥 and 𝑡 𝑦 are translation operators along the 𝑥 and 
+
+𝑦 directions, respectively. With these definitions, we have 
+
+𝑓 𝑋 𝑓 𝑇 𝑍 + ℎ𝑋 ℎ𝑇 𝑍 = 0 so that the code is a valid CSS code. 
+
+IV. TOPOLOGICAL SPACE-GROUP CODES 
+
+We now consider 𝐴 as an infinite lattice and use space group 𝐺 = 𝑇 ⋊ 𝑃 that combines lattice translations with finite point-group operations to construct topolog-ical codes. The goal of this section is to analyze the lo-cality and topology of the space-group codes using ring-module algebra. 
+
+A. Setups 
+
+We first construct the infinite space on which the space group acts. Let 
+
+ℛ0 = F2[𝑥 ±11 , . . . , 𝑥 ±1 
+
+> 𝐷
+
+] (23) be the Laurent polynomial ring in 𝐷 variables. Let 𝐴 be the set of all Laurent monomials in ℛ0. The identification 
+
+𝑥 𝑧 = 𝑥 𝑧 1 
+
+> 1
+
+· · · 𝑥 𝑧 𝐷  
+
+> 𝐷
+
+, 𝑧 = ( 𝑧 1, . . . , 𝑧 𝐷 ) ∈ Z𝐷 (24) identifies 𝐴 with the infinite integer lattice Z𝐷 . An el-ement 𝑞 ∈ ℛ 0 has the finite form 𝑞 =∑︀ 𝑧 ∈Z𝐷 𝑐 𝑧 𝑥 𝑧 with 
+
+𝑐 𝑧 ∈ F2 and only finitely many nonzero coefficients. An element 𝑝 ∈ ℛ 20 is written as a block vector 
+
+𝑝 =(︂ 𝑞 1
+
+𝑞 2)︂ , 𝑞 1, 𝑞 2 ∈ ℛ 0. (25) The translation group 𝑇 ∼= Z𝐷 . For 𝑏 ∈ Z𝐷 , the cor-responding translation acts on 𝑞 =∑︀ 𝑧 𝑐 𝑧 𝑥 𝑧 by 𝑡 𝑏 (𝑞 ) = ∑︀  
+
+> 𝑧
+
+𝑐 𝑧 𝑥 𝑧 +𝑏 . An element 𝑝 𝜌 ∈ 𝑃 acts on 𝑞 =∑︀ 𝑧 𝑐 𝑧 𝑥 𝑧 by 
+
+𝑝 𝜌 (𝑞 ) = ∑︁ 
+
+> 𝑧
+
+𝑐 𝑧 𝑥 𝜌𝑧 , (26) where 𝜌 is its matrix representation. In the Euclidean interpretation of a crystallographic point group, the ma-trices 𝜌 also preserve a lattice metric, but the algebraic construction below only uses the integral finite-order ac-tion on Z𝐷 .For the space group 𝐺 , we write each element as 𝑔 =
+
+𝑡 𝑏 𝑝 𝜌 with 𝑏 ∈ Z𝐷 and 𝜌 ∈ 𝑃 . Acting it on 𝑞 leads to 
+
+𝑔 (𝑞 ) = ∑︁ 
+
+> 𝑧
+
+𝑐 𝑧 𝑥 𝜌𝑧 +𝑏 . (27) We define the action of a group-algebra element 𝑓 =∑︀  
+
+> 𝑔 ∈𝐺
+
+𝜇 𝑔 𝑔 ∈ F2[𝐺 ] on 𝑞 by linear extension as 
+
+Γ( 𝑓 )( 𝑞 ) = ∑︁ 
+
+> 𝑔 ∈𝐺
+
+𝜇 𝑔 𝑔 (𝑞 ). (28) 
+
+Theorem IV.1 (Faithfulness of the space-group alge-bra action) . The affine lattice action of 𝐺 = 𝑇 ⋊ 𝑃 on the Laurent monomial basis induces an injective group-algebra representation. Thus the faithful representation used below is the faithful action of the full space-group algebra. Proof. For any 𝑓 1, 𝑓 2 ∈ F2[𝐺 ], the matrix representation of 𝑓 1 + 𝑓 2, 𝑓 1, and 𝑓 2 satisfy that 
+
+Γ( 𝑓 1 + 𝑓 2) = Γ( 𝑓 1) + Γ( 𝑓 2). (29) Faithfulness means that Γ is injective, which is equivalent to the kernel test 
+
+𝑓 ̸ = 0 =⇒ Γ( 𝑓 )̸ = 0 . (30) Let 𝑓 =∑︀ 𝑖 𝜇 𝑖 𝑔 𝑖 ∈ F2[𝐺 ] be a nonzero group-algebra ele-ment, written with distinct group elements and nonzero coefficients. Writing 𝑔 𝑖 = 𝑡 𝑏 𝑖 𝑝 𝜌 𝑖 , we have 
+
+Γ( 𝑓 )𝑥 𝑧 =∑︁ 
+
+> 𝑖
+
+𝜇 𝑖 𝑥 𝜌 𝑖 𝑧 +𝑏 𝑖 . (31) If the exponent vectors 𝜌 𝑖 𝑧 +𝑏 𝑖 are pairwise distinct, then the right-hand side is a nonzero linear combination of distinct Laurent monomial basis vectors and therefore is nonzero. Thus it is enough to find one lattice point 𝑧 0 at which no two terms coincide. Equivalently, if Γ( 𝑓 )𝑥 𝑧 = 0 ,5then for the 𝑖 th term, it is either zero or there exists at least one other term 𝑗 ̸ = 𝑖 with 
+
+𝜌 𝑖 𝑧 + 𝑏 𝑖 = 𝜌 𝑗 𝑧 + 𝑏 𝑗 . (32) This is because the coefficient of each Laurent monomial basis vector must vanish in F2.For every pair 𝑖 ̸ = 𝑗 , we define 
+
+𝜔 𝑖𝑗 = 𝜌 𝑖 − 𝜌 𝑗 , 𝑐 𝑖𝑗 = 𝑏 𝑗 − 𝑏 𝑖 . (33) The 𝑖 th and 𝑗 th terms coincide at 𝑧 precisely when 
+
+𝜔 𝑖𝑗 𝑧 = 𝑐 𝑖𝑗 . (34) Let 
+
+𝐶 𝑖𝑗 = {𝑧 ∈ Z𝐷 | 𝜔 𝑖𝑗 𝑧 = 𝑐 𝑖𝑗 } (35) be the corresponding coincidence set. We need to show that the finite union ⋃︀ 𝑖<𝑗 𝐶 𝑖𝑗 does not fill the whole lat-tice. If 𝜔 𝑖𝑗 = 0 , then 𝜌 𝑖 = 𝜌 𝑗 . Because the group elements 
+
+(𝑏 𝑖 , 𝜌 𝑖 ) and (𝑏 𝑗 , 𝜌 𝑗 ) are distinct, we have 𝑏 𝑖 ̸ = 𝑏 𝑗 , hence 
+
+𝑐 𝑖𝑗 ̸ = 0 . In this case, 𝐶 𝑖𝑗 is empty. It remains to treat the pairs with 𝜔 𝑖𝑗 ̸ = 0 . Choose a vector 𝑣 such that 
+
+𝜔 𝑖𝑗 𝑣 ̸ = 0 (36) for every nonzero matrix 𝜔 𝑖𝑗 that occurs. Such a 𝑣 exists. Indeed, for each nonzero 𝜔 𝑖𝑗 , choose one nonzero row 𝑤 𝑖𝑗 .Take 
+
+𝑣 = (1 , 𝑁, 𝑁 2, . . . , 𝑁 𝐷 −1). (37) Then 𝑤 𝑖𝑗 · 𝑣 is a nonzero polynomial in 𝑁 , so it has only finitely many integer roots. Since there are only finitely many pairs, an integer 𝑁 can be chosen so that 𝑤 𝑖𝑗 ·𝑣 ̸ = 0 
+
+for all selected rows. Then 𝜔 𝑖𝑗 𝑣 ̸ = 0 for all nonzero 𝜔 𝑖𝑗 .Now restrict to an integer line 
+
+𝐿 = {𝑡𝑣 | 𝑡 ∈ Z}. (38) For a fixed pair with 𝜔 𝑖𝑗 ̸ = 0 , the coincidence equation on this line is 
+
+𝑡𝜔 𝑖𝑗 𝑣 = 𝑐 𝑖𝑗 . (39) This equation has at most one integer solution 𝑡 : if both 
+
+𝑡 and 𝑡 ′ solved it, then 
+
+(𝑡 − 𝑡 ′)𝜔 𝑖𝑗 𝑣 = 0 , (40) and 𝜔 𝑖𝑗 𝑣 ̸ = 0 forces 𝑡 = 𝑡 ′. Thus each coincidence set 
+
+𝐶 𝑖𝑗 intersects 𝐿 in at most one point. There are only finitely many pairs, so the finite union ⋃︀ 𝑖<𝑗 𝐶 𝑖𝑗 intersects 
+
+𝐿 in only finitely many points. Since 𝐿 contains infinitely many lattice points, we can choose 𝑧 0 = 𝑡 0𝑣 ∈ 𝐿 outside this union. For this 𝑧 0, Eq. (34) cannot be satisfied, so the exponent vectors 𝜌 𝑖 𝑧 0 + 𝑏 𝑖 are pairwise distinct. Applying Eq. (31) at 𝑧 0 gives 
+
+Γ( 𝑓 )𝑥 𝑧 0 =
+
+> 𝑟
+
+∑︁ 
+
+> 𝑖 =1
+
+𝑐 𝑖 𝑥 𝜌 𝑖 𝑧 0+𝑏 𝑖 ̸ = 0 , (41) because the monomials appearing on the right are dis-tinct basis vectors of ℛ0 and every 𝑐 𝑖 is nonzero. Thus 
+
+Γ( 𝑓 )̸ = 0 for every nonzero 𝑓 ∈ F2[𝐺 ]. By Eq. (30), 
+
+Γ is faithful as a representation of the full space-group algebra F2[𝐺 ]. 
+
+> B. Locality
+
+A topological code requires its stabilizer generators to be local in some physical geometry. For ordinary BB codes, this geometry is usually the periodic translation lattice itself. For space-group codes, however, stabilizer terms may also contain point-group operations, and we therefore need a natural local geometry in which these point-group operations are also local. Our approach is to introduce a folded lattice: The original lattice cells are grouped into folded supercells according to the orbits of the point group 𝑃 , and locality is measured by the check-data coupling distance in this folded geometry. As we explain below, the folded lattice can be realized inside a Euclidean space. We first use reflection codes as the main example. In one dimension, the reflection-code space group is gen-erated by a translation 𝑡 𝑥 and a reflection 𝑠 𝑥 . In two dimensions, the reflection-code space group is generated by translations 𝑡 𝑥 , 𝑡 𝑦 and reflections 𝑠 𝑥 , 𝑠 𝑦 , where 
+
+𝑠 𝑥 : 𝑥 𝑎 𝑦 𝑏 ↦ → 𝑥 −𝑎 𝑦 𝑏 , 𝑠 𝑦 : 𝑥 𝑎 𝑦 𝑏 ↦ → 𝑥 𝑎 𝑦 −𝑏 . (42) We now show that, for one- and two-dimensional reflec-tion codes, both reflection and translation operations can be embedded as local geometric operations in a Euclidean space. Figure 2(a) shows the folding of a one-dimensional re-flection code. The original periodic cells are labeled by 
+
+𝑥 −4, 𝑥 −3, . . . , 𝑥 −1, 𝑥 0, 𝑥 1, . . . , 𝑥 4. The reflection 𝑥 𝑚 ↦ →
+
+𝑥 −𝑚 partitions these cells into orbits 
+
+𝐴 0 = {𝑥 0}, 𝐴 𝑎 = {𝑥 𝑎 , 𝑥 −𝑎 }, 𝑎 = 1 , . . . , 4. (43) Each orbit defines a folded supercell. The fixed point 𝑥 0
+
+forms a one-cell supercell, while all other cells are paired into two-cell supercells. Thus the original periodic chain is embedded as a one-dimensional open-boundary folded lattice. In this folded lattice, reflection exchanges inter-nal labels within a supercell, while translation acts either within a supercell or between neighboring supercells. Figure 2(b) shows the folding of a two-dimensional re-flection code. For a 5 × 5 periodic square, the original cells are labeled by 𝑥 𝑎 𝑦 𝑏 . The two reflections 𝑠 𝑥 , 𝑠 𝑦 group the cells into orbits 
+
+𝐶 𝑎,𝑏 = {𝑥 𝜖𝑎 𝑦 𝜂𝑏 | 𝜖, 𝜂 = ±1}. (44) 6x0          
+
+> x−1
+> x−2
+> x1
+> x2embed (a) (b) Reflection Translation
+> x−3x3
+> x−4x4
+> x0x1x2x3x4
+> x−1x−2x−3x−4
+> x0y0
+
+sx
+
+sy
+
+sx
+
+sy
+
+> x0y0
+> Cell
+> embed (c)
+> Coupling line Super cell
+> x0y0
+
+FIG. 2. Folded locality for reflection and space-group codes. (a) A one-dimensional reflection example. Periodic cells are grouped into reflection orbits 𝐴 0 = {𝑥 0} and 𝐴 𝑎 = {𝑥 𝑎 , 𝑥 −𝑎 }, producing a one-dimensional open-boundary folded lattice. (b) A two-dimensional reflection example. A periodic square lattice is folded by 𝑠 𝑥 and 𝑠 𝑦 into supercells given by reflection orbits. Interior supercells contain four original cells, mirror-axis supercells contain two cells, and the origin contains one cell. (c) A practical folded-layout locality example for the reflection code 𝑓 = 𝑡 𝑥 𝑠 𝑦 + 𝑠 𝑥 𝑠 𝑦 𝑡 𝑦 + 𝑠 𝑥 𝑡 𝑥 𝑠 𝑦 𝑡 𝑦 and ℎ = 𝑡 𝑥 + 𝑠 𝑥 𝑡 5 
+
+> 𝑦
+
++ 𝑠 𝑥 𝑡 𝑥 𝑡 𝑦 . Each cell contains two data qubits and two check qubits, placed on two layers for syndrome extraction. The highlighted edge is a longest coupling edge in the folded layout, and its length defines the folded locality. 
+
+If 𝑎 = 0 or 𝑏 = 0 , the supercell lies on a mirror axis and contains only two cells. The origin 𝑥 0𝑦 0 is fixed by both reflections, and hence contains only one cell. The two-dimensional periodic lattice is represented as a two-dimensional open-boundary folded lattice. This folding places reflection-related cells in the same supercell. The same construction applies to general space-group codes. Let 𝐺 = 𝑇 ⋊ 𝑃 . We group the original lattice cells by 𝑃 -orbits: 
+
+𝜆 ∼ 𝑝𝜆, 𝑝 ∈ 𝑃. (45) Each orbit [𝜆 ] defines a folded supercell. Point-group operations become internal label permutations within folded supercells, while translations become moves be-tween folded supercells. For a 𝐷 -dimensional reflection code, this folded lattice embeds directly into a 𝐷 -dimensional open-boundary Eu-clidean space. At the continuous level, coordinate reflec-tions give the quotient 
+
+R𝐷 /(Z2)𝐷 ∼= [0 , ∞)𝐷 . (46) Equivalently, each coordinate direction is folded from a two-sided direction into a half-axis. For finite lat-tices, we use the corresponding discrete folded coordi-nates. More general finite point groups need not em-bed into a same-dimensional open-boundary Euclidean region; however, prior work shows that orbit spaces of finite group actions admit embeddings into some higher-dimensional Euclidean space with bounded metric dis-tortion [47]. Thus general space-group codes also admit a natural orbifold locality interpretation. We now give a practical locality criterion for search-ing for more local reflection codes on a two-dimensional folded lattice. For a finite code, we place data qubits on the layer 𝑧 = 0 and check qubits on the layer 𝑧 = 1 .We define the folded locality as the maximum three-dimensional Euclidean length among all check-data cou-pling edges: 
+
+𝑅 fold = max    
+
+> 𝑒 ∈𝐸 (𝐻 𝑋 )∪𝐸 (𝐻 𝑍 )
+
+‖𝑝 𝐶 (𝑒 ) − 𝑝 𝐷 (𝑒 )‖2. (47) Here 𝐸 (𝐻 𝑋 ) ∪ 𝐸 (𝐻 𝑍 ) denotes the set of nonzero check-data couplings in the final parity-check matrices. Fig-ure 2(c) shows an example of a [[36 , 4, 6]] reflection code with stabilizer terms {︃ 
+
+𝑓 = 𝑡 𝑥 𝑠 𝑦 + 𝑠 𝑥 𝑠 𝑦 𝑡 𝑦 + 𝑠 𝑥 𝑡 𝑥 𝑠 𝑦 𝑡 𝑦 ,ℎ = 𝑡 𝑥 + 𝑠 𝑥 𝑡 5 
+
+> 𝑦
+
++ 𝑠 𝑥 𝑡 𝑥 𝑡 𝑦 . (48) A folded supercell contains one, two, or four original cells, depending on whether it lies at the origin, on a mirror axis, or in the interior. Each cell contains two data qubits and two check qubits, placed on two layers for syndrome extraction. For simplicity, we do not consider the details inside the cell. The highlighted edge is one of the longest check-data couplings, and its length is the metric of the code locality. The key advantage of reflection codes over ordinary BB codes is that 𝑠 𝑥 and 𝑠 𝑦 are local nearest-neighbor or intra-supercell operations in the folded lattice. Thus the monomial search space of reflection codes contains many folded-local reflection-assisted terms. This enlarges the 7geometric freedom: at the same stabilizer weight, reflec-tion codes have more ways to place algebraic couplings within a short folded-lattice distance. Consequently, without degrading the code parameters, reflection codes are more likely to yield codes with smaller folded locality. Our numerical search finds several such examples. Ta-ble I lists reflection codes whose 𝜂 = 𝑘𝑑 2/𝑛 is no worse than the matched optimal BB baseline, while their folded locality is smaller. All codes in the table use 
+
+𝑓 𝑋 = 𝑓, 𝑓 𝑍 = 𝑓 𝑇 , ℎ𝑋 = ℎ, ℎ𝑍 = ℎ𝑇 . (49) 
+
+TABLE I. Reflection codes found by the folded-locality search. For each row, the code parameter 𝜂 = 𝑘𝑑 2/𝑛 is no worse than the matched optimal BB baseline, while the folded locality is smaller. 
+
+[[ 𝑛, 𝑘, 𝑑 ]] shape 𝑓 ℎ
+
+[[24 , 4, 4]] [3 , 4] 𝑠 𝑦 𝑡 𝑦 + 𝑠 𝑥 + 𝑠 𝑥 𝑡 2
+
+> 𝑥
+
+𝑠 𝑦 𝑠 𝑦 𝑡 3 
+
+> 𝑦
+
++ 𝑠 𝑥 + 𝑠 𝑥 𝑡 2
+
+> 𝑥
+
+𝑠 𝑦 
+
+[[36 , 4, 6]] [3 , 6] 𝑡 𝑥 𝑠 𝑦 + 𝑠 𝑥 𝑠 𝑦 𝑡 𝑦 + 𝑠 𝑥 𝑡 𝑥 𝑠 𝑦 𝑡 𝑦 𝑡 𝑥 + 𝑠 𝑥 𝑡 5 
+
+> 𝑦
+
++ 𝑠 𝑥 𝑡 𝑥 𝑡 𝑦 
+
+[[48 , 4, 8]] [6 , 4] 𝑠 𝑥 𝑡 𝑦 + 𝑠 𝑥 𝑡 𝑥 𝑠 𝑦 𝑡 2 
+
+> 𝑦
+
++ 𝑠 𝑥 𝑡 2 
+
+> 𝑥
+
+𝑠 𝑥 𝑡 𝑦 + 𝑠 𝑥 𝑡 2
+
+> 𝑥
+
+𝑡 3 
+
+> 𝑦
+
++ 𝑠 𝑥 𝑡 4
+
+> 𝑥
+
+[[60 , 8, 6]] [6 , 5] 1 + 𝑡 3 
+
+> 𝑦
+
++ 𝑡 𝑥 𝑠 𝑦 𝑡 4 
+
+> 𝑦
+
+𝑡 2 
+
+> 𝑦
+
++ 𝑡 𝑥 𝑠 𝑦 𝑡 4 
+
+> 𝑦
+
++ 𝑡 4
+
+> 𝑥
+
+[[72 , 8, 8]] [12 , 3] 1 + 𝑡 3
+
+> 𝑥
+
+𝑠 𝑦 + 𝑡 3
+
+> 𝑥
+
+𝑠 𝑦 𝑡 𝑦 𝑠 𝑦 𝑡 2 
+
+> 𝑦
+
++ 𝑡 𝑥 + 𝑡 5
+
+> 𝑥
+
+C. A guiding example 
+
+We now study a concrete two-dimensional example by setting 𝐷 = 2 and taking 𝑃 to be the dihedral group 
+
+𝐷 2, generated by two reflections 𝑠 𝑥 and 𝑠 𝑦 . Let 𝑡 𝑥 and 
+
+𝑡 𝑦 denote the translation generators along the 𝑥 and 𝑦 
+
+directions, respectively, so that 𝐺 = ⟨𝑡 𝑥 , 𝑠 𝑥 , 𝑡 𝑦 , 𝑠 𝑦 ⟩. We choose 
+
+Γ𝑋 = ( 𝑓 𝑋 | ℎ𝑋 )=(︀ 𝑡 −1 
+
+> 𝑥
+
+𝑠 𝑥 𝑡 3 
+
+> 𝑦
+
+𝑠 𝑦 + 𝑡 𝑥 𝑠 𝑥 𝑡 −1 
+
+> 𝑦
+
+𝑠 𝑦 | 𝑡 −1 
+
+> 𝑥
+
+𝑠 𝑥 𝑡 2 
+
+> 𝑦
+
+𝑠 𝑦 + 𝑡 𝑥 𝑠 𝑥 𝑠 𝑦 )︀ 
+
+Γ𝑍 = ( 𝑓 𝑍 | ℎ𝑍 )=(︀ 𝑠 𝑦 𝑡 −2 
+
+> 𝑦
+
+𝑠 𝑥 𝑡 𝑥 + 𝑠 𝑦 𝑠 𝑥 𝑡 −1 
+
+> 𝑥
+
+| 𝑠 𝑦 𝑡 −3 
+
+> 𝑦
+
+𝑠 𝑥 𝑡 𝑥 + 𝑠 𝑦 𝑡 𝑦 𝑠 𝑥 𝑡 −1
+
+> 𝑥
+
+)︀ 
+
+(50) to construct a CSS code together with their transposes 
+
+Γ𝑇 𝑋 and Γ𝑇 𝑍 . One can easily check that this is a valid CSS code based on Theorem III.2. For the BB codes or their generalized version, Γ𝑇 𝑋 , Γ𝑇 𝑍 ,
+
+Γ𝑋 , and Γ𝑍 involve only translation operators and are therefore module homomorphisms. Consequently, one can define the following chain complex for modules 
+
+ℛ0 ℛ20 ℛ0  
+
+> Γ𝑇 𝑋 Γ𝑍
+
+. (51) This complex then provides a framework for analyzing the topological conditions that characterize the resulting family of BB codes. A key distinction from the BB-code setting is that our construction incorporates point group operations, such as reflections, in addition to translations. This raises the question of whether the chain complex in Eq. (51) can still be applied directly. The answer is negative: gener-ically, Γ𝑇 𝑋 , Γ𝑇 𝑍 , Γ𝑋 , and Γ𝑍 are not module homomor-phisms. Indeed, consider the reflection 𝑠 𝑥 , acting on the Laurent polynomial ring. We have 𝑠 𝑥 (𝑥 · 𝑥 2) = 𝑥 −3,whereas 𝑥 𝑠 𝑥 (𝑥 2) = 𝑥 −1, confirming that the reflection action fails to preserve the module structure. To resolve this issue, we introduce a lifted module de-scription over an invariant coefficient ring, which we il-lustrate using the preceding example. We first define an invariant subring ℛ = F2[𝑢, 𝑣 ] of the two reflections, where 
+
+𝑢 = 𝑥 + 𝑥 −1, 𝑣 = 𝑦 + 𝑦 −1, (52) are the invariant polynomials under the two reflections. Higher powers of 𝑥 and 𝑦 reduce to zeroth or first pow-ers with coefficients in ℛ. Consequently, every 𝑓 ∈ ℛ 0
+
+admits a decomposition of the form 
+
+𝑓 = 𝑓 1(𝑢, 𝑣 ) + 𝑓 𝑥 (𝑢, 𝑣 )𝑥 + 𝑓 𝑦 (𝑢, 𝑣 )𝑦 + 𝑓 𝑥𝑦 (𝑢, 𝑣 )𝑥𝑦. (53) This decomposition is unique, as shown by the normal-form computation below. Hence ℛ0 is a free ℛ-module of rank four, with basis {1, 𝑥, 𝑦, 𝑥𝑦 }. Since 𝑢 and 𝑣 
+
+are invariant under 𝑠 𝑥 and 𝑠 𝑦 , the reflections act as ℛ-module homomorphisms on ℛ4. With respect to the ba-sis {1, 𝑥, 𝑦, 𝑥𝑦 }, their actions are given by 
+
+𝑠 𝑥 ↦ →
+
+⎛⎜⎝
+
+1 𝑢 0 00 1 0 00 0 1 𝑢 
+
+0 0 0 1
+
+⎞⎟⎠ , 𝑠 𝑦 ↦ →
+
+⎛⎜⎝
+
+1 0 𝑣 00 1 0 𝑣 
+
+0 0 1 00 0 0 1
+
+⎞⎟⎠ . (54) The translations 𝑡 𝑥 and 𝑡 𝑦 , which act by multiplication by 
+
+𝑥 and 𝑦 , respectively, are also ℛ-module homomorphisms on ℛ4. In the same basis, they are represented by 
+
+𝑡 𝑥 ↦ →
+
+⎛⎜⎝
+
+0 1 0 01 𝑢 0 00 0 0 10 0 1 𝑢 
+
+⎞⎟⎠ , 𝑡 𝑦 ↦ →
+
+⎛⎜⎝
+
+0 0 1 00 0 0 11 0 𝑣 00 1 0 𝑣 
+
+⎞⎟⎠ . (55) Therefore the group action extends to a matrix map whose values are ℛ-module homomorphisms: 
+
+Λ : F2[𝐺 ] → End ℛ(ℛ4). (56) The chosen isomorphism ℛ0 ∼= ℛ4 sends the actions of 
+
+𝑠 𝑥 , 𝑠 𝑦 , 𝑡 𝑥 , 𝑡 𝑦 to the 4×4 matrices above. Thus each group-algebra element can be represented as a 4 × 4 matrix under Λ by multiplication and addition of 𝑠 𝑥 , 𝑠 𝑦 , 𝑡 𝑥 , 𝑡 𝑦 .The previous two-entry data (𝑓, ℎ ) are then represented, under the same isomorphism, by the 4 × 8 block map (︀ 
+
+Λ( 𝑓 ) | Λ( ℎ))︀ : ℛ8 −→ ℛ 4. (57) For the two pairs above, the lifted block maps of Γ𝑋 and 
+
+Γ𝑍 are 8
+
+Λ𝑋 =
+
+⎛⎜⎝
+
+𝑢𝑣 𝑢 2𝑣 𝑢 𝑢 2 + 𝑣 2 𝑢 𝑢 2 0 𝑣 
+
+0 𝑢𝑣 𝑣 2 𝑢 0 𝑢 𝑣 0
+
+𝑢 (𝑣 2 + 1) 𝑢 2𝑣 2 + 𝑢 2 + 𝑣 2 𝑢𝑣 𝑢 2𝑣 𝑢𝑣 𝑢 2𝑣 + 𝑣 𝑢 𝑢 2
+
+𝑣 2 𝑢 (𝑣 2 + 1) 0 𝑢𝑣 𝑣 𝑢𝑣 0 𝑢 
+
+⎞⎟⎠ ,
+
+Λ𝑍 =
+
+⎛⎜⎝
+
+𝑢 𝑢 2 0 𝑣 𝑢𝑣 𝑢 2𝑣 𝑢 𝑢 2 + 𝑣 2
+
+0 𝑢 𝑣 0 0 𝑢𝑣 𝑣 2 𝑢 𝑢𝑣 𝑢 2𝑣 + 𝑣 𝑢 𝑢 2 𝑢 (𝑣 2 + 1) 𝑢 2𝑣 2 + 𝑢 2 + 𝑣 2 𝑢𝑣 𝑢 2𝑣 𝑣 𝑢𝑣 0 𝑢 𝑣 2 𝑢 (𝑣 2 + 1) 0 𝑢𝑣 
+
+⎞⎟⎠ ,
+
+(58) respectively. This example illustrates the module-lifting procedure used below. 
+
+D. Module lifting 
+
+We now generalize the algebraic module-lifting step il-lustrated above. The goal is to find an invariant poly-nomial subring ℛ, express ℛ0 as a finite free ℛ-module, and represent all generators of 𝐺 by ℛ-module homo-morphisms of ℛ𝑛 . Here 𝑛 is the rank of ℛ0 as a free ℛ-module. After such a basis is fixed, each group-algebra el-ement acts on ℛ𝑛 through an ℛ-module homomorphism: 
+
+Λ : F2[𝐺 ] → End ℛ(ℛ𝑛 ). (59) 
+
+Lemma IV.2. The invariant set defined as ℛ𝑃  
+
+> 0
+
+= {𝑝 ∈ℛ0 | 𝑔 (𝑝 ) = 𝑝, ∀𝑔 ∈ 𝑃 } is a subring of ℛ0.Proof. For any 𝑝 1, 𝑝 2 ∈ ℛ𝑃  
+
+> 0
+
+, we write them as 𝑝 1 =∑︀  
+
+> 𝑚
+
+𝑐 𝑚 𝑥 𝑚 and 𝑝 2 =∑︀ 𝑛 𝑑 𝑛 𝑥 𝑛 , where 𝑐 𝑚 , 𝑑 𝑛 ∈ F2. Act-ing any element 𝑔 ∈ 𝑃 on 𝑝 1𝑝 2 leads to 
+
+𝑔 (𝑝 1𝑝 2) = ∑︁ 
+
+> 𝑚,𝑛
+
+𝑐 𝑚 𝑑 𝑛 𝑥 𝜌 𝑔 (𝑚 +𝑛 ) = 𝑔 (𝑝 1)𝑔 (𝑝 2) = 𝑝 1𝑝 2, (60) where we have used the fact that 𝑔 (𝑥 𝑚 ) = 𝑥 𝜌 𝑔 𝑚 (see Eq. (26)). In addition, we have 
+
+𝑔 (𝑝 1 + 𝑝 2) = 𝑔 (𝑝 1) + 𝑔 (𝑝 2) = 𝑝 1 + 𝑝 2. (61) They tell us that 𝑝 1𝑝 2 ∈ ℛ 𝑃  
+
+> 0
+
+and 𝑝 1 +𝑝 2 ∈ ℛ 𝑃  
+
+> 0
+
+, indicating that ℛ𝑃  
+
+> 0
+
+is a subring of ℛ0.The invariant ring ℛ𝑃  
+
+> 0
+
+needs not itself be a polynomial ring [48]. We therefore construct a polynomial subring 
+
+ℛ ⊆ ℛ 𝑃  
+
+> 0
+
+⊆ ℛ 0 (62) such that ℛ0 is a finite free ℛ-module. This formalism can simplify problems. 
+
+Lemma IV.3. Let 𝐵 = 𝐴 [𝑏 1, . . . , 𝑏 𝑁 ] be a finitely gen-erated 𝐴 -algebra. If each 𝑏 𝑖 is integral over 𝐴 , then 𝐵 is a finite 𝐴 -module. Proof. Since 𝑏 𝑖 is integral over 𝐴 , there exists a positive integer 𝑚 and 𝑎 𝑗 ∈ 𝐴 such that 
+
+𝑏 𝑚 𝑖 + 𝑎 𝑚 −1𝑏 𝑚 −1 
+
+> 𝑖
+
++ · · · + 𝑎 0 = 0 , 𝑎 𝑗 ∈ 𝐴. (63) Thus, 𝑏 𝑚 𝑖 is an 𝐴 -linear combination of lower powers, and all higher powers of 𝑏 𝑖 reduce to the finite set 
+
+{1, 𝑏 𝑖 , . . . , 𝑏 𝑚 −1 
+
+> 𝑖
+
+}. Hence 𝐴 [𝑏 𝑖 ] is a finite 𝐴 -module. The case of several generators follows straightforwardly. 
+
+Theorem IV.4. ℛ0 is a finite ℛ𝑃  
+
+> 0
+
+-module. Proof. For any 𝑝 ∈ ℛ 0, let 𝑃 = {𝑔 1, 𝑔 2, . . . , 𝑔 𝑛 }, where 
+
+𝑛 = |𝑃 |, and set 𝑎 𝑖 = 𝑔 𝑖 (𝑝 ). Consider the orbit polyno-mial 
+
+𝐹 𝑝 (𝑇 ) = 
+
+> 𝑛
+
+∏︁ 
+
+> 𝑖 =1
+
+(𝑇 + 𝑎 𝑖 ) = 𝑇 𝑛 + 𝑢 1𝑇 𝑛 −1 + · · · + 𝑢 𝑛 , (64) where 𝑇 ∈ 𝑅 0 and 𝑢 𝑗 =∑︀ 1≤𝑖 1<··· <𝑖 𝑗 ≤𝑛 𝑎 𝑖 1 · · · 𝑎 𝑖 𝑗 . In particular, 𝑢 1 =∑︀ 𝑔 ∈𝑃 𝑔 (𝑝 ).We claim that each coefficient 𝑢 𝑗 is invariant un-der the action of 𝑃 . For 𝑢 1, this is immediate from the fact that left multiplication by any 𝑔 ′ ∈ 𝑃 per-mutes the set 𝑃 , yielding 𝑔 ′(𝑢 1) = 𝑢 1. For general 
+
+𝑗 , the coefficient 𝑢 𝑗 is the sum of all products of the form 𝑔 𝑘 1 (𝑝 )𝑔 𝑘 2 (𝑝 ) · · · 𝑔 𝑘 𝑗 (𝑝 ), taken over all 𝑗 -element sub-sets {𝑔 𝑘 1 , . . . , 𝑔 𝑘 𝑗 } ⊂ 𝑃 with distinct indices. Applying 
+
+𝑔 ′ to such a term leads to 𝑔 ′(𝑔 𝑘 1 (𝑝 )𝑔 𝑘 2 (𝑝 ). . . 𝑔 𝑘 𝑗 (𝑝 )) = (𝑔 ′𝑔 𝑘 1 )( 𝑝 )( 𝑔 ′𝑔 𝑘 2 )( 𝑝 ) . . . (𝑔 ′𝑔 𝑘 𝑗 )( 𝑝 ) = 𝑔 𝑘 ′ 
+
+> 1
+
+(𝑝 )𝑔 𝑘 ′ 
+
+> 2
+
+(𝑝 ). . . 𝑔 𝑘 ′ 
+
+> 𝑗
+
+(𝑝 )
+
+where 𝑔 ′𝑔 𝑘 𝑖 = 𝑔 𝑘 𝑖 ′ . For two disjoint 𝑗 -element subsets 
+
+𝑆 1 = {𝑔 𝑘 1 , . . . , 𝑔 𝑘 𝑗 } and 𝑆 2 = {𝑔 𝑙 1 , . . . , 𝑔 𝑙 𝑗 } of 𝑃 , we claim that their images 𝑔 ′𝑆 1 and 𝑔 ′𝑆 2 remain disjoint. Indeed, if 𝑔 ′𝑆 1 ∩ 𝑔 ′𝑆 2̸ = ∅, then 𝑔 ′𝑔 𝑘 𝑎 = 𝑔 ′𝑔 𝑙 𝑏 for some indices 
+
+𝑎, 𝑏 , and left cancellation gives 𝑔 𝑘 𝑎 = 𝑔 𝑙 𝑏 , contradicting the assumption that 𝑆 1 ∩ 𝑆 2 = ∅. Therefore 𝑔 ′(𝑢 𝑗 ) = 𝑢 𝑗 ,so 𝑢 𝑗 ∈ ℛ 𝑃  
+
+> 0
+
+.The polynomial is monic and has 𝑝 as a root, that is, 𝐹 𝑝 (𝑝 ) = 0 . Thus every 𝑝 ∈ ℛ 0 is integral over ℛ𝑃  
+
+> 0
+
+.Since 𝑃 is finite, Lemma IV.3 implies that ℛ0 is a finite 
+
+ℛ𝑃  
+
+> 0
+
+-module. 
+
+Theorem IV.5. There exists a polynomial subring 
+
+ℛ = F2[𝜑 1, . . . , 𝜑 𝐷 ] ⊆ ℛ 𝑃  
+
+> 0
+
+(65) 
+
+such that ℛ0 is a finite free ℛ-module. Proof. The argument uses standard finite-group invariant theory and commutative algebra [46, 48]. The ring ℛ0 is a finite ℛ𝑃  
+
+> 0
+
+-module. The Artin–Tate lemma then implies that ℛ𝑃  
+
+> 0
+
+is a finitely generated F2-algebra [46]. Since ℛ0
+
+has Krull dimension 𝐷 and integral extensions preserve 9Krull dimension, ℛ𝑃  
+
+> 0
+
+also has Krull dimension 𝐷 [46]. Noether normalization applied to ℛ𝑃  
+
+> 0
+
+therefore gives 𝐷 
+
+algebraically independent invariants 𝜑 1, . . . , 𝜑 𝐷 such that 
+
+ℛ𝑃  
+
+> 0
+
+is finite over ℛ = F2[𝜑 1, . . . , 𝜑 𝐷 ] [46]. Since ℛ0 is fi-nite over ℛ𝑃  
+
+> 0
+
+, it is finite over ℛ. The remaining step is a standard commutative-algebra freeness statement. The Laurent polynomial ring ℛ0 is regular and hence Cohen– Macaulay, while ℛ is a polynomial ring, which is regu-lar [46]. By the local miracle-flatness criterion, equiva-lently the finite Cohen–Macaulay-over-regular case, ℛ0
+
+is finite flat over ℛ [46]. Since ℛ is Noetherian and ℛ0 is finite over ℛ, the module ℛ0 is finitely presented; hence this finite flat module is finite projective [46]. By the Quillen–Suslin theorem, every finite projective module over a polynomial ring is free [49]. Therefore there is a finite integer 𝑛 and an ℛ-basis 
+
+𝐸 = {𝑒 1, . . . , 𝑒 𝑛 } (66) such that 
+
+ℛ0 ∼= ℛ𝑛 . (67) Theorem IV.5 is an existence statement. For the exam-ples used in this paper, we choose ℛ from explicit orbit sums and verify the resulting finite-free presentation by a Gröbner normal-form calculation. For each orbit 
+
+𝑂 = {𝑔 (𝑝 ) | 𝑔 ∈ 𝑃 }, (68) define 
+
+𝑠 𝑂 =∑︁ 
+
+> 𝜒 ∈𝑂
+
+𝜒. (69) Although there are infinitely many such orbit sums, the concrete two-dimensional point groups in this work use the verified choices listed in Appendix B. For a new point group, the same verification consists of choosing candi-date invariants, computing the normal-form basis below, and checking that the listed monomials span uniquely over the chosen polynomial subring. The basis of ℛ0 as a module over ℛ is computed by a Gröbner normal form [50, 51]. Rewrite the Laurent poly-nomial ring as a quotient of an ordinary polynomial ring by introducing inverse variables 𝑋 𝑖 , 𝑌 𝑖 with 𝑌 𝑖 = 𝑋 −1 
+
+> 𝑖
+
+.Introduce base variables 𝑈 1, . . . , 𝑈 𝐷 for the invariants 
+
+𝜑 1, . . . , 𝜑 𝐷 and define 
+
+𝐵 = F2[𝑈 1, . . . , 𝑈 𝐷 , 𝑋 1, . . . , 𝑋 𝐷 , 𝑌 1, . . . , 𝑌 𝐷 ]. (70) Let 
+
+𝐼 = ⟨𝑋 𝑖 𝑌 𝑖 + 1 , 𝑈 𝑗 + Φ 𝑗 (𝑋, 𝑌 )⟩, (71) where Φ𝑗 (𝑋, 𝑌 ) is the expression of 𝜑 𝑗 in the variables 
+
+𝑋 𝑖 , 𝑌 𝑖 . A Gröbner basis of 𝐼 gives normal-form monomi-als [50, 51]. Those not divisible by leading terms form an ℛ-basis. For the reflection example, where 𝑌 1 = 𝑋 −11
+
+and 𝑌 2 = 𝑋 −12 ,
+
+𝑋 21 + 𝑈 𝑋 1 + 1 = 0 , 𝑋 22 + 𝑉 𝑋 2 + 1 = 0 . (72) The leading terms are 𝑋 21 , 𝑋 22 , 𝑌 1, 𝑌 2, so the standard monomials are 
+
+{1, 𝑋 1, 𝑋 2, 𝑋 1𝑋 2}, (73) which correspond to {1, 𝑥, 𝑦, 𝑥𝑦 } in the original Laurent ring. This confirms the uniqueness of Eq. (53). Let 
+
+𝜃 : ℛ𝑛 ∼=
+
+−→ ℛ 0 (74) be the chosen free-module identification. The lifted ma-trix map Λ is defined by transporting the original group-algebra action Γ through this basis: 
+
+Λ( 𝑞 ) = 𝜃 −1Γ( 𝑞 )𝜃, 𝑞 ∈ F2[𝐺 ]. (75) Equivalently, 𝜃 Λ( 𝑞 ) = Γ( 𝑞 )𝜃 . For the chosen pairs 
+
+(𝑓 𝑋 , ℎ 𝑋 ) and (𝑓 𝑍 , ℎ 𝑍 ), define 
+
+Λ𝑋 =(︀ Λ( 𝑓 𝑋 ) | Λ( ℎ𝑋 ))︀ 
+
+Λ𝑍 =(︀ Λ( 𝑓 𝑍 ) | Λ( ℎ𝑍 ))︀ . (76) 
+
+Λ𝑋 and Λ𝑍 are exactly the ℛ-basis expressions of the original check maps 𝐻 𝑋 and 𝐻 𝑍 in Eqs. (15). The transpose maps are defined by applying the same group-algebra transpose 𝑞 ↦ → 𝑞 𝑇 before forming the col-umn block: 
+
+Λ𝑇 𝑋 =(︀ Λ( 𝑓 𝑇 𝑋 ) | Λ( ℎ𝑇 𝑋 ))︀ 𝑇 
+
+Λ𝑇 𝑍 =(︀ Λ( 𝑓 𝑇 𝑍 ) | Λ( ℎ𝑇 𝑍 ))︀ 𝑇 .
+
+(77) Here Λ𝑇 𝑋 , Λ𝑇 𝑍 : ℛ𝑛 → ℛ 2𝑛 . The compatibility with the ordinary transpose of the original permutation check ma-trices is obtained by applying Eq. (75) to 𝑓 𝑇 𝑋 , ℎ 𝑇 𝑋 and 
+
+𝑓 𝑇 𝑍 , ℎ 𝑇 𝑍 . Thus Λ𝑇 𝑋 and Λ𝑇 𝑍 are the ℛ-basis expressions of 𝐻 𝑇 𝑋 and 𝐻 𝑇 𝑍 , respectively. They should not be con-fused with the ordinary transposes of the ℛ-matrices Λ𝑋 
+
+and Λ𝑍 ; after changing from the Laurent-monomial basis to a finite ℛ-basis, formal group-algebra transpose and ordinary matrix transpose need not coincide. 
+
+E. Topological-order condition 
+
+With the block-map notation fixed in Eqs. (15), (76), and (77), the lifted CSS complex is 
+
+ℛ0 ℛ20 ℛ0
+
+ℛ𝑛 ℛ2𝑛 ℛ𝑛 .  
+
+> Γ𝑇 𝑋 Γ𝑍
+> Λ𝑇 𝑋 Λ𝑍
+
+(78) 10 The dual lifted complex is obtained by exchanging 𝑋 and 
+
+𝑍 and applying the same formal transpose. We use the Buchsbaum–Eisenbud criterion to test ex-actness at the middle Pauli-support module [52]. We state this criterion as a lemma below and refer the inter-ested readers to Ref. [52] for further details. 
+
+Lemma IV.6 (Buchsbaum–Eisenbud criterion) . Let ℛ
+
+be a Noetherian ring and let 
+
+𝐶 ∙ : 0 → 𝐶 𝑚 𝜕 𝑚 
+
+−−→ 𝐶 𝑚 −1
+
+> 𝜕 𝑚 −1
+
+−−−→ · · · 𝜕 2
+
+−→ 𝐶 1
+
+> 𝜕 1
+
+−→ 𝐶 0
+
+(79) 
+
+be a finite free complex. Let 𝑟 𝑖 = rank 𝜕 𝑖 and let 𝐼 𝑟 𝑖 (𝜕 𝑖 )
+
+be the ideal generated by all 𝑟 𝑖 × 𝑟 𝑖 minors of 𝜕 𝑖 . Then 
+
+𝐶 ∙ is exact if and only if, for every 𝑖 ,
+
+rank 𝐶 𝑖 = 𝑟 𝑖 + 𝑟 𝑖 +1 , grade 𝐼 𝑟 𝑖 (𝜕 𝑖 ) ≥ 𝑖. (80) The algebraic topological-order target used here is middle exactness of the lifted CSS complex and middle exactness of its dual: 
+
+im(Λ 𝑇 𝑋 ) = ker(Λ 𝑍 ), im(Λ 𝑇 𝑍 ) = ker(Λ 𝑋 ). (81) For the lifted CSS complex 
+
+0 → ℛ 𝑛 Λ𝑇 𝑋 
+
+−−→ ℛ 2𝑛 Λ𝑍 
+
+−−→ ℛ 𝑛 , (82) the Buchsbaum–Eisenbud condition for middle exact-ness gives both the middle rank condition and the codimension-two condition for the incoming map: 
+
+rank(Λ 𝑇 𝑋 ) + rank(Λ 𝑍 ) = 2 𝑛, 
+
+grade 𝐼 rank(Λ 𝑇 𝑋 )(Λ 𝑇 𝑋 ) ≥ 2. (83) Since both maps have rank at most 𝑛 , this is equivalent to 
+
+rank(Λ 𝑇 𝑋 ) = rank(Λ 𝑍 ) = 𝑛 and grade 𝐼 𝑛 (Λ 𝑇 𝑋 ) ≥ 2. The Buchsbaum–Eisenbud grade condition for the outgoing map Λ𝑍 has index one and is automatic once Λ𝑍 has full rank over the polynomial domain. Similarly, for the dual lifted complex 
+
+0 → ℛ 𝑛 Λ𝑇 𝑍 
+
+−−→ ℛ 2𝑛 Λ𝑋 
+
+−−→ ℛ 𝑛 , (84) the middle exactness gives 
+
+rank(Λ 𝑇 𝑍 ) + rank(Λ 𝑋 ) = 2 𝑛, 
+
+grade 𝐼 rank(Λ 𝑇 𝑍 )(Λ 𝑇 𝑍 ) ≥ 2, (85) or equivalently rank(Λ 𝑇 𝑍 ) = rank(Λ 𝑋 ) = 𝑛 and 
+
+grade 𝐼 𝑛 (Λ 𝑇 𝑍 ) ≥ 2. Therefore, for the length-two lifted free complexes considered here, the following rank-and-grade conditions are necessary and sufficient for the mid-dle exactness target above and its dual: 
+
+⎧⎪⎪⎪⎨⎪⎪⎪⎩
+
+rank(Λ 𝑇 𝑋 ) = rank(Λ 𝑍 ) = 𝑛, 
+
+grade 𝐼 𝑛 (Λ 𝑇 𝑋 ) ≥ 2,
+
+rank(Λ 𝑇 𝑍 ) = rank(Λ 𝑋 ) = 𝑛, 
+
+grade 𝐼 𝑛 (Λ 𝑇 𝑍 ) ≥ 2.
+
+(86) The rank and grade tests in Eq. (86) are therefore per-formed on the formal transpose maps that actually enter the CSS complex. They cannot in general be replaced by ordinary transpose invariance of the ℛ-matrices unless an additional unimodular pairing or an equivalent left-right equivalence has been supplied. The syndrome quotient modules used below, such as coker(Λ 𝑋 ) and coker(Λ 𝑍 ),are therefore compatible with this middle-exactness cri-terion; they record sector data associated with finite-support Pauli boundaries. Each grade condition in the criterion can be converted into a gcd test. 
+
+Theorem IV.7. Let 𝐹 be either Λ𝑇 𝑋 or Λ𝑇 𝑍 , and assume 
+
+rank( 𝐹 ) = 𝑛 . Then 
+
+grade 𝐼 𝑛 (𝐹 ) ≥ 2 (87) 
+
+is equivalent to the condition that the 𝑛 × 𝑛 minors of 𝐹 
+
+have no nontrivial common factor: 
+
+gcd 𝐼 𝑛 (𝐹 ) = 1 . (88) 
+
+Proof. The ring ℛ = F2[𝜑 1, . . . , 𝜑 𝐷 ] is a polynomial ring over a field. We recall the needed algebraic properties. A ring is Noetherian if all of its ideals are finitely generated; by Hilbert’s basis theorem, polynomial rings over a field are Noetherian [46]. A ring is regular if each localiza-tion at a prime ideal is a regular local ring, meaning that the maximal ideal can be generated by exactly the Krull dimension many elements [46]. Polynomial rings over a field are regular, for example because they are smooth affine algebras over a field [46]. A Cohen–Macaulay ring is one in which depth equals Krull dimension after lo-calization at every prime, and every regular local ring is Cohen–Macaulay [46]. Thus ℛ is Cohen–Macaulay. Fi-nally, a unique factorization domain (UFD) is a domain with unique factorization into irreducibles, and ℛ is a UFD by Gauss’s lemma since it is a polynomial ring over the field F2 [46]. Let 𝐼 = 𝐼 𝑛 (𝐹 ). Since rank( 𝐹 ) = 𝑛 , at least one 𝑛 × 𝑛 minor is nonzero, so 𝐼 ̸ = 0 . In a Cohen– Macaulay ring, grade 𝐼 = height 𝐼 [46]. Thus grade 𝐼 ≥ 2
+
+is equivalent to saying that 𝐼 is contained in no height-one prime ideal. Because ℛ is a UFD, every height-one prime ideal is generated by an irreducible polynomial 𝑞 [46]. If all generators of 𝐼 share such a factor 𝑞 , then 𝐼 ⊆ (𝑞 ) and 
+
+height 𝐼 ≤ 1. Conversely, if height 𝐼 < 2, then 𝐼 lies in a height-one prime (𝑞 ), so 𝑞 divides every 𝑛 × 𝑛 minor. This proves the equivalence.   
+
+> F. Anyon counting
+> 1. Infinite lattices
+
+The quotient modules below record equivalence classes in the syndrome module. Two syndromes are equivalent if they differ by the boundary of a finite-support Pauli operator. For standard local translation-invariant sta-bilizer models, these quotient data count independent 11 anyon types [14, 44]. For space-group codes, we adopt the lifted module representation, in which the syndrome maps are given by Λ𝑋 , Λ𝑍 : ℛ2𝑛 → ℛ 𝑛 . The anyons are then classified by the cokernels: 
+
+coker(Λ 𝑋 ), coker(Λ 𝑍 ). (89) If both cokernels have finite dimension as F2-vector spaces, the total number of independent anyon species— which also equals the number of logical qubits—is 
+
+𝑘 = dim F2 coker(Λ 𝑋 ) + dim F2 coker(Λ 𝑍 ). (90) Note that these two vector-space dimensions are alge-braic dimensions of polynomial-module quotients. They are computed by a module Gröbner basis: after reducing by the submodule generated by the columns of Λ𝑋 or 
+
+Λ𝑍 , the remaining standard module monomials form an 
+
+F2-basis [51]. Appendix C gives the quotient-ring version and its module extension. 
+
+2. Finite periodic lattices 
+
+This subsection explains how the module calculation on the infinite lattice descends to a finite periodic sys-tem. Algebraically, finite size is imposed by replacing the Laurent ring ℛ0 with the quotient 
+
+ℛ0,𝐿 = ℛ0/𝐼 𝐿 , (91) where 𝐼 𝐿 is generated by the periodic boundary relations. For example, an 𝐿 𝑥 × 𝐿 𝑦 periodic system has 
+
+𝐼 𝐿 = ⟨𝑥 𝐿 𝑥 + 1 , 𝑦 𝐿 𝑦 + 1 ⟩. (92) We first record the descent condition for the point-group action. Let 𝑔 ∈ 𝑃 act on ℛ0. If it descends to the quotient ℛ0,𝐿 , the descended map must have the form 
+
+¯𝑔 ([ 𝑓 ]) = [ 𝑔 (𝑓 )] , (93) where [𝑓 ] denotes the class of 𝑓 modulo 𝐼 𝐿 .
+
+Proposition IV.8 (Finite descent condition) . The for-mula in Eq. (93) is well defined if and only if 
+
+𝑔 (𝐼 𝐿 ) ⊆ 𝐼 𝐿 . (94) 
+
+Proof. Let 𝑓, 𝑓 ′ ∈ ℛ 0. The equality [𝑓 ] = [ 𝑓 ′] is equiva-lent to 𝑓 −𝑓 ′ ∈ 𝐼 𝐿 . The formula in Eq. (93) is well defined precisely when [𝑔 (𝑓 )] = [ 𝑔 (𝑓 ′)] for every such pair. This is equivalent to 
+
+𝑔 (𝑓 ) − 𝑔 (𝑓 ′) ∈ 𝐼 𝐿 . (95) Since 𝑔 is a ring homomorphism, 
+
+𝑔 (𝑓 ) − 𝑔 (𝑓 ′) = 𝑔 (𝑓 − 𝑓 ′). (96) Thus the condition is that 𝑔 (ℎ) ∈ 𝐼 𝐿 for every ℎ ∈ 𝐼 𝐿 ,which is exactly Eq. (94). We now express the period relations in the folded mod-ule coordinates. Let 
+
+𝜃 : ℛ𝑛 ∼=
+
+−→ ℛ 0 (97) be the fixed ℛ-module identification. The pullback of the period ideal is the submodule 
+
+𝜃 −1(𝐼 𝐿 ) ⊆ ℛ 𝑛 . (98) Choose a presentation matrix 𝑀 𝐿 such that 
+
+im 𝑀 𝐿 = 𝜃 −1(𝐼 𝐿 ). (99) Then the finite folded module is 
+
+ℛ𝑛 𝐿 = ℛ𝑛 / im 𝑀 𝐿 ∼= ℛ0,𝐿 . (100) The matrix 𝑀 𝐿 can be written directly from the genera-tors of the period ideal: 
+
+𝑀 𝐿 =(︀ Λ( 𝑡 𝐿 1 
+
+> 1
+
++ 1) | · · · | Λ( 𝑡 𝐿 𝐷  
+
+> 𝐷
+
++ 1) )︀ . (101) The infinite check maps Λ𝑋 and Λ𝑍 descend to finite maps 
+
+Λ𝑋,𝐿 , Λ𝑍,𝐿 : ( ℛ𝑛 𝐿 )2 → ℛ 𝑛 𝐿 , (102) when they are compatible with the period relations. 
+
+Theorem IV.9 (Finite periodic logical count) . Assume that the finite maps Λ𝑋,𝐿 and Λ𝑍,𝐿 are well defined. Then the number of logical qubits is 
+
+𝑘 𝐿 = dim F2
+
+ℛ𝑛 
+
+im 𝑀 𝐿 + im Λ 𝑋 
+
++ dim F2
+
+ℛ𝑛 
+
+im 𝑀 𝐿 + im Λ 𝑍 
+
+.
+
+(103) 
+
+Proof. The number of logical qubits is given by 
+
+𝑘 𝐿 = dim F2
+
+ℛ𝑛 𝐿 
+
+im Λ 𝑋,𝐿 
+
++ dim F2
+
+ℛ𝑛 𝐿 
+
+im Λ 𝑍,𝐿 
+
+. (104) By the submodule correspondence theorem for quotient modules [38], we have 
+
+im Λ 𝑋,𝐿 = im Λ 𝑋 + im 𝑀 𝐿 
+
+im 𝑀 𝐿 
+
+. (105) Hence 
+
+ℛ𝑛 𝐿 
+
+im Λ 𝑋,𝐿 
+
+= ℛ𝑛 / im 𝑀 𝐿 
+
+(im Λ 𝑋 + im 𝑀 𝐿 )/ im 𝑀 𝐿 
+
+∼= ℛ𝑛 
+
+im 𝑀 𝐿 + im Λ 𝑋 
+
+,
+
+(106) and similarly for the 𝑍 case. In the last step of derivation, we use the third isomorphism theorem [38]. Eq. (103) thus holds. Equation (103) is the form used for the module Gröbner-basis computation. The periodic relations and the check image generate a single submodule of ℛ𝑛 , and the remaining standard module monomials give the re-quired F2-dimension. 12 
+
+G. Numerical results 
+
+We now present numerical results in Fig. 3 com-paring reflection-code families that pass the algebraic topological-order test with those that fail it. Specifically, we consider three two-dimensional topological reflection codes and three non-topological reflection codes. Fig-ure 3(a) shows the finite-size logical-qubit number for the topological codes. As 𝐿 varies, 𝑘 𝐿 has a periodic oscil-latory pattern. It sometimes reaches the corresponding infinite-size upper bound and never exceeds it, in agree-ment with the infinite-size cokernel-sector calculation. The plotted values are obtained from the direct rank computation of the finite binary check matrices. As an independent check, we also applied the finite-size module Gröbner method of Theorem IV.9; for the tested square sizes, it gives exactly the same 𝑘 𝐿 as the direct binary-rank calculation. Figure 3(b) shows the corresponding code distances. The distance grows with 𝐿 with an oscil-latory component superposed on an approximately linear trend over the tested square sizes. The observed distance behavior is consistent with topological codes: local peri-odicity can change the shortest logical representatives at special sizes, while the overall scale of the logical distance increases with the linear system size in these examples. Figure 3(c)(d) shows the contrasting behavior of the non-topological codes. Their logical-qubit numbers grow with the linear system size, again with parity-dependent oscillations, rather than staying below a fixed sector-counting bound. At the same time, their distances re-main small over the tested range. We list 18 self-searched weight-6 space-group codes whose blocklengths are strictly increasing in Table II. Each row gives the code parameters [[ 𝑛, 𝑘, 𝑑 ]] , the finite space-group quotient used in the construction, and the two group-algebra support polynomials 𝑓 and 𝑔 . The last column reports the normalized quantity 𝑘𝑑 2/𝑛 , which we use to compare against the corresponding BB-code value at the same blocklength. The distances in Table II are computed by exact mixed-integer programming whenever a candidate entered the final list. The reported distance is the smaller of the two sector distances. 
+
+H. Folded locality in AOD movement 
+
+In Sec. IV B, we discuss the locality of space-group codes from both geometric and algebraic viewpoints, with particular emphasis on the folded locality of reflection codes. The key observation there is that, after lattice cells are reorganized according to reflection orbits, cou-plings that appear to cross the periodic boundary in the original lattice can become bounded-range couplings on the folded lattice. We now explain how this folded lo-cality can translate into an experimental advantage for syndrome extraction in reconfigurable neutral atom ar-rays. We consider syndrome extraction with three types of Code 1 Upper bound 1 Code 1 Code 2 Upper bound 2 Code 2 Code 3 Upper bound 3 Code 3 4 6 8 10 5 7 9 11 0482610 (a) (b) 0482610 Number of logical qubits Code distance System size System size       
+
+> (d) 2430146810 57911 Code 1 Code 2 Code 3 Code 1 Code 2 Code 3 20 30 40 10 Number of logical qubits Code distance (c)
+
+FIG. 3. Numerical scaling of code properties with sys-tem size 𝐿 for (a)–(b) topological reflection codes and (c)– (d). (a),(c) The number of logical qubits with respect to 
+
+𝐿 ; The dashed horizontal lines in (a) indicate the upper bounds obtained from the infinite-size cokernel-sector calcu-lation based on Eq. (90). (b),(d) The code distance as a function of 𝐿 . For the topological codes in (a) and (b), the three data sets correspond to the following choices of (𝑓, ℎ )
+
+from Eq. (49): (1 + 𝑠 𝑦 𝑡 𝑥 + 𝑡 𝑥 𝑠 𝑦 + 𝑡 𝑦 , 1 + 𝑡 𝑥 𝑡 2 
+
+> 𝑦
+
++ 𝑠 𝑥 𝑡 𝑦 + 𝑡 3
+
+> 𝑥
+
+),
+
+(1 + 𝑡 𝑥 𝑡 2 
+
+> 𝑦
+
++ 𝑠 𝑦 𝑡 𝑥 + 𝑡 𝑥 𝑠 𝑦 , 1 + 𝑡 3 
+
+> 𝑦
+
++ 𝑡 𝑦 + 𝑡 𝑥 𝑡 𝑦 ), and (𝑡 −1 
+
+> 𝑥
+
+𝑠 𝑥 𝑡 3 
+
+> 𝑦
+
+𝑠 𝑦 +
+
+𝑡 𝑥 𝑠 𝑥 𝑡 −1 
+
+> 𝑦
+
+𝑠 𝑦 , 𝑡 −1 
+
+> 𝑥
+
+𝑠 𝑥 𝑡 2 
+
+> 𝑦
+
+𝑠 𝑦 + 𝑡 𝑥 𝑠 𝑥 𝑠 𝑦 ). For the non-topological codes in (c) and (d), the three choices are (𝑠 𝑥 𝑡 𝑦 +( 𝑠 𝑥 𝑡 𝑦 )3, 1+( 𝑠 𝑥 𝑡 𝑦 )2),
+
+(𝑠 𝑥 𝑡 𝑦 + ( 𝑠 𝑥 𝑡 𝑦 )3, 1 + 𝑠 𝑥 𝑡 𝑦 ), and (𝑠 𝑦 𝑡 𝑥 + ( 𝑠 𝑦 𝑡 𝑥 )3, 1 + ( 𝑠 𝑦 𝑡 𝑥 )3).
+
+physical qubits: data qubits, 𝑋 -check qubits, and 𝑍 -check qubits. The data qubits store the protected quan-tum information, while the 𝑋 - and 𝑍 -check qubits serve as ancillas for measuring 𝑋 - and 𝑍 -type stabilizers. On a neutral atom platform, measuring one stabilizer typically requires moving the corresponding check qubit close to each data qubit in the stabilizer support, applying an en-tangling gate such as a Rydberg-mediated CZ or CNOT gate, and then measuring the check qubit to read out the syndrome. Since a full QEC round measures many stabilizers, the relevant question is how efficiently many check qubits can be moved in parallel. An AOD provides a natural mechanism for such par-allel motion. It can translate many optical tweezers simultaneously, for example by moving multiple rows or columns of atoms in the horizontal or vertical di-rection. This parallelism is an important resource for quantum low-density parity-check (qLDPC) code syn-drome extraction in neutral atom arrays. At the same time, AOD motion is geometrically constrained: simul-taneously executed paths should not overlap, cross, or lead to collisions. When different moving groups would 13 
+
+TABLE II. Eighteen self-searched weight-6 space-group codes with strictly increasing blocklengths. Here 𝐺 refl (𝐿 𝑥 , 𝐿 𝑦 ) denotes the reflection space-group quotient on an 𝐿 𝑥 × 𝐿 𝑦 translation cell, with translation generators 𝑡 𝑥 , 𝑡 𝑦 and reflection generators 
+
+𝑠 𝑥 , 𝑠 𝑦 . For axial examples, 𝐶 𝑚 × 𝑆 3 denotes the direct product of a cyclic quotient 𝐶 𝑚 = ⟨𝑐 ⟩ and the point group 𝑆 3. A term such as (132) 𝑐 4 is a group element of 𝐶 𝑚 × 𝑆 3, where (132) ∈ 𝑆 3 and 𝑐 4 ∈ 𝐶 𝑚 ; expressions such as 1 + (132) 𝑐 4 + (13) 𝑐 or 
+
+𝑠 𝑥 𝑡 2
+
+> 𝑥
+
+𝑠 𝑦 𝑡 𝑦 are formal sums over F2 in the corresponding group algebra. The columns 𝑓 and 𝑔 give the two support polynomials defining the weight-6 CSS checks.                                                                                                                                                                                                                                                                                                        
+
+> [[ 𝑛, 𝑘, 𝑑 ]] group 𝑓 𝑔 𝑘𝑑 2/𝑛
+> [[12 ,8,2]] 𝐶 1×𝑆 31 + (123) + (132) 1 + (123) + (132) 2.7[[14 ,6,2]] 𝐺 refl (1 ,7) 𝑠 𝑦 𝑡 2
+> 𝑦 +𝑠 𝑦 𝑡 4
+> 𝑦 +𝑠 𝑦 𝑡 5
+> 𝑦 𝑠 𝑦 𝑡 2
+> 𝑦 +𝑠 𝑦 𝑡 4
+> 𝑦 +𝑠 𝑦 𝑡 5
+> 𝑦 1.7[[24 ,4,4]] 𝐺 refl (3 ,4) 𝑠 𝑦 𝑡 𝑦 +𝑠 𝑥 +𝑠 𝑥 𝑡 2
+> 𝑥 𝑠 𝑦 𝑠 𝑦 𝑡 3
+> 𝑦 +𝑠 𝑥 +𝑠 𝑥 𝑡 2
+> 𝑥 𝑠 𝑦 2.7[[28 ,6,4]] 𝐺 refl (7 ,2) 𝑠 𝑥 𝑠 𝑦 𝑡 𝑦 +𝑠 𝑥 𝑡 2
+> 𝑥 𝑠 𝑦 +𝑠 𝑥 𝑡 3
+> 𝑥 𝑠 𝑦 𝑡 𝑦 𝑠 𝑥 𝑡 𝑥 𝑠 𝑦 𝑡 𝑦 +𝑠 𝑥 𝑡 3
+> 𝑥 𝑠 𝑦 +𝑠 𝑥 𝑡 4
+> 𝑥 𝑠 𝑦 3.4[[36 ,4,6]] 𝐺 refl (3 ,6) 𝑡 𝑥 𝑠 𝑦 +𝑠 𝑥 𝑠 𝑦 𝑡 𝑦 +𝑠 𝑥 𝑡 𝑥 𝑠 𝑦 𝑡 𝑦 𝑡 𝑥 +𝑠 𝑥 𝑡 5
+> 𝑦 +𝑠 𝑥 𝑡 𝑥 𝑡 𝑦 4.0[[42 ,6,6]] 𝐺 refl (7 ,3) 𝑡 𝑦 +𝑡 4
+> 𝑥 𝑠 𝑦 𝑡 2
+> 𝑦 +𝑡 5
+> 𝑥 𝑡 2
+> 𝑥 𝑠 𝑦 𝑡 2
+> 𝑦 +𝑡 3
+> 𝑥 +𝑡 5
+> 𝑥 𝑡 2
+> 𝑦 5.1[[48 ,4,8]] 𝐺 refl (6 ,4) 𝑠 𝑥 𝑡 𝑦 +𝑠 𝑥 𝑡 𝑥 𝑠 𝑦 𝑡 2
+> 𝑦 +𝑠 𝑥 𝑡 2
+> 𝑥 𝑠 𝑥 𝑡 𝑦 +𝑠 𝑥 𝑡 2
+> 𝑥 𝑡 3
+> 𝑦 +𝑠 𝑥 𝑡 4
+> 𝑥 5.3[[54 ,8,6]] 𝐺 refl (3 ,9) 𝑠 𝑥 𝑡 𝑥 +𝑠 𝑥 𝑡 𝑥 𝑡 𝑦 +𝑠 𝑥 𝑡 𝑥 𝑡 2
+> 𝑦 𝑠 𝑥 𝑡 7
+> 𝑦 +𝑠 𝑥 𝑡 𝑥 𝑡 𝑦 +𝑠 𝑥 𝑡 2
+> 𝑥 𝑡 7
+> 𝑦 5.3[[56 ,6,8]] 𝐺 refl (1 ,28) 𝑡 𝑦 +𝑡 24
+> 𝑦 +𝑠 𝑥 𝑡 25
+> 𝑦 𝑡 𝑦 +𝑠 𝑥 𝑡 7
+> 𝑦 +𝑠 𝑥 𝑡 26
+> 𝑦 6.9[[60 ,8,6]] 𝐺 refl (6 ,5) 1 + 𝑡 3
+> 𝑦 +𝑡 𝑥 𝑠 𝑦 𝑡 4
+> 𝑦 𝑡 2
+> 𝑦 +𝑡 𝑥 𝑠 𝑦 𝑡 4
+> 𝑦 +𝑡 4
+> 𝑥 4.8[[66 ,4,10]] 𝐺 refl (1 ,33) 𝑡 30
+> 𝑦 +𝑡 32
+> 𝑦 +𝑠 𝑥 𝑡 19
+> 𝑦 𝑡 7
+> 𝑦 +𝑠 𝑥 +𝑠 𝑥 𝑡 32
+> 𝑦 6.1[[70 ,6,8]] 𝐺 refl (5 ,7) 𝑡 3
+> 𝑥 𝑡 6
+> 𝑦 +𝑠 𝑥 𝑡 𝑥 𝑡 𝑦 +𝑠 𝑥 𝑡 2
+> 𝑥 𝑡 2
+> 𝑦 𝑡 2
+> 𝑥 𝑡 6
+> 𝑦 +𝑠 𝑥 𝑡 𝑥 𝑡 𝑦 +𝑠 𝑥 𝑡 2
+> 𝑥 𝑡 2
+> 𝑦 5.5[[72 ,8,8]] 𝐺 refl (12 ,3) 1 + 𝑡 3
+> 𝑥 𝑠 𝑦 +𝑡 3
+> 𝑥 𝑠 𝑦 𝑡 𝑦 𝑠 𝑦 𝑡 2
+> 𝑦 +𝑡 𝑥 +𝑡 5
+> 𝑥 7.1[[78 ,4,10]] 𝐺 refl (1 ,39) 𝑠 𝑦 𝑡 3
+> 𝑦 +𝑠 𝑥 𝑠 𝑦 𝑡 35
+> 𝑦 +𝑠 𝑥 𝑠 𝑦 𝑡 37
+> 𝑦 1 + 𝑠 𝑥 𝑡 4
+> 𝑦 +𝑠 𝑥 𝑡 35
+> 𝑦 5.1[[84 ,6,10]] 𝐺 refl (21 ,2) 𝑡 6
+> 𝑥 𝑠 𝑦 𝑡 𝑦 +𝑡 10
+> 𝑥 +𝑡 12
+> 𝑥 𝑠 𝑦 𝑡 12
+> 𝑥 𝑡 𝑦 +𝑡 17
+> 𝑥 +𝑡 20
+> 𝑥 𝑠 𝑦 𝑡 𝑦 7.1[[96 ,4,12]] 𝐶 8×𝑆 31 + (132) 𝑐 4+ (13) 𝑐 1 + (13) 𝑐 4+ (12) 𝑐 66.0[[102 ,4,12]] 𝐺 refl (51 ,1) 𝑠 𝑥 𝑡 8
+> 𝑥 𝑠 𝑦 +𝑠 𝑥 𝑡 16
+> 𝑥 𝑠 𝑦 +𝑠 𝑥 𝑡 21
+> 𝑥 𝑠 𝑦 𝑠 𝑦 +𝑡 22
+> 𝑥 𝑠 𝑦 +𝑡 29
+> 𝑥 𝑠 𝑦 5.6[[124 ,10 ,10]] 𝐺 refl (62 ,1) 𝑡 10
+> 𝑥 𝑠 𝑦 +𝑡 42
+> 𝑥 𝑠 𝑦 +𝑡 54
+> 𝑥 𝑠 𝑦 𝑡 9
+> 𝑥 +𝑡 37
+> 𝑥 +𝑡 60
+> 𝑥 𝑠 𝑦 8.1
+
+cross, the motion must be decomposed into several sub-steps [19, 32]. We use the following coarse-grained movement model. Data qubits are fixed in a middle layer, while 𝑋 -check and 𝑍 -check qubits occupy two movable layers above and below the data layer (in practice, these qubits may all be placed within the same layer). During syndrome extrac-tion, the check layers are rearranged by AOD motion so that each check qubit visits the cells corresponding to its target data qubits. For a given AOD substep, the movement time is controlled by the largest displacement among the rows or columns moved in that substep. Park-ing sites, trap transfer, and pulse-level scheduling are left to a lower-level hardware compiler. As in the algebraic construction, we label lattice cells by monomials in ℛ0. In one dimension the cells are la-beled by 𝑥 𝑎 , while in two dimensions they are labeled by 𝑥 𝑎 𝑦 𝑏 . In the two-block CSS representation, each cell contains one data qubit from each data block, and also has a standard position for one 𝑋 -check qubit and one 𝑍 -check qubit. Since the data layer is fixed, the syndrome-extraction movement problem reduces to a rearrange-ment problem for the check layers. If the 𝑋 -check terms are 𝑓 𝑋 = 𝑔 1 + 𝑔 2, ℎ𝑋 = 𝑔 3 + 𝑔 4, then an 𝑋 -check qubit must visit the corresponding monomial positions in se-quence. Equivalently, the relative layer transitions are determined by 
+
+𝑔 1, 𝑔 2𝑔 −11 , 𝑔 3𝑔 −12 , 𝑔 4𝑔 −13 , (107) up to the chosen ordering convention for the syndrome-extraction circuit. The same discussion applies to 𝑍 -checks. Figure 4 illustrates the basic mechanism. In Fig. 4(a), we take 𝐿 = 8 and first consider a one-dimensional translation layout. The cells are arranged in the ordi-nary periodic order 1, 𝑥, 𝑥 2, . . . , 𝑥 7. For the sequence 
+
+1 → 𝑡 𝑥 → 𝑡 2
+
+> 𝑥
+
+, most check qubits move by one lattice spac-ing under each 𝑡 𝑥 transition. However, the qubit at the periodic boundary must move from the right edge back to the left edge. Thus every 𝑡 𝑥 layer contains a wrap-around move whose length scales with 𝐿 . Although these moves can be parallelized, the longest displacement in the sub-step grows with the system size, consuming an increasing fraction of the QEC cycle time. Figure 4(b) shows the same sequence after afolded rearrangement. The cells are ordered as 
+
+1, 𝑥 7, 𝑥, 𝑥 6, 𝑥 2, 𝑥 5, 𝑥 3, 𝑥 4. This folded order places the two sides of the periodic boundary next to each other. As a result, the apparent wrap-around transition is con-verted into a bounded-distance motion. To avoid path crossings, the 𝑡 𝑥 transition can be split into two muted batches of short moves. Crucially, after this splitting the maximum displacement in each substep is 𝑂 (1) , inde-pendent of 𝐿 . The same idea extends coordinatewise to two dimensions. In Fig. 4(c), cells are labeled by 𝑥 𝑎 𝑦 𝑏 ,and the 𝑥 -and 𝑦 -coordinates are folded independently. A translation 𝑡 𝑥 : 𝑥 𝑎 𝑦 𝑏 ↦ → 𝑥 𝑎 +1 𝑦 𝑏 acts columnwise on the folded array. Some columns move to the right and are drawn with arrows above the array; the remaining columns move to the left and are drawn with arrows be-low the array. Thus the two-dimensional folded layout is the product of two one-dimensional foldings: the pe-riodic cost in the 𝑥 -direction is reduced by folding the 
+
+𝑥 -coordinate, and similarly for the 𝑦 -direction. For ordinary BB codes, the available monomials are pure translations 𝑡 𝑎 𝑥 𝑡 𝑏 𝑦 . Folded layouts can reduce the movement cost of such translation layers, but they do not add new local algebraic operations to the stabilizer tem-14 (a) 
+
+> (b) (c) (d)
+
+1 → tx → t2
+
+> x
+> Time Time
+
+1 → tx → t2
+
+> x
+
+1 → tx
+
+1 → sx                                
+
+> 1xx2x3x4x5x6x7
+> 1x2x3x4x5x6
+> x7
+> 1x2x3x4x5
+> x7x6
+> x
+> x
+> 1x2x4x6
+> x7x3x5x
+> x4
+> x6x7x51x2x3x
+> x71x2xx4
+> x6x5x3
+> 1x2x4x6
+> x7x3x5x
+> 1x2x4x6
+> x7x3x5x
+> 1
+> y2
+> y5
+> y3
+> y4
+> y
+> 1
+> y2
+> y5
+> y3
+> y4
+> y
+
+FIG. 4. AOD movement protocols from folded locality. Arrows indicate the induced motion of check qubits between consecutive syndrome-extraction substeps. Different colored arrows need to be completed in different substeps to avoid collisions. (a) In a one-dimensional periodic order, the transition 1 → 𝑡 𝑥 → 𝑡 2 
+
+> 𝑥
+
+contains a boundary wrap move whose length scales with the system size. (b) A folded order places boundary labels next to each other, converting the wrap move into bounded-distance AOD substeps. (c) In two dimensions, folding both coordinates gives a folded 𝑥 𝑎 𝑦 𝑏 -labeled check array. The 𝑡 𝑥 transition decomposes into right-moving and left-moving column batches. (d) Reflection terms such as 𝑠 𝑥 are local permutations on folded labels, providing code-native local movement primitives beyond pure translations. 
+
+plate. Reflection codes enlarge this space. As shown in Fig. 4(d), a reflection such as 𝑠 𝑥 acts locally on the folded labels: it exchanges nearby folded partners rather than moving a qubit across the full periodic system. Therefore reflection and glide terms such as 𝑠 𝑥 𝑡 𝑎 𝑥 𝑡 𝑏 𝑦 can be imple-mented as combinations of folded-local movement prim-itives. This is the experimental counterpart of the code-native folded locality discussed in Sec. IV B: reflection terms are additional local degrees of freedom available to the code construction. 
+
+V. DISCUSSION 
+
+This work establishes space-group codes as a broad algebraic framework for topological codes beyond pure translations. Starting from a set and a permutation group, the construction produces CSS codes whose checks are directly tied to geometric operations. The two main conclusions are therefore the existence of a large class of topological codes with point-group terms, and a concrete algebraic method for analyzing their topological order and anyon-sector data. Furthermore, we have demon-strated that these codes can exhibit favorable locality properties for movement via AODs, facilitating their im-plementation in reconfigurable atom arrays. Several directions for future work merit further investi-gation. First, given the enhanced locality of space-group codes, it would be interesting to explore their realiza-tion in other quantum computing platforms, such as su-perconducting qubits. Second, the development of tai-lored decoding algorithms for these codes constitutes a promising avenue, as the absence of full translation sym-metry may lead to improved performance under certain decoders [53, 54]. Third, while our algebraic construc-tion applies in arbitrary dimensions, we have restricted our attention here to the one and two-dimensional case; a natural next step is to study the properties of higher-dimensional analogues [55]. Fourth, the possibility of stacking space-group codes to form layered codes also presents an intriguing open problem [56]. Finally, the present work focuses on the two-block CSS construction, 15 and generalizing this approach to multi-block construc-tions would be a worthwhile endeavor. 
+
+Note added. In the final stage of completing this work, we became aware of Ref. [57], which also investigates the construction of qLDPC codes based on groups and their cosets. Starting from a related code construction, our work focuses mainly on topological properties of these codes and their compatibility with hardware constraints, whereas Ref. [57] focuses primarily on the search for codes with good parameters, as well as decoding and simula-tions under a circuit-level error model. We are pleased to see that related questions have been pursued around the same time from a complementary perspective. 
+
+> ACKNOWLEDGMENTS
+
+This work is supported by Quantum Science and Technology-National Science and Technology Major Project (Grant No. 2021ZD0301604) and the Na-tional Natural Science Foundation of China (Grant No. 11974201). We also acknowledge the support by center of high performance computing, Tsinghua University. 
+
+> Appendix A: Cosets of a group used for code construction
+
+In the main construction we assumed that the input is a set 𝐴 together with a permutation group 𝐺 acting on 𝐴 . Although every finite group is isomorphic to some permutation group, in many situations one would like to start directly from a group and determine possible sets on which it can act [45]. This appendix explains how to construct such sets from subgroups of 𝐺 .Every 𝐺 -set 𝐴 decomposes into a disjoint union of or-bits [45]: 
+
+𝐴 =⨆︁ 
+
+> 𝑖
+
+𝑇 𝑖 , 𝑇 𝑖 = 𝐺𝑎 𝑖 . (A1) Each group element sends points within an orbit to points in the same orbit. For 𝑎 ∈ 𝐴 , the stabilizer subgroup is 
+
+𝐺 𝑎 = {𝑔 ∈ 𝐺 | 𝑔𝑎 = 𝑎 }. (A2) 
+
+Theorem A.1. Let 𝑇 = 𝐺𝑎 be an orbit and let 𝐻 =
+
+𝐺 𝑎 . Then 𝑇 is isomorphic to the coset space 𝐺/𝐻 . The isomorphism is 
+
+Ψ𝑎 : 𝐺/𝐻 −→ 𝑇, Ψ𝑎 (𝑔𝐻 ) = 𝑔𝑎. (A3) 
+
+Conversely, every subgroup 𝐻 ⊆ 𝐺 gives a transitive 𝐺 -set 𝐺/𝐻 under left multiplication. Proof. If 𝑔𝐻 = 𝑔 ′𝐻 , then 𝑔 −1𝑔 ′ ∈ 𝐻 , hence (𝑔 −1𝑔 ′)𝑎 = 𝑎 
+
+and 𝑔 ′𝑎 = 𝑔𝑎 . Thus Ψ𝑎 is well-defined. It is surjec-tive because every point in 𝑇 is of the form 𝑔𝑎 . If 
+
+Ψ𝑎 (𝑔𝐻 ) = Ψ 𝑎 (𝑔 ′𝐻 ), then 𝑔𝑎 = 𝑔 ′𝑎 , so 𝑔 −1𝑔 ′𝑎 = 𝑎 and 
+
+𝑔 −1𝑔 ′ ∈ 𝐻 . Hence 𝑔𝐻 = 𝑔 ′𝐻 , proving injectivity. For any subgroup 𝐻 ⊆ 𝐺 , left multiplication satisfies the group-action axioms, and any two cosets are connected by some element of 𝐺 . Thus 𝐺/𝐻 is transitive. For every 𝑘 ∈ 𝐺 and 𝑔𝐻 ∈ 𝐺/𝐻 , one has 
+
+Ψ𝑎 (𝑘 ·(𝑔𝐻 )) = Ψ 𝑎 (( 𝑘𝑔 )𝐻 ) = ( 𝑘𝑔 )𝑎 = 𝑘 (𝑔𝑎 ) = 𝑘 ·Ψ𝑎 (𝑔𝐻 ).
+
+(A4) Hence Ψ𝑎 is 𝐺 -equivariant. 
+
+Theorem A.2. For two subgroups 𝐻, 𝐾 ⊆ 𝐺 , the 𝐺 -sets 
+
+𝐺/𝐻 and 𝐺/𝐾 are isomorphic if and only if 𝐻 and 𝐾 
+
+are conjugate. Proof. Suppose Φ : 𝐺/𝐾 → 𝐺/𝐻 is a 𝐺 -set isomorphism and write Φ( 𝐾 ) = 𝑔𝐻 . Since 𝐾 fixes the coset 𝐾 ∈ 𝐺/𝐾 ,combined with 𝐺 -equivariant, we assert it must fix 𝑔𝐻 
+
+in 𝐺/𝐻 . Thus for every 𝑘 ∈ 𝐾 , 𝑘𝑔𝐻 = 𝑔𝐻 , equivalently 
+
+𝑔 −1𝑘𝑔 ∈ 𝐻 . This gives 𝑔 −1𝐾𝑔 ⊆ 𝐻 . Applying the same argument to Φ−1 gives the reverse inclusion, so 𝑔 −1𝐾𝑔 =
+
+𝐻 . Conversely, if 𝑔𝐾𝑔 −1 = 𝐻 , then 
+
+𝑥𝐾 ↦ −→ 𝑥𝑔 −1𝐻 (A5) is a well-defined 𝐺 -equivariant bijection from 𝐺/𝐾 to 
+
+𝐺/𝐻 .Therefore a general 𝐺 -set can be written as 
+
+𝐴 ∼=
+
+> 𝑁
+
+⨆︁ 
+
+> 𝑖 =1
+> 𝑛 𝑖
+
+⨆︁ 
+
+> 𝑗 =1
+
+[𝐺/𝐻 𝑖 ]𝑗 , (A6) where 𝐻 𝑖 are representatives of conjugacy classes of sub-groups, [𝐺/𝐻 𝑖 ]𝑗 denotes the 𝑗 th copy of an orbit isomor-phic to 𝐺/𝐻 𝑖 , and 𝑛 𝑖 is the multiplicity of that geometric orbit type. Each term in a group-algebra template is the action of some element 𝑔 ∈ 𝐺 . It cannot send a point in one orbit to a different orbit. Consequently the orbit decomposi-tion induces a block decomposition of the code. If 𝐴 has several orbits, the qubit set decomposes into qubit sub-sets supported on those orbits. The total Pauli module is a direct sum of orbit blocks, and the resulting code space decomposes as a tensor product of the block codes. For a single-code analysis it is therefore enough to consider one orbit at a time. 
+
+> Appendix B: Basis table for two-dimensional point groups
+
+This appendix records the invariant polynomial sub-rings and free module bases used in the module-lifting step of Sec. IV D. For a two-dimensional point group 𝑃 ,the Laurent ring 
+
+ℛ0 = F2[𝑥 ±1, 𝑦 ±1] (B1) is treated as a finite free module over a polynomial sub-ring ℛ ⊆ ℛ 𝑃  
+
+> 0
+
+. After a basis 𝐸 𝑃 is fixed, every translation 16 or point-group generator acts by a finite matrix over ℛ.This is the input used to build the maps Λ𝑋 and Λ𝑍 .Table III gives one such choice of ℛ and 𝐸 𝑃 for each two-dimensional point group used in the paper. The entries are not meant to classify invariant rings uniquely; they provide computationally convenient poly-nomial subrings over which ℛ0 is free. For example, for the dihedral group 𝐷 2 generated by 𝑥 ↦ → 𝑥 −1 and 
+
+𝑦 ↦ → 𝑦 −1, one may take ℛ = F2[𝑎, 𝑏 ] with 𝑎 = 𝑥 + 𝑥 −1
+
+and 𝑏 = 𝑦 + 𝑦 −1. Then the relations 𝑥 2 + 𝑎𝑥 + 1 = 0 and 
+
+𝑦 2 + 𝑏𝑦 + 1 = 0 reduce every Laurent monomial to the basis {1, 𝑥, 𝑦, 𝑥𝑦 }. For the group 𝐶 6, we write 𝛼 6 = 𝑥 
+
+and 𝛽 6 = 𝑦 in the displayed basis. 
+
+> Appendix C: Gröbner basis for quotient rings and modules
+
+In this appendix, we review the standard Gröbner-basis algorithm for computing the dimension of a poly-nomial quotient ring, and then states the corresponding module version [50, 51]. Let 
+
+𝑅 = F2[𝑧 1, . . . , 𝑧 𝑚 ] (C1) and let 𝐼 ⊂ 𝑅 be an ideal. Choose a monomial order, namely a total well-order on monomials that is compati-ble with multiplication. For a nonzero polynomial 
+
+𝑓 =∑︁ 
+
+> 𝛼
+
+𝑐 𝛼 𝑧 𝛼 , (C2) the leading monomial LM( 𝑓 ) is the largest monomial 𝑧 𝛽 
+
+with 𝑐 𝛽 ̸ = 0 , the leading coefficient is LC( 𝑓 ) = 𝑐 𝛽 , and the leading term is LT( 𝑓 ) = 𝑐 𝛽 𝑧 𝛽 . For monomials 𝑧 𝛼 and 
+
+𝑧 𝛽 , we say that 𝑧 𝛼 divides 𝑧 𝛽 if 𝛼 𝑖 ≤ 𝛽 𝑖 for every 𝑖 . In that case the quotient monomial is 𝑧 𝛽 −𝛼 .For two nonzero polynomials 𝑓, 𝑔 , their 𝑆 -polynomial is defined by 
+
+𝑆 (𝑓, 𝑔 ) = lcm(LM( 𝑓 ), LM( 𝑔 )) LT( 𝑓 ) 𝑓 − lcm(LM( 𝑓 ), LM( 𝑔 )) LT( 𝑔 ) 𝑔. 
+
+(C3) The purpose of this expression is to cancel the common leading monomial at the least common multiple of the two leading monomials. Over F2, the subtraction is the same as addition. We also fix the division procedure used below. To di-vide a polynomial ℎ by a current list 𝐺 = {𝑔 1, . . . , 𝑔 𝑡 },look at the leading term of the current value of ℎ. If some 
+
+LM( 𝑔 𝑖 ) divides LM( ℎ), replace 
+
+ℎ ←− ℎ − LT( ℎ)LT( 𝑔 𝑖 ) 𝑔 𝑖 . (C4) This cancels the current leading term of ℎ. Repeat the same step with the new value of ℎ. If no leading mono-mial from 𝐺 divides LM( ℎ), move LT( ℎ) to the remain-der and remove it from ℎ. The division ends when ℎ = 0 .Saying that a polynomial reduces to zero means that this division process leaves zero remainder; equivalently, its leading term can be cancelled repeatedly until no term remains outside the span generated by the leading terms of 𝐺 .Buchberger’s algorithm is a loop. Start with a gen-erating list 𝐺 = {𝑓 1, . . . , 𝑓 𝑠 }. For each pair 𝑔 𝑖 , 𝑔 𝑗 ∈ 𝐺 ,compute 𝑆 (𝑔 𝑖 , 𝑔 𝑗 ) and divide it by the current list 𝐺 . If the remainder is nonzero, adjoin this remainder to 𝐺 and then repeat the same test for the new pairs. The loop stops when every 𝑆 -polynomial has zero remainder after division by the current list. By Buchberger’s criterion, this final list is a Gröbner basis of 𝐼 [50, 51]. The process terminates because 𝑅 is Noetherian [46]. One usually performs a final reduction step. First remove every basis element whose leading monomial is divisible by the lead-ing monomial of another basis element. In particular, if two basis elements have the same leading monomial, one of them is redundant and must be removed after reduc-tion. Then reduce each remaining basis element by all the others and normalize leading coefficients to one. The result is the reduced Gröbner basis. The key computational property is then that every 
+
+𝑓 ∈ 𝑅 has a unique normal form after division by this Gröbner basis [50, 51]. A monomial 𝑧 𝛼 is called standard if it is not divisible by any LM( 𝑔 ) with 𝑔 in the Gröbner basis. Let ℬ𝐼 be the set of standard monomials. The residue classes of the monomials in ℬ𝐼 form an F2-basis of 𝑅/𝐼 [50, 51]. Therefore, if ℬ𝐼 is finite, then 
+
+dim F2 𝑅/𝐼 = # ℬ𝐼 . (C5) Here is a small example over F2 where the initial gen-erators are not already a Gröbner basis. Let 
+
+𝑅 = F2[𝑥, 𝑦 ], 𝐼 = ⟨𝑥 2, 𝑦 2 + 𝑥 2⟩. (C6) Use lexicographic order with 𝑥 > 𝑦 . Set 
+
+𝑓 1 = 𝑥 2, 𝑓 2 = 𝑦 2 + 𝑥 2. (C7) Both generators have leading monomial 𝑥 2:
+
+LM( 𝑓 1) = 𝑥 2, LM( 𝑓 2) = 𝑥 2. (C8) Their 𝑆 -polynomial is 
+
+𝑆 (𝑓 1, 𝑓 2) = 𝑓 1 + 𝑓 2 = 𝑦 2. (C9) The monomial 𝑦 2 is not divisible by the current leading monomial 𝑥 2, so the remainder is nonzero. Buchberger’s algorithm therefore adjoins 
+
+𝑓 3 = 𝑦 2. (C10) Now the leading monomials include 𝑥 2 and 𝑦 2. The re-maining 𝑆 -polynomials reduce to zero by division with the current list, so the loop has produced a Gröbner ba-sis. There is still a final simplification. The two elements 
+
+𝑓 1 and 𝑓 2 have the same leading monomial 𝑥 2; moreover, reducing 𝑓 2 by 𝑓 1 gives 
+
+𝑓 2 + 𝑓 1 = 𝑦 2 = 𝑓 3. (C11) 17 
+
+TABLE III. Invariant polynomial rings and free bases for two-dimensional point groups. The table gives the ring ℛ and a free basis of ℛ0 as an ℛ-module. The symbols used in the table are 𝑎 = 𝑥 + 𝑥 −1, 𝑏 = 𝑦 + 𝑦 −1, 𝐴 2 = 𝑥 + 𝑥 −1 + 𝑦 + 𝑦 −1,
+
+𝐵 2 = ( 𝑥 + 𝑥 −1)( 𝑦 + 𝑦 −1), 𝑠 𝑑 = 𝑥 + 𝑦 , 𝑝 𝑑 = 𝑥𝑦 , 𝑞 𝑑 = 𝑥𝑦 + 𝑥 −1𝑦 −1, 𝑠 3 = 𝑥 + 𝑦 + 𝑥 −1𝑦 −1, 𝑝 3 = 𝑥𝑦 + 𝑥 −1 + 𝑦 −1, 𝑠 6 = 𝑥 + 𝑥 −1𝑦 + 𝑦 −1,
+
+𝑝 6 = 𝑦 + 𝑥 −1 + 𝑥𝑦 −1, 𝐴 6 = 𝑥 + 𝑥 −1𝑦 + 𝑦 −1 + 𝑦 + 𝑥 −1 + 𝑥𝑦 −1, and 𝐵 6 = ( 𝑥 + 𝑥 −1𝑦 + 𝑦 −1)( 𝑦 + 𝑥 −1 + 𝑥𝑦 −1).                                          
+
+> point group ℛbasis 𝐸 𝑃 rank
+> 1F2[𝑎, 𝑏 ]{1, 𝑥, 𝑦, 𝑥𝑦 }4
+> 𝑚 𝑥 F2[𝑎, 𝑏 ]{1, 𝑥, 𝑦, 𝑥𝑦 }4
+> 𝑚 𝑑 F2[𝑠 𝑑 , 𝑞 𝑑 ]{1, 𝑥, 𝑝 𝑑 , 𝑥𝑝 𝑑 }={1, 𝑥, 𝑥𝑦, 𝑥 2𝑦 }42F2[𝑎, 𝑏 ]{1, 𝑥, 𝑦, 𝑥𝑦 }42𝑚𝑚 rect F2[𝑎, 𝑏 ]{1, 𝑥, 𝑦, 𝑥𝑦 }42𝑚𝑚 diag F2[𝐴 2, 𝐵 2]{1, 𝑥, 𝑦, 𝑥𝑦, 𝑎, 𝑎𝑥, 𝑎𝑦, 𝑎𝑥𝑦 }83F2[𝑠 3, 𝑝 3]{1, 𝑥, 𝑥 2, 𝑦, 𝑥𝑦, 𝑥 2𝑦 }63𝑚 F2[𝑠 3, 𝑝 3]{1, 𝑥, 𝑥 2, 𝑦, 𝑥𝑦, 𝑥 2𝑦 }64F2[𝐴 2, 𝐵 2]{1, 𝑥, 𝑦, 𝑥𝑦, 𝑎, 𝑎𝑥, 𝑎𝑦, 𝑎𝑥𝑦 }84𝑚𝑚 F2[𝐴 2, 𝐵 2]{1, 𝑥, 𝑦, 𝑥𝑦, 𝑎, 𝑎𝑥, 𝑎𝑦, 𝑎𝑥𝑦 }86F2[𝐴 6, 𝐵 6]{1, 𝛼 6, 𝛼 26, 𝛽 6, 𝛼 6𝛽 6, 𝛼 26𝛽 6, 𝑠 6, 𝑠 6𝛼 6, 𝑠 6𝛼 26, 𝑠 6𝛽 6, 𝑠 6𝛼 6𝛽 6, 𝑠 6𝛼 26𝛽 6}12 6𝑚𝑚 F2[𝐴 6, 𝐵 6]{1, 𝛼 6, 𝛼 26, 𝛽 6, 𝛼 6𝛽 6, 𝛼 26𝛽 6, 𝑠 6, 𝑠 6𝛼 6, 𝑠 6𝛼 26, 𝑠 6𝛽 6, 𝑠 6𝛼 6𝛽 6, 𝑠 6𝛼 26𝛽 6}12
+
+Thus 𝑓 2 is redundant. After removing this redundant generator, the reduced Gröbner basis is 
+
+𝐺 red = {𝑥 2, 𝑦 2}. (C12) The standard monomials are therefore 
+
+ℬ𝐼 = {1, 𝑥, 𝑦, 𝑥𝑦 }. (C13) Thus 
+
+dim F2 𝑅/𝐼 = 4 . (C14) The module version is similar. Let 𝑅 𝑛 have basis 
+
+𝑒 1, . . . , 𝑒 𝑛 , and let 𝑁 ⊆ 𝑅 𝑛 be a submodule generated by vectors 𝑔 1, . . . , 𝑔 𝑡 . A module monomial has the form 
+
+𝑧 𝛼 𝑒 𝑖 . To run a Gröbner-basis algorithm, one must first choose an order on these module monomials. This in-cludes a convention for comparing the basis directions 
+
+𝑒 1, . . . , 𝑒 𝑛 , such as a term-over-position or position-over-term order. For example, in 𝑅 2 one may choose an order with 𝑒 1 > 𝑒 2, so the leading module monomial of 𝑥𝑒 1 +𝑒 2
+
+is 𝑥𝑒 1. Divisibility also remembers the basis direction: 
+
+𝑧 𝛼 𝑒 𝑖 | 𝑧 𝛽 𝑒 𝑗 means 𝑖 = 𝑗 and 𝑧 𝛼 | 𝑧 𝛽 . (C15) Thus 𝑥𝑒 1 divides 𝑥 3𝑒 1 but does not divide 𝑥 3𝑒 2. In the module division algorithm, a current leading term can be cancelled by a basis element 𝑔 ∈ 𝐺 only when LM( 𝑔 )
+
+divides that leading module monomial in this sense. Hav-ing the same polynomial monomial is not enough if the terms lie in different basis components. The module Buchberger algorithm again computes a Gröbner basis 
+
+𝐺 𝑁 by reducing module 𝑆 -polynomials with this ordered basis and this divisibility rule [51]. The leading mod-ule monomials LM( 𝑔 ), 𝑔 ∈ 𝐺 𝑁 , determine the standard module monomials: these are the 𝑧 𝛼 𝑒 𝑖 not divisible by any leading module monomial [51]. In matrix computations, a submodule is usually given by the columns of a polynomial matrix; computing a module Gröbner basis of this column submodule and counting its standard module monomials gives the vector-space dimension of the corresponding cokernel whenever that dimension is finite [51]. 
+
+Appendix D: Syndrome-cokernel symmetry action of the reflection example 
+
+If a point-group element 𝑔 preserves the syndrome sub-module im Λ 𝑋 or im Λ 𝑍 , it induces a homomorphism of the corresponding syndrome cokernel. Given a quotient basis, this homomorphism can be represented by a ma-trix 𝜌 𝑔 over F2.The reflection code in Sec. IV C satisfies the topological-order condition. Its finite exact symmetry is 
+
+𝑔 = 𝑠 𝑥 𝑡 𝑦 𝑠 𝑦 . (D1) On the two syndrome cokernel quotients, 𝑔 induces the same 4 × 4 matrix 
+
+𝜌 𝑔 =
+
+⎛⎜⎝
+
+0 0 1 0 0 0 0 1 1 0 0 0 0 1 0 0 
+
+⎞⎟⎠ . (D2) This gives a computable symmetry action on the syndrome-cokernel sector modules of the reflection ex-ample. On a finite logical basis, the same symmetry ap-pears as a SWAP relabeling of four pairs of logical qubits. Such matrices identify candidate logical symmetry oper-ations when a compatible physical implementation of the point-group action is available. 
+
+[1] K. Fujii, Quantum Computation with Topological Codes: from qubit to topological fault-tolerance , Vol. 8 (Springer, 2015). 18 
+
+[2] H. Bombín, arXiv preprint arXiv:1311.0277 (2013). [3] E. Dennis, A. Kitaev, A. Landahl, and J. Preskill, Jour-nal of Mathematical Physics 43 , 4452 (2002). [4] A. Kitaev, in Proceedings of Symposia in Applied Math-ematics , Vol. 58 (2002) pp. 267–272. [5] A. Y. Kitaev, Annals of physics 303 , 2 (2003). [6] R. Dijkgraaf and E. Witten, Communications in Mathe-matical Physics 129 , 393 (1990). [7] X.-G. Wen, Physical review letters 70 , 355 (1993). [8] A. Kitaev, Annals of Physics 321 , 2 (2006). [9] A. G. Fowler, M. Mariantoni, J. M. Martinis, and A. N. Cleland, Physical Review A—Atomic, Molecular, and Optical Physics 86 , 032324 (2012). [10] D. Horsman, A. G. Fowler, S. Devitt, and R. V. Meter, New Journal of Physics 14 , 123011 (2012). [11] A. G. Fowler, A. M. Stephens, and P. Groszkowski, Phys-ical Review A—Atomic, Molecular, and Optical Physics 
+
+80 , 052312 (2009). [12] Y. Zhao, Y. Ye, H.-L. Huang, Y. Zhang, D. Wu, H. Guan, Q. Zhu, Z. Wei, T. He, S. Cao, et al. , Physical Review Letters 129 , 030501 (2022). [13] S. Bravyi, A. W. Cross, J. M. Gambetta, D. Maslov, P. Rall, and T. J. Yoder, Nature 627 , 778 (2024). [14] Z. Liang, K. Liu, H. Song, and Y.-A. Chen, PRX Quan-tum 6, 020357 (2025). [15] Z. Liang and Y.-A. Chen, arXiv preprint arXiv:2510.05211 (2025). [16] Z. Liang and Y.-A. Chen, arXiv preprint arXiv:2605.04151 (2026). [17] K. Chen, Y. Liu, Y. Zhang, Z. Liang, Y.-A. Chen, K. Liu, and H. Song, Physical Review Letters 135 ,076603 (2025). [18] R. Kobayashi, Y. Li, H. Xue, P.-S. Hsin, and Y.-A. Chen, Physical Review X 16 , 011010 (2026). [19] C. Zhao, C. Duckering, A. Gu, N. Maskara, and H. Zhou, arXiv preprint arXiv:2604.16209 (2026). [20] G. Li, A. Wu, Y. Shi, A. Javadi-Abhari, Y. Ding, and Y. Xie, in Proceedings of the Eight Annual ACM Inter-national Conference on Nanoscale Computing and Com-munication (2021) pp. 1–7. [21] J. Liu, A. Zang, M. Suchara, T. Zhong, and P. D. Hov-land, in 2025 62nd ACM/IEEE Design Automation Con-ference (DAC) (IEEE, 2025) pp. 1–6. [22] A. Strikis, D. E. Browne, and M. E. Beverland, arXiv preprint arXiv:2603.05481 (2026). [23] F. Tripier, W. C. Chung, J. Young, S. Alam, B. Bjork, A. Brodutch, F. L. Buessen, N. J. Coble, T. Del-laert, D. Maslov, et al. , arXiv preprint arXiv:2604.19481 (2026). [24] D. Bluvstein, S. J. Evered, A. A. Geim, S. H. Li, H. Zhou, T. Manovitz, S. Ebadi, M. Cain, M. Kalinowski, D. Hangleiter, et al. , Nature 626 , 58 (2024). [25] B. Tan, D. Bluvstein, M. D. Lukin, and J. Cong, in Pro-ceedings of the 41st IEEE/ACM International Confer-ence on Computer-Aided Design (2022) pp. 1–9. [26] H. Wang, P. Liu, D. B. Tan, Y. Liu, J. Gu, D. Z. Pan, J. Cong, U. A. Acar, and S. Han, in 2024 ACM/IEEE 51st Annual International Symposium on Computer Ar-chitecture (ISCA) (IEEE, 2024) pp. 293–309. [27] S. J. Evered, D. Bluvstein, M. Kalinowski, S. Ebadi, T. Manovitz, H. Zhou, S. H. Li, A. A. Geim, T. T. Wang, N. Maskara, et al. , Nature 622 , 268 (2023). [28] D. Bluvstein, A. A. Geim, S. H. Li, S. J. Evered, J. P. Bonilla Ataides, G. Baranes, A. Gu, T. Manovitz, M. Xu, M. Kalinowski, et al. , Nature 649 , 39 (2026). [29] A. Radnaev, W. Chung, D. Cole, D. Mason, T. Bal-lance, M. Bedalov, D. Belknap, M. Berman, M. Blakely, I. Bloomfield, et al. , PRX Quantum 6, 030334 (2025). [30] B. W. Reichardt, A. Paetznick, D. Aasen, I. Basov, J. M. Bello-Rivas, P. Bonderson, R. Chao, W. van Dam, M. B. Hastings, R. V. Mishmash, et al. , arXiv preprint arXiv:2411.11822 (2024). [31] I. Cong, H. Levine, A. Keesling, D. Bluvstein, S.-T. Wang, and M. D. Lukin, Physical Review X 12 , 021049 (2022). [32] Q. Xu, J. P. Bonilla Ataides, C. A. Pattison, N. Raveen-dran, D. Bluvstein, J. Wurtz, B. Vasić, M. D. Lukin, L. Jiang, and H. Zhou, Nature Physics 20 , 1084 (2024). [33] M. Wang and F. Mueller, Quantum 10 , 2009 (2026). [34] C. M. Hopkin, V. V. Albert, and D. J. Williamson, arXiv preprint arXiv:2605.19298 (2026). [35] K. Sahay, D. J. Williamson, and B. J. Brown, arXiv preprint arXiv:2602.22770 (2026). [36] D. Komoto and K. Kasai, npj Quantum Information 11 ,154 (2025). [37] M. A. Nielsen and I. L. Chuang, Quantum computation and quantum information (Cambridge university press, 2010). [38] M. F. Atiyah and I. G. Macdonald, Introduction to com-mutative algebra (CRC press, 2018). [39] A. M. Steane, IEEE Transactions on Information Theory 
+
+45 , 2492 (1999). [40] D. Gottesman, Stabilizer codes and quantum error cor-rection (California Institute of Technology, 1997). [41] M. H. Freedman and D. A. Meyer, Foundations of Com-putational Mathematics 1, 325 (2001). [42] H. Bombin and M. A. Martin-Delgado, Journal of math-ematical physics 48 (2007). [43] N. P. Breuckmann and J. N. Eberhardt, PRX quantum 
+
+2, 040101 (2021). [44] J. Haah, Communications in Mathematical Physics 324 ,351 (2013). [45] J. Gallian, Contemporary abstract algebra (Chapman and Hall/CRC, 2021). [46] D. Eisenbud, Commutative Algebra: With a View To-ward Algebraic Geometry , Graduate Texts in Mathemat-ics, Vol. 150 (Springer, 1995). [47] J. Cahill, J. W. Iverson, D. G. Mixon, and D. Packer, Foundations of Computational Mathematics 25 , 1047 (2025). [48] H. Derksen and G. Kemper, Computational invariant theory (Springer, 2015). [49] T.-Y. Lam, Serre’s Problem on Projective Modules 
+
+(Springer, 2006). [50] D. Cox, J. Little, D. O’shea, and M. Sweedler, Ideals, varieties, and algorithms (Springer, 1997). [51] G.-M. Greuel, G. Pfister, O. Bachmann, C. Lossen, and H. Schönemann, A Singular introduction to commutative algebra , Vol. 2 (Springer, 2008). [52] D. A. Buchsbaum and D. Eisenbud, Advances in Mathe-matics 18 , 245 (1975). [53] K. Yin, X. Fang, J. Ruan, H. Zhang, D. Tullsen, A. Sorn-borger, C. Liu, A. Li, T. Humble, and Y. Ding, arXiv preprint arXiv:2412.02885 (2024). [54] A. Gu, J. Ataides, M. D. Lukin, and S. F. Yelin, arXiv preprint arXiv:2604.08358 (2026). [55] M. B. Hastings, arXiv preprint arXiv:1608.05089 (2016). [56] Z.-C. Liu, C.-Y. Xu, and Y. Xu, arXiv preprint 19 
+
+arXiv:2602.15372 (2026). [57] A. Aydin, I. Tamo, and A. Barg, arXiv preprint arXiv:2606.17268 (2026).

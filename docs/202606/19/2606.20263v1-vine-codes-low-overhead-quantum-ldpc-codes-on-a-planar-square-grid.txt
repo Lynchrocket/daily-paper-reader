@@ -1,0 +1,1196 @@
+Title: Vine Codes: Low-Overhead Quantum LDPC Codes on a Planar Square Grid
+
+URL Source: https://arxiv.org/pdf/2606.20263v1
+
+Published Time: Fri, 19 Jun 2026 01:21:07 GMT
+
+Number of Pages: 26
+
+Markdown Content:
+# Vine Codes: Low-Overhead Quantum LDPC Codes on a Planar Square Grid 
+
+Georgia M. Nixon, ∗ Campbell K. McLauchlan, † and Charles C. L. van Rest 
+
+School of Physics, The University of Sydney, Sydney, New South Wales 2006, Australia 
+
+The surface code is a promising route towards large-scale quantum computing, requiring only nearest-neighbour gates amenable to superconducting hardware. However, surface codes incur large qubit overheads. Novel quantum low-density parity check (qLDPC) codes promise to reduce over-heads, but require long-range connections that are difficult to achieve on superconducting platforms. Here, we introduce “Vine Codes” – qLDPC codes that are implementable on a planar square grid through nearest-neighbour, two-qubit gates native to superconducting platforms (iSWAP and CZ). Our approach generalises the recently introduced “Directional Codes” [1] which are constrained to a torus. In contrast, vine codes have open boundary conditions constructed with the aid of rout-ing qubits. We perform extensive numeric searches and find promising candidate vine codes, e.g. [[121 , 4, 6]], [[221 , 6, 7]], and [[234 , 9, 6]] codes. We verify the circuit distances and show that data and measure qubits required can be reduced by up to ∼ 28% relative to the surface code at a circuit distance of 7. Even including routing qubits, vine codes require fewer total qubits than the surface code (e.g. ∼ 18% reduction at circuit distance 10) and benefits are expected to increase at higher distances. We perform circuit-level noise simulations to demonstrate that under a realistic noise model and at a near-term noise rate of 10 −3, vine codes can perform better than the surface code while using fewer qubits. We give an exhaustive list of all unique vine codes up to stabiliser-weight 9. We additionally introduce “Flip-Vine Codes” which possess single-qubit transversal Clifford gates useful for fault-tolerant logic and magic state cultivation. We furthermore construct examples of generalised open boundaries for vine codes that go beyond the familiar X/Z boundaries of the surface and tile codes. 
+
+I. INTRODUCTION 
+
+To run useful, large-scale quantum algorithms, quan-tum error-correction (QEC) is required to suppress the noise encountered in physical devices. A leading QEC code candidate is the surface code [2–6], owing to its high threshold, 2D-local connectivity requirements, amenabil-ity to fast and accurate decoders [3, 7–10], and the exis-tence of mature fault-tolerant computation schemes [11– 21]. The 2D planar layout of the surface code is partic-ularly well-suited to superconducting platforms, where high-degree or non-local connectivity between qubits re-mains a challenge. Superconducting devices benefit from fast and high-fidelity gates, and several core primitives of fault-tolerant quantum computation have already been demonstrated on these devices [22–30]. They are there-fore a promising platform for future quantum computers at the utility scale. Recent advancements in quantum low-density parity check (qLDPC) codes have demonstrated high rate, high distance codes at intermediate scales that can dramati-cally reduce the large overheads of QEC associated with the surface code [1, 31–47]. These codes may help reduce the overheads of running useful quantum algorithms by orders of magnitude [32, 33, 35]. However, this comes with the tradeoff that many highly performant qLDPC codes, such as the celebrated bivariate bicycle codes [31], require non-local connectivity when the qubits are em-bedded in two or even three dimensional space. This   
+
+> ∗georgia.nixon@sydney.edu.au
+> †campbell.mclauchlan@sydney.edu.au
+
+poses a particular challenge for superconducting archi-tectures which have fixed qubit layouts built into a chip. While there exist demonstrations of bivariate bicycle codes in superconducting platforms [30], the logical fi-delities demonstrated are far lower than is possible with the surface code [24]. In general, the technology required for high-fidelity, non-local connections between supercon-ducting qubits remains a challenge to realise. Directional codes are a family of recently-introduced qLDPC codes defined on a torus that can achieve high-rate, high-distance codes while only requiring local con-nectivity [1, 48]. They achieve this by using iSWAP gates for syndrome measurement. The iSWAP, along with the CZ gate, is native to superconducting platforms, and is a strong contender for the backbone of syndrome ex-traction circuits [25, 49–53]. By re-casting the qubit-swap mechanism in the iSWAP gate as an opportunity rather than a hindrance, directional codes can achieve stabiliser support spanning further than nearest neigh-bours as measure and data qubit positions are dynami-cally updated throughout the syndrome extraction cycle. However, directional codes still require non-local con-nectivity on a planar chip as they are embedded on a torus. While techniques exist for enforcing open bound-ary conditions on 2D translationally invariant codes orig-inally defined on toric layouts [41, 42, 54], it is not clear whether directional codes will be amenable to these tech-niques while retaining 2D locality and low-depth syn-drome measurement circuits. Moreover, since encoding rate and distances, along with circuit-level performance, can differ dramatically between open and closed bound-ary conditions, it is unclear whether the gains achieved by directional codes will transfer to the cases of practical relevance for superconducting devices. 
+
+> arXiv:2606.20263v1 [quant-ph] 18 Jun 2026
+
+2                                     
+
+> FIG. 1. Vine codes are defined with qubits on a square lattice where each measure qubit has four nearest neighbour data qubits. (a) -(b) The uppercase steps ⃗N,⃗E,⃗S,⃗Wentangle pairs of data and measure qubits via a CXSWAP gate (see (a)) following the data-measure qubit pairings shown in (b). The labels ⃗N,⃗E,⃗Sand ⃗Wrefer to cardinal directions that mirror the vector from the measure to the data qubit in each case. A pink X-type measure qubit will control the CXSWAP as in (a), while a blue Z-type measure qubit will be the target of the CXSWAP. (c) -(d) The lowercase steps ⃗n,⃗e,⃗s,⃗wentangle pairs of data and measure qubits via a CX gate (see (c)), where now no qubits move. The data-measure qubit pairings for each instruction are shown in (d), following the same pattern as (c). (e) The qubit register showing the dynamic position of the red
+> X-type measure qubit for the step sequence −−−−−→
+> nSewSs . Part of the Z-error detecting region for this stabiliser is highlighted in green. (f ) −−−−−→
+> nSewSs is a step sequence that encodes a valid vine code on the layout shown (alternating rows of X- and Z-type measure qubits). We show the movement of an Xmeasure qubit in red, and label the data qubits it entangles with diin each step i. The support of the stabiliser is shown by the data qubits connected by the green vine as indicated.
+
+We address this challenge in this manuscript by in-troducing vine codes (so-named because of the shape of their stabiliser supports; see Fig. 1). Vine codes demon-strate that it is possible to achieve higher rate and dis-tance codes than the surface code without requiring any other connectivity than a 2D, planar square grid. These codes generalise the directional codes in several ways. Firstly, vine codes are defined with open boundaries con-structed by introducing routing qubits. Secondly, by util-ising both iSWAP and CZ gates for syndrome extraction, vine codes form a larger family of qLDPC codes. We extend the utility of vine constructions by also in-troducing “flip-vine codes”. By altering the roles of mea-sure qubits (between measuring X and Z stabilisers) in each QEC round, flip-vine codes are weakly self-dual and possess single-qubit transversal Clifford gates. These fea-tures are useful for fault-tolerant logic [55] and for magic state cultivation [56–59]. We provide examples of flip-vine codes with periodic boundary conditions that sup-port transversal single-qubit Clifford gates. These reduce data qubit numbers by up to ∼ 83 .3% relative to the sur-face code. Through numerical searches, we find high-performing vine codes with lower overheads than the surface code (see Figs. 2 and 3). We construct vine codes with pa-rameters such as [[221 , 6, 7]], [[121 , 4, 6]], [[234 , 9, 6]] and [[437 , 6, 10]]. By providing exact circuit distances for small-instances at distance 7, we find vine codes that re-duce the data and measure qubits required by up to 28% relative to the surface code. We demonstrate that these efficiencies over the surface code are expected to improve further for larger distances. We find examples of vine codes on boundary geometries with no distance-reducing hook errors. Vine codes utilise routing qubits to achieve an open boundary. Including routing qubits, vine codes still maintain a lower total overhead relative to the surface code. Remarkably, we find vine code examples that re-quire ∼ 18% fewer total qubits (including routing) than the surface code at distance 10 (in a code which we ex-pect to have no distance-reducing hooks). Again, these benefits are expected to improve for larger distances. We 3introduce various techniques that help minimise the num-ber of routing qubits required for syndrome measure-ment, reducing it by up to ∼ 66% in relevant examples, compared to naive requirements. We perform circuit-based simulations of several exam-ples of vine codes to demonstrate their expected perfor-mance under a superconducting-inspired noise model. At a noise rate of p = 10 −3, accessible to near-term de-vices [60], vine codes perform better or comparably to the surface code despite using fewer qubits. We provide detailed descriptions of how to construct open boundaries for vine codes. We distinguish be-tween “Pauli boundaries,” analogous to the X/Z bound-aries of the surface code, and “generalised boundaries,” which encompass the coloured boundaries of the 2D color code [61–63]. We provide examples of these generalised boundaries for (flip-)vine codes and show that the sta-bilisers in these examples can be measured with no in-crease in the circuit depth. The remainder of this paper is structured as follows. In Section II, we introduce vine codes (on an infinite plane) and flip-vine codes. In Section III, we describe both the Pauli and generalised boundary constructions. In Sec-tion IV, we report the results of an exhaustive search of all valid vine codes up to stabiliser weight 9, and re-port example vine and flip-vine codes that out-perform the surface code in terms of qubit overhead. We also report the results of our numerical simulations. In Sec-tion V, we conclude and discuss future directions. In the appendices, we provide further details of our numeric searches for valid vine codes, the geometric properties of vine codes, the boundary construction at corners, proce-dures for routing qubit minimisation, and the generalised boundary circuits.  
+
+> II. VINE CODES
+
+We first introduce the vine codes on an infinite plane and introduce boundaries in Section III. Vine codes are defined with qubits on a planar square grid and with nearest neighbour gate connectivity, see Fig. 1. Qubits are arranged so that all measure qubits have only data qubits as nearest neighbours. Inspired by Ref. 1, vine codes are defined by a “step sequence” which encode a series of gates, and a “layout” which encodes relative initial positions of X- and Z- type measure qubits. The step sequence specifies the series of gates that are performed during the syndrome extraction circuit. For simplicity, we construct steps as CXSWAP or CX gates (which are equivalent to iSWAP and CZ respectively, up to single-qubit Clifford gates). We define eight types of steps that can appear in a sequence. The steps ⃗ N ,⃗ E,⃗S,⃗ W each correspond to a CXSWAP gate performed between each measure qubit and the neighbouring data qubit in the North, East, South or West direction, see Fig. 1(a)-(b). Extending from Ref. 1, we also introduce steps ⃗n,⃗e,⃗s,⃗w, which correspond to a CX gate (no swap) performed between measure and data qubits in the indi-cated cardinal direction, see Fig. 1(c)-(d). The control and target qubits of each CX/CXSWAP gate depend on whether the measure qubit involved in the gate is a Z
+
+or X measure qubit – Z (X) measure qubits are always the target (control) qubits of any entangling gates. For example, for an ⃗ N step in the sequence, a CXSWAP con-trolled on an X measure qubit will target the neighbour-ing data qubit directly above it in the square lattice grid. Similarly, during the ⃗ N step, CXSWAP gates that are targeted on Z measure qubits will be controlled by data qubits directly above. The supports of stabilisers follow a vine shape, with a main root generated by CXSWAP directions, and small offshoots generated by CX gates performed along the way. Fig. 1(a)-(d) shows how black data qubits and pink or blue measure qubits are paired up and entangled for each of the operations defined. The layout encodes the initial positions of X and Z
+
+measure qubits. In Fig. 1, we depict one typical layout which has alternating rows of X- and Z-stabilisers. This corresponds to “layout 1” in Ref. [1]. Many other valid layouts exist; for example we consider an alternative lay-out for a flip-vine code in Section III B. However unless stated otherwise, we assume the layout in Fig. 1 for the remainder of this manuscript. Figures 1(e)-(f) show an example vine code −−−−−→
+
+nSewSs 
+
+on layout 1 and the corresponding vine code stabiliser support generated. The red measure qubit begins by en-tangling with the data qubit d1 via a CX gate in the ⃗n
+
+direction. It does not move during this step. Next, we perform an ⃗ S step, where the measure qubit is entan-gled with d2 via a CXSWAP and therefore also swaps positions with d2. This now allows the measure qubit to have nearest neighbour support with a different set of qubits compared to its initial position. The remaining moves, where the measure qubit does a combination of CX and CXSWAP gates, allow it to entangle with qubits 
+
+d3-d6. Fig. 1(f) shows the support of a stabiliser and ex-panding detecting region [49] generated by the −−−−−→
+
+nSewSs 
+
+step sequence, relative to the dynamic position of the red measure qubit. Importantly, in even syndrome extraction rounds, the measure qubit takes the opposite route, returning it to its initial position while entangling with data qubits in reverse order. The period of the total measure qubit walk returning to its original position is therefore two syndrome extraction rounds. While this return route convention is assumed for vine codes, when we introduce flip-vine codes in Section II A we introduce an alternative return instruction for even syndrome extraction rounds. Only certain step sequence and layout combinations define a valid stabiliser code replete with a syndrome extraction circuit. The combination needs to ensure that 1) stabilisers of opposite type have even overlap-ping support, 2) measure qubits are not entangled or “interleaved” at the measurement step, 3) the code has 4
+
+FIG. 2. The qubit overhead scaling of the −−−−−−−→
+
+nSeW wSs vine code for three different open boundary geometries, each encoding 
+
+k = 6 logical qubits. The stabiliser support is indicated schematically by the green vine and red measure qubit in (a). The brown shape at the top of each subfigure indicates the open boundary geometry. For each boundary geometry (see Fig. 5), we plot the total number of qubits ntotal (including data, measure and routing qubits) and number of data qubits n needed to create a patch of circuit distance dcircuit , comparing these to the total number of qubits and data qubits, respectively, needed for k surface codes with the same distance. We fit the vine code ntotal and n values to the ansatz indicated, and show the fit coefficients A, B, C and D. In each case shown, C < 2k and A < k , therefore we expect vine code efficacy over the surface code to only improve for larger distances. (a) Rotated geometry. (b) Square geometry. (c) Vertical parallelogram. 
+
+FIG. 3. The qubit overhead scaling for three different open boundary patches of the −−−−−−−−−→
+
+nSeW W wSs vine code, each encoding 
+
+k = 9 logical qubits. (a) Horizontal parallelogram. (b) Square. (c) Rotated. 
+
+topological order and 4) the code generates entanglement across the whole patch. The second condition requires that, for X- and Z-stabilisers with common data support, the subset of data qubits entangled with the X-measure qubit before the Z-measure qubit must be of even size, and vice versa. We discuss the conditions 1-4 further in Appendix A. Many vine code sequences are also equiva-lent circuits modulo D4 symmetry, or generate stabilis-ers with identical data qubit support via different step sequences. We discuss these symmetries in Appendix B. 
+
+A. Flip-vine codes for transversal Clifford gates 
+
+Here, we propose a variant of vine codes that are weakly self-dual, meaning their X and Z parity check ma-5                    
+
+> (a)
+> (b) (c) (d) (e)
+> (f) (g) (h) (i)
+> FIG. 4. An example of an X-type boundary for the −−−−−−−→
+> nSeW wSs code (red dashed line). Black dots indicate data qubits, solid blue/pink dots indicate Z/Xmeasure qubits that are used for stabiliser measurements and remaining light grey/blue/pink dots indicate routing qubits that originated as data/ Z/Xqubits before introducing the boundary. (a) An X-type stabiliser that intersects the boundary is truncated to its support on data qubits above the boundary (green vine, dashed below the boundary). AZ-type stabiliser that intersects the boundary is removed from the stabiliser group (grey vine). (b) -(i) The syndrome measurement circuit close to the boundary is shown. The green truncated X-type stabiliser is shown at each step. Light blue lines indicate CX gates, brown lines indicate CXSWAP gates, and grey lines indicate SWAP gates. The location of the boundary line follows the data qubits.
+
+trices are equivalent. A consequence of weak self-duality is that a Hadamard gate applied to all data qubits is a transversal logical operation. Additional constraints may similarly result in the presence of a transversal S gate. An example of a family of codes with these properties is the 2D color codes [55, 61]. The flip-vine codes are defined as follows. Firstly, se-lect an even-length step sequence of length w (and as-sume the stabiliser weights are also all w). We then se-lect a subset of the measure qubits in the layout which will be “active”; the remaining will be qubits used for routing (see below) and will not measure any stabilis-ers. All active measure qubits measure an associated stabiliser ( X-type or Z-type) for odd QEC cycles. For even QEC cycles, when the step sequence is traced out in reverse, the measure qubits measure the opposite Pauli-type stabiliser with the same support ( Z-type or X-type, respectively). In this way, the measure qubit’s Pauli type “flips” each QEC round, and for every stabiliser there is a corresponding stabiliser with opposite Pauli type with identical support. Given that measure qubits of flip-vine codes now sup-port double the number of stabilisers relative to vine codes, half (or approximately half when open boundaries are constructed) the measure qubits of the flip-vine code will be active, while the remainder will be considered as routing qubits, performing swaps during their step se-quence instead of entangling gates. This is to ensure that the total number of stabilisers is not increased and that all stabilisers commute. Here, we prescribe how to determine which measure qubits remain active and which become routing in a flip-vine code. Let us compare the regular vine code with a given step sequence V to the flip-vine code with the same sequence VF . For V, let us denote the set of X
+
+(Z) measure qubits AX (AZ ) and the set of data qubits 
+
+D. In VF , active measure qubits A produce stabiliser generators of both Pauli types, and routing qubits R do not entangle at all with the code. To decide which measure qubits should be demoted to routing qubits, we start with an arbitrary measure qubit a0 which we define to be active and consider all the stabilisers of the vine code, V. Let measure qubit 
+
+a0 be associated with stabiliser Sa0 . Consider the n sta-bilisers that have odd overlap with Sa0 ; these are associ-ated with measure qubits separated from a0 by a vector from a set we denote ∆ ′
+
+> odd
+
+, defined in Appendix C. Let us label the n measure qubits associated to these sta-bilisers {a1, a 2, . . . , a n}. In VF , if these measure qubits are active, they support both an X-type and a Z-type stabiliser, both of which will anti-commute with a sta-biliser associated with a0. Hence, because a0 is active, 
+
+{a1, a 2, . . . , a n} must be demoted to routing qubits in VF
+
+to ensure all stabilisers commute. Let us then construct the total lattice of routing qubits that must include these {a1, a 2, . . . a n} in a systematic way. To do so, we start with an arbitrary “seed” rout-ing qubit position seed X ∈ AX . We then consider all qubits at positions seed X + −→u1 + −→u2, where −→u1, −→u2 ∈ ∆′
+
+> odd
+
+,as routing qubits also. Subsequently, we can build the 6lattice of routing qubits centered at seed X , adding in all qubits connected to seed X by any even sum of ui ∈ ∆′
+
+> odd
+
+vectors. Following the same logic, we define a set of routing qubits that start from a seed Z ∈ AZ . This results in the creation of two disjoint lattices RX/Z =
+
+{seed X/Z + P2ℓi=1 
+
+−→ui | ℓ ∈ Z, −→ui ∈ ∆′
+
+> odd
+
+}. From here, we define R to be the union of all qubits in RX and RZ .Given vectors from ∆ ′ 
+
+> odd
+
+connect measure qubits of the same type in V by definition (see Appendix C), RX ⊂ AX
+
+and RZ ⊂ AZ . Assuming that there exist no −→ui ∈ ∆′
+
+> odd
+
+such that P2ℓi=1 
+
+−→ui /∈ ∆′ 
+
+> odd
+
+for some integer ℓ (true for all cases we consider in this manuscript), then all remain-ing measure qubits can support Z and X stabilisers that mutually commute, and hence are left as active measure qubits. The circuit for the flip-vine code is then defined as follows: measure qubits in AX \R X (AZ \R Z ) measure an X-type ( Z-type) stabiliser in odd QEC rounds, and a Z-type ( X-type) stabiliser with the same support in even QEC rounds. The measure qubits follow the step sequence defining the flip-vine code in odd rounds and the reverse sequence in even rounds. Routing qubits in 
+
+RX and RZ traverse the same “vine” defined by the step sequence as the active measure qubits, but with SWAP gates rather than CXSWAP gates and therefore do not entangle with data qubits. We can use superconducting-native two-qubit gates and resets to perform SWAPs in a single circuit layer, see Section III A. Data qubits traverse the reverse step sequence to the measure/routing qubits. For some of the circuit layers in a single syndrome ex-traction round (forwards or reverse), a given data qubit will be involved in entangling gates, while for the rest of the circuit layers, it will simply be swapping with routing qubits. With a suitable choice of boundary conditions – either periodic boundary conditions, or certain generalised open boundary conditions (see Section III B) – the resulting code is weakly self-dual. All flip-vine codes (with appro-priate boundary conditions) therefore support a transver-sal Hadamard gate. The logical action of this gate will be Hj for all j = 1 , . . . , k . The codes will also possess a transversal S gate if we can find a bipartition of the data qubits into subsets A and B such that |s ∩ A| ≡ | s ∩ B|
+
+mod 4, for all stabiliser data qubit support sets s. We may then apply S (S†) gates to all data qubits in A (B)to obtain a transversal gate [55]. This is because an X
+
+stabiliser conjugated by such a gate maps to a product of an X and Z stabiliser, up to a phase. This phase is equal to i|s∩A|−| s∩B|. All codes we find admit such a bi-partition. Note that all weight-8 stabiliser codes admit a trivial bipartition of A = D and B = ∅. Therefore, sta-biliser weight-8 codes admit a logical S gate by simply applying S transversally to all data qubits. The logical action is Sj for j = 1 . . . k . 
+
+> III. BOUNDARY CONSTRUCTION
+
+Here, we demonstrate how to produce explicit finite-size instances of vine codes with open boundaries. We begin by describing the construction of X/Z boundaries which we refer to as Pauli boundaries, before discussing a more general approach.  
+
+> A. Pauli boundaries
+
+We construct X and Z Pauli boundaries where X and 
+
+Z logicals terminate respectively. These boundary types are also constructed in tile codes [41, 42], and rotated and unrotated surface codes. Similarly to those cases, we expect vine codes with Pauli boundaries to encode half the number of logical qubits as the maximum possible with periodic boundary conditions [64]. To construct the boundary geometry, we first define vectors v1 and v2 that define a parallelogram with corners 
+
+{0, v 1, v 2, v 1 + v2}. We envisage cutting out data qubits supported on this parallelogram patch from the infinite plane. We will construct boundaries running from 0 to 
+
+v1 and from v2 to v1 + v2 to be Pauli X boundaries, and those running from 0 to v2 and v1 to v1 +v2 to be Pauli-Z
+
+boundaries. To do this, we first consider the data qubit support of all stabiliser operators. We firstly discard all X- and 
+
+Z-stabilisers that have support fully outside the paral-lelogram. For stabilisers with partial support inside the parallelogram, we inspect whether the stabiliser inter-sects a Pauli X or Z boundary. We discard all X(Z)stabilisers that intersect a Pauli-Z(X) boundary. Mean-while, we truncate every X(Z) stabiliser that intersects a Pauli-X(Z) boundary to the partial support within the parallelogram. Figure 4(a) shows an example of a dis-carded Z stabiliser (grey) intersecting an X boundary (red dashed line), along with an X stabiliser truncated to a weight-3 operator, as its support below the bound-ary is removed (green solid/dashed line). We discuss the treatment of corners in Appendix D. We then delete the following qubits: 
+
+• All data qubits that lie outside the patch parallel-ogram 
+
+• All measure qubits that measure a removed sta-biliser 
+
+• All data qubits (within the parallelogram patch) that are not in the support of a stabiliser of both Pauli-types (such cases would introduce low-weight logicals). Finally, this procedure may result in a code whose Tanner graph contains multiple disjoint connected components. For example, there may be isolated Bell pairs at corners that are not entangled with the rest of the patch due to removed stabilisers. We keep all data/measure qubits 7                        
+
+> FIG. 5. The −−−−−−−→
+> nSeW wSs code with d= 10 for four boundary geometries: rotated, square, horizontal parallelogram and vertical parallelogram. Each example has the same boundary types, i.e. an X-type ( Z-type) along the boundaries parallel to v1(v2). The boundary geometry given by the unit vectors of v1and v2in each case has a significant effect on the number of qubits required to achieve d= 10 (see Table II). We show an X- ( Z)-logical representative for each patch with pink crosses (blue crosses). Lower-distance patches showed no hook errors for the same four geometries ( d=dcircuit ; see Table I). Therefore, we would expect the logical supports presented here to also represent the lowest-weight logicals at the circuit level. (a) Rotated geometry. (b) Square geometry. (c) Horizontal parallelogram. (d) Vertical parallelogram.
+
+that form the largest Tanner graph connected compo-nent. In some cases, the vine code sequence does not generate entanglement across the whole system even in the infinite plane and the boundary procedure described in this section results in approximately equal sized dis-connected regions. See Appendix A for a discussion of this case; we ignore these instances in our exhaustive vine code search in Section IV A. The above procedure gives us the measure and data qubits needed for a patch with Pauli boundaries for a given parallelogram. However, given some stabilisers near the boundary have truncated support, their asso-ciated measure qubits do not need to entangle with all the qubits in their step sequence as some data qubits that originally featured in their support have been discarded. Similarly, some data qubits near the boundary will not need to be entangled with the measure qubits along their step sequence that have been discarded. However, these discarded measure and data qubits may still be required in the planar grid to achieve the required connectivity. We label these “routing qubits”. The simplest solution that achieves the required connectivity maintains that all data and measure qubits walk along their usual trajec-tories, including near the boundary. If a data/measure 8qubit q needs to step in direction ⃗ D but there is no mea-sure/data qubit located in that direction because it has been discarded by the process above, we define a routing qubit in that location. We then exchange the entangling gate for a SWAP gate in the corresponding circuit layer between q and the routing qubit. The circuit that measures the truncated stabilisers close to the boundary using this method is straightfor-ward. One applies the same step sequence to all measure qubits (and the reverse sequence to all the data qubits). For each measure qubit a and each step in the sequence, ⃗D, if there is a data qubit in the ⃗ D direction from a, the usual gate at that point in the sequence is applied (CX or CXSWAP). Otherwise, if there is a routing qubit in that direction, a SWAP gate is applied if the step in the sequence is in {⃗N ,⃗ E,⃗ S,⃗ W }, or otherwise no gate is ap-plied. Figure 4(b)-(i) shows an example of a truncated 
+
+X stabiliser being measured by the syndrome extraction circuit. We can perform these SWAP gates in a single circuit layer by resetting the routing qubits in state |0⟩ at the be-ginning of each QEC round and applying CZSWAP gates instead of SWAP gates between routing and other qubits. In the absence of errors, the effect of this gate is the same as a SWAP gate. We can also measure the routing qubits at the end of each QEC round and form a “flag” detector from this measurement – a flipped measurement outcome of −1 indicates an error has occurred [65]. In many cases, we may reduce the routing qubit num-ber by removing unnecessary SWAP gates from the cir-cuit near the boundaries. We use a series of techniques (see Appendix E) to find these removable SWAP in-stances and observe large reductions in required rout-ing qubit numbers by removing them. For example, the distance-10 −−−−−−−→
+
+nSeW wSs code patch in Fig. 5(a) has its routing qubit number reduced by ∼ 66 .2% (from 198 to 67; see Table II). Figure 5 shows examples of parallelogram code patches obtained for the −−−−−−−→
+
+nSeW wSs step sequence using the pro-cedure above. We consider four parallelogram geometries which we refer to as rotated, square, horizontal parallel-ogram, and vertical parallelogram. All of these examples support distance-10 codes (for both X and Z logical op-erators) and we provide example minimum-weight logical operators for each patch. While using the same vine code sequence to generate a code encoding the same number of logical qubits k = 6 at distance 10, the qubit overheads vary dramatically (see Table II). In this example, the ro-tated patch has the smallest qubit overhead, requiring 82% of the qubits required for equivalent surface code patches. The horizontal parallelogram has the largest overhead, requiring 104% of the total qubits required for the surface code.  
+
+> B. Generalised boundaries
+
+We now describe boundary constructions beyond Pauli boundaries. While we will not cover boundaries in full generality, we will introduce relevant theory for gener-alised boundaries along with several practical examples. In this section, we consider codes that are equivalent (up to finite-depth unitaries) to the 2D color code to construct “coloured boundaries” that are analogous to the red/green/blue boundaries of the color code. [62, 63]. Since vine codes are 2D-local, translationally invariant, commuting Pauli stabiliser codes defined on qubits, they are equivalent (up to finite-depth unitary transforma-tions) to N ∈ Z copies of the toric code [66]. The integer 
+
+N can be obtained from the number of logical qubits the vine code supports when defined with Pauli boundaries (on a large enough patch). Therefore, our starting point is vine codes that encode k = 2 logical qubits on a patch with Pauli boundaries (which includes codes with k = 4 on a torus in Ref. [1]). These vine codes will instanti-ate the same topological phase as the 2D color code (see Appendix F for more information on the 2D color code boundaries and anyons). The first step is to identify the “anyon model” that describes the syndrome defect equivalence classes of the code; this requires associating an “anyon type” to each stabiliser generator. We associate a combination of toric code charges to each anyon type. Specifically, each anyon type a associated with an X stabiliser ( b associated with a Z stabiliser) is a product of toric code layer charges 
+
+a = ec1 
+
+> 1
+
+ec2 
+
+> 2
+
+. . . e cN 
+
+> N
+
+(b = mc1 
+
+> 1
+
+mc2 
+
+> 2
+
+. . . m cN 
+
+> N
+
+), for ci ∈ { 0, 1}
+
+where i = 1 , . . . , N labels the toric code layer. Let us define the set of “tunnelling operators” X aj (Zbj ), with each element indexed by an integer j, to be the set of Pauli X- ( Z-)operators that flip exactly two stabilisers associated with a particular anyon type a (b). This oper-ator is therefore associated with transporting a syndrome charge without increasing the weight of the total syn-drome. Similarly, logical operators can be constructed by combining tunnelling operators of the same anyon type. To construct a boundary, we consider moving from an infinite-plane code to a half-infinite plane code supported only in the x ≥ 0 region. In the x ≤ 0 region, we con-struct a trivial vacuum phase. To construct the domain wall to the vacuum phase, we first identify a maximal set of commuting tunnelling operators and applying pro-jectors for those tunnelling operators fully suppported in the x ≤ 0 region. For example, if X aj and Zbj associated with anyons a and b form a maximal set of commut-ing tunnelling operators we apply projectors 12 (1 + X aj )and 12 (1 + Zbj ). In this way, a and b now belong to a “Lagrangian subgroup” of the anyon model (for more in-formation, see Refs. 62, 63, 67–70). Equivalently, the anyons a and b are “condensed” at this boundary and their associated logical operators can terminate here. Applying projectors in this way corresponds to “mea-suring out” the associated commuting tunnelling opera-tors that are confined to the x ≤ 0 region. We then dis-90022446 8 10 12 14 16 0022446 8 10 12 14 16 0022446 8 10 12 14 16 0022446 8 10 12 14 16 0022446 8 10 12 14 16 0022446 8 10 12 14 16 
+
+(e) (f) (d) 
+
+(g) 
+
+FIG. 6. Examples of coloured boundaries applied to (flip-)vine codes that are equivalent (up to a finite-depth circuit) to the 2D color code. Data/ Z-measure/ X-measure/routing qubits are coloured black/blue/pink/grey, respectively. In (a) -(f ) we present the stabilisers of a patch of −−−−−→
+
+sEEEn code (equivalent in support to −−−−−−→
+
+N EEEN from Ref. [1]) with coloured boundaries. In (a)-(c) [(d)-(f)] we present the X (Z) stabilisers, all drawn between measure and data qubits in their starting positions. We colour the stabilisers of both types either red [(a) and (d)], blue [(b) and (e)] or green [(c) and (f)], and we colour the vertical (horizontal) boundaries blue (red), as shown in (a) and (d). Those stabilisers that intersect a boundary of the same (a different) colour are discarded (truncated by tunnelling operators). Any stabiliser that has been truncated is highlighted, while the bulk stabilisers are lighter in colour. In (g) , we present a triangular patch of −−−−−−−→
+
+sEN W Sw (equivalent sequence to −−−−−−−−→
+
+N EN W SW ) flip-vine code. The stabiliser support and colour is indicated by the coloured plaquettes, each hosting one Z and one X stabiliser. The colour of the measure qubit associated to a plaquette is given by the Pauli type of the stabiliser measured in odd rounds (in even rounds, the opposite Pauli type stabiliser is measured). Three of the plaquettes (the hexagons) are in the bulk, and the rest host boundary stabilisers. All stabilisers are drawn between the measure and data qubits as they sit at the start of the circuit. See Appendix F for the full circuits. 
+
+card any vine code stabilisers that anti-commute with the measured tunnelling operators, and use these new tun-nelling operator stabilisers to truncate all other vine code stabilisers to within the boundaries of the code patch. Note that this framework captures the Pauli boundaries introduced above, where the tunnelling operators for a given boundary are all of either X or Z type. In the case of vine codes supporting an equivalent anyon model to the color code, we can colour the sta-biliser generators and associated anyons red, green, or blue. In this way, the tunnelling operators for stabilisers of the same colour mutually commute (see Appendix F). Coloured boundaries condense both the X and Z anyons associated with a single colour label. We consider two explicit examples for coloured bound-ary construction: the −−−−−→
+
+sEEEn vine code, and the 
+
+−−−−−−−→
+
+sEN W Sw flip-vine code. Both of these encode k = 2 qubits on a Pauli boundary patch. In Fig. 6, we show the result of creating small code patches with coloured boundaries for these two codes. In Fig. 6(a)-(f), we show the X and Z stabiliser supports for the −−−−−→
+
+sEEEn code with vertical “blue” boundaries and horizontal “red” bound-aries. To construct boundaries of a given colour, say blue, we then discard any blue stabilisers (of either X
+
+or Z type) that intersect the boundary, and truncate red and green stabilisers that intersect the boundary using blue tunnelling operators. This can produce some com-plexities, which we discuss in Appendix F. We finally construct a valid syndrome measurement circuit around the coloured boundaries, which is a non-trivial process. This involves gates that break the step sequence pattern near the boundaries. We present the full circuits in Ap-pendix F. We then obtain a patch with stabilisers shown in Fig. 6(a)-(f), with all data/measure qubits in their starting locations for the syndrome measurement circuit. This patch encodes k = 2 logical qubits. For the flip-vine code shown in Fig. 6(g), we can obtain an exact copy of a 2D color code patch. In the figure, we show an example with a triangular shape that encodes a single logical qubit. Note that the step sequence does not produce a valid code on the layout presented in Fig. 1, and hence we use an alternative initial arrangement of X
+
+and Z measure qubits as shown in Fig. 6(g) (referred to as layout 3 in Ref. 1). Stabilisers of X and Z type with the same support retain equal supports after truncation (in-dicated by coloured plaquettes in the figures). The circuit that measures these stabilisers simply involves utilising routing qubits for these truncated stabilisers, in the same way as occurs when Pauli boundaries are imposed (see Section III A). Owing to the coloured boundaries being Pauli-symmetric, the resulting code is still weakly self-dual and supports transversal single-qubit Clifford gates, as is well known for the color code [61]. 
+
+IV. RESULTS 
+
+Vine codes show promising performance over the sur-face code. Here, we do an exhaustive search to find all valid vine codes up to stabiliser weight 9, see Sec-tion IV A. We benchmark the performance of selected vine code in multiple ways. First, we calculate their qubit overhead scaling, finding efficiencies relative to the surface code, see Fig. 2, Fig. 3, Fig. 5, Table I and Sec-10 tion IV B. We corroborate their performance by simulat-ing their syndrome extraction circuits under circuit-level noise, see Fig. 7 and Section IV C. Finally, we present ex-amples of flip-vine codes that permit transversal single-qubit Clifford gates, showing examples in Table III, see Section IV D.  
+
+> A. Vine code search
+
+We perform exhaustive searches over all possible vine code sequences up to stabiliser weight 9. We filter for sequences that have: commutativity, independently mea-sured stabilisers, topological order, and full patch connec-tivity, see Appendix A for a full description of conditions. We then reduce the number of sequences by by removing any that have step sequences or supports related by a rotation/reflection symmetry from D4, see Appendix B. We show a final list of vine code sequences in Table IV. We find 147 step sequences up to and including sta-biliser weight 9. Of those, 96 are stabiliser weight 9, and 51 are stabiliser weight 8 or less. We focus on weight ≤ 8sequences in Section IV B. Note that before we filter vine codes with equivalent data qubit support (see step 7 in Appendix B), we have 906 vine codes up to stabiliser weight 9. In Table IV, we choose a single representative. However, vine codes with different entangling sequences that produce the same data qubit support may differ in circuit distance, due to possessing different hook errors. We do not optimise for hook errors when choosing a canonical representative.  
+
+> B. Qubit overhead scaling
+
+We present selected vine codes and their qubit over-head scaling. We find small instances of vine codes with circuit distance 6 or 7 that already require fewer qubits than equivalent surface code patches. These efficiencies are also expected to increase as the circuit distance in-creases. Figure 2 and Fig. 3 show qubit overhead scaling for the −−−−−−−→
+
+nSeW wSs and −−−−−−−−−→
+
+nSeW W wSs codes. In each case, we construct patches with X/Z open boundaries that obtain equal circuit distances in both bases, up to circuit distance 6 or 7. We verify circuit distances from an exact distance finder [71]. We find the total number of qubits 
+
+ntotal , including n data qubits as well as measure and routing qubits required for each patch, and plot these against the circuit distance dcircuit .For the various boundary geometries indicated, at the highest verified circuit distance, we already see that these codes are more efficient than k equivalent patches of the rotated surface code with the same circuit distance. Ta-ble I shows ntotal /n surf total for selected vine sequences and boundary geometries. For the vine codes and patches shown in Fig. 2 and Fig. 3, the vine code uses fewer total qubits than the equivalent surface code construction. For example, for a rotated patch of the −−−−−−−→
+
+nSeW wSs code at distance 7, the vine code requires 88% of the total qubit count required for equivalent surface code patches. The table also shows the number of data and measure qubits (ndata+meas , i.e. omitting routing qubits) required for the vine code relative to the surface code. While we use several techniques to reduce the total number of routing qubits (see Appendix E), we envisage these reductions can be further improved. We observe these vine codes have favourable scaling with respect to equivalent surface code patches. In Fig. 2 and Fig. 3 we fit the qubit numbers ntotal and n to a polynomial ansatz with a quadratic and linear term. We expect a quadratic term similar to the surface code qubit scalings nsurf = kd 2 and nsurf total = k(2 d2 − 1) (where nsurf is the number of data qubits needed for k
+
+rotated surface code patches and nsurf total is the total data and measure qubits needed for k rotated surface code patches). We also expect the number of routing qubits required to be linear in d. The asymptopic scaling of the vine code overhead improvement in relation to the surface code ntotal /n surf total is given by C/ 2k.We find that these vine codes have increasing returns on qubit numbers relative to the surface code as the cir-cuit distance increases. For example, the −−−−−−−→
+
+nSeW wSs code on a rotated patch gives C/ 2k = 0 .797. In Fig. 5 and Ta-ble II, we corroborate this claim by constructing d = 10 patches for four boundary geometries (stim circuits for these code patches can be found at Ref. 72). The rotated geometry requires 82% of the total qubits required for equivalent surface code patches, a larger improvement than the d = 7 patch. We expect the circuit distance of the patches shown in Fig. 5 to match the code dis-tances, i.e. dcircuit = 10, as Table I illustrates that the 
+
+−−−−−−−→
+
+nSeW wSs code on all boundary geometries explored has no distance-reducing hook errors, given d = dcircuit in each case. In Table I, we give verified results for all codes where 
+
+nmeas+data /n surf total < 1 i.e. codes that at circuit distance 6 already use fewer measure and data qubits than the surface code. For these examples, we further present the polynomial fitting parameters in Fig. 9 in Ap-pendix B, finding 11 examples where C/ 2k < 1, suggest-ing improvements in qubit count over the surface code as the code distance increases. Our results indicate that the boundary cut geometry matters significantly for qubit counts. In Table I, we show qubit numbers required for the same vine code on different boundary geometries, which give varying n and 
+
+ntotal to achieve the same circuit distance. We also see that different cuts give varying biases in the length of v1
+
+and v2 to achieve equal circuit distances in both bases. While this does not affect the minimum weight logical size by construction, this may affect the relative num-ber of minimum weight logical representatives between bases. This entropic effect may be seen in circuit-level noise simulations, see Section IV C. 11 
+
+Vine Sequence Cut v1 v2 [[ n, k, ( dx, dz )]] dcircuit ntotal ntotal   
+
+> nsurf total
+> ndata+meas
+> nsurf total
+
+−−−−−−−→
+
+nSeW wSs 
+
+square [0, 22] [16, 0] [[180 , 6, (6 , 6)]] 6 393 0.9225 0.8310 rotated [-10, 10] [20, 20] [[221 , 6, (7 , 7)]] 7 511 0.8780 0.7491 horizontal parallelogram [22, 22] [16, 0] [[191 , 6, (6 , 6)]] 6 456 1.0704 0.8826 vertical parallelogram [0, 20] [20, 20] [[231 , 6, (7 , 7)]] 7 535 0.9192 0.7835 
+
+−−−−−−−−−→
+
+nSeW W wSs 
+
+square [0, 22] [24, 0] [[266 , 9, (6 , 6)]] 6 617 0.9656 0.8185 rotated [-11, 11] [23, 23] [[256 , 9, (6 , 6)]] 6 625 0.9781 0.7872 horizontal parallelogram [22, 22] [22, 0] [[234 , 9, (6 , 6)]] 6 582 0.9108 0.7183 vertical parallelogram [0, 22] [24, 24] [[278 , 9, (6 , 6)]] 6 683 1.0689 0.8560 
+
+−−−−−−−→
+
+nSEN ESs square [0, 22] [15, 0] [[173 , 4, (7 , 12)]] 7 384 0.9897 0.8814 rotated [-14, 14] [13, 13] [[182 , 4, (7 , 8)]] 7 434 1.1186 0.9278 
+
+−−−−−−−−→
+
+nEeSSwEs rotated [-17, 17] [12, 12] [[207 , 7, (6 , 6)]] 6 500 1.0060 0.8189 
+
+−−−−−−−−−−→
+
+nEN EEN Es horizontal parallelogram [13, 13] [22, 0] [[144 , 5, (6 , 6)]] 6 364 1.0254 0.7972 
+
+−−−−−−−−−−→
+
+nESW W SEs square [0, 22] [13, 0] [[151 , 5, (6 , 6)]] 6 372 1.0479 0.8394 vertical parallelogram [0, 22] [13, 13] [[143 , 5, (6 , 6)]] 6 373 1.0507 0.7915 
+
+−−−−−−−−→
+
+nEN EN Es rotated [-7, 7] [17, 17] [[130 , 4, (6 , 8)]] 6 320 1.1268 0.9014 horizontal parallelogram [17, 17] [14, 0] [[121 , 4, (8 , 6)]] 6 298 1.0493 0.8380 
+
+−−−−−−−−→
+
+nSeW weSs rotated [-11, 11] [17, 17] [[206 , 6, (6 , 6)]] 6 479 1.1244 0.9531 
+
+−−−−−−−→
+
+nEN N Es vertical parallelogram [0, 14] [13, 13] [[105 , 3, (6 , 9)]] 6 248 1.1643 0.9718 TABLE I. Boundary cut and qubit overhead information for selected vine sequences where the number of data and measure qubits ( ndata+meas ) needed to encode k logical qubits is less than what is required for k surface codes with the same circuit level distance, i.e. ndata+meas /n surf total < 1. Here, v1 and v2 give the vectors defining the boundary of the vine code cut into the shape as indicated (see also Fig. 5), n gives the number of data qubits, ( dx, d z ) are code distances in each basis, dcircuit 
+
+is the circuit distance of the patch in both bases, ntotal is the total number of qubits used for the vine code, including data, measure and routing qubits, and nsurf total is the total number of data and measure qubits needed to encode k logical qubits in the surface code (i.e. nsurf total = k(2 d2circuit − 1). While we show here only patches with circuit level distances verified by an exact distance finder [71], we expect the efficiency of the vine code relative to the surface code to improve as distances increase (see Fig. 2, and Fig. 3). 
+
+Cut v1 v2 [[ n, k, d circuit ]] nrouting → nreduced ntotal ntotal   
+
+> nsurf total
+> ndata+measure
+> nsurf total
+
+Rotated [−14 , 14] [29 , 29] [[437 , 6, 10]] 194 → 112 980 0.8208 0.7270 Square [0 , 38] [28 , 0] [[538 , 6, 10]] 198 → 67 1137 0.9523 0.8961 Horizontal parallelogram [38 , 38] [28 , 0] [[557 , 6, 10]] 236 → 140 1248 1.0452 0.9280 Vertical parallelogram [0 , 28] [28 , 28] [[435 , 6, 10]] 192 → 111 975 0.8166 0.7236 TABLE II. Qubit overheads relative to the surface code of the four patch geometries of the −−−−−−−→
+
+nSeW wSs code shown in Fig. 5, defined with vectors v1 and v2. In these patches, we conjecture dx = dz = dcircuit . We do not verify the circuit distances for these code patches, but we extrapolate from smaller patches that have no distance-reducing hook errors (see Table I). Here, 
+
+nrouting is the number of routing qubits naively required for the patches, and nreduced is the reduced requirement after using techniques from Appendix E. The final three columns use quantities defined in the caption of Table I. 
+
+C. Circuit-Level Noise Simulations 
+
+We perform numeric benchmarks of some of the vine codes found, and present our results in Fig. 7. We find that under realistic assumptions about near-term hard-ware, vine codes can perform better than the surface code while lowering overheads. This can be seen, for example, in Fig. 7(b)-(c). Our circuits use only hardware-native gates (up to single-qubit Cliffords, which are typically very low noise in real devices) and a realistic, SI1000 noise model for superconducting qubits [73]. We choose patches to sim-ulate with circuit distances 3, 5, and 7, and compare these to surface codes of equivalent distances, in both X
+
+and Z simulated quantum memory experiments. See Ap-pendix G for more details of our numerical simulations. 12 10 −3 2 × 10 −3 3 × 10 −3 4 × 10 −3
+
+Noise parameter 
+
+> 10 −4
+> 10 −3
+> 10 −2
+> 10 −1
+> 10 0
+> Logical error rate (per round)
+
+−−−−−−−→
+
+nSeW wSs Vine Code, X memory                               
+
+> 6×surface code: d= 3 6×surface code: d= 4 6×surface code: d= 5 6×surface code: d= 7 6×surface code: d= 8 Vine code: dZ= 4 Vine code: dZ= 5 Vine code: dZ= 8 10 −32×10 −33×10 −34×10 −3
+
+Noise parameter 
+
+> 10 −5
+> 10 −4
+> 10 −3
+> 10 −2
+> 10 −1
+> 10 0
+> Logical error rate (per round)
+
+−−−−−−−→
+
+nSeW wSs Vine Code, Z memory                               
+
+> 6×surface code: d= 3 6×surface code: d= 4 6×surface code: d= 5 6×surface code: d= 7 6×surface code: d= 8 Vine code: dX= 3 Vine code: dX= 5 Vine code: dX= 7 10 −32×10 −33×10 −34×10 −3
+
+Noise parameter 
+
+> 10 −4
+> 10 −3
+> 10 −2
+> 10 −1
+> 10 0
+> Logical error rate (per round)
+
+−−−−−−−−−→
+
+nSeW W wSs Vine Code, X memory                         
+
+> 9×surface code: d= 3 9×surface code: d= 5 9×surface code: d= 7 Vine code: dZ= 3 Vine code: dZ= 5 Vine code: dZ= 7 10 −32×10 −33×10 −34×10 −3
+
+Noise parameter 
+
+> 10 −4
+> 10 −3
+> 10 −2
+> 10 −1
+> 10 0
+> Logical error rate (per round)
+
+−−−−−−−−−→
+
+nSeW W wSs Vine Code, Z memory                
+
+> 9×surface code: d= 3 9×surface code: d= 5 9×surface code: d= 7 Vine code: dX= 3 Vine code: dX= 5 Vine code: dX= 7
+
+(a) (b) 
+
+(c) (d) 
+
+FIG. 7. Comparing the performance of a vine code quantum memory circuit encoding k qubits with the performance of k
+
+copies of the surface code. We use an SI1000 noise model for both types of circuit [73], a BPOSD decoder for vine codes [74] and PyMatching for the surface code [7]. (a) -(b) Memory experiments in X and Z bases are plotted for code patches of the 
+
+−−−−−−−→
+
+nSeW wSs code. The patches have rotated rectangular vectors v1 = [ −s, s ], v2 = [2 s, 2s] for s = 5 , 7, 11, and circuit distances (dX , d Z ) of (3 , 4), (5 , 5) and (7 , 8), respectively. (c) -(d) Memory experiments are plotted for patches of the −−−−−−−−−→
+
+nSeW W wSs code, with horizontal parallelogram vectors v1 = [ s, s ], v2 = [ s + 2 , 0] for s = 10 , 18 , 26. The vectors were chosen in both cases so that the patches had minimum circuit distances 3, 5, and 7. We report the circuit-distance that affects the relevant memory experiment ( dZ for X memory, dX for Z memory) in each subfigure, though note that the code patches simulated are the same between X and Z memory experiments. 
+
+The Z memory performance of the −−−−−−−→
+
+nSeW wSs vine code is better by almost an order of magnitude than the corresponding surface code patch of the same dis-tance, at a noise rate of p = 10 −3, whereas for X mem-ory the vine code is roughly equivalent, compared to a distance-7 surface code. This is due to some asymmetry in the logical operators of the vine code. For example, the ( dX = 3 , d Z = 4) patch has only a single logical qubit that has a weight-3 X-logical operator, while the other independent X logical strings have weights 4 (for three strings) or 6 (for two strings). Meanwhile, there are six weight-4, independent Z-logical strings. Additionally, the asymmetric shape of the code patch provides differ-ent entropic factors for X and Z memory experiments. Although some patches simulated here have slightly un-even dX and dZ , given that our resource comparisons in Section IV B compare vine codes to their corresponding 
+
+d × d surface code patch, we perform that same com-parison here, reporting the results for d × d surface code memory performance (with SI1000 noise). We scale the per-round logical error rate of a single surface code patch (via the formula Pk = 1 − (1 − PL)k) to estimate the logi-13                                                       
+
+> Vine sequence Code v1v2
+> nflip
+> ntoric
+> −−−−−−−−−→
+> neSW W Sws [[144 ,16 ,6]] [12 ,0] [0 ,24] 0.25
+> −−−−−−−−→
+> nSSEESSs [[120 ,6,10]] [12 ,0] [0 ,20] 0.2
+> −−−−−−−−−→
+> nSEN N ESs [[72 ,10 ,6]] [12 ,0] [0 ,12] 0.2
+> −−−−−−−−→
+> nSsEEnSs [[24 ,8,4]] [8 ,0] [6 ,6] 0.189
+> −−−−−−−−−→
+> nSeW W wSs [[32 ,12 ,4]] [8 ,0] [0 ,8] 0.167
+> −−−−−−−−−→
+> nSEEEESs [[72 ,12 ,6]] [12 ,0] [0 ,12] 0.167 TABLE III. Examples of flip-vine codes with periodic bound-ary conditions that permit transversal single-qubit Clifford gates. We report the step sequence, the code parameters, the vectors v1and v2defining the torus, along with the code’s data qubit efficiency relative to the toric code, nflip /n toric ,where nflip (ntoric ) is the number of data qubits required for the flip-vine (toric) code encoding of the same number of log-ical qubits at the same distance. Apart from the first row, we report here all codes found with nflip /n toric ≤0.2, where we remove duplicates with the same code parameters.
+
+cal error rate of k logical qubits encoded in surface codes.  
+
+> D. Flip-vine codes
+
+We provide here some examples of flip-vine codes found on a grid with periodic boundary conditions. We perform a search through the found valid step sequences up to and including length 8, and build example codes on sev-eral tori. These tori are defined with vectors v1 = [ v, 0], 
+
+v2 = [ p, w ] such that opposite boundaries of the parallel-ogram defined by these vectors are identified. We search through tori with v and w ranging between 4 and 12 and 
+
+p ranging between 0 and v, and through rectangular tori (p = 0) with v = 4 , . . . , 12, w = 4 , . . . , 24. For each size of code, we check that the wrapping of the infinite plane around the torus sends data qubits to data qubits, and Z/X measure qubits to measure qubits of the same type. We ensure that the resulting code has commuting stabilisers. We then check the number of logical qubits and the distance (the X and Z distances are equivalent). In Table III, we also supply the ratio of the number of data qubits in the flip-vine code and the number of data qubits required to encode the same k logical qubits in toric codes.  
+
+> V. CONCLUSION
+
+In this paper, we have introduced vine codes, quan-tum low-density parity check codes that can significantly reduce the overheads associated with quantum error-correction on a planar square grid. Our work is par-ticularly relevant to superconducting hardware, where the connections between qubits are often restricted to 
+
+≤ 4 nearest neighbours in a plane. Even taking into ac-count the qubits required for routing around the bound-ary, there exist vine codes encoding k ≥ 6 logical qubits that require fewer physical qubits than k surface code patches of the same circuit-distance, and which perform equal to or better than the surface code under circuit-level noise. Compare, for example, the −−−−−−−→
+
+nSeW wSs codes in Fig 7(a)-(b) to the larger-overhead distance-3, 5 and 7 surface code patches, at p ≈ 10 −3. The gains in over-heads are expected to improve as one goes to higher dis-tance. While a two-dimensional translationally invariant code is unable to perform better asymptotically than hav-ing k = Θ(1) and d = Θ( √n), one can nevertheless save considerable resources at the utility scale (up to ≲ 20 .3% based on our fits) relative to the surface code without requiring significantly more complex hardware. There are many directions still open for further re-search. We have not investigated in depth the possi-bilities of generalised boundaries or patches of differ-ent shapes (e.g., different parallelograms, triangles, pen-tagons, etc.). Future work could investigate more ex-otic boundaries, such as Pauli-Y boundaries (possible, for example, in the 2D color code [63]), or further gen-eralisations of the coloured boundaries discussed in Sec-tion III B. Future work could also consider general pre-scriptions for constructing syndrome extraction circuits for generalised boundaries. Surface codes have benefited from decades of research, and there exist many techniques that allow for further re-ductions in overheads or improvements to logical fidelity. These include yoking [21, 73], leakage-reduction [49, 75], tailoring to biased noise [76, 77], mitigation of defective components [78–80], and the use of fast and accurate decoders [7–9]. Such improvements could be brought to bear on vine codes as well. In particular, it is im-portant to investigate the performance of decoders with improved speeds [81–86]. One large avenue for future work is to understand whether it is possible to adapt existing techniques for fault-tolerant logic, such as lat-tice surgery, magic state cultivation and distillation, to integrate vine codes into a fault-tolerant architecture. Achieving arbitrary Clifford gates or multi-Pauli product measurements between the k logical qubits stored within a single vine code patch (necessary for universal quantum computation) may be challenging without re-introducing large resource overheads or long-range connectivity re-quirements. An alternative to this could be to construct vine code patches with more exotic boundary conditions storing single logical qubits. These are important direc-tions for future work. Adapting flip-vine codes for magic state cultivation and investigating their circuit-level per-formance could provide an additional fruitful avenue for further research. Our work has assumed a square grid layout, but it may be interesting for future work to investigate the trade-offs associated with scaling the connectivity. For exam-ple, the −−−−−→
+
+sEEEn (or equivalently, the −−−−−−→
+
+N EEEN ) step se-14 quence only requires a hex-grid connectivity [1]. Mean-while, other codes may exist that could achieve higher performance if one allows for a tiling in which all vertices are five- or six-valent. From a theoretical standpoint, it would be fascinating to consider the possibilities of vine codes when embedded on a hyperbolic plane, in which one can expect asymptotically constant-rate and loga-rithmic distance codes [87–90]. Meanwhile, generalising the dynamic sequence introduced in the flip-vine code construction to construct novel Floquet codes [62, 89–99] on a planar square grid could similarly produce interest-ing resource savings and stabiliser weight reductions. While we have counted the routing qubits towards the total cost of implementing a vine code patch, it is unclear how fair of an assumption this is. Indeed, surface codes also require a buffer layer of qubits around the boundary if one is to perform arbitrary lattice surgery operations with neighbouring patches [21]. It is possible that the routing qubits we have counted in this work could be absorbed into a “corridor” of qubits that would already be required for lattice surgery. A challenge for implementing vine codes on today’s de-vices involves calibrating superconducting hardware for both CZ and iSWAP gates and achieving the high gate fidelities seen in recent years for both gates simultane-ously. That being said, many of the vine codes we have investigated do not strictly require both gates to imple-ment. At the cost of potentially introducing more rout-ing qubits, sequences that contain no lower-case letters in their middle can easily be converted to a fully-upper-case sequence which is implementable solely with iSWAP gates. See, for example, some of the sequences in Table I. However, experiments have demonstrated that it is possi-ble to function superconducting devices with iSWAP and CZ gates operating together [53]. The field has focused extensively on improving CZ gate performance in partic-ular, and hence there may still be large unrealised gains to be found in the fidelities of iSWAP gates operated together with CZ gates.  
+
+> VI. ACKNOWLEDGMENTS
+
+We are grateful to Timo Hillmann, Aislin Wells, Gy¨ orgy Geher, David Byfield, Archibald Ruban, David Long, Andrew Doherty and Stephen Bartlett for helpful and encouraging discussions. During the preparation of this manuscript, it was brought to our attention that similar problems were being worked on concurrently by another group. This concur-rent work is available at Ref. 100. We thank Boren Gu and the other authors of this manuscript for coordinating with us to release our works jointly. GMN and CKM acknowledge support from the Intel-ligence Advanced Research Projects Activity (IARPA), under the Entangled Logical Qubits program through Cooperative Agreement Number W911NF-23-2-0223. CCLVR acknowledges support from the University of Sydney Nano Institute through the Taste of Research Award. The python code produced for this manuscript was written with the assistance of large language models. The ideas and writing are the authors’ own. 
+
+> Appendix A: Valid sequences
+
+Not all vine code sequences are valid codes. Here, we discuss the four conditions for a valid code: commuta-tivity, independent measurement, topological order, and patch connectivity. In Appendix B, we give all the vine codes (that include at least one CXSWAP gate) up to stabiliser weight 9 that satisfy the four criteria detailed here. We also ignore se-quences with steps that entangle then immediately unen-tangle, for example any sequence with ⃗ E directly followed by ⃗w, or ⃗ N followed by ⃗s. We assume the patch has al-ternating rows of X- and Z-stabilisers, corresponding to layout 1 in Ref. [1], (see also Fig. 1). 
+
+1. Commutativity: Stabilisers of opposite type must have even overlapping support. 
+
+2. Independent measurement: Measure qubits must not be entangled or “interleaved” at the measure-ment step. This requires that, for X- and Z-stabilisers with common data support, the subset of data qubits en-tangled with the X-measure qubit before the Z-measure qubit must be of even size, and vice versa. Let us define the set of data qubits D =
+
+{q1, q 2, . . . , q n}. We then define, for measure qubit a,
+
+Qa = {Qia | i = 1 , . . . , w }, where w is the length of the step sequence, such that Qia ∈ D is the ith data qubit entangled with measure qubit a. A step sequence and layout then defines a code with independently measured stabilisers if [1, 20] the set {(i, j ) | Qia = Qjb, j > i, a ̸ = b}
+
+has even cardinality whenever measure qubits a and b are of different Pauli types. Note that we consider vine codes that satisfy this con-dition on the layout with alternating rows of X and Z
+
+stabilisers as in Fig. 1 in our exhaustive search in Ap-pendix B. However, some vine codes may fail this con-dition on this layout but succeed on other layouts, for example, −−−−−−−−−→
+
+N EN W SW . Theorem 1 of Ref. 1 can be used to determine which layouts, if they exist, will satisfy this condition for a given step sequence (see also Ap-pendix C). It is straightforward to confirm that this The-orem holds for the more general vine code sequences in our paper, despite the inclusion of non-swapping entan-gling gates. 
+
+3. Topological order condition: Some sequences that satisfy conditions 1 and 2 above do not pro-duce topologically ordered codes. In this case, all their codewords are a fixed weight and do not in-crease with the system size. For example, −−−−−−−−→
+
+N EN N EN ,
+
+−−−−−−−−−−→
+
+N EN N N EN , −−−−−−−−−−−→
+
+N EEN N EEN , −−−−−−−−−−−−−→
+
+N EN N EN N EN and 
+
+−−−−−−−−−−−−−→
+
+N N EN N N EN N are codes that have been previously 15 referenced as valid codes [1, 48], but fail to have topolog-ical order. In some cases, the number of logical qubits also grows with the system size, but these codewords re-main fixed and low weight. Some codes have a subset of logicals that have topologi-cal order, and a subset that remain fixed weight. For ex-ample −−−−−−−−−→
+
+neSW W Sws , −−−−−−−−−−−→
+
+nEEN N N EEs , −−−−−−−−−−−→
+
+nEEN EN EEs ,
+
+−−−−−−−−−−−−→
+
+nEEN W N EEs and −−−−−−−−−→
+
+nEEnSsEEs . The fixed weight logicals in these cases may be an artifact of the corner boundary conditions we impose in our construction, see Appendix D, and should be treated with caution. How-ever, we include these examples in Table IV, as some log-icals are topological and we may obtain a high-distance code after including the low-weight logicals in the sta-biliser group. 
+
+4. Patch connectivity: Some vine codes create mul-tiple, independent and disconnected code regions, see Fig. 8. In our exhaustive search, we build vine codes us-ing a square patch with boundaries v1 = 30, and v2 = 30, which initially contains 450 data qubits. During the boundary formation, where stabilisers are truncated and removed, data qubits that are not supported on a sta-biliser of both types around the boundary are removed. While we expect this boundary formation procedure may remove some boundary data qubits, giving a final data qubit number below 450, a code that creates multiple dis-connected code regions will reduce the final data count by approximately half, or even fewer if more than 2 dis-connected regions are created. Therefore, in Table IV we omit codes that resulted in less than 250 final data qubits (some codes that divide the patch similarly to Fig. 8 have just over half the total data qubits in one disconnected region, for example −−−−−−−−−→
+
+nEewSewEs has 227 qubits in the largest disconnected region). 
+
+> Appendix B: Exhaustive vine code sequence search
+
+We perform exhaustive searches over all vine sequences up to length 9. We remove sequences that do not satisfy the four conditions of Appendix A. We also remove sequences based on the following ad-ditional criteria: 
+
+5. D4 sequence symmetry: We consider vine se-quences modulo D4 (reflection and rotation by π/ 2 sym-metry). For example, the vine code −−−→
+
+nEEs is a reflection of the sequence −−−→
+
+sEEn .
+
+6. Begin and end with CX gate: We remove se-quences that begin or end with a CXSWAP gate, i.e. the instruction N , E, S or W . This is because there exists an equivalent vine sequence that begins and ends with a CX gate that has identical data qubit support and en-tangling order. Consider replacing the CXSWAP that begins a sequence with the CX gate in the opposite car-dinal direction, i.e. ⃗ N →⃗s,⃗ E →⃗w,⃗ S →⃗n and ⃗ W →⃗e.Also consider replacing the CXSWAP gate that ends a sequence with the CX gate in the same cardinal direc-         
+
+> FIG. 8. The −−−−−−−−−→
+> nEN nsN Es code divides the patch into three, approximately equal disconnected regions. Here we show one region, where data qubits are black, Zmeasure qubits are blue, Xmeasure qubits are pink, and routing qubits are brown. The data and measure qubits of the other two regions are supported on the edge qubits. The support of the X(Z)logical operators are shown by the pink crosses (blue crosses). This patch encodes three disconnected logical qubits.
+
+tion, i.e. ⃗ N →⃗n,⃗ E →⃗e,⃗ S →⃗s and ⃗ W →⃗w. These transformations will form an equivalent code, where the first and last swap is avoided. Avoiding fruitless swaps can reduce the number of routing qubits required. For example −−−−−→
+
+N EEN is equivalent to −−−→
+
+sEEn .
+
+7. D4 support symmetry: We find codes that gen-erate equivalent data qubit support modulo D4 while en-tangling with data qubits in a different order. For exam-ple, −−−−−−−−→
+
+nSsEEnSs and −−−−−−−−−→
+
+nsEN N Esn . Filtering sequences with equivalent support symmetry modulo D4 reduces the set of vine codes we generate from 906 to 147. We remove sequences with identical support and include only one representative in Table IV. We include all represen-tatives before this reduction in Ref. 72. Satisfying conditions 1-4 in Appendix A and reduc-ing based on criteria 5-7 above, we arrive at 146 valid vine codes. These are given in Table IV. After reduc-ing based on criteria 5-7, we include only one canonical representative for each set of codes with equivalent sta-biliser support (prioritising cardinal directions in their clockwise order in the step sequences, beginning with N
+
+or n). Importantly, the reduction in step 7 reduces the num-ber of remaining codes dramatically. Without this re-duction, while still reducing based on criteria 1-6, we would arrive at 906 codes. The representative of each 16 code in Table IV may have different hook errors to a vine code that generates equivalent support via a differ-ent step sequence. We do not optimise for hook errors when choosing a representative, since the effects of hook errors depend on the final code patch one chooses. This point may be important to explore when further optimis-ing vine codes for performance on near term architectures and is left for future work. In Fig. 9, we present the qubit overhead scaling of all codes presented in Table I not already shown in Sec-tion IV B of the main text. For each subfigure in Fig. 9, we create patches of varying circuit distance, using the vine sequence and patch geometry as indicated. The cir-cuit distances dcircuit indicated on the x-axis give the dis-tances for both bases. These are obtained using the ‘con-nected cluster’ algorithm in the dist-m4ri library [71] (see Ref. 101 for a comparison of exact distance-finding algo-rithms and implementations). For each patch, we find the number of data qubits n and total number of qubits including data, measure and routing ntotal . We fit n and 
+
+ntotal as dcircuit is varied to the ansatz as indicated, giving fit parameters for A, B, C and D in each subfigure. In each case, we also plot the equivalent number of qubits ( n
+
+data qubits and ntotal data and measure qubits) needed to create k surface code patches of equivalent circuit dis-tance. Here, k is the number of logical qubits encoded by the vine code as indicated. If the quadratic fit for ntotal , C, is smaller than 2 k, we expect that the efficiency of the vine code over the surface code to improve for large distances. In each subfigure, we give the verified ratio ntotal   
+
+> nsurf total d=6
+
+between ntotal and the number of surface code qubits required for an equivalent encoding, nsurf total , and dcircuit = 6, and we also provide the predicted ratio, ntotal (fit)   
+
+> nsurf total d=10
+
+, at dcircuit = 10, ob-tained from the quadratic fit. The maximum asymptotic value of ntotal   
+
+> nsurf total
+
+is given by C/ 2k.  
+
+> Appendix C: Vine code ∆sets
+
+We define the set ∆ odd , similarly to Ref. 1. Firstly, define −−−→
+
+QiaQja as the displacement vector pointing from qubit Qia to qubit Qja, and let ∆ be the multiset (counting multiplicity) of all such displacement vectors −−−→
+
+QiaQja for 
+
+i < j and for any arbitrary measure qubit a. Finally, ∆odd is defined as the set of all vectors in ∆ that appear therein an odd number of times, along with the negatives of all such vectors. Two measure qubits separated by a combination of vectors from ∆ odd risk violating the stabiliser commutation requirements, at the circuit level. Hence, we require that any two measure qubits in a vine code that are separated by a vector from ∆ odd are of the same Pauli type (see Theorem 1 of Ref. 1). Additional to the two sets above we define ∆ ′ as the multiset of displacement vectors and their negatives. In other words, it is the multiset of all −−−→
+
+QiaQja for i, j =1, . . . , w . Then let ∆ ′ 
+
+> odd
+
+be the set of all vectors appear-ing in ∆ ′ an odd number of times. An important fact for the construction of flip-vine codes is that any two sta-bilisers overlap an odd number of times if and only if the separation of their measure qubits, −→
+
+ab ∈ ∆′
+
+> odd
+
+. We prove this below. 
+
+Proposition 1. Consider a vine code with a length-w
+
+step sequence. For two measure qubits, a and b, define their stabiliser data qubit supports as sets Sa, Sb. Assume that 0 /∈ ∆′ and that |Sa| = w for all measure qubits a.Then −→
+
+ab ∈ ∆′ 
+
+> odd
+
+if and only if |Sa ∩ Sb| is odd. Proof. The set of qubits on which the stabilisers overlap is: 
+
+Sa ∩ Sb = {(i, j ) | −−−→
+
+QiaQjb = 0 } (C1) = {(i, j ) | −−−→
+
+QiaQja = −−→
+
+ab }. (C2) But recall that every −−−→
+
+QiaQja ∈ ∆′. Hence, every time a vector −−→
+
+ab appears in ∆ ′, there is an associated point in the overlap set, corresponding to ( i, j ). And so −−→
+
+ab ∈
+
+∆′ 
+
+> odd
+
+⇐⇒ −→
+
+ab ∈ ∆′ 
+
+> odd
+
+⇐⇒ | Sa ∩ Sb| is odd. 
+
+> Appendix D: Corners
+
+Here, we describe the rules determining how stabilis-ers of X- and Z- type are truncated or removed around corners. As described in Section III A, Pauli boundaries can be defined by the parellelogram spanned by the vectors 
+
+v1 and v2. X-stabilisers that have data qubit support outside the Z-boundary are removed, while Z stabilis-ers with data qubits in this region are truncated. Cor-respondingly, Z-stabilisers that have data qubit support outside the X-boundary are removed, while X-stabilisers are truncated. Fig. 10 illustrates the Pauli boundary types for two vectors v1 and v2 and how the Pauli boundaries are trans-formed at each corner. At each corner, either v or its additive inverse −v extends from the corner away from the parallelogram, where v ∈ { v1, v 2}. We use the angle bisector of these two outward extending rays to define the domain wall where the Pauli boundaries switch type. Following the rule that X-type ( Z-type) stabilisers are removed if they have support in the Z (X) boundary domain, we generate a protocol for removing/truncating each stabiliser type near the corners. The figure high-lights two stabiliser supports for the −−−−−−−→
+
+nSeW wSs shown as a vine. The two stabilisers shown have opposite Pauli type, shown by the red highlighed measure qubit stabilis-ers that are filled in with blue ( Z-type measure qubit) or pink ( X-type measure qubit). The X-type stabiliser on the lower right is removed because it includes one data qubit that passes into the blue boundary. However, the 
+
+Z-type stabiliser shown in the top left is truncated to 17 
+
+FIG. 9. Qubit number versus circuit distance plots for all codes in Table I. The conventions are equivalent to those in Fig. 2 and Fig. 3. For each subfigure, we additionally present the verified ratio, ntotal   
+
+> nsurf total d=6
+
+, of total vine code to surface code qubits at circuit-distance 6, and the predicted ratio, ntotal (fit)   
+
+> nsurf total d=10
+
+, at dcircuit = 10 obtained from the quadratic fit. 
+
+the remaining data support on the parellelogram, as this stabiliser has no support in the pink, X boundary region. 
+
+Appendix E: Minimising routing qubits and SWAP gates 
+
+We use several techniques for constructing circuits for vine codes with boundaries in such a way as to minimise the number of routing qubits and non-entangling SWAP gates required. We begin by constructing the circuit in the way described in the main text. The techniques that reduce the number of SWAPs can then be summarised as follows into three phases: 
+
+Phase 1: Find valid shorter paths 
+
+If a data/measure qubit undergoes a sequence of SWAPs that moves it between two locations, and a shorter path exists between the same two points, con-sider moving the data/measure qubit along the shorter path. These shorter paths are added to the circuit in a greedy fashion so long as the resulting circuit is equiva-lent to the original. We define two circuits as equivalent 18 
+
+FIG. 10. The Pauli boundaries at the corners of the −−−−−−−→
+
+nSeW wSs code, with the patch enclosed by the vectors v1
+
+and v2. At each corner, we can define three rays extending away from the parallelogram: one of {± v1}, one of {± v2}, and their angular bisector which defines the domain wall between the X boundary (shaded pink region) and the Z boundary (shaed blue region). (a) The vine support of a Z-type sta-biliser near the corner. The measure qubit’s initial location is shown by the blue circle with a red outline. The data qubit support of this stabiliser falls within the parallelogram or Z
+
+boundary (shaded blue). Therefore its support is truncated to the parallelogram. (b) The vine support of an X-type stabiliser near the corner, with the measure qubit’s initial lo-cation shown by the pink circle with a red outline. Here, the lower-most data qubit falls within the blue Z boundary re-gion, therefore this stabiliser is removed. 
+
+here if both have identical space-time locations of all non-swap gates (i.e., single-qubit, CX and CXSWAP gates). If this is the case, the circuits are performing the same syndrome extraction procedure and the underlying con-nectivity is the same, but they differ only in terms of SWAP gates between data/measure qubits and routing qubits. We summarise the procedure in Algorithm 1. 
+
+Phase 2: Remove SWAP-then-measure and reset-then-SWAP events 
+
+After Phase 1, there may still be redundant SWAP se-quences that span a measure/reset layer. If the SWAPs act on a data qubit, these will be removed already in Phase 1. But if they act on a measure qubit, the SWAPs will not form a contiguous, uninterrupted segment, and will not be removed in Phase 1. Since the syndrome measurement circuits reverse each QEC round, finding these removable SWAPs is equivalent to finding regions 
+
+Algorithm 1: Delete Long Paths of SWAPS 
+
+Input: Vine code syndrome extraction circuit, C
+
+Output: Valid vine code syndrome extraction circuit, 
+
+C′, with long paths of SWAPs removed 
+
+C′ ← C;
+
+foreach data/measure qubit q in C′ do 
+
+S ← SwapSegments( q, C’ ) ; // maximal runs of SWAPs acting on q
+
+Skips ← ∅ ;
+
+foreach segment S ∈ S do 
+
+let M = ( m1, . . . , m k ) be the moves of q
+
+induced by the SWAPs of S, with each 
+
+mi ∈ { (0 , ±1) , (±1, 0) };
+
+LocalSkips ← ∅ ;
+
+foreach Direction ∈ { (0 , 1) , (1 , 0) } do 
+
+count ← min(# Direction ∈
+
+M, #( −Direction ) ∈ M ) ; // Number of pairs of forward-backward moves in 
+
+M in the direction of Direction 
+
+foreach c = 1 , . . . , count do if mc = Direction then 
+
+add mc to LocalSkips ;
+
+foreach c = 1 , . . . , count do if mc = −Direction then 
+
+add mc to LocalSkips ; // Try to delete equal number of forward and backward moves in the direction of Direction 
+
+add LocalSkips to Skips 
+
+foreach candidate sequence of swaps to skip 
+
+C ∈ Skips do 
+
+build trial circuit, Ctrial , equivalent to C′ but with all SWAPs in C removed; define the set of all non-swap gate locations ((target qubit location, gate layer) or (control qubit location, target qubit location, gate layer)) for C′, N , and Ctrial , Ntrial ;
+
+if N = Ntrial then 
+
+C′ ← Ctrial ;
+
+return C′
+
+of the circuit in which a measure qubit is reset and then SWAPped with a routing qubit, or when a measure qubit is SWAPped with a routing qubit and then measured. In such cases, we can delete the SWAP gate and update the location of the measurement/reset. We must keep iterat-ing through the circuit to look for these events, as chains of SWAPs can exist that will move resets/measurements multiple steps. We summarise the procedure in Algo-rithm 2. 
+
+Phase 3: Delete unused routing qubits 
+
+Finally, after removing all SWAPs in the above man-ner, many routing qubits that were previously necessary may now be redundant. Hence, if any routing qubit is now not acted on by a gate in the circuit, we remove this routing qubit. An example of a vine code patch before and after these three phases are performed is shown in 19 
+
+Algorithm 2: Delete SWAP-then-measure and reset-then-SWAP events                                       
+
+> Input: Vine code syndrome extraction circuit, C
+> Output: Valid vine code syndrome extraction circuit,
+> C′, with SWAP-then-measure and reset-then-SWAP events deleted
+> C′←C;
+> Cprev ← ∅ ;
+> while C′̸=Cprev do
+> Cprev ←C′;
+> foreach measure qubit qin C′do foreach SWAP gate, S, targeting qdo if If there is no gate between Sand a measurement/reset of qthen
+> C′←(C′with Sdeleted and the positions of reset/measurement of q
+> updated)
+> return C′
+> FIG. 11. An example of the SWAP reduction techniques ap-plied to a specific, d= 5 patch of −−−−−−−→
+> nSEN ESs code. After these are applied, 59 redundant routing qubits are deleted. Stim circuits for both code patches can be found at Ref. 72.
+
+Fig. 11. Note the new positions of data and measure qubits in the updated patch. 
+
+> Appendix F: Generalised boundary details
+
+The −−−−−→
+
+sEEEn (equivalently −−−−−−→
+
+N EEEN ) vine code acts as a useful example to showcase the construction of gener-alised (or coloured) boundaries in vine codes, as it shares identical topological properties with the 2D color code. This is because it encodes k = 2 logical qubits on the plane with Pauli boundary conditions. We briefly recap the anyon content of the color code [62, 63]. Like the color code, the −−−−−→
+
+sEEEn code has 9 non-trivial bosons which can be labelled by one of three colours r, g, b, and one of three Pauli labels x, y, z. For our purposes, we will treat y anyons as the combination of x and z anyons. The bosons of the model can be sum-marised: 
+
+rx gx bx
+
+ry gy by
+
+rz gz bz
+
+(F1) We can identify these with the bosons of two copies of toric code [63]: rx 7 → e1, rz 7 → m2, bx 7 → e2, bz 7 → m1,and these generate all other bosons via fusion. The La-grangian subgroups correspond to the rows and columns of the boson table, as each specifies three bosons that braid trivially. By measuring the short tunnelling op-erators of bosons in a row (column), we condense the complete Lagrangian subgroup of a Pauli (colour) type into the trivial phase. The remaining bosons are confined at this interface. This enables us to define six different boundary types for the −−−−−→
+
+sEEEn code. We have intro-duced two of these in Section III A (corresponding to the first and third rows of the table), but we also define three more here, corresponding to the columns of the table. As explained in Section III B, to construct a coloured boundary of colour c, we measure out the tunnelling operators of cx and cz anyons. For the −−−−−→
+
+sEEEn code, there are three tunnelling operator motifs, which are shown in Fig. 12. In the figure, we show the tunnelling operators for bz anyons and highlight the blue Z sta-bilisers that are flipped by the X-type tunnelling opera-tors. Horizontal translations of these motifs, and verti-cal translations by [0 , ±2], result in tunnelling operators for bz , gz or rz anyons. Translations by [1 , 1], combined with a Hadamard gate, create tunnelling operators for 
+
+rx anyons. We once again obtain tunnelling operators for gx and bx via horizontal translations and translations by [0 , ±2]. We construct a small patch of −−−−−→
+
+sEEEn code with coloured boundaries by measuring out tunnelling oper-ators for b anyons to the left and right of the patch, and then measure out r anyon tunnelling operators to the top and bottom of the patch. This creates the stabiliser pat-tern shown in Fig. 13, upon truncating the stabilisers that commute with all the measured tunnelling operators to lie within the patch. Note that this procedure can result in stabilisers that “bleed” out of the patch and overlap with tunnelling operators. We can circumvent this issue by subsequently measuring out the qubits in the trivial region again in the X or Z basis. We then have some freedom to choose a complete set of stabiliser generators near the boundary to measure (e.g., we could measure s1
+
+and s2, or s1 and s1s2). The specific boundary stabilis-ers shown in Fig. 13 were chosen to minimise the number of new shapes generated (as these new shapes require changes to the syndrome measurement circuit; see be-low). We highlight the truncated stabilisers in the figure, and colour the bulk stabilisers in muted tones. We have shifted the starting positions of some of the data and measure qubits in this patch to allow for the measure-ment of all the truncated stabilisers without increasing the depth of the syndrome extraction circuit. In partic-20 0022446 8 10 12 0022446 8 10 12 0022446 8 10 12      
+
+> FIG. 12. The three minimal-weight tunnelling operator motifs for the −−−−−→
+> sEEEn code. The three Pauli-Xoperators shown flip, in each case, only the two Zstabilisers highlighted in blue.
+
+ular, the X measure qubits on rows 0 and 2 have been moved in the direction of vector [1 , −1], and the data qubits directly above these, at (2 , 3) and (2 , 1) have been moved along vector [ −1, 1]. Owing to some of the boundary stabilisers having a dif-ferent shape to the bulk stabilisers, we need to change the syndrome measurement circuit close to the boundaries. In particular, note the different shapes of the four-body red Z (green X) boundary stabilisers on the right (left) side of the patch, and the two-body blue stabilisers on the top and bottom boundaries of the patch. These require alterations to the direction of gates in the syndrome ex-traction circuit, while the remaining boundary stabilisers are simple truncations of the shapes of bulk stabilisers. In Fig. 13, we provide all the gates for the syndrome mea-surement circuit and show how the X and Z stabilisers are formed over the course of the circuit. We choose lo-cations for the measure qubits for the different-shaped stabilisers such that routing qubits would otherwise oc-cupy these positions. To see that the circuits do not violate the commutativ-ity condition, we merely need to check that the different-shaped stabilisers are measured in a compatible fashion with their neighbours (all regular-shaped stabilisers or regular truncations are trivial, owing to the validity of the step sequence). We can focus on the right and bottom boundaries, as the top and left boundaries are the same for the sequence traced out in reverse. One can check that these stabilisers are compatible with all neighbours of the opposite Pauli type with which they overlap. We provide a further example of the −−−−−−−→
+
+sEN W Sw flip-vine code, which is also equivalent to the 2D color code. We show this code on a triangular patch with red, green and blue boundaries. The stabilisers are supported on plaquettes that host X and Z type stabilisers. These are shown in Fig. 14. The circuit construction is far simpler for this example, as all boundary stabilisers are simple truncations of their bulk counterparts. In Fig. 14, we trace the evolution of one of the stabilisers supported on a blue plaquette. 
+
+> Appendix G: Numerical Simulation Details
+
+For our simulations, we use the Stim [102] package to build syndrome extraction circuits for both X and 
+
+Z memory experiments (all stim circuits used for sim-ulations can be found at Ref. 72). For X (Z) memory experiments, we start by resetting all data qubits in the 
+
+X (Z) basis and all measure and routing qubits in the Z
+
+basis. In each QEC round, syndrome extraction is per-formed, and stabiliser measurements are compared with the last measurement record for that stabiliser to form “detectors” (parity bits equivalent to the sum mod 2 of the two measurement outcomes). Detectors are +1 in the absence of errors and so are used to determine when errors have occurred. Circuits are run for max(5 , d circuit )rounds of syndrome measurement, where dcircuit is the minimum circuit distance of the code patch (either 3, 5, or 7). At the end of the experiment, data qubits are read out in the X (Z) basis for X (Z) memory experiments. Syndrome extraction circuits are compiled into a na-tive gate set of: measurements in the Z basis, resets in the Z basis, Hadamard gates, CXSWAP, CZSWAP and CX gates (apart from in X memory experiments wherein initial/final data qubit reset and readout is performed in the X basis). The latter three gates are equivalent to gates native in superconducting devices (iSWAP and CZ) up to single-qubit Clifford rotations. Routing qubits are reset and measured in the Z basis at the beginning and end of each QEC round and CZSWAP gates are used to route data/measure qubits via these routing qubits. We include a flag detector in the circuit for each routing qubit measurement. We assume a superconducting-inspired “SI1000” noise model with noise strength p. This applies depolarising noise channels to qubits after each gate layer. Two-qubit gates are followed by a correlated two-qubit depolarising channel with strength p and Hadamard gates by a single-qubit channel with strength p/ 10. Resets in the Z (X)basis are followed by an X (Z) error channel of strength 2p. Measurements separately suffer a classical readout error with probability 5 p and are followed by a depolar-ising channel of strength p. When a qubit idles during a unitary gate layer (measurement/reset layer), it suffers a depolarising channel of strength p/ 10 (2 p). We take ≥ 100 , 000 Monte Carlo shots for each quan-21 0 2 4 6 8 10 12 14 16 0 2 4 6 8 10 12 14 16 0 2 4 6 8 10 12 14 16 024024
+
+# (d) (e) (f) 0022446 8 10 12 14 16 0 2 4 6 8 10 12 14 16 0 2 4 6 8 10 12 14 16 024
+
+# (d) (e) (f) 0022446 8 10 12 14 16 0022446 8 10 12 14 16 
+
+FIG. 13. Syndrome extraction circuits for the −−−−−→
+
+sEEEn code with vertical blue and horizontal red boundaries (see Fig. 6 for the boundaries and stabilisers of each colour). (Top) We show the complete X (left) and Z (right) stabilisers for this patch, with all data/measure qubits in their starting positions. (Pink box; (a)-(f )) We show each step of the circuit and track how X
+
+stabilisers are constructed. Teal (brown) lines indicate CX (CXSWAP) gates between data and measure qubits. Grey lines are SWAP gates. (Blue box; (a)-(f )) The same steps of the circuit are shown and the evolution of the Z stabilisers is shown. 
+
+tum memory circuit (or 1000 errors), collected using the Sinter tool in the Stim library. We use belief propaga-tion with ordered statistics decoding (BPOSD) to decode the data [74, 103, 104]. We only include detectors of the same Pauli type as the basis of the memory experiment in the decoding problem. This improved speeds of decoding considerably without noticeably affecting accuracy. For BPOSD, we use the same parameters as used in Ref. 1. We use the min-sum method of BP and a parallel sched-ule, and use OSD-CS. The number of BP iterations and the OSD order are both set to 15, and the min-sum scal-ing factor is set to 0.625. 
+
+[1] G. P. Geh´ er, D. Byfield, and A. Ruban, Direc-tional codes: a new family of quantum LDPC codes on hexagonal- and square-grid connectivity hardware (2025), arXiv:2507.19430 [quant-ph]. [2] A. Kitaev, Fault-tolerant quantum computation by anyons, Annals of Physics 303 , 2–30 (2003). [3] E. Dennis, A. Kitaev, A. Landahl, and J. Preskill, Topological quantum memory, Journal of Mathemati-cal Physics 43 , 4452–4505 (2002). [4] S. B. Bravyi and A. Y. Kitaev, Quantum codes on a 22 
+
+(a) (b) (c) (d) 
+
+(d) (e) (f) 
+
+FIG. 14. Syndrome measurement circuit for the −−−−−−−→
+
+sEN W Sw flip-vine code on a triangular patch. One Z stabiliser is traced out through the steps of the circuit (a)-(e). The same measure qubit will measure an X stabiliser with the same support in the next QEC round. The gate and qubit colour conventions are the same as in Fig. 1, Fig. 4, and Fig. 13. lattice with boundary (1998), arXiv:quant-ph/9811052 [quant-ph]. [5] A. G. Fowler, M. Mariantoni, J. M. Martinis, and A. N. Cleland, Surface codes: Towards practical large-scale quantum computation, Physical Review A 86 ,10.1103/physreva.86.032324 (2012). [6] E. T. Campbell, B. M. Terhal, and C. Vuillot, Roads towards fault-tolerant universal quantum computation, Nature 549 , 172–179 (2017). [7] O. Higgott and C. Gidney, Sparse Blossom: correcting a million errors per core second with minimum-weight matching, Quantum 9, 1600 (2025). [8] N. Delfosse and N. H. Nickerson, Almost-linear time de-coding algorithm for topological codes, Quantum 5, 595 (2021). [9] N. Shutty, M. Newman, and B. Villalonga, Efficient near-optimal decoding of the surface code through en-sembling (2024), arXiv:2401.12434 [quant-ph]. [10] S. Bravyi, M. Suchara, and A. Vargo, Efficient al-gorithms for maximum likelihood decoding in the surface code, Physical Review A 90 , 10.1103/phys-reva.90.032326 (2014). [11] R. Raussendorf and J. Harrington, Fault-tolerant quan-tum computation with high threshold in two dimen-sions, Physical Review Letters 98 , 190504 (2007). [12] D. Horsman, A. G. Fowler, S. Devitt, and R. V. Me-ter, Surface code quantum computing by lattice surgery, New Journal of Physics 14 , 123011 (2012). [13] H. Bombin and M. A. Martin-Delgado, Quantum mea-surements and gates by code deformation, Journal of Physics A: Mathematical and Theoretical 42 , 095302 (2009). [14] B. J. Brown, K. Laubscher, M. S. Kesselring, and J. R. Wootton, Poking holes and cutting corners to achieve Clifford gates with the surface code, Physical Review X 
+
+7, 10.1103/physrevx.7.021029 (2017). [15] B. J. Brown, A fault-tolerant non-Clifford gate for the surface code in two dimensions, Science Advances 6,10.1126/sciadv.aay4929 (2020). [16] S. Bravyi and A. Kitaev, Universal quantum computa-tion with ideal clifford gates and noisy ancillas, Physical Review A 71 , 10.1103/physreva.71.022316 (2005). [17] D. Litinski, Magic state distillation: Not as costly as you think, Quantum 3, 205 (2019). [18] D. Litinski, A game of surface codes: Large-scale quan-tum computing with lattice surgery, Quantum 3, 128 (2019). [19] C. Chamberland and E. T. Campbell, Universal quan-tum computing with twist-free and temporally encoded lattice surgery, PRX Quantum 3, 10.1103/prxquan-tum.3.010331 (2022). [20] G. P. Geh´ er, O. Crawford, and E. T. Campbell, Tangling schedules eases hardware connectivity requirements for quantum error correction, PRX Quantum 5, 010348 (2024). [21] G. H. Low, W. J. Huggins, D. W. Berry, T. Khattar, A. F. White, N. C. Rubin, and R. Babbush, A denser planar surface code (2026), arXiv:2605.30455 [quant-ph]. [22] Google Quantum AI et al. , Suppressing quantum er-rors by scaling a surface code logical qubit, Nature 614 ,676–681 (2023). [23] R. S. Gupta, N. Sundaresan, T. Alexander, C. J. Wood, S. T. Merkel, M. B. Healy, M. Hillenbrand, T. Jochym-O’Connor, J. R. Wootton, T. J. Yoder, A. W. Cross, M. Takita, and B. J. Brown, Encoding a magic state with beyond break-even fidelity, Nature 625 , 259–263 (2024). 23 
+
+[24] Google Quantum AI et al. , Quantum error correction below the surface code threshold, Nature 638 , 920–926 (2024). [25] Google Quantum AI et al. , Demonstrating dynamic sur-face codes (2025), arXiv:2412.14360 [quant-ph]. [26] E. Rosenfeld et al. , Magic state cultivation on a superconducting quantum processor (2025), arXiv:2512.13908 [quant-ph]. [27] R. Harper, C. Lain´ e, E. T. Hockings, C. McLauch-lan, G. M. Nixon, B. J. Brown, and S. D. Bartlett, Characterising the failure mechanisms of error-corrected quantum logic gates, Nature Communications 17 , 5039 (2026). [28] S.-H. Lee, X. C. Kolesnikow, J. Zen, E. T. Hockings, C. K. McLauchlan, G. M. Nixon, T. R. Scruby, S. D. Bartlett, R. Harper, and B. J. Brown, Scalable quan-tum error correction tailored for a heavy-hex qubit array (2026), arXiv:2604.14296 [quant-ph]. [29] Y. Wang, F. Shen, H. Xie, A. Zhang, Y. Gao, C. Zhang, X. Zhu, F. Jin, Y. Zou, N. Wang, Z. Cui, Z. Bao, Z. Zhu, J. Zhong, G. Liu, J.-N. Yang, Y. Han, Y. He, J. Shen, H. Wang, J. Huang, X. Zhang, S. Zhou, H. Dong, J. Deng, Y. Wu, Z. Song, H. Li, Z. Wang, C. Song, Q. Guo, P. Zhang, H. Wang, and Y. Li, A supercon-ducting surface-code processor with lattice-surgery log-ical operations (2026), arXiv:2606.06598 [quant-ph]. [30] K. Wang, Z. Lu, C. Zhang, G. Liu, J. Chen, Y. Wang, Y. Wu, S. Xu, X. Zhu, F. Jin, Y. Gao, Z. Tan, Z. Cui, N. Wang, Y. Zou, A. Zhang, T. Li, F. Shen, J. Zhong, Z. Bao, Z. Zhu, Y. Han, Y. He, J. Shen, H. Wang, J.-N. Yang, Z. Song, J. Deng, H. Dong, Z.-Z. Sun, W. Li, Q. Ye, S. Jiang, Y. Ma, P.-X. Shen, P. Zhang, H. Li, Q. Guo, Z. Wang, C. Song, H. Wang, and D.-L. Deng, Demonstration of low-overhead quantum error correc-tion codes, Nature Physics 22 , 308–314 (2026). [31] S. Bravyi, A. W. Cross, J. M. Gambetta, D. Maslov, P. Rall, and T. J. Yoder, High-threshold and low-overhead fault-tolerant quantum memory, Nature 627 ,778–782 (2024). [32] P. Webster, L. Berent, O. Chandra, E. T. Hockings, N. Baspin, F. Thomsen, S. C. Smith, and L. Z. Cohen, The pinnacle architecture: Reducing the cost of break-ing RSA-2048 to 100 000 physical qubits using quantum LDPC codes (2026), arXiv:2602.11457 [quant-ph]. [33] T. J. Yoder, E. Schoute, P. Rall, E. Pritchett, J. M. Gambetta, A. W. Cross, M. Carroll, and M. E. Beverland, Tour de gross: A modular quan-tum computer based on bivariate bicycle codes (2025), arXiv:2506.03094 [quant-ph]. [34] S. Xu, K. Liu, P. Rall, Z. He, and Y. Ding, Dis-tilling magic states in the bicycle architecture (2026), arXiv:2602.20546 [quant-ph]. [35] M. Cain, Q. Xu, R. King, L. R. B. Picard, H. Levine, M. Endres, J. Preskill, H.-Y. Huang, and D. Blu-vstein, Shor’s algorithm is possible with as few as 10,000 reconfigurable atomic qubits (2026), arXiv:2603.28627 [quant-ph]. [36] S. J. S. Tan, Y. Hong, T.-C. Lin, M. J. Gullans, and M.-H. Hsieh, Single-shot universality in quantum LDPC codes via code-switching (2025), arXiv:2510.08552 [quant-ph]. [37] V. Menon, J. P. Bonilla Ataides, R. Mehta, A. Gu, D. B. Tan, and M. D. Lukin, Magic tricycles: Efficient magic-state generation with finite block-length quantum LDPC codes, Physical Review X 16 , 10.1103/ghhp-cytl (2026). [38] A. Jacob, C. McLauchlan, and D. E. Browne, Single-shot decoding and fault-tolerant gates with trivariate tricycle codes (2026), arXiv:2508.08191 [quant-ph]. [39] A. J. Malcolm, A. N. Glaudell, P. Fuentes, D. Chan-dra, A. Schotte, C. DeLisle, R. Haenel, A. Ebrahimi, J. Roffe, A. O. Quintavalle, S. J. Beale, N. R. Lee-Hone, and S. Simmons, Computing efficiently in QLDPC codes (2025), arXiv:2502.07150 [quant-ph]. [40] T. R. Scruby, T. Hillmann, and J. Roffe, High-threshold, low-overhead and single-shot decodable fault-tolerant quantum memory, PRX Quantum 7, 10.1103/67xf-zdjb (2026). [41] V. Steffan, S. H. Choe, N. P. Breuckmann, F. R. F. Pereira, and J. N. Eberhardt, Tile codes: High-efficiency quantum codes on a lattice with boundary (2025), arXiv:2504.09171 [quant-ph]. [42] Z. Liang, J. N. Eberhardt, and Y.-A. Chen, Pla-nar quantum low-density parity-check codes with open boundaries (2025), arXiv:2504.08887 [quant-ph]. [43] R. K. Radebold, S. D. Bartlett, and A. C. Doherty, Explicit instances of quantum tanner codes (2025), arXiv:2508.05095 [quant-ph]. [44] P. Panteleev and G. Kalachev, Degenerate quantum LDPC codes with good finite length performance, Quantum 5, 585 (2021). [45] M. A. Tremblay, N. Delfosse, and M. E. Bever-land, Constant-overhead quantum error correction with thin planar connectivity, Physical Review Letters 129 ,050504 (2022). [46] L. Pecorari, S. Jandura, G. K. Brennen, and G. Pupillo, High-rate quantum LDPC codes for long-range-connected neutral atom registers, Nature Com-munications 16 , 1111 (2025). [47] H.-K. Lin and L. P. Pryadko, Quantum two-block group algebra codes, Phys. Rev. A 109 , 022407 (2024). [48] M. Rowshan, Structural analysis of directional qLDPC codes (2026), arXiv:2602.19057 [quant-ph]. [49] M. McEwen, D. Bacon, and C. Gidney, Relaxing hard-ware requirements for surface code circuits using time-dynamics, Quantum 7, 1172 (2023). [50] S. A. Caldwell et al. , Parametrically activated entan-gling gates using transmon qubits, Phys. Rev. Appl. 10 ,034050 (2018). [51] Y. Sung, L. Ding, J. Braum¨ uller, A. Veps¨ al¨ ainen, B. Kannan, M. Kjaergaard, A. Greene, G. O. Samach, C. McNally, D. Kim, A. Melville, B. M. Niedzielski, M. E. Schwartz, J. L. Yoder, T. P. Orlando, S. Gus-tavsson, and W. D. Oliver, Realization of high-fidelity CZ and ZZ -free iSWAP gates with a tunable coupler, Phys. Rev. X 11 , 021058 (2021). [52] M. Roth, M. Ganzhorn, N. Moll, S. Filipp, G. Salis, and S. Schmidt, Analysis of a parametrically driven exchange-type gate and a two-photon excitation gate between superconducting qubits, Phys. Rev. A 96 ,062323 (2017). [53] C. Kriˇ zan, J. Bizn´ arov´ a, L. Chen, E. Hogedal, A. Os-man, C. W. Warren, S. Kosen, H.-X. Li, T. Abad, A. Aggarwal, M. Caputo, J. Fern´ andez-Pend´ as, A. Gaikwad, L. Gr¨ onberg, A. Nylander, R. Reham-mar, M. Rommel, O. I. Yuzephovich, A. Frisk Kockum, J. Govenius, G. Tancredi, and J. Bylander, Quantum SWAP gate realized with CZ and iSWAP gates in a su-24 
+
+perconducting architecture, New Journal of Physics 27 ,074507 (2025). [54] J. N. Eberhardt, F. R. F. Pereira, and V. Steffan, Prun-ing qLDPC codes: Towards bivariate bicycle codes with open boundary conditions (2024), arXiv:2412.04181 [quant-ph]. [55] A. Kubica and M. E. Beverland, Universal transversal gates with color codes: A simplified approach, Physical Review A 91 , 10.1103/physreva.91.032330 (2015). [56] C. Gidney, N. Shutty, and C. Jones, Magic state cultiva-tion: growing T states as cheap as CNOT gates (2024), arXiv:2409.17595 [quant-ph]. [57] J. Claes, Cultivating T states on the surface code with only two-qubit gates (2025), arXiv:2509.05232 [quant-ph]. [58] Y. Vaknin, S. Jacoby, A. Grimsmo, and A. Retzker, Effi-cient magic state cultivation on the surface code (2026), arXiv:2502.01743 [quant-ph]. [59] K. Sahay, P.-K. Tsai, K. Chang, Q. Su, T. B. Smith, S. Singh, and S. Puri, Fold-transversal surface code cul-tivation (2026), arXiv:2509.05212 [quant-ph]. [60] IBM Quantum, https://quantum.cloud.ibm.com/ computers (2026). [61] H. Bombin and M. A. Martin-Delgado, Topological quantum distillation, Phys. Rev. Lett. 97 , 180501 (2006). [62] M. S. Kesselring, J. C. Magdalena de la Fuente, F. Thomsen, J. Eisert, S. D. Bartlett, and B. J. Brown, Anyon condensation and the color code, PRX Quantum 
+
+5, 10.1103/prxquantum.5.010342 (2024). [63] M. S. Kesselring, F. Pastawski, J. Eisert, and B. J. Brown, The boundaries and twist defects of the color code and their applications to topological quantum com-putation, Quantum 2, 101 (2018). [64] Z. Liang, K. Liu, H. Song, and Y.-A. Chen, Generalized toric codes on twisted tori for quantum error correction, PRX Quantum 6, 10.1103/rmy6-9n89 (2025). [65] C. Chamberland, G. Zhu, T. J. Yoder, J. B. Hertzberg, and A. W. Cross, Topological and subsystem codes on low-degree graphs with flag qubits, Physical Review X 
+
+10 , 10.1103/physrevx.10.011022 (2020). [66] H. Bombin, G. Duclos-Cianci, and D. Poulin, Universal topological phase of two-dimensional stabilizer codes, New Journal of Physics 14 , 073048 (2012). [67] A. Kapustin and N. Saulina, Topological boundary con-ditions in Abelian Chern–Simons theory, Nucl. Phys. B 
+
+845 , 393–435 (2011). [68] M. Levin, Protected edge modes without symmetry, Phys. Rev. X 3, 021009 (2013). [69] M. Barkeshli, C.-M. Jian, and X.-L. Qi, Classification of topological defects in Abelian topological states, Phys. Rev. B 88 , 241103 (2013). [70] B. Yoshida, Gapped boundaries, group cohomology and fault-tolerant logical gates, Ann. Phys. 377 , 387–413 (2017). [71] L. P. Pryadko and W. Zeng, dist-m4ri: distance of a classical or quantum CSS code, https://github.com/ QEC-pages/dist-m4ri (2024). [72] G. Nixon, C. K. McLauchlan, and C. Van Rest, Stim circuits and data for “Vine codes: Low-overhead quan-tum LDPC codes on a planar square grid” manuscript, 10.5281/zenodo.20746752 (2026). [73] C. Gidney, M. Newman, P. Brooks, and C. Jones, Yoked surface codes (2023), arXiv:2312.04522 [quant-ph]. [74] J. Roffe, LDPC: Python tools for low density parity check codes, https://pypi.org/project/ldpc/ (2022). [75] F. Battistel, B. Varbanov, and B. Terhal, Hardware-efficient leakage-reduction scheme for quantum error correction with superconducting transmon qubits, PRX Quantum 2, 10.1103/prxquantum.2.030314 (2021). [76] J. P. Bonilla Ataides, D. K. Tuckett, S. D. Bartlett, S. T. Flammia, and B. J. Brown, The xzzx surface code, Na-ture Communications 12 , 10.1038/s41467-021-22274-1 (2021). [77] D. K. Tuckett, A. S. Darmawan, C. T. Chubb, S. Bravyi, S. D. Bartlett, and S. T. Flammia, Tailoring surface codes for highly biased noise, Physical Review X 9,10.1103/physrevx.9.041031 (2019). [78] J. M. Auger, H. Anwar, M. Gimeno-Segovia, T. M. Stace, and D. E. Browne, Fault-tolerance thresholds for the surface code with fabrication errors, Physical Re-view A 96 , 10.1103/physreva.96.042316 (2017). [79] D. M. Debroy, M. McEwen, C. Gidney, N. Shutty, and A. Zalcman, Luci in the surface code with dropouts, Quantum 9, 1936 (2025). [80] S. Wolanski, Automated compilation including dropouts: Tolerating defective components in stabiliser codes (2026), arXiv:2512.01943 [quant-ph]. [81] T. M¨ uller, T. Alexander, M. E. Beverland, M. B¨ uhler, B. R. Johnson, T. Maurer, and D. Vandeth, Improved belief propagation is sufficient for real-time decoding of quantum memory (2025), arXiv:2506.01779 [quant-ph]. [82] T. Hillmann, L. Berent, A. O. Quintavalle, J. Eisert, R. Wille, and J. Roffe, Localized statistics decoding for quantum low-density parity-check codes, Nature Com-munications 16 , 10.1038/s41467-025-63214-7 (2025). [83] S. Wolanski and B. Barber, Ambiguity clustering: an accurate and efficient decoder for qLDPC codes (2025), arXiv:2406.14527 [quant-ph]. [84] S. Koutsioumpas, T. Noszko, H. Sayginel, M. Webster, and J. Roffe, Colour codes reach surface code perfor-mance using vibe decoding (2025), arXiv:2508.15743 [quant-ph]. [85] K. Sahay, D. J. Williamson, and B. J. Brown, Amatching decoder for bivariate bicycle codes (2026), arXiv:2602.22770 [quant-ph]. [86] S. J. S. Tan, I. Gill, E. Huang, P. Liu, C. Zhao, H. De-hghani, A. Kubica, H. Zhou, and A. Dua, Generalized matching decoders for 2d topological translationally-invariant codes (2026), arXiv:2603.05402 [quant-ph]. [87] N. P. Breuckmann and B. M. Terhal, Constructions and noise threshold of hyperbolic surface codes, IEEE Trans-actions on Information Theory 62 , 3731–3744 (2016). [88] N. P. Breuckmann, C. Vuillot, E. Campbell, A. Krishna, and B. M. Terhal, Hyperbolic and semi-hyperbolic sur-face codes for quantum storage, Quantum Science and Technology 2, 035007 (2017). [89] O. Higgott and N. P. Breuckmann, Constructions and performance of hyperbolic and semi-hyperbolic floquet codes, PRX Quantum 5, 10.1103/prxquantum.5.040327 (2024). [90] A. Fahimniya, H. Dehghani, K. Bharti, S. Mathew, A. J. Koll´ ar, A. V. Gorshkov, and M. J. Gullans, Fault-tolerant hyperbolic floquet quantum error correcting codes, Quantum 9, 1849 (2025). [91] M. B. Hastings and J. Haah, Dynamically generated logical qubits, Quantum 5, 564 (2021). [92] J. Haah and M. B. Hastings, Boundaries for the honey-25 
+
+comb code, Quantum 6, 693 (2022). [93] C. Gidney, M. Newman, A. Fowler, and M. Broughton, A fault-tolerant honeycomb memory, Quantum 5, 605 (2021). [94] C. Gidney, M. Newman, and M. McEwen, Benchmark-ing the planar honeycomb code, Quantum 6, 813 (2022). [95] C. Vuillot, Planar floquet codes (2021), arXiv:2110.05348 [quant-ph]. [96] M. Davydova, N. Tantivasadakarn, and S. Balasub-ramanian, Floquet codes without parent subsystem codes, PRX Quantum 4, 10.1103/prxquantum.4.020341 (2023). [97] F. Setiawan and C. McLauchlan, Tailoring dynami-cal codes for biased noise: the x3z3 floquet code, npj Quantum Information 11 , 10.1038/s41534-025-01074-1 (2025). [98] C. McLauchlan, G. P. Geh´ er, and A. E. Moylett, Accom-modating fabrication defects on floquet codes with min-imal hardware requirements, Quantum 8, 1562 (2024). [99] S. Jacoby, A. Retzker, and F. Pastawski, Stairway codes: Floquetifying bivariate bicycle codes and beyond (2026), arXiv:2603.00228 [quant-ph]. [100] B. Gu, T. Noszko, V. Steffan, J. N. Eberhardt, J. Roffe, J. Eisert, and S. Koutsioumpas, Nearest-neighbour gates are all you need: High-rate quantum low-density parity-check codes on a planar grid (2026), (Released concurrently). [101] M. Webster, A. Jacob, and O. Higgott, Distance-finding algorithms for quantum codes and circuits (2026), arXiv:2603.22532 [quant-ph]. [102] C. Gidney, Stim: a fast stabilizer circuit simulator, Quantum 5, 497 (2021). [103] P. Panteleev and G. Kalachev, Degenerate quantum LDPC codes with good finite length performance, Quantum 5, 585 (2021). [104] J. Roffe, D. R. White, S. Burton, and E. Camp-bell, Decoding across the quantum low-density parity-check code landscape, Physical Review Research 2,10.1103/physrevresearch.2.043423 (2020). 26 
+
+Weight 4 
+
+−−−→
+
+nEEs (k = 1) 
+
+Weight 5 
+
+−−−−−→
+
+nEEEs (k = 2) −−−−−→
+
+nEN Es (k = 2) 
+
+Weight 6 
+
+−−−−−→
+
+neSSws (k = 3) −−−−−−→
+
+nEEEEs (k = 3) −−−−−−−→
+
+nEN N Es (k = 3) −−−−−→
+
+nSewSs (k = 3) 
+
+−−−−−−→
+
+nSEESs (k = 3) 
+
+Weight 7 
+
+−−−−−−−→
+
+nEnEsEs (k = 2) −−−−−−−→
+
+nEnSsEs (k = 2) −−−−−−−−→
+
+nEESEEs (k = 2) −−−−−−−−→
+
+nEN N W Se (k = 2) 
+
+−−−−−−−−→
+
+nESW SEs (k = 2) −−−−−−−→
+
+nSESESs (k = 2) −−−−−−→
+
+neSSSws (k = 4) −−−−−−−→
+
+nEeSwEs (k = 4) 
+
+−−−−−−−−→
+
+nEEEEEs (k = 4) −−−−−−−−→
+
+nEEN EEs (k = 4) −−−−−−−−→
+
+nEN EN Es (k = 4) −−−−−−−−→
+
+nEN N N Es (k = 4) 
+
+−−−−−−→
+
+nSeSwSs (k = 4) −−−−−−−→
+
+nSEN ESs (k = 4) −−−−−−−→
+
+nSeW wSs (k = 6) −−−−−−−→
+
+nSEEESs (k = 6) 
+
+Weight 8 
+
+−−−−−−−→
+
+newSSews (k = 1) −−−−−−−→
+
+nsEnsEns (k = 1) −−−−−−−−−→
+
+nEsN N nEs (k = 1) −−−−−−−−−−→
+
+nEN W N W Se (k = 1) 
+
+−−−−−−−−−→
+
+nEN W Sene (k = 1) −−−−−−−−→
+
+nESsnSEs (k = 1) −−−−−−−−→
+
+nESSSSEs (k = 1) −−−−−−−−→
+
+nSESSESs (k = 1) 
+
+−−−−−−−−→
+
+nEnSsnEs (k = 2) −−−−−−−−−→
+
+nsEN N Ens (k = 3) −−−−−−−−→
+
+nEnSSsEs (k = 3) −−−−−−−−→
+
+nSsEEnSs (k = 3) 
+
+−−−−−−−−→
+
+nSEnsESs (k = 3) −−−−−−−−→
+
+neSSSSws (k = 5) −−−−−−−−−→
+
+neSW W Sws (k = 5) −−−−−−−−−→
+
+nEEEEEEs (k = 5) 
+
+−−−−−−−−−−→
+
+nEN EEN Es (k = 5) −−−−−−−−−−→
+
+nEN N N N Es (k = 5) −−−−−−−−−−→
+
+nESW W SEs (k = 5) −−−−−−−−→
+
+nSeSSwSs (k = 5) 
+
+−−−−−−−−−→
+
+nSEN N ESs (k = 5) −−−−−−−−→
+
+nSSewSSs (k = 5) −−−−−−−−→
+
+nSSEESSs (k = 5) −−−−−−−−→
+
+nSeW weSs (k = 6) 
+
+−−−−−−−−→
+
+nEeSSwEs (k = 7) −−−−−−−−−→
+
+nSeW W wSs (k = 9) −−−−−−−−−→
+
+nSEEEESs (k = 9) 
+
+Weight 9 
+
+−−−−−−−−−→
+
+newSESews (k = 2) −−−−−−−−−−→
+
+nsN EN EN ns (k = 2) −−−−−−−−−→
+
+nEneSwsEs (k = 2) −−−−−−−−−→
+
+nEnESEsEs (k = 2) 
+
+−−−−−−−−−−→
+
+nEnSW SsEs (k = 2) −−−−−−−−−−→
+
+nEsN N N nEs (k = 2) −−−−−−−−−−→
+
+nEEnW sEEs (k = 2) −−−−−−−−−−→
+
+nEEsN nEEs (k = 2) 
+
+−−−−−−−−−−→
+
+nEEsW nEEs (k = 2) −−−−−−−−−−→
+
+nEEESEewe (k = 2) −−−−−−−−−−→
+
+nEESEEnsn (k = 2) −−−−−−−−−−→
+
+nEESESEEs (k = 2) 
+
+−−−−−−−−−−→
+
+nEN ESEewe (k = 2) −−−−−−−−−−−→
+
+nEN N W Swew (k = 2) −−−−−−−−−→
+
+nESsN nSEs (k = 2) −−−−−−−−−→
+
+nESSSSSEs (k = 2) 
+
+−−−−−−−−−−→
+
+nSESW SESs (k = 2) −−−−−−−−−−−→
+
+nesW W W nws (k = 4) −−−−−−−−−→
+
+neSEEESws (k = 4) −−−−−−−−→
+
+neSSSewes (k = 4) 
+
+−−−−−−−−−−→
+
+nsEN N N Ens (k = 4) −−−−−−−−−−→
+
+nEnEEEsEs (k = 4) −−−−−−−−−−→
+
+nEnEN EsEs (k = 4) −−−−−−−−−→
+
+nEnSESsEs (k = 4) 
+
+−−−−−−−−−→
+
+nEnSSSsEs (k = 4) −−−−−−−−−−→
+
+nEeN EN wEs (k = 4) −−−−−−−−−−→
+
+nEsEEEnEs (k = 4) −−−−−−−−−−→
+
+nEsN EN nEs (k = 4) 
+
+−−−−−−−−−−→
+
+nEEnEsEEs (k = 4) −−−−−−−−−−→
+
+nEEsEnEEs (k = 4) −−−−−−−−−−→
+
+nEEEEEnsn (k = 4) −−−−−−−−−−→
+
+nEEESEEEs (k = 4) 
+
+−−−−−−−−−−→
+
+nEEN EEnsn (k = 4) −−−−−−−−−−→
+
+nEESSSEEs (k = 4) −−−−−−−−−−−→
+
+nEESW SEEs (k = 4) −−−−−−−−−−→
+
+nEN nEsN Es (k = 4) 
+
+−−−−−−−−−−−→
+
+nEN eW wN Es (k = 4) −−−−−−−−−−→
+
+nEN EN Ensn (k = 4) −−−−−−−−−−−→
+
+nEN ESEN Es (k = 4) −−−−−−−−−−−→
+
+nEN N N Ensn (k = 4) 
+
+−−−−−−−−−−−−→
+
+nEN N W N N Es (k = 4) −−−−−−−−−−→
+
+nESeW wSEs (k = 4) −−−−−−−−−→
+
+nESsEnSEs (k = 4) −−−−−−−−−−→
+
+nESwN eSEs (k = 4) 
+
+−−−−−−−−−→
+
+nESwSeSEs (k = 4) −−−−−−−−−−→
+
+nESSW SSEs (k = 4) −−−−−−−−−−−→
+
+nESW N EESs (k = 4) −−−−−−−−−→
+
+nSewSewSs (k = 4) 
+
+−−−−−−−−−→
+
+nSsEN EnSs (k = 4) −−−−−−−−−→
+
+nSEeSwESs (k = 4) −−−−−−−−−→
+
+nSEsN nESs (k = 4) −−−−−−−−−−→
+
+nSESESESs (k = 4) 
+
+−−−−−−−−−→
+
+nSSeN wSSs (k = 4) −−−−−−−−−→
+
+nSSESESSs (k = 4) −−−−−−−−−→
+
+neSwEeSws (k = 6) −−−−−−−−−→
+
+neSSSSSws (k = 6) 
+
+−−−−−−−−−−→
+
+neSSW SSws (k = 6) −−−−−−−−−−→
+
+nsEEN EEns (k = 6) −−−−−−−−−−−→
+
+nEeN N N wEs (k = 6) −−−−−−−−−→
+
+nEEnSsEEs (k = 6) 
+
+−−−−−−−−−−→
+
+nEEeSwEEs (k = 6) −−−−−−−−−−−→
+
+nEEEEEEEs (k = 6) −−−−−−−−−−−→
+
+nEEEN EEEs (k = 6) −−−−−−−−−−−−→
+
+nEEN W N EEs (k = 6) 
+
+−−−−−−−−−−−→
+
+nEN eN wN Es (k = 6) −−−−−−−−−−−→
+
+nEN EEEN Es (k = 6) −−−−−−−−−−−→
+
+nEN EN EN Es (k = 6) −−−−−−−−−−−→
+
+nEN N EN N Es (k = 6) 
+
+−−−−−−−−−−−−→
+
+nEN N N N N Es (k = 6) −−−−−−−−−→
+
+nESwEeSEs (k = 6) −−−−−−−−−−−→
+
+nESW SW SEs (k = 6) −−−−−−−−−→
+
+nSesW nwSs (k = 6) 
+
+−−−−−−−−−→
+
+nSeSSSwSs (k = 6) −−−−−−−−−→
+
+nSsEEEnSs (k = 6) −−−−−−−−−→
+
+nSEnEsESs (k = 6) −−−−−−−−−−→
+
+nSEeW wESs (k = 6) 
+
+−−−−−−−−−→
+
+nSEsEnESs (k = 6) −−−−−−−−−−−→
+
+nSEN N N ESs (k = 6) −−−−−−−−−→
+
+nSSeSwSSs (k = 6) −−−−−−−−−−→
+
+nSSEN ESSs (k = 6) 
+
+−−−−−−−−−−−→
+
+neSW W W Sws (k = 8) −−−−−−−−−−→
+
+nEeSW SwEs (k = 8) −−−−−−−−−−−→
+
+nEEN EN EEs (k = 8) −−−−−−−−−−−−→
+
+nESW W W SEs (k = 8) 
+
+−−−−−−−−−−→
+
+nSeSW SwSs (k = 8) −−−−−−−−−−−→
+
+nSeW N W wSs (k = 8) −−−−−−−−−−→
+
+nSEESEESs (k = 8) −−−−−−−−−−−→
+
+nSEN EN ESs (k = 8) 
+
+−−−−−−−−−→
+
+nEeSSSwEs (k = 10) −−−−−−−−−−−→
+
+nEEN N N EEs (k = 10) −−−−−−−−−−→
+
+nSeW SW wSs (k = 10) −−−−−−−−−−→
+
+nSEEN EESs (k = 10) 
+
+−−−−−−−−−−→
+
+nSSeW wSSs (k = 10) −−−−−−−−−−→
+
+nSSEEESSs (k = 10) −−−−−−−−−−−→
+
+nSeW W W wSs (k = 12) −−−−−−−−−−→
+
+nSEEEEESs (k = 12) TABLE IV. Topologically ordered vine code sequences up to length 9. We find the above sequences from an exhaustive search of vine codes that satisfy conditions 1-4 in Appendix A, and filter for representatives via steps 5-7 in Appendix B. This search assumes a layout with alternating rows of X- and Z-stabilisers, see Fig. 1

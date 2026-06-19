@@ -1,0 +1,544 @@
+Title: Approximating optimal decoding of quantum LDPC codes with narrow frontiers
+
+URL Source: https://arxiv.org/pdf/2606.20513v1
+
+Published Time: Fri, 19 Jun 2026 01:21:46 GMT
+
+Number of Pages: 15
+
+Markdown Content:
+# Approximating optimal decoding of quantum LDPC codes with narrow frontiers 
+
+Anthony Leverrier 1 and Rüdiger Urbanke 2
+
+> 1Inria Paris, France
+> 2EPFL, Lausanne, Switzerland
+
+We introduce the Frontier decoder, a pruned dynamic-programming decoder for sparse quantum decoding problems. 
+
+Frontier processes error variables in a cho-sen order, merges prefixes with the same residual syndrome and logical label, and ap-proximates logical-coset posterior masses by retaining only a narrow scored frontier. Without pruning, the recursion is exact ordered inference with exponential com-plexity. In the code-capacity setting, the decoder reaches thresholds close to optimal for the surface code and the color code. In the circuit-level noise model, it achieves state-of-the-art performance with a very small average retained list size: less than 100 for the gross code [[144 , 12 , 12]] at a physical error rate of 0.001 . When the list size is constant, the decoder has linear complex-ity, suggesting the possibility of low-latency implementations. 
+
+Quantum error correction requires decoders that infer a recovery operation from a noisy syndrome record. For two-dimensional codes such as the surface code, decoders typically ex-ploit the strong geometric structure of the prob-lem [1, 2, 3, 4, 5, 6, 7]. For general quantum LDPC codes, the Tanner graph is sparse but need not be geometrically local [8, 9, 10, 11, 12, 13]. This motivates decoders that do not rely on geom-etry but still exploit sparsity. Many approaches have been explored in the literature: message-passing decoders with postprocessing [14, 15, 16], guided decimation [17, 18], branch or beam-style variants [19, 20], ensembling [21, 22], mod-ifying the Tanner graph to make it amenable to message passing [23], and short-path search 
+
+> Anthony Leverrier: anthony.leverrier@inria.fr Rüdiger Urbanke: rudiger.urbanke@epfl.ch
+
+in large graphs [24, 25]. Machine-learning de-coders are also rapidly improving and achieve state-of-the-art performance when they can be trained [26, 27, 28]. We describe the Frontier decoder, motivated by the logical maximum-likelihood rule, i.e., the decision rule that minimizes the logical error prob-ability. Given the observed syndrome, this rule assigns to each logical label the total posterior mass of all compatible error configurations in that logical class, and chooses the label with largest mass. 
+
+Frontier is an ordered syndrome decoder that uses pruning. Fix an order of the fault variables. After the first t variables have been processed, this order separates the variables into a processed prefix and an unprocessed suffix; we call this sep-aration the cut at time t. A syndrome check is active at this cut if it touches at least one vari-able in the prefix and at least one variable in the suffix. The active boundary is the set of all such checks. For an active check, the prefix has already con-tributed part of the final syndrome value, but the suffix may still change it. For each prefix, the decoder records the residual syndrome, i.e., the syndrome contribution that the suffix must still supply on the active boundary, together with the logical label accumulated by the prefix. This pair is the boundary state of the prefix. A boundary state retained by the decoder is called a survivor, and the current list of survivors after the first t
+
+variables have been processed is the frontier Ft. If two prefixes have the same boundary state, then they have the same feasible suffixes. Their prob-ability masses can therefore be merged by sum-ming. A check is completed when all variables touch-ing it lie in the processed prefix. Its syndrome value can then no longer change. At that mo-ment, the decoder compares the value produced 
+
+1
+
+> arXiv:2606.20513v1 [quant-ph] 18 Jun 2026
+
+by the prefix with the observed syndrome bit. Prefixes with the wrong value are discarded; for prefixes with the right value, the completed check no longer needs to be stored. Each survivor is assigned a score S = P + C.Here P is the log of the total probability mass of all prefixes merged into that survivor. The term C is a heuristic suffix-compatibility score, es-timating how likely the unprocessed variables are to supply the remaining residual syndrome on the active boundary. The decoder retains only sur-vivors whose score is within ∆ of the best score, subject to a hard cap of K survivors. After all variables have been processed, every syndrome check has been completed. The de-coder groups the retained states by logical class, sums their masses within each class, and outputs the class with the largest retained mass. Without pruning, the same recursion is exact variable elim-ination along the chosen order. With pruning, it becomes a small-list approximation to logical-class posterior inference. The main empirical result is that this short-list dynamic program, with the simple dead-line ordering described below and a local suffix-compatibility score, can compete with much more specialized search decoders on several benchmark families, while using very small average numbers of retained states. The main contributions are: 1. We derive an ordered dynamic program for log-ical maximum-likelihood decoding. For a fixed variable order, the unpruned recursion exactly computes the posterior mass of each logical class by merging prefixes with the same active residual syndrome and logical label. 2. We turn this exact recursion into the practical 
+
+Frontier decoder. The approximation uses deadline ordering, a local suffix-compatibility score, score-gap pruning, a hard cap K, and final aggregation by logical class. 3. We test Frontier on several sparse quantum decoding problems: rotated surface codes and color codes in the code-capacity model, and ro-tated surface code and BB codes under circuit-level noise. The results show near-optimal threshold behavior in the code-capacity set-ting and competitive performance for circuit-level noise with small retained lists. 4. We use the retained terminal lists to diag-nose decoder failures. We distinguish support loss, where pruning removes the correct logi-cal class, from terminal ranking failure, where the correct class remains in the list but is not ranked first. We find that increasing the score gap ∆ reduces support loss until terminal rank-ing becomes the limiting step. The rest of the paper is organized as follows. Section 1 positions Frontier relative to related decoders. Section 2 states the decoding model, and Section 3 gives the ordered-frontier recursion and presents the Frontier decoder. Section 4 discusses ordering and committee variants. Sec-tion 5 reports the code-capacity and circuit-level noise experiments. The final sections discuss po-tential improvements and conclusions. 
+
+# 1 Related decoders 
+
+The closest relatives of Frontier are decoders that keep an explicit boundary state or a small explicit set of candidates. Trellis and variable-elimination decoders process variables in an order and summarize the past by the boundary infor-mation needed by the unprocessed suffix [29, 30, 31, 32]. Quantum trellis decoders make this con-nection explicit for stabilizer and convolutional codes [33, 34, 35]. The unpruned Frontier re-cursion belongs to this family: once an order is fixed, prefixes with the same active residual and logical label have the same feasible suffixes. Their probability masses can therefore be summed, so degenerate representatives are collapsed into one boundary state rather than kept as separate can-didates. Tensor-network decoders are close at the level of inference: they approximate logical-coset par-tition functions by contracting a graphical model while controlling the size of an intermediate boundary through a bond-dimension cutoff [5, 36, 37, 38]. In a tensor-network decoder, the numeri-cal width is controlled by the bond dimension χ.In Frontier , the corresponding empirical width is the retained frontier size |F t|: the cap K is only a hard maximum, while ∆ makes the realized width adaptive from cut to cut. The boundary it-self is different. It is not a geometric contraction boundary in a chosen lattice embedding, but the set of parity-check or detector rows crossing the ordered column cut, with each survivor labelled 
+
+2by an active residual syndrome and a logical value. Thus Frontier is geometry agnostic in the sense that it applies directly to an ordered parity-check or DEM matrix. Tesseract and decision-tree decoders are also close in spirit because they search over sparse can-didate corrections while pruning a rapidly grow-ing graph of possibilities [24, 25]. An important distinction is merging: Frontier merges all pre-fixes that have the same active boundary resid-ual and logical label before pruning the merged frontier. This makes it a pruned ordered dynamic program rather than a decoder targeting the most likely error. 
+
+# 2 Decoding model 
+
+We write the decoding problem first as a binary linear syndrome problem. A fault vector 
+
+x ∈ Fn 
+
+> 2
+
+(1) 
+
+produces syndrome 
+
+s = Hx, H ∈ Fm×n 
+
+> 2
+
+. (2) 
+
+Here H denotes either a parity-check matrix, or a Detector Error Model (DEM) matrix, depend-ing on the application. In quantum decoding, a logical matrix 
+
+L ∈ Fk×n 
+
+> 2
+
+(3) 
+
+maps the same fault vector to a logical class 
+
+ℓ = Lx. (4) 
+
+Here k is the dimension of the logical space of interest: it is the number of logical qubits when we consider only bit flips, for instance, or twice as large if we consider both bit and phase flips. Throughout, n is the number of local factors, equivalently the number of columns of the binary parity-check or DEM matrix. The probability mass of the logical class ℓ given syndrome s is 
+
+Zℓ(s) = ∑ 
+
+> x:Hx =sLx =ℓ
+
+Pr( x). (5) 
+
+The posterior probability of logical class ℓ is 
+
+Zℓ(s)/ ∑ 
+
+> ℓ′
+
+Zℓ′ (s), so maximizing posterior prob-ability is equivalent to maximizing Zℓ(s). The same notation also covers finite local factors. In general, variable j has a local alphabet Aj , prior probabilities pj (xj ), a syndrome hj (xj ) ∈ Fm 
+
+> 2
+
+,and a logical value ℓj (xj ) ∈ Fk 
+
+> 2
+
+. The binary model above is the special case Aj = F2, hj (1) = H·j ,
+
+hj (0) = 0 , and similarly for the logical values. Given an observed syndrome s, the decoder seeks the logical class ℓ with the largest posterior mass among local outcomes x = ( x1, . . . , x n) ∈ A 1 ×· · · × A n satisfying 
+
+> n⊕
+> j=1
+
+hj (xj ) = s, 
+
+> n⊕
+> j=1
+
+ℓj (xj ) = ℓ. (6) 
+
+This is the factor-model version of the same 
+
+H, s, L, ℓ problem. All notions used below are therefore defined directly from the ordered columns (hj , ℓ j ), the target syndrome, and the priors; no geometric embedding of the checks or variables is required. In the code-capacity setting, the local alpha-bet is Aj = {0, 1} when decoding one type of error in a binary CSS code. For depolarizing noise, we can instead use one Pauli factor per qubit, with alphabet Aj = {I, X, Y, Z } and pri-ors (1 − p, p/ 3, p/ 3, p/ 3) . This keeps the X/Z 
+
+correlation induced by Y errors. For circuit-level noise, the variables can be binary detector-error mechanisms or higher-alphabet circuit-location factors. A two-qubit de-polarizing fault, for example, can be represented as a single local factor with outcomes II and the 15 non-identity two-qubit Paulis, with respective priors 1 − p and p/ 15 .The rows of H correspond to code checks or to circuit-level detectors. When the distinction is not important, we use the words check and detec-tor interchangeably. 
+
+# 3 The Frontier decoder 
+
+3.1 Exact active-boundary states 
+
+Fix an order π = ( j1, . . . , j n) of the columns or factors, and write π≤t = ( j1, . . . , j t). After the first t entries in this order have been processed, let Γt be the ordered set of active checks: these are the checks that touch at least one processed factor and at least one unprocessed factor. See Fig. 1 for an illustration. A check is completed once all factors touching it have been processed. From that point on, its syndrome value can no longer change. Therefore, any prefix that gives the wrong value for a com-pleted check is discarded. Checks that touch only 
+
+3unprocessed factors do not yet depend on the pre-fix and do not need to be stored. For a binary partial path x≤t = ( xj1 , . . . , x jt ) ∈
+
+Ft 
+
+> 2
+
+on the processed variables, the active residual syndrome is 
+
+qt = sΓt ⊕ HΓt,π ≤t x≤t ∈ F|Γt| 
+
+> 2
+
+. (7) 
+
+For finite-alphabet factors, the same prefix nota-tion means x≤t = ( xj1 , . . . , x jt ) ∈ A j1 × · · · × A jt ,and the matrix product is replaced by the sum mod 2 of local syndromes. A boundary state is the pair 
+
+σt = ( qt, λ t), (8) 
+
+where 
+
+λt =
+
+> t⊕
+> r=1
+
+ℓjr (xjr ) (9) 
+
+is the logical label accumulated by the prefix. The frontier table stores a prefix log mass Pt(σt) for each reachable boundary state. It may also store one arbitrary representative prefix for each state, only to output a correction at the end. Two prefixes with the same active residual syn-drome and the same accumulated logical label have identical feasible suffix sets. They differ only in the probability mass already accumulated by the prefix. They can therefore be merged by sum-ming their masses. This merging is also one point at which quan-tum degeneracy can help the computation. A de-coder that stores individual representative errors can spread the posterior mass of one logical class over many competing candidates. In Frontier ,prefixes that induce the same active residual syn-drome and logical label are collapsed before prun-ing. Their masses add to Pt(σt), and the merged state occupies only one entry of the candidate frontier. 
+
+Proposition 1 (Unpruned exactness) . Fix a fi-nite factor model with local alphabets Aj , priors 
+
+pj (xj ), syndrome vectors hj (xj ) ∈ Fm 
+
+> 2
+
+, and log-ical values ℓj (xj ) ∈ Fk 
+
+> 2
+
+. For any variable order 
+
+π, the unpruned ordered-frontier recursion with exact merging by active residual and logical label computes the logical-class masses 
+
+Zλ(s) = ∑       
+
+> x:⊕jhj(xj)= s
+> ⊕jℓj(xj)= λ
+> ∏
+> j
+
+pj (xj ). (10) 
+
+Proof. After t variables, the active residual syn-drome records exactly the part of the target syn-drome that must still be supplied by the unpro-cessed variables on the active checks. Completed checks have fixed values; prefixes that give the wrong value on such a check have already been discarded. Checks that touch only unprocessed variables are independent of the prefix. It follows that two prefixes with the same active residual syndrome and the same accumulated log-ical label have the same feasible suffix set. They differ only in their accumulated probability mass. Merging them by summing their masses therefore preserves the exact prefix mass for every reachable boundary state. Induction over t shows that the unpruned fron-tier table stores the exact prefix mass for each boundary state. After all variables have been pro-cessed, all checks have been completed. Grouping the remaining terminal states by logical label gives exactly the desired logical-class masses Zλ(s).
+
+Corollary 1 (Exact frontier width) . If wt = |Γt|
+
+active binary syndrome constraints are present after step t, and k logical bits are tracked, then the exact merged frontier contains at most 
+
+2wt+k (11) 
+
+boundary states at step t.
+
+For circuit-level noise, this bound quickly be-comes astronomically large. Under the deadline order used in our experiments, we find max t wt =134 for the gross code [[144 , 12 , 12]] on both memory-X and memory-Z, and k = 12 , giv-ing an unpruned bound of 2146 boundary labels. The rotated-surface circuit-level DEM reaches the same exponent at d = 11 , where max t wt = 145 
+
+and k = 1 . Thus exact unpruned frontier contrac-tion is not a viable decoder for these instances. 
+
+3.2 State transition 
+
+Suppose that the next factor is jt. Each retained survivor from the current frontier Ft−1 branches over all possible values x ∈ A jt . For each child, the decoder adds log pjt (x) to the prefix log mass, XORs the syndrome hjt (x) into the residual syn-drome, and XORs the logical value ℓjt (x) into the accumulated logical label. The active residual syndrome is then restricted to the new active boundary Γt. If a check has just 
+
+4Figure 1: Standard surface-code factor model and its ordered-matrix representation. Left: one CSS side of a small planar surface-code patch, with local factors xji , bulk checks of degree four, boundary checks of degree two, and one logical-label row L. Right: the same incidence pattern written as the ordered matrix H, with columns in the order π = ( j1, . . . , j n). After step t, the processed columns are π≤t, the unprocessed columns are π>t , and the active check set Γt is exactly the set of blue rows, namely the rows touching both sides of the cut. The active residual            
+
+> qt=sΓt⊕HΓt,π ≤tx≤t∈F|Γt|
+> 2is therefore a vector with one residual syndrome bit for each blue row; the decoder stores qttogether with the accumulated logical label λt.
+
+become completed, its value is now fixed. The decoder compares this value with the observed syndrome bit. If the two disagree, the child is discarded. If they agree, the completed check no longer needs to be stored. After these updates, children with identical active residual syndrome and logical label are merged by summing their masses. The result-ing merged table is the candidate frontier before pruning. 
+
+3.3 Suffix-compatibility score and score-gap pruning 
+
+The pruning step is applied after branching, dis-carding children that fail completed checks, and merging duplicate boundary states. Let ˜Ft be the merged candidate frontier at time t, before prun-ing. Let Ft be the retained frontier after pruning. We call |F t| the retained list size at time t.The retained list size is the Frontier analogue of a tensor-network bond dimension. The param-eter K is only a memory cap; the realized pro-file (|F t|)t, and especially its average and peak over a decoding instance, is the effective bound-ary width actually used by the decoder. This is why our simulations below report retained-list statistics instead of the cap K. We also discuss in Fig. 7 the distinction between the peak frontier size max t |F t| and its average 1 
+
+> n
+> ∑
+> t
+
+|F t|.For a candidate state σ ∈ ˜Ft, let q(σ) be its ac-tive residual syndrome and let Pt(σ) be its prefix log mass. Thus Pt(σ) is the log of the total prob-ability mass of all prefixes that have been merged into σ.We also assign to each active residual q aheuristic score Ct(q). We call Ct the suffix-compatibility score. It is used only for pruning. Its purpose is to favor residual syndromes that appear easier to complete using the unprocessed variables. Candidates are ranked by the pruning score 
+
+St(σ) = Pt(σ) + αC t(q(σ)) . (12) 
+
+The parameter α controls how much the suffix-compatibility score influences pruning relative to the prefix mass. In our experiments we use α =0.8.The best pruning score would use the log prob-ability that the unprocessed variables supply the remaining residual syndrome on all active checks. Computing that probability exactly is too expen-sive. Instead, we use a row-wise approximation. For each active check i, we compute the proba-bility that the unprocessed variables supply the required residual bit on that check. We then add the corresponding log probabilities over ac-tive checks. The row probabilities ρi,t are single-
+
+5row marginals. The approximation is to add their logarithms as if the active checks were indepen-dent. They are not independent in general, be-cause one future variable can touch several active checks. Thus Ct is only a pruning heuristic. We now define this score. Fix an active check 
+
+i ∈ Γt. Let Ut(i) be the set of unprocessed variables that still touch check i, and draw each future local variable Xj independently from its prior pj . The future tail contributes the row par-ity 
+
+Bi,t = ⊕
+
+> j∈Ut(i)
+
+hj,i (Xj ). (13) 
+
+A state with active residual bit (qt)i can be com-pleted on this row only if the future tail supplies parity Bi,t = ( qt)i.For one future variable, define the parity mo-ment 
+
+μj,i = E
+
+> [
+
+(−1) hj,i (Xj )]
+
+= ∑ 
+
+> xj∈A j
+
+pj (xj )( −1) hj,i (xj ).
+
+(14) 
+
+Equivalently, μj,i = 1 − 2θj,i , where 
+
+θj,i = Pr[ hj,i (Xj ) = 1] . (15) 
+
+Because parities multiply in the (−1) (·) represen-tation, the row moment is 
+
+ηi,t = E
+
+> [
+
+(−1) Bi,t 
+
+> ]
+
+= ∏
+
+> j∈Ut(i)
+
+μj,i . (16) 
+
+The two probabilities of the binary parity Bi,t are then recovered from this moment as 
+
+ρi,t (b) = Pr[ Bi,t = b]= 12
+
+> (
+
+1 + ( −1) bηi,t 
+
+> )
+
+, b ∈ { 0, 1}. (17) 
+
+The suffix-compatibility score assigned to aresidual vector qt is the sum of the row log-compatibilities: 
+
+Ct(qt) = ∑
+
+> i∈Γt
+
+log ρi,t (( qt)i). (18) 
+
+The retained frontier is 
+
+S⋆t = max  
+
+> σ∈˜Ft
+
+St(σ),
+
+Ft = TopK 
+
+> {
+
+σ ∈ ˜Ft : St(σ) ≥ S⋆t − ∆
+
+> }
+
+. (19) 
+
+Here TopK means that, if more than K states pass the score-gap test, only the K states with largest pruning score are retained. Thus ∆ con-trols the score gap, while K is a hard memory cap. In practice, we choose K much larger than the typical retained list size, and the behaviour of the decoder is mostly determined by ∆.A transition including branching, merging, scoring and pruning is illustrated in Fig. 2. 
+
+Algorithm 1: Frontier decoding for a fixed order. Input: factor model (Aj , p j , h j , ℓ j ), syn-drome s, order π, cap K, gap ∆, suffix weight 
+
+α.
+
+Initialize: F0 = {(q0 = 0 , λ = 0 , P = 0 , c =
+
+∅)}, where c is an optional representative prefix. 
+
+For t = 1 , . . . , n :1. Let j = π(t).2. Generate children for every σ ∈ F t−1 and every x ∈ A j .3. Update the active residual syndrome, logi-cal label, prefix log mass, and representa-tive prefix c.4. Discard children that give the wrong value on a newly completed check. 5. Merge children with identical active resid-ual syndrome and logical label by summing their masses, keeping one arbitrary repre-sentative prefix. 6. Compute St(σ) for every state σ ∈ ˜Ft.7. Apply the score-gap rule and the cap K to obtain Ft.
+
+Terminal: aggregate the retained terminal states by logical class and output the class with the largest retained mass, together with the corresponding representative prefix if a correction is needed. 
+
+3.4 Terminal logical decision 
+
+After all variables have been processed, every check has been completed. The decoder aggre-gates the retained terminal states by logical class. 
+
+6Figure 2: One transition of the pruned ordered-frontier recursion on a BB code [[72 , 12 , 6]] under circuit-level noise. Retained states branch on the next binary detector variable, duplicate active-boundary labels are merged by summing their masses, and the merged candidates are scored by S = P + αC before score-gap pruning. In this boundary, the state count changes 30 → 60 → 52 → 31 .
+
+The retained mass of logical class λ is 
+
+log ̂ Z(F) 
+
+> λ
+
+(s) = log 
+
+> ∑
+> σ∈F n
+> λ(σ)= λ
+
+exp( Pn(σ))  
+
+> 
+
+. (20) 
+
+The decoder outputs ̂
+
+λ = arg max  
+
+> λ̂
+
+Z(F) 
+
+> λ
+
+(s). (21) 
+
+The logical labels are not enumerated exhaus-tively in advance. Instead, each retained survivor carries its accumulated logical label, and termi-nal aggregation is performed only over the logical classes reached by the retained frontier Fn.
+
+# 4 Design choices 
+
+4.1 Column ordering 
+
+We find that the decoder performance strongly depends on the choice of ordering π. Good or-derings aim at keeping the active set of rows fairly small and at exposing contradictions early to avoid the need to carry a large frontier. Astrategy that works well is a deadline order: vari-ables are placed so that syndrome rows close early and the number of active constraints remains con-trolled. The deadline of a row, denoted di below, is the position of its last incident variable un-der the current order. The implementation used in the experiments starts from the natural order (e.g. the temporal order of the fault locations in a quantum memory experiment) and then sorts variables by the earliest row deadline they can help close. More explicitly, let Rj ⊆ { 1, . . . , m }
+
+be the detector/check rows touched by variable 
+
+j, and let r(j) be the position of j in the natural order. For each touched row i, define 
+
+fi = min  
+
+> j:i∈Rj
+
+r(j), di = max  
+
+> j:i∈Rj
+
+r(j). (22) 
+
+The forward deadline order sorts variables by the lexicographic key 
+
+κ(j) = 
+
+> (
+
+min 
+
+> i∈Rj
+
+di, max 
+
+> i∈Rj
+
+di, min 
+
+> i∈Rj
+
+fi, r (j), j 
+
+> )
+
+, (23) 
+
+with the convention that a variable with Rj = ∅
+
+is assigned +∞ for the first three components, so that it is placed after variables that touch de-tector/check rows. The first component priori-tizes variables that can finish a row whose last possible incident variable is early. The second and third components are deterministic tie break-ers that avoid needlessly delaying columns whose 
+
+7support extends later, while preserving the origi-nal order as a final tie breaker. This ordering is not a global optimization. In particular, applying the same rule in reverse coordinates gives a useful backward ordering; the committee variants below run both forward and backward deadline-ordered decoders. 
+
+Algorithm 2: Deadline ordering. Input: natural variable order, detector/check supports Rj .
+
+For each row i: compute first touch fi and last touch di in the natural order. 
+
+For each variable j: compute the key κ(j)
+
+from Eq. (23). 
+
+Return: variables sorted by increasing κ(j).A backward deadline order is a separate per-mutation: replace r(j) by the reversed posi-tion n + 1 − r(j), compute the same key in those reverse coordinates, and sort by that key. 
+
+4.2 Committee decoding 
+
+Committee decoding is an optional extension af-ter the single-order decoder has been defined. The simplest committee runs two decoder in-stances, for example one with the forward dead-line order and one with the backward deadline order. One selection rule is to compare the retained terminal logical-class masses returned by the com-mittee members and choose the class with the largest retained mass. This is the rule we use in our simulations, with the forward/backward deadline order committee. Another rule is disagreement escalation: if the committee members disagree, rerun the decoder with larger K and ∆, up to a configured cap. 
+
+# 5 Simulation results 
+
+Our primary accuracy metric is full logical frame error rate (FER). A frame fails if the decoder outputs the wrong logical class, or if the final re-tained list is empty. An empty final list means that the decoder did not retain any error config-uration with the observed syndrome. In our sim-ulations, the results use a committee of the for-ward and backward deadline orders: both orders are run on the same syndrome and the returned logical class with larger retained terminal mass is selected. All uncertainty intervals shown are Wilson 95% confidence intervals computed from frame counts. 
+
+5.1 Code-capacity threshold benchmarks 
+
+The first code-capacity benchmark is the ro-tated surface code under depolarizing noise. The correlated Pauli decoder uses one variable per qubit with alphabet {I, X, Y, Z } and prior (1 −
+
+p, p/ 3, p/ 3, p/ 3) , so it keeps the X/Z correlation induced by Y errors. Figure 3 shows the perfor-mance of the Frontier decoder for ∆ = 10 and cap values K increasing with the code size. The crossing window is close to the known depolariz-ing code-capacity maximum-likelihood threshold scale p ≈ 0.189 [39]. It is useful to compare the retained-list size in Fig. 3 with the boundary size used in tensor-network decoders. A tensor-network decoder con-trols an MPS bond dimension χ, and for a surface code of distance d, an MPS boundary contains 
+
+O(dχ 2) scalar parameters. The bond dimension is typically a few dozen, for instance χ = 48 in [37], albeit for larger distances. These numbers are comparable to the values of the average fron-tier size observed in Fig. 3 and suggest that both decoders find different efficient descriptions of the boundary of roughly the same complexity, either a sparse list of residual-syndrome/logical labels with their accumulated masses for Frontier , or a dense low-rank boundary state for tensor-network decoding. Our second code-capacity benchmark is the hexagonal color code under bit-flip noise. Fig-ure 4 reports threshold curves and average re-tained list sizes for distances d = 9 , 13 , 17 , 21 .Again the results are consistent with the claim that the Frontier decoder approximates optimal decoding when the parameters ∆ and K are suf-ficiently large. The curves show that the ordered-frontier approximation is not tied to surface-code geometry: the same decoder is applied to a differ-ent parity-check matrix by changing the column order and active-row boundary, not by designing a new two-dimensional contraction geometry. 
+
+8Figure 3: Rotated-surface code-capacity depolarizing-noise behavior for correlated Pauli Frontier decoding. Left: full FER versus physical depolarizing probability p. The dashed line marks pc = 0 .189 , the optimal threshold obtained by computing the critical probability of a statistical-mechanics model [ 39 ]. Right: average retained list size 1
+
+> n
+
+∑ 
+
+> t
+
+|F t|
+
+for the same setting. Each qubit is represented by one I, X, Y, Z factor, all decoders use ∆ = 10 , α = 0 .8, and a cap value K that depends on the code distance. 
+
+Figure 4: Hexagonal color-code code-capacity bit-flip benchmark for Frontier decoding. Left: FER versus physical bit-flip probability p. Right: average retained list size, 1
+
+> n
+
+∑ 
+
+> t
+
+|F t| for the same setting. The Frontier decoder uses 
+
+∆ = 10 and K = 1024 for all codes. The vertical dashed line the optimal threshold, obtained from a statistical-mechanics argument pc ≃ 0.109 [40]. 
+
+5.2 Surface code under circuit-level noise 
+
+Figure 5 compares Frontier decoding against correlated minimum-weight perfect matching [6, 7, 41] for the rotated surface code under depolar-izing circuit-level noise at p = 0 .002 . The plot displays the results for a memory-Z experiment rather than considering both X and Z decod-ing. Each experiment considers d noisy syndrome extraction rounds and reports the corresponding FER per round. It is interesting to fit the per-round logical error rate 
+
+PL(d) ∝ Λ−⌊ (d+1) /2⌋ (24) 
+
+in order to evaluate the error-suppression coeffi-cient Λ. We find a value around 8.6 for Frontier 
+
+and 7.9 for correlated MWPM, compatible with the figure reported in [28] that also obtained 9
+
+for Tesseract (long beam) and 8.4 for the neural decoder Cascade. It is likely that increasing ∆
+
+and K to larger values for d = 11 would improve the error-suppression coefficient of the Frontier 
+
+decoder, but our current implementation is too slow to test this regime. 
+
+5.3 BB codes under circuit-level noise 
+
+We ran simulations for two bivariate bicycle (BB) codes [13] with parameters [[72 , 12 , 6]] and 
+
+[[144 , 12 , 12]] . In both cases, we consider circuit-level depolarizing noise and respectively 6 and 12 rounds of syndrome extraction. We report full FER including both X- and Z-decoding, and do not normalize by round nor by logical qubit count. We compare the Frontier decoder to the beam search decoder [20] in the configura-
+
+9Figure 5: Rotated-surface memory-Z memory experiment with d syndrome extraction rounds and p = 0 .002 : logical FER per round versus code distance for Frontier and correlated minimum-weight perfect matching [ 6 , 7, 41 ]. The decoder settings are ∆ = 10 , K = 1024 for d =5, 7, 9 and ∆ = 12 , K = 2048 for d = 11 . Blue point labels report the estimated average retained frontier size    
+
+> ¯R=1
+> n
+> ∑n−1
+> t=0 |F t|, averaged over sampled shots and the two directional decoder passes.
+
+tion beam64_640iters and Tesseract [24] with the short beam configuration. The DEM matri-ces have respective sizes HX = HZ = 252 × 2232 
+
+and HX = HZ = 936 × 8784 , and the logical matrices have size LX = LZ = 12 × 2232 and 
+
+LX = LZ = 12 × 8784 .Figure 6 reports both BB code results. The top row shows the [[72 , 12 , 6]] code with the FER-vs-p comparison and the p = 0.002 list-size sweep. The bottom row shows the gross code [[144 , 12 , 12]] , where the list-size sweep is performed for p = 0 .001 . The main result of these simulations is that useful FER values are obtained with a very small retained frontier, at least in the regime of interest for fault-tolerant quantum computing, i.e. for p on the order of 
+
+10 −3.Figure 7 compares the peak frontier size 
+
+max t |F t| and the average 1 
+
+> n
+> ∑
+> t
+
+|F t|. The values are obtained by averaging these quantities over 5000 shots. For p = 0 .001 , the figure shows that the peak frontier size during a shot may be ap-proximately 5 times larger than the average size, confirming the usefulness of the parameter ∆ to adapt the frontier size along the decoding. With-out ∆-adaptive pruning, one should instead keep a frontier with the peak size all along in order to obtain a similar accuracy. Figure 8 shows the tail distribution of transi-tion evaluations for the gross code under circuit-level noise with p = 0 .001 . Given that the com-plexity of the decoder is approximately linear in the number of transition evaluations, this figure shows the latency tails one can expect from a fast implementation of the Frontier decoder. The decoder settings here correspond to the strongest version of the decoder displayed in Fig. 6, namely 
+
+∆ = 20 , K = 2 14 . We see that the median number of transition evaluations is around 6 × 10 6, while the 99 .9th percentile is around 19 × 10 6, which is about three times larger. This suggests that a fast implementation of the decoder should not suffer from large latency tails. Figure 9 shows the failure decomposition for the gross code under circuit-level noise. There are three types of failures. The first one corresponds to an empty terminal frontier: this means that pruning was too aggressive and that all remain-ing states have the wrong final syndrome and are therefore removed from the terminal frontier. The second type corresponds to cases where the terminal frontier is not empty but does not con-tain the correct logical class. The final type of failure is when the correct logical class is present at the end, but not ranked first by the decoder, meaning that there is another class with a larger terminal mass. We find that increasing ∆ (and the cap value K) quickly removes the first two types of failures. In particular, in practice, it is useful to set the decoder settings so that most re-maining failures are bad terminal ranking. This typically leads to a good tradeoff between accu-racy and complexity of the decoder. 
+
+10 Figure 6: BB circuit-level benchmarks. Top: BB code [[72 , 12 , 6]] , with full FER versus physical circuit-level error rate 
+
+p on the left and full FER at p = 0 .002 versus average retained list size for a K = 4096 , ∆ = 2 , . . . , 10 sweep on the right. Bottom: gross code [[144 , 12 , 12]] , with full FER versus p on the left and full FER at p = 0 .001 versus average retained list size on the right; the cap is K = 2 14 for ∆ = 20 and K = 2 13 for 2 ≤ ∆ ≤ 14 . Both rows compare against the beam search decoder [ 20 ] in the beam64_640iters configuration and Tesseract [ 24 ] with the short beam configuration. 
+
+Figure 7: Comparison between the peak frontier size and the average frontier size during a decoding of the gross code under circuit-level noise at p = 0 .001 . The cap value is K = 2 13 for all points, except for ∆ = 20 where it is 214 .
+
+Figure 8: Transition-evaluation tail curve for the gross code under depolarizing circuit-level noise p = 0 .001 
+
+with K = 16384 , ∆ = 20 . A transition evaluation is one candidate extension before merging and pruning. 
+
+11 Figure 9: Failure decomposition of Frontier for the gross code, under depolarizing circuit-level noise with             
+
+> p= 0 .002 . The cap is fixed to K= 2 14 for ∆≤12 and
+> K= 2 14 for ∆ = 15 .Failures are classified into “no path” corresponding to shots where the terminal frontier is empty (no error with the correct syndrome was found); “truth missing” when the terminal list does not contain the true error; and “bad ranking” when the true error is in the terminal list, but not ranked first.
+
+# 6 Open problems 
+
+We now list a number of possible avenues to im-prove the Frontier decoder further. The first one is to find a better column ordering, and maybe to rely on larger committees. For instance, one could try to take into account the weight or the prior of each column, or exploit local struc-ture in the parity-check matrix. Note that for online decoders, which are of interest in order to go beyond simple memory experiments, it is very useful that the final ordering remains close to the temporal circuit ordering to avoid latency issues. This is the case of the deadline ordering for the codes we have tested. A second problem is to improve the current suffix-compatibility score. As explained, this score is a heuristic that completely ignores cor-relations between the rows of the parity-check matrix. We currently try to correct for this by adding a normalization factor α < 1, but it should be possible to do much better by taking de-tector correlations into account. In simulations, we have seen that considering pairwise correla-tions could improve the accuracy a little bit, but the tradeoff between complexity and accuracy led us to keep our simple heuristic. Terminal ranking remains a bottleneck. Some failures are not caused by losing the right class during pruning; they are caused by ranking the terminal classes incorrectly. Better terminal ag-gregation, better calibration between prefix mass and best-path evidence, or a second-stage ranker on the retained terminal list may improve this step. We note that when the final list contains several candidates, it is possible to compute a pos-terior gap. This information can be used either to accept the candidate or to decide that the result should not be trusted, and for instance rerun the decoder with larger values of ∆ and K.Even before aggressive speed optimization, 
+
+Frontier can serve as a high-accuracy offline de-coder for benchmarking faster decoders, identify-ing hard syndromes, and diagnosing whether fail-ures arise from support loss or terminal ranking. The present work focuses on memory-style code-capacity and detector-side DEM benchmarks. Ex-tending the same ordered detector-picture ap-proach to logical circuits, calibrated hardware noise, and non-Pauli errors is left for future work. 
+
+# 7 Conclusion 
+
+The Frontier decoder is based on a simple princi-ple: order the variables, keep the active boundary, merge equivalent prefixes, and prune by score gap, using a hard cap only as a safeguard. Our simu-lations suggest that this principle captures useful posterior structure in several quantum decoding problems, notably for the surface code and for the color code in the code-capacity model, and for the surface code and BB codes under circuit-level noise. In the latter case, Frontier is competitive with strong heuristic decoders while using very compact retained lists. The present results should be read as an ini-tial algorithmic study, not as a final optimized decoder. The main lesson from our experiments is that the useful object is not a small set of indi-vidual errors, but a small set of boundary states. This distinction is especially important for quan-tum decoding: many physical errors may repre-sent the same residual-syndrome/logical bound-ary state, and Frontier sums their masses be-fore pruning rather than forcing them to com-pete as separate list entries. Degeneracy is there-fore not only an ambiguity to survive, but also a source of compression. The next steps are to improve the boundary score, improve the termi-nal logical-class ranking, and understand when a small ordered frontier captures most of the posterior mass needed for the logical decision. This open problem for Frontier is analogous to the bond-dimension question for tensor-network 
+
+12 decoders, but with a matrix-order boundary in place of a geometric cut: when do the parity-check matrix, the noise model, and the ordering make the logical posterior effectively low-width after degeneracy-induced merging? 
+
+# Code availability 
+
+The implementation of the frontier decoder used in this work is available at https://github.com/ aleverrier/frontier .
+
+# Acknowledgments 
+
+AL acknowledges the Plan France 2030 through the project ANR-22-PETQ-0006. RU gratefully acknowledges the hospitality of the COSMIQ group at Inria, where this work was carried out during his sabbatical. We acknowledge the use of large language mod-els, in particular OpenAI Codex, to assist with the programming, documentation, and testing of the frontier decoder implementation. 
+
+# References 
+
+[1] Eric Dennis, Alexei Kitaev, Andrew Lan-dahl, and John Preskill. “Topological quan-tum memory”. Journal of Mathematical Physics 43 , 4452–4505 (2002). arXiv:quant-ph/0110143. [2] Jack Edmonds. “Paths, trees, and flowers”. Canadian Journal of Mathematics 17 , 449– 467 (1965). [3] Austin G. Fowler, Matteo Mariantoni, John M. Martinis, and Andrew N. Cleland. “Surface codes: Towards practical large-scale quantum computation”. Physical Review A 
+
+86 , 032324 (2012). arXiv:1208.0928. [4] Nicolas Delfosse and Naomi H. Nickerson. “Almost-linear time decoding algorithm for topological codes”. Quantum 5, 595 (2021). arXiv:1709.06218. [5] Sergey Bravyi, Martin Suchara, and Alexan-der Vargo. “Efficient algorithms for max-imum likelihood decoding in the surface code”. Physical Review A 90 , 032326 (2014). arXiv:1405.4883. [6] Oscar Higgott. “PyMatching: A Python package for decoding quantum codes with minimum-weight perfect matching”. ACM Transactions on Quantum Computing 3,16:1–16:16 (2022). arXiv:2105.13082. [7] Oscar Higgott and Craig Gidney. “Sparse Blossom: correcting a million errors per core second with minimum-weight matching”. Quantum 9, 1600 (2025). arXiv:2303.15933. [8] David J. C. MacKay, Graeme Mitchison, and Paul L. McFadden. “Sparse-graph codes for quantum error correction”. IEEE Trans-actions on Information Theory 50 , 2315– 2330 (2004). arXiv:quant-ph/0304161. [9] Jean-Pierre Tillich and Gilles Zémor. “Quan-tum LDPC codes with positive rate and min-imum distance proportional to the square root of the blocklength”. IEEE Trans-actions on Information Theory 60 , 1193– 1202 (2014). arXiv:0903.0566. [10] Nikolas P. Breuckmann and Jens N. Eber-hardt. “Quantum low-density parity-check codes”. PRX Quantum 2, 040101 (2021). arXiv:2103.06309. [11] Pavel Panteleev and Gleb Kalachev. “Asymp-totically good quantum and locally testable classical LDPC codes”. In Proceedings of the 54th Annual ACM SIGACT Symposium on Theory of Computing. Pages 375–388. (2022). arXiv:2111.03654. [12] Anthony Leverrier and Gilles Zémor. “Quan-tum Tanner codes”. In Proceedings of the 63rd IEEE Symposium on Foundations of Computer Science. Pages 872–883. (2022). arXiv:2202.13641. [13] Sergey Bravyi, Andrew W. Cross, Jay M. Gambetta, Dmitri Maslov, Patrick Rall, and Theodore J. Yoder. “High-threshold and low-overhead fault-tolerant quantum memory”. Nature 627 , 778–782 (2024). arXiv:2308.07915. [14] Joschka Roffe, David R. White, Simon Bur-ton, and Earl T. Campbell. “Decoding across the quantum low-density parity-check code landscape”. Physical Review Research 2,043423 (2020). arXiv:2005.07016. [15] Timo Hillmann, Lucas Berent, Armanda O. Quintavalle, Jens Eisert, Robert Wille, and Joschka Roffe. “Localized statistics decoding 
+
+13 for quantum low-density parity-check codes”. Nature Communications 16 , 8214 (2025). arXiv:2406.18655. [16] Antonio deMarti iOlius, Imanol Etx-ezarreta Martinez, Joschka Roffe, and Josu Etxezarreta Martinez. “An almost-linear time decoding algorithm for quantum LDPC codes under circuit-level noise”. npj Quan-tum Information (2026). arXiv:2409.01440. [17] Hanwen Yao, Waleed Abu Laban, Chris-tian Häger, Alexandre Graell i Amat, and Henry D. Pfister. “Belief propagation decod-ing of quantum ldpc codes with guided deci-mation”. In 2024 IEEE International Sympo-sium on Information Theory (ISIT). Pages 2478–2483. (2024). [18] Anqi Gong, Sebastian Cammerer, and Joseph M. Renes. “Toward low-latency itera-tive decoding of QLDPC codes under circuit-level noise” (2024). arXiv:2403.18901. [19] Antonio deMarti iOlius and Josu Etx-ezarreta Martinez. “The closed-branch de-coder for quantum LDPC codes” (2024). arXiv:2402.01532. [20] Min Ye, Dave Wecker, and Nicolas Delfosse. “Beam search decoder for quantum LDPC codes” (2025). arXiv:2512.07057. code: ionq-publications/BeamSearchDecoder com-mit:084a475. [21] Tristan Müller, Thomas Alexander, Michael E. Beverland, Markus Bühler, Blake R. Johnson, Thilo Maurer, and Drew Vandeth. “Improved belief propagation is sufficient for real-time decoding of quantum memory” (2025). arXiv:2506.01779. [22] Stergios Koutsioumpas, Hasan Sayginel, Mark Webster, and Dan E. Browne. “Au-tomorphism ensemble decoding of quantum LDPC codes” (2025). arXiv:2503.01738. [23] Arshpreet Singh Maan, Francisco Miguel Garcia Herrero, Alexandru Paler, and Valentin Savin. “Decoding correlated errors in quantum LDPC codes”. Nature Commu-nications 17 , 3965 (2026). arXiv:2510.14060. [24] Laleh Aghababaie Beni, Oscar Hig-gott, and Noah Shutty. “Tesseract: asearch-based decoder for quantum error correction” (2025). arXiv:2503.10988. code: quantumlib/tesseract-decoder v0.1.1.dev20260508215356 commit:06a20c3. [25] Kai R. Ott, Bence Hetényi, and Michael E. Beverland. “Decision-tree decoders for general quantum LDPC codes” (2025). arXiv:2502.16408. [26] Johannes Bausch, Andrew W. Senior, Fran-cisco J. H. Heras, Thomas Edlich, Alex Davies, Michael Newman, Cody Jones, Kevin J. Satzinger, Murphy Yuezhen Niu, Sam Blackwell, George Holland, Dvir Kafri, Juan Atalaya, Craig Gidney, Demis Has-sabis, Sergio Boixo, Hartmut Neven, and Pushmeet Kohli. “Learning high-accuracy er-ror decoding for quantum processors”. Na-ture 635 , 834–840 (2024). [27] John Blue, Harshil Avlani, Zhiyang He, Liu Ziyin, and Isaac L. Chuang. “Machine learn-ing decoding of circuit-level noise for bivari-ate bicycle codes” (2025). arXiv:2504.13043. [28] Andi Gu, J. Pablo Bonilla Ataides, Mikhail D. Lukin, and Susanne F. Yelin. “Scalable neural decoders for practical fault-tolerant quantum computation” (2026). arXiv:2604.08358. [29] G. David Forney. “The Viterbi algorithm”. Proceedings of the IEEE 61 , 268–278 (1973). [30] Lalit R. Bahl, John Cocke, Frederick Jelinek, and Josef Raviv. “Optimal decoding of lin-ear codes for minimizing symbol error rate”. IEEE Transactions on Information Theory 
+
+20 , 284–287 (1974). [31] Frank R. Kschischang, Brendan J. Frey, and Hans-Andrea Loeliger. “Factor graphs and the sum-product algorithm”. IEEE Trans-actions on Information Theory 47 , 498– 519 (2001). [32] Rina Dechter. “Bucket elimination: A unify-ing framework for reasoning”. Artificial In-telligence 113 , 41–85 (1999). [33] Harold Ollivier and Jean-Pierre Tillich. “Trellises for stabilizer codes: Definition and uses”. Physical Review A 74 , 032304 (2006). arXiv:quant-ph/0512041. [34] Emilie Pelchat and David Poulin. “Degener-ate Viterbi decoding”. IEEE Transactions on Information Theory 59 , 3915–3921 (2013). arXiv:1204.2439. 
+
+14 [35] Eric Sabo, Arun B. Aloshious, and Ken-neth R. Brown. “Trellis decoding for qu-dit stabilizer codes and its application to qubit topological codes”. IEEE Transactions on Quantum Engineering 5, 1–30 (2024). arXiv:2106.08251. [36] Andrew J. Ferris and David Poulin. “Ten-sor networks and quantum error correction”. Physical Review Letters 113 , 030501 (2014). arXiv:1312.4578. [37] Christopher T. Chubb. “General tensor net-work decoding of 2D Pauli codes” (2021). arXiv:2101.04125. [38] Christophe Piveteau, Christopher T. Chubb, and Joseph M. Renes. “Tensor-network decoding beyond 2D”. PRX Quantum 5,040303 (2024). arXiv:2310.10722. [39] H. Bombin, Ruben S. Andrist, Masayuki Ohzeki, Helmut G. Katzgraber, and M. A. Martin-Delgado. “Strong resilience of topo-logical codes to depolarization”. Physical Re-view X 2, 021004 (2012). arXiv:1202.1852. [40] Helmut G. Katzgraber, H. Bombin, and M. A. Martin-Delgado. “Error threshold for color codes and random three-body Ising models”. Physical Review Letters 103 ,090501 (2009). arXiv:0902.4845. [41] Oscar Higgott, Craig Gidney, and con-tributors. “PyMatching: minimum-weight perfect matching decoder implemen-tation” (2026). Python/C++ soft-ware implementation; repository https: //github.com/oscarhiggott/PyMatching ;version 2.3.1, Git tag v2.3.1, com-mit e27b8c6a5f5ba10fb74d4ebb 29822f2df5e12bcd ; accessed 2026-06-18. 
+
+15

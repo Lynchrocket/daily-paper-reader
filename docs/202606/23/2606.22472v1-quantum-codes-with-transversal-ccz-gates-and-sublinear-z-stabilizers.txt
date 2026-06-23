@@ -1,0 +1,1403 @@
+Title: Quantum Codes with Transversal CCZ Gates and Sublinear Z-Stabilizers
+
+URL Source: https://arxiv.org/pdf/2606.22472v1
+
+Published Time: Tue, 23 Jun 2026 02:10:29 GMT
+
+Number of Pages: 21
+
+Markdown Content:
+# Quantum Codes with Transversal CCZ Gates and Sublinear 
+
+# Z-Stabilizers 
+
+Ohad Elishco ∗and Itzhak Tamo †
+
+Abstract 
+
+We construct quantum CSS codes with transversal CCZ gates whose Z-stabilizers admit sublinear-weight generating sets. We build on the algebraic puncturing framework of Guruswami and Golowich [GG25a], which turns classical codes with the required Schur-product and distance conditions into CSS codes with transversal CCZ . However, applying the framework directly to the algebraic expander codes of [KT26] runs into their small dual distance, and therefore produces only sublinear quantum dimension. Our main technical step is a refined punctur-ing theorem in which the global dual-distance assumption is replaced by a condition only on the selected puncturing set. Applying this theorem to algebraic expander codes gives explicit growing-alphabet CSS codes with parameters [[ N, Θ( N ), Ω( N 1/m )]], for every fixed m ≥ 3, and with transversal CCZ gates. Moreover, the Z-stabilizer space has an explicit generating set of weight O(N 1/m ). We also reduce the alphabet to a fixed prime field using a projective-multiplicity version of multiplication-friendly codes. The resulting fixed-prime-field CSS code triples, of length n, still have transversal CCZ gates. Their dimension is near-linear, their distance is n1/m up to polylogarithmic factors, and the Z-stabilizer locality remains sublinear, again up to polylogarithmic losses. 
+
+# 1 Introduction 
+
+Transversal gates are one of the simplest mechanisms for implementing logical gates fault-tolerantly. Because they act independently on corresponding physical qudits, a single fault during a transversal gate cannot spread to many qudits within the same code block. At the same time, the Eastin–Knill theorem shows that, for any nontrivial quantum code detecting arbitrary single-subsystem errors, transversal gates cannot by themselves form a universal encoded gate set [EK09]. This makes it important to identify code families that support useful transversal non-Clifford gates while retaining strong coding parameters. One central example is the CCZ gate, a diagonal gate in the third level of the Clifford hierarchy [CGK17]. Together with Clifford gates, CCZ gives a universal gate set. Constructions based on triorthogonal codes gave early examples of transversal non-Clifford gates, but do not yield asymptotically good code families [BH12]. Krishna and Tillich showed that algebraic multiplicative structure in classical codes can be used to construct quantum CSS codes with transversal non-Clifford gates [KT19a]. In particular, using punctured Reed–Solomon codes, they obtained families supporting transversal third-level Clifford hierarchy gates with dimension and distance linear in the block length, over alphabets whose size grows with the block length. Guruswami and Golowich later isolated the general mechanism behind 
+
+> ∗Ohad Elishco is with the School of Electrical and Computer Engineering, Ben-Gurion University of the Negev, Israel (e-mail: elishco@gmail.com).
+> †Itzhak Tamo is with the Department of Electrical Engineering–Systems, Tel Aviv University, Tel Aviv 6997801, Israel (e-mail: tamo@tauex.tau.ac.il).
+
+1
+
+> arXiv:2606.22472v1 [cs.IT] 21 Jun 2026
+
+this construction: if a classical code C, its dual C⊥, and the triple Schur-product code C∗3 all satisfy appropriate distance conditions, then puncturing a set of logical coordinates produces a CSS code with transversal CCZ [GG25a]. They instantiated this framework with algebraic-geometric codes and combined it with an alphabet-reduction procedure based on quantum multiplication-friendly codes, obtaining asymptotically good quantum codes over arbitrary fixed prime-power alphabets. A concurrent independent construction with similar asymptotically good parameters and applications to constant-overhead magic-state distillation was obtained by Wills, Hsieh, and Yamasaki [WHY25]. Related fixed-alphabet and binary constructions were subsequently given by Nguyen [Ngu25]. These results show that transversal CCZ gates can be realized by code families whose dimension and distance are both linear in the block length. What these algebraic constructions above do not provide, however, is low-weight stabilizer checks. This matters for syndrome extraction, since high-weight checks are harder to measure fault-tolerantly and usually require more complicated measurement circuits. Several recent works have focused directly on the weight of the stabilizer checks. Golowich and Lin constructed qLDPC codes with transversal Cr−1Z gates, almost-linear dimension, polynomial distance, and polylogarithmic stabilizer weight [GL25]. Golowich and Guruswami subsequently obtained subsystem-code constructions with transversal CCZ , linear dimension and distance, and sublinear parity-check locality [GG25b]. In their main construction the locality is O(√N ) over an alphabet of size Θ( √N ), and the alphabet can be made constant at the cost of polylogarithmic losses. Another recent direction uses topological and homological constructions, based on cup and cap products, to obtain transversal CCZ and more general multi-controlled-Z gates for qLDPC and qLTC families [Zhu25, LLL26]. Taken together, these works show that low-weight checks are compatible with transversal non-Clifford gates. Their techniques, however, are quite different from the Schur-product-based algebraic puncturing framework that we use here. The point of comparison most relevant to the present paper is not that our parameters dominate these constructions. Rather, we return to the algebraic puncturing method underlying [KT19a, GG25a] and ask whether it can produce any form of stabilizer locality. We show that it can, at least on one side of the CSS code. More precisely, we refine the Guruswami–Golowich puncturing argument and apply the refined version to the algebraic expander codes of Kopparty and the second author [KT26]. For every fixed integer m ≥ 3, this gives growing-alphabet CSS codes of block length 
+
+N , linear dimension, distance Ω( N 1/m ), and transversal CCZ gates. In addition, the Z-stabilizer space has an explicit generating set of weight O(N 1/m ). Thus the construction is not qLDPC, and the low-weight generation is only one-sided, but it shows that sublinear stabilizer locality is possible within the algebraic Schur-product approach. 
+
+Beyond the Black-Box Puncturing Bound. Our construction uses the algebraic expander codes of [KT26]. These are Tanner-type codes [Tan81] whose local constraints are Reed–Solomon codes supported on the orbits of two noncommuting subgroups of AGL(1 , F). For every fixed local rate parameter r ∈ (0 , 1), these codes have positive rate and linear distance. The point that matters for us is the low-rate regime: the standard constraint-counting argument for Tanner codes gives only the lower bound 2 r − 1 on the global rate, and hence gives no nontrivial rate bound when r ≤ 1/2. Being able to work below this threshold is crucial for Schur-product constructions. Indeed, if Cr denotes the algebraic expander code with local rate r < 1/3, then the product of three codewords of Cr lies in C3r, which has linear distance. However, a direct application of the Guruswami–Golowich theorem to these codes does not give linear dimension. The obstruction is the small dual distance of the algebraic expander code Cr: in the relevant parameter regime, one has d(C⊥ 
+
+> r
+
+) = Θ( N 1/m ). In the black-box theorem, the number 2of logical coordinates that can be punctured is bounded by this dual distance, so one obtains only 
+
+O(N 1/m ) logical qudits. Thus, although the underlying classical code Cr has linear dimension, the resulting quantum code has vanishing rate. Our main technical contribution is to show that this dimension loss is an artifact of the black-box dual-distance condition. We prove a refined puncturing theorem that replaces the global dual-distance condition by an A-dependent condition: what matters is how much support a dual codeword must have outside the chosen logical set A. We then choose A to be an interpolation set for a lower-rate algebraic expander code Cr0 , with r0 < r . This choice gives |A| = Θ( N ), while still ensuring that every nonzero word in C⊥ 
+
+> r
+
+has Ω( N 1/m ) nonzero coordinates outside A.Consequently, the punctured CSS code has linear dimension and distance Ω( N 1/m ), rather than the sublinear dimension obtained from the black-box application. 
+
+Main Contributions. We summarize the main results of the paper. First, we obtain an explicit construction of one-sided locality over growing alphabets. For every fixed integer m ≥ 3 and every prime characteristic p, we construct CSS codes over fields of characteristic p with parameters [[ N, Θ( N ), Ω( N 1/m )]] q,
+
+where q grows polynomially with N . The codes support transversal CCZ gates, and their Z-stabilizer space has an explicit generating set of weight O(N 1/m ). The generators have a simple description in terms of the Tanner structure of the underlying algebraic expander code: they are supported either on a single orbit or on the union of two orbits. Second, we reduce the alphabet to a fixed prime field. To do so, we use the alphabet-reduction framework of Guruswami–Golowich and track the effect of concatenation and restriction on the 
+
+Z-stabilizer generators. For the inner codes, building on the multiplication-friendly-code paradigm [GJX17], we introduce a projective-multiplicity version over P1(Fq), which works over arbitrary extensions and in arbitrary characteristic. This gives, for every fixed prime p, CSS code triples over 
+
+Fp supporting transversal CCZ p, with parameters 
+
+"" 
+
+n, Ω
+
+ n
+
+(log n)4
+
+
+
+, Ω n1/m 
+
+(log n)4/m 
+
+!## 
+
+> p
+
+,
+
+and with Z-stabilizer generators of weight O  n1/m (log n)1−4/m  .
+
+Organization. Section 2 recalls the necessary background on CSS codes, Schur products, transver-sal CCZ gates, and algebraic expander codes. Section 3 proves the refined puncturing theorem. Section 4 applies this theorem to algebraic expander codes and proves the growing-alphabet con-struction, including the explicit low-weight generating set for the Z-stabilizers. Section 5 gives the fixed-prime-field alphabet reduction using projective-multiplicity multiplication-friendly codes. Section 6 concludes with open problems. 
+
+# 2 Preliminaries 
+
+Throughout, all vector spaces are over a finite field unless explicitly stated otherwise. For a finite set Ω, we write FΩ for the space of functions Ω → F. For x ∈ FΩ, let supp( x) = {ω ∈ Ω : xω̸ = 0 }
+
+and wt( x) = | supp( x)|. The standard bilinear form on FΩ is ⟨x, y ⟩ = P 
+
+> ω∈Ω
+
+xωyω. For a linear code C ⊆ FΩ, its dual is C⊥ = {x ∈ FΩ : ⟨x, c ⟩ = 0 for all c ∈ C}. If S ⊆ Ω, we write C|S for the puncturing of C to S. We also identify FS with the subspace of FΩ consisting of vectors supported 3on S. Thus C ∩ FS is the shortening of C to S, viewed inside FΩ. We will repeatedly use the standard puncturing-shortening dualities (C|S )⊥ = ( C⊥ ∩ FS )|S , (C⊥|S )⊥ = ( C ∩ FS )|S . (1) For a nonzero linear code C ⊆ FΩ, its minimum distance is 
+
+d(C) = min  
+
+> 0̸=c∈C
+
+wt( c).
+
+If |Ω| = n, dim F C = k, and d(C) = d, we say that C is an [ n, k, d ]F code, or an [ n, k, d ]q code when 
+
+|F| = q.Let F[x]<k be the space of polynomials of degree less than k over F.
+
+Interpolation sets, Schur powers, and Reed–Solomon codes For A ⊆ Ω, we say that A
+
+is an interpolation set for C if C|A = FA. Equivalently, every assignment of values on A can be interpolated by a codeword of C.For x, y ∈ FΩ, their Schur product is x ∗ y = ( xωyω)ω∈Ω. For linear codes C1, . . . , C t ⊆ FΩ,define C1 ∗ · · · ∗ Ct = span F{c1 ∗ · · · ∗ ct : ci ∈ Ci}. When all Ci = C, we write C∗t = C ∗ · · · ∗ C.The case t = 3 is the one relevant for transversal CCZ gates. For a finite set B ⊆ F and an integer k ≤ | B|, define the Reed-Solomon code RS B (k) = {(f (β)) β∈B : deg f < k } ⊆ FB .
+
+This is a [ |B|, k, |B| − k + 1] F MDS code. In particular, d(RS B (k)⊥) = k + 1. 
+
+2.1 CSS codes and restriction 
+
+We use the standard CSS formalism, with notation for specified logical encoding maps following [GG25a]. A CSS code over F is a pair Q = CSS( QX , Q Z ) with QX , Q Z ⊆ Fn such that Q⊥ 
+
+> X
+
+⊆ QZ . Its dimension is dim Q = dim QZ − dim Q⊥ 
+
+> X
+
+, and its distance is 
+
+d(Q) = min {wt( x) : x ∈ QX \ Q⊥ 
+
+> Z
+
+or x ∈ QZ \ Q⊥ 
+
+> X
+
+}.
+
+Elements of Q⊥ 
+
+> X
+
+are called X-stabilizers, and elements of Q⊥ 
+
+> Z
+
+are called Z-stabilizers. A Z-encoding map for Q is an F-linear isomorphism Enc Z : Fdim Q ∼
+
+−→ QZ /Q ⊥ 
+
+> X
+
+, where Fdim Q is the logical space. We write Q = CSS( QX , Q Z ; Enc Z ) when the Z-encoding map is part of the data. We use the same notation Enc Z (y) both for the quotient class in QZ /Q ⊥ 
+
+> X
+
+and for the corre-sponding coset inside QZ . Thus z ∈ Enc Z (y) means that z ∈ QZ is a representative of the logical 
+
+Z-coset labeled by y.
+
+Compatible X/Z -encodings. An X-encoding map for Q = CSS( QX , Q Z ), with logical space 
+
+V , is an F-linear isomorphism Enc X : V ∼
+
+−→ QX /Q ⊥ 
+
+> Z
+
+.
+
+Given a nondegenerate bilinear form B : V × V → F, we say that (Enc X , Enc Z ) are compatible with respect to B if, for every x, z ∈ V and every choice of representatives x′ ∈ Enc X (x) and 
+
+z′ ∈ Enc Z (z), one has 
+
+B(x, z ) = ⟨x′, z ′⟩.
+
+We write Q = CSS( QX , Q Z ; Enc X , Enc Z ) when both encoding maps are given. We will need the following lemma from [GG25a]. 4Lemma 2.1 (Compatible X-encodings [GG25a, Lemma 2.5]) . Let Q = CSS( QX , Q Z ; Enc Z ) be a CSS code with logical space V , and let B : V × V → F be a nondegenerate bilinear form. Then there exists an X-encoding map Enc X compatible with Enc Z with respect to B.
+
+Remark 2.2 (Meaning of compatibility) . The compatibility condition says that the physical repre-sentatives chosen for logical phase operators act on the encoded computational basis with the correct logical phases. For example, in the binary case, the logical operator Z(y) acts on the logical basis state |v⟩ by the phase (−1) y·v. If x′ ∈ Enc X (y) and z′ ∈ Enc Z (v), then the physical operator Z(x′)
+
+acts on the basis vector |z′⟩ by the phase (−1) x′·z′
+
+. Thus Z(x′) implements logical Z(y) precisely when x′ · z′ = y · v. This is the compatibility condition with the standard inner product as the logical bilinear form. Later, in the CSS concatenation step, the inner codes will use the bilinear form 
+
+B(x, z ) = Tr K/F(xz ), which is why we allow an arbitrary nondegenerate bilinear form B.
+
+Code restriction. We will also use the following restriction operation for CSS codes. Informally, restriction adds Z-stabilizers, thereby reducing the logical dimension while not decreasing the distance. To define the operation we will need the following notation. For a subset S ⊆ V , we write Enc Z (S) = {Enc Z (s) : s ∈ S} ⊆ QZ /Q ⊥ 
+
+> X
+
+.
+
+Lemma 2.3 (Restriction of logical subspaces) . Let Q = CSS( QX , Q Z ; Enc Z ) be a CSS code with logical space V , and let S ⊆ V be a linear subspace. Define QZ (S) = {z ∈ QZ : z +Q⊥ 
+
+> X
+
+∈ Enc Z (S)}.Then Q|S = CSS( QX , Q Z (S); Enc Z |S ) is a CSS code of dimension dim S, and d(Q|S ) ≥ d(Q). Thus restriction only removes logical degrees of freedom; equivalently, it adds Z-stabilizers. Proof. Since QZ (S) ⊆ QZ and Q⊥ 
+
+> X
+
+⊆ QZ (S), the pair CSS( QX , Q Z (S)) is a CSS code. The quotient 
+
+QZ (S)/Q ⊥ 
+
+> X
+
+is identified with Enc Z (S), so the dimension is dim S.For the distance, since QZ (S) ⊆ QZ , we have QZ (S)⊥ ⊇ Q⊥ 
+
+> Z
+
+, so 
+
+QX \ QZ (S)⊥ ⊆ QX \ Q⊥ 
+
+> Z
+
+and QZ (S) \ Q⊥ 
+
+> X
+
+⊆ QZ \ Q⊥ 
+
+> X
+
+,
+
+which implies that the distance cannot decrease. 
+
+2.2 Transversal CCZ 
+
+Let K be a finite field of characteristic p. For a ∈ K, define the physical gate 
+
+CCZ a 
+
+> K
+
+= X
+
+> x,y,z ∈K
+
+exp 
+
+ 2πi p Tr K/Fp (axyz )
+
+
+
+|x, y, z ⟩⟨ x, y, z |.
+
+When a = 1, we write CCZ K = CCZ 1
+
+> K
+
+.We will need the following definition. 
+
+Definition 2.4. Let I be a finite index set and let the logical space be V = KI . For h = 1 , 2, 3,let Q(h) = CSS( Q(h) 
+
+> X
+
+, Q (h) 
+
+> Z
+
+; Enc (h) 
+
+> Z
+
+) be CSS codes over K, all of length n and logical space KI . We say that the triple (Q(1) , Q (2) , Q (3) ) supports transversal CCZ K if there exists a coefficient vector 
+
+b ∈ Kn such that for all y(1) , y (2) , y (3) ∈ KI and all representatives z(h) ∈ Enc (h) 
+
+> Z
+
+(y(h)) ⊆ Q(h) 
+
+> Z
+
+, one has X
+
+> i∈I
+
+y(1)  
+
+> i
+
+y(2)  
+
+> i
+
+y(3)  
+
+> i
+
+=
+
+> n
+
+X
+
+> j=1
+
+bj z(1)  
+
+> j
+
+z(2)  
+
+> j
+
+z(3)  
+
+> j
+
+. (2) 
+
+If Q(1) = Q(2) = Q(3) , we simply say that Q supports transversal CCZ K.
+
+5The next lemma shows that Definition (2.4) has the intended operational meaning. Namely, if the identity in (2) holds for all logical labels and all choices of physical representatives, then the physical transversal operator Nnj=1 CCZ bj 
+
+> K
+
+acts on the encoded computational basis exactly as the logical CCZ K gate on the logical space KI .
+
+Lemma 2.5 ([GG25a, Lemma 2.11]) . For h = 1 , 2, 3, let Q(h) = CSS( Q(h) 
+
+> X
+
+, Q (h) 
+
+> Z
+
+; Enc (h) 
+
+> Z
+
+) be CSS codes that support transversal CCZ K with coefficient vector b ∈ Kn. Then applying Nnj=1 CCZ bj
+
+> K
+
+to the three physical code blocks implements the logical CCZ K gate on the logical basis indexed by 
+
+KI .Proof. For logical basis states y(1) , y (2) , y (3) , the Z-encoded states are uniform superpositions over the corresponding cosets Enc (h) 
+
+> Z
+
+(y(h)) ⊆ Q(h) 
+
+> Z
+
+. Consider 3 representatives z(h) ∈ Enc (h) 
+
+> Z
+
+(y(h)). Then the physical transversal gate multiplies the basis vector ( z(1) , z (2) , z (3) ) by the phase exp 
+
+ 2πi p Tr K/Fp
+
+
+
+> n
+
+X
+
+> j=1
+
+bj z(1)  
+
+> j
+
+z(2)  
+
+> j
+
+z(3) 
+
+> j
+
+ = exp 2πi p Tr K/Fp
+
+X
+
+> i∈I
+
+y(1)  
+
+> i
+
+y(2)  
+
+> i
+
+y(3) 
+
+> i
+
+!! 
+
+,
+
+where the equality follows by (2). This is precisely the logical CCZ K phase. 
+
+2.3 Algebraic expander codes 
+
+We now provide the needed notation and results of the algebraic expander code construction given in [KT26]. Let u(X) ∈ F[X] be nonconstant. Every polynomial f ∈ F[X] has a unique expansion f (X) = P 
+
+> i
+
+ci(X)u(X)i with deg ci < deg u. The u-base degree of f is deg u(f ) = max i deg ci, with the convention deg u(0) = −∞ .We will need the following result from [KT26]. 
+
+Lemma 2.6 (Subadditivity of base degree [KT26, Lemma 2.2]) . For all f1, . . . , f t ∈ F[X],
+
+deg u(f1 · · · ft) ≤ deg u(f1) + · · · + deg u(ft).
+
+Proof. If one of the fi’s is zero, the claim is immediate. It is enough to prove the case t = 2. Let d = deg u. If deg u(f ) + deg u(g) ≥ d, then the claim follows because every u-base degree is at most d − 1. Otherwise, write f = P 
+
+> i
+
+ciui and g = P 
+
+> j
+
+dj uj , where deg ci ≤ deg u(f ) and deg dj ≤ deg u(g). Then f g = P 
+
+> k
+
+ekuk, where ek = P 
+
+> i+j=k
+
+cidj . Each ek has degree at most deg u(f ) + deg u(g) < deg u, so this is already the u-base expansion of f g . Hence deg u(f g ) ≤ deg u(f ) + deg u(g).
+
+We use the algebraic expander code construction of [KT26] in the case where the global degree parameter equals the block length. The construction is built from two subgroups of AGL(1 , F): a translation subgroup 
+
+G = {x 7 → x + a : a ∈ U }
+
+for an additive subgroup U ≤ (F, +), and a scaling subgroup 
+
+H = {x 7 → bx : b ∈ B}
+
+6for a multiplicative subgroup B ≤ F×. Let A = ⟨G, H ⟩ be the group generated by G, H , which is a subgroup of the affine general linear group AGL(1 , F). Let α ∈ F be an element with trivial stabilizer in A, meaning that no non-identity element of A fixes α, and set Ω = {ϕ(α) : ϕ ∈ A} .
+
+Thus Ω is a regular A-orbit, i.e., A acts transitively on Ω and every point stabilizer is trivial. In particular, N := |Ω| = |A| .
+
+Define the invariant polynomials associated with the two group actions 
+
+g(X) = Y
+
+> a∈U
+
+(X − a), h(X) = X|H|.
+
+It is easy to verify that the polynomial g is constant on G-orbits, and h is constant on H-orbits. For r ∈ (0 , 1), the algebraic expander code is 
+
+Cr = C(G, H ; r, N ) = {(f (ω)) ω∈Ω : f ∈ Wr,N }, (3) where 
+
+Wr,N = {f ∈ F[X] : deg f < N, deg g(f ) < r |G|, deg h(f ) < r |H|} .
+
+For an element ω ∈ Ω, let G · ω = {g(ω) : g ∈ G} be the orbit of ω under G, and similarly define 
+
+H · ω. Let O be the collection of all G-orbits and H-orbits in Ω. For O ∈ O , let RO(r) ⊆ FO be the Reed–Solomon code 
+
+RO(r) = {(P (ω)) ω∈O : P ∈ F[X], deg P < k O(r)}, kO(r) = ⌈r|O|⌉ .
+
+Then RO(r) has dimension kO(r), and {c|O : c ∈ Cr} ⊆ RO(r) for every O ∈ O . In fact, Cr is the Tanner code defined by these local codes RO(r), O ∈ O .The properties of Cr are summarized in the next theorem. 
+
+Theorem 2.7. [KT26, Theorem 4.3] For any fixed m ≥ 3, r ∈ (0 , 1) , and characteristic p, there exists an explicit family of algebraic expander codes Cr of length N , defined over finite fields Fq of characteristic p, as in (3) , with alphabet size q polynomial in N , and with the following properties as N → ∞ :1. Cr is a Tanner code. Specifically, 
+
+Cr = {c ∈ FΩ 
+
+> q
+
+: c|O ∈ RO(r) for every O ∈ O} .
+
+Consequently, 
+
+C⊥ 
+
+> r
+
+= X
+
+> O∈O
+
+RO(r)⊥, (4) 
+
+where each RO(r)⊥ is extended by zero outside O.2. The local codes RO(r) have length O(N 1/m ), local rate at most r + o(1) , and local relative distance at least 1 − r − o(1) .3. The global relative distance is at least (1 − r)2.4. The global rate is at least r2m+1  
+
+> (2 m+1)!
+
+.
+
+73 Puncturing theorem for transversal CCZ 
+
+Our goal is to construct CSS codes with good parameters, supporting transversal CCZ gates, and with low-weight Z-stabilizer generators. Toward this goal, we give a mild refinement of the construction of [GG25a, Theorem 3.1], which is itself an abstract version of the construction in [KT19b]. The proof is essentially the same as the proof of [GG25a, Theorem 3.1], but we relax one of its assumptions. In particular, the original theorem uses the condition |A| < d (C⊥) to control the distance after puncturing. We replace this global dual-distance condition by an A-dependent distance condition. This is important for our application to algebraic expander codes: although d(C⊥) is only of order the local orbit size, we can choose a much larger set A for which the relevant punctured distance outside A remains large. This allows us to obtain a linear-size logical set A, and hence linear code dimension, whereas a black-box application of [GG25a, Theorem 3.1] would only give sublinear dimension. We will need the following notation. Let C ⊆ FΩ be a linear code and let A ⊆ Ω. Put E = Ω \A.Define the A-punctured distance 
+
+dA(C) = min {| supp( u) \ A| : u ∈ C, u |A̸ = 0 }.
+
+This quantity measures the part of a codeword that remains visible after the coordinates in A are removed, but only for codewords that actually interact with the logical coordinates in A. This is the distance parameter that is relevant for the punctured CSS code, rather than the global minimum distance of the dual code. 
+
+Theorem 3.1 (Refined puncturing theorem) . Let C ⊆ FΩ be a linear code and let A ⊆ Ω. Suppose that (i) C|A = FA;(ii) C ∩ FA = {0};(iii) C∗3 ∩ FA = {0}.Let E = Ω \ A and define QX = C⊥|E and QZ = C|E . Then Q = CSS( QX , Q Z ) is a CSS code of length |E|, dimension |A|, and distance min {dA(C), d A(C⊥)}. Moreover, Q supports a transversal 
+
+CCZ gate over F.Proof. By (1) we have 
+
+Q⊥ 
+
+> X
+
+= ( C⊥|E )⊥ = ( C ∩ FE )|E ⊆ C|E = QZ ,
+
+so the CSS condition holds. Define the Z-encoding map for y ∈ FA by Enc Z (y) = {c|E : c ∈ C, c |A = y}, Enc Z : FA → QZ /Q ⊥ 
+
+> X
+
+.
+
+The assumption C|A = FA ensures that Enc Z (y) is nonempty for every y. If two codewords c, c ′ ∈ C
+
+have the same restriction to A, then ( c − c′)|A = 0, so ( c − c′)|E ∈ Q⊥ 
+
+> X
+
+. Hence Enc Z is well defined as a map to QZ /Q ⊥ 
+
+> X
+
+. It is surjective by definition. If Enc Z (y) is the zero coset, then there are 
+
+c ∈ C with c|A = y and c′ ∈ C ∩ FE with c′|E = c|E . Thus c − c′ ∈ C ∩ FA and ( c − c′)|A = y. By assumption (ii), y = 0. Hence the map is injective, and the CSS dimension is |A|.We next bound the distance. A nontrivial X-logical operator is represented by an element of 
+
+QZ \ Q⊥ 
+
+> X
+
+. Such an element has the form c|E for some c ∈ C. It is trivial modulo Q⊥ 
+
+> X
+
+exactly when 
+
+c|A = 0. Indeed, if c|A = 0, then c ∈ C ∩ FE , so c|E ∈ Q⊥ 
+
+> X
+
+. Conversely, if c|E ∈ Q⊥ 
+
+> X
+
+, then there is 8c′ ∈ C ∩ FE with c′|E = c|E , so c − c′ ∈ C ∩ FA, and by assumption (ii) this forces c|A = 0. Hence the minimum weight of a nontrivial X-logical operator is exactly dA(C). Similarly, assumption (i) implies C⊥ ∩ FA = {0}. Therefore, the same argument applied to 
+
+C⊥ shows that a nontrivial Z-logical operator is represented by an element of QX \ Q⊥ 
+
+> Z
+
+, and its minimum possible weight is exactly dA(C⊥). Hence, the minimum distance satisfies d(Q) = min {dA(C), d A(C⊥)}.
+
+It remains to prove the transversal CCZ property. Since C∗3 ∩ FA = {0}, restriction to E is injective on C∗3. Therefore the mapping 
+
+c|E 7 −→ X
+
+> a∈A
+
+ca, c ∈ C∗3,
+
+defines a linear functional on C∗3|E . Extend this functional arbitrarily to a linear functional on all of FE , and write it as x 7 → P 
+
+> e∈E
+
+bexe for some b ∈ FE .Now take y(1) , y (2) , y (3) ∈ FA and representatives c(h)|E ∈ Enc Z (y(h)), where c(h) ∈ C and 
+
+c(h)|A = y(h). Then c(1) ∗ c(2) ∗ c(3) ∈ C∗3, and by the construction of b,
+
+X
+
+> e∈E
+
+bec(1)  
+
+> e
+
+c(2)  
+
+> e
+
+c(3)  
+
+> e
+
+= X
+
+> a∈A
+
+c(1)  
+
+> a
+
+c(2)  
+
+> a
+
+c(3)  
+
+> a
+
+= X
+
+> a∈A
+
+y(1)  
+
+> a
+
+y(2)  
+
+> a
+
+y(3)  
+
+> a
+
+.
+
+This is precisely the transversal-CCZ identity (2) for the logical space FA. By Lemma 2.5, the corresponding physical transversal gate implements logical CCZ .The following corollary is an immediate consequence of Theorem 3.1, and recovers Theorem 3.1 of [GG25a]. 
+
+Corollary 3.2 ([GG25a, Theorem 3.1]) . Let C ⊆ Fnq be an [n, ℓ ]q code such that C, C⊥, and 
+
+C∗3 have distances d, d⊥, and d(3) , respectively. For every k < min {ℓ, d, d ⊥, d (3) }, there is an 
+
+[[ n − k, k, ≥ min {d, d ⊥} − k ]] q quantum CSS code that supports transversal CCZ .Proof. Let Ω = [ n] be the index set of C. Choose a subset A ⊆ Ω of size k < ℓ such that C|A = FA.The assumptions k < d and k < d (3) imply C ∩ FA = {0} and C∗3 ∩ FA = {0}.For the distance terms, if c ∈ C and c|A̸ = 0, then 
+
+| supp( c) \ A| ≥ wt( c) − | A| ≥ d − k. 
+
+Thus dA(C) ≥ d − k. Similarly, dA(C⊥) ≥ d⊥ − k. The result follows by Theorem 3.1 and by noting that the distance is at least min {d, d ⊥} − k. 
+
+# 4 Instantiating the puncturing theorem with algebraic expander codes 
+
+Our plan is to instantiate Theorem 3.1 with the algebraic expander code construction [KT26]. In this section we prove some properties of these codes that will be used later in the quantum construction. Throughout this section, let m ≥ 3, r ∈ (0 , 1) be fixed, and let Cr = C(G, H ; r, N ) ⊆ FΩ be the algebraic expander code from Theorem 2.7 with length N . In particular, Cr is the Tanner code whose local constraints on the G- and H-orbits are Reed–Solomon codes of local dimension ⌈r|O|⌉ .This implies that the local constraints are of length at most |O| = O(N 1/m ). 94.1 Schur powers 
+
+The first property we need is that algebraic expander codes inherit the Schur-product behavior of their local Reed–Solomon constraints. 
+
+Lemma 4.1 (Schur-power containment) . Let t ≥ 1 be fixed and suppose tr < 1. Then C∗tr ⊆ Ctr .Consequently, d(C∗tr ) ≥ d(Ctr ) = Ω( N ).Proof. It is enough to check products of t codewords. Let c(1) , . . . , c (t) ∈ Cr. On every G-orbit 
+
+O, each c(i)|O is an evaluation of polynomial of degree less than r|O|. Hence the componentwise product 
+
+c(1) |O ∗ · · · ∗ c(t)|O
+
+is an evaluation of a polynomial of degree less than tr |O|. The same argument applies on every 
+
+H-orbit. By Theorem 2.7 c(1) ∗ · · · ∗ c(t) ∈ Ctr . Taking the span over all such products gives 
+
+C∗tr ⊆ Ctr . The distance bound follows from Theorem 2.7. For the construction of transversal CCZ codes we will use the case t = 3. Thus, whenever 
+
+r < 1/3, we have 
+
+C∗3 
+
+> r
+
+⊆ C3r and d(C∗3 
+
+> r
+
+) = Ω( N ).
+
+4.2 Exact dual distance and the limitation of the direct Guruswami–Golowich application 
+
+We next compute the exact dual distance of the code Cr. This result will be used as input to a black-box application of the Guruswami–Golowich framework [GG25a] (see Corollary 3.2), and illustrates the limitation of such a direct application. In particular, this application yields a CSS code whose dimension scales only as O(N 1/m ). Later, we build on this result with additional ideas to show that the dimension can in fact be made linear in the code length. 
+
+Lemma 4.2 (Exact dual distance) . Let kr = ⌈rL ⌉, where L = min {| G|, |H|} . Assume kr < L 
+
+(which holds for all sufficiently large N for fixed r < 1). Then d(C⊥ 
+
+> r
+
+) = kr + 1 .Proof. Let RS Ω(kr) be the Reed–Solomon code obtained by evaluating polynomials of degree less than kr on Ω. We first show that RS Ω(kr) ⊆ Cr. Indeed, for a nonnegative integer i if 0 ≤ i < k r,then i < rL . Since L ≤ | G|, |H|, the g-base and h-base degrees of Xi are both equal to i. Hence Xi
+
+satisfies both local degree constraints defining Cr. Therefore every polynomial of degree less than 
+
+kr gives a codeword of Cr. This implies that 
+
+C⊥ 
+
+> r
+
+⊆ RS Ω(kr)⊥.
+
+Since RS Ω(kr) is an [ N, k r] MDS code, its dual has minimum distance kr + 1. Thus d(C⊥ 
+
+> r
+
+) ≥ kr + 1. For the reverse inequality, let U ∈ { G, H } with |U | = L. On every U -orbit, the restriction of each codeword of Cr lies in a Reed–Solomon code of length L and dimension kr. Hence every word in the dual of this local Reed–Solomon code, extended by zero outside the orbit, belongs to 
+
+C⊥ 
+
+> r
+
+. The dual of an [ L, k r] Reed–Solomon code has a nonzero word of weight kr + 1. Therefore 
+
+d(C⊥ 
+
+> r
+
+) ≤ kr + 1, and the claim follows. Combining the dual-distance computation with the Schur-power containment gives a direct black-box application of the Guruswami–Golowich framework [GG25a]. 10 Corollary 4.3. Fix r < 1/3. Then the code Cr over Fq gives a quantum CSS code supporting transversal CCZ with parameters 
+
+[[ N − O(N 1/m ), Ω( N 1/m ), Ω( N 1/m ) ]] q.
+
+Proof. By Theorem 2.7, Cr has linear dimension and linear distance. By Lemma 4.1, C∗3 
+
+> r
+
+has linear distance. By Lemma 4.2, d(C⊥ 
+
+> r
+
+) = Θ( L). Applying Corollary 3.2 with k chosen as a sufficiently small constant multiple of L gives a quantum CSS code of length N − k = N − O(L), dimension 
+
+k = Ω( L), and distance Ω( L), supporting transversal CCZ . The result follows by noting that 
+
+L = Θ( N 1/m ). Thus, in the direct application of Corollary 3.2, the dimension is limited by the dual distance 
+
+d(C⊥ 
+
+> r
+
+) = Θ( N 1/m ). In the next subsection, we use an additional structural property of the code Cr.This will allow us to construct a quantum CSS code with constant rate, improving on the vanishing rate obtained by the direct black-box application above. Finally, note that the parameters of the quantum CSS code in Corollary 4.3 are worse than those of the quantum code constructed in [GG25a]. Nevertheless, the present construction has one important advantage: it is possible to prove that the Z-stabilizers have low weight. We will prove this later for the improved construction that achieves constant rate. 
+
+4.3 Preserving dual distance outside an interpolation set 
+
+To improve the code dimension given in Corollary 4.3, we develop a robust puncturing argument for the nonzero codewords in C⊥ 
+
+> r
+
+. Specifically, we show the existence of a linear-sized set of coordi-nates that avoids the support of any nonzero dual codeword in a substantial number of positions. Consequently, after puncturing on this set, the minimum distance of the resulting punctured dual code remains a constant fraction of the minimum distance of C⊥ 
+
+> r
+
+.The proof idea is the following. We show that if A is an interpolation set for a lower local-rate algebraic expander code, then no nonzero dual codeword of a higher local-rate code can be almost entirely supported on A.
+
+Proposition 4.4. Let 0 < r 0 < r < 1, and let A ⊆ Ω be an interpolation set for Cr0 , i.e., 
+
+Cr0 |A = FA. Then, for every nonzero z ∈ C⊥ 
+
+> r
+
+, | supp( z) \ A| > ⌊(r − r0)L⌋, hence 
+
+dA(C⊥ 
+
+> r
+
+) > ⌊(r − r0)L⌋.
+
+Proof. We first prove an interpolation claim. Let s = ⌊(r − r0)L⌋ and T ⊆ Ω \ A with |T | ≤ s. We claim that for every y ∈ FA, there exists w ∈ Cr such that w|A = y and w|T = 0. Let PT (X) = Q 
+
+> β∈T
+
+(X − β) be the annihilator polynomial of the set T . Since T ∩ A = ∅, we have PT (α)̸ = 0 for every α ∈ A. The assumption Cr0 |A = FA implies that there exists f ∈ Wr0,N 
+
+such that f (α) = yα/P T (α) for every α ∈ A. Let w be the evaluation vector of f · PT on Ω. Then, clearly w|A = y and w|T = 0. It remains to show that w is a codeword of Cr. Note that although the global ordinary degree of f · PT may equal or exceed N , we will show that its g-base and h-base degrees guarantee that its evaluation vector w satisfies all local Reed-Solomon constraints, and therefore, w ∈ Cr by the Tanner code characterization in Theorem 2.7. Since |T | ≤ s < L , the ordinary degree of PT is smaller than both |G| and |H|. Hence deg g(PT ) = deg h(PT ) = |T |. By the subadditivity of the base degree (Lemma 2.6), deg g(f · PT ) < r 0|G| + |T | ≤ r0|G| + ( r − r0)L ≤ r|G|,
+
+11 and similarly deg h(f · PT ) < r |H|. Therefore f · PT satisfies all local constraints defining the Tanner code Cr, and hence w ∈ Cr.Now let z ∈ C⊥ 
+
+> r
+
+be a dual codeword, and set T = supp( z) \ A. Suppose that |T | ≤ s. By the interpolation claim, for every y ∈ FA there is w ∈ Cr such that w|A = y and w|T = 0. Therefore, 0 = ⟨z, w ⟩ = X
+
+> a∈A
+
+zaya.
+
+Since this holds for any y ∈ FA it follows that z|A = 0. Therefore supp( z) ⊆ T , so wt( z) ≤ s < 
+
+⌈rL ⌉ + 1 = d(C⊥ 
+
+> r
+
+) by Lemma 4.2. Hence, necessarily z = 0. This implies that if z is nonzero, then 
+
+| supp( z) \ A| ≥ s + 1. 
+
+Remark 4.5. The interpolation set A in Proposition 4.4 can be constructed deterministically in polynomial time by greedily selecting coordinates corresponding to linearly independent columns of a generator matrix of Cr0 . This ensures that Cr0 |A = FA.
+
+We now present and prove our main construction of quantum codes over a growing alphabet. 
+
+Theorem 4.6 (Main growing-alphabet construction) . For any fixed m ≥ 3 and prime p, there exists an explicit family of quantum CSS codes with parameters 
+
+[[ N, Θ( N ), Ω( N 1/m ) ]] q,
+
+that support transversal CCZ gates, and whose Z-stabilizer generators have weight O(N 1/m ), where 
+
+q is a power of p and grows polynomially with N .Proof. Fix constants 0 < r 0 < r < 1/3, and let Cr = C(G, H ; r, N ) be the code from Theorem 2.7. Set L = min {| G|, |H|} . Let R0 be the rate of Cr0 , and let δr, δ 3r > 0 denote the relative minimum distances of Cr and C3r, respectively. Choose a constant 0 < α < min {R0, δ r, δ 3r}. Since α < R 0, we have ⌊αN ⌋ ≤ dim Cr0 . By Remark 4.5, applied to Cr0 , there exists an efficiently constructible set A ⊆ Ω of size ⌊αN ⌋ such that Cr0 |A = FA. Since Cr0 ⊆ Cr, it follows that Cr|A = FA.Moreover, since |A| = ⌊αN ⌋ < δ rN = d(Cr), we have Cr ∩ FA = {0}. Similarly, Lemma 4.1 gives C∗3 
+
+> r
+
+⊆ C3r, and since |A| < δ 3rN = d(C3r), we also have C∗3 
+
+> r
+
+∩ FA = {0}.Finally, by Proposition 4.4, dA(C⊥ 
+
+> r
+
+) > ⌊(r − r0)L⌋. Moreover, 
+
+dA(Cr) = min {| supp( c) \ A| : c ∈ Cr, c |A̸ = 0 } ≥ d(Cr) − | A| ≥ δrN − | A|.
+
+Applying Theorem 3.1 with C = Cr, we obtain a quantum CSS code with parameters [[ N − | A|, |A|, ≥ min {δrN − | A|, ⌊(r − r0)L⌋ + 1 } ]] q,
+
+which supports a transversal CCZ gate. The claimed parameters follow from |A| = Θ( N ), N − | A| = Θ( N ), and L = Ω( N 1/m ). It remains only to prove the claim on the weight of the Z-stabilizers. This will be established in Section 4.4, specifically in Proposition 4.7. 12 4.4 Sublinear Z-stabilizer generators 
+
+In this section we show that the quantum CSS code constructed in Theorem 4.6 has low-weight 
+
+Z-stabilizers, i.e., its Z-stabilizers can be generated by low-weight checks. This property does not follow automatically from the fact that the algebraic expander code 
+
+Cr is a Tanner code and that Q⊥ 
+
+> Z
+
+= ( C⊥ 
+
+> r
+
+∩ FE )|E , where E = Ω \ A. Indeed, Q⊥ 
+
+> Z
+
+is obtained by shortening C⊥ 
+
+> r
+
+at A, and shortening a locally generated code does not, in general, preserve local generation. To overcome this issue, we rely on a structural property of the set A, namely the interpolation property Cr0 |A = FA (see Proposition 4.4). This property forces A to be sparse within every local orbit. Exploiting this sparsity, we show that Q⊥ 
+
+> Z
+
+admits a generating set consisting of low-weight checks. Recall that for 0 < r < 1, Cr = C(G, H ; r, N ), and O denotes the collection of all G- and 
+
+H-orbits in Ω. Moreover, for O ∈ O , RO(r) ⊆ FO denotes the local Reed–Solomon code appearing in Tanner definition of the code Cr (see Theorem 2.7), and write kO(r) = dim RO(r). We view 
+
+RO(r)⊥ as a subspace of FΩ by extending vectors by zero outside O.
+
+Proposition 4.7 (Low-weight Z-stabilizers) . The Z-stabilizers of the quantum CSS code given in Theorem 4.6 admit a generating set consisting of checks of weight at most |G| + |H| = O(N 1/m ).
+
+More explicitly, the generating set consists of two types of checks. The first type is given by a basis for each dual local code whose support is entirely contained in E; these checks are supported on a single orbit. The second type consists of “gluing” checks ga for each a ∈ A, where each such check is supported on the union of one G-orbit and one H-orbit, and therefore its weight is at most 
+
+|G| + |H|.
+
+Proof. Recall that A ⊆ Ω satisfies Cr0 |A = FA, where 0 < r 0 < r < 1/3. Furthermore, the CSS code is 
+
+QX = C⊥ 
+
+> r
+
+|E , QZ = Cr|E , E = Ω \ A. 
+
+Then, by puncturing-shortening duality (1), Q⊥ 
+
+> Z
+
+= ( Cr|E )⊥ = ( C⊥ 
+
+> r
+
+∩ FE )|E . Thus, it is enough to construct low-weight generators for C⊥ 
+
+> r
+
+∩ FE .For every orbit O ∈ O , the set A ∩ O has size at most kO(r0). Indeed, otherwise, since the local code dimension is kO(r0), the coordinates in A ∩ O would be linearly dependent, contradicting the fact that A is an interpolation set for Cr0 . Next, since r0 < r < 1/3, we have r0 + r < 2/3. For sufficiently large N (and hence large orbit size |O| = Ω( N 1/m )), it holds that kO(r0) + kO(r) = 
+
+⌈r0|O|⌉ + ⌈r|O|⌉ ≤ | O|. Therefore, 
+
+|O \ A| = |O| − | A ∩ O| ≥ | O| − kO(r0) ≥ kO(r).
+
+Hence O \ A contains an information set of size kO(r) for the local MDS code RO(r). Fix such an information set IO ⊆ O \ A, |IO| = kO(r), for every orbit O ∈ O . Since RO(r) is MDS, every coordinate in O \ IO is a linear combination of the coordinates in IO. Equivalently, the dual space RO(r)⊥ has a basis 
+
+{hO,b : b ∈ O \ IO},
+
+where hO,b is supported on IO ∪ { b} and is normalized so that ( hO,b )b = 1. We view these rows as vectors in FΩ, extended by zero outside O.Since IO ⊆ E, the rows hO,b with b ∈ E are supported entirely in E. The rows with b ∈ A ∩ O
+
+are the only rows from the orbit O that have a nonzero coordinate in A. In particular, for each 
+
+a ∈ A, there are exactly two such rows touching the coordinate a: one from the G-orbit through a,13 i.e., hG·a,a , and one from the H-orbit through a, i.e., hH·a,a . Both have a-coordinate equal to 1, and neither has any other nonzero coordinate in A. Therefore ga := hG·a,a − hH·a,a belongs to C⊥ 
+
+> r
+
+∩ FE .Moreover, supp( ga) is contained in the union of the orbits G · a and H · a, so wt( ga) ≤ | G| + |H|.We now prove that these two sets of rows supported inside E, i.e., 
+
+{hO,b : O ∈ O , b ∈ (O \ IO) ∩ E} and {ga : a ∈ A}, (5) generate C⊥ 
+
+> r
+
+∩ FE . Let z ∈ C⊥ 
+
+> r
+
+∩ FE . Since Cr is a Tanner code, equivalently C⊥ 
+
+> r
+
+is generated by the local dual spaces R⊥
+
+> O
+
+, z can be written as 
+
+z = X
+
+> O∈O
+
+X
+
+> b∈O\IO
+
+λO,b hO,b = X
+
+> O∈O
+
+X 
+
+> b∈(O\IO)∩E
+
+λO,b hO,b + X
+
+> O∈O
+
+X 
+
+> a∈(O\IO)∩A
+
+λO,a hO,a ,
+
+for some scalars λO,b . Each summand in the first double sum is in the first set {hO,b : O ∈ O , b ∈
+
+(O \ IO) ∩ E}. We show next that the second double sum is spanned by the ga’s. For a fixed a ∈ A,the only two rows in the above expansion that can contribute to the a-coordinate are hG·a,a and 
+
+hH·a,a . Since z is supported on E, its a-coordinate is zero. Hence λG·a,a + λH·a,a = 0 since the 
+
+a-coordinate of both hG·a,a and hH·a,a is 1. Therefore, 
+
+λG·a,a hG·a,a + λH·a,a hH·a,a = λG·a,a (hG·a,a − hH·a,a ) = λG·a,a ga.
+
+Thus every contribution involving a coordinate of A can be replaced by a multiple of the corre-sponding row ga, and hence the second double sum is spanned by the ga’s. This proves that C⊥ 
+
+> r
+
+∩FE
+
+is generated by the elements in (5). Restricting these generators to E gives a generating set for 
+
+Q⊥ 
+
+> Z
+
+.Each local row hO,b is supported on a single orbit, and hence has weight at most max {| G|, |H|} .Each row ga is supported on the union of one G-orbit and one H-orbit, and hence has weight at most |G| + |H|, and the result follows. 
+
+Remark 4.8 ( X-stabilizers weight) . In contrast to the Z-stabilizers, the situation for the X-stabilizers is much worse. Indeed, the X-stabilizer space is Q⊥ 
+
+> X
+
+= ( Cr ∩ FE )|E .Every nonzero element of this space arises from a nonzero codeword of Cr that vanishes on A,and therefore has weight at least d(Cr) = Ω( N ), i.e., linear in the code length. 
+
+# 5 Alphabet reduction 
+
+A caveat of the quantum CSS codes constructed in Theorem 4.6 is that they are defined over an alphabet whose size grows polynomially with the code length. In this section, we address this issue by reducing the alphabet directly to the prime field 1. We do so by concatenating with multiplication-friendly inner quantum CSS codes and applying the Guruswami–Golowich alphabet-reduction operation [GG25a, Proposition 5.1] as a black box. Beyond this black-box application, we also need to track the weights of the Z-stabilizer gener-ators. Specifically, we show that the low-weight Z-stabilizer generating set established in Proposi-tion 4.7 survives the alphabet reduction, with each generator weight increasing by at most a factor equal to the length of the inner multiplication-friendly quantum CSS code. Finally, for the inner codes, we use a projective-multiplicity generalization of the multiplication-friendly codes employed in [GG25a, GJX17]. Unlike the multiplicity-one affine construction, this variant works over arbitrary field extensions and in arbitrary characteristic, including characteristic 2. 
+
+> 1One can similarly reduce the alphabet to any intermediate subfield. For clarity, we only treat the reduction to the prime field.
+
+14 5.1 Multiplication-friendly inner codes 
+
+Let K = Fqκ .A collection of classical codes ( C(h); enc (h))ah=1 , with C(h) = im(enc (h)) ⊆ Fνq , is a-multiplication-friendly for K/Fq if each enc (h) : K → Fνq is an Fq-linear injective map, and there exists an Fq-linear map dec : Fνq → K such that dec(enc (1) (x1) ∗ · · · ∗ enc (a)(xa)) = x1 · · · xa
+
+for all x1, . . . , x a ∈ K.We also use the corresponding quantum notion. A collection  Q(h)in = CSS( Q(h) 
+
+> X
+
+, Q (h) 
+
+> Z
+
+; Enc (h) 
+
+> Z
+
+)ah=1 
+
+of CSS codes over Fq, with Q(h) 
+
+> X
+
+, Q (h) 
+
+> Z
+
+⊆ Fνq and Enc (h) 
+
+> Z
+
+: K ∼
+
+−→ Q(h) 
+
+> Z
+
+/Q (h)
+
+> X
+> ⊥
+
+, is a-multiplication-friendly for K/Fq if there exists an Fq-linear map Dec Z : Fνq → K such that, for all x1, . . . , x a ∈ K
+
+and all representatives z(h) ∈ Enc (h) 
+
+> Z
+
+(xh), it holds that Dec Z
+
+ z(1) ∗ · · · ∗ z(a) = x1 · · · xa.
+
+A collection of classical multiplication-friendly codes ( C(h); enc (h))ah=1 gives a quantum multplication-friendly code via the trivial CSS conversion 
+
+Q(h)in = CSS( Fνq , C (h); enc (h)),
+
+For each h ∈ [a]. Indeed, since ( Fνq )⊥ = {0}, the Z-encoding cosets are single codewords, and the quantum multiplication-friendly identity is exactly the classical one. Each such CSS code has parameters [[ ν, κ, ≥ 1 ]] q when K = Fqκ , and its Z-stabilizer space is ( C(h))⊥, which has a generating matrix with row weight at most ν.For our transversal CCZ application, we use arity a = 4. The first three encoders are applied to the three quantum blocks, while the fourth encoder is used to expand the coefficient vector in the transversal CCZ identity. To achieve the desired parameters in the alphabet reduction, we use a projective-multiplicity generalization of the Reed–Solomon multiplication-friendly construction used in [GJX17, GG25a]. The generalization is a univariate multiplicity interpolation construction over P1(Fq): it allows derivative evaluations with prescribed local multiplicities and incorporates the point at infinity. The full construction and proof are deferred to Appendix A. 
+
+Proposition 5.1 (Projective-multiplicity multiplication-friendly codes) . Let q be a prime power, and let a, κ ≥ 1. Set D = a(κ−1) . Let (ℓP )P ∈P1(Fq ) be nonnegative integers satisfying P   
+
+> P∈P1(Fq)
+
+ℓP =
+
+D + 1 . Then there is an a-multiplication-friendly collection of classical [ν, κ ]q codes for Fqκ /Fq,where 
+
+ν = X  
+
+> P∈P1(Fq)
+
+Na,κ (ℓP ), Na,κ (ℓ) = # {(i1, . . . , i a) ∈ { 0, . . . , κ − 1}a : i1 + · · · + ia < ℓ }.
+
+Proof. See Appendix A. 
+
+Remark 5.2 (Choice of multiplicities) . The construction requires a multiplicity profile (ℓP )P ∈P1(Fq )
+
+satisfying P   
+
+> P∈P1(Fq)
+
+ℓP = a(κ − 1) + 1 . For such a profile, the length of the inner code is 
+
+ν = X  
+
+> P∈P1(Fq)
+
+Na,κ (ℓP ), = X  
+
+> P∈P1(Fq)
+
+#{(i1, . . . , i a) ∈ { 0, . . . , κ − 1}a : i1 + · · · + ia < ℓ P }.
+
+15 In particular, Na,κ (ℓ) ≤ κa for every ℓ, and therefore every choice of multiplicities gives ν ≤
+
+(q + 1) κa.A convenient choice is to distribute the multiplicities as evenly as possible. Write a(κ − 1) + 1 = 
+
+u(q + 1) + b, where 0 ≤ b < q + 1 . Assign multiplicity u + 1 to b projective points and multiplicity 
+
+u to the remaining q + 1 − b points. This choice gives ν = O(qκ a). Moreover, when q and a
+
+are fixed, it gives ν = Θ( κa): indeed, at least one projective point has multiplicity Θ( κ), and then 
+
+Na,κ (ℓ) = Θ( κa) for ℓ = Θ( κ). In particular, for the CCZ reduction below we take a = 4 and fixed 
+
+q = p, obtaining ν = Θ( κ4).When a(κ − 1) + 1 ≤ q + 1 , one may assign multiplicity 1 to a(κ − 1) + 1 projective points and multiplicity 0 to the remaining points. This recovers the standard Reed–Solomon multiplication-friendly construction, with the minor modification that the point at infinity may also be used as an evaluation point. The multiplicity variant becomes useful in the fixed-q regime, where κ grows and ordinary Reed– Solomon interpolation over Fq no longer provides sufficiently many evaluation points. Moreover, the projective formulation is sometimes necessary even in very small parameter regimes. For example, when q = a = κ = 2 , ordinary Reed–Solomon interpolation is impossible, and the point at infinity must be used in order to obtain the required multiplication-friendly property. 
+
+5.2 Alphabet reduction with low-weight Z-stabilizers 
+
+We now apply CSS code concatenation together with the restriction operation from Lemma 2.3. Let K = Fpκ , and view K as a κ-dimensional vector space over Fp. Let 
+
+Qin = CSS( QX, in , Q Z, in ; Enc X, in , Enc Z, in )be an Fp-ary CSS code with logical space K and parameters [[ ν, κ, d in ]] p. Let 
+
+Qout = CSS( QX, out , Q Z, out ; Enc X, out , Enc Z, out )be a K-ary CSS code with logical space Kkout and parameters [[ nout , k out , d out ]] K.
+
+We choose the inner X/Z -encoding maps to be compatible with respect to the trace bilinear form ( x, z ) 7 −→ Tr K/Fp (xz ), and the outer X/Z -encoding maps to be compatible with respect to the standard K-bilinear form on Kkout . With these choices, the concatenated code Qin ◦ Qout is the 
+
+Fp-ary CSS code whose encoding maps are Enc Z = (Enc Z, in )⊕nout ◦ Enc Z, out , Enc X = (Enc X, in )⊕nout ◦ Enc X, out ,
+
+and it has parameters [[ νn out , κk out , ≥ din dout ]] p.
+
+We use the alphabet-reduction theorem of Guruswami–Golowich [GG25a, Proposition 5.1], stated next in our notation. 
+
+Proposition 5.3. [GG25a, Proposition 5.1] Let K = Fpκ . Let (Q(h)in )4 
+
+> h=1
+
+be a 4-multiplication-friendly collection of inner CSS codes over Fp, where Q(h)in has parameters [[ ν, κ, d (h)in ]] p and log-ical space K. Let (Q(h)out )3 
+
+> h=1
+
+be a triple of outer CSS codes over K, where Q(h)out has parameters 
+
+[[ nout , k out , d (h)out ]] K, and suppose this triple supports transversal CCZ K.Choose X-encoding maps for the inner and outer CSS codes as follows. For h = 1 , . . . , 4, choose 
+
+Enc (h) 
+
+> X, in
+
+compatible with Enc (h) 
+
+> Z, in
+
+with respect to the bilinear mapping 
+
+(x, z ) 7 −→ Tr K/Fp (xz ).
+
+16 For h = 1 , 2, 3, choose Enc (h) 
+
+> X, out
+
+compatible with Enc (h) 
+
+> Z, out
+
+with respect to the standard K-bilinear form on Kkout . Such choices exist by Lemma 2.1. The concatenation below is taken with these compatible X/Z -encodings. Fix an integer 1 ≤ τ ≤ p with 3( τ − 1) < κ . Choose a subset T ⊆ Fp with |T | = τ , and identify 
+
+Sτ := Fp[X]<τ with FTp by evaluation on T . Also fix an identification K ≃ Fp[X]/(γ(X)) ≃ Fp[X]<κ ,where γ(X) ∈ Fp[X] is irreducible of degree κ. Thus Sτ ⊆ K.For h = 1 , 2, 3, define the restricted concatenated code by 
+
+eQ(h) := ( Q(h)in ◦ Q(h)out ) Skout 
+
+> τ
+
+.
+
+Then eQ(h) has parameters 
+
+[[ νn out , τ k out , ≥ d(h)in d(h)out ]] p.
+
+Moreover, the triple ( eQ(1) , eQ(2) , eQ(3) ) supports transversal CCZ p.
+
+We now combine Proposition 5.3 with the quantum CSS code from Theorem 4.6 and the projective-multiplicity multiplication-friendly codes from Proposition 5.1. 
+
+Theorem 5.4 (Fixed-prime-field alphabet reduction) . For any fixed m ≥ 3 and prime p, there exists an explicit family of Fp-ary quantum CSS code triples (Q(1) , Q (2) , Q (3) ) supporting transversal 
+
+CCZ p gates, where each code has parameters 
+
+"" 
+
+n, Ω
+
+ n
+
+(log n)4
+
+
+
+, Ω n1/m 
+
+(log n)4/m 
+
+!## 
+
+> p
+
+.
+
+Moreover, the Z-stabilizer generators have weight at most O n1/m (log n)1−4/m  .
+
+Proof. We apply Proposition 5.3 using the quantum CSS code from Theorem 4.6 as the outer code, and the quantum multiplication-friendly codes as inner codes, derived from the code in Proposition 5.1. By Theorem 4.6, for every fixed m ≥ 3 and characteristic p, there is an explicit family of CSS codes over fields K = Fpκ with parameters [[ N, Θ( N ), Ω( N 1/m ) ]] K.
+
+These codes support transversal CCZ K, and their Z-stabilizer generators have weight O(N 1/m ). Since the construction evaluates on a set Ω ⊆ K of size N , we have |K| ≥ N . On the other hand, 
+
+|K| is polynomial in N . Thus, for fixed characteristic p, κ = Θ(log N ).
+
+Next, by Proposition 5.1 with arity a = 4, using the balanced multiplicity profile from Re-mark 5.2, we get a classical 4-multiplication-friendly collection for K/Fp of length ν = Θ( κ4) = 
+
+O(log 4 N ). We convert these classical codes to four inner quantum codes by the trivial construction Q(h)in =CSS( Fνp , C (h)in ; enc (h)) for h = 1 , . . . , 4, each with parameters [[ ν, κ, ≥ 1 ]] p. Their Z-stabilizers have weight at most ν. Moreover, every Fp-linear functional on K has a physical inner Z-logical representative of weight at most ν.Choose any fixed 1 ≤ τ ≤ p and let κ be sufficiently large such that 3( τ − 1) < κ . By concatenating the inner and outer quantum CSS codes and then restricting the logical alphabet as in Proposition 5.3 we obtain an explicit triple of Fp-ary CSS codes supporting transversal CCZ p
+
+17 of length n = Θ( νN ), dimension τ Θ( N ) = Θ( N ) = Ω( n/ (log n)4), and distance Ω( N 1/m ) = Ω
+
+ n1/m  
+
+> (log n)4/m
+
+
+
+.It remains to track the weight of the Z-stabilizer generators. The concatenated code has two standard types of Z-stabilizers. The first type consists of the inner Z-stabilizers. These have row weight at most ν.The second type consists of lifts of outer Z-stabilizers. Let v = ( vi) ∈ KE be an outer Z-stabilizer. Fix an information set Iin of size κ for the inner code. After choosing coordinates on Iin ,each element of K is identified with a vector in Fκp . For any i, multiplication by vi is represented by a κ × κ matrix over Fp acting on the information set of the i-th inner code block. Thus the single 
+
+K-linear constraint P 
+
+> i
+
+vizi = 0 gives κ scalar Z-checks over Fp, and each such scalar check uses at most κ positions inside each nonzero outer block. Therefore an outer Z-stabilizer of weight w
+
+lifts to Fp-ary Z-stabilizers of row weight at most κw . Since the outer Z-stabilizer generators have weight O(N 1/m ), their lifts have row weight O(κN 1/m ). Next consider the restriction step. Recall that the outer CSS code from Theorem 4.6 has logical space KA, and in the alphabet-reduction step we restrict this logical space to SAτ . This adds 
+
+Z-stabilizers corresponding to the linear constraints that vanish on SAτ . Let 
+
+S⊥ 
+
+> τ
+
+= {λ ∈ K : Tr K/Fp (λs ) = 0 for every s ∈ Sτ }.
+
+Then these added constraints are exactly the constraints Tr K/Fp (λy a) = 0, for all a ∈ A and λ ∈ S⊥ 
+
+> τ
+
+.We now show that these added stabilizers also have low-weight representatives. In the proof of Proposition 4.7, for every a ∈ A we constructed a dual codeword hH·a,a ∈ C⊥ 
+
+> r
+
+whose a-th coordinate is 1, whose remaining support lies in E, and wt( hH·a,a ) ≤ | H| = O(N 1/m ). Let c ∈ Cr with c|A = y ∈ KA. Since hH·a,a ∈ C⊥ 
+
+> r
+
+, we have 0 = ⟨hH·a,a , c ⟩ = ya + ⟨hH·a,a |E , c |E ⟩.
+
+Hence −hH·a,a |E represents a functional on the physical space that represents the logical functional 
+
+y 7 → ya. Hence, by taking the trace and lifting this functional through the inner code, we get that its weight is multiplied by at most κ. Thus every added restriction stabilizer has row weight 
+
+O(κN 1/m ). Altogether, the final Z-stabilizer generators have weight at most O(max {ν, κN 1/m }) = O(κN 1/m ).
+
+Since n = νN = Θ( κ4N ), we have 
+
+κN 1/m = O
+
+
+
+κ
+
+ nκ4
+
+1/m 
+
+= O
+
+
+
+n1/m (log n)1−4/m 
+
+,
+
+using κ = Θ(log n). Thus the final Z-stabilizer generators have weight 
+
+O
+
+
+
+n1/m (log n)1−4/m 
+
+.
+
+# 6 Discussion and open problems 
+
+We have shown that the algebraic puncturing framework for transversal CCZ codes can be com-bined with algebraic expander codes without losing the linear number of logical qudits. A direct use of the Guruswami–Golowich puncturing theorem runs into the small dual distance of these codes, and therefore yields only a sublinear number of logical qudits. Our construction shows that 18 this loss is not inherent to the algebraic expander codes themselves. The key step is to choose the puncturing set as a large interpolation set for a lower-rate algebraic expander code, which gives a puncturing statement tailored to this family. As a result, the growing-alphabet construction has linear dimension, polynomial distance, and transversal CCZ gates. A separate feature of the construction is that the Z-stabilizer space is generated by explicit low-weight checks. In particular, the Z-stabilizer space admits an explicit generating set of sublinear weight. This shows that one does not have to leave the Schur-product puncturing framework in order to obtain sublinear stabilizer locality, at least on one side. The one-shot alphabet reduction then carries these features to fixed prime fields, with near-linear dimension, polynomial distance, and Z-stabilizer locality preserved up to polylogarithmic factors. Several questions remain open, and we mention two that seem most immediate. The most natural one is whether the construction can be modified so that both the X- and Z-stabilizer spaces admit low-weight generating sets. In the present construction, only the Z-stabilizer space has an explicit sublinear-weight generating set, while the X-stabilizers have high weight. Removing this asymmetry would bring the construction closer to genuinely low-density transversal-CCZ code families. A second question concerns decoding. The construction has both Tanner and algebraic struc-ture, but we do not give an efficient decoder for the resulting quantum codes. It would be useful to understand whether these two structures can be combined to give an efficient decoder. 
+
+# References 
+
+[BH12] Sergey Bravyi and Jeongwan Haah. Magic-state distillation with low overhead. Physical Review A , 86(5):052329, 2012. [CGK17] Shawn X. Cui, Daniel Gottesman, and Anirudh Krishna. Diagonal gates in the Clifford hierarchy. Physical Review A , 95(1):012329, January 2017. [EK09] Bryan Eastin and Emanuel Knill. Restrictions on transversal encoded quantum gate sets. Physical Review Letters , 102(11):110502, 2009. [GG25a] Louis Golowich and Venkatesan Guruswami. Asymptotically good quantum codes with transversal non-clifford gates. In Proceedings of the 57th Annual ACM Symposium on Theory of Computing , STOC ’25, page 707–717, New York, NY, USA, 2025. Association for Computing Machinery. [GG25b] Louis Golowich and Venkatesan Guruswami. Near-asymptotically-good quantum codes with transversal CCZ gates and sublinear-weight parity-checks, 2025. [GJX17] Venkatesan Guruswami, Lingfei Jin, and Chaoping Xing. Efficiently list-decodable punc-tured reed-muller codes. IEEE Transactions on Information Theory , 63(7):4317–4324, 2017. [GL25] Louis Golowich and Ting-Chun Lin. Quantum LDPC codes with transversal non-clifford gates via products of algebraic codes. In Proceedings of the 57th Annual ACM Sympo-sium on Theory of Computing , STOC 2025, pages 689–696. Association for Computing Machinery, 2025. [KT19a] Anirudh Krishna and Jean-Pierre Tillich. Towards low overhead magic state distillation. 
+
+Physical Review Letters , 123(7):070507, 2019. 19 [KT19b] Anirudh Krishna and Jean-Pierre Tillich. Towards low overhead magic state distillation. 
+
+Physical Review Letters , 123(7):070507, aug 2019. [KT26] Swastik Kopparty and Itzhak Tamo. Algebraic expander codes, 2026. [LLL26] Yiming Li, Zimu Li, and Zi-Wen Liu. Transversal non-clifford gates on almost-good quantum LDPC and quantum locally testable codes, 2026. [Ngu25] Quynh T. Nguyen. Good binary quantum codes with transversal CCZ gate. In Proceed-ings of the 57th Annual ACM Symposium on Theory of Computing , STOC 2025, pages 697–706. Association for Computing Machinery, 2025. [Tan81] R. M. Tanner. A recursive approach to low complexity codes. IEEE Transactions on Information Theory , 27(5):533–547, September 1981. [WHY25] Adam Wills, Min-Hsiu Hsieh, and Hayata Yamasaki. Constant-overhead magic state distillation. Nature Physics , 21(11):1842–1846, 2025. [Zhu25] Guanyu Zhu. Transversal non-Clifford gates on qLDPC codes breaking the √N distance barrier and quantum-inspired geometry with Z2 systolic freedom, 2025. 
+
+# A Proof of Proposition 5.1 
+
+Proof. Fix an irreducible polynomial γ(X) ∈ Fq[X] of degree κ, and identify Fqκ ∼= Fq[X]/(γ(X)). Thus every element of Fqκ has a unique representative in Fq[X]<κ .For b ∈ Fq, the Hasse derivatives ∂(i) 
+
+> b
+
+f are defined by the expansion 
+
+f (X) = X
+
+> i≥0
+
+∂(i) 
+
+> b
+
+f (X − b)i.
+
+For the point at infinity, with respect to a degree bound B, define ∂(i) 
+
+> ∞,B
+
+f = [ XB−i]f , the coefficient of XB−i.Let Ω be the set of tuples ( P ; i1, . . . , i a) such that P ∈ P1(Fq), 0 ≤ ij < κ , and i1 + · · · + ia < ℓ P .Thus |Ω| = ν.For each h ∈ [a], define an Fq-linear encoder Enc (h) : Fqκ → FΩ 
+
+> q
+
+as follows. Given z ∈ Fqκ , let 
+
+f ∈ Fq[X]<κ be its unique representative modulo γ(X), and set Enc (h)(z)(P ;i1,...,i a) =
+
+(
+
+∂(ih) 
+
+> P
+
+f, P ∈ Fq,∂(ih)
+
+> ∞,κ −1
+
+f, P = ∞.
+
+and let C(h) = im(Enc (h)). We first show that Enc (h) is injective. Suppose Enc (h)(z) = 0, and let f ∈ Fq[X]<κ be the representative of z. For each P ∈ P1(Fq) and each 0 ≤ r < min {ℓP , κ }, the tuple with ih = r and all other ij = 0 lies in Ω, so all such Hasse derivatives vanish. Set tP = min {ℓP , κ }. Then P 
+
+> P
+
+tP ≥ κ.Indeed, if at least one tP ≥ κ the inequality follows. Otherwise P 
+
+> P
+
+tP = P 
+
+> P
+
+ℓP = a(κ − 1) + 1 ≥ κ.The vanishing at infinity implies deg f ≤ κ − 1 − t∞, while the finite-point conditions imply that the total affine zero multiplicity of f is at least 
+
+X
+
+> b∈Fq
+
+tb ≥ κ − t∞.
+
+20 This is impossible unless f = 0. Thus Enc (h) is injective and dim C(h) = κ.We now define the decoder. Given w ∈ FΩ 
+
+> q
+
+, for each P ∈ P1(Fq) and 0 ≤ r < ℓ P , define 
+
+yP,r = X 
+
+> i1+··· +ia=r
+> 0≤ij<κ
+
+w(P ;i1,...,i a).
+
+We claim there is a unique polynomial W ∈ Fq[X] of degree at most D = a(κ − 1) such that 
+
+∂(r) 
+
+> b
+
+W = yb,r for all b ∈ Fq, 0 ≤ r < ℓ b,
+
+and 
+
+∂(r)
+
+> ∞,D
+
+W = [ XD−r]W = y∞,r for 0 ≤ r < ℓ ∞.
+
+We prove uniqueness first. The interpolation conditions define a linear map from the space of polynomials of degree at most D to FD+1  
+
+> q
+
+. Thus it suffices to show that the only polynomial satisfying the same conditions with all prescribed values equal to zero is the zero polynomial. Suppose that W ∈ Fq[X] has degree at most D and satisfies the above interpolation conditions with all prescribed values equal to zero. The conditions at infinity imply that deg W ≤ D − ℓ∞.
+
+On the other hand, for each b ∈ Fq, the conditions ∂(r) 
+
+> b
+
+W = 0for every 0 ≤ r < ℓ b, imply that W
+
+has a zero of multiplicity at least ℓb at b. Hence the total multiplicity of the affine roots of W is at least P 
+
+> b∈Fq
+
+ℓb = D + 1 − ℓ∞. This is strictly larger than the degree bound D − ℓ∞, so W = 0. Therefore there is at most one polynomial satisfying the interpolation conditions. Since the space of polynomials of degree at most D has dimension D + 1, and the number of prescribed values is P   
+
+> P∈P1(Fq)
+
+ℓP = D + 1 , the mapping is bijective, and existence follows as well. Thus there is a unique such polynomial W .Define Dec( w) = W mod γ(X) ∈ Fqκ . This map is Fq-linear. It remains to prove multiplication-friendliness. Let zh ∈ Fqκ with representatives fh ∈ Fq[X]<κ ,and set w = Enc (1) (z1) ∗ · · · ∗ Enc (a)(za). For b ∈ Fq and 0 ≤ r < ℓ b, the Hasse product rule gives 
+
+∂(r) 
+
+> b
+
+(f1 · · · fa) = X 
+
+> i1+··· +ia=r
+> 0≤ij≤κ−1
+
+∂(i1) 
+
+> b
+
+f1 · · · ∂(ia) 
+
+> b
+
+fa = yb,r .
+
+For 0 ≤ r < ℓ ∞, at infinity, using D = a(κ − 1), we have 
+
+∂(r)
+
+> ∞,D
+
+(f1 · · · fa) = [ XD−r]( f1 · · · fa) = X 
+
+> i1+··· +ia=r
+> 0≤ij<κ a
+
+Y
+
+> j=1
+
+[Xκ−1−ij ]fj = y∞,r .
+
+Since deg( f1 · · · fa) ≤ D, uniqueness gives W = f1 · · · fa. Therefore Dec( w) = W mod γ(X) = f1 · · · fa mod γ(X) = z1 · · · za,
+
+proving the claim. 
+
+# Author Contributions 
+
+All authors contributed to the research and writing of this manuscript. During the preparation of this work, the authors used a large language model for language edit-ing to improve the clarity and presentation of the manuscript. The authors take full responsibility for the content of the paper. 21

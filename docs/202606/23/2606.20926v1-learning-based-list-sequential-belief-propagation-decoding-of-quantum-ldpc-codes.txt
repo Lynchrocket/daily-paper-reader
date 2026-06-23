@@ -1,0 +1,868 @@
+Title: Learning-Based List Sequential Belief Propagation Decoding of Quantum LDPC Codes
+
+URL Source: https://arxiv.org/pdf/2606.20926v1
+
+Published Time: Tue, 23 Jun 2026 00:18:38 GMT
+
+Number of Pages: 13
+
+Markdown Content:
+> 1
+
+# Learning-Based List Sequential Belief Propagation Decoding of Quantum LDPC Codes 
+
+Mohsen Moradi , Taejoon Kim , and Rémi A. Chou 
+
+Abstract—Quantum low-density parity-check (QLDPC) codes are strong candidates for fault-tolerant quantum com-putation, but efficient decoding remains a major challenge due to short cycles, degeneracy, and the poor convergence of standard belief-propagation (BP) decoders. We propose a rein-forcement learning-based list sequential (RL-LS) BP decoder for QLDPC codes by extending the reinforcement-learning-based sequential variable-node scheduling (RL-S) framework with list-based search. At each step, the learned policy selects the next variable node to update; the decoder then retains the ordinary RL-S trajectory while also exploring a competing branch obtained by softly biasing the post-update LLR pair toward the second-most likely Pauli symbol, recomputing the incident local BP messages, and setting the visited variable node to that second-best symbol. Candidate trajectories are ranked and pruned using our proposed cumulative path metric. The resulting decoder extends the learned decoder by combining the improved convergence of learned sequential scheduling with list exploration. Numerical results on representative QLDPC benchmark codes over the depolarizing channel show that our proposed method improves the decoding performance of the underlying decoder and compares favorably with existing BP-based decoding methods. Index Terms—Quantum error correction, quantum LDPC codes, stabilizer codes, CSS codes, belief propagation, quater-nary BP, depolarizing channel, sequential scheduling, reinforce-ment learning, list decoding. 
+
+I. Introduction Quantum error correction is essential for quantum computation, since even small physical error rates can accumulate and corrupt quantum information without active protection [1], [2]. Among the many code families proposed for fault tolerance, quantum low-density parity-check (QLDPC) codes are particularly attractive because their sparse stabilizer structure supports low-weight syn-drome extraction while allowing the encoding of many logical qubits [3]. Over the last several years, progress in QLDPC code design has been substantial. Hypergraph-product codes provide explicit positive-rate Calderbank– Shor–Steane (CSS) families whose distance scales propor-tionally to the square root of the block length [4], while 
+
+Mohsen Moradi and Taejoon Kim are with the School of Electrical, Computer and Energy Engineering, Arizona State University, Tempe, AZ 85287, USA (e-mail: mmorad11@asu.edu, taejoonkim@asu.edu). Rémi A. Chou is with the Department of Computer Science and Engineering, The University of Texas at Arlington, Arlington, TX 76019, USA (e-mail: remi.chou@uta.edu). This work is in part supported by the National Science Foundation (NSF) under grants CNS2451268, CNS2514415, and ITE2515378, and the Office of Naval Research (ONR) under Grant N000142112472. 
+
+later constructions such as balanced-product codes [5], lifted-product/asymptotically good QLDPC codes [6], and quantum Tanner codes [7] have significantly improved the asymptotic rate-distance tradeoff and broadened the design space of practical QLDPC families. In addition, recent bivariate bicycle (BB) codes have provided concrete finite-length QLDPC examples with strong performance and favorable overhead [8]. Recent high-rate QLDPC construc-tions based on controlled permutation-matrix structures have further expanded the design landscape [9]. Hardware-aware implementations using reconfigurable atom arrays also highlight the potential of such codes for low-overhead fault-tolerant architectures [10]. As a result, QLDPC codes are now widely viewed as a leading route toward low-overhead fault-tolerant quantum architectures [3], [11], [8], [9], [10]. Belief propagation (BP) is a natural decoding candidate because of its low complexity, local message-passing struc-ture, and successful use in classical LDPC decoding [12], [13], [14], [15]. For QLDPC codes, however, standard BP is well known to perform poorly [16], [11]. One reason is structural: the commutativity constraints of stabilizer codes induce many short cycles in the Tanner graph, violating the independence assumptions underlying BP. A second difficulty is uniquely quantum: degeneracy, whereby distinct Pauli error patterns can yield the same syndrome and even represent equivalent recovery operations up to stabilizers. Consequently, successful decoding does not require identifying the exact physical error, but rather producing an estimate in the correct logical coset [16], [17]. These features create symmetric pseudo-codewords, trapping sets, and unstable message-passing dynamics, so that plain BP often oscillates, fails to converge, or converges to a syndrome-consistent but logically incorrect solution [16], [17], [18]. A large body of work has therefore focused on improv-ing BP-based decoding for QLDPC codes. One direction augments BP with a stronger post-processing stage. Belief propagation with order-0 ordered statistics decoding (BP-OSD-0) uses BP to generate soft reliabilities and then performs an OSD-based post-processing step to enforce syndrome consistency [11]. Stabilizer inactivation (BP-SI) reduces the cost of this approach by inactivating a carefully selected subset of qubits and solving only amuch smaller linear system [19]. More recently, localized statistics decoding (BP-LSD) has shown that much of the 
+
+> arXiv:2606.20926v1 [cs.IT] 18 Jun 2026 2
+
+post-processing can be confined to small local subgraphs, thereby improving parallelizability while retaining strong decoding performance [20]. A second line of work seeks to improve BP by modify-ing the message-passing dynamics themselves rather than appending a heavy post-processing stage. Early examples include random perturbation methods for sparse quantum codes [16]. More recent examples include overcomplete-check and neural BP decoders [21], [22], graph-neural enhancements to iterative decoding [23], trapping-set-aware message-passing refinements [24], and guided-decimation approaches that interleave short BP runs with reliability-based variable fixing [25]. Related scheduling-oriented advances include layered/random-order decoding and in-formed dynamic scheduling, both of which exploit the fact that the order in which messages are updated can signifi-cantly affect convergence on loopy QLDPC Tanner graphs [26], [27], [28]. In parallel, alternative candidate-generation and search-based BP extensions have also begun to emerge, including speculative syndrome-flip post-processing [29], multiple-bases BP list decoding [30], and learned parallel bit-flipping continuations of learned sequential BP [31]. Taken together, these results show that breaking the sym-metry of plain BP—whether through post-processing, con-trolled perturbation, decimation, bit flipping, or improved scheduling—is often the key to practical performance gains. Among these ideas, changing the BP update schedule is especially attractive because it preserves the basic and low complexity message-passing framework and can be implemented with modest overhead. In classical LDPC decoding, shuffled or serial schedules are known to im-prove convergence [32]. Recent work has shown that the same principle is also effective for QLDPC codes. In particular, sequential check-node scheduling (SCNS) and sequential variable-node scheduling (SVNS) can reduce non-convergence and improve error-correction performance relative to conventional flooding BP [27]. Building on this idea, reinforcement-learning-based sequential scheduling (RL-S) framework shows that a learned policy can further improve performance by selecting the next variable-node update based on a local syndrome-driven state representa-tion [33]. Under depolarizing noise, the resulting quaternary RL-S decoder achieves substantial performance gains over conventional quaternary BP and competitive performance relative to other BP-based baselines [33]. RL-based sequen-tial scheduling has also been studied for classical error-correcting codes, including sparse graph-based codes and polar codes [34], [35]. These developments motivate the central question of this paper: can one preserve the convergence gains of learned sequential scheduling while reducing the risk of an early mistake? This question is particularly relevant in quater-nary BP under depolarizing noise. At a visited qubit, the local posterior is often not sharply concentrated on a single Pauli symbol, and due to degeneracy a locally non-favorable choice may still belong to a globally successful decoding trajectory. A sequential decoder has no mechanism to revisit such near-misses. This suggests that a soft, list-based extension of learned sequential BP may offer a more flexible way to navigate the local ambiguities induced by degeneracy. In this paper, we address this gap by proposing alearning-based list sequential (RL-LS) BP decoder for QLDPC codes. Our proposed decoder extends the RL-S framework of [33] by maintaining a list of candidate tra-jectories rather than a single trajectory. At each decoding step, a learned policy selects the next variable node to update. The ordinary RL-S update is always retained as one candidate, while an additional candidate is generated by softly biasing the post-update LLR pair toward the second-most likely Pauli symbol, recomputing the corresponding incident local BP messages, and setting the visited variable node to that second-best symbol. Candidate trajectories are ranked and pruned using our proposed cumulative path metric, yielding a decoder that combines learned sequential scheduling with lightweight list exploration while remaining fully within the BP message-passing framework. Because the ordinary RL-S path is always preserved, our proposed decoder is a strict extension of the underlying learned decoder. A related approach is learned parallel bit flipping for RL-S (RL-S-BF), which first runs an initial RL-S prefix for T0 iterations and then tests several forced quaternary Pauli changes through independent parallel continuations [31]. While this strategy introduces trajectory diversity, its initial RL-S prefix contributes directly to the total decoding depth. In contrast, the RL-LS decoder proposed here introduces list expansion within the sequential update process itself by retaining the ordinary RL-S continuation and a soft second-symbol continuation at each selected variable node. In classical coding, a useful perspective is to view decod-ing as a search over a tree or trellis representation of the code, where each complete path corresponds to a candidate information sequence and hence to a codeword. This view-point underlies several important decoding paradigms. In sequential decoding of convolutional codes, Fano decoding and stack decoding adapt the amount of search to the observed channel output and use a path metric to rank partial paths and guide the search toward the transmitted sequence [36], [37], [38]. In list decoding, multiple candidate paths are retained concurrently, and the search breadth is controlled by the list size; this principle has been especially influential for polar codes [39]. Similar metric-guided sequential search ideas have also proved effective for polarization-adjusted convolutional (PAC) codes [40]. Our proposed RL-LS decoder can also be interpreted as exploring candidate decoding paths, following the same general principle of maintaining promising partial paths and using a path metric to determine which ones should be explored further. The remainder of the paper is organized as follows. 3
+
+Section II reviews the necessary background on stabilizer and CSS QLDPC codes, syndrome decoding, degeneracy, quaternary BP under depolarizing noise, and learned sequential scheduling. Section III presents our proposed RL-LS decoder and its path metric. Section IV discusses implementation aspects and complexity. Section V provides numerical results on representative QLDPC benchmark codes. Section VI concludes the paper. II. Background A. Stabilizer and CSS QLDPC codes A single qubit is described by a unit vector in the two-dimensional Hilbert space C2. The four Pauli operators acting on one qubit are 
+
+I =
+
+[1 00 1
+
+]
+
+, X =
+
+[0 11 0
+
+]
+
+,Y =
+
+[0 −ii 0
+
+]
+
+, Z =
+
+[1 00 −1
+
+]
+
+.
+
+Physically, X corresponds to a bit-flip error, Z to a phase-flip error, and Y = iXZ to a simultaneous bit- and phase-flip error. An n-qubit system has state space (C2)⊗n, and an operator of the form P1 ⊗ P2 ⊗ · · · ⊗ Pn means that the single-qubit operator Pi acts on qubit i. Let ω ∈ {± 1, ±i}
+
+denote a global phase. The n-qubit Pauli group is 
+
+Pn = {ωP 1 ⊗ P2 ⊗ · · · ⊗ Pn : Pi ∈ { I, X, Y, Z }} .
+
+Since global phases do not affect physical measurement outcomes, Pauli errors are typically identified with their tensor-product part alone [41], [42], [43]. An [[ n, k, d ]] quantum stabilizer code encodes k logical qubits into n physical qubits by specifying an abelian subgroup S ⊆ P n that does not contain −I⊗n, where 
+
+I⊗n = I ⊗ I ⊗ · · · ⊗ I denotes the identity operator on the n-qubit Hilbert space. The subgroup S is called the stabilizer group. Its elements are called stabilizers or stabilizer operators, and a set of independent elements whose products generate all of S is called a set of stabilizer generators. The code space is the joint +1 eigenspace of all stabilizers, 
+
+C = {|ψ⟩ ∈ (C2)⊗n : M |ψ⟩ = |ψ⟩, ∀M ∈ S } .
+
+Equivalently, C is the set of all n-qubit states that satisfy all stabilizer constraints. Since every stabilizer can be written as a product of stabilizer generators, it is enough in practice to specify and measure only the generators. The minimum distance d is the minimum weight of a Pauli operator in 
+
+N (S) \ S , where 
+
+N (S) = {P ∈ P n : P S = SP for all S ∈ S} 
+
+is the normalizer of S. Operators in N (S) \ S preserve the code space but act nontrivially on the encoded logical qubits [41]. In the binary symplectic formalism, an m-generator stabilizer code is represented by 
+
+H = [ HX HZ ] ∈ Fm×2n 
+
+> 2
+
+,
+
+where each row describes the X-support and Z-support of one stabilizer generator. The commutativity of the generators is equivalent to the symplectic orthogonality condition 
+
+HX H⊤ 
+
+> Z
+
++ HZ H⊤ 
+
+> X
+
+= 0 over F2.
+
+This binary representation is especially useful for decoding, because syndrome formation and message-passing updates can then be expressed using sparse binary matrices [41], [3]. In this paper, we focus on CSS QLDPC codes. A CSS code is specified by two sparse binary matrices 
+
+HX ∈ FmX ×n 
+
+> 2
+
+, HZ ∈ FmZ ×n 
+
+> 2
+
+,
+
+satisfying 
+
+HX H⊤ 
+
+> Z
+
+= 0 .
+
+The rows of HX define the X-type stabilizer checks, and the rows of HZ define the Z-type stabilizer checks. Because both matrices are sparse, each qubit participates in only a small number of checks and each check acts on only a small number of qubits. This low-density structure is what makes QLDPC codes attractive for scalable syndrome extraction and iterative message-passing decoding [42], [43], [3]. A convenient graphical representation of a CSS code can be given by two Tanner graphs, one associated with 
+
+HX and one associated with HZ . In each graph, the variable nodes correspond to physical qubits and the check nodes correspond to stabilizer checks. An edge is present whenever a qubit participates in a check. These sparse bipartite graphs provide the computational structure on which the BP-based decoders in this paper operate. B. Syndrome decoding, logical equivalence, and degeneracy Let 
+
+Q = ( Q1, . . . , Q n), Qi ∈ { I, X, Y, Z },
+
+denote an n-qubit Pauli error acting on a CSS code. It is convenient to decompose Q into two binary component vec-tors. For each single-qubit Pauli symbol q ∈ { I, X, Y, Z },define 
+
+eX (q) ≜ 1[q ∈ { X, Y }], eZ (q) ≜ 1[q ∈ { Y, Z }].
+
+Thus, eX (q) is the binary X-component of the error and is detected by HZ , whereas eZ (q) is the binary Z-component of the error and is detected by HX . For the full Pauli error 
+
+Q, these definitions induce 
+
+eX = ( eX (Q1), . . . , e X (Qn)) ,
+
+eZ = ( eZ (Q1), . . . , e Z (Qn)) .
+
+The measured CSS syndrome is 
+
+sX = HX eZ , sZ = HZ eX ,
+
+where all operations are over F2. In other words, X-type checks are triggered by the Z-component of the error, while 4
+
+Z-type checks are triggered by the X-component [41], [42], [43]. Given the measured syndrome (sX , sZ ), a decoder out-puts a Pauli estimate 
+
+ˆQ = ( ˆQ1, . . . , ˆQn),
+
+or equivalently the induced binary component estimates 
+
+(ˆ eX , ˆeZ ). For a tentative estimate, define the residual mismatch vectors 
+
+δX ≜ sX ⊕ HX ˆeZ , δZ ≜ sZ ⊕ HZ ˆeX ,
+
+and the residual mismatch weight 
+
+w ≜ ∥δX ∥1 + ∥δZ ∥1.
+
+The condition w = 0 means that the tentative estimate satisfies the measured syndrome. However, syndrome sat-isfaction alone is not sufficient for successful quantum decoding. For a classical linear code, the natural objective is to find the most likely error vector consistent with the syndrome. In the quantum setting, the objective is subtler: because of degeneracy, different physical Pauli errors can have the same syndrome and can also be logically equivalent if they differ by a stabilizer. More precisely, if the actual channel error is Q and the decoder outputs ˆQ, then there are three relevant cases:  
+
+> •
+
+if ˆQQ ∈ S , then decoding succeeds, even if ˆQ̸ = Q; 
+
+> •
+
+if ˆQQ ∈ N (S) \ S , then a logical error has occurred;  
+
+> •
+
+if ˆQ is not syndrome-consistent, then decoding has failed to return a valid recovery. Thus, successful decoding means returning a recovery in the correct logical coset, not necessarily recovering the exact physical error [16], [17], [41]. Degeneracy is one of the main reasons why plain BP is less reliable for QLDPC codes than for classical LDPC codes. It creates multiple competing explanations of the same syndrome, making the posterior landscape flatter and more symmetric. At the same time, QLDPC Tanner graphs contain many short cycles, so these competing explanations can reinforce one another through loopy message pass-ing. As a result, BP may oscillate, fail to converge, or converge to a syndrome-consistent but logically incorrect estimate [16], [17], [18]. Throughout this paper, decoding performance is measured by the block error rate, i.e., the probability that the decoder either fails to return a syndrome-consistent estimate or returns an estimate that is not logically equivalent to the actual channel error. C. Belief propagation for CSS codes under depolarizing noise Belief propagation is an iterative message-passing algo-rithm on the Tanner graph [14]. In the CSS setting, BP operates on two Tanner graphs, one associated with HX
+
+and one associated with HZ . Since X-type checks detect the Z-component of the error and Z-type checks detect the 
+
+X-component, the HX graph is used to infer eZ , while the 
+
+HZ graph is used to infer eX . For qubit vi, define 
+
+NX (vi) ≜ {a : HX (a, i ) = 1 },
+
+NZ (vi) ≜ {b : HZ (b, i ) = 1 },
+
+where NX (vi) and NZ (vi) are the neighboring checks of qubit vi in the two Tanner graphs. In syndrome-domain BP, each edge carries variable-to-check and check-to-variable messages. The check-node updates retain the usual sum-product form because each syndrome constraint is binary [16], [44], [14]. Under an independent Pauli-X or Pauli-Z channel, the corresponding binary component can be decoded using standard binary BP. In this paper, however, the main focus is the depolarizing channel, where p denotes the physical error probability and each qubit satisfies 
+
+Pr( Qi = I) = 1 − p, 
+
+Pr( Qi = X) = Pr( Qi = Y ) = Pr( Qi = Z) = p
+
+3 .
+
+Under this model, the X- and Z-components are sta-tistically coupled through the possibility of a Y error. Therefore, decoding the two components independently is suboptimal, and it is more natural to work with aquaternary posterior over {I, X, Y, Z } [16], [22], [33]. The quaternary-coupled implementation used in this paper keeps two scalar log-likelihood ratio (LLR) streams. Let LXi denote the a-posteriori LLR for the X-component of qubit vi, obtained from the HZ graph, and let LZi denote the a-posteriori LLR for the Z-component, obtained from the HX graph. These two LLRs are then combined to reconstruct the four-symbol belief at the variable node. For the depolarizing prior, define 
+
+πI = 1 − p, πX = πY = πZ = p
+
+3 .
+
+For q ∈ { I, X, Y, Z }, define the depolarizing correction factor 
+
+κq (p) ≜
+
+
+
+πI
+
+(1 − 2p
+
+> 3
+
+)2 , q = I, πX
+
+(1 − 2p
+
+> 3
+
+) 2p
+
+> 3
+
+, q = X, πY
+
+( 2p
+
+> 3
+
+)2 , q = Y, πZ
+
+(1 − 2p
+
+> 3
+
+) 2p
+
+> 3
+
+, q = Z. 
+
+The unnormalized quaternary belief at node i can be written explicitly as [33] 
+
+˜Bi(q) ≜
+
+
+
+κI (p) exp 
+
+( LZi + LXi
+
+2
+
+)
+
+, q = I, κX (p) exp 
+
+( LZi − LXi
+
+2
+
+)
+
+, q = X, κY (p) exp 
+
+( −LZi − LXi
+
+2
+
+)
+
+, q = Y, κZ (p) exp 
+
+( −LZi + LXi
+
+2
+
+)
+
+, q = Z. 5
+
+The normalized quaternary belief is 
+
+Bi(q) = ˜Bi(q)
+
+∑ 
+
+> q′∈{ I,X,Y,Z }
+
+˜Bi(q′) ,
+
+and the ordinary local hard decision is 
+
+ˆqi = arg max 
+
+> q∈{ I,X,Y,Z }
+
+Bi(q).
+
+The explicit four-symbol expression above is useful for see-ing how the two LLR streams combine: a positive LXi favors no X-component, a negative LXi favors an X-component, and similarly for LZi . The correction factor κq (p) then restores the depolarizing-channel coupling between the four Pauli symbols. This two-stream representation preserves the low-complexity message-passing structure of BP while accounting for the coupling induced by depolarizing noise [22], [33]. Although BP is attractive because of its locality and low complexity, its performance on QLDPC codes is often degraded by short cycles, degeneracy, and unstable iterative dynamics. These issues motivate schedule-based and list-based modifications that retain the BP message-passing structure while improving convergence and reliability. D. Sequential scheduling and learned update order In conventional flooding BP, all check-to-variable mes-sages are updated in parallel using the previous iteration’s variable-to-check messages, and then all variable-to-check messages are updated in parallel. This schedule is simple and highly parallelizable, but on Tanner graphs with many short cycles it can reinforce oscillatory or ambiguous beliefs and slow the propagation of reliable local information [32], [27]. Sequential schedules modify this behavior by updating nodes one at a time, so that newly computed messages are immediately available to later updates in the same sweep. In sequential check-node scheduling (SCNS), the decoder processes check nodes in a chosen order. In sequential variable-node scheduling (SVNS), it processes variable nodes in sequence. Both approaches inject asymmetry into the message-passing trajectory and can improve conver-gence by allowing later updates to exploit fresher infor-mation [27]. Recent work has shown that such schedules are effective for QLDPC decoding, where they can reduce non-convergence and improve error-correction performance relative to conventional flooding BP [27], [26], [28]. The choice of which node to update next is also impor-tant. A fixed sequential order can already help, but a state-dependent order can adapt the update order to the current residual syndrome pattern. This is the key idea behind the reinforcement-learning-based sequential scheduling (RL-S) framework [33]. In RL-S, the next variable node is selected by a learned policy that observes a compact local state derived from the residual mismatch around each candidate node. The policy is trained offline and then frozen at inference time. Importantly, the underlying BP update equations are unchanged; the learned component affects only the update order. This modularity makes RL-S a natural baseline on which to build list-based extensions. For each variable node i, RL-S forms a compact local state from the residual mismatch pattern around that node. Assume fixed deterministic edge orderings for NX (vi) and 
+
+NZ (vi). Let βX (a, i ) and βZ (b, i ) denote the corresponding power-of-two edge weights. Define 
+
+σXi ≜ ∑ 
+
+> a∈N X(i)
+
+δXa βX (a, i ), σZi ≜ ∑ 
+
+> b∈N Z(i)
+
+δZb βZ (b, i ),
+
+and let 
+
+Amax ≜ max  
+
+> i
+
+{ |N X (vi)|, |N Z (vi)| } .
+
+The combined local RL state is 
+
+σi ≜ σXi + 2 Amax σZi .
+
+Given the remaining set R of variable nodes not yet visited in the current sweep, RL-S selects 
+
+u⋆ ∈ arg max 
+
+> u∈R
+
+Q(σu, u ),
+
+where Q(σ, u ) is the frozen Q-table learned offline. After updating u⋆, only the residual checks incident on u⋆ and the local states of variable nodes in the corresponding second-order neighborhood need to be refreshed. Thus, RL-S preserves the low-complexity message-passing structure of BP while using a learned policy to guide the sequen-tial trajectory. Our proposed RL-LS decoder in the next section keeps this learned scheduler but replaces the single trajectory with a list of candidate trajectories. III. Proposed RL-LS Decoder Our proposed RL-LS decoder extends RL-S by keeping a list of candidate decoding trajectories instead of a single trajectory. Each list element stores the current quaternary BP messages, the tentative hard decision ˆq, the induced binary estimates (ˆ eX , ˆeZ ), the residual mismatch vectors 
+
+(δX , δZ ), the mismatch weight w, the local RL states {σi},the remaining set of variable nodes in the current sweep, and a cumulative path metric M . The learned Q-table is the same as in RL-S; it is used only to select the next variable node to update inside each surviving path. The key difference from RL-S is that RL-LS does not always commit to a single local continuation. At each selected variable node, RL-LS first keeps the ordinary RL-S continuation. It then creates one additional continuation by softly biasing the post-update LLR pair toward the second-most likely Pauli symbol and recomputing the incident local BP messages. The resulting children are ranked using our proposed cumulative path metric, and only the best L paths are retained. 6
+
+A. Local list expansion Let Vact be the set of active variable nodes considered by the decoder. For a surviving list path cℓ, let R(ℓ) ⊆ V act 
+
+denote the set of nodes not yet visited in the current sweep. The next node for this path is selected using the same greedy learned scheduler as RL-S: 
+
+u⋆ ∈ arg max 
+
+> u∈R(ℓ)
+
+Q(σ(ℓ) 
+
+> u
+
+, u ).
+
+The selected node is then removed from R(ℓ). The decoder first applies the ordinary RL-S local update at u⋆. This produces the ordinary child path cℓ, 1, which contains the updated BP messages, hard decision, residual mismatches, local RL states, and path metric after the standard RL-S update. Let (LXu⋆ , L Zu⋆ ) denote the post-update a-posteriori LLR pair at the selected node. From this pair, define the local log-score 
+
+su⋆ (q) ≜ log ˜Bu⋆ (q)= log κq (p) + 12
+
+(1 − 2eZ (q))LZu⋆ + 12
+
+(1 − 2eX (q))LXu⋆ ,
+
+for q ∈ { I, X, Y, Z }. Let 
+
+qu⋆,1 ≜ arg max 
+
+> q∈{ I,X,Y,Z }
+
+su⋆ (q)
+
+and 
+
+qu⋆,2 ≜ arg max 
+
+> q∈{ I,X,Y,Z }\{ qu⋆,1}
+
+su⋆ (q)
+
+denote the best and second-best Pauli symbols at the selected node. The local score gap is 
+
+∆u⋆ ≜ su⋆ (qu⋆,1) − su⋆ (qu⋆,2) ≥ 0.
+
+This gap measures how strongly the local quaternary posterior favors the ordinary hard decision over the closest competing Pauli symbol. The ordinary child follows the standard RL-S local update and receives no additional metric penalty: 
+
+M (ℓ, 1) ← M (ℓ).
+
+To generate the alternative child, define 
+
+αu⋆ ≜ ∆u⋆ + τ, 
+
+where τ ≥ 0 is a small fixed margin used to strengthen the soft second-symbol branch (in our simulations, we use 
+
+τ = 0 .25 ). The post-update LLR pair is then biased toward the second-best symbol by 
+
+¯LXu⋆ ≜ LXu⋆ + αu⋆
+
+(1 − 2eX (qu⋆,2)),
+
+¯LZu⋆ ≜ LZu⋆ + αu⋆
+
+(1 − 2eZ (qu⋆,2)).
+
+Starting from the ordinary child cℓ, 1, the decoder re-computes the local BP messages incident on u⋆ using 
+
+( ¯LXu⋆ , ¯LZu⋆ ). It then sets the visited variable node to qu⋆,2
+
+and updates the induced binary components, the residual mismatch vectors, the mismatch weight, and the affected local RL states. The alternative child receives the local metric penalty 
+
+M (ℓ, 2) ← M (ℓ) + ∆ u⋆ .
+
+The motivation for this additive metric is its local likelihood-ratio interpretation. Since su(q) = log ˜Bu(q), the score gap can be written as 
+
+∆u = log ˜Bu(qu, 1)˜Bu(qu, 2) = log Bu(qu, 1)
+
+Bu(qu, 2) ,
+
+where the normalization cancels in the second equality. Hence, ∆u is the local log-likelihood penalty for replacing the locally dominant Pauli symbol by the closest competing symbol. If D(ℓ) denotes the set of local expansion steps at which path cℓ takes the second-symbol branch, then 
+
+M (ℓ) = ∑
+
+> r∈D (ℓ)
+
+∆ur = − ∑
+
+> r∈D (ℓ)
+
+log Bur (qur ,2)
+
+Bur (qur ,1) ,
+
+where ur is the variable node selected at step r. Therefore, smaller values of M correspond to paths that deviate from the ordinary RL-S trajectory only at locally ambiguous nodes, while larger values correspond to deviations against stronger local BP evidence. B. List pruning and final decision After the current list elements have been expanded, the decoder collects the resulting children into a temporary set 
+
+C. Since the list cannot be allowed to grow without bound, RL-LS retains only the best 
+
+min( L, |C| )
+
+children, where L is the maximum list size. Candidates with smaller path metric M are preferred; ties are broken by the smaller residual mismatch weight w. Thus, pruning first favors paths that remain close to the locally dominant quaternary choices and then, among paths with equal metric, favors those satisfying more residual checks. If any list element reaches w = 0 , the decoder terminates and returns that candidate as a syndrome-consistent decod-ing outcome. If no path reaches w = 0 within the allowed number of iterations, the decoder returns the surviving path with the smallest (M, w ) pair in lexicographic order and declares non-convergence. Algorithm 1 summarizes our proposed RL-LS decoder. Algorithm 1 can be read as a list-based extension of the ordinary RL-S decoder. The algorithm has four main stages: initialization, sweep-level processing, local list expansion, and pruning/final selection. The list L contains the currently surviving decoding trajectories, while C is a temporary set used to collect the children generated at the current local expansion step. Each path in the list carries its own BP messages, hard decision, residual mismatches, local RL states, remaining set of unvisited variable nodes, residual mismatch weight, and cumulative path metric. Lines 1–2 initialize the decoder. The root path c1 is initialized exactly as in the ordinary RL-S decoder. Its path metric is set to zero because no second-symbol deviation has been taken yet, and the initial list therefore contains only this root path. 7
+
+Algorithm 1 RL-LS decoding with soft second-symbol expansion 
+
+Input: Q-table Q(σ, u ), maximum list size L, maximum number of iterations Imax , perturbation parameter τ
+
+Output: Estimated Pauli error ˆq, induced binary estimates 
+
+(ˆ eX , ˆeZ ), and convergence flag  
+
+> 1:
+
+Initialize the root list element c1 with the ordinary RL-S state: BP messages, hard decision, residual mismatches, local RL states, mismatch weight w(1) , remaining set, and metric M (1) ← 0 
+
+> 2:
+
+Set L ← { c1} 
+
+> 3:
+
+for t = 1 to Imax do  
+
+> 4:
+
+for all cℓ ∈ L do  
+
+> 5:
+
+Reset the remaining set R(ℓ) ← V act  
+
+> 6:
+
+end for  
+
+> 7:
+
+while there exists cℓ ∈ L with R(ℓ)̸ = ∅ do  
+
+> 8:
+
+Initialize C ← ∅  
+
+> 9:
+
+for all cℓ ∈ L do  
+
+> 10:
+
+if w(ℓ) = 0 then  
+
+> 11:
+
+return the estimate of cℓ with convergence flag 
+
+1 
+
+> 12:
+
+end if  
+
+> 13:
+
+if R(ℓ) = ∅ then  
+
+> 14:
+
+Add cℓ to C and continue  
+
+> 15:
+
+end if  
+
+> 16:
+
+Select the next variable node 
+
+u⋆ ∈ arg max 
+
+> u∈R(ℓ)
+
+Q(σ(ℓ) 
+
+> u
+
+, u ) 
+
+> 17:
+
+Remove u⋆ from R(ℓ) 
+
+> 18:
+
+Ordinary child: copy cℓ into cℓ, 1 
+
+> 19:
+
+Apply one ordinary RL-S local update at u⋆,obtaining cℓ, 1 and (LXu⋆ , L Zu⋆ ) 
+
+> 20:
+
+Compute su⋆ (q) for q ∈ { I, X, Y, Z } 
+
+> 21:
+
+Find qu⋆,1, qu⋆,2, and ∆u⋆ 
+
+> 22:
+
+Set M (ℓ, 1) ← M (ℓ) 
+
+> 23:
+
+Add cℓ, 1 to C 
+
+> 24:
+
+Alternative child: copy the updated state cℓ, 1 into 
+
+cℓ, 2 
+
+> 25:
+
+Set αu⋆ ← ∆u⋆ + τ 
+
+> 26:
+
+Perturb the updated pair toward qu⋆,2:
+
+¯LXu⋆ ← LXu⋆ + αu⋆ (1 − 2eX (qu⋆,2)) ,
+
+¯LZu⋆ ← LZu⋆ + αu⋆ (1 − 2eZ (qu⋆,2))  
+
+> 27:
+
+Recompute the incident local BP messages of u⋆
+
+using ( ¯LXu⋆ , ¯LZu⋆ ) 
+
+> 28:
+
+Set the Pauli symbol at u⋆ to qu⋆,2 
+
+> 29:
+
+Update the induced binary components, residual mismatches, mismatch weight, and affected RL states  
+
+> 30:
+
+Set M (ℓ, 2) ← M (ℓ) + ∆ u⋆ 
+
+> 31:
+
+Add cℓ, 2 to C 
+
+> 32:
+
+end for  
+
+> 33:
+
+Keep the best min( L, |C| ) candidates according to 
+
+(M, w ) 
+
+> 34:
+
+Set L equal to these surviving candidates  
+
+> 35:
+
+end while  
+
+> 36:
+
+end for  
+
+> 37:
+
+Let c⋆ ∈ arg min cℓ∈L (M (ℓ), w (ℓ)) in lexicographic order  
+
+> 38:
+
+return the estimate of c⋆ with convergence flag 0
+
+Lines 3–6 start a new decoding iteration. At the be-ginning of each iteration, every surviving path resets its remaining set R(ℓ) to the active variable-node set. Thus, within the current sweep, each path visits active variable nodes sequentially according to the learned RL-S scheduler. The difference from ordinary RL-S is that this reset is performed for every surviving list path rather than for a single trajectory. Lines 7–8 begin the local expansion loop. This loop continues as long as at least one path still has an unvisited variable node in the current sweep. At each local expansion step, the temporary child set C is cleared, and the children generated from all current paths are inserted into this set before pruning. Lines 9–17 process each current path cℓ. If a path has already reached zero residual mismatch weight, then it is syndrome-consistent and the decoder immediately returns its estimate. If the path has no remaining variable node to visit in the current sweep, it is copied unchanged into the temporary set. Otherwise, the learned Q-table is used exactly as in RL-S to select the next variable node u⋆ from the remaining set of that path. The selected node is then removed from R(ℓ), so it will not be visited again in the same sweep for that path. Lines 18–23 generate the ordinary child cℓ, 1. This child follows the standard RL-S continuation: the decoder copies the current path, applies one ordinary quaternary SVNS update at the selected variable node, updates the BP messages and hard decision, and obtains the post-update LLR pair at that node. The local Pauli scores are then computed from this post-update pair, and the best and second-best Pauli symbols are identified. Since this child follows the ordinary RL-S decision, its path metric is unchanged. Thus, the ordinary RL-S trajectory is always preserved inside the list. Lines 24–31 generate the second-symbol child cℓ, 2. This child starts from the ordinary child cℓ, 1, but then softly biases the post-update LLR pair toward the second-best Pauli symbol. The incident BP messages of the selected variable node are recomputed using this perturbed pair, and the hard decision at the selected node is set to the second-best symbol. The metric of this child is increased by the local score gap, so that deviations from a strongly preferred ordinary decision are penalized more than devi-ations between two nearly tied Pauli symbols. Lines 33–34 perform list pruning. After all current paths have been expanded, the temporary set C may contain more than L candidates. The decoder keeps only the best candidates according to the lexicographic pair (M, w ). The surviving candidates become the new list L, and the next local expansion step continues from this pruned list. Lines 37–38 describe the fallback output when no path reaches zero residual mismatch within the allowed number of iterations. In this case, the decoder selects the surviving path with the smallest lexicographic pair (M, w ) and returns its estimate with a non-convergence flag. Therefore, the returned path is the one that remains closest to the sequence of locally dominant Pauli decisions while also having the smallest residual mismatch among paths with the same metric. 8
+
+In Example 1, we first define a small CSS code and compute the corresponding syndrome pair. Then, in Exam-ple 2, we use the same instance to trace one local expansion step of Algorithm 1. Together, the two examples illustrate how our proposed RL-LS decoder forms the ordinary RL-S child, constructs the second-symbol child, and prunes the resulting candidate paths. Example 1. Consider the following CSS code with n = 12 
+
+variable nodes, mX = 6 X-type checks, and mZ = 6 Z-type checks:                                                                                                                                       
+
+> HX=
+> 
+> 101000100100110000010010011000001001000101100100000110010010000011001001
+> 
+> ,HZ=
+> 
+> 100100110000010010011000001001101000100100000110010010000011001001000101
+> 
+> .
+
+These matrices satisfy HX H⊤ 
+
+> Z
+
+= 0 over F2. The corre-sponding Tanner graph is shown in Fig. 1. In the figure, the highlighted neighborhoods indicate sample local regions of the graph; Example 2 uses the neighborhood of v7 to illustrate one RL-LS expansion step. Suppose that the channel introduces the Pauli error 
+
+Q = ( I, X, I, Z, Y, I, I, X, Z, I, Y, I ).
+
+Using eX (q) = 1[q ∈ { X, Y }] and eZ (q) = 1[q ∈ { Y, Z }],the induced component vectors are 
+
+eX = (0 , 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0) ,
+
+eZ = (0 , 0, 0, 1, 1, 0, 0, 0, 1, 0, 1, 0) .
+
+Therefore, the syndrome pair is 
+
+sX = HX eZ =
+
+
+
+011110
+
+
+
+, sZ = HZ eX =
+
+
+
+110110
+
+
+
+.
+
+This syndrome pair will be used in Example 2 to illustrate one local RL-LS expansion step. Example 2. Consider the toy code and syndrome pair from Example 1. Focus on one surviving list path cℓ during one sweep of Algorithm 1. Suppose that the local residual pattern around variable node v7 in this path is 
+
+[δX (cX, 1), δX (cX, 4)] = [1 , 0] ,
+
+[δZ (cZ, 1), δZ (cZ, 3)] = [1 , 1] .
+
+From the Tanner graph, 
+
+NX (v7) = {cX, 1, c X, 4}, NZ (v7) = {cZ, 1, c Z, 3}.
+
+Since Amax = 2 , the local binary-to-integer states are 
+
+σX 
+
+> 7
+
+= 1 · 20 + 0 · 21 = 1 , σZ 
+
+> 7
+
+= 1 · 20 + 1 · 21 = 3 .
+
+Thus, 
+
+σ7 = σX 
+
+> 7
+
++ 2 Amax σZ 
+
+> 7
+
+= 1 + 2 2 · 3 = 13 .
+
+Assume that the frozen Q-table gives the largest value at this path for variable node 7, i.e., 
+
+7 ∈ arg max 
+
+> u∈R(ℓ)
+
+Q(σ(ℓ) 
+
+> u
+
+, u ).
+
+Then Algorithm 1 selects u⋆ = 7 , equivalently the variable node vu⋆ = v7, and removes it from R(ℓ).The ordinary child cℓ, 1 is obtained by applying the usual RL-S local quaternary SVNS update at v7. This ordinary update computes the incoming check-to-variable information from the neighboring checks on both Tanner graphs, updates the local a-posteriori LLR pair (LX 
+
+> 7
+
+, L Z 
+
+> 7
+
+),forms the local quaternary belief over {I, X, Y, Z }, and makes the corresponding hard decision. RL-LS uses this ordinary update as the first child and then constructs a second child from the same post-update local information. Suppose, for illustration, that this update produces the following post-update local log-scores: 
+
+q I X Y Zs7(q) 1.45 0.20 1.05 −0.70 
+
+Then 
+
+q7,1 = I, q7,2 = Y, ∆7 = s7(I) − s7(Y ) = 0 .40 .
+
+The ordinary child follows the locally dominant Pauli decision and keeps the same path metric, 
+
+M (ℓ, 1) = M (ℓ).
+
+The alternative child cℓ, 2 explores the closest competing Pauli symbol Y . If τ = 0 .25 , then 
+
+α7 = ∆ 7 + τ = 0 .65 .
+
+Since eX (Y ) = 1 and eZ (Y ) = 1 , the perturbed pair is 
+
+¯LX 
+
+> 7
+
+= LX 
+
+> 7
+
+− 0.65 , ¯LZ 
+
+> 7
+
+= LZ 
+
+> 7
+
+− 0.65 .
+
+The decoder then recomputes the BP messages incident on 
+
+v7 using ( ¯LX 
+
+> 7
+
+, ¯LZ 
+
+> 7
+
+), sets the Pauli symbol at v7 to Y , updates the induced binary components, and refreshes the affected residual mismatches and local RL states. The alternative child receives the metric 
+
+M (ℓ, 2) = M (ℓ) + 0 .40 .
+
+Only local quantities need to be refreshed after this expansion. For the present Tanner graph, 
+
+N (cX, 1) = {v1, v 3, v 7, v 10 }, N (cX, 4) = {v4, v 6, v 7, v 10 },
+
+N (cZ, 1) = {v1, v 4, v 7, v 8}, N (cZ, 3) = {v3, v 6, v 7, v 9}.
+
+Since changing v7 can affect only the incident checks and the variable nodes adjacent to those checks, the affected second-order neighborhood is 
+
+Vaff (v7) = N (cX, 1) ∪ N (cX, 4) ∪ N (cZ, 1) ∪ N (cZ, 3)= {v1, v 3, v 4, v 6, v 7, v 8, v 9, v 10 }.9
+
+sX
+
+HX
+
+vi
+
+HZ
+
+sZ
+
+sX, 1 sX, 2 sX, 3 sX, 4 sX, 5 sX, 6
+
+cX, 1 cX, 2 cX, 3 cX, 4 cX, 5 cX, 6
+
+v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 
+
+cZ, 1 cZ, 2 cZ, 3 cZ, 4 cZ, 5 cZ, 6
+
+sZ, 1 sZ, 2 sZ, 3 sZ, 4 sZ, 5 sZ, 6       
+
+> Fig. 1. Tanner graph for the 12-variable CSS example. The highlighted variable nodes illustrate one RL-LS decoding step: v3and v11 have already been explored in the current trajectory, and v7is the current variable node where the local list expansion is carried out.
+
+All other variable nodes keep the same local RL state in this expansion step. Finally, suppose that after the update the ordinary child has residual weight w(ℓ, 1) = 2 , while the alternative child has residual weight w(ℓ, 2) = 1 . Both children are inserted into the temporary candidate set C. If the list size is large enough, both can survive and be continued. If pruning is required, the decoder compares candidates using the lexicographic pair (M, w ): the ordinary child has smaller metric, while the alternative child has smaller mismatch weight. Thus, the metric controls how much the decoder is allowed to deviate from the locally most likely trajectory, and the mismatch weight is used to break ties among paths with the same metric. This example highlights the main difference from RL-S. The RL-S decoder would keep only the ordinary contin-uation at v7 and would proceed with a single trajectory. In contrast, RL-LS keeps the ordinary RL-S continuation while also allowing a second, softly perturbed continuation toward the nearest competing Pauli symbol. Therefore, the proposed decoder preserves the learned RL-S path but adds controlled local path diversity inside the sequential update process. IV. Complexity and Latency We measure complexity and latency in terms of the number of local variable-node updates. In conventional flooding BP, all node updates within one iteration can in principle be executed in parallel, so if the maximum number of iterations is Imax , its decoding latency scales as O(Imax )
+
+under ideal parallel hardware. For sparse Tanner graphs with bounded node degrees, its computational complexity also scales as O(Imax n).In contrast, both RL-S and RL-LS apply variable-node updates sequentially within each iteration. If one local variable-node update is counted as one unit of work, then the RL-S decoder visits n variable nodes per iteration, and its worst-case computational complexity is O(Imax n).Under the same serial-update assumption, its latency is of the same order, namely O(Imax n).For our proposed RL-LS decoder, the list size is capped at L, and for each surviving trajectory and selected variable node the decoder forms at most two local continuations: the ordinary RL-S continuation and one alternative continua-tion. Therefore, in the worst case, one iteration involves at most 2Ln local updates, which gives the overall complexity bound 
+
+O(2 LI max n) = O(LI max n).
+
+When the L list elements are processed in parallel, then the latency is reduced toward O(Imax n), but it still remains larger than that of flooding BP because the variable-node updates within each trajectory are inherently sequential. The factor 2 above is conservative, since the alternative continuation reuses post-update local quantities already computed for the ordinary continuation, and the cost of ranking and pruning at most 2L candidates per expansion step is a lower-order overhead for the list sizes considered in practice. Finally, these are worst-case bounds. In practice, as shown in our numerical results, the sequential decoders 10 0.05 0.06 0.07 0.08 0.09 0.1 
+
+p                        
+
+> 10 -7
+> 10 -6
+> 10 -5
+> 10 -4
+> 10 -3
+> 10 -2
+> 10 -1
+> Block Error Rate
+> QBP, T= 1000 QBPGD, GT = 2880 RL-S, T= 100 RL-S, T= 1000 RL-LS, L= 8 , T = 100
+> Fig. 2. Comparison of the block error rate performance of our proposed RL-LS decoder with other decoders for the [[288 ,12 ,18]]
+> BB code over the depolarizing channel.
+
+often require a substantially smaller average number of iterations to converge, and even under the same cap Imax ,they typically achieve significantly better error-correction performance than conventional flooding BP. Moreover, cluster-based variants of sequential scheduling can update multiple variable nodes as a group, thereby reducing the effective sequential depth with negligible degradation in error-correction performance. Such clustered implementa-tions provide a practical path toward bringing the latency of sequential decoders closer to that of conventional BP decoders while retaining the benefits of learned scheduling. V. Numerical Results In our experiments, the reinforcement-learning used by our proposed RL-LS decoder follows the RL-S framework in [33]. In particular, we use the same learned scheduling policy and offline training procedure as in the RL-S decoder, and the learned Q-table is fixed during inference. The difference here lies in the decoding stage: instead of following only a single learned sequential trajectory, the proposed RL-LS decoder preserves the ordinary RL-S continuation and, at each selected variable-node update, can additionally explore a competing branch obtained by softly biasing the post-update LLR pair toward the second-most likely Pauli symbol, recomputing the incident local BP messages, and committing the visited variable node to that second-best symbol. The resulting candidate trajec-tories are ranked using our proposed path metric function introduced in Section III, and only the best L candidates are retained throughout decoding. The performance is reported in terms of block error rate over the depolarizing channel. Fig. 2 shows the error-correction performance of our proposed RL-LS decoder with list size L = 8 and maximum number of iterations T = 100 for the [[288 , 12 , 18]] BB code introduced in [8]. For comparison, we also include the performance of quaternary BP (QBP), QBP with guided 0.04 0.05 0.06 0.07 0.08 0.09 0.1 
+
+p                       
+
+> 10 -6
+> 10 -5
+> 10 -4
+> 10 -3
+> 10 -2
+> 10 -1
+> 10 0
+> Block Error Rate
+> QBP, T= 1000 QBPGD, GT = 1800 RL-S, T= 100 RL-S, T= 1000 BP-OSD-0 RL-LS, L= 8 , T = 100 RL-LS, L= 8 , T = 1000
+> Fig. 3. Block error rate comparison of our proposed RL-LS decoder and benchmark decoders for the [[180 ,10 ,15 ≤d≤18]] A5 code over the depolarizing channel.
+
+decimation (QBPGD), and RL-S, where RL-S corresponds to the special case of list size L = 1, under different iteration settings. For QBPGD, the inner BP decoder uses 
+
+T = 10 maximum iterations, and the maximum number of global iterations (GT) for the block length n = 288 is set to 2880 . The learning-based decoders outperform the conventional BP-based decoders. In particular, our pro-posed RL-LS decoder with T = 100 achieves performance comparable to RL-S with T = 1000 , while requiring only one-tenth of the iteration budget and therefore offering a substantial latency advantage. Table I reports the corresponding average number of iterations for the decoding schemes shown in Fig. 2. As shown in the Table, the learning-based decoders require substantially fewer average iterations than the conventional BP-based decoders across the whole range of depolarizing probabilities. Since the block error rate performance of RL-LS with L = 8 and T = 100 is close to that of RL-S with T = 1000 , the results indicate that RL-LS can attain a similar error-correction performance with comparable latency while benefiting from list-based exploration. Fig. 3 illustrates the block error rate performance of our proposed RL-LS decoder for the [[180 , 10 , 15 ≤ d ≤ 18]] 
+
+A5 code introduced in [45] over the depolarizing channel. We consider two settings for RL-LS, namely L = 8
+
+with T = 100 and T = 1000 , and compare them with QBP, QBPGD, BP-OSD-0, and RL-S under different iteration budgets. The results show that our proposed RL-LS decoder provides the best overall performance among the considered decoders across most of the examined depolarizing crossover probabilities. In particular, the gain is more pronounced in the low- and moderate-noise regimes, where RL-LS achieves a clear reduction in block error rate compared with the other BP-based schemes. Moreover, even with the smaller iteration budget T = 100 , RL-LS remains competitive with RL-S with T = 1000 . This demonstrates that combining learned sequential schedul-11                                                           
+
+> TABLE I Average number of iterations for the decoding schemes corresponding to Fig. 2 for the [[288 ,12 ,18]] BB code over the depolarizing channel.
+> p0.05 0.06 0.07 0.08 0.09 0.10 QBP, T= 1000 3.96 5.15 6.84 9.77 16.66 31.64 QBPGD, GT = 2880 4.08 5.46 7.53 11.71 24.94 59.84 RL-S, T= 100 1.94 2.21 2.55 3.09 4.07 5.95 RL-S, T= 1000 1.94 2.21 2.61 3.63 6.72 16.02 RL-LS, L= 8 ,T= 100 1.75 2.02 2.31 2.79 3.50 5.01 0.03 0.04 0.05 0.06 0.07 0.08 0.09 0.1
+
+p                    
+
+> 10 -5
+> 10 -4
+> 10 -3
+> 10 -2
+> 10 -1
+> Block Error Rate
+> QBP, T= 100 RL-S, T= 10 RL-LS, L= 16 , T = 10
+> Fig. 4. Comparison of the block error rate performance of our proposed RL-LS decoder with other decoders for the [[144 ,12 ,12]]
+> BB code over the depolarizing channel.
+
+ing with list-based exploration can substantially improve error-correction performance while maintaining a favorable decoding-latency profile. Table II reports the corresponding average number of iterations for the decoding schemes shown in Fig. 3. As shown in Table II, our proposed RL-LS decoder requires fewer average iterations than the conventional BP-based decoders across the entire range of depolarizing probabili-ties. In particular, RL-LS with L = 8 and T = 100 achieves the smallest average iteration count among the reported schemes, while also providing the strongest block error rate performance in Fig. 3. Even when the maximum iteration budget is increased to T = 1000 , RL-LS still maintains a noticeably smaller average number of iterations than QBP, QBPGD, and RL-S with the same iteration budget, especially in the moderate- and high-noise regimes. These results show that the gain of RL-LS is not only in error-correction performance, but also in decoding convergence speed, since the learned sequential policy together with list-based exploration enables the decoder to converge in fewer iterations on average while achieving better reliability. Fig. 4 presents the block error rate performance of our proposed RL-LS decoder with list size L = 16 and maximum number of iterations T = 10 for the [[144 , 12 , 12]] 
+
+BB code introduced in [8]. For comparison, we also show the performance of QBP and RL-S, where RL-S corresponds to the case L = 1 . It can be observed that the learning-based decoders perform better than the conventional QBP decoder at low depolarizing crossover probabilities. More-over, under the same iteration budget T = 10 , our proposed RL-LS decoder achieves more than a twofold reduction in block error rate compared with RL-S at p = 0.04 ,demonstrating the benefit of incorporating list-based search into the learned sequential decoding framework. Since both RL-S and RL-LS operate with the same maximum number of iterations, their decoding latency remains comparable, while RL-LS provides better error-correction performance. Table III reports the corresponding average number of iterations for the decoding schemes shown in Fig. 4. As shown in Table III, the learning-based decoders require substantially fewer average iterations than the conven-tional QBP decoder across the entire range of depolarizing probabilities. In particular, our proposed RL-LS decoder with L = 16 and T = 10 achieves the smallest average iteration count at all reported channel points, while also providing the best block error rate performance in Fig. 4. Compared with RL-S under the same iteration budget 
+
+T = 10 , RL-LS consistently converges in fewer iterations on average, which indicates that the list-based exploration not only improves the error-correction performance but also accelerates decoding convergence. These results further support the advantage of combining learned sequential scheduling with list-based search, since RL-LS attains better reliability without increasing the maximum iteration budget relative to RL-S. VI. Conclusions In this paper, we proposed a learning-based list se-quential (RL-LS) belief-propagation decoder for QLDPC codes over the depolarizing channel. Our proposed RL-LS decoder extends the RL-S framework by retaining the ordinary learned sequential decoding path while also exploring a competing path through a soft perturbation toward the second-most likely local Pauli decision. By ranking and pruning candidate trajectories using our pro-posed cumulative path metric, our decoder is able to better handle local ambiguities caused by short cycles, degeneracy, and unreliable early decisions, while remaining fully within the BP message-passing framework. Numerical results on representative BB and A5 codes showed that our proposed decoder improves upon the underlying RL-S decoder and compares favorably with existing BP-based decoding methods. Overall, the results suggest that com-bining learned sequential scheduling with list exploration is a promising direction for improving the reliability of BP-12 
+
+TABLE II Average number of iterations for the decoding schemes corresponding to Fig. 3 for the [[ 180 , 10 , 15 ≤ d ≤ 18 ]] A5 code over the depolarizing channel. 
+
+p 0.04 0.05 0.06 0.07 0.08 0.09 0.10 QBP, T = 1000 2.43 3.38 6.26 14.06 36.85 79.41 166.38 QBPGD, GT = 1800 2.44 3.57 7.69 19.09 49.90 126.04 257.66 RL-S, T = 100 1.61 1.88 2.37 3.34 5.54 10.27 19.11 RL-S, T = 1000 1.61 1.96 3.12 7.21 20.49 61.02 135.31 RL-LS, L = 8 , T = 100 1.21 1.50 1.97 2.76 4.61 8.90 15.91 RL-LS, L = 8 , T = 1000 1.21 1.53 2.39 5.62 17.33 52.15 113.42 TABLE III Average number of iterations for the decoding schemes corresponding to Fig. 4 for the [[ 144 , 12 , 12 ]] BB code over the depolarizing channel. 
+
+p 0.03 0.04 0.05 0.06 0.07 0.08 0.09 0.10 QBP, T = 100 1.75 2.32 3.06 4.00 5.37 7.56 10.87 16.02 RL-S, T = 10 1.27 1.45 1.67 1.94 2.28 2.73 3.38 4.11 RL-LS, L = 16 , T = 10 1.04 1.14 1.30 1.57 1.90 2.33 2.88 3.56 
+
+based QLDPC decoding. Future work may include adaptive list-size selection, improved path metrics, and combining the proposed approach with other strong BP enhancements for larger codes and other noise models. References 
+
+[1] P. W. Shor, “Scheme for reducing decoherence in quantum computer memory,” Physical Review A, vol. 52, no. 4, pp. R2493– R2496, 1995. [2] B. M. Terhal, “Quantum error correction for quantum memo-ries,” Reviews of Modern Physics, vol. 87, no. 2, pp. 307–346, 2015. [3] N. P. Breuckmann and J. N. Eberhardt, “Quantum low-density parity-check codes,” PRX Quantum, vol. 2, no. 4, p. 040101, 2021. [4] J.-P. Tillich and G. Zémor, “Quantum LDPC codes with positive rate and minimum distance proportional to the square root of the blocklength,” IEEE Transactions on Information Theory, vol. 60, no. 2, pp. 1193–1202, 2014. [5] N. P. Breuckmann and J. N. Eberhardt, “Balanced product quantum codes,” IEEE Transactions on Information Theory, vol. 67, no. 10, pp. 6653–6674, 2021. [6] P. Panteleev and G. Kalachev, “Asymptotically good quantum and locally testable classical LDPC codes,” in Proceedings of the 54th Annual ACM SIGACT Symposium on Theory of Computing, 2022, pp. 375–388. [7] A. Leverrier and G. Zémor, “Quantum Tanner codes,” in 2022 IEEE 63rd Annual Symposium on Foundations of Computer Science (FOCS), 2022, pp. 872–883. [8] S. Bravyi, A. W. Cross, J. M. Gambetta, D. Maslov, P. Rall, and T. J. Yoder, “High-threshold and low-overhead fault-tolerant quantum memory,” Nature, vol. 627, pp. 778–782, 2024. [9] K. Kasai, “Breaking the orthogonality barrier in quantum LDPC codes,” arXiv preprint arXiv:2601.08824, 2026. [10] C. Zhao, C. Duckering, A. Gu, N. Maskara, and H. Zhou, “Towards ultra-high-rate quantum error correction with recon-figurable atom arrays,” arXiv preprint arXiv:2604.16209, 2026. [11] J. Roffe, D. R. White, S. Burton, and E. T. Campbell, “Decoding across the quantum LDPC code landscape,” Physical Review Research, vol. 2, no. 4, p. 043423, 2020. [12] R. Gallager, “Low-density parity-check codes,” IRE Transactions on Information Theory, vol. 8, no. 1, pp. 21–28, 1962. [13] D. J. C. MacKay and R. M. Neal, “Near Shannon limit perfor-mance of low density parity check codes,” Electronics Letters, vol. 32, no. 18, pp. 1645–1646, 1996. [14] F. R. Kschischang, B. J. Frey, and H.-A. Loeliger, “Factor graphs and the sum-product algorithm,” IEEE Transactions on Information Theory, vol. 47, no. 2, pp. 498–519, 2001. [15] T. J. Richardson and R. L. Urbanke, “The capacity of low-density parity-check codes under message-passing decoding,” IEEE Transactions on Information Theory, vol. 47, no. 2, pp. 599–618, 2001. [16] D. Poulin and Y. Chung, “On the iterative decoding of sparse quantum codes,” Quantum Information & Computation, vol. 8, no. 10, pp. 987–1000, 2008. [17] K.-Y. Kuo and C.-Y. Lai, “Exploiting degeneracy in belief prop-agation decoding of quantum codes,” npj Quantum Information, vol. 8, no. 1, p. 111, 2022. [18] N. Raveendran and B. Vasić, “Trapping sets of quantum LDPC codes,” Quantum, vol. 5, p. 562, 2021. [19] J. du Crest, M. Mhalla, and V. Savin, “Stabilizer inactivation for message-passing decoding of quantum LDPC codes,” in 2022 IEEE Information Theory Workshop (ITW), 2022, pp. 488–493. [20] T. Hillmann, L. Berent, A. O. Quintavalle, J. Eisert, R. Wille, and J. Roffe, “Localized statistics decoding for quantum low-density parity-check codes,” Nature Communications, vol. 16, p. 8214, 2025. [21] S. Miao, A. Schnerring, H. Li, and L. Schmalen, “Neural belief propagation decoding of quantum LDPC codes using overcomplete check matrices,” in 2023 IEEE Information Theory Workshop (ITW), 2023, pp. 215–220. [22] ——, “Quaternary neural belief propagation decoding of quan-tum LDPC codes with overcomplete check matrices,” IEEE Access, vol. 13, pp. 25 637–25 649, 2025. [23] A. Gong, S. Cammerer, and J. M. Renes, “Graph neural networks for enhanced decoding of quantum LDPC codes,” in 2024 IEEE International Symposium on Information Theory (ISIT), 2024, pp. 2700–2705. [24] D. Chytas, M. Pacenti, N. Raveendran, M. F. Flanagan, and B. Vasić, “Enhanced message-passing decoding of degenerate quantum codes utilizing trapping set dynamics,” IEEE Com-munications Letters, vol. 28, no. 3, pp. 444–448, 2024. [25] H. Yao, W. A. Laban, C. Häger, A. G. i Amat, and H. D. Pfister, “Belief propagation decoding of quantum LDPC codes with guided decimation,” in 2024 IEEE International Symposium on Information Theory (ISIT), 2024, pp. 2478–2483. [26] J. du Crest, F. Garcia-Herrero, M. Mhalla, V. Savin, and J. Valls, “Layered decoding of quantum LDPC codes,” in 2023 12th International Symposium on Topics in Coding (ISTC), 2023, pp. 1–5. [27] M. Moradi, S. Habib, V. Nourozi, and D. G. M. Mitchell, “Sequential BP-based decoding of QLDPC codes,” CoRR, vol. abs/2602.13420, 2026. [28] T.-H. Huang and Y.-L. Ueng, “Informed dynamic scheduling for QLDPC codes,” Quantum, vol. 10, p. 1967, 2026. [29] M. Wang, A. Li, and F. Mueller, “Fully parallelized BP decoding for quantum LDPC codes can outperform BP-OSD,” CoRR, vol. abs/2507.00254, 2025. 13 
+
+[30] S. Rabeti and H. Mahdavifar, “List decoding and new bicycle code constructions for quantum LDPC codes,” CoRR, vol. abs/2511.02951, 2025. [31] M. Moradi, T. Kim, and R. A. Chou, “Learned parallel bit-flipping sequential belief propagation decoding of quantum LDPC codes,” 2026, manuscript. [32] J. Zhang, Y. Wang, M. P. C. Fossorier, and J. S. Yedidia, “Replica shuffled iterative decoding,” in Proceedings of the 2005 IEEE International Symposium on Information Theory (ISIT), 2005, pp. 454–458. [33] M. Moradi, V. Nourozi, S. Habib, and D. G. M. Mitchell, “Learn-ing to decode quantum LDPC codes via belief propagation,” CoRR, vol. abs/2603.10192, 2026. [34] S. Habib, A. Beemer, and J. Kliewer, “RELDEC: Reinforce-ment learning-based decoding of moderate length LDPC codes,” CoRR, vol. abs/2112.13934, 2021. [35] M. Moradi, S. Habib, and D. G. M. Mitchell, “Enhancing belief propagation decoding of polar codes: A reinforcement learning approach,” IEEE Communications Letters, vol. 29, no. 6, pp. 1285–1289, 2025. [36] R. M. Fano, “A heuristic discussion of probabilistic decoding,” IEEE Transactions on Information Theory, vol. 9, no. 2, pp. 64– 74, Apr. 1963. [37] K. S. Zigangirov, “Some sequential decoding procedures,” Prob-lems of Information Transmission, vol. 2, no. 4, pp. 1–10, 1966. [38] F. Jelinek, “Fast sequential decoding algorithm using a stack,” IBM Journal of Research and Development, vol. 13, no. 6, pp. 675–685, Nov. 1969. [39] I. Tal and A. Vardy, “List decoding of polar codes,” IEEE Transactions on Information Theory, vol. 61, no. 5, pp. 2213– 2226, May 2015. [40] M. Moradi, “On sequential decoding metric function of polarization-adjusted convolutional (PAC) codes,” IEEE Trans-actions on Communications, vol. 69, no. 12, pp. 7913–7922, Dec. 2021. [41] D. Gottesman, “Stabilizer codes and quantum error correction,” Ph.D. dissertation, California Institute of Technology, 1997. [42] A. R. Calderbank and P. W. Shor, “Good quantum error-correcting codes exist,” Physical Review A, vol. 54, no. 2, pp. 1098–1105, 1996. [43] A. M. Steane, “Multiple-particle interference and quantum error correction,” Proceedings of the Royal Society of London. Series A: Mathematical, Physical and Engineering Sciences, vol. 452, no. 1954, pp. 2551–2577, 1996. [44] D. J. C. MacKay, “Good error-correcting codes based on very sparse matrices,” IEEE Transactions on Information Theory, vol. 45, no. 2, pp. 399–431, 1999. [45] P. Panteleev and G. Kalachev, “Degenerate quantum LDPC codes with good finite length performance,” Quantum, vol. 5, p. 585, 2021.

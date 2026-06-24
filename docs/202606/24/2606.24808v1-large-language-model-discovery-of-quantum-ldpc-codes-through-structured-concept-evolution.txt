@@ -1,0 +1,776 @@
+Title: Large-Language-Model Discovery of Quantum LDPC Codes through Structured Concept Evolution
+
+URL Source: https://arxiv.org/pdf/2606.24808v1
+
+Published Time: Wed, 24 Jun 2026 01:18:13 GMT
+
+Number of Pages: 17
+
+Markdown Content:
+# Large-Language-Model Discovery of Quantum LDPC Codes through Structured Concept Evolution 
+
+Zidu Liu 1, ∗ and Florian Marquardt 1, 2, †
+
+> 1
+
+Max Planck Institute for the Science of Light, 91058 Erlangen, Germany 
+
+> 2
+
+Department of Physics, Friedrich-Alexander University Erlangen-N¨ urnberg, 91058 Erlangen, Germany 
+
+(Dated: June 24, 2026) Quantum computers could outperform classical machines on important problems, but only if the errors that pervade quantum hardware can be corrected at scale. Quantum low-density parity-check (qLDPC) codes offer a promising route to this goal by combining sparse parity checks with finite encoding rate and growing distance, but their construction remains a challenging discrete design problem. Here we introduce structured concept evolution (SCE), a search framework that pairs a large language model with a structured algebraic mutation grammar to discover lifted-product code families, a class of CSS qLDPC codes. Instead of asking the LLM to design codes from first principles, SCE evolves structured concepts consisting of algebraic specifications paired with executable programs that realize them, using hierarchical mutations that modify the group algebra, protograph geometry, or base space. Running SCE, we discover a diverse set of competitive code families, ranging from abelian constructions to families over non-abelian groups beyond those underlying standard designs such as bivariate-bicycle codes, and characterize them under code-capacity depolarizing noise with BP+OSD decoding. These results are obtained with lightweight models (GPT-5.4-mini and GPT-5.4-nano). 
+
+Quantum computers promise computational advan-tages for problems ranging from quantum simulation [1] and chemistry [2] to optimization and machine learn-ing [3–7], but realizing them at scale requires quantum error correction, which encodes logical information re-dundantly into many physical qubits and repeatedly ex-tracts syndromes from local parity checks [8–11]. The surface code has been the workhorse of this program ow-ing to its planar geometry and high threshold [12–14], and recent experiments demonstrate repeated error cor-rection and logical-error suppression on superconducting processors [15–17]. Yet it encodes a single logical qubit in Θ( d2) physical qubits, a vanishing rate shared by ev-ery two-dimensional geometrically local code [18], so its overhead remains the central obstacle to scaling. This ob-stacle is now practical rather than asymptotic: neutral-atom [19] and trapped-ion [20] platforms have reached or approached the thousand-qubit regime, so the number of logical qubits on a device is set directly by the rate of the underlying code. Constant-rate codes enable fault-tolerant computation with constant overhead [21]. At the error rates and code sizes relevant to near-term hardware they reduce the cost per logical qubit by roughly an order of magnitude relative to the surface code [22]. Demon-strations on reconfigurable atom arrays [23] and super-conducting hardware [24], together with full architectural proposals for neutral-atom platforms [25, 26], make such codes concrete architectural targets. This motivates the search for quantum low-density parity-check (qLDPC) codes, which combine sparse parity checks with finite en-coding rate and growing distance [27–31]. The central difficulty is that high-performing qLDPC codes are hard to find. The known families are built from algebraic product constructions: hypergraph product [27], generalized bicycle and related quasi-cyclic codes [32, 33], including the bivariate-bicycle (BB) codes [22] that descend directly from them, lifted product [28, 34], balanced product [35], fiber-bundle codes [36], quantum Tanner codes and other asymptoti-cally good constructions [29, 31, 37], each parametrized by a small set of group-algebra elements or protograph polynomials. While these frameworks guarantee the CSS commutation structure [38, 39] by construction, the resulting performance depends on the specific group-algebra elements chosen, in a way that admits no closed-form optimum [40]. The viable region is a vanishingly small subset of an exponentially large discrete search space, and locating it has so far relied largely on expert intuition, exhaustive enumeration over small instances, or random sampling. Machine-learning approaches have begun to address this as a combinatorial design problem. Reinforcement learning has been used to discover error-correction strate-gies, adapt codes to hardware-specific noise, and co-optimize stabilizer codes with their encoding circuits [41– 43], as well as to scale automated circuit discovery [44] and reduce stabilizer measurement weight [45], but these methods search over explicit, finite-size stabilizer or cir-cuit representations and do not yield the structured, scal-able code families required at large block length. Here we take a different route, drawing on recent advances in large language models (LLMs). In the quantum domain, LLMs have been used for scientific exploration and experiment design [46, 47], and within multi-agent workflows for con-structing nonadditive codes with prescribed transversal diagonal gates [48]. More recently, LLM-guided evolu-tionary search, with the LLM acting as an intelligent mutation operator [49], has emerged as a powerful tool 
+
+> arXiv:2606.24808v1 [quant-ph] 23 Jun 2026
+
+2for open-ended mathematical and algorithmic discovery, as demonstrated in FunSearch [50] and AlphaEvolve [51]. The qLDPC construction problem fits this paradigm well: a candidate code is cheap to specify and exactly verifi-able, whereas the map from construction to performance is highly nontrivial. In this work, we introduce structured concept evolu-tion (SCE), an evolutionary framework for the discov-ery of quantum LDPC codes. The evolving individuals are not codes but the higher-level concepts that gener-ate them, where each such concept pairs a structured concept specification Σ with an executable program PΣ
+
+that generates the parity-check matrices of a CSS code at any admissible block length, as shown in Fig. 1. Alarge language model serves as the mutation operator, proposing edits at the level of these concepts. Applying SCE, we build a quality-diversity archive [52]. Instead of converging to a single optimized code, the archive retains many individually competitive constructions that differ across base group family, encoding rate, and decoding performance. We then benchmark the high-performing archive members under code-capacity depolarizing noise using Belief Propagation with Ordered Statistics De-coding (BP+OSD) [40]. We implement SCE on top of OpenEvolve [53], an open-source realization of AlphaE-volve. 
+
+General recipes.— Our search space consists of lifted-product (LP) CSS codes [28, 34], a general algebraic construction that generalizes the hypergraph product (HGP) and yields some of the most powerful modern qLDPC codes, including the first asymptotically good families [29]. LP codes are built from two base pro-tographs, the analogues of the two classical HGP codes, given by matrices A and B of sizes mA ×nA and mB ×nB
+
+whose entries lie in the group algebra F2[G] of a finite group G of order q = |G|. The lifted-product check ma-trices are obtained by applying the hypergraph-product rule at the protograph level and then replacing each group-algebra entry by its left or right regular represen-tation [28]. Equivalently, with eA and eB denoting the corresponding block matrices, the CSS checks are 
+
+HX = [ eA ⊗ InB | ImA ⊗ eBT ],HZ = [ InA ⊗ eB | eAT ⊗ ImB ] (1) Because left- and right-multiplication commute, this sat-isfies HX HTZ = 0 for any finite group G. The code has 
+
+n = f q physical qubits with f = nAnB + mAmB , so the block length scales linearly with the group order q (see Supplemental Material for details [54]). The three mutation levels span a hierarchy from the broadest change to the most local. An algebraic (level-3) move replaces the base group family. Since the proto-graph shape, scaling rule, and local entries all depend on G, they are rewritten as needed to remain valid for the new group. A shape/scaling (level-2) move keeps Structured Concept Evolution ( SCE) 
+
+Structured concept generator 
+
+> LLM mutation
+> mutates specification
+> Repair / consistency
+> self -consistency checks
+> Executable program
+> (𝑷 𝚺 )
+
+Performance evaluation   
+
+> Structured specification 𝚺
+> base group/algebra
+> Protograph shape /scaling
+> Local seed matrix
+
+Check matrices: 
+
+(𝐻 !, 𝐻 ")
+
+Scores 
+
+Block length: 
+
+𝑛        
+
+> FIG. 1. The SCE framework used for qLDPC discovery. At each iteration, a parent scheme is sampled from the archive, a mutation level drawn uniformly with probability 1 /3, and the LLM prompted to apply the corresponding mutation op-erator. The LLM returns a mutated scheme (structured spec-ification Σ paired with an executable program PΣ) that con-structs the corresponding CSS code at any chosen block length
+> n.The scheme is checked for self-consistency by the repair module. The program is executed to emit the parity-check matrices ( HX, H Z), which are evaluated and assigned a fitness score S.Each evaluated scheme, together with its score, is stored in the quality-diversity archive. At the next iteration, the LLM receives high-scoring archive entries as in-context ex-amples. This score-conditioned prompting biases subsequent proposals toward regions of higher fitness.
+
+the group family fixed but changes the protograph di-mensions mA × nA and mB × nB , and hence we define 
+
+f = mAmB + nAnB and the block length n = f q . A local 
+
+(level-1) move keeps both G and the protograph shape fixed and only re-seeds the group-algebra entries of A and 
+
+B, leaving n unchanged. Because each move rewrites a structured construction rather than editing raw ma-trix entries, mutations move coherently between code families instead of isolated matrices. This structured grammar confers two practical advantages. It makes the search controllable, since the mutation-level distribution determines whether the search favors local refinement or broader algebraic exploration. It also makes the search interpretable, since each parent-to-child transition corre-sponds to a concrete construction-level operation, such as changing the base group, modifying the protograph, or re-seeding the local entries. Each iteration samples a parent scheme from the quality-diversity archive, as-signs a mutation level uniformly at random (each of the three levels with probability 1 /3), and prompts the LLM with the parent scheme together with representa-tive high-scoring archive entries as in-context examples. 3The LLM returns a complete child including specification and executable programs together (see Supplemental Ma-terial [54]). Level 1                                                                  
+
+> r10 s r 24 r2s r 13 sr18 r4s r 18 s r 26
+> r28 r13 s r 28 s r 10 s
+> A=
+> r13 s r 21 ssr8sr18 r27 r7r16
+> r22 s r 4s r 14 s r 24 s
+> A=
+> score: 0.077 →0.388 ([[1500 ,74]] →[[1500 ,79]] )Level 2 nA= 4 ,nB= 4
+> mA= 3 ,mB= 3 nA= 3 ,nB= 3
+> mA= 5 ,mB= 5
+> score: 0.268 →0.613 ([[1500 ,81]] →[[1496 ,198]] )Level 3 Z2×Z2×Zt(Z2×Z2)o Z t
+> score: 0.110 →0.118 ([[1496 ,176]] →[[1360 ,160]] )(a)
+> 0500 1000 1500 2000 2500 3000
+> Iteration
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> score
+> Round 1 Round 2 Round 3 (b)
+
+FIG. 2. Hierarchical mutation and score evolution. (a) The three mutation levels, each shown as a representative par-ent → child step drawn from the search log, with the result-ing change in score and code parameters [[ n, k ]]. Level 1: the group and protograph shape are fixed and only the local F2[G]entries of the base matrices A and B are rewritten. Here we present the base matrix A. We consider the code based on Dic m, where r is the rotation generator (the order-2 m cyclic element) and s is an order-4 element satisfying s2 = rm and 
+
+srs −1 = r−1. Level 2: the group family is fixed as Dic m and the protograph shape changes, A, B : 3 × 4 → 5 × 3. At 
+
+n ≈ 1500, the family parameter m shrinks 15 → 11. Level 3: the base group transitions from the direct-product abelian group family Z2 × Z2 × Zt to the semidirect-product non-abelian group ( Z2 × Z2) ⋊ Z t. (b) Program score of every evaluated candidate versus search iteration across the three 1000-iteration rounds. Dashed step curves trace the best score within each round. At the end of each round, the top-10 can-didates with the lowest logical error rate at p = 0 .06 are seeded into the next round. 
+
+Because mutations act on an existing algebraic specifi-cation, the search proceeds at the level of structured con-cepts. For a faithful implementation of the lifted-product template in Eq. (1), CSS commutation follows by con-struction. This constrained search space makes the mu-tation task compatible with lightweight models. In our experiments, we use OpenAI’s GPT-5.4-mini for 40% of mutation calls and GPT-5.4-nano for the remaining 60%. The child program is executed to emit ( HX , H Z ) for any choice of n. We scale the block size n within nmin ≤ n ≤
+
+nmax , with nmin = 600 and nmax = 1500, where we reject any candidate size that encodes no logical qubits or has a stabilizer weight exceeding a hard cap (here we take it as 14), and we verify the CSS condition HX HT 
+
+> Z
+
+= 0 for every candidate. The surviving codes with the largest k
+
+are decoded with BP+OSD [28, 40, 55], as implemented in the ldpc package [40], under code-capacity depolariz-ing noise. We evaluate for a small representative set of physical error rates P = {0.05 , 0.06 , 0.07 }, where p ∈ P ,yielding Monte-Carlo logical error-rate estimates bpL(p). For depolarizing noise the X- and Z-type errors are de-coded independently. During the search, belief propaga-tion uses the min-sum update rule [56] with a BP itera-tion limit of 2000, followed by order-1 combination-sweep ordered-statistics post-processing [40], and each bpL(p) is estimated from 2000 random depolarizing error samples. When no failure is observed, the zero estimate is replaced by bpL = 2 .5 × 10 −4 (half a failure in the 2000-sample). We summarize the protection at each p by a pointwise effective suppression exponent α(p) = ln(1 /bpL)/ ln(1 /p )and define the fitness score: 
+
+S = γk nmax |P| 
+
+X
+
+> p∈P
+
+α(p)2. (2) Here α(p) scores how strongly a code suppresses errors at a single rate p, which is evaluated pointwise. The score is used for selection and does not certify code dis-tance. The factor γ is a Tanner-graph novelty factor that penalizes candidates whose graph fingerprints are close to those already stored in the archive, thereby discour-aging rediscovery of near-duplicate constructions. Se-lected candidates populate an island-structured popula-tion, maintained with a per-island MAP-Elites [52] whose axes record the code rate k/n , the decoder success score, and inherited seed-lineage label according to their base group family. The specification grammar, mutation and repair operators, archive parameters, and novelty weight-ing are detailed in the Supplemental Material [54]. 
+
+Discovered codes.— The search is seeded with lifted-product CSS codes spanning both abelian and non-abelian base groups listed in Table S1. We then run SCE for three sequential rounds of 1000 iterations each. Within a round, each iteration applies a single mutation whose level is drawn independently and uniformly from 
+
+{1, 2, 3} with probability 1 /3 for each level. At the end of each round, the 10 candidates with the lowest logical error rates at p = 0 .06 are used as the seed programs in the next round. We note that selecting these seeds by logical error rate steers the evolution toward codes with better decoding performance. After three rounds, the search has generated 3000 candidate constructions. Each admitted child is executed to produce ( HX , H Z )and evaluated under a code-capacity depolarizing noise model using BP+OSD [Eq. (2)]. Figure 2(a) shows a representative parent →child exam-ple at each level. In this example, at Level 1, only the ex-4ponents of the A, B entries are modified while the group and protograph shape remain unchanged. At Level 2, the protograph shape is reshaped from (3 × 4, 3 × 4) to (5 × 3, 5 × 3), and the entries of the protograph are also changed accordingly. At the highest level of the hier-archy, Level 3, the abelian direct-product group Z2 ×
+
+Z2 × Z11 is transformed into the non-abelian semidirect-product group ( Z2 × Z2) ⋊ Z 10 . The protographs of these parent-to-child examples are listed in Supplemental Ma-terial [54]. Figure 2(b) shows the program score across the three concatenated rounds. The running-best score improves from 0 .17 to 0 .62. The mutations across lev-els contribute unequally: level-1 mutations preserve the block length n and make only local adjustments to the entries, whereas level-2 and level-3 mutations restructure the protograph or replace the base group family, chang-ing valid code block length and enabling larger jumps in the code-parameter landscape. 
+
+TABLE I. Representative SCE-discovered codes. Distances are upper bounds from QDistRnd [57] with 10 5 trials, so d
+
+and kd 2/n are reported as an upper bound. All listed codes have stabilizer weight 8. “Abel” indicates whether the base group is abelian. Source Base group Abel [[ n, k, d ]] kd 2/n 
+
+R1Elite01 Z3 × Z14 ✓ [[1428 , 186 , ≤ 18]] ≤ 42 .2R1Elite02 Z2 × Z2 × Z11 ✓ [[1496 , 198 , ≤ 16]] ≤ 33 .9R2Elite01 Dic 11 × [[1496 , 194 , ≤ 20]] ≤ 51 .9R2Elite02 D 22 × [[1496 , 198 , ≤ 16]] ≤ 33 .9R3Elite01 Dic 11 × [[1496 , 192 , ≤ 16]] ≤ 32 .9R3Elite02 Dic 11 × [[1496 , 198 , ≤ 14]] ≤ 25 .9
+
+Table I lists representative high-scoring codes from each round. At n ≈ 1500, the discovered families reach high encoding rate (up to k/n ≃ 0.13). Finite-length non-abelian LP codes have so far been explored mainly through exhaustive enumeration of two-block ansatz codes at small block lengths [58]. SCE instead reaches them by open-ended search over arbitrary pro-tograph shapes at n ≈ 1500. Exact minimum-distance computation is NP-hard for general linear codes [59], so the distances of discovered codes in Table I are upper bounds computed with the QDistRnd GAP package [57], which searches for low-weight logical operators by ran-dom information-set decoding over 10 5 trials. Using the QDistRnd-found distance as an empirical distance proxy, the best discovered codes reach kd 2/n values up to about 51 .9. 
+
+Performance under depolarizing noise.— We charac-terize selected codes under code-capacity depolarizing noise with 10 6 sampled errors per point, decoded by the same BP+OSD scheme as in the search but at heav-ier settings: a BP iteration limit of 5000 and order-4 combination-sweep OSD. For this study, we select two sets of discovered codes from the third round. The first set, Cscore , consists of the two codes with the high-10 −6 10 −5 10 −4 10 −3
+
+L(p = 0 .06) 0.02 0.04 0.06 0.08 0.10 0.12 
+
+> k/n
+
+(a) 
+
+> R3EliteP01 R3EliteP02 R3Elite01 R3Elite02 BB [[144,12,12]] BB [[288,12,18]] BB [[360,12,24 †]] BB [[756,16,34 †]]
+
+0.02 0.04 0.06 0.08 0.10 
+
+p
+
+10 −6
+
+10 −5
+
+10 −4
+
+10 −3
+
+10 −2
+
+> L
+
+(b) 
+
+FIG. 3. Performance of evolved LP codes against BB base-lines under code-capacity depolarizing noise. The logical error rate is reported per logical qubit, ϵL = 1 −(1 −pL)1/k . (a) En-coding rate k/n versus ϵL at fixed physical error rate p = 0 .06 for the top two LP elites of each set (blue: CpL , green: Cscore )and four BB codes (red). † denotes an upper bound on the distance. Points toward the upper-left are preferable (high rate, low logical error). The Cscore set attains the highest rate 
+
+k/n ≈ 0.13 among all codes shown. (b) ϵL versus p for the top two LP codes of each set and the four BB codes. Markers match panel (a). Error bars are 95% Clopper–Pearson confi-dence intervals [60]. 
+
+est fitness scores, R3Elite01 and R3Elite02 , listed in Table I. The second set CpL consists of the two codes with the lowest logical error rate at physical error rate 
+
+p = 0 .06, namely R3EliteP01 and R3EliteP02 . These two elite codes are based on the non-cyclic abelian group 
+
+Z30 ×Z2 with the code parameters [[1500 , 81 , ≤ 18]] and [[1500 , 76 , ≤ 20]], respectively. Although Zt ×Z2 was not among the seed programs, it emerged during the SCE search. As a reference, we also include BB codes with block lengths 144–756. Figure 3(a) shows the encoding rate k/n versus the logical error rate per logical qubit 
+
+ϵL = 1 − (1 − pL)1/k at fixed p = 0 .06, where pL is the block logical error rate. The Cscore set reaches k/n ≈ 0.13, 5while ϵL at this point ( ∼ 10 −5) is lower than that of three of the four BB references ([[144 , 12 , 12]], [[288 , 12 , 18]], and [[360 , 12 , ≤ 24]]). Figure 3(b) shows the full ϵL ver-sus p waterfall curves for the top two codes of each dis-covered set, together with the same BB codes. Every curve exhibits the expected error-suppression behavior as p decreases. ϵL for the discovered codes ( CpL codes [[1500 , 81 , ≤ 18]] and [[1500 , 76 , ≤ 20]]) is comparable to or below the baseline [[756 , 16 , ≤ 34]], over the measured range, while encoding roughly five times as many logical qubits. 
+
+Conclusion.— We introduced structured concept evo-lution, an LLM-guided search over qLDPC construction schemes. Applied to lifted-product codes, SCE builds a quality-diversity archive of competitive constructions at n ≈ 1500 that trade encoding rate against logical-error suppression. The search yields competitive con-structions across both abelian and non-abelian groups, reaching non-abelian families beyond those underlying bivariate-bicycle designs. All results are obtained with lightweight models (GPT-5.4-mini and GPT-5.4-nano). Several directions follow naturally. First, encoding a target platform’s qubit-connectivity graph into the mu-tation grammar or fitness score would steer the search toward hardware compatible codes. Since connectivity governs syndrome extraction depth, this also couples the search to a circuit-level objective. Second, SCE is not tied to lifted products. The same method can broaden to the balanced product, quantum Tanner codes, and fiber-bundle codes. It is also an open question whether SCE could propose entirely new CSS preserving constructions. Finally, one could co-design the code together with its encoding circuit and decoder, turning SCE into an end-to-end search over code, encoder, and decoder. 
+
+Note added.— During the preparation of this manuscript, a preprint appeared [61], also introduc-ing LLM-based methods for the discovery of BB codes, whereas we explore the broader class of lifted-product codes. 
+
+Acknowledgments.— This research is part of the Mu-nich Quantum Valley, which is supported by the Bavarian state government with funds from the Hightech Agenda Bayern Plus.  
+
+> ∗
+
+zidu.liu@mpl.mpg.de  
+
+> †
+
+florian.marquardt@mpl.mpg.de [1] A. J. Daley, I. Bloch, C. Kokail, S. Flannigan, N. Pearson, M. Troyer, and P. Zoller, Practical quantum advantage in quantum simulation, Nature 607 , 667 (2022). [2] S. McArdle, S. Endo, A. Aspuru-Guzik, S. C. Benjamin, and X. Yuan, Quantum computational chemistry, Rev. Mod. Phys. 92 , 015003 (2020). [3] E. Farhi, J. Goldstone, and S. Gutmann, A quantum approximate optimization algorithm, arXiv:1411.4028 (2014). [4] M. Cerezo, A. Arrasmith, R. Babbush, S. C. Benjamin, S. Endo, K. Fujii, J. R. McClean, K. Mitarai, X. Yuan, L. Cincio, et al. , Variational quantum algorithms, Nature Reviews Physics 3, 625 (2021). [5] J. Biamonte, P. Wittek, N. Pancotti, P. Rebentrost, N. Wiebe, and S. Lloyd, Quantum machine learning, Na-ture 549 , 195 (2017). [6] H.-Y. Huang et al. , Quantum advantage in learning from experiments, Science 376 , 1182 (2022). [7] H.-Y. Huang, R. Kueng, G. Torlai, V. V. Albert, and J. Preskill, Provably efficient machine learning for quan-tum many-body problems, Science 377 , eabk3333 (2022). [8] P. W. Shor, Scheme for reducing decoherence in quantum computer memory, Phys. Rev. A 52 , R2493 (1995). [9] D. E. Gottesman, Stabilizer Codes and Quantum Error Correction , Ph.D. thesis, California Institute of Technol-ogy (1997). [10] E. Dennis, A. Kitaev, A. Landahl, and J. Preskill, Topo-logical quantum memory, J. Math. Phys. 43 , 4452 (2002). [11] B. M. Terhal, Quantum error correction for quantum memories, Rev. Mod. Phys. 87 , 307 (2015). [12] A. Y. Kitaev, Fault-tolerant quantum computation by anyons, Ann. Phys. 303 , 2 (2003). [13] S. B. Bravyi and A. Y. Kitaev, Quantum codes on a lattice with boundary (1998), arXiv:quant-ph/9811052. [14] A. G. Fowler, M. Mariantoni, J. M. Martinis, and A. N. Cleland, Surface codes: Towards practical large-scale quantum computation, Phys. Rev. A 86 , 032324 (2012). [15] S. Krinner, N. Lacroix, A. Remm, et al. , Realizing re-peated quantum error correction in a distance-three sur-face code, Nature 605 , 669 (2022). [16] Google Quantum AI et al. , Suppressing quantum errors by scaling a surface code logical qubit, Nature 614 , 676 (2023). [17] Google Quantum AI et al. , Quantum error correction be-low the surface code threshold, Nature 638 , 920 (2025). [18] S. Bravyi, D. Poulin, and B. Terhal, Tradeoffs for reliable quantum information storage in 2D systems, Physical Re-view Letters 104 , 050503 (2010). [19] H. J. Manetsch, G. Nomura, E. Bataille, X. Lv, K. H. Leung, and M. Endres, A tweezer array with 6,100 highly coherent atomic qubits, Nature 647 , 60 (2025). [20] S.-A. Guo, Y.-K. Wu, J. Ye, L. Zhang, W.-Q. Lian, R. Yao, Y. Wang, R.-Y. Yan, Y.-J. Yi, Y.-L. Xu, et al. ,A site-resolved two-dimensional quantum simulator with hundreds of trapped ions, Nature 630 , 613 (2024). [21] D. Gottesman, Fault-tolerant quantum computation with constant overhead, Quantum Information and Computa-tion 14 , 1338 (2014). [22] S. Bravyi, A. W. Cross, J. M. Gambetta, D. Maslov, P. Rall, and T. J. Yoder, High-threshold and low-overhead fault-tolerant quantum memory, Nature 627 ,778 (2024). [23] D. Bluvstein et al. , Logical quantum processor based on reconfigurable atom arrays, Nature 626 , 58 (2024). [24] K. Wang, Z. Lu, C. Zhang, G. Liu, J. Chen, Y. Wang, Y. Wu, S. Xu, X. Zhu, F. Jin, et al. , Demonstration of low-overhead quantum error correction codes, Nature Physics , 1 (2026). [25] Q. Xu, J. P. Bonilla Ataides, C. A. Pattison, N. Raveen-dran, D. Bluvstein, J. Wurtz, B. Vasi´ c, M. D. Lukin, L. Jiang, and H. Zhou, Constant-overhead fault-tolerant quantum computation with reconfigurable atom arrays, 6
+
+Nature Physics 20 , 1084 (2024). [26] M. Cain, Q. Xu, R. King, L. R. B. Picard, H. Levine, M. Endres, J. Preskill, H.-Y. Huang, and D. Bluvstein, Shor’s algorithm is possible with as few as 10,000 recon-figurable atomic qubits (2026), arXiv:2603.28627. [27] J.-P. Tillich and G. Z´ emor, Quantum LDPC codes with positive rate and minimum distance proportional to the square root of the blocklength, IEEE Transactions on Information Theory 60 , 1193 (2014). [28] P. Panteleev and G. Kalachev, Degenerate quantum LDPC codes with good finite length performance, Quan-tum 5, 585 (2021). [29] P. Panteleev and G. Kalachev, Asymptotically good Quantum and locally testable classical LDPC codes, in 
+
+Proceedings of the 54th Annual ACM SIGACT Sympo-sium on Theory of Computing , STOC 2022 (New York, NY, USA, 2022) pp. 375–388. [30] N. P. Breuckmann and J. N. Eberhardt, Quantum low-density parity-check codes, PRX Quantum 2, 040101 (2021). [31] A. Leverrier and G. Zemor, Quantum Tanner codes, in 
+
+2022 IEEE 63rd Annual Symposium on Foundations of Computer Science (FOCS) (Denver, CO, USA, 2022) pp. 872–883. [32] D. J. C. MacKay, G. Mitchison, and P. L. McFadden, Sparse-graph codes for quantum error correction, IEEE Transactions on Information Theory 50 , 2315 (2004). [33] A. A. Kovalev and L. P. Pryadko, Quantum Kronecker sum-product low-density parity-check codes with finite rate, Physical Review A 88 , 012311 (2013). [34] P. Panteleev and G. Kalachev, Quantum LDPC codes with almost linear minimum distance, IEEE Transactions on Information Theory 68 , 213 (2022). [35] N. P. Breuckmann and J. N. Eberhardt, Balanced prod-uct quantum codes, IEEE Trans. Inf. Theory 67 , 6653 (2021). [36] M. B. Hastings, J. Haah, and R. O’Donnell, Fiber bundle codes: breaking the n1/2 polylog( n) barrier for quantum LDPC codes, in Proceedings of the 53rd Annual ACM SIGACT Symposium on Theory of Computing (STOC) 
+
+(2021) pp. 1276–1288. [37] I. Dinur, M.-H. Hsieh, T.-C. Lin, and T. Vidick, Good quantum LDPC codes with linear time decoders, in Pro-ceedings of the 55th Annual ACM Symposium on Theory of Computing (STOC) (2023) pp. 905–918. [38] A. R. Calderbank and P. W. Shor, Good quantum error-correcting codes exist, Physical Review A 54 , 1098 (1996). [39] A. M. Steane, Error correcting codes in quantum theory, Physical Review Letters 77 , 793 (1996). [40] J. Roffe, D. R. White, S. Burton, and E. Campbell, De-coding across the quantum low-density parity-check code landscape, Phys. Rev. Res. 2, 043423 (2020). [41] T. F¨ osel, P. Tighineanu, T. Weiss, and F. Marquardt, Re-inforcement learning with neural networks for quantum feedback, Physical Review X 8, 031084 (2018). [42] H. P. Nautrup, N. Delfosse, V. Dunjko, H. J. Briegel, and N. Friis, Optimizing quantum error correction codes with reinforcement learning, Quantum 3, 215 (2019). [43] J. Olle, R. Zen, M. Puviani, and F. Marquardt, Si-multaneous discovery of quantum error correction codes and encoders with a noise-aware reinforcement learning agent, npj Quantum Information 10 , 126 (2024). [44] J. Olle, O. M. Yevtushenko, and F. Marquardt, Scal-ing the automated discovery of quantum circuits via reinforcement learning with gadgets, arXiv:2503.11638 (2025). [45] A. Y. He and Z.-W. Liu, Discovering highly efficient low-weight quantum error-correcting codes with reinforce-ment learning, arXiv:2502.14372 (2025). [46] M. N¨ agele and F. Marquardt, Agentic exploration of physics models (2025), arXiv:2509.24978. [47] S. Arlt, H. Duan, F. Li, S. M. Xie, Y. Wu, and M. Krenn, Meta-designing quantum experiments with language models, Nature Machine Intelligence 8, 148 (2026), arXiv:2406.02470. [48] X. He, S. Lu, and B. Zeng, Co-designing quantum codes with transversal diagonal gates via multi-agent systems (2025), arXiv:2510.20728. [49] J. Lehman, J. Gordon, S. Jain, K. Ndousse, C. Yeh, and K. O. Stanley, Evolution through large models (2022), arXiv:2206.08896 [cs.NE]. [50] B. Romera-Paredes, M. Barekatain, A. Novikov, M. Ba-log, M. P. Kumar, E. Dupont, F. J. R. Ruiz, J. S. Ellen-berg, P. Wang, O. Fawzi, P. Kohli, and A. Fawzi, Math-ematical discoveries from program search with large lan-guage models, Nature 625 , 468 (2024). [51] A. Novikov, N. V˜ u, M. Eisenberger, E. Dupont, P.-S. Huang, A. Z. Wagner, S. Shirobokov, B. Kozlovskii, F. J. Ruiz, A. Mehrabian, et al. , Alphaevolve: A coding agent for scientific and algorithmic discovery, arXiv:2506.13131 (2025). [52] J.-B. Mouret and J. Clune, Illuminating search spaces by mapping elites, arXiv preprint arXiv:1504.04909 (2015). [53] A. Sharma, Openevolve: an open-source evolutionary coding agent (2025). [54] Z. Liu and F. Marquardt, Supplemental material for: Large-language-model discovery of quantum LDPC codes through structured concept evolution (2026). [55] D. Poulin and Y. Chung, On the iterative decoding of sparse quantum codes, Quantum Information and Com-putation 8, 987 (2008), arXiv:0801.1241. [56] M. P. C. Fossorier, M. Mihaljevi´ c, and H. Imai, Reduced complexity iterative decoding of low-density parity check codes based on belief propagation, IEEE Transactions on Communications 47 , 673 (1999). [57] L. P. Pryadko, V. A. Shabashov, and V. K. Kozin, QDis-tRnd: A GAP package for computing the distance of quantum error-correcting codes, Journal of Open Source Software 7, 4120 (2022). [58] H.-K. Lin and L. P. Pryadko, Quantum two-block group algebra codes, Physical Review A 109 , 022407 (2024). [59] A. Vardy, The intractability of computing the minimum distance of a code, IEEE Transactions on Information Theory 43 , 1757 (1997). [60] C. J. Clopper and E. S. Pearson, The use of confidence or fiducial limits illustrated in the case of the binomial, Biometrika 26 , 404 (1934). [61] J. Cruz-Benito, A. W. Cross, D. Kremer, and I. Faro, Evolutionary discovery of bivariate bicycle codes with LLM-guided search (2026), arXiv:2606.02418 [quant-ph]. [62] B. Y. Weisfeiler and A. A. Leman, The reduction of a graph to canonical form and the algebra which ap-pears therein, Nauchno-Technicheskaya Informatsia 2, 12 (1968). [63] N. Shervashidze, P. Schweitzer, E. J. van Leeuwen, K. Mehlhorn, and K. M. Borgwardt, Weisfeiler-lehman 7
+
+graph kernels, Journal of Machine Learning Research 12 ,2539 (2011). 8
+
+# Supplemental Material for: Large-Language-Model Discovery of Quantum LDPC Codes through Structured Concept Evolution  
+
+> S1. LIFTED-PRODUCT CONSTRUCTION AND CSS VALIDITY
+
+Calderbank–Shor–Steane (CSS) codes. A CSS code [38, 39] is specified by two binary parity-check matrices HX
+
+and HZ with the same number of columns (number of physical qubits). The rows of HX define X-type stabilizers, and the rows of HZ define Z-type stabilizers. The two sets of stabilizers commute if and only if 
+
+HX HT 
+
+> Z
+
+= 0 (mod 2) . (S1) If the matrices have n columns, then the code has block length n and encodes 
+
+k = n − rank 2 HX − rank 2 HZ
+
+logical qubits. Thus, a central task in constructing CSS codes is to generate parity-check matrices for which Eq. (S1) holds. 
+
+Hypergraph product (HGP) codes. Let 
+
+A ∈ FmA×nA 
+
+> 2
+
+, B ∈ FmB ×nB
+
+> 2
+
+be two classical binary parity-check matrices. The hypergraph product defines [27] 
+
+HX =  A ⊗ InB ImA ⊗ BT ,HZ =  InA ⊗ B AT ⊗ ImB
+
+. (S2) Then HX HT 
+
+> Z
+
+contains two identical contributions, A ⊗ BT + A ⊗ BT, which cancel over F2. Hence HX HT 
+
+> Z
+
+= 0. In other words, the CSS condition follows from the two-sector structure of Eq. (S2). 
+
+Lifted-product codes. Lifted-product codes preserve the same mechanism as HGP: the product HX HT 
+
+> Z
+
+again de-composes into two matching contributions that cancel over F2, while the scalar entries of A and B are replaced by structured permutation blocks. Let 
+
+A ∈ F2[G]mA×nA , B ∈ F2[G]mB ×nB
+
+be two small matrices over the group algebra of a finite group G of order q = |G|. An entry of A (and likewise B)is a formal sparse sum a = P 
+
+> g∈G
+
+ag g with the coefficient ag ∈ F2. To obtain ordinary binary matrices, each such group element is replaced by a q × q permutation block sum. More explicitly, we use the left regular representation for entries of A and the right regular representation for entries of B,
+
+a 7 → λ(a) = X
+
+> g∈G
+
+ag λ(g), b 7 → ρ(b) = X
+
+> g∈G
+
+bg ρ(g),
+
+where λ(g) and ρ(g) are the permutation matrices acting on the q-dimensional space with basis {eh}h∈G by 
+
+λ(g)eh = egh , ρ(g)eh = ehg −1 (g, h ∈ G).
+
+A direct check gives [λ(a), ρ (b)] = 0 for all a, b ∈ F2[G], (S3) which is the property responsible for the cancellation in HX HT 
+
+> Z
+
+.To build the code, we replace each matrix entry by its regular representation block: 
+
+Aij 7 −→ λ(Aij ), Bij 7 −→ ρ(Bij ).9An mA × nA array of group-algebra entries thereby becomes an mA × nA array of sparse q × q binary blocks, i.e. a matrix eA ∈ F mAq×nAq 
+
+> 2
+
+. Likewise B becomes eB ∈ F mB q×nB q 
+
+> 2
+
+. The CSS parity-check matrices then follow the hypergraph-product rule applied to the block (pre-lift) indices, 
+
+HX =  eA ⊗ InB ImA ⊗ eBT , HZ =  InA ⊗ eB eAT ⊗ ImB
+
+, (S4) where each ⊗I replicates a block index only. The two sectors yield a quantum code on n = f q physical qubits, where 
+
+f = nAnB + mAmB . By the left–right commutation Eq. (S3), we have HX HT 
+
+> Z
+
+= 0, so that Eq. (S4) defines a valid CSS code. The construction above is the algebraic search space used in this work. A candidate produced by the search is specified compactly by a finite group G, two small sparse group-algebra matrices A and B, and their protograph dimensions. The lifting map then deterministically converts this symbolic description into binary CSS check matrices 
+
+HX and HZ .
+
+S2. STRUCTURED SPECIFICATION 
+
+For each construction slot we give its general role together with a concrete instance, using a lifted-product code over the dihedral group Dm as the running example. 
+
+• Base group G: a finite group given by name and order parameter. The element enumeration, multiplication law, inversion, and the left/right regular actions are implemented by the program backend. 
+
+> ’base_space’: {’value’: { ’primitive_name’: ’lifted_product_over_dihedral_group_Dm’, ’entry_type’: ’dihedral_group_singleton_pair’, ’group’: ’D_m: elements (a,b), a in Z_m, b in {0,1}; ’ ’(a,b)(c,d) = ((a + (-1)^b c) mod m, b XOR d)’, ’action_convention’: ’A uses left regular action; ’ ’B uses right regular action via inverse.’}}
+
+• Protograph shape : integer pairs ( mA ×nA) and ( mB ×nB ) specifying the dimensions of the base matrices. The column factor f = nAnB + mAmB determines the block length via n = f q .
+
+> ’shape_schema’: {’value’: { ’candidate_shapes’: [{’name’: ’A3x4_B2x4’, ’A_shape’: [3, 4], ’B_shape’: [2, 4], ’factor’: 22}], ’column_factor_rule’: ’factor = na*nb + ma*mb’, ’entry_type’: ’dihedral_group_singleton_pair’}}
+
+• Scaling rule : a mapping from the family parameter m to the lift size q = |G(m)| and admissible block lengths 
+
+n = f q .
+
+> ’scaling_rule’: {’value’: { ’divisibility_rule’: ’select candidate with n divisible by 2*factor; ’ ’m = n // (2*factor) >= m_min’, ’m_min’: 4, ’group_order’: ’q = 2m’}}
+
+• Local code : for each of the mAnA + mB nB protograph cells, a sparse element of F2[G] given as a list of group elements. For the dihedral group of this example, each entry ( a, b ) denotes the dihedral element rasb (rotation power a ∈ Zm, reflection bit b ∈ { 0, 1}). 
+
+> ’local_code_or_checks’: {’value’: { ’candidates’: {’A3x4_B2x4’: { ’A’: [[(0,0), (1,0), (2,1), (3,0)], [(2,0), (0,1), (3,0), (1,1)], [(1,0), (3,1), (0,0), (2,1)]], ’B’: [[(0,1), (0,0), (2,1), (1,0)], [(1,1), (0,0), (3,0), (0,1)]]}}}}
+
+10 The executable program PΣ is a Python function generate (n) that reads Σ, constructs ( HX , H Z ) via Eq. (S4), and verifies HX HT 
+
+> Z
+
+= 0 and the stabilizer weight (here we set a hard threshold w ≤ 14, where w is the weight of stabilizer). The evaluator itself only accesses the generated parity check matrices and never has access to the underlying description Σ. 
+
+S3. MUTATION 
+
+At each iteration, the active mutation level is specified by a corresponding card. Mutation Level 1 targets the slot 
+
+local code or checks ; mutation Level 2 targets the slots shape schema and scaling rule ; and mutation Level 3 targets the slot base space . The cards below reproduce the operative instructions of the search configuration. 
+
+Level 1:      
+
+> ASSIGNMENT: LEVEL 1 LOCAL SEED MUTATION. Mutate only the local LP seed data in structure slots["local code or checks"]. Treat each A ij,B ij as an element of F2[G], not necessarily a singleton: it may be a sparse polynomial group-element sum such as g1+g2 or g1+g2+g3. Prefer changing, adding, removing, or toggling low-weight support terms; singleton labels, row/column shifts, swaps, reflection bits, and A/B crosslinks are also allowed. Keep the group/base space, A/B shape, scaling law, and LP presentation unchanged except for minimal consistency repairs. Do not change protograph shape in Level 1.
+
+Level 2:    
+
+> ASSIGNMENT: LEVEL 2 SHAPE SCALING MUTATION. Mutate the protograph shape and/or length-scaling law using structure slots["shape schema"] and structure slots["scaling rule"] as the focus. You may change A shape, B shape, LP column factor, valid-size rule, residue filter, or seed resize/repair rule. Keep the group/base space family and standard LP presentation unchanged. Repair local code or checks so the new shape is executable.
+
+Level 3:    
+
+> ASSIGNMENT: LEVEL 3 CONSTRUCTION SPACE MUTATION. Mutate the algebraic construction space in structure slots["base space"]: group family, group presentation, abelian decomposition, nonabelian/semidirect/dicyclic backend, action convention, or group parameterization. Keep the standard lifted-product CSS presentation immutable. Repair shape schema, scaling rule, local code or checks, helpers, valid size(), and generate() so the new group algebra/action is actually implemented.
+
+The active level is drawn independently at each iteration. Each level is assigned a probability of 1 /3. The mutation level reported here is the prompt assigned level specified by the corresponding mutation card. Since the child program is produced by an LLM, we cannot exclude occasional deviations in which the realized edited slots differ from those requested in the prompt. Across the three rounds, the observed prompt assigned frequencies remain close to one third for each level: 30 .5% /39 .0% /30 .5%, 36 .4% /29 .3% /34 .3%, and 37 .1% /33 .0% /29 .9%, for rounds 1,2, and 3, respectively, with each triple giving the level 1/2/3 separately. 
+
+Prompt contents. At each mutation step, the LLM is conditioned on two messages. The first is a system message , which is fixed throughout the run. It defines the model’s role, the required program interface, the schema of CONSTRUCTION SPEC (Σ), the allowed mutation rules, and the required output format. In particu-lar, CONSTRUCTION SPEC must contain four top-level keys: first name , lineage , construction methods , and 
+
+structure slots . The field structure slots records the construction components that may be modified, such as the algebraic base space, protograph shape, length-scaling rule, and local group-algebra entries, as described in Sec. S2. The field construction methods gives a concise derived summary of the resulting construction, including the primitive, scaling method, and consistency witnesses. The system message also requires the submitted program to implement the specified construction faithfully and to expose a function generate (n) that returns only the binary CSS parity-check matrices ( HX , H Z ). All validity checks and scores are computed from these generated matrices, not from textual claims in CONSTRUCTION SPEC .The second message is a user message , assembled separately for each mutation step. It specifies the requested edit and provides in-context examples from the archive. First, it gives the mutation assignment for the current iteration, 11 level 1 level 2 level 3                    
+
+> 0.6
+> 0.4
+> 0.2
+> 0.0
+> 0.2
+> 0.4
+> FIG. S1. Single-step score change by mutation level. Distribution of the fitness score change ∆ S=Schild − S parent across one parent →child mutation in three different levels. We collect 100 mutations at each of the three levels from round 1. Colored histograms use bins of width 0 .04. Black markers and bar give the mean of score change ±one standard deviation:
+> −0.047 ±0.108 (Level 1), −0.082 ±0.139 (Level 2), and −0.059 ±0.163 (Level 3).
+
+namely one of the three mutation levels described above. Second, it includes the full source code of the parent program to be mutated, including its CONSTRUCTION SPEC . The parent is selected from the current island-style archive instead of being forced to be the global best program. This helps maintain diversity across construction lineages. The user message then provides the parent’s evaluation record, including its fitness score, code parameters (n, k, k/n ), stabilizer-weight statistics, and the decoded logical error rates and suppression exponents at the scor-ing physical error rates. It also includes a short recent history of mutations from the same lineage, together with their resulting scores, so that the model can see which nearby edits have already been tried. Finally, the message supplies several reference programs from the archive (see details in Sec. S4). The message ends with the concrete task: produce a child program, update CONSTRUCTION SPEC consistently, implement the corresponding generate() function faithfully, obey the evaluator constraints, and return the result in the required output format. In the reported runs, each prompt contains one parent program, one best-scoring program, two additional high-scoring programs, and one broader inspiration program. 
+
+Per-level effect on score. Figure S1 reports the single-step score change ∆ S for 100 recorded parent–child tran-sitions from round 1 at each prompt assigned mutation level. The distributions are centered close to zero but have slightly negative means for all three levels. This is expected in an exploratory mutation process, where most edits do not immediately improve the decoded fitness, while the positive side of the distribution contains score-improving children that can be retained and propagated by selection. In contrast to Level 1, Level 2 and Level 3 modify higher-level structural choices. These moves are higher-risk, as they require more extensive consistency repairs and can more easily decrease the score in a single step. At the same time, they substantially enlarge the accessible search space and create opportunities to discover better codes that would be inaccessible to purely local mutations. 
+
+> S4. QUALITY-DIVERSITY ARCHIVE AND PARENT SELECTION
+
+The evolutionary database combines a MAP-Elites quality-diversity archive with an island population model. The two components have different roles. MAP-Elites determines which evaluated programs are retained, while the island model controls how parents are sampled for mutation and helps preserve multiple semi-isolated lineages. Our implementation builds on the OpenEvolve framework [53]. 12                                                                                                         
+
+> TABLE S1. Initial seed constructions used for the evolutionary search at round 1. All seeds are lifted-product CSS codes. The column factor f=nAnB+mAmBfixes the block length via n=f|G|.Seed Base group A-shape / B-shape Column factor fNote 1dihedral Dm3×4 / 3 ×425 2cyclic Zt3×4 / 3 ×425 3cyclic Zt2×4 / 2 ×420 4dicyclic Dic m3×4 / 3 ×425 5dicyclic Dic m3×4 / 3 ×425 polynomial entries 6dihedral Dm2×3 / 2 ×313 7dicyclic Dic m3×4 / 2 ×422 8dihedral Dm3×4 / 2 ×422 9Z3×Zt4×5 / 2 ×323 10 Z3×Zt3×4 / 3 ×425 polynomial entries 11 Z3×Zt3×4 / 3 ×425
+
+Initial seeds. The archive is initialized with 11 scalable lifted-product families spanning four base group families including dihedral Dm, cyclic Zt, dicyclic Dic m, and Z3 × Zt (listed in Table S1). In addition to varying the base group, we adopt protograph shapes of different sizes to further increase the diversity of the seed set. Beyond these scalable families, we also seed a bivariate-bicycle code ( Z12 ×Z24 , n = 576) and an A2 ×4/B2 ×4 dicyclic lifted-product seed ( n = 560), both with fixed block length below the scoring window ( nmin = 600). These seeds score 0 and enter the run only as diversity templates. 
+
+MAP-Elites grid. Each evaluated program is placed in a MAP-Elites cell according to three descriptor components: its decoder success probability, encoding rate k/n , and inherited seed-lineage label. These descriptor components are discretized into bins, so each program maps to a single cell of a MAP-Elites grid. Each island maintains its own grid. An occupied cell stores only the highest fitness score program whose descriptor falls in that cell. A newly evaluated program replaces the incumbent only if its combined score S is higher. The grid thus indexes, for each occupied niche, the best program found there and records which behavioral regions, decoding success, rate, and inherited seed-lineage label the search has covered so far. 
+
+Island model and migration. The population is divided into Nisl islands. At the start of each round, every seed program is placed in its own island, so that one island holds one initial seed and Nisl equals the number of seeds. Migration is triggered when the island generation counter has advanced by 20 since the previous migration event. From each island the top fraction μ = 0 .05 by fitness score is copied to its two ring-adjacent neighbors (islands 
+
+i±1 mod Nisl ). To avoid duplication a program migrates at most once. Migration lets strong candidates diffuse across islands while preserving inter-island diversity between migration events. 
+
+Parent and reference program selection The database keeps a single global elite archive holding the 20 highest scoring programs across all islands. At each step one island is scheduled, and a parent program is sampled following a three-way mixture. (1) Exploitation (50%): Parent A is drawn from the global elite archive: candidates are first restricted to the archived programs that originate from the scheduled island, and only if that island contributes none of the 20 archive members does the sampler use the full archive, i.e. elites from other islands. Archive candidates are selected by a softmax over fitness, wi ∝ exp 
+
+h Si−max j Sj
+
+> T
+
+i
+
+, where Si is the fitness score and T is the softmax temperature. The temperature is annealed geometrically over the run, from T0 = 1 .0 to T1 = 0 .1, and T (t) = (0 .1) t/T max , where t
+
+is the current iteration and Tmax = 1000 the total number of iterations. (2) Exploration (35%): Parent A is sampled uniformly from the positive-score programs in the scheduled island’s population, falling back to all valid programs in that island if none is positive. (3) Exploitation inside island (15%): Parent A is sampled from the scheduled island’s population with linear fitness score weights wi = max( Si, 0.001). After each mutation, the generated child is inserted into the scheduled island. At each iteration a small set of reference programs is drawn from the parent’s island to serve as structural context: the top 3 positive-score programs in that island, plus one additional program drawn uniformly at random from the same island. 13  
+
+> S5. NOVELTY CHECK
+
+To prevent the archive from filling with structurally similar codes, we attach to each candidate a lightweight fingerprint of its Tanner graphs. This fingerprint follows the spirit of Weisfeiler–Lehman graph-kernel methods [62, 63]. For new candidates, we compare this fingerprint with those of archived candidates and multiply its fitness score by a novelty penalty factor. For each valid candidate, we sample 128 variable nodes, with a fixed seed per block length, so that all codes of the same n are probed at identical node position. Starting from each sampled variable node, we run a breadth-first search to radius 3 in both the HX and HZ Tanner graphs. At each radius r = 1 , 2, 3, we summarize the layer by three key quantities. Local degree: the number of reached nodes of each degree; growth profile: the number of newly reached nodes at each radius r; revisits: number of edges that fold back onto already visited nodes. Each such layer summary is treated as a discrete feature, and we count its occurrences over all sampled roots. After normalization, this gives two feature distributions, ϕX and ϕZ , one for each Tanner graph of HX and HZ .A new candidate is compared only with archived candidates of the same block length n. For two candidates C and 
+
+C′, we define their structural distance as the averaged ℓ1 distance between the two Tanner-graph fingerprints, 
+
+ϵ(C, C ′) = 12 ∥ϕX (C) − ϕX (C′)∥1 + 12 ∥ϕZ (C) − ϕZ (C′)∥1. (S5) Let ϵ denote the distance from the new candidate to its nearest archived neighbour. We then multiply its score by 
+
+γ(ϵ) = 1 − e−ϵ/τ , τ = 0 .01 . (S6) Thus, candidates whose local Tanner-graph statistics nearly match an existing archive entry are strongly suppressed, whereas structurally distinct candidates are essentially unaffected. If the nearest-neighbour distance satisfies ϵ ≤ 10 −9,we treat the candidate as an exact fingerprint duplicate and reject it by setting γ = 0.  
+
+> S6. FINITE-SIZE SCALING OF DISCOVERED CODES
+
+We also examine how the discovered constructions behave as the block length is varied. We re-evaluate four scalable elite constructions from round 3: two high-scoring dicyclic codes from the Cscore set, ranked first and second (denote as R3Elite01 and R3Elite02 ), and two high decoder success rate codes from the CpL set, also ranked first and second (denote as R3EliteP01 and R3EliteP02 ). We remark that R3Elite01 and R3Elite02 belong to the dicyclic family Dic m with the block size n = 136 m. R3EliteP01 and R3EliteP02 belong to abelian Zt ×Z2 with n = 50 t.Each construction is instantiated at admissible n, and the code-capacity logical failure rate pL is measured with 10 6 Monte-Carlo shots per point under the BP+OSD decoder (iteration limit 5000, OSD-CS order 4). The results are summarized in Fig. S2. The dependence on block length is not smoothly monotone. Individual sizes can deviate sharply from their neigh-bors, for example R3Elite02 at n = 1088 and n = 2176, and a milder bump near n = 1904 shared by both dicyclic codes. They reflect the finite-size sensitivity of the particular combination of group parameter and local group-algebra entries, whose decoded performance can vary non-monotonically with m. Despite these size-dependent fluctuations, the top-score elite families still show an overall finite-size suppression trend at p = 0 .05 and p = 0 .06. Across the accessible range, increasing n generally lowers the logical failure rate before n = 2176. At p = 0 .07, the suppression is much weaker: the dicyclic families remain around pL ∼ 10 −2 and the abelian families around pL ∼ 10 −3, with little systematic improvement as n grows. On the other hand, R3EliteP01 and R3EliteP02 achieve their best performance near n ≃ 1500, the block-length region targeted by the search. Their performance does not continue to improve when extrapolated to larger n. We note that for Zt ×Z2 the group is non-cyclic only when t is even. At odd t it satisfies Zt ×Z2 ∼= Z2t and degenerates to a cyclic group. Panel (d) shows that the two families occupy different regions of the rate–decoder performance tradeoff. The dicyclic codes maintain a relatively high encoding rate, k/n ≈ 0.13, across the scanned range, whereas the abelian codes have a lower rate, k/n ≈ 0.05. At comparable block lengths, the lower-rate abelian codes achieve smaller logical failure rates, as expected from their larger redundancy. 14 500 1000 1500 2000 2500 
+
+n
+
+10 −4
+
+10 −2
+
+10 0
+
+> pL
+
+## (a) p = 0 .05 
+
+500 1000 1500 2000 2500 
+
+n
+
+10 −4
+
+10 −2
+
+10 0
+
+> pL
+
+## (b) p = 0 .06 
+
+500 1000 1500 2000 2500 
+
+n
+
+10 −4
+
+10 −2
+
+10 0
+
+> pL
+
+## (c) p = 0 .07 
+
+500 1000 1500 2000 2500 
+
+n
+
+0.05 
+
+0.10 
+
+0.15 
+
+> k/n
+
+## (d) encoding rate 
+
+R3Elite01 R3Elite02 R3EliteP01 R3EliteP02 
+
+FIG. S2. Block-length dependence of the logical failure rate. (a)–(c) pL versus n at physical error rates p = 0 .05 , 0.06 , 0.07 for the two dicyclic (Dic m, n = 136 m) and two abelian ( Zt ×Z2, n = 50 t) families. 10 6 shots per point, error bars are 95% Clopper–Pearson confidence intervals [60]. (d) Encoding rate k/n versus n for the same constructions. For the abelian family only the non-cyclic sizes ( t even) are shown. The cyclic sizes ( t odd, where Zt×Z2 ∼= Z2t) collapse to a degenerate small-distance code and are excluded. 
+
+S7. PROTOGRAPHS OF THE SPECIFIC CODES MENTIONED IN THE MAIN TEXT 
+
+Each LP code is obtained from two protograph matrices A ∈ GmA×nA and B ∈ GmB ×nB over a finite group G.Each entry below is a group element written multiplicatively in the stated generators with e the identity. Here we present the codes listed in Table I and Fig. 3. 
+
+R1Elite01 (G = Z3 × Z14 , abelian, [[1428 , 186 , ≤ 18]] )
+
+Generators x, y : x3 = y14 = e, xy = yx , |G| = 42. 
+
+A =
+
+x2y8 xy 10 x2y6 e x2y10 
+
+xy 4 x2y8 xy 7 x2y7 xy 9
+
+y13 x2y4 xy 13 y4 y5
+
+ , B =
+
+
+
+y10 y6 x y5 x2y6
+
+y6 xy y9 y5 xy 12 
+
+y3 y3 y x2y2 y7
+
+ .
+
+R1Elite02 (G = Z2 × Z2 × Z11 , abelian, [[1496 , 198 , ≤ 16]] )
+
+Generators a, b, c : a2 = b2 = c11 = e, |G| = 44. 15 
+
+A =
+
+ c5 ac 7 c2 c6 abc 2
+
+abc 2 bc 3 bc 4 bc 10 ac 6
+
+c ac 10 c3 bc c9
+
+ , B =
+
+
+
+abc 4 abc 3 e b bac 3 abc 2 bc 8 abc 4 c7
+
+bc 4 ac ac 2 ac 7 bc 5
+
+ .
+
+R2Elite01 (G = Dic 11 , non-abelian, [[1496 , 194 , ≤ 20]] )
+
+Generators r, s : r22 = e, s 2 = r11 , srs −1 = r−1, |G| = 44. 
+
+A =
+
+
+
+r8 r r15 
+
+r7s r2 r18 sr4 r er3s r3 r2sr r3 r5
+
+ , B =
+
+
+
+r11 s r9
+
+r12 e r11 
+
+r10 r3s r 16 
+
+r10 r3 r18 
+
+r9 r6s rs 
+
+ .
+
+R2Elite02 (G = D 22 , non-abelian, [[1496 , 198 , ≤ 16]] )
+
+Generators r, s : r22 = e, s 2 = e, srs −1 = r−1, |G| = 44. 
+
+A =
+
+
+
+r12 r3s r17 
+
+r8 s r15 
+
+r4s r20 s r 13 se r17 s r11 
+
+r19 r14 r9
+
+ , B =
+
+
+
+r21 r r10 
+
+r12 e r3
+
+r3 r14 r3
+
+rs r6s r 19 
+
+r14 r5 r11 
+
+ .
+
+R3Elite01 (G = Dic 11 , non-abelian, [[1496 , 192 , ≤ 16]] )
+
+Generators r, s : r22 = e, s 2 = r11 , srs −1 = r−1, |G| = 44. 
+
+A =
+
+r14 s rs r10 s r19 r6
+
+r5s r21 s r15 r9 r3sr18 s r19 r20 s r21 s e
+
+ , B =
+
+r19 s r 18 s r9 r19 r8sr2s r21 r3s r11 rs r12 s r17 r18 r15 s r 12 s
+
+ .
+
+R3Elite02 (G = Dic 11 , non-abelian, [[1496 , 198 , ≤ 14]] )
+
+Generators r, s : r22 = e, s 2 = r11 , srs −1 = r−1, |G| = 44. 
+
+A =
+
+
+
+r16 r17 s r18 s r2
+
+r17 s rs r2s r4s r 6sr18 r2s r5 r8s r11 
+
+ , B =
+
+
+
+r15 r9s r r10 s r 3
+
+r11 r5 r15 r9 r3
+
+r7 r2s r 13 r8s r3
+
+ .
+
+R3EliteP01 (G = Z30 × Z2, abelian, [[1500 , 81 , ≤ 18]] )
+
+Generators x, y : x30 = y2 = e, xy = yx , |G| = 60. 
+
+A =
+
+
+
+x22 x17 x19 x21 
+
+x23 y x11 y x22 y x10 yx x28 x2 x29 
+
+ , B =
+
+
+
+x28 y x11 y x7y x17 yx26 x18 y x29 x21 yx5y x28 y x21 y x25 y
+
+ .16 
+
+R3EliteP02 (G = Z30 × Z2, abelian, [[1500 , 76 , ≤ 20]] )
+
+Generators x, y : x30 = y2 = e, xy = yx , |G| = 60. 
+
+A =
+
+
+
+x6y x6 x6y x6
+
+e x x2 x26 
+
+x24 y x26 x21 y x23 
+
+ , B =
+
+
+
+x29 y x13 x8y x3
+
+x10 x6 x2 x28 
+
+x2y x29 x26 y x12 
+
+ .
+
+Here we list the full protograph matrices of the codes used to illustrate the three mutation levels in Fig. 2(a). These codes follow the naming convention DemoL ℓParent / DemoL ℓChild , where ℓ ∈ { 1, 2, 3} labels the mutation level of the corresponding parent-to-child step, and Parent (Child ) denotes the protograph matrices A, B of the code before (after) the mutation is applied. 
+
+DemoL1Parent (G = Dic 15 , non-abelian, [[1500 , 74]] )
+
+Generators r, s : r30 = e, s 2 = r15 , srs −1 = r−1, |G| = 60. 
+
+A =
+
+
+
+r10 s r24 r2s r13 sr18 r4s r18 s r26 
+
+r28 r13 s r28 s r 10 s
+
+ , B =
+
+
+
+r4s r 14 s r27 r4sr11 r19 r3s r 15 sr12 r27 s r9 r22 s
+
+ .
+
+DemoL1Child (G = Dic 15 , non-abelian, [[1500 , 79]] )
+
+Generators r, s : r30 = e, s 2 = r15 , srs −1 = r−1, |G| = 60. 
+
+A =
+
+r13 s r21 s s r8sr18 r27 r7 r16 
+
+r22 s r4s r14 s r 24 s
+
+ , B =
+
+ r4 r17 s e r12 sr9s r24 r7 r21 
+
+r16 s r15 s
+
+ .
+
+DemoL2Parent (G = Dic 15 , non-abelian, [[1500 , 81]] )
+
+Generators r, s : r30 = e, s 2 = r15 , srs −1 = r−1, |G| = 60. 
+
+A =
+
+
+
+r29 s e r6s r12 
+
+r28 r6s r13 r29 sr10 s r12 r20 s r 28 s
+
+ , B =
+
+
+
+r28 s r2s r7s r12 srs r7 r13 s r19 
+
+r5s r12 s r 19 s r 26 s
+
+ .
+
+DemoL2Child (G = Dic 11 , non-abelian, [[1496 , 198]] )
+
+Generators r, s : r22 = e, s 2 = r11 , srs −1 = r−1, |G| = 44. 
+
+A =
+
+
+
+r7 r r15 
+
+r6s r2 r18 sr5 r2 er3s r3 r2sr2 r3 r5
+
+ , B =
+
+
+
+r11 s r9
+
+r11 e r11 
+
+r10 r3s r 16 
+
+r11 r3 r18 
+
+r9 r6s e
+
+ .17 
+
+DemoL3Parent (G = Z2 × Z2 × Z11 , abelian, [[1496 , 176]] )
+
+Generators a, b, c : a2 = b2 = e, c 11 = e, ab = ba, ac = ca, bc = cb , |G| = 44. 
+
+A =
+
+
+
+e a + c b ab ac + ab bc e ab + a + bc c ab + ab ac e bc + c ab 
+
+ , B =
+
+
+
+e c b ac ab + aa + b e c abc bbc e + ab a b abc + c
+
+ .
+
+DemoL3Child (G = ( Z2 × Z2) ⋊ Z 10 , non-abelian, [[1360 , 160]] )
+
+Generators a, b, c : a2 = b2 = e, ab = ba, c 10 = e, cac −1 = b, cbc −1 = a, |G| = 40. (symbolic entries remain the same.) 
+
+A =
+
+ e a + c b ab ac + ab bc e ab + a + bc c ab + ab ac e bc + c ab 
+
+ , B =
+
+ e c b ac ab + aa + b e c abc bbc e + ab a b abc + c
+
+ .

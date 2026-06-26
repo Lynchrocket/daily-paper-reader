@@ -1,0 +1,260 @@
+Title: Rate-2/3 Girth-8 (3,18)-Regular Quantum LDPC Codes from Two-Branch Finite-Field Bases and CPM Lifts
+
+URL Source: https://arxiv.org/pdf/2606.27130v1
+
+Published Time: Fri, 26 Jun 2026 01:07:42 GMT
+
+Number of Pages: 12
+
+Markdown Content:
+# Rate-2/3 Girth-8 (3 , 18) -Regular Quantum LDPC Codes from Two-Branch Finite-Field Bases and CPM Lifts 
+
+Koki Okada and Kenta Kasai Institute of Science Tokyo 
+
+okada.k.3154@m.isct.ac.jp kenta@ict.eng.isct.ac.jp 
+
+Abstract 
+
+We construct a rate-2/3 quantum low-density parity-check (LDPC) code from a (3 , 18) -regular two-branch finite-field base and a circulant-permutation-matrix (CPM) lift of degree 
+
+P = 101 . The resulting code is a Calderbank–Shor–Steane (CSS) code with parameters 
+
+[[34542 , 23032 , d ≤ 310]] . We do not regard this upper bound as an estimate of the true minimum distance; rather, d ≤ 310 is the tightest upper bound currently obtained from structural lifts and decoder-produced logical errors. The construction has row weight 18 and column weight 3, and the Tanner graphs of HX and HZ separately have girth 8. Decoder experiments with log-likelihood-ratio (LLR) joint belief propagation (BP) and deterministic post-processing show no failures in 10 8 trials at p = 0 .01 , and a finite-length frame error rate (FER) sweep estimates the transition near p = 0 .029 .
+
+# 1 Introduction 
+
+Classical low-density parity-check (LDPC) codes were introduced as sparse parity-check codes in [1], and Tanner graphs became a standard language for describing their sparse constraints in [2]. In the quantum setting, Calderbank–Shor–Steane (CSS) codes [3, 4] give a direct way to build stabilizer codes from two binary parity-check matrices, but the two matrices must satisfy an exact orthogonality condition. This condition makes quantum LDPC design more restrictive than the classical case: sparsity, rate, short-cycle control, and commutation must be achieved simultaneously. Early work adapted sparse graphs to stabilizer codes [5]. Product constructions then pro-vided systematic ways to obtain families with positive rate and growing distance, including hypergraph product codes [6], balanced product codes [7], lifted product codes [8], asymptoti-cally good quantum LDPC codes, and quantum Tanner codes [9, 10]. These results establish the asymptotic viability of quantum LDPC codes, while finite-length design still requires explicit choices of degree distribution, orthogonality constraints, lift structure, and decoder. High rate is also a practical requirement in fault-tolerant quantum computation (FTQC). The number of physical qubits per protected logical qubit affects the size of memory blocks, the cost of logical operations, and the hardware scale required for large computations. Constant-overhead FTQC can be formulated in terms of quantum LDPC families [11], and quantum LDPC codes have been proposed as alternatives to surface-code-style layouts for reducing overhead [12]. Recent work on reconfigurable atom arrays also emphasizes finite-size high-rate codes with practical logical error rates [13]. For this reason, an explicit high-rate finite-length code is useful only if its algebraic constraints and decoder performance are both checked directly. Finite-length performance depends on decoding as well as construction. Belief propaga-tion combined with ordered-statistics-decoding post-processing has been used successfully for degenerate quantum LDPC codes [14, 15], building on ordered statistics decoding for classical linear codes [16]. Trapping-set analysis for quantum LDPC codes [17] gives another way to 1
+
+> arXiv:2606.27130v1 [quant-ph] 25 Jun 2026
+
+analyze small residual syndromes after iterative decoding. Recent finite-length work has also studied non-binary LDPC-based quantum error correction near the coding-theoretic bound [18], error-floor reduction, and rapid finite-length error-rate transitions under joint belief-propagation decoding [19, 20]. On the construction side, recent work has focused on the interaction between CSS orthog-onality, regular sparse matrices, short-cycle control, and finite circulant-permutation-matrix (CPM) or affine-permutation lifts [21, 22, 23]. The two-branch finite-field base construction in [24] separates the base-stage regularity and orthogonality checks from the lift-stage search. This paper applies that approach to a column-weight-three, row-weight-eighteen target with rate close to two thirds, and then gives a CPM lift of degree one hundred one. The result is not presented as an asymptotic family and no distance lower bound is claimed. The contri-bution is the explicit construction of one high-rate CSS LDPC instance, together with direct verification of its ranks, orthogonality, row and column weights, same-type girth, exclusion of specified low-weight logical supports, decoding measurements, and the explicit distance upper bound established here. 
+
+# 2 Two-Branch Finite-Field Base 
+
+Throughout the paper, binary vectors are column vectors and are denoted by bold symbols when they are written as vectors. The notation “same-type Tanner graph” means the Tanner graph of one parity-check matrix alone, either HX or HZ ; this is a descriptive term used to distinguish those graphs from the bipartite incidence relation between X- and Z-checks used in the CSS orthogonality test. This section specifies the base matrices before the CPM lift. The role of the base is to fix the row and column weights, to make CSS orthogonality a finite-field coset condition, and to remove same-type 4-cycles before any lift coefficients are chosen. 
+
+2.1 Field and Indices 
+
+Let the field be F19 , and let 
+
+M = {1, 4, 16 , 7, 9, 17 , 11 , 6, 5}
+
+be the order-9 multiplicative subgroup of F×
+
+> 19
+
+. The target column weight is J = 3 , and the target row weight is L = 18 .Base columns are indexed by 
+
+(b, t, h ) ∈ { 0, 1} × F19 × M, 
+
+where b is the branch, t is the field variable, and h is the subgroup element. Hence the base length is 
+
+n0 = 2 · 19 · 9 = 342 .
+
+Rows on each side S ∈ { X, Z } are indexed by 
+
+(g, r ) ∈ { 0, 1, 2} × F19 ,
+
+so each side has 3 · 19 = 57 base rows. 
+
+2.2 Base Incidence Rule 
+
+The coefficient matrices used in this construction are 
+
+A =
+
+> (
+
+0 16 17 0 2 14 
+
+> )
+
+, B =
+
+> (
+
+4 10 11 11 10 5
+
+> )
+
+.
+
+2Here Ab,g is used on the X side and Bb,g on the Z side. A column (b, t, h ) is connected on the X side to the row (g, r ) satisfying 
+
+r = t + Ab,g h (mod 19) .
+
+On the Z side, the same column is connected to the row (g, r ) satisfying 
+
+r = t + Bb,g h (mod 19) .
+
+For a fixed column, there is one edge for each g = 0 , 1, 2, so the column weight is 3. For a fixed row, each choice of b ∈ { 0, 1} and h ∈ M determines a unique t, so the row weight is 2|M | = 18 .The block structure of these base parity-check matrices is shown in Fig. 1. 
+
+Figure 1: Block-colored bitmap of the base parity-check matrices H(0)  
+
+> X
+
+and H(0)  
+
+> Z
+
+. The natural macroblock structure is 3 row groups by 2 column-branch blocks. Each row group consists of 19 finite-field-coordinate rows, and each column branch is subdivided by the finite-field coordinate into 19 blocks of 9 columns. The base CSS code has parameters [[342 , 232 , 6]] .
+
+2.3 Quotient-Coset Conditions 
+
+Same-type 4-cycle exclusion and CSS orthogonality are checked by quotient-coset tests. For the 
+
+X side and two distinct row groups g̸ = g′, define 
+
+∆0 = A0,g − A0,g ′ , ∆1 = A1,g − A1,g ′ .
+
+The same-type condition requires ∆0, ∆1̸ = 0 and 
+
+∆0/∆1 /∈ M. 
+
+The same condition is imposed on B for the Z side. This ensures that any two rows on the same side intersect in at most one column, eliminating same-type 4-cycles. For CSS orthogonality, for an X-row group g and a Z-row group g′, define 
+
+∆0 = A0,g − B0,g ′ , ∆1 = A1,g − B1,g ′ .
+
+The cross condition requires ∆0, ∆1̸ = 0 and 
+
+∆0/∆1 ∈ M. 
+
+Then any X-row and Z-row intersect in either 0 or 2 columns, which is even over F2. Therefore 
+
+HX HTZ = 0 holds at the base level. This coefficient pair passes these tests. Thus the base matrices already have the required row and column weights, no same-type 4-cycles, and exact CSS orthogonality. 33 CPM Lift and Construction Procedure 
+
+The lift replaces each nonzero base entry by a circulant permutation matrix. The purpose of the lift is to increase the blocklength while preserving the verified base-level constraints. The additional restriction introduced here is that each shift is affine-linear in the finite-field coordinate t; this keeps the lift constraints linear over Z101 .
+
+3.1 Lift Definition 
+
+Each 1-entry in the base matrix is replaced by a P ×P cyclic permutation matrix, with P = 101 .The lift degree is not fixed uniquely by the theory; it is a design parameter in the finite search used here. We choose P to be prime and larger than q = 19 so that the lifted constraints can be handled by linear algebra over the field ZP . The value P = 101 gives a code of length 
+
+342 P while still allowing the search to find coefficients satisfying CSS orthogonality, all same-type 6-cycle nonclosure constraints, and the exclusion constraints for low-weight logical supports identified during the iterative measurements. Increasing P gives more possible values for the lift coefficients, but it also increases the blocklength and the cost of verification and decoder mea-surements. Thus P = 101 is not claimed to be theoretically optimal for distance or threshold; it is the lift degree for which this finite-length construction balances the construction constraints with computational tractability. If the edge between base row i and base column j has shift 
+
+σ(i, j ) ∈ Z101 , then lifted row (i, s ) is connected to 
+
+(j, s + σ(i, j ) mod P ).
+
+Rather than choosing all edge shifts independently, we restrict them to be affine-linear in the base variable t:
+
+σS (g, b, h ; t) = cS,g,b,h + dS,g,b,h t (mod 101) . (1) The number of variables is 2 · 3 · 2 · 9 · 2 = 216 .The purpose of this affine-shift restriction is not only to reduce the number of lift variables. It preserves the algebraic structure of the two-branch finite-field base, and it turns the main lifted constraints into linear algebra over Z101 . In particular, lifted CSS orthogonality becomes a system of linear equations in the coefficients cS,g,b,h , d S,g,b,h , and each lifted same-type 6-cycle closure condition becomes the vanishing of a linear form. Thus the construction can first solve the orthogonality equations and then search the resulting affine solution space while avoiding the nonzero linear forms corresponding to unwanted 6-cycles and identified low-weight logical-support modes. Choosing independent arbitrary CPM shifts would give more freedom, but it would also lose this finite-field parametrization and make the simultaneous enforcement of orthogonality, girth, and forbidden-support constraints a larger nonlinear search problem. 
+
+3.2 Lifted Orthogonality 
+
+Suppose a base X-row x and a base Z-row z intersect in two columns j0, j 1. To preserve even overlap after lifting, the two intersections must occur at the same sheet difference. This gives the linear equation 
+
+σX (x, j 0) − σZ (z, j 0) − σX (x, j 1) + σZ (z, j 1) = 0 (mod 101) . (2) Substituting the affine-shift form in (1) into (2) gives a linear equation in the lift coefficients. All such cross-row pairs produce 1539 linear equations. After reduction, the equality system used for the lift search has rank 167, leaving 49 free variables. 43.3 Excluding Same-Type 6-Cycles 
+
+For each base same-type 6-cycle C, let ℓC (c, d ) ∈ Z101 be the signed sum of edge shifts around the cycle. The lifted cycle closes if and only if 
+
+ℓC (c, d ) = 0 (mod 101) . (3) Thus all lifted same-type 6-cycles are excluded by requiring ℓC (c, d )̸ = 0 for every base same-type 6-cycle in (3). The base has 5472 same-type 6-cycles on each side, 10944 in total. After reduction by the lifted-orthogonality equality system, these give 3749 distinct nonzero linear-form constraints. A randomized search over the 49-dimensional affine solution space found a point satisfying all of them. 
+
+3.4 Eliminating Low-Weight Logical Supports Observed During Construc-tion 
+
+The forbidden-support list is the set of base-column supports that are explicitly forbidden to have a consistent realization in the next CPM lift. It was obtained through an iterative construction procedure. We first built a CPM lift and measured its finite-length decoding behavior. When a low-weight logical failure was observed, its logical support was projected to base columns, constraints were added so that this support and its affine equivalents would be incompatible with the next lift, and the lift search was rerun. The observed low-weight logical supports were not arbitrary small sets; they were produced by small even-intersection patterns in the two-branch base. Of the 110 input supports collected for this construction, 109 had lifted weight 6 and still projected to six base columns. Almost all of these weight-6 supports chose three columns from each of the two branches. Such supports often meet opposite-side checks in 0 or 2 incident edges. When this happens, the incident edges at each opposite-side check can be paired, and realizability as a lifted logical support is governed mainly by linear consistency equations for the CPM sheet indices. Thus the relevant structure is not a same-type short cycle itself, but a small base support with even opposite-side check incidences whose sheet-consistency equations are satisfied by the chosen CPM shifts. Because the finite-field coordinates have affine symmetries, each support identified by the measurements represents an orbit of equivalent supports, so the affine equivalents were excluded together with it. The supports accumulated through this iterative design procedure were organized as entries containing the side, an occurrence count, the residual syndrome weight, the logical weight, and the support columns. The support fields contain lifted column indices for putative X- and Z-type logical supports. For lift degree P = 101 , a lifted column index u is written as 
+
+u = P j + s, 0 ≤ s < P, 
+
+and projected to the base column π(u) = j = ⌊u/P ⌋ by discarding the sheet index s. The base column j is decoded as 
+
+j = b |F19 | | M | + t |M | + ih, b ∈ { 0, 1}, t ∈ F19 , hi ∈ M. 
+
+The 110 input supports reduce after projection and deduplication to 69 base supports (39 on the X side and 30 on the Z side). We also included the affine orbit induced by the finite-field symmetry 
+
+t 7 → at + b, h 7 → ah, a ∈ M, b ∈ F19 .
+
+After orbit expansion and deduplication, this produced 285 forbidden supports: 228 on the X
+
+side and 57 on the Z side. The data specifying this forbidden-support exclusion step, together with the complete CPM lift coefficients of the constructed code, are provided on the homepage cited in [25]. 5For each forbidden base support, we tested directly whether it can be realized in the lifted code as a codeword or logical-support pattern. If the support meets each opposite-side check in an even number of edges, the incident edges at that check can be paired. Each choice of such pairings gives linear consistency equations for the CPM sheet indices. If those equations are all satisfied by the chosen lift coefficients, then that base support still has a compatible lifted realization and has not been eliminated. The lift coefficients were chosen so that no such realization remains. The verification found no forbidden base support for which any pairing pattern satisfied the corresponding CPM-sheet consistency equations. Thus none of the 285 forbidden base supports, including their affine equivalents, can be realized in the constructed code. 
+
+3.5 Construction Algorithm 
+
+The construction procedure combines the algebraic certificates in Section 2 and the preceding parts of Section 3 into a single finite-length CSS code. The purpose is to preserve the base-level regularity and CSS orthogonality, remove lifted same-type 6-cycles, and also avoid the low-weight logical-support patterns found during the iterative decoding measurements. The main difficulty is that these requirements interact: CSS orthogonality is an equality constraint, same-type 6-cycle exclusion is a collection of nonzero linear-form constraints, and forbidden-support exclusion depends on pairing choices inside the support. The affine CPM shift form in (1) is used so that the first two lifted constraints can be handled by linear algebra before the remaining nonzero and support-realizability tests are applied. With this interpretation, the construction proceeds as follows. 1. Build the finite-field base using the incidence rules r = t + Ab,g h and r = t + Bb,g h from Section 2. 2. Verify the quotient-coset certificate from Section 2; this checks same-type 4-cycle exclusion and CSS orthogonality before lifting. 3. Introduce CPM lift variables cS,g,b,h , d S,g,b,h for the affine shift form in (1). 4. Enumerate all lifted CSS-orthogonality equations, using the condition in (2). 5. Enumerate the same-type 6-cycle closure conditions in (3) and reduce them modulo the lifted-orthogonality equality system. 6. Search the resulting 49-dimensional equality-system solution space for a point satisfying all nonzero 6-cycle constraints. 7. Generate lift-consistency equations for the forbidden support list and reject lift coefficients for which any forbidden support remains realizable, as described in Subsection 3.4. 8. Expand HX , H Z and explicitly verify ranks, orthogonality, girth, row weights, and col-umn weights; the resulting code specification and decoder measurements are reported in Subsection 3.6 and Section 5. 
+
+3.6 Resulting Lifted Code 
+
+Expanding the base matrices with the selected CPM lift coefficients gives two binary parity-check matrices HX and HZ . The base length is n0 = 342 and the lift degree is P = 101 , so the lifted blocklength is n = P n 0 = 34542 . Each side has 57 P = 5757 check rows, and the base incidence rule preserves column weight 3 and row weight 18. Rank computation gives 
+
+rank HX = rank HZ = 5755 , hence the CSS dimension is k = n − rank HX − rank HZ =
+
+623032 . Thus the constructed lifted code is a near-rate-2/3 (3 , 18) -regular CSS LDPC code with parameters [[34542 , 23032 , d ≤ 310]] . The main specifications are summarized in Table 1. Table 1: Main parameters of the constructed code. Quantity Value Base length n0 342 Base rows per side 57 Base rank H(0)  
+
+> X
+
+55 Base rank H(0)  
+
+> Z
+
+55 Base dimension k0 232 Base distance d0 6Base CSS parameters [[ n0, k 0, d 0]] [[342 , 232 , 6]] 
+
+Lift degree P 101 Code length n 34542 Rows of HX 5757 Rows of HZ 5757 
+
+rank HX 5755 
+
+rank HZ 5755 
+
+k = n − rank HX − rank HZ 23032 Rate k/n 0.6667824677 Row weight 18 Column weight 3Same-type girth 8The base ranks are rank H(0)  
+
+> X
+
+= rank H(0)  
+
+> Z
+
+= 55 , giving base dimension k0 = 232 and base rate 0.6783625731 . An exhaustive small-weight search finds no nontrivial base logical operator of weight below 6 and finds weight-6 logical operators on both CSS sides; hence the base CSS parameters are [[ n0, k 0, d 0]] = [[342 , 232 , 6]] . For the lifted distance, we claim only explicit upper bounds obtained by directly verifying low-weight non-stabilizer logical representatives in the opposite parity-check kernel; these are not distance lower bounds. The details are given in Subsection 3.7. 
+
+3.7 Explicit Minimum-Distance Upper Bounds 
+
+This subsection gives upper bounds on the minimum distance of the constructed lifted code ob-tained from explicitly verified logical operators. These statements are upper bounds, not proved lower bounds. There is a substantially tighter structural upper bound than the Singleton-type bound. The base CSS code contains an X-logical of weight 6 with support {0, 1, 67 , 73 , 83 , 304 },or, in coordinate form, (0 , 0, 0) , (0 , 0, 1) , (0 , 7, 4) , (0 , 8, 1) , (0 , 9, 2) , and (1 , 14 , 7) . Lifting this support to all P = 101 sheets gives a lifted vector of weight 606. Direct verification gives zero 
+
+HZ syndrome, and the vector is not in the row space of HX . Hence the constructed lifted code satisfies the structural all-sheet distance upper bound d ≤ 6P = 606 . We also checked whether a base logical support can close on only finitely many sheets, which would give a smaller lifted logical than the all-sheet lift. Enumerating the weight-6 base logicals gives 2679 X-side supports and 12939 Z-side supports. For each support, the incident edges in every opposite-side check were paired, and each pairing produced consistency congruences for the CPM sheet variables over Z101 . If these congruences are consistent for the chosen lift coefficients, the base support gives a finite-sheet lifted logical. For the chosen lift, no such finite-sheet realization was found among all 2679 X-side and 12939 Z-side weight-6 base logical supports. Thus the upper bound obtained from weight-6 base logicals remains the all-sheet bound d ≤ 606 . No base logical of 7weight 2 or 4 exists. A deterministic all-variable syndrome solve applied to 18 failure instances from the p =0.0237 measurements gives a tighter explicit upper bound. In one case, the pre-postprocessing residual was purely Z-type, with residual Pauli weight 26 and residual syndrome weights (0 , 52) 
+
+on the two CSS sides. This case is therefore outside the weight-two ETS-library branch. The all-variable syndrome solve selected a Z-repair of weight 312 for this residual syndrome. Af-ter applying this repair, the residual syndrome vanished, but the resulting residual Pauli was logically nontrivial and had Pauli weight 310. We also analyzed the structure of this weight-310 representative. Its projection to base columns contains 221 distinct base columns. The multiplicity distribution over base columns is 155 columns appearing once, 46 appearing twice, 17 appearing three times, and 3 appearing four times. The odd-multiplicity base projection has weight 172 and has zero syndrome with respect to the base HX . After lifting, restricting HX to the 310 support columns gives rank 309, hence a one-dimensional kernel. Thus the 310-column support does not contain a smaller nonempty HX -syndrome-zero sub-support. The induced HX Tanner subgraph is one connected component with 310 variables and 407 checks. We then searched for logicals with the same structure. For each finite-field translation 
+
+t 7 → t+b, b ∈ F19 , the corresponding CPM sheet-offset consistency equations were solved, giving 19 weight-310 logical supports. Together with the 101 global sheet translations, this produces 
+
+19 · 101 = 1919 weight-310 logical representatives of the same structure. These representatives give the same upper bound d ≤ 310 , but they do not reduce the weight. Finally, we tried to reduce this representative within the same logical class by adding Z-stabilizer rows. Adding a single Z-stabilizer row gives best weight 318, and an exhaustive check of 251695 row pairs from 710 selected rows gives no representative below weight 310. A beam search of width 1024 and depth 10 also found no representative below weight 310. We also re-solved the same residual-syndrome equation while demoting the trivial weight-26 solution; this conservative tightening step likewise did not find a representative below weight 310. Therefore the best explicit distance upper bound obtained here for the constructed lifted code is d ≤ 310 ,which supersedes the all-sheet structural bound 606. This paper does not prove d ≥ 20 . The supported statement is that the forbidden-support family accumulated during the construction process and its affine equivalents are eliminated, and that the local and ETS checks used in the iterative construction did not detect this low-weight logical representative. A rigorous distance lower bound would require a separate logical-operator search, integer-programming certificate, information-set decoding, or a symmetry-reduced enumeration. 
+
+# 4 Decoding Method 
+
+The decoder used in the experiments is a log-domain log-likelihood-ratio (LLR) joint belief-propagation (BP) decoder followed by deterministic post-processing. Here joint BP refers to the sum-product decoder on the CSS syndrome-decoding factor graph formed by two Tanner graphs coupled through the local joint prior at each qubit [26]. Syndrome failures and logical failures are treated as different outcomes: a trial with a nonzero residual syndrome is classified as a syndrome failure, while a zero-syndrome residual is tested for logical nontriviality separately. This separation is necessary because a large residual syndrome is a decoder failure but is not itself evidence for a low-weight logical operator. The post-processing stage is designed for the cases where BP leaves a small residual syn-drome. For very small residuals, the decoder first applies deterministic local repair tests that verify the produced syndrome before applying a correction. When the residual syndrome has weight two, the decoder also uses an elementary-trapping-set (ETS) library, motivated by trapping-set analysis for quantum LDPC codes [17]. Here an ETS entry is a checked local 8repair pattern whose check-induced subgraph has degree-one odd checks and degree-two even checks, and whose odd-check set is exactly the two unsatisfied checks. If these local and ETS tests do not apply, the decoder can fall back to ordered-statistics-decoding (OSD)-style repair or to a more general syndrome solve, depending on the experiment being performed. Each ETS-library entry is represented as (S, c 0, c 1, V ), where S ∈ { X, Z } is the side to be repaired, c0, c 1 are the two odd checks, and V is the variable set to flip. When the residual syndrome is {c0, c 1}, the decoder retrieves V and applies it only after verifying that V produces exactly the residual syndrome. Thus a library entry is used as a checked correction rather than as an unconditional flip. 
+
+# 5 Numerical Results 
+
+At p = 0 .01 , 10 8 trials were completed with the LLR joint-BP decoder and deterministic post-processing. No syndrome failure and no logical failure were observed, so the empirical frame error rate (FER) at this point is zero. Using the rough one-sided 95% zero-failure rule 3/N , the corresponding experimental upper bound at p = 0 .01 is about 3 × 10 −8.For higher-FER points, the measurement should not rely on a small number of early failures. We therefore measured an FER sweep from p = 0 .034 downward. For the lower-FER points, independent decoder processes were combined only to reduce wall-clock time; each process used the same LLR joint-BP decoder and deterministic post-processing. All failures in this sweep were syndrome failures; no logical failure was observed. The combined point estimates are plotted in Fig. 2. 0.00 0.02 0.04 0.06 0.08 0.10 
+
+> physical error probability p
+> 10 −7
+> 10 −6
+> 10 −5
+> 10 −4
+> 10 −3
+> 10 −2
+> 10 −1
+> 10 0
+> FER
+> BP threshold (p=0.034)
+> hashing bound R=2/3 (p=0.04454)
+> measured FER
+
+Figure 2: FER measurements for the constructed (3 , 18) , P = 101 lifted code. The horizontal axis is shown on 0 ≤ p ≤ 0.1. The vertical lines mark the BP threshold estimate p = 0 .034 and the rate-2/3 hashing bound p = 0 .04454 . The markers are connected as a visual guide. The ETS-library branch was tested on failure instances obtained in the p = 0 .0237 measure-ments. Five of these failures had Z-side residual-syndrome weight two and residual Pauli weight 12. The corresponding ETS supports all belonged to the same isomorphism orbit. Using the 9finite-field translation symmetry of size q = 19 and the CPM sheet translation of size P = 101 ,this orbit was expanded exhaustively into 19 · 101 = 1919 ETS entries. Every expanded entry was validated directly on the lifted HX Tanner graph by checking that its produced syndrome is exactly the prescribed two-check syndrome. For 18 p = 0 .0237 failure instances, the isomorphism-expanded ETS library was combined with local exact repair and weighted-OSD-style post-processing, 9 of the 18 failures were re-paired. In particular, all five targeted failures with residual-syndrome weight two and residual Pauli weight 12 were repaired. The remaining nine failures had residual-syndrome weights such as 17, 19, 50, 52, 84, 234, 976, 2367, and 2427, and are outside the scope of the two-check ETS library used here. 
+
+# 6 Discussion 
+
+The main feature of the construction is that both stages are expressed as explicit algebraic conditions. At the base level, regularity, CSS orthogonality, and same-type 4-cycle exclusion reduce to quotient-coset membership tests. At the lift level, CSS orthogonality becomes a linear equality system, while same-type 6-cycle closure becomes a family of nonzero linear-form constraints. This reduces the finite search space while preserving exact CSS orthogonality and achieving same-type girth 8. The construction also uses finite-length decoding evidence in a specific way. Successive lifts are tested by decoding; observed low-weight logical supports are converted into additional forbidden supports; and the lift search is repeated with the enlarged constraint set. This iterative use of decoding evidence is useful at length 3.4 × 10 4, where exhaustive distance verification is difficult. 
+
+# 7 Conclusion 
+
+Using a two-branch multiplicative-coset base over F19 and a P = 101 CPM lift, we constructed a (3 , 18) -regular CSS LDPC code with 
+
+n = 34542 , k = 23032 , k/n = 0 .6667824677 .
+
+The code has row weight 18, column weight 3, exact CSS orthogonality, and same-type Tanner girth 8. The low-weight logical supports accumulated during the iterative construction proce-dure, together with their affine equivalents, are not realizable in the constructed lift. In 10 8
+
+trials at p = 0 .01 , no failure was observed under LLR joint BP with post-processing. The FER sweep estimates the FER as 5.14 × 10 −3 at p = 0 .0294 and 3.94 × 10 −4 at p = 0 .0285 , with no observed logical failures in the sweep. Applying deterministic all-variable syndrome solve to the failure instances found a syndrome-valid, logically nontrivial residual Pauli operator of weight 310, giving the explicit distance upper bound d ≤ 310 .
+
+# References 
+
+[1] R. Gallager, “Low-density parity-check codes,” IRE Transactions on Information Theory ,vol. 8, no. 1, pp. 21–28, 1962. [2] R. M. Tanner, “A recursive approach to low complexity codes,” IEEE Transactions on Information Theory , vol. 27, no. 5, pp. 533–547, 1981. [3] A. R. Calderbank and P. W. Shor, “Good quantum error-correcting codes exist,” Physical Review A , vol. 54, no. 2, pp. 1098–1105, 1996. 10 [4] A. M. Steane, “Multiple-particle interference and quantum error correction,” Proceedings of the Royal Society of London A , vol. 452, no. 1954, pp. 2551–2577, 1996. [5] D. J. C. MacKay, G. Mitchison, and P. L. McFadden, “Sparse-graph codes for quantum error correction,” IEEE Transactions on Information Theory , vol. 50, no. 10, pp. 2315– 2330, 2004. [6] J.-P. Tillich and G. Zemor, “Quantum LDPC codes with positive rate and minimum dis-tance proportional to the square root of the blocklength,” IEEE Transactions on Informa-tion Theory , vol. 60, no. 2, pp. 1193–1202, 2014. [7] N. P. Breuckmann and J. N. Eberhardt, “Balanced product quantum codes,” IEEE Trans-actions on Information Theory , vol. 67, no. 10, pp. 6653–6674, 2021. [8] P. Panteleev and G. Kalachev, “Quantum LDPC codes with almost linear minimum dis-tance,” IEEE Transactions on Information Theory , vol. 68, no. 1, pp. 213–229, 2022. [9] ——, “Asymptotically good quantum and locally testable classical LDPC codes,” in Pro-ceedings of the 54th Annual ACM SIGACT Symposium on Theory of Computing , 2022, pp. 375–388. [10] A. Leverrier and G. Zemor, “Quantum tanner codes,” in 2022 IEEE 63rd Annual Sympo-sium on Foundations of Computer Science , 2022, pp. 872–883. [11] D. Gottesman, “Fault-tolerant quantum computation with constant overhead,” Quantum Information and Computation , vol. 14, no. 15–16, pp. 1338–1371, 2014. [12] N. P. Breuckmann and J. N. Eberhardt, “Quantum low-density parity-check codes,” PRX Quantum , vol. 2, no. 4, p. 040101, 2021. [13] C. Zhao, C. Duckering, A. Gu, N. Maskara, and H. Zhou, “Towards ultra-high-rate quan-tum error correction with reconfigurable atom arrays,” arXiv:2604.16209, 2026. [14] P. Panteleev and G. Kalachev, “Degenerate quantum LDPC codes with good finite length performance,” Quantum , vol. 5, p. 585, 2021. [15] J. Roffe, D. R. White, S. Burton, and E. Campbell, “Decoding across the quantum low-density parity-check code landscape,” Physical Review Research , vol. 2, p. 043423, 2020. [16] M. P. C. Fossorier and S. Lin, “Soft-decision decoding of linear block codes based on ordered statistics,” IEEE Transactions on Information Theory , vol. 41, no. 5, pp. 1379–1396, 1995. [17] N. Raveendran and B. Vasić, “Trapping sets of quantum LDPC codes,” Quantum , vol. 5, p. 562, 2021. [18] D. Komoto and K. Kasai, “Quantum error correction near the coding theoretical bound,” 
+
+npj Quantum Information , vol. 11, p. 154, 2025. [19] K. Kasai, “Efficient mitigation of error floors in quantum error correction using non-binary low-density parity-check codes,” in 2025 IEEE International Symposium on Information Theory (ISIT) , 2025, pp. 2789–2794. [20] D. Komoto and K. Kasai, “Sharp error-rate transitions in quantum QC-LDPC codes under joint BP decoding,” arXiv:2507.11534, 2025. [21] K. Kasai, “Breaking the orthogonality barrier in quantum LDPC codes,” arXiv:2601.08824, 2026. 11 [22] K. Okada and K. Kasai, “High-girth regular quantum LDPC codes from affine-coset struc-tures,” arXiv:2604.20838, 2026. [23] ——, “High-girth regular quantum LDPC codes from square-base hypergraph products via CPM lifts,” arXiv:2604.27817, 2026. [24] ——, “A two-branch finite-field construction for regular CSS LDPC bases,” arXiv:2605.23894, 2026. [25] K. Kasai, “Kenta Kasai’s homepage,” https://kasai.ict.eng.isct.ac.jp/. [26] ——, “A factor-graph formulation of CSS syndrome decoding: joint BP and four-state BP,” arXiv:2605.05132, 2026. 12

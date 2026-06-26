@@ -1,0 +1,947 @@
+Title: Efficient foundation decoders for fault-tolerant quantum computing
+
+URL Source: https://arxiv.org/pdf/2606.27119v1
+
+Published Time: Fri, 26 Jun 2026 01:24:17 GMT
+
+Number of Pages: 32
+
+Markdown Content:
+# Efficient foundation decoders for fault-tolerant quantum computing 
+
+Ge Yan, 1 Shanchuan Li, 1, 2 Shiyi Xiao, 1, 3 Pengyue Ma, 1 Hanyan Cao, 4 Feng Pan, 4, ∗ and Yuxuan Du 1, 5, †
+
+> 1
+
+College of Computing and Data Science, Nanyang Technological University, Singapore 
+
+> 2
+
+Department of Electrical Engineering and Computer Science, Tokyo University of Agriculture and Technology, Koganei, Tokyo, Japan 
+
+> 3
+
+School of Artificial Intelligence, Shanghai Jiao Tong University, Shanghai, China 
+
+> 4
+
+Science, Mathematics and Technology Cluster, Singapore University of Technology and Design, Singapore 
+
+> 5
+
+School of Physical and Mathematical Science, Nanyang Technological University, Singapore 
+
+Foundation decoders, a class of high-capacity neural decoders, are leading candidates for fault-tolerant quantum computing, with accurate and efficient decoding at large code distances. However, their construction often faces a steep scaling barrier, as larger code distances rapidly amplify the cost of syndrome generation and neural optimization. To address this bottleneck, here we devise neural transfer unification ( NTU ), a unified framework for efficient foundation decoders. A central feature of NTU is its ability to align decoding tasks across code distances via algebraic structures shared by scalable code families, which enables knowledge learned on smaller codes to accelerate large-scale decoder training. We instantiate NTU as NTU -Transformer, a transformer-based neural decoder tailored for planar surface codes and bivariate bicycle codes. For planar surface codes under circuit-level noise, NTU -Transformer outperforms correlation-aware matching on the [[361 , 1, 19]] code and further scales to the [[625 , 1, 25]] code, where it exceeds standard matching through transfer adaptation. For the bivariate bicycle code with [[72 , 12 , 6]], it surpasses Relay-BP in the low-physical-error regime. These results establish our proposal as a scalable route to amortized cross-distance training of foundation decoders for fault-tolerant quantum processors. 
+
+- NTU project page: https://grahamyan.github.io/ntu-decoder 
+
+I. INTRODUCTION 
+
+Fault-tolerant quantum computation is widely envisioned as the route to unlocking the full promise of quantum computing in the presence of pervasive hardware noise [1–3]. Central to this is quantum error correction (QEC), which protects logical information by encoding it redundantly across many physical qubits [4–6]. With physical noise below a threshold, increasing the code distance enables QEC to exponentially suppress logical error rates. This makes the development of QEC architectures that are both powerful and practically implementable a long-standing challenge, owing to the difficulty of balancing robustness, overhead, and compatibility with hardware constraints [7–9]. Among existing proposals [10–12], surface codes [12–14] and bivariate bicycle (BB) codes [15] stand out as leading candidates, supported by rapid experimental progress across superconducting, trapped-ion, and neutral-atom platforms [16–22]. Efficient and accurate decoders are indispensable for realizing the full potential of these QEC codes. For this reason, substantial efforts have been made to develop decoding methods, which can be categorized into two broad paradigms: traditional and neural approaches. The former, including maximum-likelihood decoding [12, 23–25], belief propaga-tion [26–28], and matching-based decoders [29–31], have become standard tools in modern QEC experiments because of their high decoding accuracy, but their computational efficiency degrades at large code distances. Neural decoders offer a complementary paradigm by learning decoding rules directly from syndrome data [32–35], although early models often lagged behind leading traditional decoders in accuracy. Foundation decoders have transformed neural decoding into a competitive route for practical QEC. Concrete examples are AlphaQubit series [20, 21] and Cas-cade [36], featured by high-capacity architectures and large-scale training. Despite this progress, current foundation decoders face a severe scaling bottleneck, with training at only modest code distances already requiring thousands of GPU-hours and direct extension to practically relevant large-distance codes becoming untenable. This raises a question: can foundation decoders be scaled more efficiently? 
+
+In this study, we provide a positive affirmation by introducing neural transfer unification ( NTU ), a framework for efficiently constructing foundation decoders via cross-distance transfer . Conceptually, NTU exploits scale-invariant decoding structures across code distances, aligning different-sized decoding tasks within a shared representation space. Attributed to this alignment, NTU can transfer the decoding knowledge learned at smaller distances within the same code family to foundation decoders operating at larger code distances. In this regard, NTU departs from the curriculum   
+
+> ∗feng pan@sutd.edu.sg
+> †yuxuan.du@ntu.edu.sg
+> arXiv:2606.27119v1 [quant-ph] 25 Jun 2026
+
+2Surface (𝑑 = 3) Surface (𝑑 = 5)
+
+Spatial Invariance  Temporal Invariance  Scale Invariance 
+
+a
+
+b      
+
+> Surface code
+> Bivariate bicycle code
+> Logical Error Classification Physical Error Inference
+
+Local Perception  
+
+> e.g. Conv/Attention
+> 𝑑  = 15 𝑑  = 19
+
+Message Passing  
+
+> e.g. GNN
+
+Global Decision             
+
+> Transferable Fine-tune (Dimention change)
+> Post -Processing
+> -deterministic
+> 0.00 0.01 0.02 0.03 0.04 0.05
+> Self-attention probability
+> Transferable
+> [72, 12, 6] [144, 12, 12]
+> Init Iter 1
+> Logical qubit
+> Data qubit
+> Xstabilizer
+> Zstabilizer
+> 711 15 19
+> Code distance d
+> 17.5 18.0 18.5 19.0 19.5 20.0 20.5 21.0
+> Training compute (log 10  FLOPs)
+> 1000 GPU hours
+
+c
+
+> ∼ Γ  d, Γ ≈ 1.64 ∼ Γ  d, Γ ≈ 1.51
+> Scratch
+> NTU
+
+FIG. 1. QEC code invariance and network transfer. a, Topological invariances in quantum error correction codes. The fundamental motifs of both planar surface codes and quasi-cyclic bivariate bicycle codes exhibit scale invariance. This scale invariance manifests across spatial translations, temporal syndrome extraction cycles, and large distance expansions. The shaded regions explicitly denote the invariant local topological neighborhoods defined by the codes’ generating polynomials. 
+
+b, Neural decoder network transfer. For logical error classification (left), the architecture is explicitly decoupled into a scale-invariant local perception backbone and a scale-dependent global decision layer. The heatmaps provide a qualitative comparison of self-attention for a matched detector-error pattern on the d = 15 and d = 19 lattices. Their similar concentration around matched local relations is consistent with the reuse of relation-aware features after transfer. For physical-error inference models, the transfer mechanism is different: the neural decoder learns local message-passing rules for predicting recovery information, and the final logical parity is then resolved by deterministic post-processing. The stability of these localized rules across code sizes supports the same conclusion that NTU reuses scale-invariant decoding structures rather than relearning distance-specific representations from scratch. c, Computational overhead for scaling to large code distances. The training compute is evaluated as the threshold required to exceed standard PyMatching accuracy. While train-from-scratch methods suffer from severe cold-start plateaus, the NTU transfer paradigm fundamentally suppresses the computational scaling exponent (reducing Γ from 1.64 to 1.51), enabling highly efficient network generation at massive code distances. 
+
+learning paradigm of current foundation decoders [37], replacing costly staged training with amortized cross-distance transfer. This paradigm shift turns the foundation decoders from distance-specific training into reusable scaling, substantially reducing computational overhead. For practical deployment, NTU can be instantiated with diverse neural architectures. We realize this flexibility as NTU -Transformer, a transformer-based foundation decoder designed for high-accuracy cross-distance decoding in planar surface codes and BB codes. Its architecture is built around two specific designs: a new scalable transformer embedding model and a geometry-aware rotary positional encoding, which embed variable-size syndrome data into a shared latent representation space. Together, these designs preserve the scale-invariant decoding structures shared across code distances while capturing global syndrome correlations, enabling effective cross-distance transfer. We 3conduct systematic experiments against strong available baselines to validate the effectiveness and scalability of NTU -Transformer. For surface codes, NTU -Transformer outperforms highly optimized correlation-aware matching on the [[361 , 1, 19]] code. Beyond accuracy, NTU substantially reduces the empirical compute scaling of foundation-decoder training, enabling transfer to the larger [[625 , 1, 25]] code, where it achieves lower logical error rates than standard matching without restarting large-scale training. For the [[72,12,6]] BB code, it also outperforms Relay-BP [38] in the low-physical-error regime. Beyond these benchmarks, NTU -Transformer addresses a broader reproducibility gap in foundation decoding by providing an open and end-to-end pipeline for construction, transfer, and evaluation. By making the full pipeline and trained decoders openly available, our work lowers a key computational barrier to high-accuracy neural decoding and provides a practical starting point for real-time, hardware-integrated decoders in fault-tolerant quantum processors.   
+
+> II. RESULTS A. Scale invariance in QEC
+
+A QEC code is conventionally denoted by [[ n, k, d ]], where n, k, and d specify the number of physical qubits, logical qubits, and the code distance, respectively. In addition, given a syndrome-extraction circuit, the set of md syndrome detectors is denoted by Dd. Among the many quantum code families, Calderbank–Shor–Steane (CSS) codes are particularly prominent and include several leading architectures for fault-tolerant quantum computation [39, 40]. Given their broad relevance, we focus here on structural CSS code families whose larger instances are generated by repeated construction rules. This setting includes planar surface codes and BB codes, and can also extend to other structured quantum low-density parity-check families [41], e.g., lifted-product codes [42], whose generator rules are preserved across distances. We next formulate the scale invariance for these codes, which serves as the organizing principle for cross-distance transfer in NTU . Intuitively, it refers to preserving the relative neighborhood structure of syndrome detectors as the code distance d changes. To formalize this notion, we describe syndrome detectors in an algebraic language. Adetector v ∈ D d is labeled by an algebraic coordinate with v = xiyj tr , where x and y encode the repeated spatial or algebraic structure of the code family, t amounts to the repeated syndrome-extraction rounds, and the integers i, j,and r specify the detector coordinates along these directions. For a detector v, its neighborhood is determined by the relative shifts from v to the detectors connected to it by the code construction. The allowed relative shifts form a finite set M(x, y, t ; d), i.e., a detector u ∈ D d belongs to the neighborhood of v when v−1u ∈ M (x, y, t ; d), giving 
+
+N (v; d) = v · M (x, y, t ; d). (1) For code families considered here, M(x, y, t ; d) is fixed by their repeated construction rules. Refer to Supplementary Information (SI) A for surface and BB cases. As d increases, the detector set Dd expands, while N (v; d) for ∀v
+
+retains the same relative structure encoded by M. This preserved relative structure enables NTU to transfer decoder representations across code distances.   
+
+> B. Framework of NTU
+
+NTU is designed to address the computational barrier in constructing foundation decoders at large code distances. This barrier arises because foundation decoders must optimize many parameters over large syndrome datasets, a cost that grows rapidly with code distance. Existing approaches alleviate this burden through curriculum-like learn-ing [37], but still build distance-specific representations largely from scratch. As a result, the computational cost grows sharply with d (see SI A for more details). Rather than scaling the curriculum to ever larger distances, NTU 
+
+formulates foundation-decoder construction as a transfer-learning problem [43], in which knowledge acquired from smaller distances is structurally aligned and reused at larger distances. 
+
+NTU consists of four steps : spatiotemporal invariance discovery, distance-independent syndrome encoding, neural decoding, and transfer adaptation (refer to Methods for details). The first step turns the scale invariance in Eq. (1) into a transferable decoding principle. Rather than treating detectors at different distances as unrelated input coordinates, 
+
+NTU identifies detector environments generated by the same relative-shift rules and regards them as instances of the same decoding pattern. For example, the surface code in Fig. 1a repeats the same local check unit as d increases, with red and blue stabilizer checks connected through nearby data qubits. Similarly, a BB code repeats algebraic connectivity patterns generated by cyclic shifts. Syndrome extraction further repeats these check-connectivity rules 47 11 15 19   
+
+> Code distance d
+> 10 −9
+> 10 −8
+> 10 −7
+> 10 −6
+> 10 −5
+> 10 −4
+> LER
+> p= 0.3%
+
+a   
+
+> Tesseract
+> PyMatching
+> Corr. PyMatching
+> NTU-Transformer
+> 0%
+> 6%
+> 12%
+> 18%
+> Sample fraction
+> 0500 1.0k 1.5k
+> Training steps
+> 0.5
+> 0.6
+> 0.7
+> 0.8
+> 0.9
+> 1.0
+> Accuracy
+
+c   
+
+> d= 11
+> d= 15
+> d= 19
+> NTU
+> Scratch
+> 394
+> 526
+> 542
+> 553
+> 563
+> 572
+> 581
+> 591
+> 603
+> 619
+> 772
+> Detector errors
+> 99.80%
+> 99.85%
+> 99.90%
+> 99.95%
+> 100.00%
+> Accuracy
+
+b  
+
+> NTU-Transformer
+> PyMatching
+> Sample fraction
+> d= 19
+> p= 0.5%
+
+FIG. 2. Decoding performance and topological transfer dynamics of the neural decoder on the planar surface code. a, Logical error per round (LER) as a function of code distance d ∈ { 7, 11 , 15 , 19 } evaluated at a physical error rate of p = 0 .3%. The transferred base model (purple circles) demonstrates highly competitive fault-tolerant scaling, significantly outperforming standard PyMatching (green squares) and closely approaching the performance of Correlated PyMatching (blue diamonds), establishing a robust baseline for large-distance scaling. b, Decoding accuracy over d-rounds resolved by the number of detector errors within the evaluation window on d = 19. The underlying histogram denotes the sample fraction distribution across the error weights. While traditional matching-based algorithms experience severe performance degradation in highly degenerate, high-weight error regimes, NTU -Transformer maintains superior accuracy. c, Resolution of the cold-start problem via NTU . The plot contrasts the training dynamics (accuracy versus fine-tuning steps) of models trained from scratch (dashed lines) against those initialized via NTU (solid lines). Without NTU , models suffer from a prolonged optimization plateau; notably, the d = 19 model (dashed purple line) remains completely stagnant at 50% accuracy even after 2,000 steps. In stark contrast, transferred models exhibit instantaneous vertical convergence. This empirical evidence verifies that the local perception backbone perfectly maps to the topological invariance of the larger lattice, leaving only the global decision layer to quickly adapt to the expanded boundaries. 
+
+across measurement rounds. These repeated patterns allow NTU to align equivalent decoding environments and transfer decoding representations across code distances. The second step converts the invariance identified above into a distance-independent syndrome representation that is shared by neural decoders across distances. Achieving this is challenging because the syndrome Sd ∈ { 0, 1}md is indexed by the detector set Dd, whose size varies with the code distance d. Consequently, a standard neural decoder ties its input coordinates and embeddings to a distance-specific detector set, preventing direct reuse across distances. To remove this dependence, NTU represents each matched neighborhood N (v; d) across code distances by their relative shifts in M(x, y, t ; d). As illustrated in Fig. 1a, a matched neighborhood for the surface codes is the local syndrome environment around a stabilizer detector, encoded by horizontal, vertical, and temporal offsets rather than by absolute lattice locations. Mathematically, for each detector v, NTU constructs an input feature by aggregating the syndrome values in its matched neighborhood, i.e., 
+
+h(v) = σ
+
+ X 
+
+> u∈N (v;d)
+
+wv−1u Sd(u)
+
+
+
+, (2) where Sd(u) is the syndrome value at detector u, σ(·) is a nonlinear activation, and wv−1u ∈ Rq is a learnable embedding vector associated with the relative shift v−1u ∈ M (x, y, t ; d). In this way, the input-feature construction yields a distance-independent syndrome encoding that can be reused across code distances. The third step applies a neural decoder f (Sd; θ) to the encoded syndrome zd = {h(v) : v ∈ D d} in Eq. (2). Here, θ denotes all trainable parameters of the neural decoder, e.g., the embedding parameters wv−1u and those of 5the backbone. As a backbone-agnostic framework, NTU can instantiate f (Sd; θ) with any neural architecture that processes encoded detector features and their relations, because the distance dependence has already been absorbed into the input encoding. When the goal is to construct a foundation decoder, the chosen backbone is taken to be sufficiently high-capacity, with a large number of trainable parameters. Once the decoder architecture is fixed, NTU 
+
+first trains it on a smaller and tractable code at distance d, yielding optimized parameters θ∗ for the source decoder 
+
+f (Sd; θ∗). The fourth step, transfer adaptation, initializes the decoder at a larger distance d′ with these parameters, i.e., θ ← θ∗, and fine-tunes it on the encoded syndromes zd′ [43]. Repeating this procedure grows the decoder across distances without restarting large-scale training, completing the NTU framework for amortizing the cost of foundation decoding.   
+
+> C. Implementation of NTU -Transformer
+
+To build a foundation decoder for both surface codes and BB codes, NTU is instantiated with a newly designed Transformer backbone, dubbed NTU -Transformer. The proposed decoder has three key components: syndrome-dataset construction, a transfer-optimization procedure, and a QEC-aware Transformer architecture. Below, we briefly describe these ingredients and provide the implementation details in Methods and SI C. The training set at the distance d is denoted by Td = {(S(i) 
+
+> d
+
+, y(i) 
+
+> d
+
+)}Nd
+
+> i=1
+
+, where S(i) 
+
+> d
+
+is the raw syndrome, y(i) 
+
+> d
+
+is the supervision label for the chosen decoding task, and the superscript i denotes the i-th training example. For surface-code decoding, yd records the induced logical error. For BB-code decoding with physical-error inference, the label records low-level error or recovery variables associated with the decoding graph. The datasets Td are generated first at smaller, tractable distances to train the foundation decoder, whereas larger-distance datasets are then generated for transfer adaptation and evaluation. Once {T d} are prepared, NTU -Transformer is trained in two stages. At the first stage, the model is optimized on 
+
+Td at a smaller and tractable distance d using a task-specific supervised objective, i.e., 
+
+L(Td; θ) = 1
+
+NdNdX
+
+> i=1
+
+ℓ
+
+
+
+f  S(i) 
+
+> d
+
+; θ, y(i)
+
+> d
+
+
+
+, (3) where the per-sample loss ℓ(·, ·) is chosen according to the decoding output. Denote the optimized source decoder by 
+
+f (Sd; θ∗). Then the transfer adaptation initializes the larger-distance decoder with θ ← θ∗ and fine-tunes it on the dataset Td′ with d′ > d . As specified by the NTU framework, repeating this procedure across distances amortizes the cost of foundation-decoder training without restarting optimization at each larger distance. The last ingredient is instantiating the decoder f (Sd; θ) as NTU -Transformer, combining standard attention blocks [44] with two code-aware components. The first component is the redesigned scalable transformer embedding model [45], which implements the distance-independent syndrome encoding h in Eq. (2) and maps the encoded syn-drome zd into Transformer tokens. The second component is a redesigned and QEC-aware rotary position embedding (RoPE) [46], which supports effective global attention without disrupting detector relations across code distances. The proposed RoPE is essential, as standard positional embeddings are incompatible with the transfer principle of 
+
+NTU . Concretely, in curriculum-style Transformer-based decoders [20, 21], the same local detector relation within 
+
+N (v; d) can receive distinct positional representations when a surface-code lattice is padded or rescaled to a larger distance d′. This mismatch prevents direct cross-distance transfer and contributes to the scaling barrier visualized in Fig. 1c. To avoid this, NTU -Transformer applies RoPE to relative algebraic displacements consistent with the shift set M(x, y, t ; d) in Eq. (1). This design preserves detector geometry learned at smaller distances, allowing global attention to transfer to larger codes without relearning distance-specific positional structure. 
+
+Remark . As a flexible framework, NTU can be instantiated with different neural decoder backbones. For BB codes, we also instantiate NTU with a neural belief-propagation backbone [47], dubbed NTU -Neural-BP. Implementation details are provided in SI D.  
+
+> III. EXPERIMENTAL RESULTS
+
+We next conduct systematic experiments on surface codes and BB codes to evaluate the decoding performance and cross-distance transferability of NTU . Additional implementation details and extended simulation results are provided in SI E&F. 60.1 0.2 0.3 0.4 0.5                     
+
+> Physical error rate p(%)
+> 10 −7
+> 10 −6
+> 10 −5
+> 10 −4
+> 10 −3
+> 10 −2
+> LER [[72,12,6]]
+> a
+> BP+OSD Relay BP (2d) Relay BP
+> Neural-BP
+> Transformer
+> 0% 10% 20% 30%
+> Sample fraction
+> 02.5k 5k 7.5k 10k 12.5k 15k
+> Training steps
+> 50% 60% 70% 80% 90% 100%
+> Accuracy
+> c
+> Neural-BP
+> Transformer NTU Scratch
+> [[144,12,12]]
+> 044 50 55 58 62 66 69 74 81 143
+> Detector errors
+> 0% 20% 40% 60% 80% 100%
+> Accuracy
+> b
+> [[72,12,6]]
+> p= 5 × 10 −3
+> BP+OSD Relay BP
+> Neural-BP
+> Transformer Sample fraction
+
+FIG. 3. Performance evaluation and transfer learning dynamics on non-local BB codes. a, Logical error rates evaluated on the fundamental [[72 , 12 , 6]] base code. The NTU -Transformer strictly outperforms standard BP+OSD and achieves comparable performance against advanced multi-stage RelayBP across all tested physical error rates p. b, Decoding accuracy resolved by the number of detector errors at a fixed physical error rate of p = 0 .5%. The background histogram indicates the sample fraction for each error-weight bin. While traditional heuristics experience sharp performance drops in the high-detector-error regime due to massive syndrome degeneracy, the neural decoder sustains robust accuracy. c, Training convergence on the [[144 , 12 , 12]] code. Validation accuracy is tracked over the initial training steps to highlight the cold-start phase. Networks initialized from scratch (empty triangles) languish in a prolonged optimization plateau. Conversely, transferring the local perception backbones (solid circles) allows both the NTU -Transformer and NTU -Neural-BP to successfully bypass this initial optimization trap, yielding drastically accelerated convergence. 
+
+A. Surface codes 
+
+The first task applies NTU -Transformer to planar rotated surface codes, [[ d2, 1, d ]], using a standard Z-basis memory experiment [18, 22]. To understand how NTU -Transformer scales as a foundation decoder, we increase the code distance 
+
+d from 7 to 19 (97–721 physical qubits) and compare it with three leading decoders: minimum-weight perfect matching (MWPM) using PyMatching, its correlated-noise variant (MWPM-Corr), and Tesseract [48–50]. The logical error per round (LER) [18], i.e., the fraction of experiments in which the decoder would fail per syndrome-extraction round, measures the performance. Unless otherwise specified, all experiments use R = d syndrome-extraction rounds, with samples generated by Stim [51] under a circuit-level depolarizing noise model with uniform physical error rate p.Following the transfer pipeline introduced above, NTU -Transformer contains approximately 32 million trainable parameters. For d = 7 , 11 , 15 , 19, it is trained with 4 .1 × 10 7, 5 .7 × 10 7, 1 .3 × 10 8, and 2 .9 × 10 8 samples under 10 4,1.4 × 10 4, 3 .2 × 10 4, and 7 .1 × 10 4 iterations, respectively. The scaling of the LER of NTU -Transformer with code distance d at p = 0 .3% is shown in Fig. 2a. Evaluation is performed on on-the-fly test examples, where each syndrome sample is generated during evaluation rather than drawn from a fixed pre-generated test set. In this setting, NTU -Transformer outperforms both MWPM-Corr and MWPM across the tested distances. For example, at d = 19, it reaches an LER of 1 .1 × 10 −8, compared with 1 .3 × 10 −8
+
+for MWPM-Corr and 1 .6 × 10 −7 for MWPM. Although Tesseract can reach higher accuracy, it relies on hypergraph-based shortest-path heuristics whose computational cost becomes increasingly demanding at larger code distances. We therefore use its extrapolated results beyond d = 9 as a reference rather than as a scalable decoding baseline. These results establish NTU -Transformer as a scalable foundation decoder for high-accuracy surface-code decoding at large distances. To further characterize the decoding performance in the high-detector-weight regime, we perform a refined analysis at d = 19. To this end, we set the physical error rate to p = 0 .5%, which increases the occurrence of higher-weight 7detector-error events and more complex syndrome patterns. Figure 2b reports the decoding accuracy as a function of detector-error weight, using 7 .5 × 10 6 on-the-fly syndrome samples with comparable fractions across the tested weight bins. Across all weights, NTU -Transformer achieves higher decoding accuracy over d rounds than MWPM, and the advantage becomes more pronounced in the high-weight regime. For example, at weight 772, NTU -Transformer reaches an accuracy of approximately 99 .90%, compared with 99 .82% for MWPM. These results indicate that NTU -Transformer captures non-local syndrome correlations that are essential for high-accuracy decoding at large code distances, attributed to the tailored global attention mechanism. We next examine whether NTU reduces the computational barrier of train-from-scratch foundation decoding. To this end, we train the same NTU -Transformer architecture either with sequential transfer adaptation or from scratch, using matched hyperparameters and training budgets. Figure 2c shows that NTU -Transformer reaches near-saturated accuracy (i.e., > 99%) within 750 steps for d = 11 , 15 , 19. In contrast, scratch training enters a cold-start plateau that worsens with distance: even after another 1250 steps, it reaches only 92 .7%, 71 .8%, and 50 .0% accuracy at d = 11, 15, 19, respectively. This gap identifies cold-start optimization as a key barrier in large-distance neural decoding and shows that NTU alleviates it through cross-distance transfer.  
+
+> B. BB codes
+
+The second task applies NTU to BB codes, extending the evaluation beyond planar geometries. To provide a com-prehensive comparison, we benchmark against standard BP+OSD [52] and representative Relay-family decoders [53], including Relay-BP and Relay-2D. As in the surface-code experiments, all experiments use R = d syndrome-extraction rounds, with samples generated under a circuit-level depolarizing noise model with uniform physical error rate p. De-coder performance is again reported as LER. For BB codes, a logical failure is counted when the residual error after applying the predicted recovery induces a non-trivial logical operator. To systematically assess the effect of the neural backbone, we evaluate both NTU -Transformer and NTU -Neural-BP on the same BB-code decoding tasks. We begin by benchmarking NTU on the [[72 , 12 , 6]] BB code across all noise levels. Each NTU decoder uses a fixed architecture and parameter count across all test configurations, approximately 3 .6 × 10 7 for NTU -Transformer and 3 .0 × 10 5 for NTU -Neural-BP. For each physical error rate p ∈ { 0.1, 0.2, 0.3, 0.4, 0.5}%, the models are trained separately for 1 .5 × 10 4 update steps, corresponding to 6 .1 × 10 7 and 3 .1 × 10 7 on-the-fly syndrome samples for NTU -Transformer and NTU -Neural-BP, respectively. The results are shown in Fig. 3a. The two NTU -based decoders exhibit distinct behavior: NTU -Neural-BP improves over standard BP+OSD, but still shows a noticeable gap to the stronger Relay-family baselines. When p = 0 .1%, the LERs are 4 .3 × 10 −6, 1 .2 × 10 −6, and 3 .5 × 10 −7 for NTU -Neural-BP, Relay-2d and Relay-BP, respectively. In contrast, NTU -Transformer outperforms all reference decoders under small tested physical error rates, reaching an LER of 1 .8 × 10 −7 with a standard deviation of 8 .5 × 10 −8 at p = 0 .001. We then probe the decoding mechanism of NTU -Transformer and NTU -Neural-BP on the [[72 , 12 , 6]] BB code. As with the surface-code analysis, Fig. 3b reports decoding accuracy as a function of detector-error weight at p = 0 .5%, evaluated over 10 6 on-the-fly syndrome samples. Standard BP-based decoders such as BP+OSD degrade more rapidly in the high-weight regime, where syndrome patterns become more degenerate and correlated. By contrast, NTU -Transformer maintains good performance across the tested weight bins, e.g., it reaches 97 .8% accuracy at detector-error [81 , 143), compared with 85 .7% for BP+OSD. This indicates that NTU -Transformer captures non-local syndrome correlations induced by the quasi-cyclic structure of BB codes, extending its high-weight robustness beyond planar geometries. We lastly examine whether the scale invariance exploited by NTU reduces the training barrier when the BB code is scaled. Figure 3c illustrates the training dynamics when transferring from the [[72 , 12 , 6]] BB code to the larger [[144 , 12 , 12]] BB code. With random initialization, both neural backbones enter a cold-start plateau, reaching only 52 .5% accuracy for NTU -Transformer and 59 .7% accuracy for NTU -Neural-BP after 1500 training steps. By contrast, 
+
+NTU initializes the larger-code decoder from the optimized [[72 , 12 , 6]] decoder and rapidly reaches high decoding accuracy: NTU -Transformer reaches 93 .1% accuracy within 2500 steps, and NTU -Neural-BP reaches 95 .3% accuracy within 500 steps. The effect appears for both neural backbones, indicating that NTU reuses algebraically matched decoding representations rather than relying on a backbone-specific shortcut. These results show that NTU mitigates the large-distance training barrier across both planar and quasi-cyclic quantum memory architectures.  
+
+> IV. DISCUSSION
+
+We have presented NTU , a novel transfer-learning framework for constructing foundation decoders that scale across code distances. By exploiting scale invariance in scalable code families, NTU converts distance-dependent syndrome 8data into reusable decoding representations, replacing repeated large-distance optimization with cross-distance trans-fer. This moves neural decoding beyond prior curriculum-like learning and directly addresses the scaling barrier of foundation decoding. Instantiated as NTU -Transformer, the framework achieves high-accuracy decoding for planar surface codes up to [[361 , 1, 19]] and extends to BB codes, outperforming leading baseline decoders while substan-tially reducing computational overhead. These results suggest a shift from distance-specific neural decoders towards reusable foundation decoders for fault-tolerant quantum computation. Our study points to broader research directions in which AI can advance scalable foundation decoding and create new opportunities for quantum error correction [54–56]. Several important avenues remain to be explored. The first is to identify scale invariance in broader families of quantum codes and design corresponding NTU backbones. Beyond surface and BB codes, many promising code families, such as hypergraph-product codes [42], lifted-product codes [41], and Floquet codes [57, 58], possess algebraic, geometric, or temporal structures that may be reused across code sizes. Extending NTU to these structures would broaden foundation decoding from the code families studied here to a wider class of scalable QEC architectures. Moreover, it is crucial to explore how foundation decoders can be used to achieve real-time decoding [59–61]. A natural route is to compress high-capacity foundation decoders into lightweight models through hardware-aware techniques such as knowledge distillation, quantization, and network pruning [62]. However, these model-compression techniques rely on powerful foundation decoders that provide reliable supervision signals and reveal the relevant syndrome structure [35, 36]. To the best of our knowledge, NTU is the first open-source foundation decoder for QEC, providing a practical starting point for systematic real-time decoder optimization. Another important direction is to build foundation decoders for logical circuits beyond quantum memory exper-iments [63]. Recent progress has begun to move neural decoding from memory benchmarks towards circuit-level logical operations [64]. However, prior studies remain limited to relatively small code distances, fixed logical gate sets, and specific circuit families, and their accuracy–runtime trade-off still depends on task-specific training and architecture design. This leaves open how to construct foundation decoders that generalize across logical operations, code distances, and syndrome-extraction schedules. NTU with a circuit-aware transfer could address this limitation and provide a unified neural backbone for fault-tolerant quantum processors. 
+
+[1] P. W. Shor, Fault-tolerant quantum computation, in Proceedings of 37th conference on foundations of computer science 
+
+(IEEE, 1996) pp. 56–65. [2] A. M. Steane, Efficient fault-tolerant quantum computing, Nature 399 , 124 (1999). [3] E. T. Campbell, B. M. Terhal, and C. Vuillot, Roads towards fault-tolerant universal quantum computation, Nature 549 ,172 (2017). [4] D. Gottesman, An introduction to quantum error correction and fault-tolerant quantum computation, arXiv preprint arXiv:0904.2557 (2009). [5] B. M. Terhal, Quantum error correction for quantum memories, Reviews of Modern Physics 87 , 307 (2015). [6] J. Roffe, Quantum error correction: an introductory guide, Contemporary Physics 60 , 226 (2019). [7] P. W. Shor, Scheme for reducing decoherence in quantum computer memory, Physical Review A 52 , R2493 (1995). [8] A. M. Steane, Error correcting codes in quantum theory, Physical Review Letters 77 , 793 (1996). [9] D. Gottesman, Stabilizer codes and quantum error correction (California Institute of Technology, 1997). [10] H. Bombin and M. A. Martin-Delgado, Topological quantum distillation, Physical review letters 97 , 180501 (2006). [11] A. Y. Kitaev, Fault-tolerant quantum computation by anyons, Annals of Physics 303 , 2 (2003). [12] E. Dennis, A. Kitaev, A. Landahl, and J. Preskill, Topological quantum memory, Journal of Mathematical Physics 43 ,4452 (2002). [13] A. G. Fowler, M. Mariantoni, J. M. Martinis, and A. N. Cleland, Surface codes: Towards practical large-scale quantum computation, Physical Review A—Atomic, Molecular, and Optical Physics 86 , 032324 (2012). [14] D. S. Wang, A. G. Fowler, and L. C. Hollenberg, Surface code quantum computing with error rates over 1%, Physical Review A—Atomic, Molecular, and Optical Physics 83 , 020302 (2011). [15] S. Bravyi, A. W. Cross, J. M. Gambetta, D. Maslov, P. Rall, and T. J. Yoder, High-threshold and low-overhead fault-tolerant quantum memory, Nature 627 , 778 (2024). [16] L. Egan, D. M. Debroy, C. Noel, A. Risinger, D. Zhu, D. Biswas, M. Newman, M. Li, K. R. Brown, M. Cetina, and C. Monroe, Fault-tolerant control of an error-corrected qubit, Nature 598 , 281 (2021). [17] C. Ryan-Anderson, J. G. Bohnet, K. Lee, D. Gresh, A. Hankin, J. P. Gaebler, D. Francois, A. Chernoguzov, D. Lucchetti, N. C. Brown, et al. , Realization of real-time fault-tolerant quantum error correction, Physical Review X 11 , 041058 (2021). [18] G. Q. AI, Suppressing quantum errors by scaling a surface code logical qubit, Nature 614 , 676 (2023). [19] D. Bluvstein et al. , Logical quantum processor based on reconfigurable atom arrays, Nature 626 , 58 (2024). [20] J. Bausch, A. W. Senior, F. J. Heras, T. Edlich, A. Davies, M. Newman, C. Jones, K. Satzinger, M. Y. Niu, S. Blackwell, 
+
+et al. , Learning high-accuracy error decoding for quantum processors, Nature 635 , 834 (2024). [21] N. Lacroix, A. Bourassa, F. J. Heras, L. M. Zhang, J. Bausch, A. W. Senior, T. Edlich, N. Shutty, V. Sivak, A. Bengtsson, 9
+
+et al. , Scaling and logic in the color code on a superconducting quantum processor, Nature , 1 (2025). [22] G. Q. AI and Collaborators, Quantum error correction below the surface code threshold, Nature 638 , 920 (2025). [23] S. Bravyi, M. Suchara, and A. Vargo, Efficient algorithms for maximum likelihood decoding in the surface code, Physical Review A 90 , 032326 (2014). [24] N. Sundaresan, T. J. Yoder, Y. Kim, M. Li, E. H. Chen, G. Harper, T. Thorbeck, A. W. Cross, A. D. C´ orcoles, and M. Takita, Demonstrating multi-round subsystem quantum error correction using matching and maximum likelihood decoders, Nature Communications 14 , 2852 (2023). [25] H. Cao, G. Yan, Y. Du, and F. Pan, Maximum likelihood decoding of quantum error correction codes, arXiv preprint arXiv:2605.17230 (2026). [26] D. J. MacKay, G. Mitchison, and P. L. McFadden, Sparse-graph codes for quantum error correction, IEEE Transactions on Information Theory 50 , 2315 (2004). [27] D. Poulin and Y. Chung, On the iterative decoding of sparse quantum codes, arXiv preprint arXiv:0801.1241 (2008). [28] H. Yao, W. A. Laban, C. H¨ ager, A. G. i Amat, and H. D. Pfister, Belief propagation decoding of quantum ldpc codes with guided decimation, in 2024 IEEE International Symposium on Information Theory (ISIT) (IEEE, 2024) pp. 2478–2483. [29] J. Edmonds, Paths, trees, and flowers, Canadian Journal of mathematics 17 , 449 (1965). [30] Y. Wu and L. Zhong, Fusion blossom: Fast mwpm decoders for qec, in 2023 IEEE international conference on quantum computing and engineering (QCE) , Vol. 1 (IEEE, 2023) pp. 928–938. [31] O. Higgott and C. Gidney, Sparse blossom: correcting a million errors per core second with minimum-weight matching, Quantum 9, 1600 (2025). [32] G. Torlai and R. G. Melko, Neural decoder for topological codes, Physical review letters 119 , 030501 (2017). [33] K. Meinerz, C.-Y. Park, and S. Trebst, Scalable neural decoder for topological surface codes, Physical Review Letters 128 ,080505 (2022). [34] X. Ni, Neural network decoders for large-distance 2d toric codes, Quantum 4, 310 (2020). [35] G. Yan, S. Li, and Y. Du, Rethink the role of neural decoders in quantum error correction, arXiv preprint arXiv:2605.12046 (2026). [36] A. Gu, J. Ataides, M. D. Lukin, and S. F. Yelin, Scalable neural decoders for practical fault-tolerant quantum computation, arXiv preprint arXiv:2604.08358 (2026). [37] Y. Bengio, J. Louradour, R. Collobert, and J. Weston, Curriculum learning, in Proceedings of the 26th Annual International Conference on Machine Learning (Association for Computing Machinery, 2009) pp. 41–48. [38] T. Maurer, M. B¨ uhler, M. Kr¨ oner, F. Haverkamp, T. M¨ uller, D. Vandeth, and B. R. Johnson, Real-time decoding of the gross code memory with fpgas, arXiv preprint arXiv:2510.21600 (2025). [39] A. R. Calderbank and P. W. Shor, Good quantum error-correcting codes exist, Physical Review A 54 , 1098 (1996). [40] A. Steane, Multiple-particle interference and quantum error correction, Proceedings of the Royal Society of London. Series A: Mathematical, Physical and Engineering Sciences 452 , 2551 (1996). [41] N. P. Breuckmann and J. N. Eberhardt, Quantum low-density parity-check codes, PRX quantum 2, 040101 (2021). [42] P. Panteleev and G. Kalachev, Quantum ldpc codes with almost linear minimum distance, IEEE Transactions on Infor-mation Theory 68 , 213 (2021). [43] S. J. Pan and Q. Yang, A survey on transfer learning, IEEE Trans. on Knowl. and Data Eng. 22 , 1345 (2010). [44] A. Vaswani, N. Shazeer, N. Parmar, J. Uszkoreit, L. Jones, A. N. Gomez, L. Kaiser, and I. Polosukhin, Attention is all you need, Advances in neural information processing systems 30 (2017). [45] R. Sadhukhan, S. Cao, H. Dong, C. Zhao, A. Purpura-Pontoniere, Y. Tian, Z. Liu, and B. Chen, Stem: Scaling transformers with embedding modules, arXiv preprint arXiv:2601.10639 (2026). [46] J. Su, M. Ahmed, Y. Lu, S. Pan, W. Bo, and Y. Liu, Roformer: Enhanced transformer with rotary position embedding, Neurocomputing 568 , 127063 (2024). [47] Y.-H. Liu and D. Poulin, Neural belief-propagation decoders for quantum error-correcting codes, Physical review letters 
+
+122 , 200501 (2019). [48] O. Higgott, Pymatching: A python package for decoding quantum codes with minimum-weight perfect matching, ACM Transactions on Quantum Computing 3, 1 (2022). [49] O. Higgott, T. C. Bohdanowicz, A. Kubica, S. T. Flammia, and E. T. Campbell, Improved decoding of circuit noise and fragile boundaries of tailored surface codes, Physical Review X 13 , 031007 (2023). [50] L. Aghababaie Beni, O. Higgott, and N. Shutty, Tesseract: A search-based decoder for quantum error correction (2025), arXiv:2503.10988 [quant-ph]. [51] C. Gidney, Stim: a fast stabilizer circuit simulator, Quantum 5, 497 (2021). [52] J. Roffe, D. R. White, S. Burton, and E. Campbell, Decoding across the quantum low-density parity-check code landscape, Physical Review Research 2, 043423 (2020). [53] T. M¨ uller, T. Alexander, M. E. Beverland, M. B¨ uhler, B. R. Johnson, T. Maurer, and D. Vandeth, Improved belief propagation is sufficient for real-time decoding of quantum memory, arXiv preprint arXiv:2506.01779 (2025). [54] Z. Wang and H. Tang, Artificial intelligence for quantum error correction: A comprehensive review, arXiv preprint arXiv:2412.20380 (2024). [55] Y. Alexeev, M. H. Farag, T. L. Patti, M. E. Wolf, N. Ares, A. Aspuru-Guzik, S. C. Benjamin, Z. Cai, S. Cao, C. Cham-berland, et al. , Artificial intelligence for quantum computing, Nature Communications 16 , 10829 (2025). [56] Y. Du, Y. Zhu, Y.-H. Zhang, M.-H. Hsieh, P. Rebentrost, W. Gao, Y.-D. Wu, J. Eisert, G. Chiribella, D. Tao, et al. ,Artificial intelligence for representing and characterizing quantum systems, arXiv preprint arXiv:2509.04923 (2025). [57] M. B. Hastings and J. Haah, Dynamically generated logical qubits, Quantum 5, 564 (2021). 10 
+
+[58] M. Davydova, N. Tantivasadakarn, and S. Balasubramanian, Floquet codes without parent subsystem codes, PRX Quantum 
+
+4, 020341 (2023). [59] L. Skoric, D. E. Browne, K. M. Barnes, N. I. Gillespie, and E. T. Campbell, Parallel window decoding enables scalable fault tolerant quantum computation, Nature Communications 14 , 7040 (2023). [60] E. Campbell, A series of fast-paced advances in quantum error correction, Nature Reviews Physics 6, 160 (2024). [61] B. Barber, K. M. Barnes, T. Bialas, O. Bu˘ gdaycı, E. T. Campbell, N. I. Gillespie, K. Johar, R. Rajan, A. W. Richardson, L. Skoric, et al. , A real-time, scalable, fast and resource-efficient decoder for a quantum computer, Nature Electronics 8,84 (2025). [62] Y. Cheng, D. Wang, P. Zhou, and T. Zhang, Model compression and acceleration for deep neural networks: The principles, progress, and challenges, IEEE Signal Processing Magazine 35 , 126 (2018). [63] H. Zhou, M. Cain, and M. D. Lukin, Opportunities in full-stack design of low-overhead fault-tolerant quantum computation, Nature Computational Science 5, 1110 (2025). [64] Y. Zhou, C. Wan, Y. Xu, J. P. Zhou, K. Q. Weinberger, and E.-A. Kim, Learning to decode logical circuits, Nature Computational Science , 1 (2025). [65] N. Delfosse and N. H. Nickerson, Almost-linear time decoding algorithm for topological codes, Quantum 5, 595 (2021). [66] S. Huang, M. Newman, and K. R. Brown, Fault-tolerant weighted union-find decoding on the toric code, Physical Review A 102 , 012419 (2020). [67] P. Panteleev and G. Kalachev, Degenerate quantum ldpc codes with good finite length performance, Quantum 5, 585 (2021). [68] S. Krastanov and L. Jiang, Deep neural network probabilistic decoder for stabilizer codes, Scientific reports 7, 11003 (2017). [69] S. Varsamopoulos, B. Criger, and K. Bertels, Decoding small surface codes with feedforward neural networks, Quantum Science and Technology 3, 015004 (2017). [70] A. S. Maan and A. Paler, Machine learning message-passing for the scalable decoding of qldpc codes, npj Quantum Information 11 , 78 (2025). [71] A. S. Bhave, N. Choudhury, and K. Basu, Hypernq: A hypergraph neural network decoder for quantum ldpc codes, arXiv preprint arXiv:2511.01741 (2025). [72] S. Varsamopoulos, K. Bertels, and C. G. Almudever, Comparing neural network based decoders for the surface code, IEEE Transactions on Computers 69 , 300 (2019). [73] P. Baireuther, T. E. O’Brien, B. Tarasinski, and C. W. Beenakker, Machine-learning-assisted correction of correlated qubit errors in a topological code, Quantum 2, 48 (2018). [74] B. M. Varbanov, M. Serra-Peralta, D. Byfield, and B. M. Terhal, Neural network decoder for near-term surface-code experiments, Physical Review Research 7, 013029 (2025). [75] A. W. Senior, T. Edlich, F. J. Heras, L. M. Zhang, O. Higgott, J. S. Spencer, T. Applebaum, S. Blackwell, J. Led-ford, A. ˇZemgulyt˙ e, et al. , A scalable and real-time neural decoder for topological quantum codes, arXiv preprint arXiv:2512.07737 (2025). [76] M. Lange, P. Havstr¨ om, B. Srivastava, I. Bengtsson, V. Bergentall, K. Hammar, O. Heuts, E. van Nieuwenburg, and M. Granath, Data-driven decoding of quantum error correcting codes using graph neural networks, Physical Review Research 7, 023181 (2025). [77] G. Hu, W. Ouyang, C.-Y. Lu, C. Lin, and H.-S. Zhong, Efficient and universal neural-network decoder for stabilizer-based quantum error correction, arXiv preprint arXiv:2502.19971 (2025). [78] H. Wang, P. Liu, K. Shao, D. Li, J. Gu, D. Z. Pan, Y. Ding, and S. Han, Transformerqec: Transferable transformer for quantum error correction code decoding, in IEEE/ACM International Conference on Computer-Aided Design (ICCAD), FastML for Science Workshop (2023). [79] H. Cao, F. Pan, Y. Wang, and P. Zhang, qecgpt: decoding quantum error-correcting codes with generative pre-trained transformers, arXiv preprint arXiv:2307.09025 (2023). [80] X. Mi and F. Mueller, Toward uncertainty-aware and generalizable neural decoding for quantum ldpc codes, arXiv preprint arXiv:2510.06257 (2025). [81] J. Yosinski, J. Clune, Y. Bengio, and H. Lipson, How transferable are features in deep neural networks?, in Proceedings of the 28th International Conference on Neural Information Processing Systems - Volume 2 (MIT Press, 2014) pp. 3320–3328. [82] K. He, R. Girshick, and P. Dollar, Rethinking imagenet pre-training, in 2019 IEEE/CVF International Conference on Computer Vision (ICCV) (2019) pp. 4917–4926. [83] A. R. Zamir, A. Sax, W. Shen, L. J. Guibas, J. Malik, and S. Savarese, Taskonomy: Disentangling task transfer learning, in 2018 IEEE/CVF Conference on Computer Vision and Pattern Recognition (IEEE, 2018) pp. 3712–3722. [84] T. Chen, I. Goodfellow, and J. Shlens, Net2net: Accelerating learning via knowledge transfer, in International Conference on Learning Representations (ICLR) (2016). [85] P. Panteleev and G. Kalachev, Asymptotically good quantum and locally testable classical ldpc codes, in Proceedings of the 54th annual ACM SIGACT symposium on theory of computing (2022) pp. 375–388. [86] S. Bravyi, D. Poulin, and B. Terhal, Tradeoffs for reliable quantum information storage in 2d systems, Physical review letters 104 , 050503 (2010). [87] K. Cho, B. van Merri¨ enboer, C. Gulcehre, D. Bahdanau, F. Bougares, H. Schwenk, and Y. Bengio, Learning phrase representations using RNN encoder–decoder for statistical machine translation, in Proceedings of the 2014 Conference on Empirical Methods in Natural Language Processing (EMNLP) (2014) pp. 1724–1734. [88] J. Devlin, M.-W. Chang, K. Lee, and K. Toutanova, Bert: Pre-training of deep bidirectional transformers for language understanding, in Proceedings of the 2019 Conference of the North American Chapter of the Association for Computational 11 
+
+Linguistics: Human Language Technologies (2019) pp. 4171–4186. [89] J. Lee, Y. Lee, J. Kim, A. Kosiorek, S. Choi, and Y. W. Teh, Set transformer: A framework for attention-based permutation-invariant neural networks, in Proceedings of the 36th International Conference on Machine Learning (ICML) (2019) pp. 3744–3753. [90] T.-Y. Lin, P. Goyal, R. Girshick, K. He, and P. Doll´ ar, Focal loss for dense object detection, in Proceedings of the IEEE International Conference on Computer Vision (ICCV) (2017) pp. 2999–3007. [91] D. Ruiz, J. Guillaud, A. Leverrier, M. Mirrahimi, and C. Vuillot, Ldpc-cat codes for low-overhead quantum computing in 2d, Nature Communications 16 , 1040 (2025). [92] J. Kaplan, S. McCandlish, T. Henighan, T. B. Brown, B. Chess, R. Child, S. Gray, A. Radford, J. Wu, and D. Amodei, Scaling laws for neural language models (2020), arXiv:2001.08361 [cs.LG]. [93] N. Srivastava, G. Hinton, A. Krizhevsky, I. Sutskever, and R. Salakhutdinov, Dropout: A simple way to prevent neural networks from overfitting, Journal of Machine Learning Research 15 , 1929 (2014). 12 
+
+> CONTENTS
+
+I. INTRODUCTION 1II. RESULTS 3A. Scale invariance in QEC 3B. Framework of NTU 3C. Implementation of NTU -Transformer 5III. Experimental results 5A. Surface codes 6B. BB codes 7IV. DISCUSSION 7References 8A. Preliminary 12 1. Surface code 13 2. Bivariate bicycle codes 13 3. Neural decoders and foundation decoders 14 4. Transfer learning 16 B. Details of the NTU Framework 16 C. Implementation details of NTU -Transformer 18 1. Implementation details of core components in NTU -Transformer 18 2. Mid-round supervision via classical distillation 21 D. Implementation details of NTU -Neural-BP 21 1. Implementation details of core components in NTU -Neural-BP 21 2. Training: physical error inference and syndrome consistency 23 E. Experimental details 23 1. Evaluation metrics 24 2. Experimental setup for surface code 25 3. Experimental setup for BB code 26 F. Extended experimental results 27 1. Extended training compute scaling 27 2. Cold-start in scratch training 28 3. Structural ablation of NTU -Transformer 29 4. Transfer from under-converged source checkpoints 31 The organization of the Supplementary Information (SI) is as follows. In SI A, we briefly recap the necessary background on surface and BB codes, their classical and neural decoders, and transfer learning. After that, we elaborate on the NTU framework in SI B. The implementation details of its two instantiations, NTU -Transformer and 
+
+NTU -Neural-BP, are provided in SI C and D, respectively. SI E specifies the evaluation metrics, training protocols, and baselines. SI F presents more simulation results. 
+
+> SI A: Preliminary
+
+This section collects the background used throughout the SI. Specifically, SI A 1 and SI A 2 briefly introduce the rotated surface code and bivariate bicycle codes, together with their conventional decoders. SI A 3 then reviews neural decoders for these two code families, and SI A 4 summarizes the transfer-learning ingredients that NTU builds on. 13  
+
+> 1. Surface code
+
+Code construction. The rotated surface code encodes a single logical qubit, k = 1, in n = d2 data qubits on a two-dimensional lattice, where d is the code distance. As shown in Fig. 1a, weight-four X- and Z-type stabilizers tile alternating plaquettes in a checkerboard pattern, so each bulk check couples only to nearby data qubits. This planar locality makes surface codes well suited to superconducting hardware with limited qubit connectivity. However, it also limits their encoding efficiency: increasing the code distance requires the number of data qubits to grow quadratically. For a distance-d memory experiment, the syndrome-extraction circuit is repeated for R rounds. Each detector 
+
+v ∈ D d is a binary parity of selected measurement outcomes, typically comparing stabilizer measurements across rounds, and is assigned a spacetime coordinate v = xiyj tr , where x and y index the lattice and t indexes the measurement round. Thus, Dd spans a three-dimensional syndrome volume with md = |D d| = O(d2R) detectors, and decoding requires reasoning over this full spacetime volume rather than over a single round. 
+
+Conventional decoders. Conventional matching-based decoders operate on a detector graph derived from Dd and the detector error model (DEM) [51]. In this graph, nodes correspond to detectors in Dd, and edges correspond to graphlike fault mechanisms. A detector fires in a given shot when its associated measurement parity is nonzero. The DEM further specifies the edge weights and logical-observable effects used by the decoder to infer a correction. Matching-based decoding then proceeds as follows. From the multi-round syndrome Sd ∈ Fmd 
+
+> 2
+
+, with one bit per detector and md = |D d|, the decoder returns an estimated fault-edge vector ˆ e ∈ FM 
+
+> 2
+
+, where M is the number of graphlike fault edges considered by the decoder. The associated logical prediction is obtained from the logical-observable map L ∈ F1×M 
+
+> 2
+
+, a fixed binary row vector specified by the same DEM, i.e., ˆyd = Lˆe ∈ { 0, 1}.
+
+The true label yd ∈ { 0, 1} is the logical observable value produced by the simulator for the same shot. A shot is counted as a logical failure when ˆ yd̸ = yd, and averaging this event over shots, followed by the per-round rescaling in SI E 1, gives the logical error per round (LER). The baselines below differ only in how they choose ˆ e, and all share the readout ˆ yd = Lˆe (Fig. 2a). 
+
+MWPM. Minimum-weight perfect matching (MWPM) pairs detection events through paths on the spacetime detec-tor graph, with edge weights determined by the log-likelihoods of the corresponding fault mechanisms. The decoder returns the minimum-weight set of paths, including possible boundary connections, that explains the observed syn-drome [29]. This path set defines ˆ e, from which the predicted logical flip is read out as ˆ yd = Lˆe. Here we implement MWPM by using the sparse PyMatching backend [31, 48]. 
+
+Correlated MWPM. A single circuit-level fault, such as a Y error, can flip both X- and Z-type detectors, whereas plain MWPM treats the corresponding matching problems independently. Correlated MWPM (MWPM-Corr) incorporates these cross-type correlations by reweighting edges before a second matching pass [49]. The resulting matched paths define ˆ e, and the logical prediction is again obtained from Lˆe. This improves accuracy while remaining within the matching paradigm. Here we implement MWPM-Corr by using the sparse Correlated PyMatching backend [31, 48]. 
+
+Union-find. Union-find replaces global matching by growing and merging clusters of detection events on the same spacetime detector graph until each cluster can be locally corrected or connected to a boundary [65, 66]. The union of these local corrections defines ˆ e, and the logical prediction is computed as before. Union-find has near-linear runtime and low latency, trading accuracy for speed relative to optimized matching.  
+
+> 2. Bivariate bicycle codes
+
+Code construction. Bivariate bicycle (BB) codes are quantum low-density parity-check (qLDPC) codes built over the group ring R = F2[x, y ]/⟨xℓ − 1, y m − 1⟩, where ℓ and m specify the two cyclic dimensions of the code, and x and 
+
+y act as translations along them [15]. Two sparse polynomials A, B ∈ R define the CSS check matrices 
+
+HX = [ A B ], HZ = [ BT AT ], (A1) where the transpose denotes the group-ring involution. Because the polynomial shifts commute over R, this construc-tion satisfies the CSS condition HX HTZ = 0 over F2. The rows of HX and HZ define the X- and Z-type stabilizer checks, respectively. For the BB codes considered here, the generators A and B each contain three monomials, so each row of HX and HZ has weight six. Thus, unlike the weight-four local checks of the surface code in SI A 1, BB checks are sparse but connect qubits through non-local cyclic shifts. This algebraic construction gives BB codes a different scaling structure from planar surface codes. Whereas a rotated surface code encodes one logical qubit using n = d2 data qubits, the BB instances studied here encode 14 multiple logical qubits, including the [[72 , 12 , 6]] and [[144 , 12 , 12]] codes, using n = 2 ℓm data qubits. Increasing the cyclic dimensions ℓ and m enlarges the code while keeping the polynomial generators fixed. As shown in Fig. 1a, the relative algebraic relations that define the detector neighborhoods repeat across sizes, providing the BB analogue of the scale-invariant decoding structure used by NTU .
+
+Conventional decoders. BB-code decoding is naturally formulated on a sparse spacetime Tanner graph derived from the circuit-level DEM. One node set corresponds to detectors Dd across all syndrome-extraction rounds, and the other to M circuit-level fault mechanisms; an edge indicates that a fault mechanism flips the corresponding detector. We represent this graph by the detector–fault incidence matrix HDEM ∈ Fmd×M 
+
+> 2
+
+. Multiplication by HDEM maps a fault vector to the detector syndrome it would produce, so decoding seeks an estimate ˆ e ∈ F2M satisfying HDEM ˆe = Sd
+
+for the observed multi-round syndrome Sd ∈ Fmd 
+
+> 2
+
+. The graph inherits the sparse algebraic structure of HX and HZ
+
+in Eq. (A1), while also incorporating timelike detector relations and measurement faults across syndrome-extraction rounds. The logical prediction is obtained from the DEM logical-observable map, ˆ yd = Lˆe, where L ∈ Fk×M 
+
+> 2
+
+has one row per logical observable. For the [[72 , 12 , 6]] BB code, k = 12, so ˆ yd ∈ F12 2 predicts all logical observables simultaneously. Because multiple logical qubits are encoded, we report the per-round, per-logical-qubit logical error rate ϵLQ defined in SI E 1. The BB baselines in Fig. 3a differ in how they estimate ˆ e, while sharing this logical readout. 
+
+Belief propagation. Belief propagation (BP) iterates check-to-variable and variable-to-check messages on the DEM Tanner graph to estimate the posterior reliability of each fault mechanism [26, 27, 52]. A hard decision on these reliabilities gives an estimated fault vector ˆ e, from which the logical prediction is read out as ˆ yd = Lˆe. The cost scales with the number of message-passing iterations and the number of graph edges. In qLDPC codes, short cycles in the Tanner graph and stabilizer degeneracy can prevent standard BP from producing a syndrome-consistent estimate, motivating the post-processing methods below. 
+
+Ordered statistics decoding. BP with ordered statistics decoding (BP+OSD) uses the soft reliabilities produced by BP to select a reliable information set and then solves the syndrome equation on a full-rank subset of columns of 
+
+HDEM , optionally searching low-order flips among the least reliable fault mechanisms [52, 67]. This post-processing can restore a syndrome-consistent estimate ˆ e when raw BP fails, after which the logical prediction is again obtained as ˆ yd = Lˆe. Its cost increases with the OSD order. 
+
+Local subgraph decoding. Local subgraph decoding (LSD) localizes the ordered-statistics search to connected subgraphs associated with the residual syndrome, rather than applying a global OSD step to the full Tanner graph [67]. When the residual syndrome decomposes into localized components, this produces a syndrome-consistent estimate ˆ e at lower cost than global OSD, with the logical readout computed as before. 
+
+RelayBP. RelayBP retains the Tanner-graph message-passing structure but augments standard BP with a multi-stage relay procedure. A global BP stage is followed by multiple relay branches with perturbed memory strengths, which helps escape degenerate fixed points that can trap standard BP on qLDPC Tanner graphs [53]. The first syndrome-consistent candidate produced by these relay branches defines ˆ e, and the logical prediction is obtained from Lˆe. With sufficient iterations and relay branches, RelayBP provides a strong conventional baseline for BB-code decoding.  
+
+> 3. Neural decoders and foundation decoders
+
+Neural decoding paradigms. Neural decoders learn a syndrome-to-error or syndrome-to-logical map from data [32, 68, 69]. Following the main text, we write such a decoder as a trainable map f (Sd; θ) with parameters θ, acting on the binary detector history Sd ∈ { 0, 1}md defined in Eq. (2). In our setting, the learning target falls into two paradigms: logical error classification and physical error inference. The former trains the network to predict the logical flip directly from the syndrome, whereas the latter trains it to infer physical-error or recovery information before applying a deterministic logical readout. These two learning paradigms correspond to the surface-code and BB-code experiments described below, respectively. 
+
+Logical error classification. In this paradigm, the neural decoder f (Sd; θ) predicts the logical flip directly, ˆyd = f (Sd; θ) ∈ Fk 
+
+> 2
+
+, (A2) where yd is the logical label associated with the observed detector history. This target does not require the decoder to identify a particular fault configuration ˆ e as introduced in SI A 1 and A 2, since many physically distinct recovery chains can have the same logical effect. Instead, the neural decoder must learn which syndrome features are relevant to the final logical parity, effectively collapsing degenerate recoveries into the same classification target. This makes logical error classification a natural formulation for surface-code memory experiments, where the main task is to decide whether a logical observable has flipped. 15 However, this formulation also imposes an architectural constraint. As the code distance increases, the detector history Sd grows with |D d|, whereas the output dimension remains fixed by the number of logical observables. Adecoder built from flattened distance-specific inputs therefore couples local syndrome recognition to a particular global detector layout, making the model size and input structure explicitly distance dependent. A scalable classifier should instead separate local syndrome feature extraction from the final logical decision stage, so that changes in the syndrome volume do not require redefining the entire model. 
+
+Physical error inference. In this paradigm, the neural decoder is trained to infer a recovery or fault estimate before applying a fixed logical readout. Formally, ˆe = f (Sd; θ) ∈ FM 
+
+> 2
+
+, with ˆyd = Lˆe, (A3) where the M output coordinates correspond to the fault mechanisms of the decoding graph, and L is the DEM logical-observable map defined in SI A 1 and SI A 2. This formulation is naturally aligned with Tanner-graph message passing, because the network can associate learnable updates with detector–fault relations and then use the fixed map L to obtain the logical prediction. It therefore provides a natural setting for neural belief-propagation decoders [47, 70, 71]. However, physical error inference also introduces a degeneracy issue. For a given detector syndrome Sd, there are generally many fault estimates ˆ e that reproduce the syndrome and have the same logical effect. Thus, unlike logical error classification, the supervised target for the neural decoder f is not unique at the level of physical or recovery configurations. A decoder based on this paradigm must therefore learn a syndrome-consistent representative whose logical class is correct, rather than a unique underlying error. 
+
+Neural architectures. The choice of neural architecture (or neural backbone) is orthogonal to the choice of learning paradigm. The two learning paradigms above specify what the neural network f is trained to predict, whereas the architecture specifies how the detector history Sd is represented and processed in f .Existing neural decoding architectures can be grouped into several broad classes. Early neural decoders used multilayer perceptrons (MLPs) on flattened syndromes [32, 68, 69]. Convolutional neural networks (CNNs) exploit spatial locality in syndrome volumes [36, 72], while recurrent models and high-capacity foundation decoders emphasize the temporal structure generated by repeated syndrome extraction [20, 73–75]. Graph-based approaches either process detector or spacetime graphs directly [76], or unroll check-to-variable message passing on the decoding graph, as in neural belief propagation [47, 70, 77]. More recently, attention-based and Transformer decoders have been introduced for neural decoding. These models treat detectors as tokens, giving the decoder a global receptive field over the syndrome history [20, 75]. For example, Transformer-QEC studies cross-distance fine-tuning by re-adapting positional encodings [78]. Beyond these mainstream architectures, further variants include hypergraph-based, generative and uncertainty-aware neural decoders [71, 79, 80]. We remark that NTU is backbone-agnostic. It can be applied to different neural architectures, provided that their learnable parameters are tied to scale-invariant detector relations, such as the relative-shift set M(x, y, t ; d) in Eq. (1), rather than to absolute detector indices. 
+
+Foundation decoders. A foundation decoder refers to a high-capacity neural decoder designed for the large-scale 
+
+regime of QEC, where the goal is to learn reusable decoding representations that remain effective at high code distances and can support downstream adaptation across related decoding tasks [20, 75]. Different neural decoders, foundation decoders emphasize the scale and generality of the learned decoder. That is, the model is trained to capture broadly reusable syndrome structure and to operate in regimes where conventional decoders may become inaccurate or computationally constrained. Technically, a foundation decoder remains a neural decoder in the sense above, i.e., a training set Td is first constructed, followed by optimizing f (Sd; θ). In addition, it can be built under either logical error classification in Eq.(A2) or physical error inference in Eq.(A3), and it can use different neural backbones. What distinguishes it from a general neural decoder is the intended role of its parameters: they should provide a reusable decoding prior for a family of related code instances. This requirement creates a computational challenge. As the code distance grows, the detector volume md increases and the model must acquire higher-capacity representations, making training from scratch at the largest distance prohibitively expensive. Existing foundation decoders address this challenge through curriculum learning, training first at small distances and progressively enlarging the code [37, 75]. However, such procedures still require substantial distance-by-distance adaptation. NTU instead constructs foundation decoders by transfer: relation-tied parameters are reused across distances, so that decoding knowledge learned at smaller distances can be amortized rather than relearned from scratch at every scale. 16  
+
+> 4. Transfer learning
+
+Parameter transfer. Transfer learning reuses knowledge from a source task to improve optimization or generalization on a related target task [43]. In neural networks, this is commonly implemented through parameter initialization. A source model is first optimized to obtain parameters θ∗, and a target model is then initialized from θ∗, or from a shape-compatible subset of these parameters, instead of random weights. The target model is subsequently fine-tuned on the target task. This procedure can accelerate convergence and improve data efficiency even when training from scratch could eventually reach comparable accuracy given sufficient data and computation [81, 82]. This effect is often attributed to hierarchical feature reuse: early and intermediate layers encode broadly reusable structure, whereas later layers are more specialized to the target objective and label space [83]. Effective parameter transfer is not automatic. It requires the transferred parameters to retain compatible roles in the source and target models. When the input structure, output space or data distribution changes, directly reusing all parameters can lead to negative transfer, in which source-specific features slow down optimization or degrade target performance. In this regard, a central challenge in transfer learning is to decide which parameters should be reused, frozen, reinitialized or fine-tuned, and how to ensure that the reused parameters represent features that remain meaningful for the target task. 
+
+Cross-distance transfer for QEC. For QEC decoding, NTU casts cross-distance scaling as exactly this source-optimization, parameter-reuse, and target-adaptation pipeline, instantiated on the datasets of the main text. Con-cretely, training the source decoder f (Sd; θ) on Td = {(S(i) 
+
+> d
+
+, y(i) 
+
+> d
+
+)}Nd 
+
+> i=1
+
+at a small, tractable distance d and transferring it to a larger code d′ > d amounts to 
+
+θ∗ = arg min  
+
+> θ
+
+L(Td; θ), θ ← θ∗, θ∗ 
+
+> d′
+
+= arg min  
+
+> θ
+
+L(Td′ ; θ), (A4) where L is the training loss of Eq. (3) and Td′ = {(S(i) 
+
+> d′
+
+, y(i) 
+
+> d′
+
+)}Nd′ 
+
+> i=1
+
+. The middle step θ ← θ∗ is the transfer itself, namely that the target optimization at d′ starts from the source optimum θ∗ rather than from random weights, with 
+
+d′ a larger lattice for surface codes or larger cyclic blocks ℓ, m for BB codes. Only the relation-tied parameters are reused, while the distance-dependent buffers are regenerated for the target code, as detailed in SI B. 
+
+Transfer with architectural scaling. Parameter transfer does not require the source and target neural networks to have identical architectures. When the target task requires greater capacity, the source network can be embedded into a larger model through function-preserving network expansion, such as Net2Net transformations [84]. These transformations widen layers or insert additional layers while initializing the enlarged model to preserve, or minimally perturb, the source function. The newly introduced parameters then provide additional capacity during fine-tuning. In this work, however, we keep the hidden dimension and depth fixed across code distances. This fixed-capacity design is a deliberate experimental control, not a requirement of NTU , and allows us to isolate the effect of relation-tied parameter transfer from the effect of increasing model size.   
+
+> SI B: Details of the NTU Framework
+
+Here we formalize the NTU framework outlined in the main text and introduce the definitions used by both decoder instantiations. We first define a scale-invariant code family and make precise the neighbourhood relations in Eq. (1). We then specify the code classes covered by the framework and state a generator-preservation condition for algebraic code families. Finally, we connect this code-level invariance to parameter sharing in neural decoders, describe architecture-agnostic ways to realize it, and present the cross-distance transfer-adaptation protocol. 
+
+Scale-invariant QEC code families. The starting point of NTU is a scalable QEC code family whose decoding problem has the same local relational structure at different code distances or block sizes. Informally, a QEC code family is scale invariant for decoding if increasing the size of the code only creates more instances of the same detector–detector and detector–qubit relations, rather than changing the rules that define those relations. In other words, the detector and qubit sets may grow with the instance index d, but the local relation template used to construct their neighborhoods should remain the same. We make this notion operational as follows. Let Dd and Qd denote the detector and qubit sets of the code instance indexed by d. Each detector v ∈ D d is assigned an algebraic or geometric coordinate v = xiyj tr , where x and y
+
+encode repeated spatial or algebraic directions and t indexes the syndrome-extraction round. The local decoding environment of v is specified by a finite set of relative shifts M(x, y, t ; d), i.e., N (v; d) = v · M (x, y, t ; d) as defined in Eq. (1). The QEC code family is scale invariant when there exists a common relative-shift template such that, for each distance d, M(x, y, t ; d) is obtained by applying this same template to the finite detector set Dd. More specifically, 17 the dependence on d in M(x, y, t ; d) only records finite-instance effects, i.e., detector types, missing neighbors at boundaries, and validity constraints imposed by the finite code geometry. If a shifted coordinate lies outside Dd or corresponds to an invalid detector type, that neighbor is removed by a validity mask. This definition also gives a practical way to identify scale invariance. One first chooses a coordinate system for the detector set, and then checks whether the neighborhood of each detector can be generated from a finite set of relative shifts that is reused across distances. For the rotated surface code, an interior detector at spacetime coordinate ( i, j, r )has the same relative pattern of nearby detectors and data-qubit fault mechanisms as an interior detector of the same type in a larger-distance code. Increasing d therefore does not change the local decoding rule; it only places more copies of this rule on a larger spacetime syndrome volume. Boundary detectors are handled by truncating the same relative-shift template to the valid detector set Dd. This repeated local detector environment is the scale invariance of the surface-code decoding problem, as illustrated in Fig. 1a. 
+
+Scope and transferability of scale-invariant families. The scale-invariant condition is a structural criterion rather than a restriction to a particular named code family. As a result, NTU can support a broad range of QEC code families whose scalable construction preserves a finite typed alphabet of decoder-relevant relations across sizes. Equivalently, after choosing suitable detector coordinates, the local detector neighbourhoods N (v; d) can be generated from a common relative-shift template, denoted by M(x, y, t ; d) after restriction to the finite instance, up to detector types and boundary truncations. This criterion covers two broad types of scalable structure. One route to this condition is geometric repetition .Regular planar topological code families, such as the rotated surface-code family studied here [12, 13], preserve their local relation alphabet because the same plaquette or cell pattern is repeated as the code distance increases. Related examples include color-code [10], subsystem-code and Floquet-code families [57, 58], whenever their stabilizer or measurement schedules preserve a finite set of detector-relation types across sizes. A second route is algebraic repetition . Here the reusable relation alphabet is generated not by a repeated geometric cell, but by a fixed algebraic generator template. BB codes described in SI A 2 provide such an example [15], i.e., increasing the cyclic dimensions while keeping the same polynomial relation pattern preserves the local Tanner-graph alphabet. In this case, generator preservation is the concrete condition that makes relation-tied neural parameters directly reusable across sizes. More generally, lifted-product, hypergraph-product and generalized lifted-product codes can fall within the same scale-invariant class when their scalable construction rules preserve such reusable algebraic relation types [41, 42, 85]. The above distinction also clarifies what lies outside the direct scope of NTU . A sequence of code instances is not scale invariant if its local detector neighborhoods cannot be generated from a common relative-shift template, either geometrically or algebraically. For example, independently optimized code instances may use different plaquette layouts, measurement schedules or algebraic generators at different sizes. Such choices may improve the code distance or the figure of merit kd 2/n [15, 86], but they can also change the relation alphabet on which the neural decoder was trained. While this does not rule out transfer in general, it weakens direct relation-tied parameter reuse and may require reinitializing, remapping or adapting relation-specific embeddings and message functions. 
+
+Relation-compatible neural representations and transfer. We now explain how NTU turns code-level scale invariance into neural parameter reuse. The key requirement is relation compatibility : learnable parameters should be tied to reusable decoder-relevant relations, rather than to absolute detector or qubit identities. In this way, these relations encode the scale-invariant structure of a given code family. As a result, the neural decoder represents syndromes Sd through relation types that retain the same meaning across code distances, allowing the corresponding parameters to be transferred. In the notation of Eq. (2), this corresponds to constructing local representations such as h(v) from relation-indexed weights. As the code is scaled, the detector and qubit sets expand, but the meaning of each relation label is preserved, allowing the learned local perception rule to be reused on the larger instance. The requirement of relation compatibility is independent of the particular neural backbone, but different architec-tures realize it through different parameter-sharing mechanisms. To be concrete, convolutional models can implement relation compatibility through shared local stencils associated with fixed relation types [36, 72]. Graph neural net-works and neural belief-propagation models implement it through shared message and update functions over node or edge relations [47, 70]. Transformer-based decoders require additional care, because absolute sequence-position embeddings [44] are tied to a particular detector ordering and do not by themselves preserve cross-distance relations. With such relation-preserving representations, the same attention blocks can operate on detector sets of different sizes while retaining access to the local relations learned at smaller distances. Given a scale-invariant code family and a relation-compatible neural architecture, NTU proceeds cross-distance transfer by separating reusable learnable parameters from distance-dependent auxiliary objects, which provides a structurally aligned initialization that avoids relearning the same decoder-relevant relations from random initialization. Following SI A 4, the source neural decoder is first trained at a smaller distance d, where syndrome generation and optimization are more tractable. Its relation-tied parameters, including embedding tables, local aggregation weights, message functions, recurrent layers, attention blocks and other shape-compatible modules, are then used to initialize 18 the target decoder at a larger distance d′ > d , following the source-to-target initialization in Eq. (A4). By contrast, non-learned objects that depend explicitly on the target size, such as coordinate maps, gather indices, sparse edge tensors, attention masks and boundary-validity masks, are regenerated from the target code description. The optimizer state is reset, and the target model is fine-tuned to adapt to boundary statistics, changed detector counts, global aggregation behavior and possible shifts in the syndrome distribution.  
+
+> SI C: Implementation details of NTU -Transformer
+
+NTU -Transformer is the Transformer instantiation of the NTU framework in SI B, specialized to the logical error classification paradigm of Eq. (A2). Here we describe its implementation details. The pipeline of NTU -Transformer is summarized in SI Fig. 1 and consists of three stages . First, topology-driven input embeddings convert the multi-round detector history Sd ∈ Fmd 
+
+> 2
+
+into detector tokens {ξd,r (v) : v ∈ D d} for subsequent recurrent and attention updates. For both surface and BB codes, the local component of ξd,r (v) is constructed from the binary syndrome pattern in the invariant neighbourhood N (v; d). Its features are therefore indexed by reusable code relations rather than absolute detector positions, following the relation-indexed representation h(v) in Eq. (2). In the second stage, a factorized spatiotemporal backbone updates the tokens {ξd,r (v)} by combining per-detector recurrent updates along the syndrome-extraction rounds with spatial Transformer layers equipped with geometry-aware rotary positional encodings . In the third stage, a logical-query cross-attention head aggregates the variable-size token set into the fixed-size logical prediction ˆ yd ∈ Fk 
+
+> 2
+
+in Eq. (A2). The remainder of this section is organized as follows. In SI C 1, we describe the spatiotemporal backbone together with the three code-aware components that make this pipeline compatible with the scale-invariant structure of the code family: scale-invariant input embeddings, geometry-aware rotary positional encodings for relation-preserving global attention, and logical-query cross-attention for fixed-size logical readout. In SI C 2, we describe the mid-round distillation signal used during training, which provides additional supervision on detector-prefix inputs and helps mitigate the cold-start plateau.   
+
+> 1. Implementation details of core components in NTU -Transformer
+
+Topology-driven input embedding. NTU -Transformer is designed to operate on binary detector events rather than continuous analog readouts. This distinction is important for the first stage of representation learning. In hardware-specific neural decoders with access to soft measurement information, the input already contains continuous confidence values, and a direct linear or multilayer-perceptron projection can extract dense low-level features [20, 21]. In our setting, the available input is a sparse binary detector-event history Sd. At the low physical error regime, most detector entries are zero, while the informative nonzero events are rare and highly localized. Our empirical studies observe that directly projecting this sparse binary tensor with a generic dense layer or convolution is very challenging, in which the early optimization is unstable. This is caused by the fact that most input channels are repeatedly inactive and gradients are concentrated on a small number of rare event locations. To address this challenge, NTU -Transformer uses topology-driven lookup embeddings, as illustrated in SI Fig. 1d. Instead of assigning embeddings to absolute detector indices, the input embedding module builds a dense representa-tion from the binary pattern observed in the invariant neighborhood N (v; d), drawing from a fixed set of lookup entries indexed by the relation set M(x, y, t ; d) of the code family [45]. Concretely, the embedding is the relation-indexed lookup, i.e., 
+
+h(v) = X
+
+> r∈M (x,y,t ;d)
+
+Er
+
+Sd(v · r), (C1) where Er [·] is a learnable table indexed by the binary syndrome value at the relation-r neighbor, a discrete realization of the aggregation in Eq. (2). When the code distance d increases, the number of detectors grows accordingly, whereas the relation set M(x, y, t ; d) and its tables Er [·] remain unchanged, so the same embedding parameters can be reused across distances. We now specify how the relation set M(x, y, t ; d) that indexes the embedding in Eq. (C1) is instantiated for each code family. For rotated surface codes, the relation system is local and geometric. The embedding in Eq. (C1) uses the binary value of a detector together with nearby same-type, cross-type, and temporal neighbors defined by the plaquette structure. For BB codes, there is no faithful planar nearest-neighbor geometry because the stabilizer connectivity is non-local. We therefore define the embedding neighborhood algebraically from the polynomial-induced stabilizer-intersection structure, as illustrated in SI Fig. 1a. In particular, the same-type and cross-type detector relations 19 a                             
+
+> Surface Code
+> Bivariate Bicycle Code
+> Embedding ℎ𝑑 ,1(𝑣 )
+> Spatial -temporal
+> Syndrome 𝑠 𝑑 ,1
+> Embedding ℎ𝑑 ,2(𝑣 )
+> Spatial -temporal
+> Syndrome 𝑠 𝑑 ,2
+> Embedding
+> ℎ𝑑 ,𝑟 −1(𝑣 )
+> Spatial -temporal
+> Syndrome 𝑠 𝑑 ,𝑟 −1
+> Embedding ℎ𝑑 ,𝑟 (𝑣 )
+> Spatial -temporal
+> Syndrome 𝑠 𝑑 ,𝑟
+> Readout
+> Same type
+> neighbors
+> Opp type
+> neighbors
+> Precedent
+> ResNet
+> NN
+> Embed
+> NN
+> Embed
+> NN
+> Embed
+> Embedding
+> Readout
+> Syndrome
+> 𝑠 𝑑 ,≤1
+> Classical
+> decoder
+> Readout
+> Syndrome
+> 𝑠 𝑑 ,≤2
+> Classical
+> decoder
+> Readout
+> Syndrome
+> 𝑠 𝑑 ,≤𝑟 −1
+> Classical
+> decoder
+> Mid -round
+> distillation
+> Spatial -temporal
+> per -detector GRU
+> per -detector GRU
+> Transformer
+> Detector
+> event
+> NN
+> Embed ×3
+> ℎ𝑑 ,𝑛 (𝑣 )
+> Token 𝜉 𝑑 ,𝑛 −1(𝑣 )
+> Token 𝜉 𝑑 ,𝑛 (𝑣 )
+> Transformer
+> RoPE
+> Multi -head attention
+> Add &Norm
+> SwiGLU FFN
+> Add &Norm
+> Readout
+> Logical query
+> Mean
+> pooling
+> Cross -attention
+> Norm &Linear head
+> Token 𝜉 𝑑 ,𝑟 (𝑣 )
+
+# …   
+
+> Logical error prob
+> [0,1]𝑘
+
+b
+
+d
+
+c
+
+e f
+
+> ℎ𝑑 ,𝑛 (𝑣 )
+
+SI FIG. 1. Schematic illustration of NTU -Transformer using the surface code as an example. a, Visualization of the scale-invariant detector neighborhood used by the embedding and positional modules. Both codes have data qubits in yellow. X and Z stabilizers are shown in red and blue respectively. Notice that the BB codes are cyclic codes with periodic boundaries. b, Overview of the NTU -Transformer pipeline over a detector-event history. At each round, the syndrome vector is converted into topology-driven detector embeddings, processed by the spatiotemporal backbone, and finally aggregated by the readout module to predict the logical error probability. c, Mid-round process supervision. Prefix syndromes are decoded by a classical teacher to produce intermediate pseudo-labels, which provide auxiliary supervision during training while using only observable detector prefixes. d–f, Implementation details of the main network blocks. d, The embedding block combines detector events with same-type, opposite-type, and temporal relation features before a residual stem projection. This relation-indexed construction is shared by surface and BB codes once the corresponding neighborhood relations are specified. e, The spatiotemporal block alternates recurrent detector-wise updates with spatial Transformer layers. The Transformer layer applies geometry-aware RoPE to attention queries and keys. For BB codes, the coordinates and offsets used by RoPE are defined by the polynomial relation system to preserve transferability across block sizes. f, The readout block uses logical-query cross-attention to aggregate variable-size detector representations into fixed-size logical error probabilities. 
+
+are read off from the generating polynomials A and B of Eq. (A1). That is, two stabilizer checks share data qubits precisely when the corresponding blocks of HX = [ A B ] and HZ = [ BT AT ] have overlapping support, and the relative shift connecting them is the group-ring monomial that links their supports. Here the transpose ( ·)T appearing in 
+
+HZ is the group-ring involution x 7 → x−1, y 7 → y−1, which we apply consistently so that each relation is indexed by the physically correct cyclic shift. This avoids heuristic coordinate metrics, such as torus Euclidean distance, which may assign the same embedding label to detector pairs that do not represent the same physical relation. Under this construction, the surface-code and BB-code embeddings follow the same principle: local input features are indexed by invariant code relations. 
+
+Spatiotemporal perception backbone. NTU -Transformer processes the embedded detector-event history Sd with a factorized spatiotemporal backbone. The temporal component propagates information across repeated QEC rounds, while the spatial or algebraic component models correlations among detectors within a single round. NTU -Transformer 20 implements this structure by interleaving gated recurrent layers [87] with spatial Transformer blocks [44]. The re-current layers update detector representations along the time direction, and the Transformer layers allow all detector tokens within the same round to exchange information through self-attention [44]. This design is aligned with the transfer principle of NTU in SI B. Each round applies a per-detector recurrent update along time followed by spatial self-attention across detectors, i.e., 
+
+ξd,r (v) = TF  GRU( ξd,r −1(v), hd,r (v)) , (C2) where hd,r (v) is the round-r embedding of detector v from Eq. (C1), GRU( ·, ·) is the gated recurrent update [87] that propagates each detector token along the R rounds, and TF( ·) is a spatial Transformer layer that mixes the tokens {ξd,r (v) : v ∈ D d} within round r. Because the operations GRU and TF share parameters across rounds and detectors, increasing the code distance d changes the number of tokens but not the update rule. The backbone employed in NTU -Transformer consists of five gated recurrent layers and six Transformer layers, with Transformer blocks inserted between recurrent stages, as illustrated in SI Fig. 1e. Each Transformer block uses multi-head self-attention, a SwiGLU feed-forward module, and normalization layers. The main architectural specifications of NTU -Transformer are summarized in SI Table 1. 
+
+Geometry-aware rotary positional encoding. A key challenge in applying Transformers to scalable QEC codes is the absence of a distance-independent positional system. Standard learned positional embeddings [88] and sequence-indexed sinusoidal embeddings [44], which are broadly used in large language models, are tied to the ordering and length of the detector sequence. However, they are infeasible for QEC decoding. This is because when the code distance d changes, the detector set Dd expands and the flattened sequence changes, so the same physical or algebraic relation may receive a different positional representation. This issue is especially severe for non-local qLDPC codes, where the Tanner graph does not provide a natural Euclidean coordinate system for attention. To overcome this bottleneck, NTU -Transformer adapts a geometry-aware rotary positional encoding [46] to supply such a coordinate system. In particular, the position assigned to a detector is not its sequence index, but its intrinsic coordinate in the code construction. For rotated surface codes, this coordinate is the physical lattice coordinate of the stabilizer detector. For BB codes, it is the cyclic matrix coordinate induced by the block-circulant polynomial construction. Writing pv for this coordinate and R(·) for the rotary rotation, the attention logit, i.e., the pre-softmax score between detectors u and v, becomes 
+
+auv = R(pu)qu
+
+⊤R(pv )kv
+
+ = q⊤
+
+> u
+
+R(pv − pu) kv , (C3) where qu and kv are the query and key vectors of detectors u and v, R(p) is the block-diagonal rotary rotation matrix associated with coordinate p, and auv is the resulting attention logit. The second equality uses the rotary identity 
+
+R(pu)⊤R(pv ) = R(pv −pu), so auv depends only on the displacement pv −pu. Since a fixed relation v−1u ∈ M (x, y, t ; d)gives a fixed displacement, the same local relation produces the same relative phase at any code size. 
+
+Remark . We deliberately do not normalize these coordinates by the global lattice size or torus dimensions. Although normalizing positional indices by the sequence length is sometimes adopted to encourage length generalization in Transformers [46], here it would make the same local displacement appear smaller as the code grows, changing the relative phase associated with an invariant relation. The rotary encoding is therefore defined on unnormalized code coordinates with a code-size-independent frequency basis. For surface codes, this recovers the usual physical geometric intuition. For BB codes, it provides an algebraic coordinate system that makes polynomial shifts visible to attention, enabling Transformer layers to represent relative structure even in non-local qLDPC geometries. 
+
+Logical readout by cross-attention. For logical error classification in Eq. (A2), the decoder must map the variable-size detector representation to the fixed-size prediction ˆ yd over the k logical observables. A flattened classification head would be tied to a particular code distance and cannot be reused after scaling. Simple length-independent pooling operations, such as mean or max pooling [89], avoid this shape mismatch but can discard structured parity information that is needed to resolve logically inequivalent error classes. As shown in SI Fig. 1f, NTU -Transformer instead uses a cross-attention readout. Mathematically, a set of k learnable logical query tokens Q = {qlog 1 , . . . , qlog  
+
+> k
+
+}, one for each of the k logical observables of the [[ n, k, d ]] code and distinct from the per-detector attention queries qu in Eq. (C3), attends to the final-round detector tokens, ˆyd = CrossAttn  Q, {ξd,R (v) : v ∈ D d}, (C4) producing the k-dimensional prediction ˆ yd of Eq. (A2). This mechanism functions as a trainable, geometry-aware pooling operation. It is compatible with a detector set Dd of variable size md while still allowing the logical queries to aggregate distributed evidence across the full syndrome history. The readout is shape-compatible across distances. However, because the number of detector tokens changes with code distance d, the statistics of attention logits and aggregated features also change. For this reason, the readout is transferred together with the backbone but is further recalibrated during target-distance fine-tuning. 21  
+
+> 2. Mid-round supervision via classical distillation
+
+Training a logical classification decoder only from the final logical label can create a severe optimization bottleneck as the number of rounds scale polynomially with the code distance d. At large distances, the syndrome history is long, logical failures are sparse, and the final label provides weak supervision to early recurrent states. In practice, this can cause a randomly initialized model to remain near a constant-output solution during the early stage of training. To provide denser training signals, NTU -Transformer uses mid-round supervision via classical distillation, as illus-trated in SI Fig. 1c. More specifically, at an intermediate round, NTU -Transformer retains the observed detector events up to that round and mask the future detector events. A classical decoder is then applied to this truncated detector history to generate an intermediate pseudo-label. The neural decoder is trained on a combination of the final logical label and these intermediate pseudo-labels, i.e., 
+
+L = ℓ( ˆ yd, yd) + β(s)
+
+> R
+
+X
+
+> r=1
+
+wr ℓ  ˆy(r) 
+
+> d
+
+, ˜y(r)
+
+> d
+
+, (C5) where ℓ is the per-sample loss of Eq. (3), ˆ y(r) 
+
+> d
+
+is the prediction from the round-r detector prefix, ˜ y(r) 
+
+> d
+
+is the classical-teacher pseudo-label on that prefix, wr are time-progressive weights, and β(s) is the distillation coefficient annealed over training step s.This construction is different from fake-end supervision based on simulator-internal information [75]. Simulator-derived intermediate observables (e.g. Stim-based simulation) can be useful for training, but they are not available from real quantum devices. Our pseudo-labels require only the experimentally accessible detector-event prefix and an external classical decoder. Therefore, the same supervision strategy can in principle be applied to real-device syndrome streams, provided that a suitable classical teacher decoder is available. The distillation weight is large during the early stage of training, where it supplies stable intermediate gradients. The weight is then reduced as training proceeds, so that the network is not forced to imitate the teacher indefinitely. This annealing is important because the classical teacher may be suboptimal under correlated circuit-level noise or highly degenerate error configurations. Once the auxiliary supervision is weakened, the neural decoder continues optimizing against the final logical labels and can learn corrections beyond the teacher’s decision rule.  
+
+> SI D: Implementation details of NTU -Neural-BP
+
+NTU -Neural-BP is the message-passing instantiation of the NTU framework of SI B, specialized to the physical error inference paradigm of Eq. (A3). Its pipeline is summarized in SI Fig. 2. It runs directly on the bipartite Tanner graph of SI A 2, whose check nodes are the detectors carrying the syndrome Sd and whose variable nodes are the 
+
+M fault mechanisms. The shared neural message updates are unrolled for 2 d iterations, after which the variable beliefs give the recovery ˆ e ∈ FM 
+
+> 2
+
+, mapped through the fixed logical map to ˆ yd = Lˆe as in Eq. (A3). In contrast to NTU -Transformer, which builds transferable coordinates so that global attention sees the same relation at every distance, NTU -Neural-BP uses the sparse decoding graph itself as the scaffold and shares only local update rules, so its transfer involves no learned positional representation. The core components of NTU -Neural-BP are a relation-tied neural message passer that transfers across graph sizes, recurrent gated stabilization for the short-cycle and degeneracy pathologies of belief propagation (BP) on qLDPC graphs, and a syndrome-consistency-regularized inference objective. In the remainder of this section, we first detail these core components in SI D 1. After that, we exhibit the training objective of NTU -Neural-BP in SI D 2.   
+
+> 1. Implementation details of core components in NTU -Neural-BP
+
+Graph-induced relation representation. NTU -Neural-BP provides a message-passing instantiation of NTU . In-stead of constructing detector tokens and positional coordinates as in NTU -Transformer, it operates directly on the sparse decoding graph associated with the code, as illustrated in SI Fig. 2. In particular, the graph contains detec-tor nodes, error-variable nodes, and edges, indicating which error variables contribute to which detector events. In a code-level formulation, these error variables may correspond to data-qubit error components. In the DEM formulation used for the BB-code experiments, they correspond to elementary error mechanisms, each of which flips a specified set of detectors and logical observables. This graph-induced representation plays the same conceptual role as the topology-driven embedding in NTU -Transformer. It exposes the invariant relation structure of the code to the neural network while avoiding any depen-dence on absolute detector or variable indices. The graph tensors, including the check matrix H and logical-observable 22 a 
+
+> Surface Code
+
+## b    
+
+> Data qubit
+> Xstabilizer
+> Zstabilizer
+> Error node
+
+## c    
+
+> Syndrome  𝑠
+> Message passing
+> 𝑤 detector →error
+> 𝑤 error →detector
+> Iter 1 Iter 2𝑑
+> Belief
+> Syndrome consistency Map
+
+SI FIG. 2. Schematic illustration of NTU -Neural-BP using the rotated surface code as an example. a, Local planar structure of the rotated surface code, showing data qubits and the two stabilizer types. b, Detector-error bipartite graph used by NTU -Neural-BP. Red and blue nodes denote the two detector types, and green nodes denote error variables defined by the detector error model rather than physical data qubits themselves. In the surface-code circuit-level noise model used here, these error variables arise from four elementary noise channels in Stim: after clifford depolarization , after reset flip ,
+
+before round data depolarization , and before measure flip . Each green node is connected to the detector nodes flipped by the corresponding DEM term. c, Neural message-passing decoder. The observed syndrome is injected on the detector side, and shared neural message updates are iteratively applied on the detector-error graph for 2 d iterations. During training, the inferred error-variable beliefs are additionally constrained by syndrome consistency. After the final iteration, the belief on each error node is used to infer the error configuration, which is then mapped through the fixed logical map to predict the logical outcome. 
+
+map L of SI A 2 and the per-variable priors pj , are generated from the target code instance, whereas the trainable parameters are attached to the shared message and update functions. Mathematically, each error variable j enters message passing through its prior as a log-likelihood ratio 
+
+γj = log 1 − pj
+
+pj
+
+, (D1) and the observed syndrome Sd is injected on the check (detector) nodes. Thus, when the code is scaled, the graph becomes larger, but the local computational rule applied on the graph remains reusable. 
+
+Relation-tied neural message passing. As depicted in the neural message-passing decoder of SI Fig. 2c, NTU -Neural-BP follows the information flow of belief propagation while replacing fixed analytic updates with trainable neural updates. Messages are exchanged between detector nodes and error-variable nodes along the sparse graph. The same message-generation and node-update functions are shared across graph locations, so the model learns how to process a type of local relation rather than how to process a particular edge index. Concretely, at iteration t, the variable-to-check messages are produced by a shared neural function, i.e., 
+
+m(t) 
+
+> j→c
+
+= gθ
+
+
+
+γj , P  
+
+> c′∋j, c ′̸=c
+
+m(t−1) 
+
+> c′→j
+
+
+
+, (D2) where j indexes an error-variable node and c a check (detector) node, m(t) 
+
+> j→c
+
+is the message sent from variable j to check c at iteration t, and γj is the prior log-likelihood ratio of Eq. (D1). The sum runs over all checks c′ incident to variable j except the recipient c (denoted c′ ∋ j, c ′̸ = c), aggregating the incoming check-to-variable messages m(t−1) 
+
+> c′→j
+
+from the previous iteration; excluding the recipient c is the standard extrinsic-information rule of belief propagation. The shared neural function gθ is applied identically at every variable node, and an analogous shared function generates the check-to-variable messages. Because gθ is tied to relation type rather than to an edge index, it transfers unchanged to a larger graph. This parameter sharing is the message-passing analogue of the relation-tied representation used by NTU -Transformer. In NTU -Transformer, the embedding and positional encoding are designed so that attention sees the same relative re-lation at different distances. In NTU -Neural-BP, the graph itself specifies the allowed relations, and the neural update rule is applied uniformly across them. The resulting decoder is therefore naturally compatible with cross-distance transfer as long as the scaled code family preserves the same decoding-graph relation structure. 
+
+Stabilized neural BP updates. This component stabilizes the unrolled message passing of SI Fig. 2c and comprises three ingredients: multilayer perceptrons (MLPs) that transform the messages, recurrent gated units that maintain a 23 per-node state across iterations, and normalization with bounded nonlinearities that control the message scale. Stabi-lization is necessary because qLDPC decoding graphs contain many short cycles and degenerate error configurations, which can make conventional belief propagation oscillate or become trapped in unreliable fixed points. NTU -Neural-BP mitigates these pathologies by parameterizing the message-passing dynamics with these neural modules: the MLPs transform messages, while the recurrent gated updates maintain detector and error-variable states across iterations. The recurrent state allows the model to regulate repeated information circulating through short loops, rather than applying a memoryless BP update at every step. Each node maintains a recurrent state updated by a gated unit [87], 
+
+h(t) 
+
+> j
+
+= GRU  h(t−1)  
+
+> j
+
+, m (t)
+
+> j
+
+, (D3) where h(t) 
+
+> j
+
+is the recurrent state of node j at iteration t and m(t) 
+
+> j
+
+aggregates the incoming messages of Eq. (D2). The memory in h(t) 
+
+> j
+
+damps the oscillations that short cycles induce in memoryless BP. Finally, normalization layers and bounded nonlinearities control the scale of the latent messages as the unrolled iteration depth increases; these components leave the decoding graph unchanged and only make the learned message dynamics easier to optimize. In the BB-code experiments, the resulting NTU -Neural-BP model has approximately 3 × 10 5 trainable parameters, with the concrete depth, optimizer settings, and training schedule reported in SI E and the full architecture specifications listed in SI Table 1.  
+
+> 2. Training: physical error inference and syndrome consistency
+
+We first describe how NTU -Neural-BP is trained at a single code distance through a physical-error-inference objec-tive, and then how the trained model is transferred across graph sizes. 
+
+Inference objective. At a single code distance, NTU -Neural-BP is trained in the physical-error-inference paradigm of Eq. (A3). Here, physical error inference means predicting the low-level recovery ˆ e ∈ FM 
+
+> 2
+
+on the decoding graph before its logical effect ˆ yd = Lˆe is determined through the fixed logical map L of SI A 2. For the BB-code implementation, the entries of e are the M elementary error mechanisms in the detector-error model. After prediction, the inferred error variables are mapped to detector syndromes and logical observable flips using the corresponding graph and logical maps. The prediction target is sparse at low physical error rates, so the supervised objective is chosen to emphasize rare active error variables and to avoid collapse to the trivial no-error prior. We also include a syndrome-consistency regularization term, giving the objective 
+
+L = Lfocal (ˆ e, e) + λsyn H ˆe ⊕ Sd , (D4) where ˆ e is the predicted error configuration read from the final beliefs, e is the true error label, and Lfocal is the focal loss [90], which down-weights the abundant inactive variables and emphasizes the rare active ones. The second term penalizes syndrome inconsistency with weight λsyn : here ⊕ denotes bitwise modulo-2 addition (XOR), so H ˆe ⊕ Sd is the residual syndrome of the prediction and H ˆe ⊕ Sd its Hamming weight, which vanishes exactly when H ˆe = Sd.This injects the parity-check constraint into the optimization and encourages physically admissible predictions. During evaluation, the predicted ˆ e is mapped to ˆ yd = Lˆe as in Eq. (A3), and a failure is counted when ˆ yd̸ = yd.
+
+Transfer across graph sizes. Cross-distance transfer in NTU -Neural-BP separates learnable local update rules from non-learned graph tensors. The source model is first trained on a smaller code instance. Its trainable message functions, recurrent update functions, normalization parameters, and readout components are then loaded into the target model. The sparse graph tensors for the target code, including detector indices, error-variable indices, edge connectivity, priors, and logical maps, are regenerated from the target code description. This transfer mechanism is simpler than that of NTU -Transformer because no learned absolute positional representation is involved. The graph defines which objects communicate, and the neural parameters define how information is transformed along those relations. Target-side fine-tuning then adapts the reused message-passing dynamics to the changed graph size, iteration depth, and syndrome distribution. 
+
+Extension to other backbones. The same relation-tied principle extends beyond the two backbones studied here to other graph neural decoders, hypergraph neural decoders, or trainable variants of belief propagation, provided that their parameters are tied to invariant node, edge, or hyperedge relation types rather than to absolute indices. 
+
+> SI E: Experimental details
+
+This section is organized as follows. SI E 1 defines the evaluation metrics, in particular the logical error per round used throughout. SI E 2 and SI E 3 then give the experimental protocols, training hyperparameters, and classical baselines for the surface-code and BB-code experiments, respectively. 24 
+
+SI Table 1. Model architecture specifications for the two NTU decoder instantiations. NTU -Transformer performs logical error classification with relation-aware attention, whereas NTU -Neural-BP performs physical error inference through relation-tied message passing. Training hyperparameters and optimization protocols are reported in SI E. 
+
+Configuration module NTU -Transformer NTU -Neural-BP 
+
+Decoding paradigm Logical error classification Physical error inference Input structure Binary detector tokens Detector-error graph Core dimensions dmodel =512, nheads =8 dhidden =128 Network depth 5 GRU layers, 6 TF layers 12/24 BP iterations Feed-forward / MLP size SwiGLU, dhidden =1024 Message-update MLPs, dhidden =128 Readout mechanism 2-layer cross-attention, dFFN =2048 2-layer MLP with GELU Relation encoding Topological embedding + RoPE, Θ=100 Sparse graph connectivity Stabilization layers RMSNorm LayerNorm, ScaledTanh Total parameters ∼ 32M ∼ 0.30M 
+
+Remark . Unless otherwise stated, neural-decoder training was performed with PyTorch distributed data parallelism on NVIDIA H800 GPUs with 80 GB memory. NTU -Transformer experiments used bfloat16 mixed precision, whereas 
+
+NTU -Neural-BP experiments were run in float32. Online syndrome generation and, when applicable, teacher-label generation were parallelized with CPU workers and streamed to the GPU training processes. The large-distance surface-code stress tests at d = 23 and d = 25 used a separate 16-GPU NVIDIA H200 configuration with 140 GB memory per GPU, as described in SI F. 
+
+1. Evaluation metrics 
+
+The calculation of logical error per round and per logical qubit. To ensure fault tolerance in the time domain, each quantum memory experiment is executed across exactly d consecutive syndrome extraction rounds to form a complete spatiotemporal code block. The total logical error rate of this block is defined as the complement of the decoding accuracy over the d-round duration, meaning the temporal depth of the block scales proportionally with the code distance d. To facilitate a standardized comparison of decoding performance across varying experiment lengths and structurally distinct code families, we adopt the logical error per round (LER) as our primary evaluation metric [18, 22, 75]. For architectures encoding multiple logical qubits ( k > 1), such as BB codes, the metric is strictly quantified as the logical error per round and per logical qubit [91]. Unless explicitly stated otherwise, the phrase “per qubit” throughout this work always denotes per logical qubit, and a single round refers to one full QEC cycle. Let Pblock (R) denote the block-level logical error probability after R rounds of syndrome extraction. For a single logical qubit, we define the logical fidelity as 
+
+F (R) = 1 − 2Pblock (R). (E1) Assuming independent round-by-round accumulation of logical errors, the fidelity satisfies 
+
+F (R) = (1 − 2ϵround )R , (E2) where ϵround is the LER per round. Thus, 
+
+ϵround = 12
+
+h
+
+1 − (1 − 2Pblock (R)) 1/R i
+
+. (E3) If results at multiple round numbers R are available, we instead fit log F (R) = log F0 + R log (1 − 2ϵround ) , (E4) and extract ϵround from the fitted slope. This logical-fidelity-based extraction is consistent with the LER definition adopted in AlphaQubit 2 and related QEC studies [18, 22, 75]. For a code encoding k logical qubits, we further define the block-level logical error probability per logical qubit as 
+
+PLQ (R) = 1 − (1 − Pblock (R)) 1/k . (E5) 25 This normalization converts the total block-level logical error probability into the effective logical error probability of a single logical qubit, and is introduced here to enable fair comparison between code families with different logical encoding rates [91]. The corresponding LER per logical qubit per round is 
+
+ϵLQ = 12
+
+h
+
+1 − (1 − 2PLQ (R)) 1/R i
+
+. (E6) Unless otherwise stated, the LER per qubit is referred as to ϵLQ . In the low-error regime, Pblock (R) ≪ 1, this reduces to 
+
+PLQ (R) ≈ Pblock (R)
+
+k , ϵLQ ≈ Pblock (R)
+
+kR . (E7) This approximation is useful for intuition, while all reported values in this study are computed using the exact expressions above. 
+
+Computes and training time. We profile computational overhead using two complementary metrics. First, we estimate algorithmic training compute from multiply–accumulate operations (MACs). Forward MACs are measured with the fvcore library using the model in train() mode, so that auxiliary branches used for process supervision are included in the profiled computation. Following the standard approximation that a training step costs about three forward passes when accounting for forward and backward propagation [92], we estimate the training cost per step as 3 times the profiled forward MACs. We then convert MACs to floating-point operations by counting one MAC as two FLOPs. Thus, the reported training compute per step is 6 times the profiled forward MAC count. Unless stated otherwise, computational budgets in this work are reported in FLOPs. Second, we measure empirical throughput using wall-clock profiling. Because CUDA execution in PyTorch is asyn-chronous, we place torch.cuda.synchronize() calls around the timed code regions before recording elapsed time. For each training step, we separately measure the online data generation and preprocessing time, the GPU forward– backward computation time, and the distributed data-parallel communication plus optimizer-update time. This de-composition separates model computation from data-generation and synchronization overheads, allowing throughput comparisons across code distances and model configurations to be interpreted more consistently.  
+
+> 2. Experimental setup for surface code
+
+Experimental protocol. For the surface-code experiments, we generate rotated surface-code memory circuits with 
+
+R = d syndrome-extraction rounds using Stim [51]. Samples are generated online under the circuit-level depolarizing noise model, with the distance-specific physical error rates and training budgets listed in Table 2. Following the logical-error-classification objective of SI C 2, the NTU -Transformer is trained on binary detector-event histories and supervised by the final logical observable label through the loss ℓ( ˆ yd, yd) in Eq. (C5). To provide process supervision, we construct prefix syndromes by masking all detector events after each intermediate round and decode these truncated histories with a correlated PyMatching teacher, as described in SI C 2. The resulting intermediate binary cross-entropy loss is the second term of Eq. (C5), weighted by the time-progressive coefficients wr and combined with the final-label loss. The distillation coefficient β(s) of Eq. (C5) is annealed from 8.0 to 0.2 over the early training stage, so that intermediate supervision dominates the cold-start phase but does not constrain the late-stage decoder to imitate the teacher. We use stabilizer dropout, a QEC-specific variant of dropout [93] that randomly masks stabilizer detector events during training, as a regularizer for the surface-code NTU -Transformer. During the first 50% of training, the mask probability is fixed at pmask = 0 .8 with drop ratio pdrop = 0 .5. Both quantities are then linearly decayed to zero between 50% and 80% of training and remain disabled for the final 20%. Optimization uses AdamW with bfloat16 mixed precision, a 100-step linear warmup, cosine learning-rate decay to 5% of the peak value, and global gradient clipping with maximum norm 1 .0. Weight decay 10 −2 is applied only to structural projection weights, while biases, normalization parameters, embedding tables, logical query tokens, and readout heads are excluded from weight decay. Training is parallelized with PyTorch distributed data parallelism, and online teacher-label generation is performed by CPU workers. For cross-distance transfer, all shape-compatible learnable parameters are loaded from the source checkpoint, in-cluding the embedding tables, recurrent layers, Transformer blocks, readout layers, and logical query parameters. Distance-dependent buffers are not transferred. These include coordinate maps, gather indices, validity masks, same-type and cross-type neighbour indices, attention masks, and other topology buffers. They are regenerated from the target-distance circuit before fine-tuning. The optimizer state is reset after transfer, and a new warmup–cosine schedule is started for the target run. 26                                                                  
+
+> SI Table 2. Training configurations for the surface-code NTU -Transformer experiments. All runs use online Stim sampling with R=dsyndrome-extraction rounds. Distance dRounds RPeak LR ptrain peval Local batch Max steps 772×10 −50.005 0.005 32 100,000 11 11 2×10 −50.005 0.005 16 150,000 15 15 2×10 −50.005 0.005 8200,000 19 19 2×10 −50.005 0.005 4250,000 23 23 2×10 −50.007 0.007 2150,000 25 25 2×10 −50.007 0.007 2150,000
+
+Baseline methods. We benchmark the NTU -Transformer against three non-trainable decoding baselines for the rotated surface code: standard PyMatching, Correlated PyMatching, and Tesseract. These baselines span the most relevant accuracy–complexity spectrum for circuit-level surface-code decoding: a fast graphlike MWPM decoder, a stronger correlation-aware matching decoder, and a search-based most-likely-error reference. 
+
+Standard PyMatching. We use PyMatching as the standard minimum-weight perfect matching baseline. For each cir-cuit, we first extract a graph-like detector error model using stim.Circuit.detector error model(decompose errors=True) .The resulting DEM is loaded with pymatching.Matching.from detector error model , and decoding is performed in batch mode with decode batch . This baseline treats the decomposed error mechanisms as independent graph-like edges, following the standard MWPM assumption [29, 31]. It therefore provides the canonical fast matching reference for surface-code decoding, but it does not explicitly use the residual correlations introduced when non-graph-like physical faults are decomposed into graph-like components. 
+
+Correlated PyMatching. We additionally evaluate the correlated matching mode implemented in PyMatching. The decoder is constructed from the same decomposed Stim DEM, but with enable correlations=True during both graph construction and batch decoding. We include this decoder as a stronger matching-based baseline that partially accounts for circuit-level error correlations while remaining within the MWPM decoding paradigm. 
+
+Tesseract. Tesseract [50] is included as an accuracy-oriented search-based reference. It is provided with the same detector error model and evaluated on the same held-out detector-event samples as the other baselines. Because its search procedure is substantially more computationally demanding than matching-based decoding at large distances, we use Tesseract primarily as a high-accuracy reference rather than as a scalable throughput baseline. In our experi-ments, direct Tesseract decoding was feasible for d = 3 , 5, 7, 9 at p = 0 .003; we use these results to extrapolate its performance to larger distances, including d = 19.  
+
+> 3. Experimental setup for BB code
+
+Experimental protocol. For the BB-code experiments, detector events are generated online with Stim using the BB memory circuits and the CNOT-layer syndrome-extraction schedule. A uniform circuit-level depolarizing error rate 
+
+p is applied to Clifford gates, reset operations, measurements, and pre-round data depolarization. The code-specific learning rates, batch sizes, gradient-accumulation factors, and training horizons are listed in Table 3. We evaluate both NTU -Transformer and NTU -Neural-BP on the same detector-event distribution. The NTU -Transformer is trained as a logical error classifier using the final logical observable labels. Unlike the surface-code experiments, we do not use MWPM-based process distillation for BB codes, because the BB detector-error structure is non-graphlike and does not provide the same matching-based prefix teacher. We therefore set the distillation coefficient to zero. Stabilizer dropout is also disabled for Transformer runs, with pmask = pdrop = 0. Optimization uses AdamW with bfloat16 mixed precision, a 100-step warmup, cosine decay to 5% of the peak learning rate, and global gradient clipping with maximum norm 1 .0. The same selective weight-decay strategy as in the surface-code Transformer is used: structural projection weights receive weight decay 10 −2, while biases, normalization parameters, topological embeddings, logical query tokens, and readout heads are excluded. For NTU -Neural BP, the Stim detector-error model is converted into a sparse representation consisting of a detector-incidence map and a logical-observable map. The model is trained in the physical-error-inference paradigm, where the prediction variables are the error variables defined by this detector-error representation. The objective combines a focal loss with α = 0 .95 and γ = 2 .0 with a syndrome-consistency loss weighted by λsyn = 0 .2. The BP unrolling depth is fixed to Niter = 2 d. Optimization uses AdamW in float32, a 100-step warmup, cosine decay to 5% of the peak learning rate, global gradient clipping with maximum norm 1.0, and uniform weight decay 10 −4. No edge-level or message-level dropout is applied. 27                                                                 
+
+> SI Table 3. Training configurations for the BB-code experiments. The NTU -Transformer is trained for logical error classifica-tion, while NTU -Neural-BP is trained for physical error inference on the detector-error representation. Code Decoder Rounds ( R)BP iter. Peak LR ptrain peval Local batch Grad. accum. Max steps [[72 ,12 ,6]] NTU -Transformer 6–5×10 −40.005 0.005 512 150,000 [[144 ,12 ,12]] NTU -Transformer 12 –5×10 −40.005 0.005 256 430,000 [[72 ,12 ,6]] NTU -Neural-BP 612 3×10 −40.005 0.005 512 115,000 [[144 ,12 ,12]] NTU -Neural-BP 12 24 3×10 −40.005 0.005 512 115,000
+
+Transfer from [[72 , 12 , 6]] to [[144 , 12 , 12]] follows the same separation between learnable parameters and code-dependent buffers. For NTU -Transformer, all shape-compatible learnable parameters are loaded, while coordinate maps, masks, neighbor indices, and other topology buffers are regenerated for the target code. For NTU -Neural-BP, the trainable message-passing parameters are reloaded, while the sparse graph tensors, priors, detector-incidence map, and logical-observable map are replaced by their target-code versions. In both cases, the optimizer state is reset before target-side fine-tuning. 
+
+Baseline methods. For BB-code experiments, we benchmark against BP+OSD [52, 67] and RelayBP [53], whose decoding principles are reviewed in SI A 2. Both baselines are training-free and operate on the same detector-error representation used for the corresponding BB evaluations. Here we specify only their concrete implementations and hyperparameters. 
+
+BP+OSD. We use BP+OSD as a standard classical decoder for qLDPC codes [52, 67]. The Stim DEM is converted into a sparse bipartite parity-check matrix H together with the corresponding per-mechanism priors, and the decoder is instantiated using ldpc.BpOsdDecoder in sum-product mode with combination-sweep ordered-statistics decoding (osd method="osd cs" , osd order=10 ). The role of the OSD post-processing stage in restoring a syndrome-consistent estimate when raw BP fails is described in SI A 2. 
+
+RelayBP. We additionally evaluate RelayBP [53], a recent BP-based heuristic whose two-stage relay schedule for escaping degenerate trapping-set failures in quantum LDPC decoding is summarized in SI A 2. We use the released implementation accompanying Ref. [53] with its default memory-factor distribution. We report two RelayBP configu-rations. The original RelayBP setting uses 80 BP iterations in the first stage and 60 BP iterations in the second stage, with 300 parallel second-stage relay branches. The depth-aligned RelayBP-2 d setting uses 2 d BP iterations in the first stage and 2 d BP iterations in each second-stage relay branch, again with 300 parallel relay branches. The RelayBP-2d configuration is aligned with the NTU -Neural-BP unrolling depth, while the original RelayBP setting provides a higher-complexity reference following the released decoder configuration. In both cases, decoding terminates once a syndrome-consistent error configuration is found or all scheduled relay branches have been exhausted. 
+
+> SI F: Extended experimental results
+
+This section collects additional simulation results that support the main text. SI F 1 extends the training-compute scaling analysis to larger code distances, SI F 2 diagnoses the cold-start collapse of scratch-initialized training, SI F 3 ablates the two scale-invariant structural components of NTU -Transformer, and SI F 4 shows that cross-distance transfer remains effective from under-converged source checkpoints.  
+
+> 1. Extended training compute scaling
+
+In the main text, the training-compute scaling analysis was performed under a controlled protocol for distances up to d = 19. In that setting, all runs used the same training physical error rate ptrain = 5 × 10 −3, the same evaluation criterion, and the same hardware class described in the remark of SI E. This controlled setting was used to estimate the scaling trend reported in Fig. 1c. To further probe the large-distance regime, we extended the transfer ladder to d = 23 and d = 25. These two runs required a modified experimental setting because the original hardware configuration became memory-limited at these distances. Accordingly, the large-distance stress tests were performed on 16 NVIDIA H200 GPUs with 140 GB memory per GPU, and the training physical error rate was increased to ptrain = 7 × 10 −3. This choice increases the density of nontrivial detector-event patterns and empirically reduces the number of training samples required to exceed the PyMatching reference. However, ptrain = 7 ×10 −3 is close to the high-noise transition region of this training setup, and models trained at this noise level do not necessarily give the best inference performance at substantially 28 7 11 15 19 23 25 
+
+Code distance d                 
+
+> 18 19 20 21 22
+> Training compute (log 10  FLOPs)
+> ∼ Γ  d, Γ ≈ 1.64 ∼ Γ  d, Γ ≈ 1.51
+> Scratch
+> NTU
+> SI FIG. 3. Extended training-compute scaling of NTU -Transformer on rotated surface codes. Training compute is measured as the total FLOPs required for the decoder to exceed the PyMatching reference accuracy. Filled markers denote runs performed under the controlled protocol used in the main text, with ptrain = 5 ×10 −3. Dashed lines show exponential scaling fits for scratch training and NTU , with fitted bases Γ = 1 .64 and Γ = 1 .51, respectively. Open squares indicate large-distance stress-test runs at d= 23 and d= 25, performed with ptrain = 7 ×10 −3and a larger hardware configuration. These two points are shown to indicate feasibility beyond the controlled range, but are not included in the controlled scaling fit.
+
+lower physical error rates. We therefore treat the d = 23 and d = 25 runs as out-of-protocol scaling probes rather than as points generated under the same controlled conditions as d ≤ 19. In SI Fig. 3, these two large-distance points are shown with open square markers to distinguish them from the controlled ptrain = 5 × 10 −3 runs. The measured training compute values are 3 .08 × 10 20 , 3 .88 × 10 20 , and 6 .30 × 10 20 
+
+FLOPs for d = 19, d = 23, and d = 25, respectively. The corresponding wall-clock training costs are 896, 768, and 1048 GPU-hours, respectively. Because the d = 23 and d = 25 experiments use both a different noise distribution and a different hardware platform, their wall-clock times are not directly comparable to the d ≤ 19 runs. In particular, the larger GPU memory and increased parallelism can reduce wall-clock cost even when the profiled FLOP count increases. We thus use the d = 23 and d = 25 measurements as reference points for large-distance feasibility and not as part of the controlled scaling fit.  
+
+> 2. Cold-start in scratch training
+
+The cold-start plateau in Fig. 2c is not fully explained by accuracy alone. For the single-logical-qubit surface-code memory task at p = 0 .005, the logical labels are approximately balanced between 0 and 1. A decoder that makes random binary predictions and a decoder that collapses to a constant output can both remain close to 50% block accuracy. This makes it difficult to distinguish slow feature learning from a trivial output mode using accuracy alone. A common way to make early training easier is to begin from a smaller physical error rate, where nontrivial logical labels are rarer and the positive-label fraction is reduced [36, 75]. This forms a curriculum over the label distribution, but it does not remove the intrinsic optimization difficulty of training a high-capacity decoder with tens of millions of parameters at large distance. Here, instead of changing the training distribution, we directly diagnose the scratch-trained outputs at the same p = 0 .005 setting. At each checkpoint, we threshold the predicted logical logits on a 29 0 500 1000 1500 2000          
+
+> Training steps
+> d=11
+> d=15
+> d=19
+> 02500 5000 7500 10000 12500 15000 012345678910 11
+> Logical qubit
+> All-0 Healthy All-1
+
+a
+
+b              
+
+> SI FIG. 4. Cold-start mode-collapse diagnostics for scratch-initialized NTU -Transformer training. a, Surface-code logical classification. Each horizontal bar tracks the output state of a scratch-initialized decoder during early training at distances d= 11 ,15 ,19. Checkpoints are classified as all-0 collapse, all-1 collapse, or healthy according to whether the thresholded predictions on the validation batch are constant or non-constant. As the distance increases, the decoder spends longer intervals in constant-output states, indicating that the 50% accuracy plateau is dominated by trivial prediction modes rather than unbiased random guessing. b, BB-code logical classification. The same diagnostic is applied separately to the 12 logical outputs of the BB-code decoder. Each row corresponds to one logical qubit, and each column corresponds to a training checkpoint. The frequent alternation between all-0 and all-1 states shows that cold-start collapse also occurs at the level of individual logical heads in the multi-logical-qubit setting.
+
+held-out validation batch and classify the checkpoint as all-0 collapse, all-1 collapse, or healthy, depending on whether all validation samples are assigned to a constant logical value. SI Fig. 4 shows that the scratch-training plateau is dominated by constant-output modes rather than unbiased random guessing. As the distance increases, the scratch-initialized NTU -Transformer spends longer intervals switching between all-0 and all-1 predictions instead of learning a meaningful syndrome-to-logical mapping. The same behaviour is also observed in BB-code logical classification, where different logical heads can independently become trapped in constant-output states. This failure mode is more pronounced for BB codes because the readout must assign multiple logical queries to different distributed detector features while optimizing several logical-output losses simultaneously. 
+
+NTU initialization reduces this failure mode by providing a pre-aligned local perception backbone, so target fine-tuning mainly recalibrates the enlarged global decision layer instead of first escaping a trivial constant predictor.   
+
+> 3. Structural ablation of NTU -Transformer
+
+Surface-code ablation. We first perform the architecture ablation on the rotated surface code, where the local planar geometry makes the two structural transfer channels especially transparent, as shown in SI Fig. 5. The transfer task initializes a d = 11 target decoder from a pretrained d = 7 NTU -Transformer under circuit-level depolarizing noise with ptrain = peval = 5 × 10 −3. We focus on the first 2 ,000 target fine-tuning steps, so the comparison should be interpreted as a transfer-efficiency test rather than a comparison of ultimate trainability given unlimited optimization. As shown in SI Fig. 5a, the Full model exhibits the fastest lift-off from the random-guess baseline, showing that physical-coordinate RoPE and the local one-ring stem together provide a strongly aligned initialization for the larger lattice. Ablating either component slows this early fine-tuning process. Removing RoPE weakens the relative geomet-ric phase information in the spatial attention maps, while removing the local stem weakens the consistency between the discrete input embedding vocabulary and the same physical surface-code neighborhood after scaling. Nevertheless, either structural channel alone is sufficient to retain a nontrivial transfer trajectory on the planar surface code. Only the double ablation remains close to random guessing over the fixed early horizon, indicating that when both physical 30 0 500 1000 1500 2000             
+
+> Training steps
+> 50% 60% 70% 80% 90% 100%
+> random guess
+> d=11
+> Accuracy
+> Full − RoPE −Embed
+> − RoPE & Embed
+> 01000 2000 3000 4000 5000 50% 60% 70% 80% 90% 100% [[144,12,12]]
+> Accuracy
+> Training steps
+> Full − RoPE −Embed
+> − RoPE & Embed
+
+a b
+
+SI FIG. 5. Structural ablation of NTU -Transformer at p = 0 .005 . a, Surface-code transfer to the d = 11 target task. Removing either geometry-aware RoPE or the topology-driven embedding module slows early fine-tuning, while removing both components leaves the transferred model close to the random-guess baseline within the plotted training window. Here, “Embed” denotes the topology-driven input embedding used to align detector features across code sizes. b, BB-code transfer to the [[144 , 12 , 12]] target task. In this non-local geometry, transfer is more sensitive to structural alignment: only the full model shows a sustained escape from the cold-start regime, whereas the RoPE-ablated, embedding-ablated, and double-ablated variants remain near random guessing. The accuracy here is the averaged over all 12 logical qubits. 
+
+alignment channels are removed, the transferred checkpoint no longer provides a measurable early acceleration over the cold-start regime. Thus, for the surface code, RoPE and the local stem should be understood primarily as transfer accelerators rather than strict determinants of final model capacity. Their role is to preserve scale-invariant local physical priors so that target-side fine-tuning starts from a nontrivial basin instead of spending substantial optimization compute escaping the cold-start plateau. 
+
+BB-code ablation. We next perform the same type of architecture ablation on BB-code transfer, where the quasi-cyclic non-local topology makes the consistency of the structural alignment more stringent. To isolate the contribution of the two scale-invariant structural components of NTU -Transformer, namely the geometry-aware rotary positional en-coding and the polynomial-induced topological embedding, we conduct a 2 ×2 ablation on the [[72 , 12 , 6]] → [[144 , 12 , 12]] transfer task, as shown in SI Fig. 5b. All four runs share the optimization protocol of SI E 3 and are trained for 5 ,000 fine-tuning steps, which is sufficient to discriminate sustained lift-off from the cold-start basin. The two ablated implementations are defined as follows. The code-size-scaled torus RoPE parameterizes the inverse frequencies as inv freq i ∝ 2π/ℓ along the first torus axis and analogously inv freq j ∝ 2π/m along the second. Placing the code-size constants ℓ and m in the denominator causes the same relative offset ∆ i to produce different RoPE phases on [[72 , 12 , 6]] ( ℓ = 6) and [[144 , 12 , 12]] ( ℓ = 12). The Full model instead uses the Cartesian, code-size-independent RoPE introduced in SI C, inv freq k = Θ −k/ quarter dim with Θ = 100, whose inverse-frequency buffer is identical across both codes. The torus L2-nearest embedding replaces the polynomial-induced offset set of SI C (which yields Ksame = 12 same-type and Kcross = 9 cross-type neighbors derived from the off-diagonal terms of AA T , BB T , and AB ) with a geometric heuristic that selects each stabilizer’s K = 6 torus-L2-nearest same-type neighbors. The resulting neighbor set includes pairs that share no common data qubit on the BB Tanner graph while omitting genuine polynomial-induced neighbors at larger L2 distance, so the same embedding index no longer encodes the same physical relation across the two code sizes. In contrast to the surface-code case, breaking either alignment is sufficient to remove the measurable early transfer advantage on BB codes. The RoPE ablated, embedding ablated, and double-ablated configurations all remain close to the 50% random-guess plateau within the 5 ,000-step fine-tuning horizon, while only the Full model exhibits sustained lift-off. This does not imply that the target architectures are untrainable given enough optimization compute; rather, 31 0 1k 2k 3k 4k       
+
+> Training steps
+> 50% 60% 70% 80% 90% 100%
+> Accuracy
+> d= 11
+> a
+> Converged source Under-converged source
+> 03k 6k 9k 12k 15k
+> Training steps
+> 50% 60% 70% 80% 90% 100%
+> Accuracy [[144,12,12]]
+> b
+> Converged source Under-converged source
+
+SI FIG. 6. Transfer from under-converged source checkpoints. a, Rotated surface-code transfer from a d = 7 source checkpoint to the d = 11 target task. The source-task accuracies of the converged and under-converged checkpoints are 98% and 97%, respectively. Although the under-converged source gives a lower initial target accuracy, its fine-tuning trajectory rises on a comparable time scale and progressively approaches the converged-source transfer. b, BB-code transfer from [[72 , 12 , 6]] source checkpoints to the [[144 , 12 , 12]] target task. The source-task accuracies of the converged and under-converged checkpoints are 88% and 78%, respectively. Despite the lower source convergence, both target trajectories escape the 50% random-guess baseline within the early fine-tuning stage and approach the same accuracy range after continued training. Together, these experiments show that effective NTU framework does not require complete source-task convergence: an under-converged source model can already provide a useful scale-invariant initialization for larger target codes, with the lower initial target accuracy largely compensated by subsequent target-side fine-tuning. 
+
+it shows that the specific cross-code transfer acceleration provided by NTU depends on preserving both the positional phase alignment and the polynomial neighborhood alignment in this non-local quasi-cyclic topology. 
+
+4. Transfer from under-converged source checkpoints 
+
+A practical question for the NTU framework is whether the source model must be fully converged before it can provide a useful initialization for a larger target code. If transferable structural priors emerge before source-task saturation, the pretraining compute required to initiate cross-distance transfer can be reduced. We test this directly on both representative code families by transferring from source checkpoints taken at different convergence levels along the same pretraining trajectory, while keeping the target architecture, optimizer schedule, noise setting, and fine-tuning protocol fixed. As shown in SI Fig. 6, under-converged source checkpoints remain effective for both the rotated surface-code and BB-code transfers. In the surface-code experiment, a lower-accuracy d = 7 source checkpoint transfers successfully to the d = 11 target task. In the BB-code experiment, an under-converged [[72 , 12 , 6]] source checkpoint similarly transfers to the larger [[144 , 12 , 12]] target task. In both cases, the less-converged source starts from a lower target accuracy than the more-converged source, indicating that the transferred representation is not yet fully calibrated. However, this initial deficit does not prevent target-side learning: the fine-tuning curves rise on comparable time scales, avoid the random-guess plateau, and approach similar accuracy ranges after continued training. These results indicate that the NTU framework does not rely on complete source-task saturation. The transferable ingredients appear to be local, scale-invariant topological priors encoded in the perception backbone, which emerge before the source task reaches its final accuracy. Full source convergence mainly improves the initial target calibration, whereas the remaining mismatch introduced by an under-converged source checkpoint can be absorbed by continued target-side fine-tuning. This further reduces the effective pretraining burden of the NTU framework, since cross-distance transfer can be initiated once a nontrivial local perception backbone has formed rather than only after 32 exhaustive source-task optimization.

@@ -1,0 +1,1480 @@
+Title: Quantum group codes for non-Clifford logic: enhanced decoding, addressability and parallelizability
+
+URL Source: https://arxiv.org/pdf/2606.27211v1
+
+Published Time: Fri, 26 Jun 2026 01:14:05 GMT
+
+Number of Pages: 22
+
+Markdown Content:
+# Quantum group codes for non-Clifford logic: enhanced decoding, addressability and parallelizability 
+
+## Jean Gasnier 1 and Virgile Gu´ emard 1,2 1Institut de Math´ ematiques de Bordeaux, UMR 5251, Universit´ e de Bordeaux, France 
+
+> 2
+
+## Naquidis Center, Institut d’Optique Graduate School, 91127, Palaiseau, France June 26, 2026 
+
+Abstract 
+
+We introduce a framework based on classical quasi group codes to define a class of quantum CSS codes, called quantum group codes , supporting transversal multi-control-Z gates which are both ad-dressable and parallelizable, thus allowing to efficiently implement circuits composed of non-Clifford gates at the logical level. Building on this, we use a lifting procedure of classical AG codes established from class field theory to construct good quantum group codes with improved decoding complexity and logical multi-control-Z gate parallelizability. More precisely, on input a good quantum AG code over the alphabet Fq with transversal CmZ gate, we apply this lifting procedure to its underlying classi-cal AG code and obtain a quantum group code over the alphabet Fq2 supporting a transversal CmZ
+
+gate as well as addressable and parallelizable Cm−1Z gates. In addition, this quantum code admits a quasi-quadratic time decoder with a linear decoding radius. This is to be compared with the previous quantum AG codes which have a cubic-time decoder. Hence, our work implies a decrease of the time complexity of state-of-the-art magic-state distillation protocols by an almost linear factor. 
+
+Contents 1 Introduction 22 Preliminaries: linear codes and algebraic geometry codes 4
+
+2.1 Linear codes . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 42.1.1 Group codes and quasi group codes . . . . . . . . . . . . . . . . . . . . . . . . . . . 42.1.2 Codes with multiplication properties . . . . . . . . . . . . . . . . . . . . . . . . . . . 52.1.3 Puncturing and shortening . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 62.2 Algebraic geometry codes . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 62.2.1 Background on function fields . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 62.2.2 Algebraic geometry codes and their parameters . . . . . . . . . . . . . . . . . . . . . 8
+
+3 Quantum group codes: parallelizable transversal gates 9
+
+3.1 Quantum group codes and multi-control gates . . . . . . . . . . . . . . . . . . . . . . . . . . 93.2 Sufficient conditions for parallelizable addressability . . . . . . . . . . . . . . . . . . . . . . 10 3.3 Known examples . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 14 
+
+4 Good quantum group codes with enhanced decoding 14 
+
+4.1 Good quasi-abelian AG codes with the m-multiplication property . . . . . . . . . . . . . . . 14 4.1.1 Class field theory . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 15 4.1.2 Lifting function fields with many rational places . . . . . . . . . . . . . . . . . . . . 15 4.1.3 Good quasi-abelian AG codes . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 17 4.2 Good quantum group codes from lifted AG codes . . . . . . . . . . . . . . . . . . . . . . . . 18 1
+
+> arXiv:2606.27211v1 [quant-ph] 25 Jun 2026
+
+1 Introduction 
+
+Existing quantum fault-tolerant computation schemes [ABO08, Got14, FGL18] suffer from large space and time overhead, still rendering a practical quantum computer out of reach. The study of quantum error correcting codes, and in particular Calderbank-Shor-Steane codes [CS96, Sho95, Ste96a], supporting transversal gates lies at the center of much recent progress. Broadly speaking, we say that a quantum code admits a transversal gate U if there exists a short depth physical quantum circuit composed of local gates whose effect is to implement U at the logical level. The low connectivity of the physical circuit prevents errors from propagating, making transversal gates naturally fault tolerant. While no quantum code supports a universal set of transversal gates [EK09], it is a major challenge to design codes admitting certain transversal gates up to the third level of the Clifford hierarchy such as the T and the CCZ gates[CGK17]. Major efforts have been invested both in the study of fault-tolerant properties of quantum low-density parity-check (LDPC) codes and non-LDPC codes. While the class of LDPC codes is one of the leading candidates for physical implementations and extensive efforts have already been invested on designing LDPC codes with transversal Clifford and non-Clifford gates [BMD06, Bom15, KB15, PR13, KYP15, VB19], with recent progress on high rate codes [ZSP +24, SPW24, Zhu25, GL24, Lin24], the parameters and computation capabilities of these codes appear to be still limited. Alternatively, relaxing the LDPC constraint has proved fruitful to understand which properties of a code allows for efficient fault-tolerant computation. Currently, parameters and computational capacities of non-LDPC codes surpass those of LDPC codes, which motivates our focus on those codes in this work. First, non-LDPC codes supporting non-Clifford transversal gates are a key component of magic state distillation (MSD) [BK05], a protocol that enables universal fault-tolerant quantum computation when combined with gate teleportation. MSD is a very resource-intensive technique and improving of its time and space overhead, the latter being defined as the ratio of input to output magic states of a protocol, is the subject of major research efforts. First, it was shown that generator matrices of punctured classical Reed-Muller and Reed-Solomon codes yield quantum codes over prime-dimensional qudits adapted for MSD [CAB12, BH12, KT19]. These techniques have been generalized to algebraic geometry (AG) codes, pro-ducing asymptotically good binary quantum codes supporting non-Clifford transversal gates, thus allowing for asymptotically constant space-overhead MSD [WHY25, GG24, Ngu24]. In all prior work mentioned above, the unique transversal gate supported by the LDPC or non-LDPC codes is implemented by acting on all the physical qudits at the same time, and its effect is to act on all or a large fraction of the logical qudits. For high rate quantum codes, the algorithmic practicality and application outside of MSD of such global gates appear to be limited. What is rather needed is a precise control over which logical qudits are operated on. Therefore, a new direction of study has been initiated [HVWZ25b] on quantum codes supporting addressable non-Clifford gates. Namely, a m-qudit gate is addressable if a large fraction of m-subsets of logical qudits can be acted upon transversally 1 via a short depth physical circuit of local gates. In [HVWZ25b, HVWZ25a], the addressable orthogonality framework accounts for codes with these properties and proves the existence of such codes with asymptotically good parameters. Building on this work, it was shown in [Gu´ e25] that there exists a good code family that supports addressable gates in arbitrary levels of the Clifford hierarchy, and more importantly that these gates can be parallelized to a high degree. These results lead to a substantial reduction in the depth overhead of multi-control-Z circuits. More precisely, with these codes, the minimal depth of any logical Cm−1Z-circuit, m > 1, involving logical qudits from m-distinct code blocks is upper bounded by O(km−1), where k is the code dimension 2.
+
+Main results. The recent work on MSD and addressability presented above may still be improved at several levels. First, the MSD scheme of [WHY25] is based on quantum codes admitting a decoder with a cubic time-complexity in the length of the code. This implies that the MSD protocol [WHY25] inherits a cubic time-complexity, thus leaving room for progress. The constructions of asymptotically good addressable codes suffer from the same high decoding complexity. Second, the only existing family of quantum codes with linear distance and fully addressable gates is built from a very specific family of classical codes, namely transitive AG codes defined over the tower of function fields from [Sti06]. It remains interesting to study different families of such codes. In this work, we address both of these problems. First, we identify sufficient properties of a quantum code to admit parallelizable gates. Such quantum codes can be directly built from classical quasi group codes with multiplication properties. Then, we leverage recent lifting results on AG codes to convert good quantum AG codes with a unique global transversal gate, such as those used in MSD protocols, into quantum 
+
+> 1Note that we are only interested in transversal gates, so that addressability is meant to imply transversality in this work
+> 2This scaling is optimal for dense circuits but can be readily improved from the results of [Gu´ e25] by considering specific circuits.
+
+2codes with addressable and parallelizable non-Clifford gates. The lifting is done via an abelian function field extension developed in [CG26] using class field theory, which naturally endows the linear codes with a linear-time encoder and a quadratic-time decoder, up to logarithmic factors, with a linear decoding radius. In this work, we verify that this transformation preserves the properties necessary to build a quantum CSS code with transversal non-Clifford gates. Moreover, the inherited free-module structure of the code is exactly suited for addressability and parallelizability of the logical gates. Importantly, the quadratic time decoder can be directly used to decode the quantum codes we construct up to errors of linear size. We can summarize our results in the following theorem. 
+
+Theorem 1.1. Let t > 4 be a power of two, and set q = t4. Then, for any 1 < m ⩽ t 
+
+> 2
+
+− 1 there exists: (1) a sequence of q-dimensional qudit quantum group codes with asymptotic parameters 
+
+[[ n, Θ( n/ log n), Θ( n)]] q ,
+
+and admitting transversal C ˜m−1Z-gates that are fully addressable for all 1 < ˜m ⩽ m. Moreover, the depth of any logical circuit of C ˜m−1Z-gates acting across the m code blocks of Q⊗ em is upper bounded by O(k ˜m−1), where k denotes the dimension of Q.(2) a sequence of q-dimensional qudit quantum group codes with asymptotic parameters 
+
+[[ n, Θ( n), Θ( n)]] q ,
+
+and admitting a transversal C ˜mZ-gate as well as orbit-wise addressable transversal C ˜m−1Z gates across 
+
+Θ(log( n)) orbits of size Θ( n/ log( n)) for 1 < ˜m ⩽ m.In both cases, the quantum code family admits a O(n2 · polylog( n)) -time decoder 3 with a linear decoding radius. 
+
+Note that for simplicity of exposition, we focus on the characterization of inter-block multi-control-Z
+
+circuits. Nevertheless, our result can be directly extended to circuits of Cm−1Z gates acting on a single codeblock of Q, at the expense of a factor in the circuit depth linear in m.As can be seen from the parameters of the codes in item (1) and (2) , our construction allows for a trade-off between the degree of addressability of the multi-control-Z gates and the dimension of the quantum code. In item (1) , we obtain the highest degree of addressability, while in item (2) , there is still a strong degree of addressability, but we emphasize that there is still a transversal gate with global action. Namely, by acting on all the physical qubits across the m blocks of Q, we obtain a global action on all the logical qudits: C ˜m−1Z = C ˜m−1Z⊗k
+
+.Given a [[ n, k, d ]] CSS code C with a transversal CCZ gate, let γ := log( n/k )log d denotes the overhead exponent of the associated magic-state-distillation (MSD) protocol. An MSD protocol is said to have constant overhead when its associated asymptotic overhead exponent is γ = 0. State-of-the-art magic state distillation protocols [WHY25] have a time complexity in O(n3). Here, we obtain the following corollary of Theorem 1.1. 
+
+Corollary 1.2. Let q = t4 with t ⩾ 6. Then, there exists a [[ n, Θ( n), Θ( n)]] q quantum code family allowing for a constant overhead distillation protocol of qubit CCZ -magic states with an O(n2 · polylog( n)) time complexity. 
+
+Organization of the article. In Section 2, we review some preliminary notions related to linear codes. In particular, quasi group codes, algebraic geometry codes and their multiplicative properties are discussed. In Section 3, we introduce the notion of quantum group codes and we present our generic construction of a quantum code having advantageous properties for multi-control-Z circuits. In Section 4, we present our main application. Based on a lifting procedure for AG codes developed in [CG26], we construct quantum group codes with good parameters and whose automorphism group contains an abelian subgroup of large order acting freely. This leads to the families of codes presented in Theorem 1.1. 
+
+Acknowledgements. V.G. would like to thank Anthony Leverrier for useful discussions. V.G also ac-knowledges the Plan France 2030 through the project NISQ2LSQ ANR-22-PETQ-0006, and funding from the Naquidis Innovation Center, under which part of this work was produced. 
+
+> 3The polylogarithmic factor of the decoder is log 4(n)
+
+32 Preliminaries: linear codes and algebraic geometry codes 2.1 Linear codes 
+
+Let Fq be a finite field with q elements. A linear [ n, k, d ]q -code C is a k-dimensional subspace C ⊆ Fnq
+
+with minimum (Hamming) distance d. We are interested in codes having an additional structure of group module. Throughout, we write [ n] := {1, . . . n }.
+
+2.1.1 Group codes and quasi group codes 
+
+Given a permutation σ ∈ Sn and a vector x = ( xi)i∈[n] = ( x1, . . . , x n) ∈ Fnq , we denote by x · σ the vector 
+
+x · σ = ( xσ(1) , . . . , x σ(n))This defines a right action of Sn on Fnq . Recall that one says that the action of a subgroup G ⊆ Sn on [ n] is 1. transitive if, for any given i, j ∈ [n], there exists σ ∈ G such that σ(i) = j.2. free if, for every i ∈ [n], the only σ ∈ G such that σ(i) = i is the identity element. Moreover, if the action of G is free, it means its order divides n, i.e. ℓ = n 
+
+> |G|
+
+is an integer. Let C ⊆ Fnq be a linear code and define 
+
+PAut (C) = {σ ∈ Sn | C · σ = C}
+
+the permutation automorphism group of C, i.e. the group of permutations of Sn stabilizing C. One says that a code C is transitive if PAut (C) acts transitively on [ n]. By definition, any subgroup G ⊆ PAut (C)acts on C (on the right), as well as on [ n] (on the left). An interesting case arises when there exists a subgroup G ⊆ PAut (C) whose action on [ n] is both transitive and free. In this case, as shown in [BRS09], the code C is a G code , i.e. is isomorphic to a right ideal of the group algebra Fq [G]. For instance, if G is cyclic, this amounts to say that C is a cyclic code. Finally, we will be interested in the following slight generalization of G codes. 
+
+Definition 2.1 (Quasi-G code) . Let C be a q-ary code of length n and let G be a group. Then, C is a 
+
+quasi-G code if there exists a subgroup H ⊆ PAut (C) isomorphic to G whose action on [ n] is free. If G is abelian, we will also say that C is a quasi-abelian code .According to [BW23], this amounts to say that C is isomorphic to a right G-module inside Fq [G]ℓ (on which G acts by multiplication on the right on each coordinate), where ℓ = n 
+
+> |G|
+
+is the number of orbits of 
+
+G in [ n]. An important property of quasi group codes is the following: 
+
+Lemma 2.2. Let G be a group. Then the dual of a quasi-G code is a quasi-G code. Proof. Let C be a quasi-G code and let y ∈ C⊥. For any x ∈ C and σ ∈ G, one has 
+
+⟨x, y · σ⟩ = ⟨x · σ−1, y ⟩ = 0 .
+
+Remark 2.3. One can define a left action of Sn on Fnq by for x ∈ Fnq and σ ∈ G, σ · x := x · σ−1. Since 
+
+G ⊆ Sn is stable under inversion, any quasi-G code C is stable under the induced action of G on the left. In this setting, C is also isomorphic to a left submodule of Fq [G]ℓ. This is the image of the right G-module of 
+
+Fq [G]ℓ isomorphic to C under the antimorphism defined by σ 7 → σ−1. This shows that there is no preferred side for working with quasi-G codes, but that one needs to pay attention to the choice of convention. This is particularly true when G is non-commutative. 
+
+Quasi-G codes and G-linear algebra. One interesting property of quasi-G codes is the possibility to define them via a generator matrix with coefficients in Fq [G]. Indeed, let C be a quasi-G code with parameters [˜ n, ˜k, d ], let n = ˜n 
+
+> |G|
+
+and let M be the corresponding right G-module of Fq [G]n. Let g1, . . . , g k ∈
+
+Fq [G]n be a set of generators of M of minimum size. Then 
+
+M =
+
+( kX
+
+> i=1
+
+gi · αi : α ∈ Fq [G]k
+
+)
+
+4or in other words M is the image of M ∈ Mat n,k (Fq [G]) (under multiplication on the right) where the columns of M are the generators ( gi)i∈[k].The matrix M describes a G-linear morphism, which is in particular a linear morphism. By fixing an order on the elements of G, one can associate with M a matrix fM of size n · | G| × k · | G| with coefficients in Fq with a particular shape. Explicitly, one computes the matrix fM ∈ Mat ˜n,k ·| G|(Fq ) by replacing every entry Mij ∈ Fq [G] by its left-regular representation, or equivalently the matrix of the multiplication by 
+
+Mij on the left. One would want the columns of fM to generate the code C. However, the orbits of the action of G on [ n] need not be composed of adjacent integers, so this will not be the case in general. Still, there always exists a permutation σ ∈ Sn such that the columns of fM generate C · σ, a code permutation equivalent to C.Note also that the columns of fM need not be linearly independent in general. In fact, fM has rank k · | G|
+
+if and only if M is free , i.e. is isomorphic to Fq [G]k as a right Fq [G]-module, in which case ˜k = k · | G|.In a slightly abusive manner, we will call M a generator matrix of C as well. To avoid confusion with traditional generator matrix, we will emphasize on the ring of definition of the coefficients of the matrix. 
+
+Remark 2.4. An equivalent construction can be defined for the left G-module M ′ associated with C. In that case, M ′ is the image (under multiplication on the left) of a matrix M′ ∈ Mat k,n (Fq [G]). One can then associate with M′ a matrix fM′ with coefficients in Fq by replacing each entry by its right-regular representation. One needs to carefully choose the basis of Fq [G] in order to compute fM′ in a coherent manner. The detailed process is available in [Gas25, Section 4.4]. In order to stick to the writing conventions in coding theory, we will choose to see quasi group codes as modules on the left as much as possible in what follows. 
+
+Remark 2.5. When M is free, i.e. isomorphic to Fq [G]k, the representation of C by M ∈ Mat n,k (Fq [G]) requires n · k · | G| coefficients in Fq instead of ˜ n · ˜k = n · k · | G|2 coefficients for a classical generator matrix of C. One can see from this favorable situation that quasi-G codes possess shorter representations than generic codes. 
+
+Encoding quasi-G codes. Let C be a quasi-G code with parameters [˜ n, ˜k, d ], let n = ˜n 
+
+> |G|
+
+and let M be the corresponding left G-module of Fq [G]n. Let g1, . . . , g k ∈ Fq [G]n be a set of generators of M of minimum size, and M ∈ Mat k,n Fq [G] the corresponding generating matrix of C.One may sometimes take advantage from the G-linearity of M to encode C faster than by performing a naive evaluation of a generator matrix, at the cost of O(˜k · ˜n) operations. Essentially, a product in Fq [G]can be computed at the cost of at most Cq (|G| log |G|) operations using the Fast Fourier Transform [CG26, Theorem 2], where Cq is a constant depending only on q. As such, the encoding of C in this fashion requires at most Cq (n · k · | G| log |G|) = Cq (k log |G|˜n) operations. Thus, if k log |G| becomes negligible relative to ˜k, then this technique allows for a faster encoding of C.This is particularly true when C is a free Fq [G]-module and ˜k = k · | G|.
+
+Proposition 2.6. Let C be a quasi-G code with parameters [˜ n, ˜k, d ], let n = ˜n 
+
+> |G|
+
+and let M be the right 
+
+G-module of Fq [G]n associated with C. Assume that M is free, i.e. that M is isomorphic to Fq [G]k as an 
+
+Fq [G]-module, where k = ˜k 
+
+> |G|
+
+. Then C can be encoded at the cost of at most Cq (n · k · | G| log |G|) operations, where the positive constant Cq depends only on q.Assume further that there exists a positive constant αq such that 
+
+n ⩽ αq log |G|.
+
+Then, C can be encoded in quasi-linear time in its length ˜n = n · | G|.Proof. We prove the second assertion. Recall that k ⩽ n ⩽ αq log |G|. Thus C can be encoded at the cost of at most α2 
+
+> q
+
+· C q (|G| log 3 |G|) operations. Since the length of C is ˜ n = n · | G| ⩾ |G|, this complexity is quasi-linear in ˜ n.
+
+2.1.2 Codes with multiplication properties 
+
+Central for this work are codes satisfying different levels of self-orthogonality. Given two vectors x and y
+
+of Fnq , their Schur product is defined as the vector x ⋆ y := ( x1y1, . . . , x nyn). Given a linear code C ⊆ Fnq ,we also define its n-fold Schur product by 
+
+C⋆m = { x1 ⋆ x 2 ⋆ · · · ⋆ x m : x1, x 2, . . . , x m ∈ C }.
+
+5Moreover, given a vector u ∈ Fnq with only nonzero components, we define u ⋆ C := { u ⋆ x : x ∈ C }. The codes C and u⋆C have the same length, dimension, and minimum distance. The permutation automorphism groups PAut (C) and PAut (u ⋆ C ) are, in general, non-isomorphic. 
+
+Definition 2.7 (Multiplication property) . Let m ⩾ 1 be an integer. We say that a linear code C satisfies the m-multiplication property if there exists a fixed vector u with only nonzero components such that 
+
+u ⋆ C ⋆m ⊆ C⊥.For any vector space Fnq , we call the vector with all entries equal to one the all-one vector .
+
+Lemma 2.8. Let C be a code satisfying the m-multiplication property and containing the all-one vector. Then, C satisfies the em-multiplication property for every 1 ⩽ em ⩽ m.
+
+The proof can be found in [Gu´ e25]. In that case, notice that u ⋆ C ⊆ C⊥, and since the all-one vector belongs to C, it follows that u ∈ C⊥.
+
+2.1.3 Puncturing and shortening 
+
+We shall later construct quantum codes from classical codes. This will rely on puncturing and shortening classical codes and we hence recall the definition of these code transformations. Throughout this section, we consider a linear code as a subset of FNq , where N is an index set of cardinality n. We may for example think of N as being equal to [ n]. 
+
+Definition 2.9 (Punctured and shortened codes) . Let L ⊆ N and denote the complement of L in N as 
+
+L := N \ L. Given a vector c ∈ FNq , its restriction to the indices of L is denoted cL := ( ci)i∈L ∈ FLq . Then, for a classical code C ⊆ FNq , we define (1) The L-punctured code CL := { cL : c ∈ C } ⊆ FLq .(2) The L-shortened code CL=0 := { cL : c ∈ C, c L = 0 } ⊆ F Lq .We will also use the following duality relations between puncturing and shortening as well as useful parameter estimates. 
+
+Lemma 2.10. Let C ⊆ FNq be an [n, k, d ] code and let L ⊆ N be of cardinality ℓ. Then, (C⊥)L=0 = ( CL)⊥
+
+and (C⊥)L = ( CL=0 )⊥. Moreover we have the following parameter estimates. (1) If ℓ < d , then CL has dimension k, and (C⊥)L=0 has dimension n − ℓ − k.(2) CL=0 has distance d, and CL has distance at least d − ℓ.
+
+See Theorem 1.5.7 of [HP03] for a proof. 
+
+2.2 Algebraic geometry codes 2.2.1 Background on function fields Function fields. Let Fq (z) be the rational function field. A function field F/ Fq over Fq is a finite extension of Fq (z). It is well-known that there is an equivalence of categories between the category of function fields over Fq and the category of smooth projective curves over Fq [Liu02, Section 7, Rem. 3.14]. Through this equivalence, the notion corresponding to a (closed) point is a place P of F , i.e. the maximal ideal of a valuation ring of F . We denote by νP the corresponding valuation and OP its valuation ring. Let us assume that the field of constants of F (i.e. the algebraic closure of Fq in F ) is Fq . The residue field at P is the field KP = OP /P . The evaluation of an element f ∈ O P at P is the image of f under the canonical map OP → O P /P . It is denoted by f (P ). The degree of a place is the degree of the extension 
+
+KP /Fq . A place is called rational if its residue field is isomorphic to Fq , or equivalently, if it has degree one. 
+
+Extensions of algebraic function fields. Let F be a function field and assume that eF is an extension of F . Let Q be a place of eF , then P := Q ∩ F is a place of F . One says that Q lies above P and we denote this relation by Q | P . We say that a place P of F splits completely in eF if the number of places Q of eF
+
+such that Q | P is exactly [ eF : F ]. Assume that the extension eF /F is Galois, with Galois group G. The Galois group acts transitively on the set of places lying above a given place of F .6Let P be a place of F and Q a place of eF lying above P . One can see that the residue field KQ is an extension of KP . One defines the inertia degree of Q as 
+
+fQ := [ KQ : KP ].
+
+Since eF /F is Galois, it does not depend on the choice of Q above P , and will be denoted by fP as well. Define the decomposition group of Q as 
+
+D(Q/P ) := {σ ∈ G | σ(Q) = Q}.
+
+There exists a canonical group morphism 
+
+D(Q/P ) −→ Gal (KQ/K P )whose kernel is I(Q/P ) the inertia group of Q. One defines the ramification index of Q as eQ = |I(Q/P )|.It does not depend on the choice of Q as well because eF /F is Galois, and therefore can be denoted by eP .Let dP be the number of places of eF lying above P , then one has 
+
+dP · eP · fP = [ eF : F ].
+
+Thus, P splits completely in eF if and only if eP = fP = 1. 
+
+Riemann-Roch spaces. A divisor D in a function field F/ Fq is a formal sum of finitely many places with integer coefficients, namely D = P nP P . A divisor D is said to be positive or effective , written D ⩾ 0, if all of its coefficients are positive integers. Given an element f ∈ F , we write ( f ) for its associated principal divisor . Moreover, we denote the Riemann-Roch space associated with a divisor D by 
+
+L(D) = {f ∈ F : ( f ) + D ⩾ 0} ∪ { 0}.
+
+Writing D = Dpos − Dneg as the difference of two effective divisors, we see that f ∈ L (D) if and only if 
+
+f has poles of limited order at the places of Dpos and zeros of sufficient order at the places of Dneg . If we have another divisor D′ ⩾ D, then L(D′) allows functions with fewer zeros and more poles, and thus 
+
+L(D) ⊆ L (D′). 
+
+Picard group. Let D and D′ be two divisors of F , one defines them to be equivalent if D − D′ is a principal divisor, which is denoted by D ∼ D′. One then defines the Picard group of F
+
+Pic( F ) = Div( F )/ ∼
+
+the group of equivalence classes of divisors of F . Since every principal divisor has degree 0, one can extend the notion of degree to equivalence classes. Then, one defines Pic 0(F ) = {c ∈ Pic( F ) | deg c = 0 }
+
+the subgroup of classes of degree 0. 
+
+Lifting divisors and differentials. Let F/ Fq be a function field, and let eF /F be a separable extension of F . Let D be a divisor of F . One can define the conorm in eF of a divisor of F by Con eF /F 
+
+X nP P
+
+
+
+= X
+
+> P
+
+X
+
+> Q|P
+
+eQ · nP Q
+
+where eQ denotes the ramification index of Q. It follows from this definition that, for two divisors D, D′
+
+of F , if D ⩽ D′ then Con eF /F (D) ⩽ Con eF /F (D′). As shown in [Sti08, Corollary 3.1.14], the degree of the conorm satisfies the following relation deg Con eF /F (D) = [ eF : F ][K : Fq ] deg D. 
+
+where K is the field of constants of eF . We denote by Ω F the space of differentials of F . Given a differential 
+
+ω ∈ ΩF , there exists a unique differential of eF extending ω in the sense of [Sti08, Theorem 3.4.6], that we call the cotrace of ω in eF /F , and denoted by Cotr eF /F (ω). 7The divisor of the cotrace of ω is closely related to the conorm of the divisor of ω:
+
+
+
+Cotr eF /F (ω)
+
+
+
+= Con eF /F (( ω)) + ∆ eF /F 
+
+where ∆ eF /F is the different of the extension eF /F (see [Sti08, Definition 3.4.3]). The divisor ∆ eF /F is supported by places ramified in eF (see [Sti08, Theorem 3.5.1]). In particular, it is zero if the extension is unramified. 
+
+2.2.2 Algebraic geometry codes and their parameters 
+
+Let F/ Fq be a function field whose field of constants is Fq and let P1, . . . , P n be n distinct rational places of F . Let P = P1 + . . . + Pn be a divisor of F . Let D be a divisor with supp P ∩ supp D = ∅. We may consider the algebraic geometry (AG) code 
+
+CL(P, D ) := {(f (P1), . . . , f (Pn)) ∈ Fnq | f ∈ L (D)}.
+
+Algebraic geometry codes admit the following lower bounds on their parameters due to the Riemann-Roch Theorem. 
+
+Proposition 2.11. Let g denotes the genus of the function field F , defined over Fq , and let P and D be defined as above. Suppose that 
+
+2g − 2 < deg D < n. 
+
+Then, the code CL(P, D ) is an [n, k, d ]-code such that k = deg D + 1 − g and d ⩾ n − deg D. Moreover, the dual code of CL(P, D ) has minimum distance d⊥ ⩾ deg D − 2g + 2 .
+
+It is common to define the designed distance of CL(P, D ) as 
+
+d∗ := n − deg D. 
+
+Now assume that F is a Galois extension of a function field F ′/Fq , with Galois group G, in which P1, . . . , P n
+
+are unramified. Also assume that G fixes the two divisors P and D. Then, G acts freely on the set of rational places {P1, . . . , P n} (because they are unramified), and G stabilizes the Riemann-Roch space L(D). This yields the following result. 
+
+Proposition 2.12. With the notation of the beginning of the paragraph, assume that F is a Galois extension of a function field F ′/Fq , with Galois group G, in which P1, . . . , P n are unramified. Also assume that G
+
+fixes the two divisors P and D. Then CL(P, D ) is a quasi-G code. Proof. For σ ∈ G, and f ∈ L (D), we define 
+
+σ−1 · f (P1), . . . , f (Pn) :=  (σ−1 · f )( P1), . . . , (σ−1 · f )( Pn) =  f (σ(P1)) , . . . , f (σ(Pn))  ∈ CL(P, H ). (1) By identifying the sets [ n] and {P1, . . . , P n}, we can then see G as a subgroup of Sn. Moreover, G stabilizes 
+
+CL(P, D ), thus G is a subgroup of PAut (CL(P, D )). Finally, since the action of G on the rational places is free, by Definition 2.1, the code CL(P, D ) is a quasi-G code. We end this section by giving criteria for CL(P, D ) to possess the all-one vector and to satisfy the 
+
+m-multiplication property. 
+
+Proposition 2.13. With the notation of the beginning of the paragraph, assume D is effective. Then 
+
+CL(P, D ) contains the all-one vector. Moreover, let m be an integer, and let η ∈ ΩF be a differential of F
+
+having a simple pole at every rational place of P . If 
+
+(m + 1) D ⩽ P + ( η),
+
+then the code CL(P, D ) satisfies the m-multiplication property. Proof. If D is effective, Fq ⊆ L (D) and in particular 1 ∈ L (D). Thus the all-one vector belongs to CL(P, D ). Now, let u = (Res Pi (η)) 1⩽i⩽n be the vector of residues of η at P . From [Sti08, Proposition 2.2.10], since η
+
+has simple poles at P , u does not have a null component, and one has 
+
+CL(P, D )⊥ = u ⋆ C L(P, P − D + η).
+
+Since D is effective, L(D)⋆m ⊆ L (m · D), and the hypothesis yields 
+
+u ⋆ C L(P, D )⋆m ⊆ CL(P, D )⊥.
+
+83 Quantum group codes: parallelizable transversal gates 3.1 Quantum group codes and multi-control gates CSS codes. An efficient method to protect quantum information against the effect of noise is provided by Calderbank-Shor-Steane (CSS) codes [CS96, Ste96a, Ste96b], a type of stabilizer quantum error correcting codes defined by two linear codes. Let us recall that the state space of an n q -dimensional qudit system is (Cq )⊗n, with computational basis states denoted {| x⟩ : x ∈ Fnq }. For our purpose q denotes a power of two, although the discussion can be generalized to other field characteristics. 
+
+Definition 3.1 (CSS code) . Let C0, C 1 ⊆ Fnq be two linear codes such that C⊥ 
+
+> 0
+
+⊆ C1. A quantum CSS code CSS( C0, C 1) is the subspace of ( Cq )⊗n given by Span  c + C⊥ 
+
+> 0
+
+: c ∈ C1 .
+
+where we used the notation c + C⊥ 
+
+> 0
+
+:= 1 
+
+> |C⊥
+> 0|1/2
+
+P
+
+> b∈C⊥
+> 0
+
+|c + b⟩. Its parameters, noted [[ n, k, d ]] q , are the 
+
+code length n, the dimension k = dim( C1/C ⊥ 
+
+> 0
+
+) and the distance d = min( d0, d 1), with 
+
+d0 = min 
+
+> c∈C1\C⊥
+> 0
+
+|c|, d1 = min 
+
+> c∈C0\C⊥
+> 1
+
+|c|.
+
+An infinite family of CSS codes of growing size is said to be good if its parameters scale asymptotically as [[ n, Θ( n), Θ( n)]]. Given a quantum CSS code Q := CSS( C0, C 1), we denote the quotient map π : C1 → C1/C ⊥ 
+
+> 0
+
+. We may choose a set of representatives for the space C1/C ⊥ 
+
+> 0
+
+and this choice is described via a section of π, namely a map 
+
+s : C1/C ⊥ 
+
+> 0
+
+→ C1 (2) such that π ◦ s = id. Then, given an element y ∈ C1/C ⊥ 
+
+> 0
+
+we define the following quantum state, up to a global normalization factor, 
+
+|y⟩ := X  
+
+> c∈C1:π(c)= y
+
+|c⟩ . (3) Note that given a representative c of y, i.e. an element c ∈ C1 with π(c) = y, the state |y⟩ agrees with the common notation c + C⊥ 
+
+> 0
+
+used in Definition 3.1. Using the section s, we can also write |y⟩ = s(y) + C⊥ 
+
+> 0
+
+.Finally, we define an encoding map for Q as an isomorphism E : Fkq
+
+> ∼
+
+−→ C1/C ⊥ 
+
+> 0
+
+.
+
+That is, E fixes a choice of preferred basis for its codomain. Given such an encoding and any computational basis state |x⟩, where x ∈ Fkq , we then define its encoding |x⟩ with respect to E as the unit vector 
+
+|x⟩ = |E( x)⟩ (4) = s ◦ E( x) + C⊥ 
+
+> 0
+
+(5) We then refer to the image of the ith tensor component of ( Cq )⊗k via E as the ith logical qudit. 
+
+Quantum G codes. Of importance for us will be quantum codes inheriting group properties from those of quasi-G code. The following definition will be of particular relevance in the next section to estimate the existence of transversal multi-control-Z gates. 
+
+Definition 3.2 (Quantum G code) . Let G be a group and let Q = CSS( C0, C 1) be a quantum code such that C0, C 1 ⊆ Fnq are quasi-G codes. We see C⊥ 
+
+> 0
+
+and C1 as left Fq [G]-modules. Then, we refer to Q
+
+as a quantum G code if there exists a section s of the canonical map π : C1 → C1/C ⊥ 
+
+> 0
+
+, i.e a G-module homomorphism 
+
+s : C1/C ⊥ 
+
+> 0
+
+→ C1 (6) such that π ◦ s = id. Moreover, we say that Q is a regular quantum G code if C1/C ⊥ 
+
+> 0
+
+is isomorphic to Fq [G]. Clearly, in that case, the dimension of Q is kQ = |G|. Finally, we say that Q is a free quantum G code if there exists an integer r such that C1/C ⊥ 
+
+> 0
+
+≃ Fq [G]r , in which case its dimension is kQ = r|G|.
+
+Remark 3.3. Note that a section always exists in the sense of Fq -vector spaces, but the stronger condition in Definition 3.2 requires s to be compatible with the module structure, i.e s ◦ σ = σ ◦ s, for σ ∈ G. Also note that a surjective map to a free module always admits a section. 9Multi-control-Z gates. In this work, we consider quantum CSS codes whose main purpose is either to be used in magic state distillation protocols, or for circuit compilation. Central components of these protocols are non-Clifford gates, instances of which are multi-control-Z gates. These particular gates constitute our main focus. Let m be a positive integer and q be a power of 2. For any γ ∈ Fq , the action of a physical (m − 1) -control-Z gate Cm−1Zγ on m physical qudit registers in the computational basis is given as follows, 
+
+Cm−1Zγ |x0⟩ | x1⟩ . . . |xm−1⟩ := exp ( iπ tr( γ x 0 x1 . . . x m−1)) |x0⟩ | x1⟩ . . . |xm−1⟩ ,xi ∈ Fq for i = 0 , . . . , m − 1, and tr := tr Fq /F2 denotes the trace map from Fq to the prime field F2.Given a quantum CSS code Q of dimension k, we may encode information in the tensor product code 
+
+Q⊗m, which is composed of m copies of Q. We refer to each copy of the original code as a code block of 
+
+Q⊗m. We label the physical qudit registers in each code block by the set N of cardinality n.A physical Cm−1Z gate on physical qudit registers corresponding to elements P0, P 1, . . . , P m−1 ∈ N ,respectively in code blocks 0 , 1, 2, . . . , m − 1, is denoted Cm−1Zγ [P0, P 1, . . . , P m−1], where γ ∈ Fq . Likewise, given a set L of cardinality k and an encoding map E : FLq → C1/C ⊥ 
+
+> 0
+
+for Q, a logical (interblock) Cm−1Z
+
+operator targeting logical qudits indexed by Q0, Q 1, . . . , Q m−1 ∈ L belonging respectively to code blocks 0, 1, 2, . . . , m − 1, is denoted by Cm−1Zγ [Q0, Q 1, . . . , Q m−1]. Its effect is given on a computational basis state by 
+
+Cm−1Zγ [Q0, Q 1, . . . , Q m−1] |x0⟩ | x1⟩ . . . |xm−1⟩ := exp 
+
+
+
+iπ tr( γ x 0 
+
+> Q0
+
+x1 
+
+> Q1
+
+. . . x m−1 
+
+> Qm−1
+
+)
+
+
+
+|x0⟩ | x1⟩ . . . |xm−1⟩,
+
+where xi = ( xiQ)Q∈L, i = 0 , . . . , m − 1. For the quantum codes relevant for us, such a logical operator may be performed via a (non-unique) circuit of physical ( m − 1)-control-Z gates. The minimal complexity of this circuit may vary from code to code but the ideal case is precisely when there exists such a circuit of depth one. In that case, a logical gate is said to admit a transversal implementation , or simply to be 
+
+transversal .
+
+3.2 Sufficient conditions for parallelizable addressability 
+
+In this section, we introduce a generic construction of quantum codes that support transversal logical multi-control-Z gates acting on any specified tuple of logical qudits of fixed size. We also analyze the extent to which these gates can be implemented in parallel. 
+
+Theorem 3.4. Let N be an index set of cardinality n and let G be a group 4 of order ℓ acting on N . Let 
+
+m ⩾ 2 and r be integers and let C ⊆ FNq be a quasi-G code with parameters [n, k, d ] with k > rℓ , satisfying the 
+
+m-multiplication property and the 2-multiplication property with respect to a vector u = ( ui)i∈N . Suppose moreover that C⊥ has distance d⊥ > ℓ . Let L1, . . . , L r ⊆ N be r distinct orbits of the action of G on 
+
+N , let L = ∪ri=1 Li and let L := N \ L. Let us define the two classical codes C0 := ( CL=0 )⊥ ⊆ FLq and 
+
+C1 := CL ⊆ FLq . Then, we have the following: (1) C⊥ 
+
+> 0
+
+⊆ C1 and the quantum CSS code Q := CSS( C0, C 1) is a free quantum G code. (2) Q has parameters [[ nQ, k Q, d Q]] with 
+
+nQ = n − rℓ, kQ = rℓ, dQ ⩾ min {d(C⊥), d (C)} − rℓ. 
+
+(3) There exists an encoding map E : FLq → C1/C ⊥ 
+
+> 0
+
+defining a basis of logical qudits {| x⟩ = |E( x)⟩ : x ∈
+
+FLq } such that given any subset S ⊆ L and any (m − 1) elements σ1, . . . , σ m−1 ∈ G, the logical circuit 
+
+Y
+
+> Q∈S
+
+C m−1ZQ, σ 1(Q), σ 2(Q), . . . , σ m−1(Q)
+
+can be performed in depth one via a circuit of physical Cm−1Z gates. (4) In particular, given any orbit Li ⊆ L and any m-tuple of logical qudits on this orbit, Q0, . . . , Q m−1 ∈
+
+Li, each belonging to a distinct code block of Q⊗m, the logical gate C m−1ZQ0, Q 1, . . . , Q m−1
+
+ can be performed in depth one.      
+
+> 4The index set Ncan be thought of being equal to [ n] with G⊆Sn.
+
+10 Corollary 3.5. Let r, G and Q be defined as in Theorem 3.4. For r = 1 , Q is a regular quantum G code and is fully addressable via C m−1Z gates. In that case, the minimal physical depth of any logical interblock 
+
+Cm−1Z-circuit on Q⊗n is upper bounded by km−1.
+
+Remark 3.6. Informally, the mutli-control-Z gates of the code of Theorem 3.4 can specifically address sets of logical qudits only orbit-wise, and gates involving qudits on different orbits can be parallelized as long as those gates involve the same group elements σ1, . . . , σ m−1.Hence, there is a trade-off between the dimension of the quantum code and the level of addressability: when the orbit size is sublinear in n,puncturing/shortening on more orbits increases the dimension while only puncturing a single orbit yields full addressability. We prove Theorem 3.4 in several steps. First, we establish technical lemmas on the module structure of Q. Then, we discuss how to physically implement the sequence of logical gates of item (3) .All the maps discussed in this section are defined in the category of Fq [G]-modules unless otherwise stated. Since C is a left Fq [G]-module and L is a union of orbits of the G-action, it follows that both C1
+
+and C⊥ 
+
+> 0
+
+are left Fq [G]-modules. Throughout, we let πL : C → FLq and πL : C → C1 denote the projection on the coordinates of L and L, respectively. Clearly, these maps are compatible with the G-action since L
+
+is a union of orbits. 
+
+Lemma 3.7. Let C, C0, and C1 be defined as in Theorem 3.4. Then, πL is surjective, πL is an isomorphism, 
+
+C⊥ 
+
+> 0
+
+⊆ C1 and C1/C ⊥ 
+
+> 0
+
+is a free Fq [G]-module of rank r. In particular, there exist elements g1, . . . , g r ∈ C
+
+such that πLi (gi) = (1 , 0, . . . , 0) and 
+
+C1/C ⊥ 
+
+> 0
+
+=
+
+> r
+
+M
+
+> i=1
+
+Fq [G] · π ◦ πL(gi).
+
+Moreover, the map 
+
+s : C1/C ⊥ 
+
+> 0
+
+−→ C1
+
+πL(gi) + C⊥ 
+
+> 0
+
+7 −→ πL(gi) (7) 
+
+is a well defined section of π.Proof. Since d(C⊥) > rℓ , the projection πL is surjective. Indeed, d(C⊥) > rℓ implies that ( C⊥)L=0 = {0}
+
+since |L| ⩽ rℓ . Using Lemma 2.10, one has ( CL)⊥ = πL(C)⊥ = {0}, hence πL(C) = FLq . Moreover, since L
+
+is a union of r orbits of G, the space FLq is a free Fq [G]-module of rank r. Thus, the exact sequence 0 −→ ker πL −→ C −→ FLq −→ 0splits. Let g1, . . . , g r ∈ C be such that πLi (gi) = (1 , 0, . . . , 0) (which exists by surjectivity), one has 
+
+C = Lri=1 Fq [G] · gi ⊕ ker πL and the first summand is clearly free. We are going to show that πL is an isomorphism of Fq [G]-modules. We only need to show its injectivity. Let x ∈ ker πL. Since C is self-orthogonal, one has for all σ ∈ G and all g ∈ { g1, . . . , g r },
+
+⟨u ⋆ x, σ · g⟩ = ⟨uL ⋆ π L(x), σ · πL(g)⟩ + ⟨uL ⋆ π L(x), σ · πL(g)⟩ = 0 .
+
+Since πL(x) = 0, one has ⟨uL ⋆ π L(x), σ · πL(g)⟩ = 0. Then, as the permutations of the elements of 
+
+{g1, . . . , g r } form the canonical basis of FLq , one has uL ⋆ π L(x) = 0, and πL(x) = 0 as well, because u has only non-zero components. Thus x = 0, and 
+
+C1 = πL(C) = 
+
+> r
+
+M
+
+> i=1
+
+Fq [G] · πL(gi)
+
+!
+
+⊕ πL(ker πL) = 
+
+> r
+
+M
+
+> i=1
+
+Fq [G] · πL(gi)
+
+!
+
+⊕ C⊥ 
+
+> 0
+
+.
+
+In particular, C⊥ 
+
+> 0
+
+⊆ C1 and C1/C ⊥ 
+
+> 0
+
+is a free Fq [G]-module of rank r generated by the elements of {πL(gi) + 
+
+C⊥ 
+
+> 0
+
+: 1 ⩽ i ⩽ r} and one has a section as given by Equation (7). From now on, we denote by π : C1 → C1/C ⊥ 
+
+> 0
+
+the canonical quotient map. 
+
+Lemma 3.8. Let C, C0, C1 and u be defined as in Theorem 3.4. Then, there exists an encoding E : FLq →
+
+C1/C ⊥ 
+
+> 0
+
+such that for any m + 1 codewords f 0, f 1, . . . , f m ∈ C1 it holds that 
+
+X 
+
+> P∈L
+
+ uL ⋆ f 0 ⋆ f 1 · · · ⋆ f m−1 
+
+> P
+
+= X
+
+> Q∈L
+
+ uL ⋆ x 0 ⋆ x 1 ⋆ · · · ⋆ x m−1 
+
+> Q
+
+(8) 
+
+where xi ∈ FLq is such that E( xi) = π(f i) for 0 ⩽ i ⩽ m − 1.
+
+11 Proof. The map E completes the following commutative diagram: 
+
+C C1
+
+FLq C1/C ⊥ 
+
+> 0
+
+.
+
+> πL
+> πL
+> π
+> ∼
+> E
+
+(9) As stated in Lemma 3.7, there exists {g1, . . . g r } ∈ C such that πLi (gi) = (1 , 0, . . . , 0). Then E is defined by πL(gi) 7 → π ◦ πL(gi), for 1 ⩽ i ⩽ r, and extended by linearity. Now, recall that by Lemma 3.7, πL is an isomorphism. Hence, for f i ∈ C1, let ˜f i ∈ C denotes its antecedent by πL. From the m-multiplication property of C,
+
+X
+
+> Q∈L
+
+
+
+u ⋆ ˜f 0 ⋆ ˜f 1 · · · ⋆ ˜f m−1
+
+> Q
+
++ X 
+
+> P∈L
+
+
+
+u ⋆ ˜f 0 ⋆ ˜f 1 · · · ⋆ ˜f m−1
+
+> P
+
+= 0 ,
+
+or written differently, by projecting the vectors onto the components over which the sum are defined 
+
+X
+
+> Q∈L
+
+
+
+uL ⋆ π L( ˜f 0) ⋆ π L( ˜f 1) ⋆ · · · ⋆ π L( ˜f m−1)
+
+
+
+> Q
+
+= X 
+
+> P∈L
+
+
+
+uL ⋆ π L( ˜f 0) ⋆ π L( ˜f 1) · · · ⋆ π L( ˜f m−1)
+
+
+
+> P
+
+Now, from the diagram in Equation (9), we know that E( πL( ˜f i)) = π(fi). We can thus set xi = πL( ˜f i). Moreover, πL( ˜f i) = f i, proving the claim. We now introduce the following notion of modulation function , which originates from [Gu´ e25]. 
+
+Definition 3.9. Let C be the code defined in Theorem 3.4. Given any subset S ⊆ L, corresponding to a subset of logical qudits of Q via E, and a vector λ ∈ FLq , we define the associated modulation function 
+
+Λ( λ, S ) := s ◦ E(1 S ⋆ λ ⋆ u −1 
+
+> L
+
+),
+
+where we write 5 u−1 := ( u−1 
+
+> Q
+
+)Q∈N and 1 S denotes the vector with components 1 on the positions of S and 0s on the complement of S.Note that Λ ∈ C1, since it is defined via the section s : C1/C ⊥ 
+
+> 0
+
+→ C1. Using this modulation function, we now exhibit a physical circuit whose effect at the logical level is to address specific tuples of logical qudits with multi-control-Z gates. 
+
+Lemma 3.10. Let Q be the quantum code defined in Theorem 3.4. Let S ⊆ L be a subset of indices, describing a subset of logical qudits. Then, for any logical state |ψ⟩ ∈ Q ⊗m, given any modulation function 
+
+Λ := Λ( λ, S ) as in Definition 3.9, and any group elements σ1, σ 2, . . . , σ m−1 ∈ G, it holds that 
+
+Y
+
+> Q∈S
+
+Cm−1ZλQ [Q, σ 1(Q), σ 2(Q), . . . , σ m−1(Q)] |ψ⟩ = Y 
+
+> P∈L
+
+Cm−1ZuP ΛP [P, σ 1(P ), σ 2(P ), . . . , σ m−1(P )] |ψ⟩ .
+
+(10) 
+
+Proof. The proof is similar to that of [Gu´ e25]. By linearity, it is enough to determine the action of the sequence of gates in the r.h.s of Equation (10) on a tensor product of logical basis states |x0⟩ | x1⟩ . . . |xm−1⟩,where xj = ( xjQ)Q∈L ∈ FLq , and |xj ⟩ ∈ Q belongs to the j-th code block of ( Q)⊗m. Let us recall that the encoding of x ∈ FLq is defined as |x⟩ := |E( x)⟩ = P
+
+> b∈C⊥
+> 0
+
+|s ◦ E( x) + b⟩, where s is a section of π. By linearity, it is sufficient to check the action of the set of physical gates on a tensor product |F⟩ := f 0 f 1 . . . f m−1 ,
+
+where f j is any summand s ◦ E( xj ) + bj , for bj ∈ C⊥ 
+
+> 0
+
+, of |xj ⟩, j = 0 , . . . , m − 1. It follows that f j is any codeword of C1. Moreover, let us recall that the set of physical qudits is in bijection with the set L = N \ L.Hence, we index the component of a codeword f j ∈ C1 such that f j = ( f jP )P ∈L ∈ FLq . Then, applying the circuit in the r.h.s of Equation (10) to |F⟩ yields 
+
+Y 
+
+> P∈L
+
+Cm−1ZuP ΛP [P, σ 1(P ), σ 2(P ), . . . , σ m−1(P )] |F⟩ = Y 
+
+> P∈L
+
+exp 
+
+
+
+iπ tr 
+
+
+
+uP ΛP f 0 
+
+> P
+
+f 1  
+
+> σ1(P)
+
+. . . f m−1 
+
+> σm−1(P)
+
+ 
+
+|F⟩
+
+= exp 
+
+iπ tr 
+
+ X 
+
+> P∈L
+
+uP ΛP f 0 
+
+> P
+
+f 1  
+
+> σ1(P)
+
+. . . f m−1 
+
+> σm−1(P)
+
+ |F⟩ .  
+
+> 5Recall that uhas only non-zero components.
+
+12 Given any codeword f ∈ C1 and element σ ∈ G, we have that fσ(P ) = ( σ−1 · f )P , where the r.h.s is the 
+
+P component of the vector σ−1 · f , which is still a codeword of C1, since C1 is a quasi-G code. It follows that we may transform the sum in the exponential by applying Lemma 3.8 to the m functions σ−1 
+
+> j
+
+· f j for 0 ⩽ j ⩽ m − 1, with the function f m taken to be Λ = E(1 S ⋆ λ ⋆ u −1 
+
+> L
+
+). This yields 
+
+X 
+
+> P∈L
+
+uP ΛP f 0 
+
+> P
+
+f 1  
+
+> σ1(P)
+
+. . . f m−1  
+
+> σm−1(P)
+
+= X 
+
+> P∈L
+
+ uL ⋆ Λ ⋆ f 0 ⋆ (σ−11 · f 1) ⋆ · · · ⋆ (σ−1 
+
+> m−1
+
+· f m−1) 
+
+> P
+
+= X
+
+> Q∈L
+
+ uL ⋆ 1S ⋆ λ ⋆ u −1 
+
+> L
+
+⋆ x 0 ⋆ (σ−11 · x1) ⋆ · · · ⋆ (σ−1 
+
+> m−1
+
+· xm−1)
+
+> Q
+
+= X
+
+> Q∈S
+
+λQ x0 
+
+> Q
+
+x1 
+
+> σ1(Q)
+
+. . . x m−1
+
+> σm−1(Q)
+
+,
+
+where the first equality is a simple rewriting in terms of Schur product, the second equality follows from Lemma 3.8, using that 
+
+σ−1 
+
+> j
+
+· f j = σ−1 
+
+> j
+
+· (s ◦ E( xi) + bi) = s ◦ E( σ−1 
+
+> j
+
+· xi) + σ−1 
+
+> j
+
+· bj ,
+
+for any σj ∈ G, j = 0 , . . . , m − 1 and hence π(σ−1 
+
+> j
+
+· f j ) = E( σ−1 
+
+> j
+
+· xi). In the last line we have used the vector 1 S to transform a sum over L into a sum over S. It follows directly that 
+
+Y 
+
+> P∈L
+
+Cm−1ZuP ΛP [P, σ 1(P ), σ 2(P ), . . . , σ m−1(P )] |F⟩ = Y
+
+> Q∈S
+
+exp 
+
+
+
+iπ tr 
+
+
+
+λQx0
+
+> Q
+
+x1 
+
+> σ1(Q)
+
+. . . x m−1
+
+> σm−1(Q)
+
+ 
+
+|F⟩ .
+
+(11) Since this holds for any vector f 0, f 1, . . . , f m−1 ∈ C1, by linearity it also holds for any product |x⟩ := 
+
+|x0⟩ | x1⟩ . . . |xm−1⟩ of logical basis states. We thus obtain 
+
+Y 
+
+> P∈L
+
+Cm−1ZuP ΛP [P, σ 1(P ), σ 2(P ), . . . , σ m−1(P )] |x⟩ = Y
+
+> Q∈S
+
+exp 
+
+
+
+iπ tr 
+
+
+
+λQx0
+
+> Q
+
+x1 
+
+> σ1(Q)
+
+. . . x m−1
+
+> σm−1(Q)
+
+ 
+
+|x⟩
+
+= Y
+
+> Q∈S
+
+Cm−1ZγQ [Q, σ 1(Q), σ 2(Q), . . . , σ m−1(Q)] |x⟩.
+
+By linearity, this holds for any other state |ψ⟩ ∈ Q ⊗m.We now have all the components required to prove Theorem 3.4. 
+
+Proof of Theorem 3.4. For item (1), by construction it is clear that C⊥ 
+
+> 0
+
+⊆ C1. Moreover, since L is a union of orbits of G, there is a well defined action of G on L defining a subgroup of the automorphism group of 
+
+C1 and C⊥ 
+
+> 0
+
+, making them both left G-module. Moreover, by Lemma 3.7, C1/C ⊥ 
+
+> 0
+
+is a free G-module, and it follows that Q is, by definition, a free quantum G code. We now treat the parameters given in item (2) . For the dimension of Q, we appeal to item (1) , or equivalently Lemma 3.7, telling that Q is a free quantum G code, and consequently kQ = dim( C1/C ⊥ 
+
+> 0
+
+) = dim Fq
+
+Lri=1 Fq [G] = rℓ . For the distance, we have 
+
+d(Q) ⩾ min {d(C0), d (C1)} = min d (CL=0 )⊥, d (CL)
+
+= min {d(( C⊥)L), d (CL)}
+
+⩾ min {d(C⊥), d (C)} − rℓ, 
+
+where the second line follows from Lemma 2.10. For item (3) , in Lemma 3.10 we showed that the product of physical gates 
+
+C := Y 
+
+> P∈L
+
+Cm−1ZuP ΛP [P, σ 1(P ), σ 2(P ), . . . , σ m−1(P )] implements the logical circuit Q 
+
+> Q∈S
+
+Cm−1ZλQ [Q, σ 1(Q), σ 2(Q), . . . , σ m−1(Q)]. First, for each multi-control-
+
+Z gate of C, the m − 1 targeted physical qudits belong to different codeblocks. Suppose that two of these gates overlap on qudits Q1, Q 2 ∈ S, say in the ith codeblock, for some 1 ⩽ i ⩽ m. Then, we must have σi(Q1) = σi(Q2), which means that Q1 = Q2 since G acts freely on L. Hence C is a sequence of non-overlapping physical gates and can be implemented transversally. 13 For the last claim, item (4) , we may take the singleton S = {Q0}. Then, given any ( m − 1)-tuple of logical qudits Q1, . . . , Q m−1 ∈ Li, we can find elements σ1, . . . , σ m−1 ∈ G such that Qi = σi(Q0), for 1 ⩽ i ⩽ m − 1, since the code is a free quantum G code. Hence, the logical C m−1ZQ0, Q 1, . . . , Q m−1
+
+
+
+targets any m-tuple of logical qudits and is also performed in depth one via the circuit of Lemma 3.10. 
+
+Proof of Corollary 3.5. The proof follows the same line as that of Section 3.3 in [Gu´ e25]. Since we have a single orbit, the multi-control-Z gates can target any m-tuples of logical qudits. Successively applying the physical circuit of Lemma 3.10 for all possible choices of σ1, . . . , σ m−1 ∈ G, we can obtain the all-to-all inter-block Cm−1Z circuit (with a choice of modulation λ for each gate), with physical depth |G|m−1 = km−1.Any other circuit can be obtained from the all-to-all circuit by appropriately choosing the sets S at each time step. 
+
+3.3 Known examples 
+
+Instances of codes that share similar properties to that of quantum group codes are given in [HVWZ25b, HVWZ25a, Gu´ e25]. Before we introduce our main construction in the next section, we connect these known examples to the formalism developed in Theorem 3.4. First, in [HVWZ25a], the code C is an algebraic geometry code CL(P, D ) with the 4-multiplication property taken from [Sti06] and defined over a Galois extension field F ′ of some fixed function field F . The set N is the set of rational places in the support of the divisor P . The divisor D is another divisor disjoint from P . The group G is the Galois group Gal (F ′/F ) and the set L is the set of places of F ′ above a given rational place P0 of F . The set N is the set of all rational places of F ′ that lie above rational places of F .Second, in [Gu´ e25], similarly to [HVWZ25a], the code C is an instantiation of the construction of [Sti06] that has the m-multiplication property for any fixed m ⩾ 2. The group G is the Galois group Gal (F/F ′′ )of any intermediate field extension F ′′ , where F ⊆ F ′′ ⊆ F ′. This allows for control over the parameters of the quantum code. Then L is the set of places of F ′ above a given rational place of F ′′ . It was first proved in [Gu´ e25] that the gates of [HVWZ25a] can be parallelized, allowing logical multi-control-Z circuits to be implemented with a minor space-time overhead. Finally, in [HVWZ25b], the constructed quantum code with addressable gates are quotients of quantum 
+
+G codes. There construction resembles the ones from [HVWZ25a, Gu´ e25] and Section 4.2. In that case, the code C is a Reed-Solomon code over Fq with a restricted subset of evaluation points N that we now define. Let F be a subfield of Fq . Then, F acts on Fq by translation, and hence on the coordinates of the Reed-Solomon code. We may set G := F and find a subset of Fq stabilized by F and over which F acts freely: F is such a subset. Then, instead of L being a full orbit of G, it is defined as a subset of the orbit of some ζ ∈ Fq \ F . In [HVWZ25b], those choices are made so as to ensure the multiplication-property of C.Then, following the notation of Theorem 3.4, the set of indices N := L ∪ F and it indeed holds that L = F
+
+is stabilized by G and disjoint from L.
+
+4 Good quantum group codes with enhanced decoding 4.1 Good quasi-abelian AG codes with the m-multiplication property 
+
+In this section, we use a construction from [CG26] that produces quasi-G codes from algebraic geometry, where G is an abelian group of large order relative to the length of the code. Since the original paper is written in a geometric language, we explain some of the ideas using the language of function fields. We show that this construction preserves the m-multiplication property, and is therefore suitable for designing quantum codes with transversal gates that are addressable. The authors of [CG26] also showed that the traditional decoding algorithm for AG codes can be adapted to benefit from the additional module structure of these codes, making them efficiently encodable and decodable. The aim of this section is to prove the following theorem: 
+
+Theorem 4.1. Let q > 4 be a prime power. Let F be a function field of genus g > 1 with field of constants 
+
+Fq , such that N (F ) 
+
+> g
+
+> 2, where N (F ) is the number of rational places of F . Let P be the divisor sum of n
+
+rational places of F , with n > 2g and D be an effective divisor with supp D ∩ supp P = ∅ satisfying 
+
+2g − 2 < deg D < deg P. 
+
+Let C := CL(P, D ), a code of length n and dimension k. Assume there exists an integer m and η ∈ ΩF
+
+with a simple pole at every rational place of F such that 
+
+(m + 1) D ⩽ P + ( η),
+
+14 hence C satisfies the m-multiplication property. Then, there exists an AG code eC = CL( eP , eD) over Fq2 with the same rate and designed relative distance as C, which is a quasi-G code for G an abelian group such that 
+
+αq n ⩽ log |G| ⩽ βq n, 
+
+where αq and βq are two positive constants depending solely on q. Moreover, eC is a free Fq2 [G]-module of rank k and satisfies the m-multiplication property. The dual code eC⊥ has the same rate and designed relative distance as C⊥, and is a quasi-G code as well. It is also free as a Fq2 [G]-module, of rank n − k.
+
+Theorem 4.1 yields many interesting implications when applied to a good (or excellent) family of AG codes with the multiplication property. For instance, let ( Ci)i⩾0 be the family of AG codes from [WHY25]. Applying Theorem 4.1, one obtains a family of good quasi-abelian AG codes ( eCi)i⩾0 with large permuta-tion automorphism group satisfying the m-multiplication property for any positive integer m < 6. Using Proposition 2.6, because these codes are free Fq2 [G]-modules, it follows that they can also be encoded in quasi-linear time in their length. It is also shown in [CG26] that they can be decoded in quasi-quadratic time (see [CG26, Section 9.3]). 
+
+4.1.1 Class field theory 
+
+Our construction requires an unramified abelian extension of function field eF /F . Class field theory gives a complete description of all abelian extensions of a function field F/ Fq in terms of its Picard group Pic( F ). We will make a summary of a few results that suit our needs. Let P be a rational place of F . The following classical proposition [Ros87], or see [Gas25, Section 3.3.2, Proposition 16 and 17], gives a description of unramified abelian extensions of F in which P splits completely. 
+
+Proposition 4.2. Fix a separable closure Fsep of F . There exists a maximum unramified abelian extension of F in Fsep in which P splits completely. It is called the Hilbert class field of F (with respect to P ) and is denoted by Hil P (F ). The field of constants of Hil P (F ) is the same as the one of F .
+
+The following theorem [Ros87, Theorem 1.3] gives a description of the Galois group of Hil P (F ), classifies intermediate extensions between F and Hil P (F ), and gives a criterion for rational places of F to split completely in any intermediate extension. 
+
+Theorem 4.3. With the notation above, one has 
+
+Gal (Hil P (F )/F ) ≃ Pic 0(F ).
+
+In particular, Galois theory states that there is a one-to-one correspondence between subgroups H of Pic 0(F )
+
+and unramified abelian extensions of F in Fsep , denoted eFH , in which P splits completely. The Galois group of eFH is naturally isomorphic to Pic 0(F )/H .In addition, a rational place P ′ of F splits completely in eFH if and only if the equivalence class of the degree zero divisor P ′ − P in Pic 0(F ) belongs to H.
+
+This proposition will be later used to lift algebraic geometry codes defined over some function field F .It remains to select appropriately the function field F and the subgroup H. This is the aim of the next section. 
+
+4.1.2 Lifting function fields with many rational places 
+
+Let F/ Fq be a function field over Fq of genus g(F ) with field of constants Fq . Let P be the divisor sum of 
+
+n rational places of F and D be a divisor such that supp( P ) ∩ supp( D) = ∅ and 2g(F ) − 2 < deg D < n. 
+
+Let m be a positive integer and η ∈ ΩF be a differential with a simple pole at every rational place of P ,and assume ( m + 1) D ⩽ P + ( η), so that CL(P, D ) satisfies the m-multiplication property. 
+
+Theorem 4.4. Let F, P, D, η be as above. Let F ′ = Fq2 ⊗Fq F - be the constant field extension of F to Fq2 .Then, there exists a separable unramified extension eFH /F with the following properties: (a) The field of constants of eFH is Fq2 .
+
+15 (b) The extension eFH /F ′ is abelian and G := Gal ( eFH /F ′) is an abelian group of order 
+
+|G| ⩾ (√q − 1) 2g(F ).
+
+Moreover, there exists divisors eP , eD ∈ Div( eFH ) such that: (1) eP is the sum of the n · | G| rational places (over Fq2 ) above the places of P .(2) deg eD = deg D · | G| and 2g( eFH ) − 2 < deg eD < n · | G|.
+
+(3) eP and eD are invariant under the action of G.(4) The Riemann-Roch space L( eD) is a free Fq2 [G]-module of rank deg( D) − g(F ) + 1 .(5) Cotr eFH /F (η) has a simple pole at every place of eP .(6) The following inequality holds: 
+
+(m + 1) eD ⩽ eP +
+
+
+
+Cotr eFH /F (η)
+
+
+
+.
+
+Proof. We start with items (a)-(b) . First, F ′ is a function field over Fq2 of genus g(F ), and F ′/F is an unramified extension of degree 2. The rational places of F ′ (whose residue field is Fq2 ) are composed of: 
+
+• the places lying above rational places Q of F . In this case, rQ = eQ = 1 and fQ = 2. 
+
+• the places lying above places Q′ of degree 2 of F . In this case, eQ′ = 2 and rQ′ = fQ′ = 1. Moreover, the conorm map induces an injective map from Pic 0(F ) to Pic 0(F ′), so we may identify Pic 0(F )with a subgroup H of Pic 0(F ′). 6 Let P0 be a rational place of F ′ lying above a rational place of F . We may define eFH as in Theorem 4.3, the unramified abelian extension of F ′ in which P splits completely with Galois group isomorphic to Pic 0(F ′)/H . Namely, we have a tower of Galois extensions 
+
+F ⊆ F ′ ⊆ eFH ⊆ Hil P0 (F ′).
+
+Since F ′/F is unramified and eFH /F ′ is unramified then the extension eFH /F is unramified as well. A theorem of Weil [Wei48], proving the Riemann Hypothesis for function fields of transcendance degree 1 over a finite field implies that (√q − 1) 2g(F ) ⩽ | Pic 0(F )| ⩽ (√q + 1) 2g(F ) and ( q − 1) 2g(F ′) ⩽ | Pic 0(F ′)| ⩽ (q + 1) 2g(F ′)
+
+and since g(F ′) = g(F ), the order of the Galois group satisfies 
+
+| Gal( eFH /F ′)| = | Pic 0(F ′)|/| Pic 0(F )| ⩾ (√q − 1) 2g(F ).
+
+Concerning items (1)-(4) , for every rational place P ′ of F ′, we have P ′ − P0 ∈ H if and only if P ′ lies above a rational place of F , in which case P ′ splits completely in eFH . Since [ eFH : F ′] = |G|, there are 
+
+n · | G| rational places above places of supp( P ). Let eP = Con eF /F (P ), and eD = Con eF /F (D). As conorms, they are invariant under the action of G. The freeness of L( ˜D) as an Fq2 [G]-module is proved in [CG26, Section 4, Theorem 1]. Then, the operator Con eFH /F multiplies the degree of the divisors by [ eFH :F ][Fq2 :Fq ] = |G|,and one has 2g( eF ) − 2 = |G| · (2 g(F ) − 2) by the Riemann-Hurwitz formula [Sti08, 3.4.13], since the extension eFH /F is unramified. Finally, for item (5)-(6) , since eFH /F is unramified, one has 
+
+
+
+Cotr eFH /F (η)
+
+
+
+= Con eFH /F (( η)). Thus, Cotr eFH /F (η) has simple poles at the places above P . Finally one has (m + 1) Con eFH /F (D) ⩽ Con eFH /F (P ) + Con eFH /F (( η)) .    
+
+> 6With the geometric point of view, this is just saying that Fq-rational points of the Jacobian variety form a subgroup of the Fq2-rational points.
+
+16 4.1.3 Good quasi-abelian AG codes 
+
+We now examine the implications of Theorem 4.4 in the context of AG codes. 
+
+Corollary 4.5. Let F , P , D, η be as in Theorem 4.4. Let C := CL(P, D ) be an AG code with parameters 
+
+[n, k, d ]. In particular, since (m + 1) D ⩽ P + ( η), C has the m-multiplication property. Then, there exists an unramified field extension eF /F and a linear code eC over Fq2 with the following properties: (1) eC := CL( eP , eD), where eP and eD are conorms of P and D in eF , respectively. (2) eC is a quasi-G code with G abelian and |G| ⩾ (√q − 1) 2g(F ).(3) eC is a free Fq2 [G]-module of rank k.(4) eC has the m-multiplication property. (5) eC has parameters [en, ek, ed] with: 
+
+ek = k · | G|, ed ⩾ (n − deg D) · | G|, en = n · | G|.
+
+(6) The dual code eC⊥ is a free Fq2 [G]-module of rank (n − k), and has parameters [en⊥, ek⊥, ed⊥] where : 
+
+ek⊥ = ( n − k) · | G|, ed⊥ ⩾ (deg D − 2g(F ) + 2) · | G|, en = n · | G|.
+
+Proof. Since one has k = deg( D)−g(F )+1 by the Riemann-Roch theorem and 2 g( eF )−2 = |G|· (2 g(F )−2) by the Riemann-Hurwitz formula [Sti08, 3.4.13], items (1)-(5) follow from Theorem 4.4. For item (6) recall that the dual code of eC = CL( eP , eD) has a geometric nature: eC⊥ is the image of the (injective) residue map res eD− eP , eP : Ω( eD − eP ) −→ Fenq2
+
+ω 7 −→ (Res Pi (ω)) i⩽en
+
+where Ω( eD − eP ) := {ω ∈ Ω eF | (ω) ⩾ eD − eP }. The parameters of the code can be checked in [Sti08, Theorem 2.2.7], and the freeness in [CG26, Proposition 7]. 
+
+Remark 4.6. In [CG26], the decoding algorithm requires, for technical reasons, G to have order either a power of p or coprime to p, where p is the characteristic of Fq . Any abelian group G can be decomposed as 
+
+G = Gp × Gℓ where Gp is a p-group and Gℓ has order coprime to p. Let eF ′ be the subfield of eF fixed by the smaller these two subgroups. One can replace eF and eC by eF ′ and eC′, the lift of CL(P, D ) in eF ′, in the previous corollary. With these changes, every statement remains true except that G′, the Galois group of 
+
+eF ′, only satisfies |G′| ⩾ (√q − 1) g(F ) (see [CG26, Section 9.2]). Then |G′| is either a power of p or coprime to p.We are now ready to prove Theorem 4.1. 
+
+Proof of Theorem 4.1. The assumptions of the Theorem allow to use Corollary 4.5: there exists an AG code eC which is a quasi-G code with G abelian. According to Remark 4.6, we can assume that G has order either a power of the characteristic p or coprime to p, if we only assume that |G| ⩾ (√q − 1) g . Then eC
+
+satisfies most of the conditions: we only need to show that there exists αq and βq , two positive constants depending only on q, such that 
+
+αq n ⩽ log |G| ⩽ βq n. 
+
+We assumed that n > 2g(F ). Moreover, the Hasse-Weil bound [Wei48] states that 
+
+n ⩽ N (F ) ⩽ q + 1 + 2 g√q. 
+
+Since g > 1, one has 2g < n ⩽ q + 1 + 2 g√q < (q + 1 + 2 √q)g, 
+
+or equivalently nq + 1 + 2 √q < g < n
+
+2 .
+
+17 Finally, according to the construction in Theorem 4.4 and [Wei48], one has (√q − 1) g ⩽ |G| ⩽
+
+ q + 1 
+
+√q − 1
+
+2g
+
+,
+
+and hence log  √q − 1
+
+q + 1 + 2 √q · n < log( √q − 1) · g ⩽ log |G| ⩽ 2 log 
+
+ q + 1 
+
+√q − 1
+
+
+
+· g < log 
+
+ q + 1 
+
+√q − 1
+
+
+
+· n. 
+
+In [CG26], the authors show that the traditional cubic-time decoding algorithm of AG codes can be adapted to take advantage of the structure of free Fq [G]-module. They design a randomized decoding algorithm with quasi-quadratic complexity in |G|, and since in Theorem 4.1 one has n = Θ(log |G|), this yields quasi-quadratic complexity in the length of the code. We give the precise result in the following theorem. 
+
+Theorem 4.7 (from [Gas25, Corollary 53.1]) . We use the notation of Theorem 4.1 and denote by ˜n the length of eC, by ˜g the genus of the function field over which it is defined, and by d∗ = n − deg( D) the designed distance of C. There exists a constant Cq such that the following holds: there exists a randomized (Las Vegas) decoding algorithm for eC allowing to decode up to |G| · ⌊ (d∗ + g − 1) /2⌋ − ˜g errors with at most 
+
+Cq · ˜n2 polylog(˜ n) operations. 
+
+Note that |G| · ⌊ (d∗ + g − 1) /2⌋ − ˜g is equal to ⌊( ˜d∗ − ˜g − 1) /2⌋ when ( d∗ + g − 1) /2 is an integer (where ˜d∗ denotes the designed distance of eC). 
+
+4.2 Good quantum group codes from lifted AG codes 
+
+In this section we prove the main results of our work, Theorem 1.1 and Corollary 1.2. Our proof combines the framework for parallel addressability developed in Section 3.2 and the AG code lifting method exposed in Section 4.1. 
+
+Theorem 4.8 (Restatement of Theorem 1.1) . Let t > 4 be a power of two, and set q = t4. Then, for any 
+
+1 < m ⩽ t 
+
+> 2
+
+− 1 there exists: (1) a sequence of q-dimensional qudit regular quantum group codes with asymptotic parameters 
+
+[[ n, Θ( n/ log n), Θ( n)]] q ,
+
+and admitting transversal C ˜m−1Z-gates that are fully addressable for all 1 < ˜m ⩽ m. Moreover, the depth of any logical circuit of C ˜m−1Z-gates acting across the m code blocks of Q⊗ em is upper bounded by O(k ˜m−1), where k denotes the dimension of Q.(2) a sequence of q-dimensional qudit free quantum group codes with asymptotic parameters 
+
+[[ n, Θ( n), Θ( n)]] q ,
+
+and admitting a transversal C ˜mZ-gate as well as orbit-wise addressable transversal C ˜m−1Z gates across 
+
+Θ(log( n)) orbits of size Θ( n/ log( n)) for 1 < ˜m ⩽ m.In both cases, the quantum code family admits a O(n2 · polylog( n)) -time decoder 7 with a linear decoding radius. Proof. Let {C(i) : i ∈ N} be an asymptotically good family of AG q′-ary code, where each C(i) ⊆ Fn(i) 
+
+> q′
+
+has parameters [ n(i), k (i), d (i)]q′ , rate κ(i), relative distance δ(i), and satisfies the assumption of Theorem 4.4 for all i ∈ N. In particular, C(i) has the m-multiplication property and the 2-multiplication property. Because the codes contain the all-one vector, they also have the ˜ m-multiplication property for every 1 < ˜m ⩽ m.Suppose moreover that the dual-code family {(C(i))⊥ : i ∈ N} is asymptotically good as well. Instances of such codes can be found in [GG24, Ngu24, WHY25, HVWZ25a, Gu´ e25]. In the even-characteristic case of [Gu´ e25] this is especially verified for t > 4, q′ = t2 and 1 < m ⩽ t 
+
+> 2
+
+− 1. 
+
+> 7The polylogarithmic factor of the decoder is log 4(n)
+
+18 Then, following Theorem 4.4, each C(i), can be lifted into a q-ary code ˜C(i), where q := q′2, with parameters [˜ n(i), ˜k(i), ˜d(i)]q such that ˜C(i) and ( ˜C(i))⊥ have the same rate κ(i), κ (i)⊥ and relative distance 
+
+δ(i), δ (i)⊥ as those of C(i) and ( C(i))⊥, respectively. That is, { ˜C(i) : i ∈ N} and {( ˜C(i))⊥ : i ∈ N} are asymptotically good families of codes. Moreover, these two codes are quasi-G(i) codes for some group G(i)
+
+of order ℓ(i) satisfying αq n(i) ⩽ log ℓ(i) ⩽ βq n(i) where αq , β q are positive universal constants. Let r(i) ⩾ 1 be an integer and let L(i) be a union of r(i) orbits of the action of G(i). Notice that since log ℓ(i) < β q n(i) and the family of lifted codes and their duals are both good, we can choose r(i) such that 
+
+r(i)ℓ(i) < min { ˜d(i)⊥, ˜k(i)}. Then, the code ˜C(i) satisfies the assumptions of Theorem 3.4. We define the shortened code C(i)0 = C(i) 
+
+> L(i)=0
+
+and the punctured code C(i)1 = C(i) 
+
+> L(i)
+
+. It follows that the quantum code 
+
+Q(i) := CSS( C(i)0 , C (i)1 ) is a free quantum G(i) code with parameters [[ n(i) 
+
+> Q
+
+, k (i) 
+
+> Q
+
+, d (i) 
+
+> Q
+
+]] such that 
+
+n(i) 
+
+> Q
+
+= ℓ(i)(n(i) − r(i)) ⩽ ℓ(i)
+
+ log ℓ(i)
+
+αq
+
+− r(i)
+
+
+
+k(i) 
+
+> Q
+
+= r(i)ℓ(i)
+
+d(i) 
+
+> Q
+
+⩾ min {d(( ˜C(i))⊥), d ( ˜C(i))} − rℓ (i)
+
+⩾ ℓ(i)
+
+ min {δ(i), δ (i)⊥} · log ℓ(i)
+
+βq
+
+− r(i)
+
+
+
+.
+
+We distinguish two cases. (1) First, suppose that r(i) = 1. Then, the family {Q (i) : i ∈ N} has asymptotic parameters scaling as [[ n, Θ( n/ log n), Θ( n)]]. From Theorem 3.4, each member Q(i) is a regular quantum G(i) code which admits an encoder E (i) allowing for the transversal implementation of the full set of addressable logical 
+
+C em−1Z gates for 1 < em ⩽ m, and those can be parallelized k(i) 
+
+> Q
+
+at a time from Lemma 3.10. From Corollary 3.5, it follows that the physical depth of any logical circuit on Q⊗m composed of inter-block 
+
+Cm−1Z gates is bounded by O (k(i) 
+
+> Q
+
+) m−1.(2) Second, suppose that r(i) = ⌊η(i)n(i)⌋, for some constant-approaching term 
+
+η(i) < 12 min {κ(i), δ (i), δ (i)⊥, β q
+
+
+
+1 + 1
+
+αq
+
+
+
+}, (12) where the 1 /2-factor can be replaced by an arbitrary constant less than one. In that case, we obtain the parameter bounds 
+
+n(i) 
+
+> Q
+
+⩽ ℓ(i) log ℓ(i)
+
+ 1
+
+αq
+
+− η(i)
+
+βq
+
++ 1 
+
+
+
+k(i) 
+
+> Q
+
+⩾ ℓ(i)
+
+
+
+log ℓ(i) η(i)
+
+βq
+
+− 1
+
+
+
+d(i) 
+
+> Q
+
+⩾ ℓ(i)
+
+ log ℓ(i)(min {δ(i), δ (i)⊥} − η(i))
+
+βq
+
++ 1 
+
+
+
+.
+
+In particular, letting η(i) approach its upper bound given in Equation (12), the family {Q (i) : i ∈ N}
+
+has asymptotic parameters scaling as [[ n, Θ( n), Θ( n)]]. From Theorem 3.4, each member Q(i) is a free quantum G(i)-code which admits an encoder E (i) allowing for the transversal implementation of the logical C em−1Z gates acting orbit-wise on tuples of logical qubits for 1 < em ⩽ m, and those can be parallelized k(i) 
+
+> Q
+
+at a time as shown in Lemma 3.10. Moreover, for each member of the family, the gate CmZ is still transversal, i.e. ( CmZ)⊗n(i) 
+
+> Q
+
+= CmZ⊗k(i) 
+
+> Q
+
+.In both cases, from Theorem 4.7, each code Q(i) admits a quasi-quadratic-time decoder for both X-type and Z-type errors. This is the decoder of the classical AG code ˜C(i), which has a linear decoding radius and benefits from the fast matrix multiplication in Fq [G(i)]. Here, by transversal gate, we mean a gate acting globally on all the physical qubits across the m blocks of Q, with an induced action on all the logical qudits: C ˜m−1Z = C ˜m−1Z⊗k
+
+.19 Corollary 4.9 (Restatement of Corollary 1.2) . Let q = t4 with t ⩾ 6. Then, there exists a [[ n, Θ( n), Θ( n)]] q
+
+quantum code family allowing for a constant overhead distillation protocol of qubit CCZ -magic state with an 
+
+O(n2 · polylog( n)) time complexity. Proof. This follows from item (2) of Theorem 4.8, stating the existence of a [[ n, Θ( n), Θ( n)]] q quantum code family with transversal CCZ q gate and an O(n2 · polylog( n))-time complexity decoder and a linear decoding radius. We can use this construction in the magic-state distillation protocol of [WHY25], converting qudits to qubits using a self-orthogonal basis of Fq and converting a CCZ q magic state into a CCZ magic state. 20 References 
+
+[ABO08] Dorit Aharonov and Michael Ben-Or. Fault-tolerant quantum computation with constant error rate. SIAM Journal on Computing , 38(4):1207–1282, 2008. [BH12] Sergey Bravyi and Jeongwan Haah. Magic-state distillation with low overhead. Phys. Rev. A ,86:052329, Nov 2012. [BK05] Sergey Bravyi and Alexei Kitaev. Universal quantum computation with ideal clifford gates and noisy ancillas. Phys. Rev. A , 71:022316, Feb 2005. [BMD06] H. Bombin and M. A. Martin-Delgado. Topological quantum distillation. Phys. Rev. Lett. ,97:180501, Oct 2006. [Bom15] H´ ector Bomb´ ın. Gauge color codes: optimal transversal gates and gauge fixing in topological stabilizer codes. New Journal of Physics , 17(8):083002, aug 2015. [BRS09] Jos´ e Joaqu´ ın Bernal, ´Angel R´ ıo, and Juan Jacobo Sim´ on. An intrinsical description of group codes. Des. Codes Cryptography , 51(3):289–300, June 2009. [BW23] Martino Borello and Wolfgang Willems. On the algebraic structure of quasi-group codes. 
+
+Journal of Algebra and Its Applications , 22(10):2350222, 2023. [CAB12] Earl T. Campbell, Hussain Anwar, and Dan E. Browne. Magic-state distillation in all prime dimensions using quantum reed-muller codes. Phys. Rev. X , 2:041021, Dec 2012. [CG26] Jean-Marc Couveignes and Jean Gasnier. Explicit Riemann-roch spaces in the Hilbert class field. In Nils Bruin, David Kohel, and Chloe Martindale, editors, Arithmetic, Geometry, Cryptography and Coding Theory , volume 832 of Contemporary Mathematics . AMS, 2026. [CGK17] Shawn X. Cui, Daniel Gottesman, and Anirudh Krishna. Diagonal gates in the clifford hier-archy. Phys. Rev. A , 95:012329, Jan 2017. [CS96] A. R. Calderbank and Peter W. Shor. Good quantum error-correcting codes exist. Physical Review A , 54(2):1098–1105, August 1996. [EK09] Bryan Eastin and Emanuel Knill. Restrictions on transversal encoded quantum gate sets. 
+
+Phys. Rev. Lett. , 102:110502, Mar 2009. [FGL18] Omar Fawzi, Antoine Grospellier, and Anthony Leverrier. Constant overhead quantum fault-tolerance with quantum expander codes. In 2018 IEEE 59th Annual Symposium on Founda-tions of Computer Science (FOCS) , pages 743–754, 2018. [Gas25] Jean Gasnier. Arithmetics and Algorithmics of Algebraic Curves and Applications to Coding Theory and Cryptography . PhD thesis, Universit´ e de Bordeaux, 2025. Original in French, English version on https://www.math.u-bordeaux.fr/~jgasnier001/ .[GG24] Louis Golowich and Venkatesan Guruswami. Asymptotically good quantum codes with transversal non-clifford gates, 2024. [GL24] Louis Golowich and Ting-Chun Lin. Quantum ldpc codes with transversal non-clifford gates via products of algebraic codes, 2024. [Got14] Daniel Gottesman. Fault-tolerant quantum computation with constant overhead. Quantum Info. Comput. , 14(15–16):1338–1372, November 2014. [Gu´ e25] Virgile Gu´ emard. Good quantum codes with addressable and parallelizable transversal non-clifford gates, 2025. [HP03] W. Cary Huffman and Vera Pless. Fundamentals of Error-Correcting Codes . Cambridge University Press, 2003. [HVWZ25a] Zhiyang He, Vinod Vaikuntanathan, Adam Wills, and Rachel Yun Zhang. Asymptotically good quantum codes with addressable and transversal non-clifford gates, 2025. [HVWZ25b] Zhiyang He, Vinod Vaikuntanathan, Adam Wills, and Rachel Yun Zhang. Quantum codes with addressable and transversal non-clifford gates, 2025. 21 [KB15] Aleksander Kubica and Michael E. Beverland. Universal transversal gates with color codes: A simplified approach. Phys. Rev. A , 91:032330, Mar 2015. [KT19] Anirudh Krishna and Jean-Pierre Tillich. Towards low overhead magic state distillation. Phys. Rev. Lett. , 123:070507, Aug 2019. [KYP15] Aleksander Kubica, Beni Yoshida, and Fernando Pastawski. Unfolding the color code. New Journal of Physics , 17(8):083026, aug 2015. [Lin24] Ting-Chun Lin. Transversal non-clifford gates for quantum ldpc codes on sheaves, 2024. [Liu02] Qing Liu. Algebraic geometry and arithmetic curves , volume 6 of Oxf. Grad. Texts Math. 
+
+Oxford: Oxford University Press, 2002. [Ngu24] Quynh T. Nguyen. Good binary quantum codes with transversal ccz gate, 2024. [PR13] Adam Paetznick and Ben W. Reichardt. Universal fault-tolerant quantum computation with only transversal gates and error correction. Phys. Rev. Lett. , 111:090505, Aug 2013. [Ros87] Michael Rosen. The Hilbert class field in function fields. Expo. Math. , 5:365–378, 1987. [Sho95] Peter W. Shor. Scheme for reducing decoherence in quantum computer memory. Physical Review A , 52(4):R2493–R2496, October 1995. [SPW24] Thomas R. Scruby, Arthur Pesah, and Mark Webster. Quantum rainbow codes, 2024. [Ste96a] A. M. Steane. Error Correcting Codes in Quantum Theory. Physical Review Letters , 77(5):793– 797, July 1996. [Ste96b] A. M. Steane. Multiple-particle interference and quantum error correction. Proceedings of the Royal Society of London. Series A: Mathematical, Physical and Engineering Sciences ,452(1954):2551–2577, November 1996. [Sti06] H. Stichtenoth. Transitive and self-dual codes attaining the tsfasman-vladut-zink bound. IEEE Transactions on Information Theory , 52(5):2218–2224, 2006. [Sti08] Henning Stichtenoth. Algebraic Function Fields and Codes . Springer Publishing Company, Incorporated, 2nd edition, 2008. [VB19] Michael Vasmer and Dan E. Browne. Three-dimensional surface codes: Transversal gates and fault-tolerant architectures. Phys. Rev. A , 100:012312, Jul 2019. [Wei48] Andr´ e Weil. Sur les courbes alg´ ebriques et les vari´ et´ es qui s’en d´ eduisent , volume 7 of Publ. Inst. Math. Univ. Strasbourg . Hermann, Paris, 1948. [WHY25] Adam Wills, Min-Hsiu Hsieh, and Hayata Yamasaki. Constant-overhead magic state distilla-tion. Nature Physics , September 2025. [Zhu25] Guanyu Zhu. A topological theory for qldpc: non-clifford gates and magic state fountain on homological product codes with constant rate and beyond the n1/3 distance barrier. 2025. [ZSP +24] Guanyu Zhu, Shehryar Sikander, Elia Portnoy, Andrew W. Cross, and Benjamin J. Brown. Non-clifford and parallelizable fault-tolerant logical gates on constant and almost-constant rate homological quantum ldpc codes via higher symmetries. 2024. 22

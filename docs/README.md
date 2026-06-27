@@ -6,36 +6,32 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-06-26
-- 运行时间：2026-06-26 22:09:20 UTC
+- 最新运行日期：2026-06-27
+- 运行时间：2026-06-27 20:27:03 UTC
 - 运行状态：成功
-- 本次总论文数：5
-- 精读区：5
-- 速读区：0
+- 本次总论文数：4
+- 精读区：2
+- 速读区：2
 
 ### 今日简报（AI）
-今日精读5篇论文，重点关注两篇高分研究（均9.0/10）。最值得看的方向：基于空间群的拓扑码突破平移不变性限制，以及高效基础解码器推动容错量子计算。建议从这两篇论文入手，深入了解拓扑码与量子纠错解码的最新进展。
-- 详情：[/202606/26/README](/202606/26/README)
+今日聚焦容错量子计算的高效基础解码器与非克利福德逻辑的量子群码研究。精读中9分论文提出高性能解码器，8分论文增强解码、可寻址与并行能力。建议普通读者跟进这两项实用化进展，观察其推动量子纠错落地的潜力。
+- 详情：[/202606/27/README](/202606/27/README)
 
 ### 精读区论文标签
-1. [Topological Codes from Space Groups: A Route beyond Translation Invariance](/202606/26/2606.20548v2-topological-codes-from-space-groups-a-route-beyond-translation-invariance)  
-   标签：评分：9.0/10、query:qec-code
-   evidence：基于空间群的拓扑码，超越平移不变性
-2. [Efficient foundation decoders for fault-tolerant quantum computing](/202606/26/2606.27119v1-efficient-foundation-decoders-for-fault-tolerant-quantum-computing)  
+1. [Efficient foundation decoders for fault-tolerant quantum computing](/202606/27/2606.27119v1-efficient-foundation-decoders-for-fault-tolerant-quantum-computing)  
    标签：评分：9.0/10、query:qec-decoding
-   evidence：用于容错量子计算的基础解码器
-3. [Rate-2/3 Girth-8 (3,18)-Regular Quantum LDPC Codes from Two-Branch Finite-Field Bases and CPM Lifts](/202606/26/2606.27130v1-rate-23-girth-8-318-regular-quantum-ldpc-codes-from-two-branch-finite-field-bases-and-cpm-lifts)  
-   标签：评分：9.0/10、query:qec-code
-   evidence：构造了围长8的量子LDPC码并进行了解码实验
-4. [Toric code made subsystem: a framework for topological subsystem codes using anticommuting quantum spin liquids](/202606/26/2606.26226v1-toric-code-made-subsystem-a-framework-for-topological-subsystem-codes-using-anticommuting-quantum-spin-liquids)  
+   evidence：提出NTU框架用于容错量子计算的高效基础解码器
+2. [Quantum group codes for non-Clifford logic: enhanced decoding, addressability and parallelizability](/202606/27/2606.27211v1-quantum-group-codes-for-non-clifford-logic-enhanced-decoding-addressability-and-parallelizability)  
    标签：评分：8.0/10、query:qec-code
-   evidence：利用反交换量子自旋液体的环面码子系统框架
-5. [Quantum group codes for non-Clifford logic: enhanced decoding, addressability and parallelizability](/202606/26/2606.27211v1-quantum-group-codes-for-non-clifford-logic-enhanced-decoding-addressability-and-parallelizability)  
-   标签：评分：8.0/10、query:qec-decoding
-   evidence：量子群码与增强解码
+   evidence：量子群码与增强译码
 
 ### 速读区论文标签
-- 本次无速读推荐。
+1. [Nonlinear Geometrizability of State-Dependent Proto-Area in Approximate Holographic Codes](/202606/27/2606.22598v1-nonlinear-geometrizability-of-state-dependent-proto-area-in-approximate-holographic-codes)  
+   标签：评分：7.0/10、query:qec-decoding
+   evidence：全息码中的近似恢复
+2. [Connecting Quantum Tomography and Quantum Retrodiction](/202606/27/2606.23777v1-connecting-quantum-tomography-and-quantum-retrodiction)  
+   标签：评分：6.0/10、query:qec-decoding
+   evidence：量子信道的Petz恢复映射
 
 
 <div class="dpr-home-promo-card">

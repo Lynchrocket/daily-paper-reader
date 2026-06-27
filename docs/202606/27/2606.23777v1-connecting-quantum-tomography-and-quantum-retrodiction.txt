@@ -1,0 +1,1782 @@
+Title: Connecting Quantum Tomography and Quantum Retrodiction
+
+URL Source: https://arxiv.org/pdf/2606.23777v1
+
+Published Time: Wed, 24 Jun 2026 00:06:16 GMT
+
+Number of Pages: 14
+
+Markdown Content:
+Connecting Quantum Tomography and Quantum Retrodiction 
+
+Sebastian Murk ,∗ Ian Tan ,† Fabian M ¨uller ,‡ and Dominik ˇSafr ´anek §
+
+Faculty of Mathematics and Physics, Charles University, Ke Karlovu 3, 121 16 Praha 2, Czech Republic 
+
+Quantum tomography and quantum retrodiction are traditionally viewed as separate inference tasks: tomography reconstructs quantum states from measurement data, whereas retrodiction infers past quantum states from observed outcomes. We show that the two are manifestations of the same underlying principle. We prove that the Petz recovery map associated with a measurement channel is precisely the gradient update of the log-likelihood used in maximum-likelihood tomography. Consequently, repeated applications of the Petz map monotonically increase the likelihood. Extending beyond measurement channels, we derive a noncommutative generalization of the Petz map from the gradient of a generalized likelihood for arbitrary quantum channels. The resulting iterative procedure maximizes the likelihood and provides a general framework for quantum tomography, establishing a direct bridge between retrodiction, recovery maps, and statistical inference. 
+
+Keywords: Quantum tomography, quantum retrodiction, maximum likelihood estimation, Petz recovery map, Kubo–Mori geometry. 
+
+Quantum tomography and quantum retrodiction are very similar in spirit but differ in their mathematical formulation. Quantum tomography seeks to identify the quantum state that most likely generated a set of measurement outcomes and to de-sign measurements that enable this reconstruction as efficiently as possible. Quantum retrodiction, by contrast, seeks to invert a generally non-invertible quantum channel by inferring the input state that would have produced a given observed output state. In quantum tomography, the task is performed by making measurements and observing either individual outcomes, prob-ability distributions, or expectation values of observables to probe the space of density matrices. Since no single projective measurement can uniquely determine a quantum state, this typically requires measurements in multiple bases. There are numerous methods for reconstructing a quantum state from measurement data. These may differ in practice but should converge to the same solution for complete and noise-free data. The two prominent methods are linear inversion [ 1– 4], which seeks to solve for the quantum state as a solution to a set of linear equations, and maximum-likelihood estimation [ 5 –13 ], which aims to find the state that most-likely generated the data. Other methods include Bayesian state [ 14 – 20 ], shadow [ 21 –24 ], least squares [ 25 ], gentle or weak measurements [ 26 , 27 ], compressed-sensing [ 28 , 29 ], matrix product states [ 30 , 31 ], self-guided [ 32 , 33 ], and neural network tomography [ 34 – 38 ]. Quantum retrodiction, on the other hand, assumes knowl-edge of the full output quantum state, rather than only measure-ment outcomes or a probability distribution, together with the channel that produced it. Its task is then to infer a possible input state that could have led to the observed output. For a unitary evolution, retrodiction is trivial and amounts to evolving the observed state backward in time. For non-invertible channels, however, some information about the input is inevitably lost, so the retrodicted state cannot be uniquely determined. How to assign this missing information remains an open question,     
+
+> ∗sebastian.murk@matfyz.cuni.cz
+> †y-e.tan@matfyz.cuni.cz
+> ‡fabian.muller@matfyz.cuni.cz
+> §dominik.safranek@matfyz.cuni.cz
+
+with the Petz and the rotated Petz recovery maps representing two prominent mathematically motivated approaches. Their appeal stems from the properties of exact [ 39 – 41 ] and approx-imate [ 42 – 48 ] recoverability. Whenever no information has been lost, as characterized by equality in the data-processing inequality, these maps recover the original state exactly. This is the content of Petz’s theorem. When only a small amount of information is lost, the recovered state remains close to the original one. Moreover, in the commuting case, the Petz map reduces to classical Bayesian updating, and more generally to Jeffrey’s rule in the presence of incomplete evidence, which motivates its interpretation as a quantum analogue of Bayes’ theorem [ 49 –60 ]. Like Bayes’ rule, Petz-based retrodiction depends on a prior state that supplies the information lost by the channel, although different recovery maps prescribe different ways of incorporating this prior information. Both quantum tomography and quantum retrodiction have critical applications in quantum technologies: quantum to-mography remains the go-to method for full quantum diagnos-tics, enabling the characterization and verification of quantum states and processes in quantum computers, sensors, and com-munication devices [ 61 – 64 ]. This characterization provides information about state-preparation fidelity, gate errors, noise sources, and the security of quantum communication proto-cols [ 3 , 65 ]. Quantum retrodiction, and the Petz recovery map in particular, plays a central role in quantum error correction and channel reversal. The Petz map is optimal for perfectly correctable codes and remains near-optimal when the code is only approximately correctable [ 66 – 70 ], with recent experi-mental demonstrations [ 71 – 74 ]. More broadly, it has found applications across quantum information theory [ 75 ], quantum thermodynamics [54, 76–80], and quantum gravity [81, 82]. In this paper, we mathematically connect these two frame-works by extending quantum retrodiction to the multi-channel setting required for tomography and extending quantum tomog-raphy beyond quantum-to-classical channels, which represent measurements, to arbitrary quantum channels. We show that the gradient of the log-likelihood is represented by a quantum channel, which we call the Kubo–Mori (KM) update. The KM update coincides with the Petz recovery map when the 1
+
+> arXiv:2606.23777v1 [quant-ph] 22 Jun 2026
+
+predicted output commutes with the observed evidence, but is generally distinct otherwise. As a special case, we show that the Petz map itself coincides with the gradient of the standard log-likelihood. Like the Petz recovery map, the KM update generalizes quantum Bayes’ theorem, but unlike it, arises directly from the inference problem. We establish local monotonicity properties and prove global monotonicity and convergence in the commuting-output case, while providing evidence for the general case. Finally, we use these results to develop and implement tomographic protocols based on iterat-ing the Petz recovery map and the KM update for standard and general-channel quantum tomography, respectively. 
+
+I. Log-Likelihood gradient as Kubo–Mori update 
+
+Mathematical preliminaries. We consider the setting of quantum tomography. The goal is to infer an unknown input state ρ from measurement data obtained through a known quantum channel E. Since ρ is not directly accessible, only its image under E can be estimated from data. We therefore write 
+
+X ⩾ 0, Y ··= E(σ) > 0, (1) where X denotes the evidence, represented by an estimator of the true output state E(ρ), while Y denotes the prediction corresponding to a candidate input state σ. We assume that conditions (1) hold throughout the paper. We consider the problem of finding the state σ that most likely generated the data X, formulated as maximization of the log-likelihood functional 
+
+LX (σ) ··= Tr X ln E(σ). (2) Equivalently, this amounts to minimizing the Umegaki quan-tum relative entropy D(X||E (σ)) , which quantifies the distin-guishability between quantum states and has an operational interpretation in quantum hypothesis testing through quantum Stein’s lemma [ 83 – 86 ]. For the quantum-to-classical (i.e., mea-surement) channel, 
+
+Eqc (σ) = X 
+
+> i
+
+Tr[Π iσ] |i⟩⟨ i| , (3) which maps a quantum state to measurement outcomes en-coded in a classical register, the log-likelihood functional (2) reduces to the standard form 
+
+Lqc (σ) = X 
+
+> i
+
+ˆpi ln Tr[Π iσ] (4) used in maximum-likelihood quantum tomography, where 
+
+ˆpi = Ni/N are relative measured frequencies, {Πi} is a set of POVM elements, and {| i⟩} is an orthonormal basis of the classical register. 
+
+Log-likelihood gradient. The KM superoperator is defined as [87–91] 
+
+ΩY (X) ··=
+
+Z 10
+
+Y tX Y 1−t dt. (5) To understand how small changes in σ affect the log-likelihood functional (2), we consider its Fr´ echet derivative 
+
+DLX (σ)[∆] = Tr X Ω−1
+
+> Y
+
+ E(∆)  . (6) It can be interpreted as the directional derivative of LX at σ in the direction ∆. The Fr ´echet derivative of the matrix logarithm at Y is the inverse KM action Ω−1 
+
+> Y
+
+.1
+
+The gradient is the Riesz representation of the Fr ´echet deriva-tive with respect to a chosen inner product [ 93 ]. We consider two inner products: the Hilbert–Schmidt inner product and, for a full-rank state σ, the inverse-square-root metric 
+
+gσ (A, B ) ··= Tr σ−1/2A†σ−1/2B, (7) which is a monotone metric corresponding to f = √· [91 ]. In the commuting case, the latter reduces to the classical Fisher metric gp(a, b ) ··= P 
+
+> iaibi
+> pi
+
+. Since Ω−1 
+
+> Y
+
+is self-adjoint with respect to the Hilbert–Schmidt inner product, and E† is the Hilbert–Schmidt adjoint of E, we have 
+
+DLX (σ)[∆] = Tr [ GX (σ) ∆] = gσ
+
+ GσX (σ), ∆, (8) where the two gradients with respect to σ for a fixed output operator X are defined as 
+
+GX (σ) ··= E†Ω−1
+
+> E(σ)
+
+(X), GσX (σ) ··= √σ G X (σ)√σ. (9) A full-rank stationary point of LX on the trace-one manifold, such as a maximizer of the log-likelihood, satisfies 
+
+DLX (σ)[∆] = 0 , for all ∆ = ∆ †, Tr[∆] = 0 . (10) Using (6), this is equivalent to 
+
+GX (σ) = λ1, (11) for some Lagrange multiplier λ ∈ R. Thus (11) is the Euler– Lagrange equation for the trace-one constrained optimization problem. Taking the trace while using that both X and σ are density matrices implies λ = 1 . If σ is full rank, then Eq. (11) is equivalent to GσX (σ) = σ. This can be proven by multiplying the equation by √σ and σ−1/2 from both sides to get the right and left implications, respectively. 
+
+KM update as the direction of maximal log-likelihood in-crease. Let us define the line-search update function 
+
+ση = σ + η∆, f (η) ··= LX (ση ). (12) From the definition of the Fr´ echet derivative, we have 
+
+f ′(0) = DLX (σ)[∆] = gσ
+
+ GσX (σ) − σ, ∆, (13) where Tr[∆] = 0 allows us to make the first argument tangent by adding a −σ term. In the inverse-square-root metric (7) , the steepest-ascent direction on the trace-one manifold is given by the Riemannian gradient, 
+
+∆ = GσX (σ) − σ. (14) Substituting this choice into (13) gives 
+
+f ′(0) = gσ (∆ , ∆) = ∥∆∥2 
+
+> gσ
+
+⩾ 0. (15)                     
+
+> 1Equivalently, if f(A)··= ln A, then the Fr ´echet derivative of fat Yis the linear map Df (Y) = ··Ω−1
+> Y, i.e., Df (Y)[ X] = Ω −1
+> Y(X)[92].
+
+2For full-rank σ, equality holds iff ∆ = 0 , i.e., iff the stationary condition (11) is satisfied with λ = 1 .Using (14), the line search is given by 
+
+ση = (1 − η) σ + η σ +, (16) where σ+ = GσX (σ) denotes the updated density matrix corre-sponding to η = 1 , in which case the update becomes purely multiplicative. The prescription X → σ+ defines a quantum channel, 
+
+RKM 
+
+σ, E (X) ··= GσX (σ) = √σ E†Ω−1
+
+Y (X)√σ. (17) We call this map the KM update. 
+
+Relation between the KM update and the Petz recovery map. 
+
+The Petz recovery map is defined as [40], 
+
+Rσ, E (X) ··= √σ E†Y −1/2XY −1/2√σ, (18) with X and Y as in Eq. (1). We have the following relation. 
+
+Theorem 1. The KM update can be expressed as, 
+
+RKM 
+
+σ, E (X) = √σ E†h
+
+k(KY )Y −1/2XY −1/2i√σ, (19) 
+
+where KY ··= [ln Y, ·] encodes the noncommutativity between the evidence X and the prediction Y , and 
+
+k(ω) = ω
+
+2 sinh( ω/ 2) = 1 − ω2
+
+24 + O(ω4). (20) Thus, the Petz map is the zeroth-order approximation to the KM update. Since k is an even function, the leading noncom-mutative correction is quadratic in KY . This is why, for weak noncommutativity, the Petz map and the KM update nearly coincide. Additional properties of the KM update are provided in App. A.1 and A.2. The underlying geometric intuition is illustrated in Fig. 1. All proofs are provided in the Appendix. 
+
+Monotonicity. The update in the density matrix (16) is in the direction of the maximum log-likelihood increase, which guaranties that the log-likelihood will increase locally. We derive an exact quantitative bound showing this. 
+
+Theorem 2. The minimal and maximal guaranteed increase in the log-likelihood is given by, 
+
+− ln  1−ηgσ(∆ σση , ∆)  ⩽ LX (ση )−L X (σ) ⩽ ηgσ (∆ , ∆) ,
+
+(21) 
+
+where ∆σση ··= GσX (ση ) − σ, ∆ = ∆ σσ , and GσX (ση ) =
+
+√σE†[Ω −1
+
+E(ση )(X)] √σ. For non-invertible σ, the expressions evaluate by replacing σ1/2σ−1/2 → 1, which leads to 
+
+− ln Tr XΩ−1
+
+E(ση )(Y ) on the left-hand side. 
+
+This theorem shows that, unless the Riemannian gradient 
+
+∆ = 0 (i.e., σ is a fixed point of the KM update; a stationary point of the log-likelihood for an invertible σ), there always exists a sufficiently small η > 0 such that the argument of the logarithm is less than one. Consequently, the log-likelihood increases strictly. Inspired by this, we formulate the follow-ing conjecture: the KM update increases the log-likelihood globally, i.e., for the full multiplicative update η = 1 .input space 
+
+<latexit sha1_base64="tdy5cBUx22e49sInllEMc7AaEZY=">AAAB7XicbVDLSgNBEOyNrxhfUY9eBoPgKeyKRI9BLx4jmAckS5idzCZj5rHMzAphyT948aCIV//Hm3/jJNmDJhY0FFXddHdFCWfG+v63V1hb39jcKm6Xdnb39g/Kh0cto1JNaJMornQnwoZyJmnTMstpJ9EUi4jTdjS+nfntJ6oNU/LBThIaCjyULGYEWye1eoYNBe6XK37VnwOtkiAnFcjR6Je/egNFUkGlJRwb0w38xIYZ1pYRTqelXmpogskYD2nXUYkFNWE2v3aKzpwyQLHSrqRFc/X3RIaFMRMRuU6B7cgsezPxP6+b2vg6zJhMUkslWSyKU46sQrPX0YBpSiyfOIKJZu5WREZYY2JdQCUXQrD88ippXVSDWrV2f1mp3+RxFOEETuEcAriCOtxBA5pA4BGe4RXePOW9eO/ex6K14OUzx/AH3ucPn/GPLg==</latexit> 
+
+ω
+
+<latexit sha1_base64="S3ArUb+j6acSKW3edSXDVlZdNF0=">AAAB63icbVDLSgNBEOyNrxhfUY9eBoPgKeyKRI9BLx4jmAckS5idzGaHzGOZmRVCyC948aCIV3/Im3/jbLIHjRY0FFXddHdFKWfG+v6XV1pb39jcKm9Xdnb39g+qh0cdozJNaJsornQvwoZyJmnbMstpL9UUi4jTbjS5zf3uI9WGKflgpykNBR5LFjOCbS4NdKKG1Zpf9xdAf0lQkBoUaA2rn4ORIpmg0hKOjekHfmrDGdaWEU7nlUFmaIrJBI9p31GJBTXhbHHrHJ05ZYRipV1Jixbqz4kZFsZMReQ6BbaJWfVy8T+vn9n4OpwxmWaWSrJcFGccWYXyx9GIaUosnzqCiWbuVkQSrDGxLp6KCyFYffkv6VzUg0a9cX9Za94UcZThBE7hHAK4gibcQQvaQCCBJ3iBV094z96b975sLXnFzDH8gvfxDSM+jlI=</latexit> 
+
+ω
+
+<latexit sha1_base64="TT+6CtahloGR0u4NDGvPIRB00ng=">AAACI3icbZDLSgMxFIYz9V5vVZdugkWoKGVGpIogiCIIIlSxF+jUIZOmbWjmQnJGLMO8ixtfxY0Lpbhx4buYXhBt/SHw851zyDm/GwquwDQ/jdTU9Mzs3PxCenFpeWU1s7ZeVkEkKSvRQASy6hLFBPdZCTgIVg0lI54rWMXtnPfrlQcmFQ/8O+iGrO6Rls+bnBLQyMkc24q3POLs4hNsewTalIj4NnHiId/7YRdJch/bwB4hvrpOklx1x8lkzbw5EJ401shk0UhFJ9OzGwGNPOYDFUSpmmWGUI+JBE4FS9J2pFhIaIe0WE1bn3hM1ePBjQne1qSBm4HUzwc8oL8nYuIp1fVc3dlfWY3X+vC/Wi2C5lE95n4YAfPp8KNmJDAEuB8YbnDJKIiuNoRKrnfFtE0koaBjTesQrPGTJ015P28V8oWbg+zp2SiOebSJtlAOWegQnaJLVEQlRNETekFv6N14Nl6NnvExbE0Zo5kN9EfG1zfD6aUB</latexit> 
+
+ω+ = RKM 
+
+ω,E (X)
+
+current estimate 
+
+unknown system state 
+
+updated estimate 
+
+Hilbert –Schmidt gradient 
+
+<latexit sha1_base64="Qu+Lb1wF5GQwmFu4+1Ll4KOboVo=">AAACDHicbVDLSgMxFM3UV62vqks3wSLUTZkRqS6LblxWsK3QGUomzbShSWZM7ghl6Ae48VfcuFDErR/gzr8xfSxs64HA4ZxzubknTAQ34Lo/Tm5ldW19I79Z2Nre2d0r7h80TZxqyho0FrG+D4lhgivWAA6C3SeaERkK1goH12O/9ci04bG6g2HCAkl6ikecErBSp1jyzYOGzDe8J8mo7IepEAxO51SbcivuBHiZeDNSQjPUO8VvvxvTVDIFVBBj2p6bQJARDZwKNir4qWEJoQPSY21LFZHMBNnkmBE+sUoXR7G2TwGeqH8nMiKNGcrQJiWBvln0xuJ/XjuF6DLIuEpSYIpOF0WpwBDjcTO4yzWjIIaWEKq5/SumfaIJBdtfwZbgLZ68TJpnFa9aqd6el2pXszry6AgdozLy0AWqoRtURw1E0RN6QW/o3Xl2Xp0P53MazTmzmUM0B+frFzZ+nF8=</latexit> 
+
+→ω(•)→ω
+
+<latexit sha1_base64="R2M2IkxpdY/TBPf/FzfF2UqBJD8=">AAAB/nicbVDLSgMxFM3UV62vUXHlJliEuikzItWNUBTBZQX7kM5QMmmmDU0yQ5IRylDwV9y4UMSt3+HOvzHTzkJbDwQO59zLPTlBzKjSjvNtFZaWV1bXiuuljc2t7R17d6+lokRi0sQRi2QnQIowKkhTU81IJ5YE8YCRdjC6zvz2I5GKRuJej2PiczQQNKQYaSP17IOHS48jPcSIpTeTiqfogKOTnl12qs4UcJG4OSmDHI2e/eX1I5xwIjRmSKmu68TaT5HUFDMyKXmJIjHCIzQgXUMF4kT56TT+BB4bpQ/DSJonNJyqvzdSxJUa88BMZlHVvJeJ/3ndRIcXfkpFnGgi8OxQmDCoI5h1AftUEqzZ2BCEJTVZIR4iibA2jZVMCe78lxdJ67Tq1qq1u7Ny/SqvowgOwRGoABecgzq4BQ3QBBik4Bm8gjfryXqx3q2P2WjBynf2wR9Ynz+ozJVP</latexit> 
+
+Y = E(ω)
+
+<latexit sha1_base64="d+3EpKFXXWC2GAyMhx5BR9cSYpE=">AAAB+3icbVDLSsNAFJ3UV62vWJduRotQF5ZEpLosunFnBfuQJobJdNIOnUnCzEQsIb/ixoUibv0Rd/6N0zYLbT1w4XDOvdx7jx8zKpVlfRuFpeWV1bXiemljc2t7x9wtt2WUCExaOGKR6PpIEkZD0lJUMdKNBUHcZ6Tjj64mfueRCEmj8E6NY+JyNAhpQDFSWvLMsnPDyQB59w/piZ05B9XusWdWrJo1BVwkdk4qIEfTM7+cfoQTTkKFGZKyZ1uxclMkFMWMZCUnkSRGeIQGpKdpiDiRbjq9PYNHWunDIBK6QgWn6u+JFHEpx9zXnRypoZz3JuJ/Xi9RwYWb0jBOFAnxbFGQMKgiOAkC9qkgWLGxJggLqm+FeIgEwkrHVdIh2PMvL5L2ac2u1+q3Z5XGZR5HEeyDQ1AFNjgHDXANmqAFMHgCz+AVvBmZ8WK8Gx+z1oKRz+yBPzA+fwAxf5NB</latexit> 
+
+!→1
+
+Y (X)
+
+output space 
+
+current prediction 
+
+observed data 
+
+<latexit sha1_base64="b/t8+sbTO+jGLZ+gmbtJiI0Ao+M=">AAAB/nicbVDLSsNAFL3xWesrKq7cDBahbkoiUt0IRRFcVrAPaEqZTCft0EkmzEyEEgr+ihsXirj1O9z5N07aLLT1wMDhnHu5Z44fc6a043xbS8srq2vrhY3i5tb2zq69t99UIpGENojgQrZ9rChnEW1opjltx5Li0Oe05Y9uMr/1SKViInrQ45h2QzyIWMAI1kbq2YdtdIW8EOshwTy9nZQ9ORSnPbvkVJwp0CJxc1KCHPWe/eX1BUlCGmnCsVId14l1N8VSM8LppOglisaYjPCAdgyNcEhVN53Gn6ATo/RRIKR5kUZT9fdGikOlxqFvJrOgat7LxP+8TqKDy27KojjRNCKzQ0HCkRYo6wL1maRE87EhmEhmsiIyxBITbRormhLc+S8vkuZZxa1Wqvfnpdp1XkcBjuAYyuDCBdTgDurQAAIpPMMrvFlP1ov1bn3MRpesfOcA/sD6/AHPnJTG</latexit> 
+
+X = E(ω)
+
+updated prediction 
+
+<latexit sha1_base64="YE1ULjwfLnVcLyFWFZOpN4GWD44=">AAACBHicbVDLSsNAFJ34rPUVddnNYBEqhZKIVDdCUQSXFexDmhAm00k7dDIJMxOhhC7c+CtuXCji1o9w5984abPQ1gMXDufcy733+DGjUlnWt7G0vLK6tl7YKG5ube/smnv7bRklApMWjlgkuj6ShFFOWooqRrqxICj0Gen4o6vM7zwQIWnE79Q4Jm6IBpwGFCOlJc8s3XtVeAGdEKkhRiy9nlQcSQch8qrHnlm2atYUcJHYOSmDHE3P/HL6EU5CwhVmSMqebcXKTZFQFDMyKTqJJDHCIzQgPU05Col00+kTE3iklT4MIqGLKzhVf0+kKJRyHPq6MztWznuZ+J/XS1Rw7qaUx4kiHM8WBQmDKoJZIrBPBcGKjTVBWFB9K8RDJBBWOreiDsGef3mRtE9qdr1Wvz0tNy7zOAqgBA5BBdjgDDTADWiCFsDgETyDV/BmPBkvxrvxMWtdMvKZA/AHxucPr/6W3w==</latexit> 
+
+Y+ = E(ω+)
+
+KM -corrected evidence 
+
+local KM correction at Y <latexit sha1_base64="K3oBkGWgvgfEIBEh8kUJJG+BRpk=">AAACKnicbVDBTttAFFxDgZACDfTYi0NUKRyIbFQBF6RQVNFbqUQgVdZYz5sXZ8Wube2ukSLL38OFX+HCAYS49kO6DjlQYKSVRjPv6e1MlAmujec9OnPzHxYWl2rL9Y8rq2ufGusbZzrNFcMeS0Wq+hFoFDzBnuFGYD9TCDISeB5dHlX++RUqzdPk1EwyDCTECR9xBsZKYePwOCxos1+2qeaxhK0DKsGMGYjiR3lBhxDHqGiTRjwe0F8SYwj/XBTbfkmb7f5WJQdho+V1vCnct8SfkRaZ4SRs3NFhynKJiWECtB74XmaCApThTGBZp7nGDNglxDiwNAGJOiimUUv3q1WG7ihV9iXGnaovNwqQWk9kZCerIPq1V4nveYPcjPaDgidZbjBhz4dGuXBN6la9uUOukBkxsQSY4vavLhuDAmZsu3Vbgv868ltyttPxdzu7v7+1ut9nddTIF7JJ2sQne6RLfpIT0iOMXJNbck8enBvnznl0np5H55zZzmfyH5y//wAOaKZt</latexit> 
+
+GX (ω) = E†[!→1
+
+Y (X)]
+
+<latexit sha1_base64="czqcUsY0lBu3KXqoTUUpIorIoGc=">AAAB8nicbVDLSgMxFM3UV62vqks3wSK4KjMi1WVRBJcV7AOmQ8mkmTY0kwzJHaEM/Qw3LhRx69e482/MtLPQ1gOBwzn3knNPmAhuwHW/ndLa+sbmVnm7srO7t39QPTzqGJVqytpUCaV7ITFMcMnawEGwXqIZiUPBuuHkNve7T0wbruQjTBMWxGQkecQpASv5/ZjAmBKR3c0G1Zpbd+fAq8QrSA0VaA2qX/2homnMJFBBjPE9N4EgIxo4FWxW6aeGJYROyIj5lkoSMxNk88gzfGaVIY6Utk8Cnqu/NzISGzONQzuZRzTLXi7+5/kpRNdBxmWSApN08VGUCgwK5/fjIdeMgphaQqjmNiumY6IJBdtSxZbgLZ+8SjoXda9Rbzxc1po3RR1ldIJO0Tny0BVqonvUQm1EkULP6BW9OeC8OO/Ox2K05BQ7x+gPnM8fefSRZg==</latexit> 
+
+E
+
+<latexit sha1_base64="dfew9A7X8gur9EF6Qo21Clb3c44=">AAAB/HicbVDLSsNAFL3xWesr2qWbYBFclUSkuiyK4LKCfUATy2QyaYdOJmFmIoRQf8WNC0Xc+iHu/BsnbRbaemDgcM693DPHTxiVyra/jZXVtfWNzcpWdXtnd2/fPDjsyjgVmHRwzGLR95EkjHLSUVQx0k8EQZHPSM+fXBd+75EISWN+r7KEeBEacRpSjJSWhmbNjZAaY8Tym+mDG6DRiIihWbcb9gzWMnFKUocS7aH55QYxTiPCFWZIyoFjJ8rLkVAUMzKtuqkkCcITNCIDTTmKiPTyWfipdaKVwApjoR9X1kz9vZGjSMos8vVkEVUueoX4nzdIVXjp5ZQnqSIczw+FKbNUbBVNWAEVBCuWaYKwoDqrhcdIIKx0X1VdgrP45WXSPWs4zUbz7rzeuirrqMARHMMpOHABLbiFNnQAQwbP8ApvxpPxYrwbH/PRFaPcqcEfGJ8/C0iVCw==</latexit> 
+
+E†
+
+<latexit sha1_base64="czqcUsY0lBu3KXqoTUUpIorIoGc=">AAAB8nicbVDLSgMxFM3UV62vqks3wSK4KjMi1WVRBJcV7AOmQ8mkmTY0kwzJHaEM/Qw3LhRx69e482/MtLPQ1gOBwzn3knNPmAhuwHW/ndLa+sbmVnm7srO7t39QPTzqGJVqytpUCaV7ITFMcMnawEGwXqIZiUPBuuHkNve7T0wbruQjTBMWxGQkecQpASv5/ZjAmBKR3c0G1Zpbd+fAq8QrSA0VaA2qX/2homnMJFBBjPE9N4EgIxo4FWxW6aeGJYROyIj5lkoSMxNk88gzfGaVIY6Utk8Cnqu/NzISGzONQzuZRzTLXi7+5/kpRNdBxmWSApN08VGUCgwK5/fjIdeMgphaQqjmNiumY6IJBdtSxZbgLZ+8SjoXda9Rbzxc1po3RR1ldIJO0Tny0BVqonvUQm1EkULP6BW9OeC8OO/Ox2K05BQ7x+gPnM8fefSRZg==</latexit> 
+
+E
+
+<latexit sha1_base64="czqcUsY0lBu3KXqoTUUpIorIoGc=">AAAB8nicbVDLSgMxFM3UV62vqks3wSK4KjMi1WVRBJcV7AOmQ8mkmTY0kwzJHaEM/Qw3LhRx69e482/MtLPQ1gOBwzn3knNPmAhuwHW/ndLa+sbmVnm7srO7t39QPTzqGJVqytpUCaV7ITFMcMnawEGwXqIZiUPBuuHkNve7T0wbruQjTBMWxGQkecQpASv5/ZjAmBKR3c0G1Zpbd+fAq8QrSA0VaA2qX/2homnMJFBBjPE9N4EgIxo4FWxW6aeGJYROyIj5lkoSMxNk88gzfGaVIY6Utk8Cnqu/NzISGzONQzuZRzTLXi7+5/kpRNdBxmWSApN08VGUCgwK5/fjIdeMgphaQqjmNiumY6IJBdtSxZbgLZ+8SjoXda9Rbzxc1po3RR1ldIJO0Tny0BVqonvUQm1EkULP6BW9OeC8OO/Ox2K05BQ7x+gPnM8fefSRZg==</latexit> 
+
+E
+
+FIG. 1. Schematic representation of the KM update. The current estimate σ predicts Y = E(σ), while the data define an output-space evidence operator X; ideally, X = E(ρ). The inverse KM action at Y gives the corrected evidence Ω−1
+
+Y (X), which is pulled back through E† to the Hilbert–Schmidt gradient GX (σ). Conjugation by √σ produces the positive state update σ+ = RKM 
+
+σ, E (X), with updated prediction Y+ = E(σ+).
+
+Conjecture 3. The KM update can only increase the log-likelihood, 
+
+LX (σ+) ⩾ LX (σ), (22) 
+
+where σ+ = RKM 
+
+σ, E (X). Equality holds iff σ is the fixed point of the KM update, σ+ = σ.
+
+Numerical tests on 10 8 random instances in dimensions 2–
+
+5, further refined by simulated annealing, did not reveal any violation of this inequality. We prove a weaker version of the conjecture for quantum-to-classical channels. For such channels, X and Y commute, and the KM update reduces to the Petz map. 
+
+Theorem 4 (Petz monotonicity for quantum-to-classical like-lihood) . Consider the quantum-to-classical channel (3) . For any state σ, the Petz update is given by, 
+
+σ+ ··= Rσ, Eqc (X) = X
+
+i
+
+ˆpi
+
+Tr[Π iσ]
+
+√σ Πi
+
+√σ. (23) 
+
+Then the standard tomographic log-likelihood satisfies 
+
+Lqc (σ+) ⩾ Lqc (σ). (24) 
+
+Equality holds iff σ is a fixed point of the Petz map, σ+ = σ.
+
+Along with the Petz recovery map [ 57 ], the KM update is a possible generalization of Jeffrey’s rule to quantum physics. The above theorem and the previous conjecture imply that the application of this version of Jeffrey’s rule always increases the log-likelihood. This generalizes the classical result of Jacobs [94], see App. A.8. Note that replacing the KM update with the Petz recov-ery map in Conjecture 3 does not satisfy the desired inequal-ity: since the Petz map is not the exact gradient of the log-likelihood (2) , applying it at a maximizer for noncommuting outputs with overcomplete basis and imperfect data can de-crease it. A concrete example exhibiting a large violation is provided in App. A.8. 3KM update and Petz recovery as quantum tomography meth-ods. The following observation, which is a rephrasing of the discussion below Eq. (11) combined with concavity of the log-likelihood (see App. A.3), provides the basis for the KM update as a tomography method. 
+
+Theorem 5. Every full-rank fixed point σ of the KM update is a maximizer of the log-likelihood. 
+
+Theorem 2 guarantees that a line-search implementation can choose a step that increases the log-likelihood whenever the current state is not stationary. By Theorem 5, any full-rank fixed point reached by the iteration is a maximizer. For the full step η = 1 in the Petz case, we prove monotonic-ity and subsequential fixed-point convergence; under unique-ness of the relevant fixed point, the whole sequence converges. We conjecture that the analogous full-step statement extends to the KM update. 
+
+Theorem 6 (Convergence of the Petz iteration) . Suppose that 
+
+{Πi} is a tomographically complete measurement with all observed probabilities ˆpi positive. We denote the unique maximizer of the log-likelihood Lqc as ˆσMLE , and the iter-ated Petz update as σk = ( σk−1)+, for some initial prior 
+
+σ0. Then σk → ˆσMLE or det( σk) → 0. If the upper level set {σ : L(σ) ⩾ L(σ0)} contains only invertible states, then 
+
+σk → ˆσMLE .
+
+Using these results, we design a quantum tomography method as follows. Consider a set {E j } of channels with corresponding estimated outputs Xj . Define the weighted log-likelihood as 
+
+X 
+
+> j
+
+wj LXj (σ), LXj (σ) = Tr Xj ln Ej (σ), (25) which generalizes the standard maximum-likelihood formu-lation. The weights {wj } represent the relative importance of each dataset and, in analogy with the usual log-likelihood, are typically chosen as empirical frequencies wj = Nj /N of channel executions yielding data Xj .Due to the linearity of the Fr ´echet derivative, we can define the weighted KM update as 
+
+RKM  
+
+> σ, {E j}
+
+({Xj }) ··= X 
+
+> j
+
+wj RKM  
+
+> σ, Ej
+
+(Xj ), (26) which corresponds to the gradient of the weighted log-likelihood in the inverse-square-root metric (7) . Equiva-lently, this is the ordinary KM update for the block channel 
+
+E⊕ = L 
+
+> j
+
+wj Ej with data X⊕ = L 
+
+> j
+
+wj Xj , up to an irrele-vant additive constant in the likelihood, see App. A.7. This construction translates a tomography problem with several measurements into one with a single measurement and thus generalizes the theorems above. The channel set may be undercomplete, overcomplete, or informationally complete. Quantum tomography is performed by iterating the KM update from an initial prior σ0. Together with the prior, the weights determine the point in the null space (set of log-likelihood maximizers) to which the iteration con-verges or, for imperfect data, the boundary point it approaches, upper level set  
+
+> FIG. 2. The KM iteration converges locally to the maximum-likelihood estimator (MLE), provided the initial prior is sufficiently close. Otherwise, it may instead follow the log-likelihood gradient to a boundary point rather than the MLE, for example, when finite data make the observations incompatible with any physical state.
+
+see Fig. 2. In the overcomplete case, the weights also encode the relative importance of different channels, prioritizing those with more reliable data. We illustrate the method in Fig. 3 on the standard tomog-raphy setup using Pauli measurements on six qubits and on the following noncommutative KM example: Defining a Stine-spring channel, S · ·= U (• ⊗ | 0⟩⟨ 0|)U †, we denote system and environment marginals, and quantum-to-classical correlation channels, 
+
+ES = Tr E S, EE = Tr S S, (27) 
+
+EC = M
+
+> (a,b )19
+
+X
+
+> i,j
+
+Tr 
+
+h
+
+P (a) 
+
+> i
+
+⊗P (b) 
+
+> j
+
+S(•)
+
+i
+
+|ab, ij ⟩⟨ ab, ij | ,
+
+where a and b represent different settings of Pauli measure-ments. We perform tomography by iterating the weighted KM update (26) using these highly overcomplete and incompati-ble channels. For the Petz map, we also consider a stabilized iteration, σk+1 = (1 − δ)( σk)+ + δI/d , which improves con-vergence by preventing the state from approaching the bound-ary. For initial priors sufficiently close to the limit point, we observe that the tomography method converges exponentially fast. 
+
+II. Discussion and conclusions 
+
+In this paper, we studied the exact gradient of the log-likelihood functional and found that it leads to an update rule that we call the KB update. Together with the Petz recovery map and the rotated Petz recovery map, the KM update may be viewed as a candidate quantum analogue of Bayes’ and Jeffrey’s rule. All three maps reduce to the classical Bayes update in the com-muting case. Unlike the Petz map, which arises naturally in the characterization of equality in the data-processing inequal-ity [ 39 , 41 ], or the rotated Petz map, which strengthens this connection through fidelity-based recovery bounds [ 46 , 47 ], the KM update arises from the maximum-likelihood inference problem, namely the task of finding the reference state whose predicted output best explains the observed data. More specifically, if closeness is quantified by the Umegaki quantum relative entropy (a choice supported by its uniqueness under four natural axioms [ 95 ]), then the KM update is its gra-dient with respect to the reference state and therefore follows the direction of steepest descent. Conjecture 3 and Theorem 4 4FIG. 3. Left: Maximum-likelihood quantum tomography based on iterative application of the weighted Petz map over Pauli bases, with the prior initialized as the maximally mixed state. Twenty states of six qubits of varying rank were randomly generated (including 20% pure states), and regularized to make them full-rank, ρ = (1 − ϵ)ρ + ϵI/d , ϵ = 10 −2. We show the stabilized iteration ( δ = 10 −7) and the unstabilized case ( δ = 0 ) in the inset. Right: Tomography of a qubit via iterative unstabilized KM updates in a Stinespring setup with three overcomplete, incompatible channels defined by a random unitary U, using otherwise identical settings. The method converges faster for highly mixed states. The unstabilized iteration can exhibit premature numerical stagnation near the boundary, as shown in the inset. 
+
+further suggest that it monotonically decreases the relative en-tropy, extending Jacobs’ monotonicity result for Jeffrey’s rule and the Kullback–Leibler divergence [ 94 ]. In contrast, the Petz recovery map violates the analogous monotonicity property. Since it is the unit natural-gradient step of the log-likelihood, the KM update has the structural features expected of a tomo-graphic iteration, including the local monotonicity and con-vergence properties established in Theorems 2 and 5. In the commuting-output setting, the KM iteration reduces to the Petz iteration, for which we establish the stronger properties of full-step monotonicity and convergence to the maximum-likelihood estimator in Theorems 4 and 6. This allows us to design and implement a tomographic proto-col that is a first-order gradient-ascent method, applicable both to standard quantum tomography via the quantum-to-classical channel and to a multi-view reconstruction using general quan-tum channels. This is realized by formulating the weighted KM update (26) , which enables us to treat undercomplete, informationally complete, overcomplete, and imperfect data within a unified framework. An interesting comparison can be made with Bayesian quantum tomography, which applies the classical Bayes the-orem to infer a posterior distribution over quantum states. A common point estimate is the Bayesian mean estimator, 
+
+ˆσBME = R σ p (σ|data ) dσ, obtained by averaging over the pos-terior distribution [ 14 –20 ]. In contrast to the present approach, this integral is generally not available in closed form and is typ-ically approximated using methods such as sequential Monte Carlo or Metropolis–Hastings sampling [96]. Here, we find the KM update to generalize Bayes’ and Jef-frey’s rules, while being formulated entirely in terms of quan-tum states rather than probability distributions. Starting from the search for a fully quantum analogue of Bayesian inference, we therefore arrived at a somewhat surprising conclusion: the resulting update naturally leads to maximum-likelihood esti-mation. This raises the intriguing possibility that maximum-likelihood estimation is, in fact, the natural form of Bayesian inference in quantum theory. The remaining open problems are to establish global mono-tonicity of the undamped KM update, derive general conver-gence guarantees, characterize its limiting points even in un-dercomplete settings, and develop faster and higher-order to-mographic protocols inspired by the present approach. Finally, the results presented here suggest that Kubo–Mori geometry provides the natural structure underlying maximum-likelihood estimation, thereby connecting quantum tomogra-phy, recovery maps, and quantum Bayesian retrodiction within a unified framework. 
+
+Acknowledgments 
+
+This research was supported by the Czech Science Foun-dation through the Junior Star grant 25-17250M (SM, FM, and D ˇS) and by Charles University in Prague through PRIMUS/25/SCI/027 (IT and D ˇS). We thank Joe Schindler and Valerio Scarani for the initial discussions that sparked this project, and especially Francesco Buscemi for early in-sights into the possible convergence of the Petz recovery map iteration. 
+
+Data availability 
+
+The source code used to generate Fig. 3, the numerical evi-dence supporting Conjecture 3, and the search for the Petz monotonicity counterexample reported in the Appendix are available at https://github.com/dominik-safranek/km-update-tomography.   
+
+> [1] K. Vogel and H. Risken, Determination of quasiprobability distributions in terms of probability distributions for the rotated quadrature phase, Phys. Rev. A 40 , 2847(R) (1989).
+
+5[2] U. Leonhardt, Measuring the Quantum State of Light (Cam-bridge University Press, Cambridge, 1997). [3] D. F. V. James, P. G. Kwiat, W. J. Munro, and A. G. White, Measurement of qubits, Phys. Rev. A 64 , 052312 (2001). arXiv:quant-ph/0103121 [quant-ph] (2001). [4] G. M. D’Ariano, M. G. A. Paris, and M. F. Sacchi, Quantum Tomography, Adv. Imaging Electron Phys. 128 , 205 (2003). arXiv:quant-ph/0302028 [quant-ph] (2003). [5] Z. Hradil, Quantum-state estimation, Phys. Rev. A 55 ,R1561(R) (1997). arXiv:quant-ph/9609012 [quant-ph] (1996). [6] K. Banaszek, G. M. D’Ariano, M. G. A. Paris, and M. F. Sacchi, Maximum-likelihood estimation of the density matrix, Phys. Rev. A 61 , 010304(R) (1999). arXiv:quant-ph/9909052 [quant-ph] (1999). [7] M. Je ˇzek, J. Fiur ´a ˇsek, and Z. Hradil, Quantum inference of states and processes, Phys. Rev. A 68 , 012305 (2003). arXiv:quant-ph/0210146 [quant-ph] (2002). [8] M. Paris and J. ˇReh ´a ˇcek (Eds.), Quantum State Estimation (Springer Berlin, Heidelberg, 2004). [9] J. ˇReh ´a ˇcek, Z. Hradil, E. Knill, A. I. Lvovsky, Diluted maximum-likelihood algorithm for quantum tomography, Phys. Rev. A 75 , 042108 (2007). arXiv:quant-ph/0611244 [quant-ph] (2006). [10] R. Blume-Kohout, Hedged Maximum Likelihood Quantum State Estimation, Phys. Rev. Lett. 105 , 200504 (2010). arXiv:1001.2029 [quant-ph] (2010). [11] E. Bolduc, G. C. Knee, E. M. Gauger, and J. Leach, Projected gradient descent algorithms for quantum state tomography, npj Quantum Inf. 3, 44 (2017). arXiv:1612.09531 [quant-ph] (2016). [12] K. Aditi and S. Becker, Rigorous maximum-likelihood esti-mation for quantum states, Phys. Rev. A 112 , 052436 (2025). arXiv:2506.16646 [quant-ph] (2025). [13] A. Gaikwad, M. S. Torres, S. Ahmed, and A. F. Kockum, Gradient-descent methods for fast quantum state tomography, Quantum Sci. Technol. 10 , 045055 (2025). arXiv:2503.04526 [quant-ph] (2025). [14] R. Blume-Kohout, Optimal, reliable estimation of quan-tum states, New J. Phys. 12 , 043034 (2010). arXiv:quant-ph/0611080 [quant-ph] (2006). [15] F. Husz ´ar and N. M. T. Houlsby, Adaptive Bayesian quantum tomography, Phys. Rev. A 85 , 052120 (2012). arXiv:1107.0895 [quant-ph] (2011). [16] R. Kueng and C. Ferrie, Near-optimal quantum tomography: estimators and bounds, New J. Phys. 17 , 123013 (2015). arXiv:1503.00677 [quant-ph] (2015). [17] C. Granade, J. Combes, and D. G. Cory, Practical Bayesian to-mography, New J. Phys. 18 , 033024 (2016). arXiv:1509.03770 [quant-ph] (2015). [18] S. S. Straupe, Adaptive quantum tomography, JETP Lett. 104 ,510 (2016). arXiv:1610.02840 [quant-ph] (2016). [19] J. M. Lukens, K. J. H. Law, A. Jasra, and P. Lougovski, A practical and efficient approach for Bayesian quantum state estimation, New J. Phys. 22 , 063038 (2020). arXiv:2002.10354 [quant-ph] (2020). [20] J. C. Chapman et al. , Bayesian homodyne and heterodyne tomography, Opt. Express 30 , 15184 (2022). arXiv:2202.03499 [quant-ph] (2022). [21] S. Aaronson, Shadow Tomography of Quantum States, arXiv:1711.01053 [quant-ph] (2017). [22] H.-Y. Huang, R. Kueng, and J. Preskill, Predicting many prop-erties of a quantum system from very few measurements, Nat. Phys. 16 , 1050 (2020). arXiv:2002.08953 [quant-ph] (2020). [23] R. Stricker et al. , Experimental Single-Setting Quantum State Tomography, PRX Quantum 3, 040310 (2022). arXiv:2206.00019 [quant-ph] (2022). [24] Z. Qin, J. M. Lukens, B. T. Kirby, and Z. Zhu, Enhancing quantum state reconstruction with structured classical shadows, npj Quantum Inf. 11 , 147 (2025). arXiv:2501.03144 [quant-ph] (2025). [25] M. Gu t¸˘ a, J. Kahn, R. Kueng, and J. A. Tropp, Fast state tomog-raphy with optimal error bounds, J. Phys. A: Math. Theor. 53 ,204001 (2020). arXiv:1809.11162 [quant-ph] (2018). [26] C. H. Bennett, P. W. Shor, J. A. Smolin, and A. V. Thap-liyal, Universal quantum data compression via nondestructive tomography, Phys. Rev. A 73 , 032336 (2006). arXiv:quant-ph/0403078 [quant-ph] (2004). [27] S. Wu, State tomography via weak measurements, Sci. Rep. 3,1193 (2013). arXiv:1212.3655 [quant-ph] (2012). [28] D. Gross et al. , Quantum State Tomography via Compressed Sensing, Phys. Rev. Lett. 105 , 150401 (2010). arXiv:0909.3304 [quant-ph] (2009). [29] S. T. Flammia, D. Gross, Y.-K. Liu, and J. Eisert, Quantum tomography via compressed sensing: error bounds, sample complexity and efficient estimators, New J. Phys. 14 , 095022 (2012). arXiv:1205.2300 [quant-ph] (2012). [30] M. Cramer et al. , Efficient quantum state tomography, Nat. Commun. 1, 149 (2010). arXiv:1101.4366 [quant-ph] (2011). [31] B. P. Lanyon et al. , Efficient tomography of a quantum many-body system, Nat. Phys. 13 , 1158 (2017). arXiv:1612.08000 [quant-ph] (2016). [32] C. Ferrie, Self-Guided Quantum Tomography, Phys. Rev. Lett. 
+
+113 , 190404 (2014). arXiv:1406.4101 [quant-ph] (2014). [33] R. J. Chapman, C. Ferrie, and A. Peruzzo, Experimental Demonstration of Self-Guided Quantum Tomography, Phys. Rev. Lett. 117 , 040402 (2016). arXiv:1602.04194 [quant-ph] (2016). [34] S. Lohani et al. , Machine learning assisted quantum state estimation, Mach. Learn.: Sci. Technol. 1, 035007 (2020). arXiv:2003.03441 [quant-ph] (2020). [35] G. Torlai et al. , Neural-network quantum state tomography, Nat. Phys. 14 , 447 (2018). arXiv:1703.05334 [cond-mat.dis-nn] (2017). [36] T. Xin et al. , Local-measurement-based quantum state tomog-raphy via neural networks, npj Quantum Inf. 5, 109 (2019). arXiv:1807.07445 [quant-ph] (2018). [37] J. Carrasquilla, G. Torlai, R. G. Melko, and L. Aolita, Recon-structing quantum states with generative models, Nat. Mach. Intell. 1, 155 (2019). arXiv:1810.10584 [quant-ph] (2018). [38] A. M. Palmieri et al. , Experimental neural network en-hanced quantum tomography, npj Quantum Inf. 6, 20 (2020). arXiv:1904.05902 [quant-ph] (2019). [39] D. Petz, Sufficient subalgebras and the relative entropy of states of a von Neumann algebra, Commun. Math. Phys. 105 , 123 (1986). [40] D. Petz, Sufficiency of channels over von Neumann algebras, Quart. J. Math. Oxford Ser. 39 , 97 (1988). [41] D. Petz, Monotonicity of quantum relative entropy revisited, Rev. Math. Phys. 15 , 79 (2003). arXiv:quant-ph/0209053 [quant-ph] (2002). [42] P. Hayden, R. Jozsa, D. Petz, and A. Winter, Structure of States Which Satisfy Strong Subadditivity of Quantum Entropy with Equality, Commun. Math. Phys. 246 , 359 (2004). arXiv:quant-ph/0304007 [quant-ph] (2003). [43] O. Fawzi and R. Renner, Quantum Conditional Mutual Informa-tion and Approximate Markov Chains, Commun. Math. Phys. 
+
+340 , 575 (2015). arXiv:1410.0664 [quant-ph] (2014). 
+
+6[44] M. M. Wilde, Recoverability in quantum information theory, Proc. R. Soc. A 471 , 20150338 (2015). arXiv:1505.04661 [quant-ph] (2015). [45] D. Sutter, O. Fawzi, and R. Renner, Universal recovery map for approximate Markov chains, Proc. R. Soc. A 472 , 20150623 (2016). arXiv:1504.07251 [quant-ph] (2015). [46] D. Sutter, M. Tomamichel, and A. W. Harrow, Strength-ened Monotonicity of Relative Entropy via Pinched Petz Recovery Map, IEEE Trans. Inf. Theory 62 , 2907 (2016). arXiv:1507.00303 [quant-ph] (2015). [47] D. Sutter, M. Berta, and M. Tomamichel, Multivariate Trace Inequalities, Commun. Math. Phys. 352 , 37 (2017). arXiv:1604.03023 [math-ph] (2016). [48] M. Junge et al. , Universal Recovery Maps and Approximate Sufficiency of Quantum Relative Entropy, Ann. Henri Poincar ´e
+
+19 , 2955 (2018). arXiv:1509.07127 [quant-ph] (2015). [49] M. S. Leifer and R. W. Spekkens, Towards a formulation of quantum theory as a causally neutral theory of Bayesian in-ference, Phys. Rev. A 88 , 052130 (2013). arXiv:1107.5849 [quant-ph] (2011). [50] M. Tsang, Generalized conditional expectations for quantum retrodiction and smoothing, Phys. Rev. A 105 , 042213 (2022). arXiv:1912.02711 [quant-ph] (2019). [51] J. Surace and M. Scandi, State retrieval beyond Bayes’ retrod-iction, Quantum 7, 990 (2023). arXiv:2201.09899 [quant-ph] (2022). [52] A. J. Parzygnat and F. Buscemi, Axioms for retrodiction: achieving time-reversal symmetry with a prior, Quantum 7,1013 (2023). arXiv:2210.13531 [quant-ph] (2022). [53] A. J. Parzygnat and J. Fullwood, From Time-Reversal Symme-try to Quantum Bayes’ Rules, PRX Quantum 4, 020334 (2023). arXiv:2212.08088 [quant-ph] (2022). [54] F. Buscemi, J. Schindler, and D. ˇSafr ´anek, Observational entropy, coarse-grained states, and the Petz recovery map: information-theoretic properties and bounds, New J. Phys. 25 ,053002 (2023). arXiv:2209.03803 [quant-ph] (2022). [55] C. C. Aw, K. Onggadinata, D. Kaszlikowski, and V. Scarani, Quantum Bayesian Inference in Quasiprobability Represen-tations, PRX Quantum 4, 020352 (2023). arXiv:2301.01952 [quant-ph] (2023). [56] M. Scandi, P. Abiuso, J. Surace, and D. D. Santis, Quantum Fisher information and its dynamical nature, Rep. Prog. Phys. 
+
+88 , 076001 (2025). arXiv:2304.14984 [quant-ph] (2023). [57] G. Bai, F. Buscemi, and V. Scarani, Quantum Bayes’ Rule and Petz Transpose Map from the Minimum Change Principle, Phys. Rev. Lett. 135 , 090203 (2025). arXiv:2410.00319 [quant-ph] (2024). [58] M. Liu, V. Scarani, A. Auff `eves, and K. T. Laverick, Retrodic-tive approach to quantum state smoothing, Phys. Rev. A 112 ,L030203 (2025). arXiv:2501.15986 [quant-ph] (2025). [59] M. Liu, G. Bai, and V. Scarani, Unifying Quantum Smooth-ing Theories with Extended Retrodiction, arXiv:2510.08447 [quant-ph] (2025). [60] M. Liu, V. Scarani, and G. Bai, Proper and Improper Mixed States Serve as Different Prior Beliefs for Quantum State Retro-diction, Phys. Rev. Lett. 136 , 060203 (2026). arXiv:2502.10030 [quant-ph] (2025). [61] I. L. Chuang and M. A. Nielsen, Prescription for experimen-tal determination of the dynamics of a quantum black box, J. Mod. Opt. 44 , 2455 (1997). arXiv:quant-ph/9610001 [quant-ph] (1996). [62] J. F. Poyatos, J. I. Cirac, and P. Zoller, Complete Characteriza-tion of a Quantum Process: The Two-Bit Quantum Gate, Phys. Rev. Lett. 78 , 390 (1997). arXiv:quant-ph/9611013 [quant-ph] (1996). [63] A. I. Lvovsky and M. G. Raymer, Continuous-variable optical quantum-state tomography, Rev. Mod. Phys. 81 , 299 (2009). arXiv:quant-ph/0511044 [quant-ph] (2005). [64] C. L. Degen, F. Reinhard, and P. Cappellaro, Quantum sensing, Rev. Mod. Phys. 89 , 035002 (2017). arXiv:1611.02427 [quant-ph] (2016). [65] V. Scarani et al. , The security of practical quantum key dis-tribution, Rev. Mod. Phys. 81 , 1301 (2009). arXiv:0802.4155 [quant-ph] (2008). [66] H. Barnum and E. Knill, Reversing quantum dynamics with near-optimal quantum and classical fidelity, J. Math. Phys. 43 ,2097 (2002). arXiv:quant-ph/0004088 [quant-ph] (2000). [67] H. K. Ng and P. Mandayam, Simple approach to approximate quantum error correction based on the transpose channel, Phys. Rev. A 81 , 062342 (2010). arXiv:0909.0931 [quant-ph] (2009). [68] A. Gily ´en et al. , Quantum Algorithm for Petz Recovery Chan-nels and Pretty Good Measurements, Phys. Rev. Lett. 128 ,220502 (2022). arXiv:2006.16924 [quant-ph] (2020). [69] G. Zheng, W. He, G. Lee, and L. Jiang, Near-Optimal Perfor-mance of Quantum Error Correction Codes, Phys. Rev. Lett. 
+
+132 , 250602 (2024). arXiv:2401.02022 [quant-ph] (2024). [70] J. Chen, M. Song, J. J. X. Chan, and V. Scarani, The Petz recovery map for optical losses, arXiv:2511.05941 [quant-ph] (2025). [71] H. Li et al. , Experimental Tabletop Petz recovery of a photonic qubit, arXiv:2606.12020 [quant-ph] (2026). [72] W.-H. Png and V. Scarani, Petz recovery maps of single-qubit decoherence channels in an ion trap quantum processor, Phys. Rev. A 112 , 022613 (2025). arXiv:2504.20399 [quant-ph] (2025). [73] M. Song, H. Kwon, and V. Scarani, Exact and approximate conditions of tabletop reversibility: when is Petz recovery cost-free?, arXiv:2510.26895 [quant-ph] (2025). [74] G. Singh et al. , Realizing the Petz recovery map on an NMR quantum processor, Phys. Rev. A 113 , 052415 (2026). arXiv:2508.08998 [quant-ph] (2025). [75] S. Beigi, N. Datta, and F. Leditzky, Decoding quantum infor-mation via the Petz recovery map, J. Math. Phys. 57 , 082203 (2016). arXiv:1504.04449 [quant-ph] (2015). [76] J. ˚Aberg, Fully Quantum Fluctuation Theorems, Phys. Rev. X 
+
+8, 011019 (2018). arXiv:1601.01302 [quant-ph] (2016). [77] H. Kwon and M. S. Kim, Fluctuation Theorems for a Quantum Channel, Phys. Rev. X 9, 031029 (2019). arXiv:1810.03150 [quant-ph] (2018). [78] C. C. Aw, F. Buscemi, and V. Scarani, Fluctuation theorems with retrodiction rather than reverse processes, AVS Quantum Sci. 3, 045601 (2021). arXiv:2106.08589 [cond-mat.stat-mech] (2021). [79] F. Buscemi and V. Scarani, Fluctuation theorems from Bayesian retrodiction, Phys. Rev. E 103 , 052111 (2021). arXiv:2009.02849 [quant-ph] (2020). [80] C. C. Aw, L. H. Zaw, M. Balanz ´o-Juand ´o, and V. Scarani, Role of Dilations in Reversing Physical Processes: Tabletop Reversibility and Generalized Thermal Operations, PRX Quan-tum 5, 010332 (2024). arXiv:2308.13909 [quant-ph] (2023). [81] J. Cotler et al. , Entanglement Wedge Reconstruction via Uni-versal Recovery Channels, Phys. Rev. X 9, 031011 (2019). arXiv:1704.05839 [hep-th] (2017). [82] C.-F. Chen, G. Penington, and G. Salton, Entanglement wedge reconstruction using the Petz map, J. High Energy Phys. 01 ,168 (2020). arXiv:1902.02844 [hep-th] (2019). [83] H. Umegaki, Conditional expectation in an operator algebra. IV. Entropy and information, Kodai Math. Sem. Rep. 14 , 59 
+
+7(1962). [84] F. Hiai and D. Petz, The proper formula for relative entropy and its asymptotics in quantum probability, Commun. Math. Phys. 143 , 99 (1991). [85] T. Ogawa and H. Nagaoka, Strong converse and Stein’s lemma in quantum hypothesis testing, IEEE Trans. Inf. Theory 46 ,2428 (2000). [86] M. A. Nielsen and I. L. Chuang, Quantum Computation and Quantum Information (Cambridge University Press, 2010). [87] R. Kubo and K. Tomita, A General Theory of Magnetic Reso-nance Absorption, J. Phys. Soc. Jpn. 9, 888 (1954). [88] H. Mori, Transport, Collective Motion, and Brownian Motion, Prog. Theor. Phys. 33 , 423 (1965). [89] D. Petz and G. T ´oth, The Bogoliubov inner product in quantum statistics, Lett. Math. Phys. 27 , 205 (1993). [90] D. Petz, Geometry of canonical correlation on the state space of a quantum system, J. Math. Phys. 35 , 780 (1994). [91] D. Petz, Monotone metrics on matrix spaces, Linear Algebra Appl. 244 , 81 (1996). [92] N. J. Higham, Functions of Matrices: Theory and Computation (Society for Industrial and Applied Mathematics, Philadelphia, PA, 2008). [93] J. B. Conway, A Course in Functional Analysis (Springer, New York, 2007). [94] B. Jacobs, Learning from What’s Right and Learning from What’s Wrong, Electron. Proc. Theor. Comput. Sci. 351 , 116 (2021). arXiv:2112.14045 [cs.LO] (2021). [95] H. Wilming, R. Gallego, and J. Eisert, Axiomatic Characteriza-tion of the Quantum Relative Entropy and Free Energy, Entropy 
+
+19 , 241 (2017). arXiv:1702.08473 [quant-ph] (2017). [96] G. I. Struchalin et al. , Experimental adaptive quantum tomog-raphy of two-qubit states, Phys. Rev. A 93 , 012103 (2016). arXiv:1510.05303 [quant-ph] (2015). [97] M. B. Ruskai, Inequalities for Quantum Entropy: A Review with Conditions for Equality, J. Math. Phys. 43 , 4358 (2002). arXiv:quant-ph/0205064 [quant-ph] (2002). Erratum: J. Math. Phys. 46 , 019901 (2005). [98] Lieb, Elliott H., Convex Trace Functions and the Wigner– Yanase–Dyson Conjecture, Adv. Math. 11 , 267 (1973). [99] M. Vernooij and M. Wirth, Derivations and KMS-Symmetric Quantum Markov Semigroups, Commun. Math. Phys. 403 , 381 (2023). arXiv:2303.15949 [math.OA] (2023). [100] R. C. Jeffrey, The Logic of Decision (The University of Chicago Press, Chicago, IL, 1990). [101] J. Pearl, Probabilistic Reasoning in Intelligent Systems: Net-works of Plausible Inference (Morgan Kaufmann Publishers, San Mateo, CA, 1988). [102] H. Chan and A. Darwiche, On the revision of probabilistic beliefs using uncertain evidence, Artif. Intell. 163 , 67 (2005). [103] A. J. Parzygnat and B. P. Russo, A non-commutative Bayes’ the-orem, Linear Algebr. Appl. 644 , 28 (2022). arXiv:2005.03886 [quant-ph] (2020). [104] S. Kullback and R. A. Leibler, On Information and Sufficiency, Ann. Math. Stat. 22 , 79 (1951). 
+
+Appendix A Supplementary Material Contents 
+
+A.1 Modular-frequency and integral forms of the inverse KM action . . . . . . . . . . . . . . . . 8A.2 Properties of the KM update . . . . . . . . . . . . . 8A.3 Concavity of the log-likelihood and uniqueness of the maximizer . . . . . . . . . 9A.4 Proof of Theorem 2 . . . . . . . . . . . . . . . . . . . . 10 A.5 Proof of Theorem 5 . . . . . . . . . . . . . . . . . . . . 10 A.6 Proof of Theorems 4 and 6 . . . . . . . . . . . . . . 10 A.7 Weighted channel data as a single block channel . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 13 A.8 Classical and quantum Bayes’ theorem and monotonicity violation by the Petz map . . . . 13 A.9 Expressions for the quantum-to-classical channel . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 14 
+
+A.1. Modular-frequency and integral forms of the inverse KM action 
+
+Let Y = P 
+
+> i
+
+yi |i⟩⟨ i|, yi > 0. Then each matrix unit |i⟩⟨ j| is an eigenoperator of the modular generator KY ··= [ln Y, ·] with eigenvalue 
+
+KY (|i⟩⟨ j|) = (ln yi − ln yj ) |i⟩⟨ j| =·· ωij |i⟩⟨ j| . (A1) In the same basis, the inverse KM action is diagonal, 
+
+ Ω−1 
+
+> Y
+
+(X) 
+
+> ij
+
+= ln yi − ln yj
+
+yi − yj
+
+Xij , (A2) with the diagonal case understood by continuity. Since 
+
+yi − yj = 2 √yiyj sinh( ωij /2) , (A3) we obtain 
+
+ Ω−1 
+
+> Y
+
+(X) 
+
+> ij
+
+= k(ωij ) Xij 
+
+√yiyj
+
+, k(ω) = ω
+
+2 sinh( ω/ 2) .
+
+(A4) Equivalently, 
+
+Ω−1 
+
+> Y
+
+(X) = k(KY )Y −1/2XY −1/2. (A5) This proves the modular-frequency filter form in Theorem 1. The same inverse KM action admits the integral representa-tion 
+
+Ω−1 
+
+> Y
+
+(X) = 
+
+Z
+
+> R
+
+β0(t) Y −(1+ it )/2X Y −(1 −it )/2 dt, (A6) where β0(t) = π/ [2(cosh( πt ) + 1)] is normalized such that 
+
+k(ω) = 
+
+Z
+
+> R
+
+β0(t)e−itω/ 2 dt. (A7) The same probability density β0 appears in Ref. [ 48 ] as the weight in the averaged rotated-Petz recovery map. Here, how-ever, it represents the inverse KM operator itself rather than a CPTP average of recovery channels. 
+
+A.2. Properties of the KM update 1. Linearity in X
+
+RKM  
+
+> σ, E
+
+(aX 1 + bX 2) = a RKM  
+
+> σ, E
+
+(X1) + b RKM  
+
+> σ, E
+
+(X2). (A8) 
+
+2. Positivity 
+
+If X ⩾ 0, then 
+
+RKM  
+
+> σ, E
+
+(X) ⩾ 0, (A9) because Ω−1 
+
+> Y
+
+is positive, E† is positive, and conjugation by √σ
+
+preserves positivity. 83. Trace preservation in the argument 
+
+Tr RKM  
+
+> σ, E
+
+(X) = Tr σ E†[Ω −1 
+
+> Y
+
+(X)]  = Tr E(σ) Ω −1 
+
+> Y
+
+(X)
+
+= Tr Y Ω−1 
+
+> Y
+
+(X) = Tr[ X]. (A10) In particular, if X is a density operator, then RKM  
+
+> σ, E
+
+(X) is again a density operator. 
+
+4. Exact recovery of the reference output 
+
+RKM 
+
+> σ, E
+
+ E(σ) = σ, (A11) since Ω−1 
+
+> Y
+
+(Y ) = 1 and E†(1) = 1.
+
+5. Reduction to the Petz term in the commuting limit 
+
+If [X, Y ] = 0 , then 
+
+Ω−1 
+
+> Y
+
+(X) = Y −1/2XY −1/2, (A12) and therefore 
+
+RKM  
+
+> σ, E
+
+(X) = √σ E†Y −1/2XY −1/2 √σ, (A13) which is the ordinary Petz recovery form. 
+
+6. Sum representation 
+
+The KM update can be written as the sum 
+
+RKM  
+
+> σ, E
+
+(X) = σ + ∆ KM  
+
+> σ, E
+
+(X), (A14) with ∆KM  
+
+> σ, E
+
+(X) ≡ GσX (σ) − σ, cf. Eqs. (14) and (17). 
+
+7. Channel representation 
+
+Introducing 
+
+Mσ (A) ··= E√σ E†(A) √σ, (A15) 
+
+ΦY (A) ··= Y −1/2 Mσ (A) Y −1/2, (A16) the predicted output after the update Y+ ··= E[RKM  
+
+> σ, E
+
+(X)] fac-torizes as 
+
+Y+ = Mσ [Ω −1 
+
+> Y
+
+(X)] = Φ Y, ∗( bXY ), (A17) where ΦY, ∗ denotes the Hilbert–Schmidt adjoint of ΦY and 
+
+bXY ··= √Y Ω−1 
+
+> Y
+
+(X)√Y . Since ΦY is unital CP, ΦY, ∗ is CPTP. Moreover, it preserves Y , ΦY, ∗(Y ) = Y . This is not the physical measurement channel itself, but an auxiliary CPTP map determined by Y , σ, and E. The data processing inequality can be written in CPTP channel form as 
+
+D(Y+∥Y ) = D ΦY, ∗
+
+  bXY
+
+ ΦY, ∗(Y ) ⩽ D  bXY ∥Y .
+
+(A18) 
+
+A.3. Concavity of the log-likelihood and uniqueness of the maximizer 
+
+For fixed X ⩾ 0, the map 
+
+σ 7 → L X (σ) = Tr[ X ln E(σ)] (A19) is concave on the domain where E(σ) > 0. Indeed, for 0 ⩽
+
+t ⩽ 1,
+
+LX (tσ 1 + (1 − t)σ0) = Tr X ln  tE(σ1) + (1 − t)E(σ0) 
+
+⩾ tLX (σ1) + (1 − t)LX (σ0), (A20) by operator concavity of the logarithm and positivity of the trace pairing with X. Consequently, for any two admissible states, 
+
+LX (ρ) ⩽ LX (σ) + DLX (σ)[ ρ − σ]. (A21) In the quantum-to-classical case, write pi ··= ˆ pi and set 
+
+S · ·= {σ ⩾ 0 : Tr[ σ] = 1 }, (A22) 
+
+D+ ··= {σ ∈ S : Tr[Π iσ] > 0 ∀ i}. (A23) On states in S \D +, the likelihood Lqc is extended by setting 
+
+Lqc (σ) = −∞ .
+
+Lemma 7. Suppose {Πi} is a finite informationally complete POVM with nonzero effects and pi > 0 ∀ i. Then Lqc is strongly concave on D+ and has a unique maximizer over the state space S.Proof. Let H0 denote the space of traceless Hermitian matrices and set 
+
+pmin ··= min  
+
+> i
+
+pi, c ··= min 
+
+> ∆∈H0
+> ∥∆∥2=1
+
+X
+
+> i
+
+[Tr(Π i∆)] 2. (A24) Since {Πi} is informationally complete, the map ∆ 7 →
+
+(Tr[Π i∆]) i is injective on H0. Hence c > 0, because the func-tion being minimized is continuous and strictly positive on the compact unit sphere in H0. For σ ∈ D + and ∆ ∈ H0,
+
+−D2Lqc (σ)[∆ , ∆] = X
+
+> i
+
+pi
+
+[Tr(Π iσ)] 2 [Tr(Π i∆)] 2
+
+⩾ X
+
+> i
+
+pi[Tr(Π i∆)] 2
+
+⩾ pmin c ∥∆∥22,
+
+(A25) where we used Tr[Π iσ] ⩽ 1 due to 0 ⩽ Πi ⩽ 1 and Tr[ σ] = 1 .Thus Lqc is strongly concave on D+.It remains to prove existence. Since each Πi is a nonzero POVM effect, the maximally mixed state 1/d belongs to D+,and thus Lqc (1/d ) > −∞ . With the boundary convention specified above, the map σ 7 → L qc (σ) is upper semicontinuous on S, i.e., 
+
+lim sup 
+
+> n→∞
+
+Lqc (σn) ⩽ Lqc (σ) (A26) whenever σn ∈ S and σn → σ ∈ S . Since S is compact, Lqc 
+
+attains a maximum on S. Moreover, since the maximum value is at least Lqc (1/d ) > −∞ , any maximizer must lie in D+.Finally, if σ1 and σ2 were two distinct maximizers, then for 
+
+0 < θ < 1 strong concavity would give 
+
+Lqc 
+
+ (1 − θ)σ1 + θσ 2
+
+ > (1 − θ)Lqc (σ1) + θLqc (σ2), (A27) contradicting maximality. Hence the maximizer is unique. ■
+
+9A.4. Proof of Theorem 2 
+
+Lower bound. Assume that Y > 0 and Yη > 0, such that the logarithms below are ordinary matrix logarithms. We have 
+
+Tr[ X ln Yη − X ln Y ] = D(X|| Y ) − D(X|| Yη ), (A28) where Y = E(σ) and Yη = E(ση ). The quantum relative entropy, defined as [83, 86], 
+
+D(X|| Y ) = Tr[ X(ln X − ln Y )] , (A29) can be expressed through the following optimization iden-tity [97]: 
+
+D(X|| Y ) = sup 
+
+> H=H†
+
+Tr[ XH ] − ln Tr eH+ln Y  . (A30) This implies 
+
+Tr[ X ln Yη − X ln Y ] = sup 
+
+> H=H†
+
+Tr[ XH ] − ln Tr eH+ln Y 
+
+− sup 
+
+> ˜H= ˜H†
+
+Tr X ˜H − ln Tr e ˜H+ln Yη 
+
+⩾ − ln Tr eln X−ln Yη +ln Y  + ln Tr eln X 
+
+= − ln Tr eln X−ln Yη +ln Y , (A31) where we picked H = ˜H = ln X − ln Yη , which maximizes the second supremum and gives a lower bound on the first. We use Lieb’s triple-matrix inequality [ 97 , 98 ]: for any positive definite operators R, S, T > 0,
+
+Tr eln R−ln S+ln T  ⩽ Tr R Ω−1 
+
+> S
+
+(T ) , (A32) where 
+
+Ω−1 
+
+> S
+
+(T ) = 
+
+Z ∞
+
+> 0
+
+(S + u1)−1 T (S + u1)−1 du. (A33) Using the theorem, we thus have 
+
+Tr[ X ln Yη − X ln Y ] ⩾ − ln Tr 
+
+h
+
+X Ω−1 
+
+> Yη
+
+(Y )
+
+i
+
+. (A34) Next, we derive, 
+
+1 − Tr 
+
+h
+
+X Ω−1 
+
+> Yη
+
+(Y )
+
+i
+
+= Tr 
+
+h
+
+E† Ω−1 
+
+> Yη
+
+(X)(ση − σ)
+
+i
+
+(A35) 
+
+= η Tr 
+
+hE† Ω−1 
+
+> Yη
+
+(X) − 1(σ+ − σ)
+
+i
+
+= η Tr 
+
+hE† Ω−1 
+
+> Yη
+
+(X) − 1  √σ E† Ω−1 
+
+> Y
+
+(X)√σ − σi
+
+= ηgσ
+
+√σE† Ω−1 
+
+> Yη
+
+(X) − 1√σ, √σE† Ω−1 
+
+> Y
+
+(X) − 1√σ
+
+
+
+= ηgσ (∆ σση , ∆σσ ).
+
+This provides the desired inequality, 
+
+Tr[ X ln Yη − X ln Y ] ⩾ − ln 1 − η gσ (∆ σση , ∆) , (A36) where we have set ∆ ≡ ∆σσ .Using the inequality − ln(1 − x) ⩾ x, valid whenever x < 
+
+1, gives the looser inequality 
+
+Tr[ X ln Yη −X ln Y ] ⩾ 1−Tr X Ω−1 
+
+> Yη
+
+(Y ) = ηgσ (∆ σση , ∆) .
+
+(A37) This can be independently derived using concavity of the log-likelihood (A21) , and extends the inequality to semidefinite X
+
+for which the explicit optimizer H = ln X − ln Yη has to be interpreted by approximation. 
+
+Upper bound. Using Eq. (A21), we have 
+
+LX (ση ) − L X (σ) ⩽ DLX (σ)[ ση − σ] (A38) 
+
+= η Tr E† Ω−1 
+
+> Y
+
+(X) ∆
+
+= η Tr   E† Ω−1 
+
+> Y
+
+(X) − 1 ∆
+
+= η gσ (∆ , ∆) ,
+
+where Y = E(σ) and ∆ = σ+ − σ = ( ση − σ)/η .
+
+A.5. Proof of Theorem 5 
+
+We will prove that every full-rank fixed point σ of the KM update is a maximizer of the log-likelihood. Since σ is full rank, the fixed-point equation RKM  
+
+> σ, E
+
+(X) = σ is equivalent to 
+
+GX (σ) = 1. Conversely, stationarity on the trace-one manifold gives GX (σ) = λ1, and taking the trace against σ gives λ =Tr[ X] = 1 . Thus being a full-rank fixed point is equivalent to being a stationary point of the log-likelihood. In other words, as we have shown in the main text, the following statements are equivalent, 
+
+DLX (σ)[∆ ′] = 0 ∀ ∆′ = ∆ ′† , Tr[∆ ′] = 0 
+
+⇐⇒ GX (σ) = 1 ⇐⇒ ∆ = 0 ⇐⇒ R KM  
+
+> σ, E
+
+(X) = σ. (A39) This follows from Eqs. (14) and (17) . Using concavity of the log-likelihood (A21), for any other state σ′, we have 
+
+LX (σ′) ⩽ LX (σ) + DLX (σ)[ σ′ − σ] = LX (σ), (A40) where we selected ∆′ = σ′ − σ for the first stationarity con-dition. Thus, the log-likelihood of any other state is upper-bounded by that at the stationary point; hence every full-rank stationary point is a maximizer of the log-likelihood. 
+
+A.6. Proof of Theorems 4 and 6 
+
+In what follows, we use pi ··= ˆ pi ⩾ 0 with P 
+
+> i
+
+pi = 1 , qi ··=Tr[Π iσ] > 0, q′ 
+
+> i
+
+··= Tr[Π iσ+], and ∥·∥ to denote the Hilbert– Schmidt norm. Terms with pi = 0 are understood as omitted in expressions containing (Cp )i or q′ 
+
+> i
+
+in a denominator, or containing q′ 
+
+> i
+
+inside a logarithm or inside f (q′
+
+> i
+
+/q i). Let 
+
+p =
+
+
+
+p1
+
+...
+
+pm
+
+ , q =
+
+
+
+q1
+
+...
+
+qm
+
+ , Q =
+
+
+
+q1 0
+
+. . .
+
+0 qm
+
+ .
+
+(A41) Next, define the m×m positive semidefinite matrix B by 
+
+Bij ··= 1
+
+qiqj
+
+Tr Πi
+
+√σ Πj
+
+√σ. (A42) 10 The above is a Gram matrix: its entries are given by Bij =
+
+⟨ 1 
+
+> qi
+
+Πi, 1 
+
+> qj
+
+Πj ⟩σ , where 
+
+⟨A, B ⟩σ ··= Tr A†√σ B √σ (A43) is a positive semidefinite sesquilinear form on Cd×d. When 
+
+σ is full rank, it is an inner product, known as the KMS inner product [ 99 ]. We also let C = QB . Thus, the entries of C are given by 
+
+Cij = 1
+
+qj
+
+Tr Πi
+
+√σ Πj
+
+√σ. (A44) These entries are nonnegative, since 
+
+Tr Πi
+
+√σ Πj
+
+√σ = Π1/2
+
+> i
+
+√σ Π1/2
+
+> j
+> 2
+
+⩾ 0. (A45) Note that Cq = q, since 
+
+(Cq )i = X
+
+> j
+
+Cij qj = X
+
+> j
+
+1
+
+qj
+
+Tr  Πi
+
+√σ Πj
+
+√σqj
+
+= Tr 
+
+h
+
+Πi
+
+√σ X
+
+> j
+
+Πj
+
+√σ
+
+i
+
+= Tr[Π iσ] = qi.
+
+(A46) Finally, the spectral radius ρ(A) of a square matrix A is defined as 
+
+ρ(A) = max {| λ| : λ is an eigenvalue of A}. (A47) 
+
+Lemma 8. If D is a diagonal matrix with diagonal entries 
+
+d1, . . . , d m ⩾ 0, then P 
+
+> i
+
+diqi ⩽ ρ(DC ).Proof. The matrix H ··= √BDQ √B is Hermitian positive semidefinite. Hence, for every nonzero vector z,
+
+⟨Hz, z ⟩⟨z, z ⟩ ⩽ λmax (H) = ρ(H). (A48) Moreover, H and DQB = DC = ( DQ √B)√B have the same nonzero eigenvalues, and therefore the same spectral radius. Thus ρ(H) = ρ(DC ). Setting z = √Bq and using Cq = q
+
+and Bq = 1, where 1 is the vector with every entry equal to one, gives 
+
+ρ(DC ) ⩾ ⟨√BDCq, √Bq ⟩⟨√Bq, √Bq ⟩ = ⟨Dq, Bq ⟩⟨q, Bq ⟩
+
+= ⟨Dq, 1⟩⟨q, 1⟩ =
+
+P 
+
+> i
+
+diqi
+
+P 
+
+> i
+
+qi
+
+= X
+
+> i
+
+diqi.
+
+(A49) 
+
+■
+
+Lemma 9. Let A be a square matrix such that Aij ⩾ 0, and let x be a vector such that xi > 0. If Ax ⩽ λx with λ > 0,then ρ(A) ⩽ λ. In particular, if Ax = λx , then ρ(A) = λ.Proof. See Theorem 4 in Ref. [ 94 ] for a proof of the first statement. If Ax = λx , then λ is an eigenvalue of A, so 
+
+ρ(A) ⩾ λ and ρ(A) ⩽ λ. Hence, ρ(A) = λ. ■
+
+Lemma 10 (Jacobs-type inequality for the quantum-to-classi-cal Petz update) . Tr[ GX (σ+) σ] ⩽ 1.Proof. The proof adapts the matrix argument behind Jacobs’ Proposition 2 on the classical Jeffrey-rule contraction [ 94 ] to the quantum-to-classical Petz update. The new ingredient is the Gram matrix (A42) built from the noncommuting POVM elements and the current state σ.Let D be the diagonal matrix defined by the entries 
+
+di ··=
+
+(
+
+pi/[( Cp )i], pi > 0,
+
+0, pi = 0 . (A50) For pi > 0, the denominator is positive because 
+
+(Cp )i ⩾ Cii pi = pi
+
+qi
+
+Π1/2
+
+> i
+
+√σ Π1/2
+
+> i
+> 2
+
+> 0, (A51) and we have 
+
+X 
+
+> j:pj>0
+
+diCij pj = di
+
+X
+
+> j
+
+Cij pj = di(Cp )i = pi. (A52) Equivalently, the submatrix of DC obtained by retaining the rows and columns with pi > 0 satisfies 
+
+(DC )pi>0,p j >0 (pj )pj >0 = ( pi)pi>0. (A53) Thus this submatrix is entrywise nonnegative and has the strictly positive eigenvector (pi)pi>0 with eigenvalue one. By Lemma 9, its spectral radius is one. It remains only to compare this retained submatrix with the full matrix DC . If the indices with pi > 0 are ordered first, then 
+
+DC =
+
+(DC )pi>0,p j >0 (DC )pi>0,p j =0 
+
+0 0
+
+
+
+, (A54) because di = 0 whenever pi = 0 . Hence the full matrix has the same nonzero eigenvalues as the retained submatrix, together with possible additional zero eigenvalues. Therefore ρ(DC ) = 1.Thus, by Lemma 8, 
+
+Tr[ GX (σ+) σ] = X
+
+> i:pi>0
+
+piqi
+
+Tr(Π iσ+)= X
+
+> i:pi>0
+
+piqi
+
+P 
+
+> jpj
+> qj
+
+Tr[Π i
+
+√σ Πj
+
+√σ]= X
+
+> i:pi>0
+
+piqi
+
+(Cp )i
+
+= X
+
+> i
+
+diqi (A55) 
+
+⩽ ρ(DC ) = 1 .
+
+■
+
+Lemma 11. For every ϵ > 0, there exists δ > 0 such that 
+
+Tr[ GX (σ) σ+] − 1 < ϵ whenever Lqc (σ+) − L qc (σ) < δ .Proof. Set qi = Tr[Π iσ] and q′ 
+
+> i
+
+= Tr[Π iσ+]. By Lemma 10, we have 
+
+X
+
+> i
+
+pi
+
+qi
+
+q′
+
+> i
+
+= Tr[ GX (σ+) σ] ⩽ 1. (A56) 11 Define f : (0 , ∞) → R by f (t) = t−1 − 1 + ln t. Since 
+
+f ′(t) = t − 1
+
+t2 (A57) and f (1) = 0 , the function f is nonnegative on (0 , ∞) and increasing on [1 , ∞). By (A56), 
+
+X
+
+> i
+
+pif
+
+ q′
+
+> i
+
+qi
+
+
+
+= X
+
+> i
+
+pi
+
+qi
+
+q′
+
+> i
+
+− 1 + X
+
+> i
+
+pi ln 
+
+ q′
+
+> i
+
+qi
+
+
+
+(A58) 
+
+⩽ X
+
+> i
+
+pi ln 
+
+ q′
+
+> i
+
+qi
+
+
+
+= Lqc (σ+) − L qc (σ).
+
+Given ϵ > 0, choose δ = p∗f (1 + ϵ), where p∗ ··= min {pi :
+
+pi > 0} > 0. If Lqc (σ+)−L qc (σ) < δ , then P 
+
+> i
+
+pif (q′
+
+> i
+
+/q i) < δ. 
+
+Thus, for every i with pi > 0,
+
+pif
+
+ q′
+
+> i
+
+qi
+
+
+
+⩽ X
+
+> j
+
+pj f
+
+ q′
+
+> j
+
+qj
+
+
+
+< δ ⩽ pif (1 + ϵ). (A59) Hence f (q′
+
+> i
+
+/q i) < f (1 + ϵ). If q′
+
+> i
+
+/q i < 1, then q′
+
+> i
+
+/q i < 1 + ϵ
+
+immediately. If q′
+
+> i
+
+/q i ⩾ 1, then monotonicity of f on [1 , ∞)
+
+gives q′
+
+> i
+
+/q i < 1 + ϵ. Therefore, 
+
+Tr[ GX (σ) σ+] = X
+
+> i
+
+pi
+
+q′
+
+> i
+
+qi
+
+< 1 + ϵ. (A60) 
+
+■
+
+Lemma 12. Let σ be a d × d density matrix and let A ∈ Cd×d.Then ∥√σA √σ∥ ⩽ ∥σ1/4A σ 1/4∥.Proof. In the eigenbasis of σ, we have σ = P 
+
+> i
+
+λi |i⟩⟨ i|. Then 
+
+∥√σA √σ∥2 = X
+
+> i,j
+
+λiλj |Aij |2 ⩽ X
+
+> i,j
+
+pλiλj |Aij |2
+
+= ∥σ1/4A σ 1/4∥2.
+
+(A61) 
+
+■
+
+Lemma 13. For every ϵ > 0, there exists δ > 0 such that 
+
+Lqc (σ+) − L qc (σ) < δ implies ∥σ+ − σ∥ < ϵ .Proof. Let ϵ > 0. By Lemmas 11 and 12, there exists δ > 0
+
+such that 
+
+∥σ+ − σ∥2 = ∥√σ(GX (σ) − 1)√σ∥2
+
+⩽ ∥σ1/4(GX (σ) − 1) σ1/4∥2
+
+= Tr (GX (σ) − 1)√σ(GX (σ) − 1)√σ
+
+= Tr[( GX (σ) − 1)( σ+ − σ)] = Tr[ GX (σ)( σ+ − σ)] (A62) 
+
+= Tr[ GX (σ) σ+] − 1 < ϵ 2
+
+whenever Lqc (σ+) − L qc (σ) < δ . For the penultimate equality, we used the fact that σ+ − σ is traceless. ■
+
+It remains to prove monotonicity and the equality condition; this is the content of Theorem 14 below, whose proof uses Lemma 13. 
+
+Theorem 14. Lqc (σ+) ⩾ Lqc (σ) with equality iff σ+ = σ.Proof. Suppose Lqc (σ+) − L qc (σ) ⩽ 0. Then Lqc (σ+) −Lqc (σ) < δ for any δ > 0. By Lemma 13, ∥σ+ − σ∥ = 0 and 
+
+σ+ = σ. Thus, it is not possible that Lqc (σ+) < Lqc (σ) and 
+
+Lqc (σ+) = Lqc (σ) implies σ+ = σ. ■
+
+Together with the explicit formula for the Petz update estab-lished above, this proves Theorem 4. 
+
+Proof of Theorem 6. By Theorem 14, Lqc (σk) is nondecreas-ing. By Lemma 7, Lqc has a maximizer, so Lqc (σk) is bounded above. Hence lim k→∞ Lqc (σk) = ·· ℓ∞ exists. Let C · ·= {σk}.Since Lqc (σk) ⩾ Lqc (σ0) > −∞ , the probabilities Tr[Π iσk]
+
+are bounded away from zero ∀ i. Thus every point of C lies in the domain where the Petz update and Lqc are continuous. Define 
+
+F (σ) ··= ∥σ+ − σ∥ + |L qc (σ) − ℓ∞| (A63) on this domain, and set A · ·= C ∩ F −1(0) . By Lemma 13 and the definition of ℓ∞, F (σk) → 0. Thus, by compactness of C
+
+and continuity of F , there exists σ ∈ C such that F (σ) = 0 ,and A is nonempty. 
+
+Case 1 . Suppose there exists an invertible state σ ∈ A . Since 
+
+F (σ) = 0 , we have σ+ = σ. As σ is invertible, this fixed-point equation implies GX (σ) = 1. Hence 
+
+DLqc (σ)[∆] = 0 (A64) for every traceless Hermitian ∆, and by concavity σ maximizes 
+
+Lqc . By Lemma 7, σ = ˆ σMLE . Since Lqc (σ) = ℓ∞, every ω ∈ A 
+
+also satisfies 
+
+Lqc (ω) = ℓ∞ = Lqc (ˆ σMLE ), (A65) and is therefore a maximizer. Again by Lemma 7, ω = ˆ σMLE ,so A = {ˆσMLE }.It follows that σk → ˆσMLE . If not, then there exists an open set U containing ˆσMLE and a subsequence such that σki /∈ U ∀ i.Then the closure B of {σki } is a compact subset of C and does not contain ˆσMLE . Thus B ∩ A = ∅, and by compactness of B
+
+and continuity of F on C,
+
+F (σki ) ⩾ min  
+
+> σ∈B
+
+F (σ) > 0, (A66) contradicting F (σk) → 0.
+
+Case 2 . Suppose det( σ) = 0 ∀ σ ∈ A . Then det( σk) → 0. If not, then there exists ϵ > 0 and a subsequence σki such that 
+
+det( σki ) > ϵ ∀ i. Then the closure B of {σki } is a compact subset of C and, by continuity of the determinant, does not intersect A. Thus, by compactness of B and continuity of F
+
+on C,
+
+F (σki ) ⩾ min  
+
+> σ∈B
+
+F (σ) > 0, (A67) contradicting F (σk) → 0.This proves the dichotomy. It remains to prove the level set assertion. Suppose that the upper level set 
+
+K = {σ : Lqc (σ) ⩾ Lqc (σ0)} (A68) 12 contains only invertible states. By monotonicity, σk ∈ K ∀ k.Since K is compact and K ∩ det −1(0) = ∅,
+
+min  
+
+> σ∈K
+
+det( σ) > 0. (A69) Thus the alternative det( σk) → 0 is impossible. By the di-chotomy just proved, σk → ˆσMLE . ■
+
+Note that this theorem extends to any number of measure-ments by the construction from App. A.7. We assumed that all observed probabilities pji are positive. In quantum state tomography, this can be ensured by additive smoothing 
+
+ˆpi = Ni + αN + αm , (A70) where Ni is the number of times outcome i is observed, N is the total number of measurements, m is the number of possible measurement outcomes, and α > 0 is a smoothing parameter. 
+
+A.7. Weighted channel data as a single block channel 
+
+A weighted likelihood for several channels can be written as a single-channel likelihood on a direct-sum output space. Define 
+
+E⊕(σ) = M
+
+> j
+
+wj Ej (σ), X⊕ = M
+
+> j
+
+wj Xj , X
+
+> j
+
+wj = 1 ,
+
+(A71) and wj ⩾ 0. Then, up to the constant P 
+
+> j
+
+wj Tr[ Xj ] ln wj ,
+
+Tr[ X⊕ ln E⊕(σ)] = X
+
+> j
+
+wj Tr[ Xj ln Ej (σ)] . (A72) Moreover, since Ω−1  
+
+> wjYj
+
+(wj Xj ) = Ω −1 
+
+> Yj
+
+(Xj ), the KM update for E⊕ is exactly 
+
+RKM  
+
+> σ, E⊕
+
+(X⊕) = X
+
+> j
+
+wj RKM  
+
+> σ, Ej
+
+(Xj ). (A73) 
+
+Example: quantum-to-classical channel. 
+
+For Ej (σ) = P 
+
+> i
+
+Tr Π(j) 
+
+> i
+
+σ |j, i ⟩⟨ j, i |, the block channel E⊕
+
+is the quantum-to-classical channel associated with the single POVM {wj Π(j) 
+
+> i
+
+}i,j and the block data 
+
+X⊕ = X
+
+> j,i
+
+wj ˆp(j) 
+
+> i
+
+|j, i ⟩⟨ j, i | . (A74) Thus the weighted Petz update is the ordinary Petz update for this unified POVM, and the weighted KM identity above reduces to the same construction in the commuting case. 
+
+A.8. Classical and quantum Bayes’ theorem and monotonicity violation by the Petz map 
+
+Let X and Y be random variables taking values from finite sets X and Y respectively. We view the random variable X
+
+as representing the state of a classical system, while Y is the result of an observation on the system. The observation can be modeled as a “forward” process E corresponding to the stochastic matrix with entries given by the conditional probabilities p(y|x) for x ∈ X and y ∈ Y . Given a prior distribution σ(x) representing an agent’s belief about X, we apply the forwards process to obtain the distribution 
+
+E(σ)( y) = X
+
+> x∈X
+
+p(y|x) σ(x). (A75) If an observation y is made, Bayes’ rule prescribes the follow-ing update to the prior: 
+
+σy (x) = p(y|x) σ(x)
+
+P 
+
+> x∈X
+
+p(y|x) σ(x) . (A76) Jeffrey’s rule extends Bayes’ to situations with “soft evidence”, where the observation is a distribution τ (y). In this case, the updated state is 
+
+σ+(x) = X
+
+> y∈Y
+
+σy (x) τ (y). (A77) The expression above has the form σ+ = Rσ, E (τ ), where 
+
+Rσ, E is the Bayesian reverse process determined by the prior 
+
+σ and the forward channel E. Bayes’ rule (A76) is recovered when τ is a delta distribution. Jeffrey’s rule follows from Jeffrey’s probability kinematics [ 100 ], is equivalent to Pearl’s virtual-evidence update [ 101 , 102 ], and can also be derived from a minimum-change principle [57]. Viewing quantum mechanics as the noncommutative gen-eralization of classical probability theory, one naturally asks for a quantum Bayes rule: a CPTP map R extending (A77) to quantum states and channels. Several inequivalent proposals exist [ 51 , 52 , 57 , 103 ], reflecting the fact that no single quan-tum extension has the same universal status as classical Bayes’ rule. In the relative-entropy setting, the canonical object is the 
+
+Petz recovery map (18) , which characterizes equality in the data-processing inequality [39–41] 
+
+D(E(ρ)∥E (σ)) ⩽ D(ρ∥σ). (A78) For faithful σ and compatible supports, equality holds precisely when ρ is recovered from its channel output by the Petz map, 
+
+Rσ, E (E(ρ)) = ρ.Jacobs [ 94 ] showed that Jeffrey’s update moves the pre-dicted observation toward the soft evidence in a precise relative-entropy sense: for the Kullback–Leibler divergence [104] 
+
+DKL (p∥q) ··= X
+
+> z
+
+p(z)[ln p(z) − ln q(z)] , (A79) one has 
+
+DKL (τ ∥E (σ+)) ⩽ DKL (τ ∥E (σ)) , (A80) where τ , E(σ+), and E(σ) are classical distributions. Theorem 4 in the main text generalizes the Petz–Jeffrey monotonicity statement for quantum-to-classical channels (3) ,whose outputs are mutually commuting, even though their quantum inputs need not be. This Theorem can be rewritten as, 
+
+D(X ∥ E qc (σ+)) ⩽ D(X ∥ E qc (σ)) , (A81) 13 with equality iff σ+ = σ, and where σ+ = Rσ, Eqc (X).However, as mentioned in the main text, the Petz recov-ery map does not satisfy such a monotonicity theorem in gen-eral. The obstruction is the noncommutative output differential: when [E(σ), X ]̸ = 0 , one generally has 
+
+Ω−1
+
+> E(σ)
+
+(X)̸ = E(σ)−1/2X E(σ)−1/2. (A82) A concrete example which exhibits violation of this inequality is 
+
+σ =
+
+ 23 00 13
+
+
+
+, X =
+
+0.99 00 0.01 
+
+
+
+, E(σ) = 
+
+> 2
+
+X
+
+> j=1
+
+Kj σK † 
+
+> j
+
+,K1 =
+
+−0.251899+0 .447484 i 0.284823 −0.031868 i
+
+0.308714 −0.635360 i −0.388139+0 .067281 i
+
+
+
+,K2 =
+
+−0.215046+0 .189193 i −0.500736 −0.114805 i
+
+0.279643 −0.277632 i 0.696647+0 .115962 i
+
+
+
+.
+
+(A83) For the Petz recovery map Rσ, E , we obtain 
+
+D(X ∥ E (σ)) − D(X ∥ E (Rσ, E (X))) = −2.022036 , (A84) while for the KM update RKM  
+
+> σ, E
+
+, we have 
+
+D(X ∥ E (σ)) − D X E(RKM  
+
+> σ, E
+
+(X))  = 0 .069089 . (A85) Notice that in this case X and Y = E(σ) are highly non-commuting; the Frobenius norm is equal to ∥[X, Y ]∥F =0.659206 , which is close to the maximum given by 1/√2.This example was found numerically using random instances further refined by simulated annealing. This is consistent with Theorem 1 of Ref. [ 57 ], where the Petz map is recovered as the solution of the minimum-change problem in the output-commuting case [E(σ), X ] = 0 . The corresponding noncommutative likelihood-gradient correction is the inverse KM action derived in Sec. I. 
+
+A.9. Expressions for the quantum-to-classical channel 
+
+The quantum-to-classical channel is defined as 
+
+Eqc (σ) = X
+
+> i
+
+Tr[Π iσ] |i⟩⟨ i| . (A86) Using Πi = K† 
+
+> i
+
+Ki, we can rewrite it in terms of its Kraus decomposition as 
+
+Eqc (σ) = X
+
+> i,j
+
+|i⟩⟨ j| KiσK † 
+
+> i
+
+|j⟩⟨ i| , (A87) with adjoint 
+
+E†
+
+> qc
+
+(Z) = X
+
+> i,j
+
+K† 
+
+> i
+
+|j⟩⟨ i| Z |i⟩⟨ j| Ki. (A88) The inverse KM superoperator is 
+
+Ω−1
+
+> Eqc (σ)
+
+(X) = 
+
+Z
+
+> R
+
+β0(t) Eqc (σ)−(1+ it )/2X Eqc (σ)−(1 −it )/2 dt. 
+
+(A89) If X is diagonal in the {| i⟩} basis, e.g., because it has been produced by the quantum-to-classical channel, then X =P 
+
+> i
+
+ˆpi |i⟩⟨ i|, Eqc (σ) and X commute, and 
+
+Ω−1
+
+> Eqc (σ)
+
+(X) = Eqc (σ)−1/2X Eqc (σ)−1/2 = X
+
+> i
+
+ˆpi
+
+Tr[Π iσ] |i⟩⟨ i| .
+
+(A90) This means that the Hilbert-Schmidt gradient is 
+
+GX (σ) = E†Ω−1
+
+> Eqc (σ)
+
+(X) = X
+
+> i,j
+
+K† 
+
+> i
+
+|j⟩ ˆpi
+
+Tr[Π iσ] ⟨j| Ki
+
+= X
+
+> i
+
+ˆpi
+
+Tr[Π iσ] Πi, (A91) and the gradient in the inverse square-root metric (7) is 
+
+GσX (σ) = √σ G X (σ)√σ = X
+
+> i
+
+ˆpi
+
+Tr[Π iσ]
+
+√σ Πi
+
+√σ. (A92) This leads to the Riemmanian gradient, 
+
+∆ = GσX (σ) − σ = √σ
+
+ X 
+
+> i
+
+ˆpi
+
+Tr[Π iσ] Πi − I
+
+√σ. (A93) If X = Eqc (ρ) has been computed directly as an output of the channel for a state ρ, then ˆpi ≡ pi = Tr[Π iρ], and the KM update applied to Eqc (ρ) equals the Petz recovery map, 
+
+RKM  
+
+> σ, Eqc
+
+(Eqc (ρ)) = Rσ, Eqc (Eqc (ρ)) = X
+
+> i
+
+pi
+
+Tr[Π iσ]
+
+√σ Πi
+
+√σ. 
+
+(A94) Inserting the quantum-to-classical channel and X into the generalized log-likelihood, we obtain 
+
+LX (σ) = Tr X ln Eqc (σ)
+
+= Tr 
+
+ X
+
+> i
+
+ˆpi |i⟩⟨ i| ln 
+
+ X 
+
+> i
+
+Tr[Π iσ] |i⟩⟨ i|
+
+
+
+= X
+
+> i
+
+ˆpi ln Tr[Π iσ].
+
+(A95) This is the standard log-likelihood. For a line search update 
+
+ση = σ + η ∆, f (η) ··= LX (ση ), (A96) the quantum-to-classical channel gives 
+
+f ′(0) = gσ (∆ , ∆) = ∥∆∥2
+
+> gσ
+
+= Tr 
+
+ X
+
+> i
+
+ˆpi
+
+Tr[Π iσ] Πi − I
+
+√σ
+
+!2. (A97) This means an approximate increase in the log-likelihood when performing a line search update, 
+
+LX (ση ) ≈ L X (σ) + η f ′(0) . (A98) 14

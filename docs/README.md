@@ -6,32 +6,29 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-06-27
-- 运行时间：2026-06-27 20:27:03 UTC
+- 最新运行日期：2026-06-28
+- 运行时间：2026-06-28 20:21:48 UTC
 - 运行状态：成功
-- 本次总论文数：4
+- 本次总论文数：2
 - 精读区：2
-- 速读区：2
+- 速读区：0
 
 ### 今日简报（AI）
-今日聚焦容错量子计算的高效基础解码器与非克利福德逻辑的量子群码研究。精读中9分论文提出高性能解码器，8分论文增强解码、可寻址与并行能力。建议普通读者跟进这两项实用化进展，观察其推动量子纠错落地的潜力。
-- 详情：[/202606/27/README](/202606/27/README)
+今日精读两篇量子纠错码前沿，聚焦非Clifford逻辑与费米子拓扑相。  
+《Quantum group codes》以9.0高分提出增强解码、可寻址性与并行化方案，是重点。  
+建议关注编码设计如何助力量子计算的可扩展性。
+- 详情：[/202606/28/README](/202606/28/README)
 
 ### 精读区论文标签
-1. [Efficient foundation decoders for fault-tolerant quantum computing](/202606/27/2606.27119v1-efficient-foundation-decoders-for-fault-tolerant-quantum-computing)  
+1. [Quantum group codes for non-Clifford logic: enhanced decoding, addressability and parallelizability](/202606/28/2606.27211v1-quantum-group-codes-for-non-clifford-logic-enhanced-decoding-addressability-and-parallelizability)  
    标签：评分：9.0/10、query:qec-decoding
-   evidence：提出NTU框架用于容错量子计算的高效基础解码器
-2. [Quantum group codes for non-Clifford logic: enhanced decoding, addressability and parallelizability](/202606/27/2606.27211v1-quantum-group-codes-for-non-clifford-logic-enhanced-decoding-addressability-and-parallelizability)  
+   evidence：量子群码具有增强的解码能力
+2. [Majorana-Pauli stabilizer codes and duality webs of fermionic topological phases](/202606/28/2606.25048v1-majorana-pauli-stabilizer-codes-and-duality-webs-of-fermionic-topological-phases)  
    标签：评分：8.0/10、query:qec-code
-   evidence：量子群码与增强译码
+   evidence：提出了马约拉纳-泡利稳定子码，用于费米子环面码，直接关联稳定子码与拓扑量子纠错码
 
 ### 速读区论文标签
-1. [Nonlinear Geometrizability of State-Dependent Proto-Area in Approximate Holographic Codes](/202606/27/2606.22598v1-nonlinear-geometrizability-of-state-dependent-proto-area-in-approximate-holographic-codes)  
-   标签：评分：7.0/10、query:qec-decoding
-   evidence：全息码中的近似恢复
-2. [Connecting Quantum Tomography and Quantum Retrodiction](/202606/27/2606.23777v1-connecting-quantum-tomography-and-quantum-retrodiction)  
-   标签：评分：6.0/10、query:qec-decoding
-   evidence：量子信道的Petz恢复映射
+- 本次无速读推荐。
 
 
 <div class="dpr-home-promo-card">

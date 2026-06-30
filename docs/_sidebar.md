@@ -1,6 +1,9 @@
 * <a class="dpr-sidebar-root-link" href="#/">首页</a>
 * <a class="dpr-sidebar-root-link dpr-sidebar-noactive-link" href="javascript:void(0)" data-dpr-hash="#/tutorial/README">使用教程</a>
 * Daily Papers
+  * 2026-06-30 <!--dpr-date:20260630-->
+    * 精读区
+      * <a class="dpr-sidebar-item-link dpr-sidebar-item-structured" href="#/202606/30/2606.23161v1-on-the-intractability-of-the-minimum-distance-problem-for-regular-ldpc-codes" data-sidebar-item="{&quot;title&quot;: &quot;On the Intractability of the Minimum Distance Problem for Regular LDPC Codes&quot;, &quot;link&quot;: &quot;https://arxiv.org/abs/2606.23161v1-on-the-intractability-of-the-minimum-distance-problem-for-regular-ldpc-codes&quot;, &quot;score&quot;: &quot;8.0&quot;, &quot;tags&quot;: [{&quot;kind&quot;: &quot;query&quot;, &quot;label&quot;: &quot;qec-code&quot;}], &quot;evidence&quot;: &quot;分析经典LDPC码最小距离，对量子LDPC码设计至关重要&quot;}">On the Intractability of the Minimum Distance Problem for Regular LDPC Codes</a>
   * 2026-06-28 <!--dpr-date:20260628-->
     * 精读区
       * <a class="dpr-sidebar-item-link dpr-sidebar-item-structured" href="#/202606/28/2606.27211v1-quantum-group-codes-for-non-clifford-logic-enhanced-decoding-addressability-and-parallelizability" data-sidebar-item="{&quot;title&quot;: &quot;Quantum group codes for non-Clifford logic: enhanced decoding, addressability and parallelizability&quot;, &quot;link&quot;: &quot;https://arxiv.org/abs/2606.27211v1-quantum-group-codes-for-non-clifford-logic-enhanced-decoding-addressability-and-parallelizability&quot;, &quot;score&quot;: &quot;9.0&quot;, &quot;tags&quot;: [{&quot;kind&quot;: &quot;query&quot;, &quot;label&quot;: &quot;qec-decoding&quot;}], &quot;evidence&quot;: &quot;量子群码具有增强的解码能力&quot;}">Quantum group codes for non-Clifford logic: enhanced decoding, addressability and parallelizability</a>

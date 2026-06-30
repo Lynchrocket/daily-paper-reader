@@ -1,0 +1,1607 @@
+Title: On the Intractability of the Minimum Distance Problem for Regular LDPC Codes
+
+URL Source: https://arxiv.org/pdf/2606.23161v1
+
+Published Time: Tue, 23 Jun 2026 03:38:30 GMT
+
+Number of Pages: 18
+
+Markdown Content:
+> 1
+
+# On the Intractability of the Minimum Distance Problem for Regular LDPC Codes 
+
+Chenyuan Jia, Qingqing Peng, Ke Liu, Guanghui Wang, Guiying Yan 
+
+Abstract —The minimum distance problem (MDP) for low-density parity-check (LDPC) codes is a central problem in coding theory and is closely related to the analysis of low-weight codewords and error-floor behavior. Although the unrestricted MDP is computationally intractable, its complexity under degree constraints that commonly occur in LDPC code design has remained less clear. In this paper, we study the MDP for left regular and biregular Tanner graphs. We prove that the problem is NP -complete and W[1] -complete for J-left regular Tanner graphs for every fixed J ≥ 3, and also for (3 , 3) -regular bipartite graphs. We further establish W[1] -completeness for (J, K)-regular instances for every fixed J, K ≥ 3. The reductions are based on a degree-preserving transformation framework consisting of hyperedge decomposition, check node splitting, and controlled variable replication. These transformations transfer hardness between di ff erent degree distributions while preserving explicit bijections among nonzero codewords, even covers, and nonempty 
+
+(a, 0) -trapping sets. The results delineate the computational limits of exact LDPC code analysis under natural regularity constraints. 
+
+Index Terms —Regular LDPC codes, minimum distance, NP-completeness, W[1]-completeness. 
+
+I. I ntroduction 
+
+# LOW-DENSITY parity-check (LDPC) codes [1] are fun-damental in modern communication systems because they achieve capacity-approaching performance under belief-propagation (BP) decoding. Their high-SNR performance, however, may be limited by the error-floor phenomenon, where the bit error rate (BER) decreases much more slowly than predicted by the waterfall-region behavior [2]. Minimum distance is a key global parameter in this regime: a small min-imum distance implies the existence of low-weight codewords that can dominate high-SNR performance, especially under maximum-likelihood or near-maximum-likelihood decoding. Under iterative BP decoding, small trapping or absorbing structures also play a central role. For this reason, computing and bounding the minimum distance of LDPC codes remains a basic problem in coding theory and code design [3]–[5]. The minimum distance problem (MDP) has several equiva-lent combinatorial formulations. In the Tanner-graph represen-tation, the support of a nonzero codeword is a nonempty set of 
+
+This work is partially supported by the National Key R&D Program of China, (2023YFA1009600) (Corresponding author: Guanghui Wang). C. Jia, Q. Peng and G. Wang are with the School of Mathematics, Shan-dong University, Shandong, China (e-mail: chenyuanjia@mail.sdu.edu.cn; pqing@mail.sdu.edu.cn; ghwang@sdu.edu.cn). G. Yan is with the Academy of Mathematics and Systems Science, CAS, University of Chinese Academy of Sciences, Beijing, 100190 China (e-mail: yangy@amss.ac.cn). K. Liu is with the Hangzhou Research Center, Huawei Technologies Co. Ltd., Hangzhou, China (e-mail: liuke79@huawei.com). 
+
+variable nodes such that every adjacent check node is incident with an even number of selected variables. This is precisely a nonempty ( a, 0)-trapping set. In the corresponding incidence-hypergraph representation, variables become hyperedges and parity checks become vertices; codewords then correspond to 
+
+even covers , namely subfamilies of hyperedges in which every vertex has an even degree [6], [7]. These equivalent viewpoints connect minimum distance, even covers, and trapping sets through the same parity constraint. The unrestricted MDP is known to be computationally hard. Classical results establish the NP-completeness of maximum-likelihood decoding and related weight problems [8], the NP-completeness of minimum distance computation [5], and strong inapproximability results for minimum distance [9]. For trapping set-related structures, Dehghan and Banihashemi [10], [11] established hardness results for locating elementary trapping sets and small cycles. In parameterized complexity, Bhattacharyya et al. [12] showed W[1]-hardness for the param-eterized minimum distance /even cover problem. What remains less well understood is how this hardness behaves under the uniform-degree structures that arise naturally in LDPC Tanner graphs, such as left regular and ( J, K)-regular configurations. In this paper, we systematically study the hardness of computing the minimum distance in left regular and biregular LDPC Tanner graphs. We prove that, for every fixed J ≥ 3, the problem is NP-complete and W[1]-complete on J-left regular Tanner graphs. We also prove NP-completeness and W[1]-completeness for (3 , 3)-regular bipartite graphs, and W[1]-completeness for ( J, K)-regular graphs for every fixed J, K ≥ 3. The reductions rely on a degree-preserving transformation framework based on hyperedge decomposition, check node splitting, and controlled variable replication. Each transforma-tion is designed to preserve an explicit bijection between fea-sible parity structures so that minimum-cardinality solutions can be tracked across di ff erent degree distributions. Overall, the paper shows that natural regularity constraints do not, by themselves, remove the intrinsic di ffi culty of exact minimum distance computation. By presenting the minimum distance, even-cover, and trapping-set formulations in a unified framework, the results clarify the complexity boundary for regular LDPC code analysis and provide guidance on where exact algorithms are unlikely to be practical. II. O verview 
+
+This section provides a roadmap for the paper and high-lights how the main hardness results are connected. At a high level, the argument proceeds in three layers. First, in 
+
+> arXiv:2606.23161v1 [cs.CC] 22 Jun 2026 2
+
+Section III, we formalize the equivalence among nonzero codewords, nonempty ( a, 0)-trapping sets, and nonempty even covers in the associated incidence hypergraph. This unified viewpoint allows us to move freely between coding-theoretic and combinatorial formulations of the MDP. Second, Section IV develops three local transformation primitives that preserve the relevant parity structures through explicit solution maps: hyperedge decomposition, check node splitting, and controlled variable replication. These transfor-mations form the technical core of the paper. They allow us to adjust the left degree, right degree, and uniformity of the underlying incidence structures while keeping precise control over feasible solutions and their cardinalities. Third, these primitives are assembled into the reduction chain shown in Fig. 1. In Section V, we first reduce the unrestricted minimum even cover problem to the 3-uniform case, which yields hardness for the 3-left regular MDP. We then extend this to every fixed left degree J ≥ 3. Next, Section VI uses check node splitting and variable replication to obtain hardness for the (3 , 3)-regular case, and then amplifies the construction to all fixed biregular pairs ( J, K) with J, K ≥ 3. Thus, the main theorems of the paper are not isolated state-ments; rather, they arise from a coherent reduction framework in which each stage prepares the structural input required for the next one.                
+
+> Unrestricted MDP
+> 3-left regular MDP
+> J-left regular MDP, J≥3
+> (3 ,3)-regular MDP
+> (3 ,K)-regular MDP, K≥3
+> (J,K)-regular MDP, J,K≥3
+> hyperedge decomposition
+> +controlled replication
+> Karp reduction
+> adding global checks
+> Karp reduction
+> splitting
+> + replication
+> Karp reduction
+> right-degree amplification
+> FPT reduction
+> left-degree amplification
+> Karp reduction
+> Fig. 1. Reduction flow for the MDP under left regular and biregular degree constraints.
+
+III. P reliminaries 
+
+A. Graphs and Hypergraphs 
+
+A graph is a pair G = (V, E), where V is a set of vertices and E is a set of edges. The graph is undirected if each edge connects two vertices without orientation. A graph is 
+
+simple if it has no loops and no multiple edges. Thus, for a simple undirected graph, each edge can be written as an unordered pair {u, v} with u, v ∈ V and u , v. Unless otherwise specified, all graphs referred to in the following text are simple undirected graphs. Two vertices u, v ∈ V(G) are said to be 
+
+adjacent in G if {u, v} ∈ E(G). In this case, we also say that 
+
+u is adjacent to v, or that u is a neighbor of v. For a vertex 
+
+v ∈ V(G), its degree in G, denoted by deg G(v), is the number of vertices adjacent to v. A graph G is called k-regular if deg G(v) = k for every v ∈ V(G). For a graph G = (V, E) and a subset U ⊆ V, the induced subgraph of G on U, denoted by G[U], is the graph with vertex set U and edge set 
+
+E(G[U]) = {{ u, v} ∈ E : u, v ∈ U}.
+
+A path of length ℓ in G is a sequence of distinct vertices 
+
+v0, v1, . . . , vℓ
+
+such that {vi−1, vi} ∈ E for every 1 ≤ i ≤ ℓ. A cycle of length 
+
+ℓ is a sequence 
+
+v0, v1, . . . , vℓ−1, v0,
+
+where v0, v1, . . . , vℓ−1 are distinct, ℓ ≥ 3, and 
+
+{vi−1, vi} ∈ E for 1 ≤ i ≤ ℓ − 1, {vℓ−1, v0} ∈ E.
+
+Equivalently, a cycle is obtained from a path by adding an edge between its two endpoints. The girth of G, denoted by 
+
+g(G), is the length of the shortest cycle in G. If G contains no cycle, then its girth is defined to be infinite. We shall also use hypergraphs. A hypergraph generalizes an ordinary graph: in an ordinary graph, each edge is incident to exactly two vertices, whereas in a hypergraph, a hyperedge may be incident to any positive number of vertices. 
+
+Definition 1 (Hypergraph) . A hypergraph is denoted by 
+
+H = (V, E), E = (eα)α∈I ,
+
+where V is a finite set of vertices, I is a finite index set, and each e α is a nonempty subset of V, called a hyperedge .
+
+We use an indexed family of hyperedges rather than a set of subsets: if α , β but eα = eβ, then eα and eβ are still regarded as two distinct hyperedges. This convention is useful for representing multiple hyperedges. A vertex v ∈ V is said to be incident with a hyperedge eα
+
+if v ∈ eα. The degree of v in H is deg H (v) = |{ α ∈ I : v ∈ eα}| .
+
+The hypergraph is J-uniform if every hyperedge has cardinality 
+
+J, that is, |eα| = J for every α ∈ I. It is K-regular if every vertex is incident with exactly K hyperedges, that is, deg H (v) = K for every v ∈ V. It is linear if any two distinct indexed hyperedges intersect in at most one vertex: 
+
+|eα ∩ eβ| ≤ 1, ∀α , β. 
+
+Definition 2 (Even cover) . Let H = (V, E) be a hypergraph with E = (eα)α∈I . For a subset Y ⊆ I of hyperedge indices, let 
+
+HY = (V, (eα)α∈Y )3
+
+be the sub-hypergraph formed by selecting only the hyperedges indexed by Y. The degree of a vertex v ∈ V with respect to Y is 
+
+deg Y (v) B |{ α ∈ Y : v ∈ eα}| .
+
+The set Y is called an even cover if every vertex is incident with an even number of selected hyperedges, that is, 
+
+deg Y (v) ≡ 0 (mod 2) , ∀v ∈ V.
+
+Vertices with degree zero are allowed, since zero is even. 
+
+Fig. 2 illustrates the definition of an even cover. The red hyperedges are the selected hyperedges in Y, while the black hyperedge belongs to the hypergraph but is not selected. In the selected sub-hypergraph, every vertex is incident with exactly two red hyperedges, and hence every vertex has even degree with respect to Y. Therefore, the red hyperedges form an even cover. 
+
+e1
+
+e2
+
+e3
+
+e4
+
+v1
+
+v2
+
+v3
+
+v4
+
+v5
+
+v6
+
+Y = {e1, e2, e3} is an even cover                                                           
+
+> Fig. 2. A hypergraph H=(V,E) illustrating an even cover. The vertex set is
+> V={v1,v2,v3,v4,v5,v6}, and the hyperedge set is E={e1,e2,e3,e4}, where
+> e1={v1,v2,v3},e2={v4,v5},e3={v1,v2,v3,v4,v5}, and e4={v3,v6}. The selected hyperedges Y={e1,e2,e3}form an even cover: with respect to Y,we have deg Y(vi)=2 for i=1, . . . , 5, while deg Y(v6)=0. Thus every vertex has even degree in the selected sub-hypergraph. The dashed black hyperedge
+> e4belongs to E \ Yand is not selected.
+
+B. LDPC Codes and Trapping Sets 
+
+An [ n, k, d] binary linear code C is a k-dimensional sub-space of Fn 
+
+> 2
+
+with minimum Hamming distance d. A matrix 
+
+M ∈ Fk×n 
+
+> 2
+
+whose rows form a basis of C is called a generator matrix . A parity-check matrix for C is a matrix H ∈ F(n−k)×n
+
+> 2
+
+such that 
+
+C = {x ∈ Fn 
+
+> 2
+
+: Hx⊤ = 0}.
+
+Equivalently, the codewords of C are precisely the binary vectors satisfying all parity-check equations specified by the rows of H.The matrix H induces a Tanner graph G = (L, R, E), where the variable nodes L correspond to the codeword coordinates, the check nodes R correspond to the parity-check equations, and {v j, ri} ∈ E if and only if Hi, j = 1. The Tanner graph is a simple bipartite graph with bipartition ( L, R). It is J-left regular 
+
+if every variable node has degree J, and K-right regular if every check node has degree K. Equivalently, every column of H has weight J and every row of H has weight K. When the number of nonzero entries in H is linear in the block length, i.e., |E| = O(n), the associated code is called a low-density parity-check (LDPC) code. 
+
+Definition 3 (Nonzero codewords) . A vector c ∈ Fn 
+
+> 2
+
+is a nonzero codeword of C if c , 0 and H c⊤ = 0. Equivalently, 
+
+C \ { 0} = {c ∈ Fn 
+
+> 2
+
+\ { 0} : Hc⊤ = 0}.
+
+Definition 4 (( a, b)-trapping sets) . Let G = (L, R, E) be a Tanner graph. For S ⊆ L, let N(S ) = {r ∈ R : there exists v ∈ S such that {v, r} ∈ E}
+
+be the set of neighboring check nodes of S , and let 
+
+GS = G[S ∪ N(S )] 
+
+be the subgraph induced by S together with its neighboring check nodes. The set S is an (a, b)-trapping set if |S | = a and exactly b check nodes in GS have odd degree in GS .Since (a, 0) -trapping sets occur frequently in the reduction arguments, we shall use the term trapping set to refer to a nonempty (a, 0) -trapping set, unless stated otherwise. 
+
+Proposition 5 (Codeword—trapping set correspondence) . Let 
+
+G = (L, R, E) be the Tanner graph of a binary linear code 
+
+C with parity-check matrix H. For a subset S ⊆ L, define its characteristic vector cS ∈ Fn 
+
+> 2
+
+by 
+
+(cS ) j =
+
+
+
+1, if v j ∈ S ,
+
+0, if v j < S .
+
+Then a nonempty set S ⊆ L is a trapping set if and only if cS is a nonzero codeword of C. Consequently, the minimum distance of C is equal to the minimum cardinality of a nonempty trapping set in G.Proof. For a subset S ⊆ L, consider its characteristic vector 
+
+cS . For the row hi of H corresponding to the check node ri,we have 
+
+hi c⊤ 
+
+> S
+
+=
+
+> n
+
+X
+
+> j=1
+
+Hi, j(cS ) j =
+
+X 
+
+> vj∈S
+
+Hi, j (mod 2) .
+
+The integer sum Pv j∈S Hi, j counts exactly the number of neighbors of check node ri contained in S , that is, the degree of 
+
+ri in the induced subgraph GS if ri ∈ N(S ), and zero otherwise. Therefore, S is an ( a, 0)-trapping set if and only if 
+
+X 
+
+> vj∈S
+
+Hi, j ≡ 0 (mod 2) for every check node ri. By the displayed identity above, this is equivalent to 
+
+Hc⊤ 
+
+> S
+
+= 0.
+
+Since S is nonempty, cS , 0, and its Hamming weight is |S |.Minimizing |S | over all nonempty trapping sets is therefore equivalent to minimizing the Hamming weight of a nonzero codeword. □4
+
+C. Hypergraph Representation 
+
+We next describe a construction of a hypergraph from the Tanner graph induced by a parity-check matrix. Given 
+
+H ∈ Fm×n 
+
+> 2
+
+, let G = (L, R, ET ) be its Tanner graph, where 
+
+R = {r1, . . . , rm} is the set of check nodes and L = {v1, . . . , vn}
+
+is the set of variable nodes. Define a hypergraph H = (V, E)by taking V = {r1, . . . , rm} to be the set of parity checks and by associating with each column j the indexed hyperedge 
+
+e j = {ri : Hi, j = 1}.
+
+Equivalently, e j is determined by the edges incident with the variable node v j in the Tanner graph: the check-node endpoints of those incident edges are precisely the nodes contained in e j. In this construction, the check nodes of the Tanner graph become the vertices of the hypergraph, while each variable node determines one indexed hyperedge through its incident check nodes. This construction is illustrated in Fig. 3. Under this representation, column weight J corresponds to J-uniformity of the hypergraph, and row weight K corresponds to K-regularity of the hypergraph. Under this representation, the codewords of the code defined by H are in bijective correspondence with the even covers of 
+
+H; in particular, the zero codeword corresponds to the empty even cover [7], [13]. 
+
+## 1 2 3 4
+
+## 1
+
+## 2
+
+## 3
+
+## 4 
+
+> Fig. 3. Hypergraph representation of a Tanner graph variable node and its adjacent check nodes.
+
+Proposition 6 (Codeword—even cover correspondence) . Let 
+
+C be a binary linear code with parity-check matrix H, and let H = (V, E) be the hypergraph constructed from the Tanner graph of H as above. For any x ∈ Fn
+
+> 2
+
+, define Yx B { j ∈ { 1, . . . , n} : x j = 1}.
+
+Then Hx⊤ = 0 ⇐⇒ Yx is an even cover of H.
+
+Consequently, nonzero codewords of C are in a weight-preserving bijection with nonempty even covers of H.Proof. The ith coordinate of Hx⊤ is 
+
+> n
+
+X
+
+> j=1
+
+Hi, j x j (mod 2) ,
+
+which is exactly the number, modulo two, of selected hyper-edges containing the vertex ri. Hence, the parity-check equa-tions hold if and only if every hypergraph vertex has an even degree in the selected subfamily of hyperedges. The Hamming weight of x equals the number of selected hyperedges, giving the claimed weight-preserving bijection. □
+
+D. Complexity-Theoretic Background 
+
+NP -completeness: The class NP consists of decision prob-lems for which a “yes” instance admits a certificate verifiable in polynomial time. A problem is NP-complete if it belongs to NP and every problem in NP is polynomial-time reducible to it [14]. 
+
+Parameterized complexity: Parameterized complexity stud-ies decision problems together with an auxiliary parame-ter [15]. A parameterized problem is a language L ⊆ Σ∗ × N,whose instances are pairs ( x, k), where k is the parameter. 
+
+Definition 7 (Fixed-parameter tractability) . A parameterized problem L is fixed-parameter tractable (FPT ) if there exists an algorithm deciding whether (x, k) ∈ L in time f (k)|x|O(1) ,where f is a computable function depending only on k. 
+
+The class FPT contains all fixed-parameter tractable prob-lems. The W-hierarchy provides a standard framework for identifying parameterized problems that are unlikely to be fixed-parameter tractable [16]. 
+
+Definition 8 (W[1]-completeness) . A parameterized problem is W[1] -hard if every problem in W[1] admits an FPT -reduction to it. It is W[1] -complete if it is W[1] -hard and also belongs to W[1] .
+
+An FPT-reduction from a parameterized problem L1 to another parameterized problem L2 maps an instance ( x, k) to an instance ( x′, k′) in time f (k)|x|O(1) such that ( x, k) ∈ L1 if and only if ( x′, k′) ∈ L2, and k′ ≤ g(k) for some computable function g [17]. 
+
+Theorem 9 (Standard intractability implications) . Under the usual complexity-theoretic assumptions, the following implica-tions hold.  
+
+> •
+
+If P , NP , then no NP -complete problem admits a polynomial-time algorithm.  
+
+> •
+
+If FPT , W[1] , then no W[1] -complete problem is fixed-parameter tractable. E. Problem Formulations 
+
+The MDP for binary linear codes can be expressed in three equivalent languages: parity-check matrices, Tanner graphs, and incidence hypergraphs. We use these formulations in-terchangeably in the reductions. In all variants below, the parameter is the target size w.
+
+a) General instances.: We first consider the unrestricted setting.  
+
+> •
+
+Min Distance : Given a binary matrix H ∈ Fm×n 
+
+> 2
+
+and an integer w > 0, decide whether there exists a nonzero vector x ∈ Fn 
+
+> 2
+
+such that wt( x) ≤ w and Hx ⊤ = 0.5 
+
+> •
+
+Min Trap : Given a bipartite graph G = (L, R, E) and an integer w > 0, decide whether there exists a nonempty set S ⊆ L with |S | ≤ w such that 
+
+|N(r) ∩ S | ≡ 0 (mod 2) for every r ∈ R. 
+
+> •
+
+Min Even Cover : Given a hypergraph H = (V, E) and an integer w > 0, decide whether there exists a nonempty set Y ⊆ E with |Y| ≤ w such that deg Y (v) ≡ 0 (mod 2) for every v ∈ V.
+
+The equivalence of these formulations follows from Propo-sition 5, Proposition 6, and the standard incidence transfor-mations between matrices, Tanner graphs, and hypergraphs. Hence, the three formulations transfer hardness results among one another. 
+
+b) Column-regular instances.: For a fixed integer J ≥
+
+3, requiring the parity-check matrix to have constant column weight J is equivalent to requiring the Tanner graph to be J-left regular and the corresponding hypergraph to be J-uniform. We denote the restricted variants by M in Distance J , M in Trap J ,and M in Even Cover J . 
+
+> •
+
+Min Distance J : the matrix H has constant column weight 
+
+J; 
+
+> •
+
+Min Trap J : the bipartite graph G = (L, R, E) is J-left regular;  
+
+> •
+
+Min Even Cover J : the hypergraph H = (V, E) is J-uniform. The question and the parameter remain unchanged. 
+
+c) Biregular instances.: We also consider the case in which both column and row weights are fixed. Equiva-lently, the Tanner graph is ( J, K)-regular, and the incidence hypergraph is J-uniform and K-regular. The corresponding variants are denoted by M in Distance (J,K), M in Trap (J,K), and Min Even Cover (J,K). 
+
+> •
+
+Min Distance (J,K): the matrix H has constant column weight J and constant row weight K; 
+
+> •
+
+Min Trap (J,K): the bipartite graph G = (L, R, E) is ( J, K)-regular;  
+
+> •
+
+Min Even Cover (J,K): the hypergraph H = (V, E) is J-uniform and K-regular. Again, the objective is to find a nonempty solution of size at most w that satisfies the same even-parity condition. 
+
+Remark 10 (Parameterized equivalence) . Within each struc-tural class—unrestricted, column-regular, and biregular—the matrix, Tanner graph, and hypergraph formulations are equiv-alent under parameter-preserving transformations. Columns of H correspond to variable nodes in the Tanner graph and to hyperedges in the hypergraph, whereas rows of H correspond to check nodes and to hypergraph vertices. These transforma-tions are computable in linear time, preserve the target size w, and maintain the relevant uniformity or regularity restrictions. Therefore, the reductions below may be stated in whichever of the three equivalent languages is most convenient. 
+
+IV. I ntermediate Transformations 
+
+In this section, we present three transformation primitives that are used repeatedly in the reductions, especially in the proofs in Section V and Section VI. The main di ffi culty in proving hardness for structured LDPC codes is transforming arbitrary instances into regular or nearly regular configurations without changing the underlying parity problem. In particular, the transformations must avoid creating artificial low-weight solutions and must preserve the correspondence between feasible supports in the original and transformed instances. The three primitives developed below —hyperedge decomposition , check node splitting , and 
+
+variable replication —provide the tools needed to control degrees while preserving the solution space through explicit maps. We begin by addressing a fundamental obstacle that arises in reductions involving hypergraph representations: the presence of hyperedges with arbitrarily large cardinality. In the context of MDPs for regular LDPC codes, we often need to work with 3-uniform hypergraphs (corresponding to variable nodes of degree three in the Tanner graph). However, general in-stances may contain hyperedges involving many vertices. The following decomposition procedure resolves this mismatch by systematically breaking down large hyperedges into chains of size-three components while introducing auxiliary vertices to maintain structural integrity. 
+
+Algorithm 1 Decomposition of Large Hyperedges into 3-Uniform Components 
+
+Require: A Hypergraph H = (V, E)
+
+Ensure: A hypergraph H′ = (V′, E′) with all hyperedges of size at most 3  
+
+> 1:
+
+Initialize V′ ← V, E′ ← E  
+
+> 2:
+
+for each hyperedge e ∈ E do  
+
+> 3:
+
+Let k ← | e| 
+
+> 4:
+
+Enumerate the vertices of e as v1, v2, . . . , vk, such that e = {v1, v2, . . . , vk} 
+
+> 5:
+
+if k > 3 then  
+
+> 6:
+
+Introduce auxiliary vertices x1, x2, . . . , xk−3 
+
+> 7:
+
+Construct new hyperedges:  
+
+> 8:
+
+e1 ← { v1, v2, x1} 
+
+> 9:
+
+ek−2 ← { xk−3, vk−1, vk} 
+
+> 10:
+
+for j ← 2 to k − 3 do  
+
+> 11:
+
+e j ← { x j−1, v j+1, x j} 
+
+> 12:
+
+end for  
+
+> 13:
+
+Update vertex and edge sets:  
+
+> 14:
+
+V′ ← V′ ∪ { x1, . . . , xk−3} 
+
+> 15:
+
+E′ ← (E′ \ { e}) ∪ { e1, e2, . . . , ek−2} 
+
+> 16:
+
+end if  
+
+> 17:
+
+end for  
+
+> 18:
+
+return (V′, E′)The correctness of Algorithm 1 hinges on a careful analysis of how even covers behave under this chain-like decomposi-tion. The key insight is that the auxiliary vertices introduced during splitting impose parity constraints that force all sub-hyperedges originating from the same original hyperedge to act in unison—they must either all participate in an even cover or all remain excluded. This ”all-or-nothing” property is precisely what enables the decomposition to preserve the combinatorial essence of the original problem, as illustrated in Fig. 4. 61 
+
+> 2
+> 3
+> 4
+> 5
+> 6
+> 1
+> 2
+> a
+> 3
+> b
+> 4
+> c
+> 5
+> 6
+> Fig. 4. Example of decomposing a hyperedge of size six. Numbers denote original vertices, and letters denote auxiliary vertices.
+
+The computational e ffi ciency of Algorithm 1 is straight-forward. The algorithm processes each hyperedge e ∈ E
+
+independently. For a hyperedge of cardinality |e| > 3, it introduces |e| − 3 auxiliary vertices and constructs |e| − 2 new 3-uniform hyperedges, requiring O(|e|) operations. Summing over all hyperedges, the total running time is O P
+
+> e∈E
+
+|e|
+
+!
+
+, which is linear in the total size of the input hypergraph representation. 
+
+Lemma 11. Let H = (V, E) be a hypergraph, and let 
+
+H′ = (V′, E′) be the hypergraph obtained from H by applying the hyperedge decomposition procedure in Algorithm 1. Write V′ = V ∪ Vaux , where V aux is the set of auxiliary vertices introduced by the procedure. Let A and A′ denote the families of all even covers of H and H′, respectively. Then the following statements hold. 
+
+(i) Chain constraint. Suppose that an original hyperedge e ∈ E is decomposed into an ordered chain C(e) =
+
+(e1, e2, . . . , et) ⊆ E ′, where, for each j = 1, 2, . . . , t − 1,the two consecutive sub-hyperedges e j and e j+1 intersect in the unique auxiliary vertex x j ∈ Vaux . Then, for every Y′ ∈ A ′, if e i ∈ Y′ for some i ∈ { 1, 2, . . . , t}, then 
+
+{e1, e2, . . . , et} ⊆ Y′.
+
+(ii) Bijection of even covers. There exists a map T : A → A′ such that T is a bijection. More precisely, after regarding every undecomposed hyperedge e as a chain 
+
+C(e) = {e}, the map T (Y) =
+
+[
+
+> e∈Y
+
+C(e), Y ∈ A ,
+
+is a bijection from A onto A′.Proof. All parity computations below are taken over F2. For a subset Z and an element a, write 1Z (a) for the indicator of the event a ∈ Z. For each e ∈ E , let C(e) denote the chain produced from e by Algorithm 1; if e is not decomposed, set 
+
+C(e) = {e}. The sets C(e), e ∈ E , form a partition of E′.We first prove the chain constraint. Let e ∈ E be decomposed into C(e) = (e1, . . . , et), and let x j be the auxiliary vertex shared by e j and e j+1. By construction, x j is incident, among the hyperedges of E′, exactly with e j and e j+1. If Y′ ∈ A ′, the even-cover condition at x j gives 
+
+1Y′ (e j) + 1Y′ (e j+1) ≡ 0.
+
+Hence 1Y′ (e j) = 1Y′ (e j+1) for every j = 1, . . . , t − 1. Induction along the chain shows that all sub-hyperedges in C(e) have the same membership status in Y′. Therefore, once one of them belongs to Y′, all of them belong to Y′, proving (i). We now define the forward map T : A → 2E′
+
+by 
+
+T (Y) =
+
+[
+
+> e∈Y
+
+C(e).
+
+We verify that T (Y) is an even cover of H′ whenever Y ∈ A . If 
+
+v ∈ V is an original vertex, then, for every original hyperedge 
+
+e, the total number of sub-hyperedges in C(e) containing v is exactly 1e(v): a decomposed hyperedge distributes its original vertices among the chain, and an undecomposed hyperedge is unchanged. Consequently, deg T (Y)(v) ≡
+
+X
+
+> e∈Y
+
+1e(v) = deg Y (v) ≡ 0.
+
+If x j ∈ Vaux is introduced inside the chain of some decomposed hyperedge e, then x j is incident only with the adjacent pair 
+
+e j, e j+1. The definition of T selects either both of these sub-hyperedges, when e ∈ Y, or neither of them, when e < Y.Hence deg T (Y)(x j) is either 2 or 0, and is therefore even. Thus 
+
+T (Y) ∈ A ′.Define a reverse map P : A′ → 2E by 
+
+P(Y′) = {e ∈ E : C(e) ⊆ Y′}.
+
+By the chain constraint, for every Y′ ∈ A ′ and every e ∈ E ,either the whole chain C(e) is contained in Y′, or it is disjoint from Y′. Therefore P is well defined and captures exactly the selected chains of Y′. To see that P(Y′) is an even cover of H,fix v ∈ V. Since each original occurrence of v in a hyperedge e
+
+corresponds to exactly one occurrence of v in the chain C(e), and since each chain is either fully selected or not selected at all, we obtain deg P(Y′)(v) ≡ deg Y′ (v) ≡ 0.
+
+Thus P(Y′) ∈ A .Finally, P(T (Y)) = Y for every Y ∈ A by the definition of T .Conversely, if Y′ ∈ A ′, the chain constraint implies that Y′ is precisely the union of those chains C(e) with e ∈ P(Y′); hence 
+
+T (P(Y′)) = Y′. Thus P = T −1 on A′, and T is a bijection. This proves (ii) and completes the proof. □
+
+Having established a rigorous mechanism for controlling hyperedge cardinality, we now turn our attention to a dual problem that arises in the Tanner graph domain: reducing the degree of check vertices while preserving the trapping set structure. In practical LDPC code constructions, check vertices may have arbitrarily high degrees, especially when the code length increases. However, our hardness reductions for (3 , 3)-regular and ( J, K)-regular instances require precise control over both variable node and check node degrees. The following check node splitting procedure addresses this need 7
+
+by decomposing high-degree check vertices into chains of degree-three components, mirroring the structural philosophy of Algorithm 1 but operating in the bipartite graph domain. 
+
+Algorithm 2 Check Node Splitting for Degree Reduction to Three 
+
+Require: Bipartite graph G = (L, R, E), where L and R denote variable and check nodes, respectively 
+
+Ensure: A bipartite graph G′ = (L′, R′, E′) with deg( r) ≤ 3for all r ∈ R′ 
+
+> 1:
+
+Initialize L′ ← L, R′ ← R, E′ ← E 
+
+> 2:
+
+for each check node r ∈ R do  
+
+> 3:
+
+Let k ← deg( r) 
+
+> 4:
+
+Enumerate neighbors of r as u1, u2, . . . , uk, i.e., 
+
+N(r) = {u1, . . . , uk} 
+
+> 5:
+
+if k > 3 then  
+
+> 6:
+
+Introduce auxiliary variable nodes y1, y2, . . . , yk−3 
+
+> 7:
+
+Construct split check nodes r1, . . . , rk−2 with updated neighborhoods:  
+
+> 8:
+
+N(r1) ← { u1, u2, y1} 
+
+> 9:
+
+N(rk−2) ← { yk−3, uk−1, uk} 
+
+> 10:
+
+for j ← 2 to k − 3 do  
+
+> 11:
+
+N(r j) ← { y j−1, u j+1, y j} 
+
+> 12:
+
+end for  
+
+> 13:
+
+Update graph components:  
+
+> 14:
+
+R′ ← (R′ \ { r}) ∪ { r1, . . . , rk−2} 
+
+> 15:
+
+L′ ← L′ ∪ { y1, . . . , yk−3} 
+
+> 16:
+
+E′ ← { (u, r) | u ∈ L′, r ∈ R′, u ∈ N(r)} 
+
+> 17:
+
+end if  
+
+> 18:
+
+end for  
+
+> 19:
+
+return (L′, R′, E′)The preservation of trapping sets under Algorithm 2 relies on a more subtle argument than the hyperedge decomposition case. While the chain structure again enforces coordinated behavior among the split check nodes, the membership as-signments of the auxiliary variable nodes are not simply binary ”all-in” or ”all-out”. Instead, they follow a prefix-parity rule that deterministically propagates the parity information from the original variable nodes. This deterministic assignment ensures that the local parity constraints at each split check node are satisfied while maintaining consistency with the original trapping-set structure. Fig. 5 provides a matrix-level illustration of the split opera-tion on a randomly generated bipartite graph. In this represen-tation, the shaded entries indicate the nonzero incidences after splitting, whereas all remaining entries are zero. The figure makes explicit that each original check constraint is replaced by a sequence of local constraints coupled through auxiliary variable nodes. Therefore, the auxiliary vertices serve as parity-propagation interfaces between consecutive split check nodes, which explains why their memberships are governed by the prefix-parity rule rather than by an independent all-or-nothing selection rule. From a computational standpoint, Algorithm 2 iterates through each check node r ∈ R and processes its neighbors. For a check node of degree deg( r) > 3, the algorithm introduces deg( r)−3 auxiliary variable nodes and constructs deg( r)−2 new degree-three check nodes, requiring O(deg( r)) operations. The total running time is therefore O P
+
+> r∈R
+
+deg( r)
+
+!
+
+= O(|E|), where 
+
+|E| denotes the number of edges in the bipartite graph. 
+
+Lemma 12. Let G = (L, R, E) be a bipartite graph, and let 
+
+G′ = (L′, R′, E′) be the bipartite graph obtained from G by applying the check node splitting procedure in Algorithm 2. Write L ′ = L ∪ Laux , where L aux is the set of auxiliary variable nodes introduced by the split procedure, and let R ′ be the resulting set of split check nodes. Let A and A′ denote the families of all trapping sets of G and G′, respectively. Then there exists a map Q : A → A ′ such that Q is a bijection. Proof. We use the parity formulation of trapping sets adopted in this reduction: a subset of variable nodes is feasible if every check node is adjacent to an even number of selected variable nodes. All sums are taken over F2.For each check node r ∈ R with kr = deg G(r) > 3, let its neighbors be ordered as NG(r) = {ur
+
+> 1
+
+, ur
+
+> 2
+
+, . . . , urkr }, consistently with Algorithm 2. The split procedure replaces r by check nodes rr
+
+> 1
+
+, . . . , rrkr −2 and introduces auxiliary variable nodes 
+
+yr
+
+> 1
+
+, . . . , yrkr −3, where 
+
+NG′ (rr
+
+> 1
+
+) = {ur
+
+> 1
+
+, ur
+
+> 2
+
+, yr
+
+> 1
+
+}, NG′ (rrj) = {yrj−1, urj+1, yrj}
+
+for 2 ≤ j ≤ kr − 3, and 
+
+NG′ (rrkr −2) = {yrkr −3, urkr −1, urkr }.
+
+For S ∈ A , define Q(S ) ⊆ L′ by preserving all original variable nodes and assigning each auxiliary variable node according to the prefix parity 
+
+Q(S ) ∩ L = S ,
+
+1Q(S )(yrj) ≡
+
+> j+1
+
+X
+
+> i=1
+
+1S (uri ), 1 ≤ j ≤ kr − 3.
+
+This formula defines Q for all split check nodes; check nodes of degree at most three introduce no auxiliary variables. We first prove that Q(S ) ∈ A ′. Unsplit check nodes retain their original neighborhoods, so their parity constraints remain satisfied. Consider a split chain associated with some r ∈ R.For the first split check node, 
+
+1Q(S )(ur
+
+> 1
+
+) + 1Q(S )(ur
+
+> 2
+
+) + 1Q(S )(yr
+
+> 1
+
+)
+
+≡1S (ur
+
+> 1
+
+) + 1S (ur
+
+> 2
+
+) +
+
+> 2
+
+X
+
+> i=1
+
+1S (uri )
+
+≡0 (mod 2) .
+
+For an intermediate split check node rrj, 2 ≤ j ≤ kr − 3, the prefix definition gives 
+
+1Q(S )(yrj−1) + 1Q(S )(urj+1) + 1Q(S )(yrj)
+
+≡
+
+> j
+
+X
+
+> i=1
+
+1S (uri ) + 1S (urj+1) +
+
+> j+1
+
+X
+
+> i=1
+
+1S (uri )
+
+≡0 (mod 2) .8Original matrix H 
+
+Variable nodes            
+
+> 12345678910 11 12
+> Check nodes
+> 1
+> 2
+> 3
+> 4
+> 5
+> 6
+> Reduced matrix H 0
+
+Variable nodes         
+
+> 14710 13 16 19 22
+> Check nodes
+> 1
+> 2
+> 3
+> 4
+> 5
+> 6
+> 7
+> 8
+> 9
+> 10
+> 11
+> 12
+> 13
+> 14
+> 15
+> 16
+> Split
+> Fig. 5. Matrix representation of a bipartite graph after the check node splitting operation. Shaded entries indicate nonzero positions; all remaining entries are zero.
+
+For the last split check node, 
+
+1Q(S )(yrkr −3) + 1Q(S )(urkr −1) + 1Q(S )(urkr )
+
+≡
+
+> kr
+
+X
+
+> i=1
+
+1S (uri )
+
+≡0 (mod 2) ,
+
+because S satisfies the parity condition at the original check node r. Hence every check node in G′ has even intersection with Q(S ), and therefore Q(S ) ∈ A ′.It remains to show that Q is bijective. Define P : A′ → 2L
+
+by P(S ′) = S ′ ∩ L. We first show that P(S ′) ∈ A for every 
+
+S ′ ∈ A ′. For an unsplit check node this is immediate. For a split check node r, the parity constraints in G′ are 
+
+1S ′ (ur
+
+> 1
+
+) + 1S ′ (ur
+
+> 2
+
+) + 1S ′ (yr
+
+> 1
+
+) ≡ 0 (mod 2) ,
+
+1S ′ (yrj−1) + 1S ′ (urj+1) + 1S ′ (yrj) ≡ 0 (mod 2) ,
+
+1S ′ (yrkr −3) + 1S ′ (urkr −1) + 1S ′ (urkr ) ≡ 0 (mod 2) ,
+
+2 ≤ j ≤ kr − 3.
+
+The middle family is empty when kr = 4. Adding all applicable congruences cancels every auxiliary variable yrj, which appears exactly twice, and yields 
+
+> kr
+
+X
+
+> i=1
+
+1S ′ (uri ) ≡ 0.
+
+Since uri ∈ L, this is exactly the parity condition for P(S ′) at the original check node r. Hence P(S ′) ∈ A .Clearly P(Q(S )) = S for all S ∈ A . Conversely, let S ′ ∈ A ′.The first congruence in the split chain gives 
+
+1S ′ (yr
+
+> 1
+
+) ≡ 1S ′ (ur
+
+> 1
+
+) + 1S ′ (ur
+
+> 2
+
+),
+
+and the jth intermediate congruence gives recursively 
+
+1S ′ (yrj) ≡ 1S ′ (yrj−1) + 1S ′ (urj+1), 2 ≤ j ≤ kr − 3.
+
+Therefore 
+
+1S ′ (yrj) ≡
+
+> j+1
+
+X
+
+> i=1
+
+1S ′ (uri ) =
+
+> j+1
+
+X
+
+> i=1
+
+1P(S ′)(uri ),
+
+which is exactly the prefix-parity assignment used in the defi-nition of Q(P(S ′)). Thus every auxiliary variable has the same membership status in Q(P(S ′)) as in S ′, while the original variables agree by definition of P. Hence Q(P(S ′)) = S ′.Consequently, P = Q−1 on A′, and Q is a bijection. □
+
+The transformations developed so far control hyperedge cardinality and check node degree. A third challenge remains: in reductions targeting ( J, K)-regular instances with bounded parameters, we often need to amplify the ”influence” of spe-cific variable nodes without violating the required regularity constraints. A naive approach of simply duplicating variables would violate the degree bounds that define our problem classes. The following variable replication procedure resolves this tension by creating multiple “clones” of a target variable node that are forced to behave identically under any trap-ping set constraint, while maintaining strict 3-left regularity throughout the transformation. This technique is used later to ensure that certain structural components dominate the cardinality of potential solutions. By carefully tuning the replication factor, we can make the contribution of specific variables arbitrarily large relative to other graph components, enabling precise control over which configurations can realize minimum-weight solutions. The correctness of Algorithm 3 rests on a cascade of parity constraints that propagate outward from the original variable node v through the entire chain of replication nodes. Each newly introduced check node of degree two acts as an ”equality enforcer,” compelling its two neighboring variable nodes to adopt identical membership statuses in any valid trapping set. This creates a domino e ff ect: once v’s status is determined, it ripples through x1 and x2, then continues through subsequent pairs ( x3, x4), ( x5, x6), and so forth, until 9
+
+Algorithm 3 Variable Replication with Degree-Bounded Check Node Insertion 
+
+Require: 3-left regular bipartite graph G = (L, R, E), target variable v ∈ L, replication count m = 2k (k ∈ Z+)
+
+Ensure: A 3-left regular bipartite graph G′ = (L′, R′, E′)containing m mutually equivalent variables  
+
+> 1:
+
+Initialize L′ ← L, R′ ← R, E′ ← E 
+
+> 2:
+
+Identify neighbors of v: N(v) = {r1, r2, r3} 
+
+> 3:
+
+Introduce auxiliary variables x1, x2 ∈ L′ 
+
+> 4:
+
+Update edges: E′ ← E′ \ { (v, r1), (v, r2)} ∪ { (x1, r1), (x2, r2)} 
+
+> 5:
+
+Introduce auxiliary check nodes y1, y2 ∈ R′ 
+
+> 6:
+
+Update edges: E′ ← E′ ∪ { (x1, y1), (x2, y2), (v, y1), (v, y2)} 
+
+> 7:
+
+for i ← 4 to m step 2 do  
+
+> 8:
+
+Introduce variables xi−1, xi ∈ L′ and check nodes 
+
+yi−1, yi, yi−1,i ∈ R′ 
+
+> 9:
+
+Update edges: E′ ← E′ ∪
+
+(xi−3, yi−1), (xi−1, yi−1),
+
+(xi−2, yi), (xi, yi),
+
+(xi−1, yi−1,i), (xi, yi−1,i)
+
+ 
+
+> 10:
+
+end for  
+
+> 11:
+
+Introduce terminal check nodes ym+1, ym+2 ∈ R′ 
+
+> 12:
+
+Update edges: E′ ← E′ ∪{(xm−1, ym+1), (xm, ym+1), (xm−1, ym+2), (xm, ym+2)} 
+
+> 13:
+
+return (L′, R′, E′)all replication nodes are constrained to mirror v’s behavior. The joint check nodes y2 j+1,2 j+2 serve as structural bridges that maintain 3-left regularity without imposing additional constraints, as illustrated in Fig. 6. 
+
+ξ
+
+α β γ
+
+bdca21
+
+ξ
+
+γ
+
+β
+
+α
+
+43fe     
+
+> Fig. 6. Example of expanding a variable node ξwith replication factor m=4. Numbers denote replicated variables, and letters denote auxiliary check nodes.
+
+The algorithm can be implemented e ffi ciently with a single pass through the replication chain. It introduces m replication nodes and a corresponding number of auxiliary check nodes and edges through a loop that iterates m/2 times, with each iteration performing a constant number of edge insertions. Consequently, the running time is O(m), linear in the number of replication nodes. 
+
+Lemma 13. Let G = (L, R, E) be a 3-left regular bipartite graph. Fix v ∈ L, and apply the variable replication procedure in Algorithm 3 to v with an even integer m ≥ 2, producing replication variable nodes x 1, x2, . . . , xm. Let G′ = (L′, R′, E′)
+
+be the resulting 3-left regular bipartite graph, where L ′ =
+
+L ∪ { x1, x2, . . . , xm}. Let A and A′ denote the families of all trapping sets of G and G′, respectively. Then the following statements hold. 
+
+(i) Equivalent-variable constraint. For every S ′ ∈ A ′,v ∈ S ′ ⇐⇒ x1 ∈ S ′ ⇐⇒ · · · ⇐⇒ xm ∈ S ′.
+
+Equivalently, v and all replication variables are either selected simultaneously or excluded simultaneously in every trapping set of G′.
+
+(ii) Bijection of trapping sets. The map F v,m : A → A ′
+
+defined by Fv,m(S ) =
+
+
+
+S ∪ { x1, x2, . . . , xm}, if v ∈ S ,
+
+S , if v < S ,
+
+is a bijection. Proof. As in the preceding lemma, trapping sets are inter-preted through the even-neighbor parity constraints at check nodes, and all congruences are over F2. Let NG(v) = {r1, r2, r3}
+
+be the three original neighbors of v, labelled as in Algorithm 3. We first prove the equivalent-variable constraint. Let S ′ ∈A′. The auxiliary check nodes y1 and y2 have neighborhoods 
+
+{v, x1} and {v, x2}, respectively. Hence 
+
+1S ′ (v) + 1S ′ (x1) ≡ 0, 1S ′ (v) + 1S ′ (x2) ≡ 0,
+
+so x1 and x2 have the same membership status as v. Now consider any iteration of Algorithm 3 that introduces xi−1 and 
+
+xi, where i = 4, 6, . . . , m. The auxiliary check nodes yi−1 and 
+
+yi have neighborhoods {xi−3, xi−1} and {xi−2, xi}, respectively. Their parity constraints imply 
+
+1S ′ (xi−3) = 1S ′ (xi−1), 1S ′ (xi−2) = 1S ′ (xi).
+
+Induction over i = 4, 6, . . . , m therefore yields 
+
+1S ′ (x1) = 1S ′ (x2) = · · · = 1S ′ (xm) = 1S ′ (v).
+
+The additional check nodes with neighborhoods {xi−1, xi},including the terminal check nodes, are then automatically satisfied and do not alter this conclusion. This proves (i). We next show that Fv,m is well defined. Let S ∈ A . The map Fv,m preserves every original variable in L and assigns each xi the same membership status as v. For every original check node other than possibly r1 and r2, the neighborhood contribution is unchanged. At r1 and r2, Algorithm 3 replaces the incidences of v by incidences of x1 and x2, respectively; since 1Fv,m(S )(x1) = 1Fv,m(S )(x2) = 1S (v), the parity at these two check nodes is exactly the same as in G. All newly introduced auxiliary check nodes are adjacent to pairs of variables that 10 
+
+have identical membership statuses under Fv,m(S ), and there-fore each such check node is incident with either zero or two selected variables. Hence every check node of G′ has even intersection with Fv,m(S ), and Fv,m(S ) ∈ A ′.Define P : A′ → 2L by P(S ′) = S ′ ∩ L. We prove that 
+
+P(S ′) ∈ A for every S ′ ∈ A ′. Let S ′ ∈ A ′. For check nodes whose neighborhoods are not modified by the replication, the parity condition for P(S ′) is inherited directly from S ′. For 
+
+r1 and r2, the graph G′ contains x1 and x2 in place of v,respectively. By (i), 1S ′ (x1) = 1S ′ (x2) = 1S ′ (v). Replacing x1
+
+and x2 by v therefore preserves parity at r1 and r2 when passing from G′ back to G. The third neighbor r3 of v is unchanged. Thus every check node of G has even intersection with P(S ′), and P(S ′) ∈ A .Finally, P(Fv,m(S )) = S for every S ∈ A , since P simply deletes the replication variables. Conversely, for any S ′ ∈ A ′,statement (i) shows that the memberships of x1, . . . , xm are uniquely determined by the membership of v. Therefore ap-plying Fv,m to P(S ′) restores exactly the original statuses of all replication variables, while all original variables are preserved by P. Hence Fv,m(P(S ′)) = S ′. Thus P = F−1 
+
+> v,m
+
+on A′, so Fv,m
+
+is a bijection. This proves (ii) and completes the proof. □
+
+The three algorithmic primitives developed in this section form an integrated framework underpinning all subsequent hardness reductions. Each transformation addresses a distinct structural challenge while adhering to a unifying principle: preserving bijective correspondences between solution spaces. Lemma 11 enforces hyperedge cardinality constraints without altering even cover structure; Lemma 12 reduces check node degrees to three while maintaining trapping set equivalence; and Lemma 13 amplifies variable contributions compatibly with strict regularity requirements. In Section V, we leverage Algorithm 1 to transform arbitrary hypergraphs into 3-uniform configurations, then employ Algorithm 3 to preserve minimum even covers. The proof of Section VI incorporates Algorithm 2 to achieve full (3 , 3)-regularity, followed by variable replica-tion operations enforcing degree bounds on both bipartition sides. All three algorithms run in polynomial time and are lo-cal : each transformation operates independently on individ-ual structural elements without requiring global coordination. This makes the transformations easy to compose in the later reductions. The auxiliary structures introduced—chains of sub-hyperedges, split check node sequences, and variable replica-tion clusters—exhibit predictable properties facilitating rigor-ous analysis of solution cardinalities in transformed instances. While presented in the context of minimum distance and trapping set problems, this degree-preserving transformation framework extends to broader combinatorial problems on graphs and hypergraphs where parity constraints are central, and may find independent utility in other hardness reductions involving structured constraint satisfaction or coding-theoretic constructions. V. L eft Regular Minimum Distance Problem 
+
+We first study the MDP for Tanner graphs with constant left degree, equivalently parity-check matrices with constant column weight. By the codeword—even cover correspondence in Proposition 6, this is the same as studying minimum even covers in uniform hypergraphs. The cases J ≤ 2 are polynomial-time tractable and therefore do not exhibit the hardness phenomena considered here. When 
+
+J = 1, the associated hypergraph is 1-uniform, so the problem reduces to checking whether some vertex is incident with two identical singleton hyperedges; in the simple-hypergraph case, no nonempty even cover exists. When J = 2, the associated hypergraph is an ordinary graph, possibly with parallel edges: hyperedges become graph edges, and nonempty even covers are exactly nonempty unions of cycles. The minimum distance is therefore the length of a shortest cycle, with a pair of parallel edges counted as a cycle of length two. This can be found in polynomial time. Thus J = 3 is the first left-degree regime in which computational hardness can arise. We show that this threshold is tight. The proof for J =
+
+3 reduces the unrestricted minimum even cover problem to the 3-uniform case. The reduction combines hyperedge decomposition, padding, and controlled variable replication. The maps used in this proof are explicitly built from the bijections established in the intermediate transformations: the hyperedge-decomposition bijection T constructed in the proof of Lemma 11, and the variable-replication bijections Fv,m
+
+constructed in the proof of Lemma 13. We then extend the result to every fixed J > 3 by adding global check nodes adjacent to all variables. Since every trapping set in a 3-left regular Tanner graph has even cardinality, these global checks are automatically satisfied and do not change the feasible supports. 
+
+A. Intractability of the 3-Left Regular Case 
+
+The first step is to show that degree three on the left side already retains the full complexity of the unrestricted MDP. Equivalently, we prove hardness for 3-uniform hypergraphs. 
+
+Theorem 14. The decision problem Min Distance 3 is NP -complete, and it is W[1] -complete when parameterized by the target size w. Proof. We give a polynomial-time reduction from Min Even Cover . Let ( H, w) be an instance of M in Even Cover ,where H = (V, E). Since no feasible solution can contain more than |E| hyperedges, we may replace w by min {w, |E|} .If necessary, we add one dummy singleton hyperedge incident with a private vertex; this hyperedge cannot belong to any even cover and only ensures that w < |E|. This harmless preprocessing simplifies the threshold separation below. Apply Algorithm 1 to H, and let H0 = (V0, E0) be the resulting hypergraph. Let 
+
+Thyp : A(H) −→ A (H0)denote the map T constructed in the proof of Lemma 11; explicitly, Thyp replaces each selected hyperedge by the entire chain of sub-hyperedges produced from it. Lemma 11 shows that Thyp is a bijection, with inverse obtained by contracting each selected chain back to its original hyperedge. 11 
+
+The hypergraph H0 has all hyperedges of size at most three. To obtain a strictly 3-uniform hypergraph, we pad the hyperedges of size one and two. Let 
+
+V1 = V0 ∪ { y1, y2, z1, z2}.
+
+For every hyperedge e ∈ E0 with |e| = 2, replace e = {a, b}
+
+by {a, b, z1}; for every hyperedge e ∈ E0 with |e| = 1, replace 
+
+e = {a} by {a, y1, y2}. Then add the three auxiliary hyperedges 
+
+A = {y1, y2, z1}, {y1, z1, z2}, {y2, z1, z2} .
+
+Let H1 = (V1, E1) denote the resulting 3-uniform hypergraph. We now define a padding map 
+
+Upad : A(H0) −→ A (H1)inside the present proof. For Y0 ∈ A(H0), first take the corresponding padded copies of all hyperedges in Y0. These selected padded hyperedges can induce odd parity on the auxiliary vertices only in one of the following four patterns: no odd auxiliary vertex; only z1 odd; exactly y1 and y2 odd; or y1, y2, z1 all odd. Define Upad (Y0) by adding, respectively, 
+
+∅, A, {y1, z1, z2}, {y2, z1, z2} , {y1, y2, z1} .
+
+This correction makes all four auxiliary vertices even and leaves the original vertices unchanged. Conversely, the parity constraints at y1, y2, z1, z2 uniquely determine which of the four correction sets must be present. Hence Upad is a bijection between the even covers of H0 and those of H1. Moreover, this padding step adds at most three auxiliary hyperedges to any cover. The padding step gives a 3-uniform instance, but di ff erent original hyperedges may have been represented by chains of di ff erent lengths. We therefore equalize their contribution by controlled variable replication. Let si be the number of hy-peredges in the chain corresponding to the original hyperedge 
+
+ei ∈ E after Algorithm 1, and choose an integer B > |E| + 3such that B ≥ max i si + 2. For each ei, choose an even integer 
+
+mi ≥ 2 such that 
+
+si + mi ∈ { B, B + 1}.
+
+Using the Tanner-graph interpretation of Proposition 6, we apply the variable replication operation to the variable nodes representing the non-auxiliary hyperedges associated with ei.Let 
+
+Fexp = Fvt ,mt ◦ · · · ◦ Fv1,m1
+
+denote the composition of the maps Fv,m constructed in the proof of Lemma 13, applied over all replication steps. By Lemma 13, every factor Fv,m is a bijection on trapping sets; through Proposition 6, the same composition gives a bijection on the corresponding even-cover families. Let H2 be the final 3-uniform hypergraph obtained after all these replications. The complete solution map used by the reduction is there-fore 
+
+Ψ B Fexp ◦ Upad ◦ Thyp : A(H) −→ A (H2),
+
+where Thyp is the map constructed in the proof of Lemma 11, 
+
+Upad is constructed above, and Fexp is the composition of the maps constructed in the proof of Lemma 13. Since all three components are bijections, Ψ is a bijection. It remains to verify that the cardinality threshold is separated correctly. If X ∈ A (H) has |X| = t, then each selected original hyperedge contributes either B or B + 1 hyperedges after replication, and the padding correction contributes at most three additional hyperedges. Hence 
+
+tB ≤ | Ψ(X)| ≤ t(B + 1) + 3.
+
+Set the target bound in the final instance to 
+
+bw = w(B + 1) + 3.
+
+If H has an even cover of size at most w, then H2 has an even cover of size at most bw. Conversely, suppose Y ∈ A (H2)and |Y| ≤ bw. Since Ψ is bijective, Y = Ψ (X) for a unique 
+
+X ∈ A (H). If |X| ≥ w + 1, then 
+
+|Y| ≥ (w + 1) B > w(B + 1) + 3 = bw,
+
+where the strict inequality follows from B > w + 3. This contradiction gives |X| ≤ w. Thus ( H, w) is a yes-instance of Min Even Cover if and only if ( H2, bw) is a yes-instance of the 3-uniform even-cover formulation, and hence, by Proposition 6, of M in Distance 3.The transformation is polynomial in the input size and preserves the parity structure through the explicit bijection 
+
+Ψ. Membership in NP is immediate by checking a proposed support. The standard certificate-based characterization of the parameterized version places the problem in W[1], and the same mapping-based reduction transfers the parameterized hardness. Therefore M in Distance 3 is NP-complete and W[1]-complete. □
+
+Theorem 14 identifies the exact point at which left regularity ceases to give an e ffi ciently solvable structure. The restriction to column weight three is not merely a sparse special case of the unrestricted problem; it already has enough parity structure to encode arbitrary even-cover instances. The replication step is essential: it ensures that the bijection between feasible supports also preserves the ordering of their cardinalities after the transformation. 
+
+B. Intractability of Left Degree at Least Three 
+
+We next lift the hardness of the 3-left regular case to every fixed left degree. For a target degree J > 3, the construction adds J − 3 global check nodes, each adjacent to all variable nodes. This raises every left degree from three to J while leaving the original local parity constraints intact. The only point to check is that the new global checks impose no additional restriction on trapping sets. In a 3-left regular graph, every trapping set has even cardinality: summing the even parity constraints over all check nodes counts exactly three incidences for each selected variable, so 3 |S | ≡ 0 (mod 2), and therefore |S | is even. 
+
+Theorem 15. For every fixed integer J ≥ 3, the problem 
+
+Min Trap J is NP -complete and W[1] -complete when param-eterized by the target set size w. 12 
+
+Proof. The case J = 3 is Theorem 14 under the Tanner-graph formulation. Assume J > 3, and let G = (L, R, E) be a 3-left regular Tanner graph. Construct G′ = (L′, R′, E′) by setting 
+
+L′ = L and 
+
+R′ = R ∪ { r∗
+
+> 1
+
+, . . . , r∗
+
+> J−3
+
+},
+
+where each global check node r∗ 
+
+> i
+
+is adjacent to all nodes of 
+
+L. The original edges are retained, and the new edges are precisely ( v, r∗ 
+
+> i
+
+) for v ∈ L and 1 ≤ i ≤ J − 3. The graph G′ is 
+
+J-left regular and is computable in polynomial time. We construct in this proof the map 
+
+ΓJ : A(G) −→ A (G′),
+
+ΓJ (S ) = S ,
+
+where A(G) and A(G′) denote the families of trapping sets in 
+
+G and G′, respectively. If S ∈ A (G), then all original check nodes remain even. Moreover, since G is 3-left regular, 3|S | =
+
+X
+
+> r∈R
+
+|NG(r) ∩ S | ≡ 0 (mod 2) ,
+
+so |S | is even. Each global check node is adjacent to exactly the nodes of S among the selected set and is therefore also even. Hence ΓJ (S ) ∈ A (G′). Conversely, define the inverse candidate 
+
+ΠJ : A(G′) −→ 2L,
+
+ΠJ (S ′) = S ′.
+
+If S ′ ∈ A (G′), then the parity constraints at all original check nodes r ∈ R are satisfied in G′. Since the neighborhoods of these original checks are unchanged, S ′ is a trapping set of 
+
+G. Thus ΠJ (S ′) ∈ A (G). Clearly ΠJ (ΓJ (S )) = S for every S ∈ A(G) and 
+
+ΓJ (ΠJ (S ′)) = S ′ for every S ′ ∈ A (G′). Therefore ΓJ is a bijection, with inverse ΠJ , and it preserves cardinality exactly. The minimum trapping set size and the target parameter w
+
+are unchanged. This gives a polynomial-time and parameter-preserving reduction from the 3-left regular case to the J-left regular case. Membership in NP and W[1] follows by the usual support-verification argument, completing the proof. □
+
+Together, Theorems 14 and 15 establish a sharp complexity boundary for left regular Tanner graphs. Column weights at most two admit polynomial-time algorithms, whereas every fixed column weight J ≥ 3 already yields NP-complete and W[1]-complete instances. Thus left regularity alone does not mitigate the intrinsic di ffi culty of minimum distance computation. This motivates the biregular setting considered next, where both variable node and check node degrees are simultaneously constrained. VI. B iregular Minimum Distance Problem 
+
+We now impose regularity on both sides of the Tanner graph. In matrix terms, this corresponds to parity-check matrices with constant column weight and constant row weight; in the hypergraph formulation, it corresponds to uniform regular incidence structures. This setting is central for LDPC codes since many standard ensembles and explicit constructions use fixed variable node and check node degrees to control local graph structure and iterative-decoding behavior. The low-degree regimes remain algorithmically benign. If every check node has degree one, each parity check forces its unique neighboring variable to be zero. If every check node has degree two, each parity check imposes an equality constraint between two variables, and the instance reduces to a graph of equality components. In that case, the minimum nonzero support can be found by identifying the smallest feasible component. Therefore, the first right-degree regime in which the hardness phenomena considered here can occur is K = 3. The goal of this section is to show that full biregularity does not restore tractability once both degrees are at least three. We first prove hardness for the base case (3 , 3). The proof starts from the 3-left regular case, uses the check node splitting map 
+
+Q constructed in the proof of Lemma 12, and then applies the replication maps Fv,m constructed in the proof of Lemma 13 to control the cardinality of auxiliary solutions. We then extend the parameterized hardness to arbitrary fixed degrees ( J, K)with J, K ≥ 3: the right degree is increased through high-girth auxiliary structures, and the left degree is increased by a replica-and-global-check construction. 
+
+A. Intractability of the (3 , 3) -Regular Case 
+
+The base case (3 , 3) requires simultaneous control of the two sides of the bipartition. Starting from the hardness of the 3-left regular case, we first reduce all check node degrees to at most three. This step preserves trapping sets through the prefix-parity map Q constructed in the proof of Lemma 12, but it may create auxiliary variable nodes of degree two. These degree imbalances are then repaired by duplicating the instance, coupling corresponding degree-two variables, and amplifying selected non-auxiliary variables so that no smaller trapping set can be supported primarily on the auxiliary structure. The remaining obstacle is the presence of check nodes of degree two. We remove them by taking su ffi ciently many dis-joint copies and attaching new degree-three variable gadgets to the degree-two checks. The number of copies and the length of the iterative construction are chosen so that every trapping set using the newly introduced su ffi x variables is necessarily larger than the relevant threshold. Therefore, minimum trapping sets in the final (3 , 3)-regular instance correspond to minimum trapping sets in the original instance. 
+
+Theorem 16. The problem Min Distance (3 ,3) is NP -complete and W[1] -complete when parameterized by the target set size w. Proof. We present a two-phase polynomial-time reduction from M in Trap 3. Let G = (L, R, E) be a 3-left regular instance. First, repeatedly delete any check node of degree one together with its unique neighboring variable node. Such a variable node cannot occur in any trapping set, so this preprocessing preserves the feasible supports after restriction to the remain-ing variables. We may therefore assume that every check node has degree at least two. 13 
+
+Apply the check node splitting procedure of Algorithm 2 to obtain a graph G1 = (L1, R1, E1) in which every check node has degree two or three. Let 
+
+Qsplit : A(G) −→ A (G1)be the bijection constructed in the proof of Lemma 12. Thus 
+
+Qsplit preserves all original variables and assigns the auxiliary variables by the prefix-parity rule specified in that proof. Its inverse is the projection S 1 7 → S 1 ∩ L.The splitting operation may introduce degree-two variable nodes. Let x1, . . . , xh be the degree-two variable nodes in G1.Take a disjoint copy bG1 of G1, and let bxi denote the copy of 
+
+xi. Add a new check node zi adjacent to xi and bxi for each 
+
+i. Denote the resulting graph by G2. The coupling checks zi
+
+enforce 
+
+1S 2 (xi) = 1S 2 (bxi), 1 ≤ i ≤ h
+
+for every trapping set S 2 of G2. In particular, the canonical duplication map 
+
+∆dup : A(G1) −→ A (G2),
+
+∆dup (S 1) = S 1 ∪ bS 1,
+
+constructed in the present proof, sends every trapping set of 
+
+G1 to a trapping set of G2 of twice the cardinality. We next amplify the non-auxiliary variables so that the auxiliary variables introduced by splitting cannot determine a smaller minimum solution. Let m0 be the number of auxiliary variables introduced by Algorithm 2, increased by one if necessary so that m0 is even. Apply Algorithm 3 to each non-auxiliary variable in G2 with the prescribed even replication parameter. Let 
+
+Φamp = Fvt ,mt ◦ · · · ◦ Fv1,m1
+
+be the resulting composition of replication maps, where every 
+
+Fv j,m j is the bijection constructed in the proof of Lemma 13. Since each component map is bijective, Φamp is a bijection between the trapping sets before and after the amplification step. Let G3 be the amplified graph and define the composite forward map 
+
+Θ B Φamp ◦ ∆dup ◦ Qsplit .
+
+Thus Θ maps every trapping set of the original graph G to a trapping set of G3.Let Y1 be a minimum trapping set of G3, and map it back by applying Φ−1amp , then projecting through the duplication gadget, and finally applying Q−1split . Denote the resulting trapping set in 
+
+G by X1. Suppose, for contradiction, that G contains a trapping set X2 with |X2| < |X1|; it is enough to consider the boundary case |X2| = |X1| − 1. By the definition of the amplification map, the canonical lift Θ(X2) has cardinality bounded above by (m0 + 1) |X2| + m0 = (m0 + 1) |X1| − 1.
+
+On the other hand, every trapping set in G3 whose inverse image in G is X1 has size at least ( m0 + 1) |X1|. Hence Θ(X2)would be strictly smaller than Y1, contradicting the minimality of Y1. Therefore the first phase preserves minimum solutions after the explicit composite mapping Θ.We now regularize the remaining check nodes of degree two. Reset notation and let G = (L, R, E) be a 3-left regular graph in which every check node has degree two or three. If all check nodes already have degree three, there is nothing to prove. Otherwise, let q be the number of degree-two check nodes. Choose the smallest integer c such that 3 | c and cq ≥
+
+3|L| + 3, and form c disjoint copies of G. Let h = cq be the number of degree-two checks across these copies. We iteratively eliminate the degree-two checks. At iteration 
+
+i, add a new variable node adjacent to all current degree-two checks and then split this high-degree variable node into degree-three su ffi x variables, introducing auxiliary check nodes of degree two as needed. The operation reduces the number of degree-two checks by three in each nonterminal iteration, and it stops when no degree-two check remains. Denote the resulting graph by G4. By construction, every variable node and every check node in G4 has degree three; see Fig. 7. It remains to exclude small trapping sets that use su ffi xvariables. In the first iteration, the parity constraints force all su ffi x variables created at that stage to be selected simulta-neously; there are cq − 2 such variables, which is larger than 
+
+|L|. For a later iteration k, if a trapping set contains a su ffi xvariable created at stage k, the adjacent parity constraints force the selection of at least one su ffi x variable from stage k − 1. Repeating this implication backward to stage zero yields at least 
+
+cq − 2 − 2k ≥ cq − 2 − 2cq 
+
+3 + 2 = cq 
+
+3 > |L|
+
+selected su ffi x variables. Thus any trapping set intersecting the su ffi x part has cardinality greater than |L|. Since an original trapping set can be embedded into one of the disjoint copies without selecting su ffi x variables, no minimum trapping set is created by the su ffi x construction. The final graph is (3 , 3)-regular and preserves the minimum trapping-set size up to the controlled scaling already accounted for in the first phase. The construction is polynomial, and membership in NP and W[1] follows from direct verification of a selected variable set. Hence M in Distance (3 ,3) is NP-complete and W[1]-complete. 
+
+□
+
+Theorem 16 shows that the smallest nontrivial biregular class already captures the hardness of the MDP. It serves as the base case for the general biregular classification. We next show that the parameterized hardness persists when either side degree is increased to any fixed value at least three. 
+
+B. Parameterized Intractability for Fixed Degrees J , K ≥ 3We first increase the right degree while keeping the left degree equal to three. The main di ffi culty is that increasing each check degree by one introduces auxiliary variables of small degree. To prevent these variables from forming unin-tended low-weight trapping sets, we embed them into a high-girth (2 , K)-regular auxiliary graph. Since trapping sets in 2-left regular graphs coincide with unions of cycles, su ffi ciently large girth rules out small auxiliary-supported solutions. After establishing hardness for (3 , K)-regular instances, we increase the left degree by a replica construction. Given a ( J −14 … 
+
+> …
+> …
+> …
+> …
+> …
+> …
+> …
+> …
+> …
+> …
+> …
+> …
+> Fig. 7. Second phase of the reduction in the proof of Theorem 16. Yellow nodes denote original check nodes of degree two, blue nodes denote variable nodes generated during the iterative construction, and red nodes denote auxiliary check nodes.
+
+1, K)-regular instance, we take K disjoint copies and connect corresponding variables across the copies through global check nodes of degree K. These global checks force every selected variable position to occur in an even number of copies. Thus a solution in the original instance can be lifted by selecting it in two copies, while every nonzero solution in the new instance projects to a nonzero solution in at least one original copy. This gives exact factor-two preservation of the optimum and completes the induction on J.
+
+Lemma 17 (Erd¨ os-Sachs-Sauer bound [18], [19]) . For any integers k ≥ 2 and g ≥ 3, if n ≥ 4 g−2P
+
+> t=1
+
+(k − 1) t, then there exists a k-regular graph on n nodes with girth at least g. 
+
+Lemma 18. For any 2-left regular Tanner graph, the cardi-nality of a minimum trapping set is exactly half of the graph girth. Proof. Let Z = (LZ , RZ , EZ ) be a 2-left regular Tanner graph with girth g, and let amin be the minimum trapping-set cardi-nality. Since Z is bipartite, g is even. For the upper bound, take a shortest cycle C of length g.The cycle alternates between LZ and RZ , and therefore contains exactly g/2 variable nodes. Let S be this set of variable nodes. Every check node on C has exactly two neighbors in S , and every check node outside C has zero neighbors in S . Hence 
+
+S is a trapping set and amin ≤ g/2. For the lower bound, let S ⊆ LZ be any nonempty trapping set and consider the subgraph induced by S ∪ N(S ). Every variable node has degree two in this induced subgraph, and ev-ery check node has even degree by the trapping-set condition. Thus all nodes in the induced subgraph have even degree, so the subgraph decomposes into edge-disjoint cycles. Each such cycle has length at least g and contains at least g/2 variable nodes. Therefore |S | ≥ g/2. Combining the two bounds gives 
+
+amin = g/2. □
+
+Lemma 18 is the mechanism that excludes spurious small solutions in the auxiliary part of the right-degree reduction. By choosing the auxiliary graph to have a girth at least 2( w + 1), every nonempty trapping set supported on that part has more than w variable nodes. Consequently, no solution of size at most w can use the auxiliary structure. 
+
+Theorem 19. For every fixed integer K ≥ 3, the problem 
+
+Min Distance (3 ,K) is W[1] -complete when parameterized by the target set size w. Proof. We use the trapping-set formulation of the minimum-distance problem given by Proposition 5. Thus it is enough to work with nonempty subsets of variable nodes that satisfy even parity at every check node. We prove the hardness part by induction on K. The case 
+
+K = 3 is exactly Theorem 16. Now fix K ≥ 4 and assume that Min Distance (3 ,K−1) is W[1]-hard when parameterized by the target size w. Let G = (L, R, E) be a (3 , K − 1)-regular Tanner graph, where R = {r1, . . . , rm}. The case m = 0 is trivial, so we assume m ≥ 1. We first raise the degree of every original check node from 
+
+K −1 to K. For each i ∈ [m], introduce a new auxiliary variable node xi and join xi to ri. Let X = {x1, . . . , xm}. After this operation, every check node in R has degree K, every original variable node in L still has degree 3, and every auxiliary variable node xi has degree 1. It remains to give each xi two additional incident check edges without creating a trapping set of size at most w supported on the auxiliary variables. We now construct a fixed auxiliary block. Put 
+
+g⋆ = max {3, w + 1}.15 
+
+Choose an integer n⋆ such that Kn ⋆ is even and 
+
+n⋆ ≥ 4
+
+> g⋆−2
+
+X
+
+> t=1
+
+(K − 1) t.
+
+By Lemma 17, there exists a simple K-regular graph H⋆ on 
+
+n⋆ vertices with girth at least g⋆. Since n⋆ depends only on the fixed integer K and on the parameter w, this constant-size graph can be found by exhaustive search; the existence supplied by Lemma 17 is su ffi cient for the reduction. Let Z⋆ = (A⋆, B⋆, E⋆) be the incidence Tanner graph of 
+
+H⋆: the check side B⋆ is the vertex set of H⋆, the variable side A⋆ is the edge set of H⋆, and a variable corresponding to an edge uv is adjacent to the two checks corresponding to 
+
+u and v. Then every variable node of Z⋆ has degree 2, every check node has degree K, and 
+
+|A⋆| = Kn ⋆
+
+2 .
+
+Set 
+
+N⋆ := |A⋆|.
+
+Moreover, the girth of Z⋆ is 
+
+g(Z⋆) ≥ 2g⋆ ≥ 2( w + 1) ,
+
+because every cycle in the incidence graph projects to a cycle in H⋆.We next take enough copies of the partially constructed instance so that the number of auxiliary variables is divisible by N⋆. Let 
+
+d = gcd( m, N⋆), c = N⋆
+
+d .
+
+Then c ≤ N⋆, so c is bounded by a function of K and w only, and cm is divisible by N⋆. Take c disjoint copies of the graph obtained from G after adding the auxiliary variables xi. For the 
+
+jth copy we write L( j) = {v( j) : v ∈ L}, R( j) = {r( j) 
+
+> i
+
+: 1 ≤ i ≤ m},
+
+and X( j) = {x( j) 
+
+> i
+
+: 1 ≤ i ≤ m}. Let 
+
+X◦ :=
+
+> c
+
+[
+
+> j=1
+
+X( j).
+
+Thus |X◦| = cm . Since N⋆ | cm , partition X◦ arbitrarily into 
+
+q := cm N⋆ sets B1, . . . , Bq of size N⋆.For each block Bℓ, place a fresh copy of the Tanner graph 
+
+Z⋆ by identifying its variable side A⋆ with Bℓ. Let Z2 denote the union of all new check nodes introduced in these copies of 
+
+Z⋆. Denote the final Tanner graph by G′ = (L′, R′, E′). Thus 
+
+L′ =
+
+
+
+> c
+
+[
+
+> j=1
+
+L( j)
+
+ ∪ X◦, R′ =
+
+
+
+> c
+
+[
+
+> j=1
+
+R( j)
+
+ ∪ Z2.
+
+We verify regularity. Each original copied variable v( j) has the same three incident checks as v had in G. Each auxiliary variable x( j) 
+
+> i
+
+is adjacent to the copied original check r( j) 
+
+> i
+
+and to two new checks in the corresponding copy of Z⋆, so it also has degree 3. Each copied original check r( j) 
+
+> i
+
+has its original 
+
+K − 1 copied neighbors together with the one new neighbor 
+
+x( j) 
+
+> i
+
+, so it has degree K. Finally, every new check in Z2 has degree K by the definition of Z⋆. Hence G′ is (3 , K)-regular. The construction is fixed-parameter computable. Indeed, the auxiliary block Z⋆ has size depending only on K and w,the number of copies satisfies c ≤ N⋆, and all remaining operations are disjoint copying and edge insertion. Hence the output size is bounded by f (K, w)|G| O(1) for some computable function f .We now prove the equivalence of the two instances with the same target parameter w.First suppose that G has a trapping set S ⊆ L with |S | ≤ w.Define 
+
+S (1) := {v(1) : v ∈ S } ⊆ L(1) .
+
+We claim that S (1) is a trapping set of G′. In the first copy, each check r(1)  
+
+> i
+
+sees exactly the same selected original variables as 
+
+ri sees in G, and the auxiliary variable x(1)  
+
+> i
+
+is not selected. Therefore the parity at r(1)  
+
+> i
+
+is even. In every other copied original check, no original variable is selected and no auxiliary variable is selected. Finally, every new check in Z2 is adjacent only to auxiliary variables, none of which is selected. Hence all check nodes of G′ have even parity on S (1) . Thus G′ has a trapping set of size at most w.Conversely, suppose that G′ has a trapping set T ⊆ L′ with 1 ≤ | T | ≤ w.
+
+We first show that T contains no auxiliary variable. Let 
+
+TX := T ∩ X◦.
+
+Every check node in Z2 is adjacent only to variables in X◦.Since T is a trapping set of G′, every check node in Z2 has an even number of neighbors in TX . Hence, if TX is nonempty, then TX is a nonempty trapping set in the disjoint union of the copies of Z⋆. This disjoint union is 2-left regular and has girth at least 2( w+1). By Lemma 18, every nonempty trapping set in this auxiliary graph has size at least w + 1. Therefore 
+
+|T | ≥ | TX | ≥ w + 1,
+
+contradicting |T | ≤ w. Hence 
+
+T ∩ X◦ = ∅.
+
+Since T is nonempty and contains no auxiliary variables, there exists some copy index j ∈ [c] such that 
+
+T ∩ L( j) , ∅.
+
+Define the projection of T onto the jth original copy by 
+
+π j(T ) : = {v ∈ L : v( j) ∈ T }.
+
+We claim that π j(T ) is a trapping set of G. Let ri ∈ R be any check node of G. In G′, the corresponding copied check 
+
+r( j) 
+
+> i
+
+is adjacent to the copied original neighbors of ri and to the auxiliary variable x( j) 
+
+> i
+
+. Since x( j) 
+
+> i
+
+< T , the parity condition at r( j) 
+
+> i
+
+says exactly that ri has an even number of neighbors in π j(T ). This holds for every i ∈ [m]. Therefore π j(T ) is a nonempty trapping set of G. Moreover, 
+
+|π j(T )| = |T ∩ L( j)| ≤ | T | ≤ w.
+
+Thus G has a trapping set of size at most w.16 
+
+We have proved (G, w) ∈ Min Distance (3 ,K−1) ⇐⇒ 
+
+(G′, w) ∈ Min Distance (3 ,K). The target parameter is unchanged, and the reduction is an FPT-reduction for fixed K. By the induction hypothesis, M in Distance (3 ,K) is W[1]-hard for every fixed K ≥ 3. Finally, membership in W[1] follows from the standard weighted-support formulation of the minimum-distance prob-lem: one guesses at most w variable nodes and verifies, using the bounded right degree K, that each parity check is satisfied. Therefore M in Distance (3 ,K) is W[1]-complete. □
+
+Theorem 19 establishes parameterized hardness for every fixed right degree once the left degree is three. It remains to propagate the result to larger left degrees. This step uses no high-girth gadget; instead, it relies on global parity checks across several copies of the instance. 
+
+Theorem 20. For fixed integers J, K ≥ 3, the problem 
+
+Min Distance (J,K) is W[1] -complete when parameterized by the target set size w. Proof. We induct on the left degree J. The base case J =
+
+3 is Theorem 19. Assume that M in Distance (J−1,K) is W[1]-complete, and let G = (L, R, E) be a ( J − 1, K)-regular instance with L = {v1, . . . , vn}.Construct K disjoint copies Gi = (Li, Ri, Ei) for i = 1, . . . , K,and write v(i) 
+
+> j
+
+for the copy of v j in Li. Add global check nodes 
+
+c1, . . . , cn, where each c j is adjacent to v(1)  
+
+> j
+
+, . . . , v(K) 
+
+> j
+
+. Denote the resulting graph by G′. Every copied variable gains exactly one new incident edge, so its degree becomes J; each original copied check still has degree K, and each global check has degree K. Thus G′ is ( J, K)-regular. This is the construction illustrated in Fig. 8. 1
+
+Define the lifting map constructed in the present proof by 
+
+ΛJ : A(G) −→ A (G′),
+
+ΛJ (S ) = {v(1)  
+
+> j
+
+: v j ∈ S } ∪ { v(2)  
+
+> j
+
+: v j ∈ S }.
+
+For local check nodes in the first two copies, the parity constraints are inherited from S ; all local check nodes in the remaining copies see no selected variables. Each global check 
+
+c j sees either two selected copies of v j or none. Hence ΛJ (S ) is a trapping set of G′ and |ΛJ (S )| = 2|S |. Therefore the optimum in G′ is at most twice the optimum in G.Conversely, let Y ∈ A (G′) be nonempty. For each copy define the projection 
+
+πi(Y) = {v j ∈ L : v(i) 
+
+> j
+
+∈ Y}, 1 ≤ i ≤ K.
+
+Each nonempty πi(Y) is a trapping set of G, since the local checks in copy i impose exactly the original parity constraints. Moreover, the global check c j enforces that the number of copies containing v j is even. Thus every selected variable position contributes to at least two copies. If Xmin is aminimum trapping set of G, then for any nonempty projection 
+
+πi(Y) we have |πi(Y)| ≥ | Xmin |, and the even-copy condition gives 
+
+|Y| ≥ 2|πi(Y)| ≥ 2|Xmin |.
+
+> 1The construction is analogous to the global-check component of GC-LDPC codes [20].
+
+Hence the optimum in G′ is at least twice the optimum in G.The optimum is therefore scaled by exactly a factor of two. For the decision problem, map the parameter w to 2 w. The transformation is polynomial and is an FPT-reduction for fixed 
+
+J and K. Membership in W[1] follows from the standard weighted-support formulation, completing the induction and the proof. □
+
+Combining Theorems 16 and 20, we obtain the biregular counterpart of the left regular hardness result. Polynomial-time behavior is confined to degenerate low-degree regimes, such as column weight at most two or row weight at most two. Once both sides have fixed degree at least three, biregularity does not simplify the MDP in the parameterized sense. Thus even highly structured regular LDPC Tanner graphs retain the intrinsic combinatorial hardness of finding low-weight nonzero codewords. VII. D iscussion 
+
+The intractability results established in this work have direct implications for the design and analysis of LDPC codes. Since minimum distance computation remains hard even under strong regularity constraints, practical code design cannot rely on exact minimum distance evaluation except for highly restricted families. A more viable approach is to combine heuristic search, provable lower bounds, and additional alge-braic or combinatorial structure. In particular, regular LDPC codes arising from finite geometries, incidence designs, or other highly symmetric constructions may contain exploitable features that are absent from arbitrary regular Tanner graphs. These results are also relevant to the error-floor phenomenon in iterative LDPC decoding. Low-weight codewords and small even-parity structures are among the principal contributors to high-SNR error floors. The hardness results proved here indicate that exhaustive identification of such structures is computationally prohibitive in general regular ensembles. Consequently, e ff ective error-floor analysis should emphasize structure-aware enumeration, probabilistic prediction, and mit-igation mechanisms that avoid solving the exact MDP as a subroutine. A central open direction is to determine whether the bireg-ular hardness results can be strengthened from parameterized hardness to full NP-completeness in the linear-hypergraph setting. This leads to the following problem.  
+
+> •
+
+Min Linear Even Cover (J,K): Given a J-uniform, K-regular, linear hypergraph H = (V, E) and an integer w > 0, decide whether there exists a nonempty set Y ⊆ E with |Y| ≤ w
+
+such that deg Y (v) ≡ 0 (mod 2) for every v ∈ V.
+
+Conjecture 21. For any fixed integers J , K ≥ 3, the problem 
+
+Min Linear Even Cover (J,K) is NP -complete and W[1] -complete when parameterized by the target set size w. 
+
+Resolving Conjecture 21 would complete the complexity classification of minimum distance computation for regular LDPC codes in the corresponding linear-hypergraph model. A natural proof strategy would proceed in two stages. First, 17 
+
+3-regular checks 3-regular checks 3-regular checks 
+
+Copies 
+
+· · · · · · · · · 
+
+· · · 
+
+Auxiliary checks    
+
+> Fig. 8. Schematic reduction from the (3 ,3)-regular case to the (4 ,3)-regular case using copies and global check nodes.
+
+one would need a linearity-preserving version of the reduction underlying Theorem 20; the main challenge is to transform a general J-uniform, K-regular hypergraph into a linear one while preserving even covers and their minimum cardinalities. The mapping perspective developed earlier suggests the correct form of such a transformation: it should admit an explicit bijection on feasible even covers, analogous to the map T
+
+constructed in the proof of Lemma 11. Hyperedge subdivision is a plausible mechanism for resolving multiple intersections, but it must be designed so that auxiliary vertices enforce deterministic parity propagation rather than introduce new small covers. Second, one would need an induction on the regularity parameter K that preserves linearity. The degree-increasing constructions in Theorem 19 and Theorem 20 show how global parity constraints can transfer hardness across regularity classes. However, a linear-hypergraph analog would require the corresponding solution maps to be explicit and invertible, in the same sense as the map Q constructed in the proof of Lemma 12 and the maps Fv,m constructed in the proof of Lemma 13. Establishing such maps while maintaining pairwise hyperedge intersections of size at most one appears to be the principal technical obstacle. VIII. C onclusion 
+
+This work provides a complexity-theoretic characterization of the MDP for regular LDPC codes. The main results are as follows: (i) For every fixed J ≥ 3, the MDP for J-left regular Tanner graphs is NP-complete and W[1]-complete; (ii) For (3 , K)-regular bipartite graphs with every fixed K ≥ 3, the problem is NP-complete and W[1]-complete; (iii) For ( J, K)-regular instances with every fixed J, K ≥ 3, the problem is W[1]-complete. The reductions are organized around a degree-preserving transformation framework consisting of hyperedge decompo-sition, check node splitting, and controlled variable replication. The key technical point is not merely that these transforma-tions preserve feasibility, but that their proofs construct explicit maps between solution spaces: the even-cover bijection T in Lemma 11, the trapping-set bijection Q in Lemma 12, and the replication bijections Fv,m in Lemma 13. These maps allow the subsequent reductions to track feasible supports and minimum-cardinality solutions through increasingly constrained graph classes. By unifying minimum distance, even covers, and trapping sets within a single parity-based framework, the paper clarifies why exact minimum distance computation remains in-trinsically di ffi cult for regular LDPC codes and why structural restrictions alone are insu ffi cient to eliminate this hardness. References                                     
+
+> [1] R. Gallager, “Low-density parity-check codes,” IRE Transactions on Information Theory , vol. 8, no. 1, pp. 21–28, 1962. [2] T. Richardson, “Error floors of ldpc codes,” in Proceedings of the An-nual Allerton Conference on Communication, Control, and Computing ,vol. 41, no. 3, 2003, pp. 1426–1435. [3] R. G. Downey, M. R. Fellows, A. Vardy, and G. Whittle, “The parametrized complexity of some fundamental problems in coding theory,” SIAM Journal on Computing , vol. 29, no. 2, pp. 545–570, 1999. [4] S. Arora, L. Babai, J. Stern, and Z. Sweedyk, “The hardness of approximate optima in lattices, codes, and systems of linear equations.”
+> J. Comput. Syst. Sci. , vol. 54, no. 2, pp. 317–331, 1997. 18
+
+[5] A. Vardy, “The intractability of computing the minimum distance of a code,” IEEE Transactions on Information Theory , vol. 43, no. 6, pp. 1757–1766, 1997. [6] U. Feige, Small Linear Dependencies for Binary Vectors of Low Weight .Berlin, Heidelberg: Springer Berlin Heidelberg, 2008, pp. 283–307. [7] J.-T. Hsieh, P. K. Kothari, and S. Mohanty, “A simple and sharper proof of the hypergraph moore bound,” in Proc. of the 2023 Annu. ACM-SIAM Symp. on Discrete Algorithms (SODA) . Philadelphia, PA, USA: SIAM, 2023, pp. 2324–2344. [8] E. Berlekamp, R. McEliece, and H. van Tilborg, “On the inherent intractability of certain coding problems (corresp.),” IEEE Transactions on Information Theory , vol. 24, no. 3, pp. 384–386, 1978. [9] I. Dumer, D. Micciancio, and M. Sudan, “Hardness of approximating the minimum distance of a linear code,” IEEE Transactions on Information Theory , vol. 49, no. 1, pp. 22–37, 2003. [10] A. Dehghan and A. H. Banihashemi, “Hardness results on finding leafless elementary trapping sets and elementary absorbing sets of ldpc codes,” IEEE Transactions on Information Theory , vol. 65, no. 7, pp. 4307–4315, 2019. [11] ——, “On finding bipartite graphs with a small number of short cycles and large girth,” IEEE Transactions on Information Theory , vol. 66, no. 10, pp. 6024–6036, 2020. [12] A. Bhattacharyya, E. Bonnet, L. Egri, S. Ghoshal, K. C. S., B. Lin, P. Manurangsi, and D. Marx, “Parameterized intractability of even set and shortest vector problem,” J. ACM , vol. 68, no. 3, Mar. 2021. [13] J.-T. Hsieh, P. K. Kothari, S. Mohanty, D. M. Correia, and B. Sudakov, “Small even covers, locally decodable codes and restricted subgraphs of edge-colored kikuchi graphs,” International Mathematics Research Notices , vol. 2025, no. 5, p. rnaf045, 03 2025. [14] M. R. Garey and D. S. Johnson, Computers and Intractability: A Guide to the Theory of NP-Completeness (Series of Books in the Mathematical Sciences) , first edition ed. W. H. Freeman, 1979. [15] M. G. J¨ org Flum, Parameterized complexity , first edition ed. Springer Berlin, Heidelberg, 2006. [16] R. G. Downey and M. R. Fellows, Fundamentals of parameterized complexity , first edition ed. Springer London, 2013. [17] E. D. Demaine, W. Gasarch, and M. Hajiaghayi, Computational In-tractability: A Guide to Algorithmic Lower Bounds . MIT Press, 2026. [18] P. Erd¨ os and H. Sachs, “Regul¨ are graphen gegebener taillenweite mit minimaler knotenzahl (in german),” Wiss. Z. Martin-Luther-Univ. Halle-Wittenberg Math.-Natur. Reihe , vol. 12, pp. 251–257, 1963. [19] N. Sauer, “On the existence of regular n-graphs with given girth,” 
+
+Journal of Combinatorial Theory, Series A , vol. 9, pp. 144–147, 1970. [20] J. Li, S. Lin, K. Abdel-Gha ff ar, W. E. Ryan, and D. J. Costello, “Globally coupled ldpc codes,” in 2016 Information Theory and Applications Workshop (ITA) , 2016, pp. 1–10. 
+
+Chenyuan Jia received the B.Sc. degree in mathematics from Ocean Uni-versity of China, in 2024. He is currently pursuing the Ph.D. degree in mathematics with the School of Mathematics, Shandong University, China. His research interests include coding theory, combinatorial optimization and computational complexity theory. 
+
+Qingqing Peng received the B.Sc. degree in mathematics from Shaanxi University of Science & Technology, China, in 2021. She is currently pursuing the Ph.D. degree in mathematics with the School of Mathematics, Shandong University, China. Her research interests include coding theory. 
+
+Ke Liu received the B.Sc. degree in mathematics from Ocean University of China, and the Ph.D. degree from Tsinghua University, China, in 2017 and 2021, respectively. He joined Huawei Technologies Company Ltd. in 2021. His research interests include coding theory and graph theory and its applications. 
+
+Guanghui Wang received the B.S. degree in mathematics from Shandong University, China, and the Ph.D. degree from the Universit´ e Paris-Sud, France, in 2001 and 2007, respectively. He is currently a Professor with the School of Mathematics, Shandong University, Shandong, China. His research interests include applied mathematics and their applications. 
+
+Guiying Yan received the B.S., M.S., and Ph.D. degrees in mathematics from Shandong University. She is currently a Professor with the Academy of Math-ematics and Systems Science, Chinese Academy of Sciences, Beijing, China. Her research interests include applied mathematics and their applications.

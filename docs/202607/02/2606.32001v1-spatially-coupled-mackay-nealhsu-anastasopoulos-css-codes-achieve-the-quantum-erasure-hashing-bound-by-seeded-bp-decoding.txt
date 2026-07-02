@@ -1,0 +1,1602 @@
+Title: Spatially Coupled MacKay-Neal/Hsu-Anastasopoulos CSS Codes Achieve the Quantum-Erasure Hashing Bound by Seeded BP Decoding
+
+URL Source: https://arxiv.org/pdf/2606.32001v1
+
+Published Time: Wed, 01 Jul 2026 01:39:30 GMT
+
+Number of Pages: 29
+
+Markdown Content:
+# Spatially Coupled MacKay–Neal/Hsu–Anastasopoulos CSS Codes Achieve the Quantum-Erasure Hashing Bound by Seeded BP Decoding 
+
+Kenta Kasai Institute of Science Tokyo 
+
+kenta@ict.eng.isct.ac.jp 
+
+Abstract 
+
+In classical sparse-graph coding, spatial coupling is a mechanism by which belief-propagation (BP) decoding attains the maximum-a-posteriori (MAP) or area-threshold performance of the uncoupled system. Since MacKay–Neal/Hsu–Anastasopoulos (MN/HA) punctured sparse en-sembles achieve capacity under MAP decoding, it is natural to ask whether spatially coupled MN/HA-type Calderbank–Shor–Steane (CSS) codes can reach the hashing bound on the quan-tum erasure channel under seeded BP decoding. We answer this question at the density evo-lution (DE) level for hard-erasure CSS decoding. On an erased coordinate, the two binary Pauli components remain unresolved, equivalently the erased qubit is represented by the four Pauli possibilities. We first define the CSS ensemble through sparse punctured matrices and the corresponding dense parity-check matrices. For fixed finite Z-side, X-side, and check degrees, we then derive a five-message uncoupled DE recursion, decompose it into Z-side and X-side constituent systems, and define the two constituent potentials. Applying the coupled-vector potential method to the two constituents separately proves that seeded BP decoding on the resulting finite-degree factor graphs reaches the smaller of the Z-side degree ratio and the X-side complementary degree ratio. In the X/Z equal-rate specialization, where the Z-side and X-side constituent design rates are equal, this BP threshold is the hashing-bound channel parameter determined by the design rate. Thus the paper gives a DE-level proof that seeded BP decod-ing with finite-degree factor graphs achieves the hashing bound for the X/Z equal-rate family. Finite-length BP concentration, block-error convergence, and a finite-code realization of the ideal DE seed are separate questions. 
+
+# 1 Introduction 
+
+Calderbank–Shor–Steane (CSS) codes are a standard way to build quantum stabilizer codes from an orthogonality relation between two classical linear codes [1, 2]. On the classical side, low-density parity-check (LDPC) codes make local graph-based decoding possible [3, 4]. The MacKay–Neal (MN) and Hsu–Anastasopoulos (HA) ensembles use punctured sparse representations to obtain bounded-degree graphical constructions with capacity-oriented decoding properties [5, 6]. Quantum LDPC code construction has developed in parallel with the classical sparse-graph coding literature. Hypergraph-product codes gave positive-rate quantum LDPC families with dis-tance proportional to the square root of the block length [7], and lifted-product constructions later gave asymptotically good quantum LDPC codes [8]. Spatial coupling has also been studied di-rectly for quantum LDPC codes, including spatially coupled quasi-cyclic quantum LDPC codes, entanglement-assisted spatially coupled quantum LDPC codes, and algebraic spatially coupled quantum LDPC constructions [9, 10, 11]. These construction results motivate decoding analyses 1
+
+> arXiv:2606.32001v1 [quant-ph] 30 Jun 2026
+
+for CSS codes, but they do not by themselves provide a density-evolution (DE) theorem for the punctured MN/HA representation considered here. Before the terminology of spatial coupling became standard, the same construction principle appeared in the study of low-density parity-check (LDPC) convolutional codes: periodic low-density convolutional parity-check matrices were introduced in [12], and terminated LDPC convolutional ensembles were shown by density evolution to have belief-propagation (BP) thresholds close to capacity in [13, 14]. Protograph-based LDPC convolutional and spatially coupled LDPC ensembles were then developed as a structured design framework with distance and threshold analysis [15, 16]. Spatial coupling was also formulated in the classical LDPC setting as a method that lets BP decoding attain the maximum-a-posteriori (MAP) or area-threshold performance of the uncoupled system [17]. The vector-potential method extends the same proof strategy to DE systems with multiple message types [18]. For MN/HA-type ensembles, prior work proceeds from threshold improvement and asymptotic analysis on the binary erasure channel (BEC), to capacity-achieving bounded-degree cases, to symmetric-information-rate (SIR) achievability over generalized erasure channels (GECs) [19, 20, 21, 22, 23]. Thus, from the classical viewpoint, the natural expectation is that spatial coupling should expose the MAP performance of MN/HA-type systems to BP decoding. This expectation has a direct CSS analogue. If the Z-side and X-side MN/HA constituents have MAP thresholds matching their respective capacity or area limits, then using those constituents in a CSS sparse representation suggests that spatial coupling should make seeded BP decoding reach the quantum-erasure hashing-bound parameter. The point is not that the conclusion follows automatically from the classical results: the erased quantum coordinate couples the two Pauli components and produces the five-message recursion studied below. The role of this paper is to prove the corresponding threshold-saturation statement for that recursion. The finite-degree CSS construction in [24] uses MN/HA-type punctured sparse representations as nested structures for building CSS pairs. Its minimum-distance result is an existence statement for the finite random code ensemble: with suitable finite degrees, the resulting CSS codes have positive relative minimum distance, and the achievable rate–distance tradeoff reaches the quantum Gilbert–Varshamov benchmark. This distance statement controls the code family itself, but it does not specify an iterative erasure decoder or its threshold. This paper isolates the hard-erasure decoding problem associated with the same sparse representation over the quantum erasure channel. On erased coordinates, the two Pauli components remain unresolved, so the Z-side and X-side sparse decoding problems are described by a five-message recursion driven by the same erasure probability. The contribution of this paper is to formulate and prove the MN/HA spatial-coupling potential analysis for that five-message recursion. We state the uncoupled recursion, decompose it into two constituent recursions, express the hashing bound by a degree-of-freedom count, and prove saturation of seeded spatial coupling as a deterministic DE statement. 
+
+# 2 Sparse CSS Erasure Models 
+
+This section first fixes the CSS notation and the quantum-erasure decoding model, and then defines the ensemble through punctured sparse representations. We begin by briefly reviewing the finite-degree CSS construction of [24], keeping only the notation needed for the later decoding analysis. All vectors are column vectors, and 0 denotes the zero column vector of the context-dependent length. We write Row( M ) for the row span of M , represented as a subspace of column vectors. Start from a general CSS code specified by two binary check matrices 
+
+HX ∈ FmX ×N 
+
+> 2
+
+, HZ ∈ FmZ ×N 
+
+> 2
+
+, HX HTZ = 0.
+
+2Rows of HX are interpreted as X-type stabilizers, and rows of HZ as Z-type stabilizers. Write a binary Pauli error as (eX , eZ ) ∈ FN 
+
+> 2
+
+× FN 
+
+> 2
+
+. The measured syndromes are 
+
+σX = HX eZ , σZ = HZ eX .
+
+The decoder is given the erasure state S = ( S1, . . . , S N ). If Si = 0 , the coordinate is known and 
+
+(eX,i , e Z,i ) = (0 , 0) . If Si = 1 , the erased coordinate leaves eX,i and eZ,i unresolved; equivalently, the erased qubit is represented by the four possibilities I, X, Y, Z . Quantum-erasure decoding has been studied for surface codes, color codes, hypergraph product codes, and more general quantum LDPC codes using linear-time maximum-likelihood decoding, trimming, fast erasure decoding, belief propagation with guided decimation, cluster decomposition, degeneracy-aware BP, stabilizer-assisted inactivation, and quantum Maxwell erasure decoding [25, 26, 27, 28, 29, 30, 31, 32]. The deterministic density-evolution recursion associated with this model is introduced in Section 3. The decoding objective is to recover an estimate (̂eX ,̂ eZ ) from (σX , σZ ) and S with the same syndrome, such that the residual is CSS-stabilizer equivalent to the true error: ̂
+
+eX + eX ∈ Row( HX ),̂ eZ + eZ ∈ Row( HZ ).
+
+For a hard-erasure decoder in these models, the basic state is whether the relevant visible component has been resolved or remains unknown. Here and throughout the paper, a visible component means an unpunctured component that remains as a physical CSS coordinate, in contrast to the hidden auxiliary components that are punctured in the sparse representation. The next definitions fix the random matrix ensembles used in the sparse representation. We state both the uncoupled and tail-biting spatially coupled versions so that the finite ensembles are specified independently of any decoding dynamics. 
+
+Definition 1 ((j, k, M )-regular random matrix) . Let j, k, M be positive integers such that k divides 
+
+jM , and put m = jM/k . A (j, k, M )-regular random matrix is a binary matrix 
+
+A ∈ Fm×M
+
+> 2
+
+drawn uniformly from the set of matrices with every column of weight j and every row of weight 
+
+k. Equivalently, it is the regular specialization of the standard socket ensemble LDPC(Λ , P ) in [4, Def. 3.15], with M variable nodes of degree j and m check nodes of degree k, conditioned on having no parallel edges. □
+
+This first ensemble is the uncoupled building block. The next definition records the corre-sponding tail-biting coupled block matrix. It is the exact-socket version of the (ℓ, r, L, w ) spatially coupled ensemble in [17, Sec. II-C]. 
+
+Definition 2 ((j, k, M, L, w )-spatially coupled regular random matrix) . Let j, k, M, L, w be positive integers such that k | jM and w | jM , and put m = jM/k . A (j, k, M, L, w )-spatially coupled regular random matrix is a tail-biting binary matrix 
+
+ASC ∈ FLm ×LM 
+
+> 2
+
+with variable sections i ∈ Z/L Z, each containing M columns, and check sections c ∈ Z/L Z, each containing m rows. In each variable section, partition the jM variable sockets into w groups of size jM/w , indexed by offsets s = 0 , . . . , w − 1. In each check section, partition the km = jM 
+
+check sockets into w groups of the same size. For every section i and offset s, match uniformly the 
+
+s-th variable-socket group of section i to the s-th check-socket group of section i + s modulo L,conditioned on simplicity. The resulting matrix has column weight j, row weight k, and nonzero blocks only between variable section i and check sections i, . . . , i + w − 1 modulo L. □
+
+3The following ensemble builds the visible CSS pair from an MN/HA-type sparse representa-tion with punctured auxiliary coordinates. The extended matrices are sparse and define the local constraints of the representation. The visible-coordinate matrices HX , H Z , however, are generally dense after puncturing. 
+
+Definition 3 (Nested regular ensemble through punctured sparse representations) . Fix integers 
+
+jZ , j X , k with 1 ≤ jZ < j X < k . Let N be a block parameter chosen so that the row counts below are integral. Draw a (jZ , k, N )-regular random matrix 
+
+AZ ∈ FmZ ×N 
+
+> 2
+
+, mZ = jZ
+
+k N, 
+
+in the sense of Definition 1. Independently draw a (jX − jZ , k, N )-regular random matrix 
+
+A∆ ∈ Fm∆×N 
+
+> 2
+
+, m∆ = jX − jZ
+
+k N, 
+
+and set 
+
+AX =
+
+> [
+
+AZ
+
+A∆
+
+> ]
+
+.
+
+Then Row( AZ ) ⊆ Row( AX ), AX ∈ FmX ×N 
+
+> 2
+
+, mX = mZ + m∆ = ( jX /k )N , and each column of AX
+
+has weight jX . Finally draw a (k, k, N )-regular random matrix 
+
+B ∈ FN ×N
+
+> 2
+
+in the sense of Definition 1. The rightmost N coordinates are the visible variable v ∈ FN 
+
+> 2
+
+, and the left block consists of hidden variables that are punctured. As in [24], define the extended sparse parity-check matrices 
+
+H′ 
+
+> Z
+
+=
+
+> [
+
+AZ 0
+
+B IN
+
+> ]
+
+, H′ 
+
+> X
+
+=
+
+> [
+
+ATX BT ]
+
+. (1) The left hidden variable is u ∈ FN 
+
+> 2
+
+for H′ 
+
+> Z
+
+and w ∈ FmX 
+
+> 2
+
+for H′ 
+
+> X
+
+. The visible codes are obtained by puncturing the left hidden-variable part of the kernels: 
+
+CZ = {v ∈ FN 
+
+> 2
+
+: ∃ u ∈ FN 
+
+> 2
+
+, H ′
+
+> Z
+> [
+
+uv
+
+> ]
+
+= 0},CX = {v ∈ FN 
+
+> 2
+
+: ∃ w ∈ FmX 
+
+> 2
+
+, H ′
+
+> X
+> [
+
+wv
+
+> ]
+
+= 0}.
+
+(2) Equivalently, 
+
+CZ = B(Ker AZ ), CX = {v ∈ FN 
+
+> 2
+
+: BT v ∈ Row( AX )}.
+
+□
+
+A tail-biting spatially coupled sparse representation is obtained by applying Definition 2 to each construction matrix. The next definition specifies only the finite sparse representation. The seeded boundary condition is a separate DE object defined in Definition 7 and applied in Theorem 9. 4Definition 4 (Spatially coupled punctured sparse representation) . Fix positive integers 
+
+jZ , k Z , j ∆, k ∆, k B , M, L, w . Assume that 
+
+kZ | jZ M, k∆ | j∆M, w | jZ M, w | j∆M, w | kB M. 
+
+Put 
+
+n = LM, mZ = jZ MkZ
+
+, m∆ = j∆Mk∆
+
+, mX = mZ + m∆.
+
+Draw independently 
+
+ASC  
+
+> Z
+
+∼ (jZ , k Z , M, L, w ), ASC ∆ ∼ (j∆, k ∆, M, L, w ), BSC ∼ (kB , k B , M, L, w ),
+
+in the sense of Definition 2, and set 
+
+ASC  
+
+> X
+
+=
+
+[
+
+ASC 
+
+> Z
+
+ASC ∆
+
+]
+
+∈ FLm X ×n 
+
+> 2
+
+.
+
+The spatially coupled extended sparse matrices are 
+
+H′SC  
+
+> Z
+
+=
+
+[
+
+ASC  
+
+> Z
+
+0
+
+BSC In
+
+]
+
+∈ FL(mZ +M )×2n 
+
+> 2
+
+, H′SC  
+
+> X
+
+=
+
+[
+
+(ASC  
+
+> X
+
+)T (BSC )T ]
+
+∈ Fn×L(mX +M )2 . (3) The associated visible codes are obtained by puncturing the hidden coordinates: 
+
+CSC  
+
+> Z
+
+= {v ∈ Fn 
+
+> 2
+
+: ∃ u ∈ Fn 
+
+> 2
+
+, H ′SC 
+
+> Z
+
+[
+
+uv
+
+]
+
+= 0},CSC  
+
+> X
+
+= {v ∈ Fn 
+
+> 2
+
+: ∃ w ∈ FLm X 
+
+> 2
+
+, H ′SC 
+
+> X
+
+[
+
+wv
+
+]
+
+= 0}.
+
+This is a tail-biting finite ensemble. The deterministic seed used in Theorem 9 is an additional DE boundary condition and is not part of (3). The degree notation used in the DE sections is the special case kZ = k∆ = kB = k and j∆ = jX − jZ . □
+
+The definition above fixes the graph ensemble before any decoding dynamics are introduced. The following table only summarizes the block sizes and degrees so that the nested construction can be read without unpacking the whole definition each time. 
+
+Table 1 Construction matrices and degrees. Here mZ = ( jZ /k )N , m∆ = (( jX − jZ )/k )N , and mX = ( jX /k )N .Matrix Size Degree Comment 
+
+AZ mZ × N (jZ , k )-regular Gives the Z-side A-check (5). 
+
+A∆ m∆ × N (jX − jZ , k )-regular Additional row block in AX .
+
+AX = [ AZ ; A∆] mX × N (jX , k )-regular Appears as ATX in the X-side check (7). 
+
+B N × N (k, k )-regular Appears in the Z-side B-check (6) and the X-side check (7). 
+
+H′ 
+
+> Z
+
+(mZ + N ) × 2N – Z-side extended sparse matrix. 
+
+H′ 
+
+> X
+
+N × (mX + N ) – X-side extended sparse matrix. 
+
+HX ρX × N Generally dense Dense visible-coordinate row basis with Row( HX ) = C⊥ 
+
+> X
+
+.
+
+HZ ρZ × N Generally dense Dense visible-coordinate row basis with Row( HZ ) = C⊥ 
+
+> Z
+
+.
+
+5The next proposition checks that the visible codes obtained from the punctured sparse repre-sentation satisfy the CSS orthogonality condition. The DE is written on the sparse representation, but this step fixes its relation to the usual dense visible-coordinate parity-check matrices. 
+
+Proposition 1 (Dense parity-check matrices) . The visible codes of Definition 3 satisfy C⊥ 
+
+> Z
+
+⊆ CX .Hence CX , C Z define a CSS pair. The corresponding dense visible-coordinate parity-check matrices 
+
+HX , H Z are any row-basis matrices satisfying 
+
+Row( HX ) = C⊥ 
+
+> X
+
+, Row( HZ ) = C⊥ 
+
+> Z
+
+. (4) Since Row( HZ ) = C⊥ 
+
+> Z
+
+⊆ CX = (Row( HX )) ⊥, every row of HZ is orthogonal to every row of HX ,and hence 
+
+HX HTZ = 0.
+
+More explicitly, if KX is a row-basis matrix of Ker AX , one may take 
+
+HX = KX BT .
+
+One then replaces KX BT by a row basis of the same row space. Also 
+
+Row( HZ ) = {v ∈ FN 
+
+> 2
+
+: ∃ x ∈ FmZ 
+
+> 2
+
+, A TZ x + BT v = 0},
+
+which is obtained by taking the kernel of [ATZ BT ], splitting hidden and visible coordinates, and projecting to the visible block. In general, these compressed matrices HX , H Z are dense. □
+
+Proof. We have 
+
+C⊥ 
+
+> Z
+
+= {v ∈ FN 
+
+> 2
+
+: BT v ∈ (Ker AZ )⊥ = Row( AZ )}.
+
+Since Row( AZ ) ⊆ Row( AX ), this gives C⊥ 
+
+> Z
+
+⊆ { v : BT v ∈ Row( AX )} = CX . This is the orthogonal-ity stated above. Moreover, CX = {v : KX BT v = 0}, so the row space of KX BT is the parity-check row space of CX . The expression for HZ is exactly the displayed expression for C⊥ 
+
+> Z
+
+.The bitmaps in Figures 1 and 2 reproduce the extended sparse matrices H′ 
+
+> Z
+
+, H ′ 
+
+> X
+
+and the com-pressed visible-coordinate matrices HZ , H X from the finite example in [24]. They are included here to show the consequence of Proposition 1: after puncturing the hidden variables, the actual visible parity-check matrices need not retain the sparsity of the extended matrices H′ 
+
+> Z
+
+, H ′ 
+
+> X
+
+in (1). The example uses the notation of [24], with (jZ , k Z , j ∆, k ∆, k ) = (3 , 8, 2, 8, 2) , n = 40 , mZ = 15 ,
+
+m∆ = 10 , and mX = 25 . The finite-instance parameters are summarized in Table 2. Figure 3 shows one small tail-biting spatially coupled realization of (3). The example uses 
+
+L = 20 , w = 2 , M = 8 ,
+
+ASC  
+
+> Z
+
+∼ (3 , 8, 8, 20 , 2) , ASC ∆ ∼ (2 , 8, 8, 20 , 2) , BSC ∼ (2 , 2, 8, 20 , 2) .
+
+The two bitmaps display only the sparse extended matrices; the dense visible matrices obtained after puncturing are different objects. For the same realization, Figure 4 displays dense visible-coordinate row bases obtained af-ter puncturing the hidden coordinates. The Z-side matrix is obtained by projecting a basis of 
+
+Ker[( ASC  
+
+> Z
+
+)T (BSC )T ] to the visible block, and the X-side matrix is KX (BSC )T , where KX is a basis matrix of Ker ASC  
+
+> X
+
+. This finite example illustrates that the sparse matrices in Figure 3 represent a generally dense visible-coordinate CSS pair. 6Figure 1: Extended sparse parity-check matrices reproduced from [24]. The upper bitmap is the Z-side matrix H′ 
+
+> Z
+
+∈ F55 ×80 2 , with blocks AZ , B, and In. The lower bitmap is the X-side matrix 
+
+H′ 
+
+> X
+
+= [ ATX BT ] = [ ATZ AT 
+
+> ∆
+
+BT ] ∈ F40 ×65 2 . The two bitmaps are shown with the same column scale and right alignment, so the rightmost visible-coordinate blocks, both of width 40, have matching horizontal extent. Black lines indicate block boundaries. 7Figure 2: Compressed visible-coordinate parity-check matrices reproduced from [24]. The upper bitmap is the Z-side matrix HZ ∈ F16 ×40 2 , obtained by projecting a basis of Ker[ ATZ BT ] to the visible component. The lower bitmap is the X-side matrix HX = KX BT ∈ F15 ×40 2 , where KX is a basis matrix of Ker AX . No final reduced row echelon form is applied in the displayed representatives. The two bitmaps are shown with the same horizontal scale because both matrices have 40 visible-coordinate columns. 8Figure 3: A tail-biting spatially coupled sparse-matrix realization. The upper bitmap is H′SC  
+
+> Z
+
+, with 
+
+ASC  
+
+> Z
+
+in blue, BSC in light blue, and In in yellow. The lower bitmap is H′SC  
+
+> X
+
+= [( ASC  
+
+> X
+
+)T (BSC )T ], with 
+
+(ASC  
+
+> Z
+
+)T in blue, (ASC ∆ )T in purple, and (BSC )T in light blue. The two bitmaps are right-aligned and scaled so that the visible, unpunctured n-coordinate blocks have the same physical width. Thin gray lines mark section boundaries; thick lines mark block boundaries. 9Figure 4: Dense visible-coordinate parity-check row bases corresponding to the tail-biting realiza-tion in Figure 3. The upper bitmap is the Z-side matrix HZ ∈ F61 ×160 2 . The lower bitmap is the X-side matrix HX ∈ F60 ×160 2 . Both matrices are displayed on the same horizontal scale because they have the same n = 160 visible coordinates. 10 Table 2: Parameters of the finite CSS instance displayed in Figures 1 and 2. The design dimension is the value predicted from the sparse block sizes, while the actual dimension is computed from the displayed visible row bases. 
+
+Quantity Value Meaning Degree tuple (jZ , k Z , j ∆, k ∆, k ) =(3 , 8, 2, 8, 2) 
+
+AZ is (3 , 8) -regular, A∆ is (2 , 8) -regular, and B is (2 , 2) -regular. Visible length n = 40 Number of physical visible coordi-nates. Sparse block row counts (mZ , m ∆, m X ) =(15 , 10 , 25) 
+
+Here mX = mZ + m∆.Extended matrices H′ 
+
+> Z
+
+∈ F55 ×80 2 , H′ 
+
+> X
+
+∈ F40 ×65 2 Matrices shown in Figure 1. Visible row bases HZ ∈ F16 ×40 2 , HX ∈ F15 ×40 2 Matrices shown in Figure 2. Design CSS dimension and rate Kdes  
+
+> Q
+
+= 10 , Rdes  
+
+> Q
+
+= 1 /4 Computed from n−(n−mX )−mZ =
+
+mX − mZ = 25 − 15 .Displayed CSS dimension and rate 
+
+KQ = 9 , RQ = 9 /40 Computed as n − rank HX −
+
+rank HZ = 40 − 15 − 16 .
+
+For the DE below, the dense syndrome equations are represented as sparse affine systems after fixed syndrome representatives tZ , tX have been chosen. The Z-side A-check (5) is 
+
+AZ fZ = 0 (5) and the Z-side B-check (6) is 
+
+eX = tZ + BfZ . (6) This is the sparse representation of the dense syndrome equation involving HZ eX . The X-side sparse equations use the stacked matrix and transpose form 
+
+BT eZ = tX + ATX gX . (7) This is the sparse representation of the dense syndrome equation involving HX eZ . We call (5) a Z-side A-check, (6) a Z-side B-check, and the constraint in (7) an X-side check. The constant offsets tZ , tX change only the recovered bit values; they do not change whether an erasure message is known or unresolved. The next proposition computes the design rate of the sparse representation and the hashing-bound channel parameter that is compared with the potential threshold in Section 7. A quantum erasure leaves two unknown binary Pauli degrees of freedom per erased coordinate. The calculation is the degree-of-freedom form of the erasure hashing/capacity expression in [33]. 
+
+Proposition 2 (Design rate and hashing-bound parameter) . For the finite-degree ensemble of Definition 3 with common check degree k, the constituent design rates are 
+
+Rdes  
+
+> Z
+
+= 1 − jZ
+
+k , Rdes  
+
+> X
+
+= jX
+
+k ,
+
+and the CSS design rate is 
+
+Rdes  
+
+> Q
+
+= jX − jZ
+
+k .
+
+The X/Z equal-rate specialization is the case Rdes  
+
+> Z
+
+= Rdes  
+
+> X
+
+, equivalently jX = k − jZ . It has 
+
+Rdes  
+
+> Q
+
+= 1 − 2jZ
+
+k .
+
+11 Equivalently, for a target design rate 0 < ρ < 1, any k such that 
+
+jZ = 1 − ρ
+
+2 k, jX = 1 + ρ
+
+2 k
+
+are integers gives an X/Z equal-rate degree triple with Rdes  
+
+> Q
+
+= ρ. A purely integral parametrization is 
+
+(jZ , j X , k ) = ( j, j + λ, 2j + λ), Rdes  
+
+> Q
+
+= λ
+
+2j + λ , j ≥ 2, λ ≥ 1.
+
+For the quantum erasure channel, an erased coordinate leaves two unknown binary Pauli compo-nents, and the hashing-bound channel parameter is 
+
+ϵhash = 1 − Rdes 
+
+> Q
+
+2 .
+
+In the rate-1/3 example (jZ , j X , k ) = (4 , 8, 12) ,
+
+ϵhash = 1 /3.
+
+□
+
+Proof. The Z-side visible constituent has N punctured variables and mZ = ( jZ /k )N sparse con-straints, giving Rdes  
+
+> Z
+
+= 1 − jZ /k . The X-side visible constituent has design dimension mZ + m∆ =(jX /k )N , giving Rdes  
+
+> X
+
+= jX /k . The CSS design rate is Rdes  
+
+> Z
+
++ Rdes  
+
+> X
+
+− 1 = ( jX − jZ )/k . For the quantum erasure channel, each erased coordinate contributes two unresolved binary degrees of freedom, so the conditional degree-of-freedom density is 2ϵ. The hashing-bound condition is 
+
+2ϵ = 1 − Rdes  
+
+> Q
+
+.
+
+# 3 Density Evolution for CSS Erasure Decoding 
+
+The ensembles in Section 2 are finite random sparse-graph ensembles for each block length. The following standard density-evolution limit gives the asymptotic meaning of the deterministic recur-sions used in this section. 
+
+Theorem 1 (Density-evolution limit for local erasure decoding) . Fix the degrees of the sparse CSS ensemble in Definition 3, an erasure probability ϵ, and a finite number ℓ of BP iterations. As 
+
+N → ∞ , the depth-ℓ computation neighborhood of a uniformly chosen edge of each message type is tree-like with probability tending to one. Consequently, the expected message-erasure probability after ℓ iterations converges to the value obtained from the corresponding tree recursion [4]. The same local limit applies sectionwise to the tail-biting coupled ensemble of Definition 4 when L, w, ℓ 
+
+are fixed and M → ∞ . Hence the per-coordinate residual erasure probabilities in the code-length limit are described by the deterministic DE equations stated below. □
+
+This theorem justifies replacing a large finite computation neighborhood by a tree recursion for any fixed number of iterations. The rest of the section derives that tree recursion explicitly for the five message types of Definition 3. The next theorem gives the concrete recursion for the uncoupled finite-degree case with fixed Z-side, X-side, and check degrees. It identifies the deterministic recursion whose fixed points are analyzed in Sections 5 and 6; it is not a finite-length concentration or block-error theorem for the random CSS ensembles. 12 Let a, b be the erasure probabilities of messages from a Z-side punctured variable to the Z-side A-check (5) and to the Z-side B-check (6), respectively. Let c be the erasure probability of the Z-side visible-component message to the Z-side B-check (6). Let d, e be the erasure probabilities of X-side auxiliary-variable and X-side visible-component messages to the X-side check (7), respectively. The reverse check-to-variable erasure probabilities are 
+
+ˆa = 1 − (1 − a)k−1, (8) 
+
+ˆb = 1 − (1 − c)(1 − b)k−1, (9) 
+
+ˆc = 1 − (1 − b)k, (10) 
+
+ˆd = 1 − (1 − d)jX −1(1 − e)k, (11) 
+
+ˆe = 1 − (1 − d)jX (1 − e)k−1. (12) 
+
+Theorem 2 (Hard-erasure density evolution) . For CSS erasure decoding over the quantum erasure channel, the abstract local ternary erasure rule is described by 
+
+a+ = ˆ ajZ −1ˆbk,b+ = ˆ ajZ ˆbk−1,c+ = ϵ, d+ = ˆdk−1,e+ = ϵ ˆek−1.
+
+(13) The residual erasure probabilities of the Z-side and X-side visible components are 
+
+rZ = ϵ ˆc, rX = ϵ ˆek. (14) 
+
+□
+
+Proof. The check-to-variable updates (8)–(12) are the usual erasure-check updates for (5), (6), and (7). A Z-side punctured variable sends an erasure to an A-check iff all other jZ −1 A-check messages and all k B-check messages are erased, giving a+. It sends an erasure to a B-check iff all jZ A-check messages and the other k − 1 B-check messages are erased, giving b+. Information about one Pauli component does not determine the other component. Hence the Z-side visible-component message to (6) remains erased exactly when the channel erases the coordinate, giving c+ = ϵ. The X-side auxiliary-variable update gives d+ = ˆdk−1. The X-side visible-component message remains erased when the channel erases the coordinate and the other k −1 X-side check messages are erased, giving 
+
+e+ = ϵˆek−1. The residual formulas require one additional incoming check message, giving (14). The recursion is closed because the hard-erasure rule tracks only whether each message is resolved. Its Z-side and X-side parts will be analyzed by separate potentials, so we now record the two constituent recursions read off from (13). The Z-side equations use (8)–(10): 
+
+a+ = ˆ ajZ −1ˆbk,b+ = ˆ ajZ ˆbk−1,c+ = ϵ, 
+
+(15) and the Z-side residual is 
+
+rZ = ϵ ˆc. (16) 13 The X-side equations use (11)–(12): 
+
+d+ = ˆdk−1,e+ = ϵ ˆek−1, (17) and the X-side residual is 
+
+rX = ϵ ˆek. (18) 
+
+# 4 Vector-Potential Preliminaries 
+
+This section recalls the vector-potential construction for uncoupled density-evolution systems and the corresponding threshold-saturation theorem. The next section specializes these general objects to the Z-side and X-side constituent recursions of this paper. The term admissible is used below in the standard finite-dimensional sense needed for the coupled-vector potential argument: the recursion is monotone, has enough differentiability for a Taylor expansion, and has scalar primitives from which the potential is built. 
+
+Definition 5 (Admissible uncoupled vector DE system) . All vectors in this section are column vectors. Let the state space be [0 , 1] d, ordered coordinatewise, and consider an uncoupled density-evolution system 
+
+x+ = f (g(x); ϵ), 0 ≤ ϵ ≤ 1.
+
+This system is called admissible if the following conditions hold. 1. f (·; ϵ) and g(·) map [0 , 1] d into [0 , 1] d, are twice continuously differentiable on this compact state space, and are coordinatewise nondecreasing. The map f (y; ϵ) is also nondecreasing in 
+
+ϵ.2. g(0) = 0 and f (g(0); ϵ) = 0 for every ϵ. Thus 0 is the successful fixed point. 3. There exist a positive diagonal matrix D and scalar functions F (y; ϵ) and G(x) such that 
+
+∇F (y; ϵ) = Df (y; ϵ), ∇G(x) = Dg(x).
+
+□
+
+The admissibility conditions are the structural hypotheses needed for the potential method. They ensure that the next definition produces a scalar function whose stationary points coincide with DE fixed points. 
+
+Definition 6 (Vector potential for an uncoupled DE system) . For an admissible uncoupled vector DE system, with D, F, G as in Definition 5, the associated vector potential is 
+
+U (x; ϵ) = g(x)T Dx − G(x) − F (g(x); ϵ). (19) With the convention inf ∅ = + ∞, define 
+
+F⋆(ϵ) = {x ∈ [0 , 1] d \ { 0} : x = f (g(x); ϵ)}, ∆E(ϵ) = inf  
+
+> x∈F ⋆(ϵ)
+
+U (x; ϵ). (20) The potential threshold is 
+
+ϵpot = sup {ϵ0 ∈ [0 , 1] : ∆ E(ϵ) > 0 for every 0 ≤ ϵ < ϵ 0}. (21) 
+
+□
+
+14 This function is useful because fixed points of the corresponding DE recursion are critical configurations of the potential, and the coupled-vector potential argument measures their cost by 
+
+U . The energy gap ∆E(ϵ) in (20) is the quantity that controls threshold saturation after spatial coupling. The next definition fixes the seeded spatially coupled recursion used in the threshold statement. It is written for a general vector DE system, so the same formula applies to any constituent system satisfying Definition 5. 
+
+Definition 7 (Seeded spatially coupled DE) . Let the state space be [0 , 1] d, ordered coordinatewise, and let 0 be the successful state. Fix a coupling length L, a coupling width w with 1 ≤ w < L , and a seed interval S ⊂ Z/L Z. Indices below are taken modulo L. For a profile X(ℓ) = ( x(ℓ)0 , . . . , x(ℓ)
+
+> L−1
+
+),define 
+
+¯x(ℓ) 
+
+> c
+
+= 1
+
+w
+
+> w−1∑
+> r=0
+
+x(ℓ)
+
+> c−r
+
+, (22) 
+
+y(ℓ) 
+
+> c
+
+= g( ¯ x(ℓ) 
+
+> c
+
+), (23) 
+
+¯y(ℓ) 
+
+> i
+
+= 1
+
+w
+
+> w−1∑
+> r=0
+
+y(ℓ)
+
+> i+r
+
+, (24) 
+
+x(ℓ+1)  
+
+> i
+
+=
+
+> {
+
+0, i ∈ S ,
+
+f ( ¯ y(ℓ) 
+
+> i
+
+; ϵ), i / ∈ S . (25) The seeded DE is initialized by 
+
+x(0)  
+
+> i
+
+=
+
+> {
+
+0, i ∈ S ,
+
+1, i / ∈ S ,
+
+where 1 denotes the largest state in [0 , 1] d. The recursion is successful in the non-seeded region if 
+
+lim  
+
+> ℓ→∞
+
+x(ℓ) 
+
+> i
+
+= 0 for every i / ∈ S .
+
+□
+
+The standard threshold-saturation result used below is a general theorem for admissible vector systems. It states that spatial coupling raises the DE threshold to the potential threshold of the uncoupled system. 
+
+Theorem 3 (General spatial-coupling threshold saturation, after [18]) . Let 
+
+x+ = f (g(x); ϵ)
+
+be an admissible uncoupled vector DE system with vector potential U , successful fixed point 0,and potential threshold ϵpot . Form the seeded spatially coupled DE system as in Definition 7. Then, for every ϵ < ϵ pot , there exists a finite coupling width w0(ϵ) such that, for all w ≥ w0(ϵ)
+
+and sufficiently long coupled chains, the seeded coupled DE converges to the successful fixed point in the non-seeded region. Consequently, the DE threshold of the spatially coupled system is the potential threshold ϵpot of the uncoupled system. □
+
+We use this theorem as a standard result and do not reproduce its shift argument. In the notation of Definition 7, the seed imposes the successful boundary condition 0, and the conclusion needed in this paper is that no non-successful coupled fixed point remains outside the seed when 
+
+w is sufficiently large and ϵ < ϵ pot . Since the seeded DE iteration is monotone from the largest initial state outside the seed, this absence of non-successful fixed points implies convergence to the successful profile. 15 5 Constituent Potentials and Fixed Points 
+
+We now instantiate (19) for the two uncoupled DE systems recorded at the end of Section 3. For the Z-side system (15), put 
+
+DZ = diag( jZ , k, 1) ,
+
+and define 
+
+FZ (yZ ; ϵ) = ˆ ajZ ˆbk + ϵˆc, (26) 
+
+GZ (xZ ) = jZ
+
+(
+
+a − 1 − (1 − a)k
+
+k
+
+)
+
++ kb − (1 − c)
+
+(
+
+1 − (1 − b)k)
+
+. (27) Then ∇FZ (yZ ; ϵ) = DZ fZ (yZ ; ϵ) and ∇GZ (xZ ) = DZ gZ (xZ ), where fZ is the right side of (15) and gZ is defined by (8)–(10). The Z-side potential is 
+
+UZ (xZ ; ϵ) = gZ (xZ )T DZ xZ − GZ (xZ ) − FZ (gZ (xZ ); ϵ). (28) For the X-side system (17), put 
+
+DX = diag( jX , k ),
+
+and define 
+
+FX (yX ; ϵ) = jX
+
+k ˆdk + ϵˆek, (29) 
+
+GX (xX ) = jX d + ke + (1 − d)jX (1 − e)k − 1. (30) Then ∇FX (yX ; ϵ) = DX fX (yX ; ϵ) and ∇GX (xX ) = DX gX (xX ), where fX is the right side of (17) and gX is defined by (11)–(12). The X-side potential is 
+
+UX (xX ; ϵ) = gX (xX )T DX xX − GX (xX ) − FX (gX (xX ); ϵ). (31) The stationary points of UZ and UX are exactly the fixed points of the two constituent recursions. We now define the fixed-point classes used in the two constituent potential thresholds. The terminology follows the bounded-degree MN/HA potential analysis in [21]; it classifies solutions of the fixed-point equations (15) and (17), and does not add a channel assumption. 
+
+Definition 8 (Successful, trivial, and nontrivial constituent fixed points) . Fix ϵ. Let FZ (ϵ) be the fixed-point set of (15). The Z-side successful and trivial fixed-point sets are 
+
+SZ (ϵ) = {xZ ∈ F Z (ϵ) : a = b = 0 }, TZ (ϵ) = {xZ ∈ F Z (ϵ) : a = b = 1 }.
+
+Here c = ϵ at every Z-side fixed point. The Z-side nontrivial fixed-point set is 
+
+NZ (ϵ) = FZ (ϵ) \ (SZ (ϵ) ∪ T Z (ϵ)).
+
+The Z-side non-successful fixed-point set is 
+
+F⋆Z (ϵ) = FZ (ϵ) \ S Z (ϵ) (= TZ (ϵ) ∪ N Z (ϵ)) .
+
+Similarly, let FX (ϵ) be the fixed-point set of (17). The X-side successful and trivial fixed-point sets are 
+
+SX (ϵ) = {xX ∈ F X (ϵ) : d = e = 0 }, TX (ϵ) = {xX ∈ F X (ϵ) : d = 1 , e = ϵ}.
+
+16 The X-side nontrivial fixed-point set is 
+
+NX (ϵ) = FX (ϵ) \ (SX (ϵ) ∪ T X (ϵ)).
+
+The X-side non-successful fixed-point set is 
+
+F⋆X (ϵ) = FX (ϵ) \ S X (ϵ) (= TX (ϵ) ∪ N X (ϵ)) .
+
+□
+
+The successful fixed-point sets represent decoding success and are excluded from the energy-gap minimization. The trivial fixed-point sets are saturated erasure branches whose potentials vanish at the corresponding constituent hashing-bound values. The nontrivial fixed-point sets contain all remaining fixed points. With the convention inf ∅ = + ∞, define 
+
+∆EZ (ϵ) = inf    
+
+> xZ∈F ⋆Z(ϵ)
+
+UZ (xZ ; ϵ), ϵpot ,Z = sup {ϵ : ∆ EZ (ϵ) > 0}. (32) Similarly, define 
+
+∆EX (ϵ) = inf    
+
+> xX∈F ⋆X(ϵ)
+
+UX (xX ; ϵ), ϵpot ,X = sup {ϵ : ∆ EX (ϵ) > 0}. (33) The threshold used for the five-message recursion is 
+
+ϵpot := min {ϵpot ,Z , ϵ pot ,X }. (34) 
+
+# 6 Nontrivial Constituent Potential Positivity 
+
+This section supplies the nontrivial positivity input used below in Theorems 6 and 7. The trivial fixed points will be handled in those threshold proofs by direct substitution. For the nontrivial fixed points, the proof has four separate parts: first define the two remainder nonnegativity conditions, then explain how each fixed degree reduces to a finite algebraic sign check, then prove the Z-side positivity, and finally prove the X-side positivity. 
+
+6.1 Remainder Conditions 
+
+The exact algebraic input is the nonnegativity of two remainders. We define them before stating the corresponding conditions, so that the hypotheses used later are explicit. For the Z side, let 
+
+ˆaZ (a) = 1 − (1 − a)k−1, ˆbZ (b; ϵ) = 1 − (1 − ϵ)(1 − b)k−1.
+
+Define 
+
+RZ (a, b ; ϵ) = ( jZ − 1) aˆaZ (a) + kb ˆbZ (b; ϵ) − jZ a + jZ
+
+k {1 − (1 − a)k} − kb 
+
++
+
+(
+
+1 − jZ
+
+k
+
+)
+
+{1 − (1 − b)k}. (35) For the X side, let 
+
+ˆdX (d, e ) = 1 − (1 − d)jX −1(1 − e)k, ˆeX (d, e ) = 1 − (1 − d)jX (1 − e)k−1.
+
+17 Define 
+
+RX (d, e ) = jX d ˆdX (d, e ) + ke ˆeX (d, e ) − jX d − ke − (1 − d)jX (1 − e)k + 1 
+
+− jX
+
+k ˆdX (d, e )k −
+
+> (
+
+1 − jX
+
+k
+
+> )
+
+ˆeX (d, e )k. (36) The conditions below state that these explicitly defined remainders are nonnegative on the nontrivial fixed-point branches. 
+
+Definition 9 (Algebraic nontrivial positivity conditions) . The Z-side condition PZ (jZ , k ) is the following statement. For every 0 ≤ ϵ < j Z /k and every xZ = ( a, b, ϵ )T ∈ N Z (ϵ), the quantity 
+
+RZ (a, b ; ϵ) defined in (35) is nonnegative. The X-side condition PX (jX , k ) is the following statement. For every 0 ≤ ϵ < 1 − jX /k and every xX = ( d, e )T ∈ N X (ϵ), the quantity RX (d, e ) defined in (36) is nonnegative. □
+
+These conditions are finite-degree algebraic inputs, not additional channel models. The following subsection explains how they can be certified for fixed degrees by eliminating dependent variables from the fixed-point equations. 
+
+6.2 Fixed-Degree Certification 
+
+The next proposition explains what remains after the fixed-point equations are used to remove the channel parameter and the message variables that are not independent. For fixed degrees, the conditions PZ and PX become finite real-algebraic sign problems. 
+
+Proposition 3 (Fixed-degree algebraic certification) . For fixed integers 2 ≤ jZ < k and 2 ≤ jX <k, the conditions PZ (jZ , k ) and PX (jX , k ) reduce to finite Sturm/resultant sign checks on univariate polynomials. Consequently every fixed X/Z equal-rate family member (jZ , j X , k ) = ( j, j +λ, 2j +λ)
+
+has an exact finite certificate problem. □
+
+Proof. For the Z side, take a nontrivial fixed point and write u = ˆ a and v = ˆb. Put 
+
+aZ (u, v ) = ujZ −1vk, bZ (u, v ) = ujZ vk−1.
+
+The fixed-point equations give 
+
+a = aZ (u, v ), b = bZ (u, v ),
+
+and the check equation ˆa = 1 − (1 − a)k−1 gives the algebraic relation 
+
+ΦZ (u, v ) := u − 1 + {1 − aZ (u, v )}k−1 = 0 .
+
+The second check equation recovers the channel value as 
+
+ϵ = EZ (u, v ) := 1 − 1 − v
+
+{1 − bZ (u, v )}k−1 .
+
+Since the successful and trivial fixed points are removed, the nontrivial branch has 0 < u, v < 1,and the condition 
+
+0 ≤ EZ (u, v ) < jZ
+
+k
+
+18 is exactly 0 ≤ ϵ < j Z /k . After substituting a = aZ , b = bZ , ˆa = u, and ˆb = v into (35), the remainder becomes 
+
+QZ (u, v ) = ( jZ − 1) aZ u + kb Z v − jZ aZ + jZ
+
+k {1 − (1 − aZ )k} − kb Z
+
++
+
+> (
+
+1 − jZ
+
+k
+
+> )
+
+{1 − (1 − bZ )k}. (37) Thus PZ (jZ , k ) is exactly the nonnegativity of QZ on this real algebraic branch. For the X side, write u = ˆd and define 
+
+dX (u) := uk−1, ΦX (u, e ) := u − 1 + {1 − dX (u)}jX −1(1 − e)k = 0 .
+
+Then d = dX (u), and the check equation for ˆd gives ΦX (u, e ) = 0 . The second check value is 
+
+hX (u, e ) := 1 − { 1 − dX (u)}jX (1 − e)k−1,
+
+so the fixed-point equation e = ϵˆek−1 recovers 
+
+ϵ = EX (u, e ) := ehX (u, e )k−1 .
+
+Substituting d = dX , ˆd = u, and ˆe = hX into (36) gives 
+
+QX (u, e ) = jX dX u + keh X − jX dX − ke − { 1 − dX }jX (1 − e)k + 1 
+
+− jX
+
+k uk −
+
+> (
+
+1 − jX
+
+k
+
+> )
+
+hkX . (38) Thus PX (jX , k ) is exactly the nonnegativity of QX on the real branch with 
+
+0 < u < 1, 0 ≤ e < 1, ΦX (u, e ) = 0 , 0 ≤ EX (u, e ) < 1 − jX
+
+k .
+
+It remains to justify that the fixed-degree test is finite and exact. For fixed degrees, 
+
+ΦZ , QZ , ΦX , QX are polynomials with rational coefficients, and the inequalities involving EZ
+
+and EX become polynomial inequalities after clearing denominators that are strictly positive on the displayed branches. The relevant branch endpoints, threshold crossings, vertical tangencies, and possible zeros of QZ or QX are roots of univariate resultants. A Sturm sequence isolates these roots and gives the exact sign table on each resulting interval; interval Newton steps then give disjoint rational boxes for the real branch segments. Thus the positivity or failure of positivity is certified by finitely many univariate polynomial sign checks for each fixed degree pair. Thus the positivity assumptions used below can be checked without rerunning a DE simulation: for each fixed degree pair they reduce to exact polynomial sign tests. The next two subsections show how those algebraic signs enter the potentials. 
+
+6.3 Z-Side Positivity 
+
+We now show how the Z-side remainder condition enters the potential. The calculation splits UZ
+
+into a strictly positive area term and the algebraic remainder RZ .
+
+Theorem 4 (Z-side nontrivial positivity) . Assume 2 ≤ jZ < k and PZ (jZ , k ). If 0 ≤ ϵ < j Z /k ,then 
+
+UZ (xZ ; ϵ) > 0 for every xZ ∈ N Z (ϵ).
+
+□
+
+19 Proof. Let xZ = ( a, b, c )T ∈ N Z (ϵ). At every Z-side fixed point, c = ϵ. Since the fixed point is neither successful nor trivial, 0 < a < 1 and 0 < b < 1. Substituting c = ϵ in (15) gives the bounded-degree MN/HA BEC constituent recursion 
+
+a = ˆ ajZ −1ˆbk, b = ˆ ajZ ˆbk−1, ˆa = 1 − (1 − a)k−1, ˆb = 1 − (1 − ϵ)(1 − b)k−1.
+
+Thus NZ (ϵ) is the nontrivial fixed-point set of that constituent BEC system. We now expand UZ . Since c = ϵ, ˆc = 1 − (1 − b)k, and ˆajZ ˆbk = aˆa at a fixed point, (28) becomes 
+
+UZ (xZ ; ϵ) = jZ aˆa + kb ˆb − jZ
+
+> (
+
+a − 1 − (1 − a)k
+
+k
+
+> )
+
+− kb + (1 − ϵ)ˆ c − aˆa
+
+= ( jZ − 1) aˆa + kb ˆb − jZ a + jZ
+
+k {1 − (1 − a)k} − kb + (1 − ϵ)ˆ c. (39) Separating the area term at the Z-side constituent hashing-bound value gives 
+
+UZ (xZ ; ϵ) =  
+
+> (
+
+jZ
+
+k − ϵ
+
+> )
+
+ˆc + RZ (a, b ; ϵ), (40) where RZ is the remainder defined in (35). The first term in (40) is strictly positive for 0 ≤ ϵ < j Z /k ,because 0 < b < 1 implies ˆc > 0.The sign of RZ is the only remaining point. The condition PZ (jZ , k ) states exactly that this re-mainder is nonnegative on the nontrivial fixed-point set. This is a separate algebraic nonnegativity condition, to be checked on the fixed-point branch for the degrees under consideration. The follow-ing convexity identities are elementary inequalities used in such fixed-degree checks; by themselves they do not replace PZ (jZ , k ). For 0 < t < 1 and m ≥ 2,
+
+1 − (1 − t)m
+
+m − t(1 − t)m−1 = 
+
+> ∫t
+> 0
+
+(m − 1) s(1 − s)m−2 ds > 0,
+
+and 
+
+1 − (1 − t)m − mt (1 − t)m−1 = 
+
+> ∫t
+> 0
+
+m(m − 1) s(1 − s)m−2 ds > 0.
+
+Thus, under PZ (jZ , k ), RZ (a, b ; ϵ) ≥ 0 on NZ (ϵ). Combining this with the strictly positive area term in (40) proves UZ (xZ ; ϵ) > 0 for 0 ≤ ϵ < j Z /k .
+
+6.4 X-Side Positivity 
+
+The X-side proof has the same structure. The fixed-point equation removes the explicit channel factor from UX , leaving a positive area term and the remainder RX .
+
+Theorem 5 (X-side nontrivial positivity) . Assume 2 ≤ jX < k and PX (jX , k ). If 0 ≤ ϵ < 1−jX /k ,then 
+
+UX (xX ; ϵ) > 0 for every xX ∈ N X (ϵ).
+
+□
+
+Proof. Let xX = ( d, e )T ∈ N X (ϵ). Since the fixed point is neither successful nor trivial, 0 < d < 1.When ϵ > 0, the equation e = ϵˆek−1 gives 0 < e < ϵ . When ϵ = 0 , any nontrivial fixed point has 
+
+e = 0 and 0 < d < 1. In both cases ˆe > 0. The fixed-point equations are 
+
+d = ˆdk−1, e = ϵˆek−1, ˆd = 1 − (1 − d)jX −1(1 − e)k, ˆe = 1 − (1 − d)jX (1 − e)k−1.
+
+20 Expanding (31) gives 
+
+UX (xX ; ϵ) = jX d ˆd + ke ˆe − jX d − ke − (1 − d)jX (1 − e)k + 1 − jX
+
+k ˆdk − ϵˆek. (41) At a fixed point, e = ϵˆek−1, so ϵˆek = eˆe. Separating the X-side area term gives 
+
+UX (xX ; ϵ) = 
+
+> (
+
+1 − jX
+
+k − ϵ
+
+> )
+
+ˆek + RX (d, e ), (42) where RX is the remainder defined in (36). The first term in (42) is strictly positive for 0 ≤ ϵ < 
+
+1 − jX /k , because a nontrivial fixed point has ˆe > 0. The condition PX (jX , k ) states exactly that the remaining term RX (d, e ) is nonnegative on NX (ϵ). Therefore 
+
+UX (xX ; ϵ) > 0 (xX ∈ N X (ϵ), 0 ≤ ϵ < 1 − jX /k ).
+
+# 7 Threshold Saturation and X/Z Equal-Rate Degree Families 
+
+The previous section isolated the positivity input for nontrivial fixed points. The next two theorems combine that input with direct computations on the trivial fixed-point branches to identify the two constituent potential thresholds. 
+
+Theorem 6 (Z-side potential threshold) . Assume 2 ≤ jZ < k and the Z-side algebraic positivity condition PZ (jZ , k ) of Section 6. Then 
+
+ϵpot ,Z = jZ
+
+k .
+
+□
+
+Proof. The successful fixed point has a = b = 0 and c = ϵ; it has UZ = 0 and is excluded from 
+
+F⋆Z (ϵ). The Z-side trivial fixed point has a = b = 1 and c = ϵ. Then ˆa = ˆb = ˆ c = 1 , and direct substitution into (28) gives 
+
+UZ ((1 , 1, ϵ )T ; ϵ) = jZ + k + ϵ −
+
+> (
+
+jZ − jZ
+
+k + k − 1 + ϵ
+
+> )
+
+− (1 + ϵ)= jZ
+
+k − ϵ. 
+
+Thus the trivial Z-side fixed point has positive potential for ϵ < j Z /k and reaches zero at ϵ = jZ /k .For xZ ∈ N Z (ϵ), the fixed point is nontrivial in the classification used for bounded-degree MN/HA potentials [21]. The Z-side nontrivial positivity proved in Theorem 4 gives 
+
+UZ (xZ ; ϵ) > 0 for every xZ ∈ N Z (ϵ) whenever ϵ < jZ
+
+k .
+
+Together with the previous computation on TZ (ϵ), this implies ∆EZ (ϵ) > 0 for ϵ < j Z /k . At 
+
+ϵ = jZ /k , the trivial fixed point has zero potential, and the area/MAP threshold converse for this constituent BEC potential, used in the MN/HA potential analysis of [21], prevents a larger potential threshold. Hence ϵpot ,Z = jZ /k .21 The X-side threshold is obtained by the same logic, with the complementary degree ratio 1−jX /k 
+
+replacing the Z-side ratio jZ /k .
+
+Theorem 7 (X-side potential threshold) . Assume 2 ≤ jX < k and the X-side algebraic positivity condition PX (jX , k ) of Section 6. Then 
+
+ϵpot ,X = 1 − jX
+
+k .
+
+□
+
+Proof. The successful fixed point d = e = 0 has UX = 0 and is excluded. The X-side trivial fixed point has d = 1 and e = ϵ. Then ˆd = ˆ e = 1 , and 
+
+UX ((1 , ϵ )T ; ϵ) = jX + kϵ − (jX + kϵ − 1) − 
+
+> (
+
+jX
+
+k + ϵ
+
+> )
+
+= 1 − jX
+
+k − ϵ. 
+
+Thus the trivial X-side fixed point reaches zero at ϵ = 1 − jX /k . For xX ∈ N X (ϵ), the X-side nontrivial positivity proved in Theorem 5 gives 
+
+UX (xX ; ϵ) > 0 for every xX ∈ N X (ϵ) whenever ϵ < 1 − jX
+
+k ,
+
+and the same area/MAP threshold converse used for the bounded-degree MN/HA constituent in [21] excludes a larger X-side potential threshold. Hence ϵpot ,X = 1 − jX /k .Consequently, 
+
+ϵpot = min  
+
+> {
+
+jZ
+
+k , 1 − jX
+
+k
+
+> }
+
+. (43) The five-message recursion separates into the Z-side and X-side constituent recursions. Thus no additional five-message potential is needed. The saturation proof below applies the coupled-vector potential theorem separately to (fZ , gZ , U Z ) and (fX , gX , U X ). Under the X/Z equal-rate condition jZ + jX = k, the threshold in (43) equals the hashing-bound parameter computed in Proposition 2. 
+
+Remark 1 (Relation to existing potential analyses) . The proof route used here follows the estab-lished spatial-coupling potential literature. The coupled MN/HA density-evolution equations and numerical BEC threshold evidence appear in [19], and an asymptotic analysis of spatially coupled MN/HA LDPC ensembles appears in [20]. Multi-edge BEC potentials, duality, and bounded-degree MN/HA threshold saturation are treated in [21]; fixed-degree positivity for a bounded-degree MN family is treated in [22]; and the GEC a posteriori probability transfer, area, and SIR potential framework are treated in [23]. The present recursion is decomposed into two BEC constituent sys-tems, and the constituent potential identities, positivity, and spatial-coupling saturation use those arguments separately on the Z and X sides. □
+
+The preceding two threshold computations identify the two constituent thresholds. The next theorem packages them into the single threshold relevant to the original five-message CSS recursion and records the simplification under the X/Z equal-rate condition. 22 Theorem 8 (Constituent potential threshold) . Assume 2 ≤ jZ < jX < k, PZ (jZ , k ), and 
+
+PX (jX , k ). Then 
+
+ϵpot = min 
+
+{ jZ
+
+k , 1 − jX
+
+k
+
+}
+
+.
+
+If the additional X/Z equal-rate degree condition jZ + jX = k is imposed, then 
+
+ϵpot = ϵhash = 1 − Rdes 
+
+> Q
+
+2 .
+
+For (jZ , j X , k ) = (4 , 8, 12) , this value is 1/3. □
+
+Proof. By the definition (34) and Theorems 6 and 7, 
+
+ϵpot = min 
+
+{ jZ
+
+k , 1 − jX
+
+k
+
+}
+
+.
+
+This proves the general threshold formula. Under jZ + jX = k, the two entries in the minimum are both jZ /k . Since Rdes  
+
+> Q
+
+= ( jX − jZ )/k = ( k − 2jZ )/k ,
+
+jZ
+
+k = 1 − Rdes 
+
+> Q
+
+2 = ϵhash .
+
+This proves the claimed equality. The fixed-degree reduction in Proposition 3 identifies the finite algebraic sign checks needed to verify the positivity assumptions in Theorem 8. For the X/Z equal-rate example (jZ , j X , k ) = (4 , 8, 12) , Figure 5 plots the constituent potentials on the trivial fixed-point branches and on the numerically found nontrivial fixed points. The trivial branches cross zero at the constituent threshold 1/3, while the shown nontrivial fixed-point branches remain positive on the plotted range. This figure is a numerical check of the fixed-point landscape; the exact fixed-degree certificate problem is described in Proposition 3. The next theorem applies this general saturation statement to the two constituent systems. Since the five-message recursion separates into two constituent recursions, saturation of both con-stituents implies that both residuals in (14) converge to zero. 
+
+Theorem 9 (Spatial-coupling saturation) . Assume 2 ≤ jZ < j X < k , PZ (jZ , k ), and PX (jX , k ).Fix ϵ < ϵ pot . For each s ∈ { Z, X }, and for a tail-biting length L and coupling width w with 
+
+1 ≤ w < L , consider the seeded tail-biting spatially coupled constituent recursion obtained from 
+
+(fs, gs) by the standard modulo-L window average, 
+
+¯x(ℓ) 
+
+> s,c
+
+= 1
+
+w
+
+> w−1
+
+∑
+
+> r=0
+
+x(ℓ) 
+
+> s, (c−r) mod L
+
+, y(ℓ) 
+
+> s,c
+
+= gs( ¯ x(ℓ)
+
+> s,c
+
+),
+
+¯y(ℓ) 
+
+> s,i
+
+= 1
+
+w
+
+> w−1
+
+∑
+
+> r=0
+
+y(ℓ) 
+
+> s, (i+r) mod L
+
+, x(ℓ+1)  
+
+> s,i
+
+= fs( ¯ y(ℓ) 
+
+> s,i
+
+; ϵ),
+
+where xZ,i is a three-component column vector and xX,i is a two-component column vector. All components of xZ,i and xX,i are fixed to zero on a seed interval S of w consecutive sections. There exists a finite coupling width w0(ϵ) such that, whenever w ≥ w0(ϵ) and L > w , no non-successful constituent fixed point remains in the unseeded sections on either side and the residuals converge to zero. Therefore the seeded coupled DE saturates to ϵpot . □
+
+23 0.0 0.1 0.2 0.3 0.4 0.5 0.6       
+
+> 0.2
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> constituent potential
+> 0.0 0.1 0.2 0.3 0.4 0.5 0.6
+> constituent threshold
+> trivial fixed-point branch
+> nontrivial fixed-point branch
+
+Figure 5: Constituent potentials evaluated at fixed points for (jZ , j X , k ) = (4 , 8, 12) . The blue curve is the potential on the trivial fixed-point branch. The red curve is the potential on the nontrivial fixed-point branch in NZ (ϵ) or NX (ϵ), namely the fixed points other than the successful and trivial ones in Definition 8. The dotted vertical line marks the constituent potential threshold 1/3.
+
+Proof. Since ϵ < ϵ pot , the definition (34) gives ϵ < ϵ pot ,Z and ϵ < ϵ pot ,X . The constituent maps 
+
+(fZ , gZ ) and (fX , gX ) are twice continuously differentiable on their compact order intervals, are nondecreasing, and preserve those intervals. Equations (26)–(28) and (29)–(31) provide the admis-sible vector potential identities for the Z-side and X-side systems, respectively. Apply the coupled-vector potential theorem of [18] separately to (fZ , gZ , U Z ) and (fX , gX , U X ).Equivalently, the standard shift argument applied to each constituent shows that a non-successful coupled fixed point would decrease the corresponding coupled potential by an amount controlled by ∆EZ (ϵ) or ∆EX (ϵ), while the second-order window-averaging term is bounded by Ks/w . For sufficiently large w, both constituent systems therefore have only the successful fixed point in the unseeded sections. The five-message DE separates into the two constituent recursions, so the residuals converge to zero. The X/Z equal-rate degree condition can therefore be used as a rate parameter. The next proposition records the specialization explicitly, separating the rate parameter from the constituent positivity certificates. 
+
+Proposition 4 (Rate-parametrized X/Z equal-rate saturation) . Let 0 < ρ < 1 and choose k so that 
+
+jZ = 1 − ρ
+
+2 k, jX = 1 + ρ
+
+2 k
+
+are integers satisfying 2 ≤ jZ < j X < k . Assume PZ (jZ , k ) and PX (jX , k ). Then the X/Z equal-rate ensemble has design rate Rdes  
+
+> Q
+
+= ρ, and its product potential threshold is 
+
+ϵpot = ϵhash = 1 − ρ
+
+2 .
+
+Consequently, for every ϵ < (1 − ρ)/2, the seeded tail-biting coupled DE of Theorem 9 converges to zero residual for sufficiently large coupling width. Equivalently, for integers j ≥ 2 and λ ≥ 1, the one-parameter X/Z equal-rate family 
+
+(jZ , j X , k ) = ( j, j + λ, 2j + λ)
+
+24 has 
+
+Rdes  
+
+> Q
+
+= λ
+
+2j + λ , ϵpot = ϵhash = j
+
+2j + λ ,
+
+under the corresponding positivity conditions PZ (j, 2j + λ) and PX (j + λ, 2j + λ). The example 
+
+(jZ , j X , k ) = (4 , 8, 12) is the case j = 4 , λ = 4 , hence ρ = 1 /3. □
+
+Proof. The displayed choice satisfies jZ + jX = k and 
+
+jX − jZ
+
+k = (1 + ρ)k/ 2 − (1 − ρ)k/ 2
+
+k = ρ, 
+
+so Proposition 2 gives Rdes  
+
+> Q
+
+= ρ. By Theorem 8, the X/Z equal-rate product potential threshold is 
+
+ϵpot = jZ
+
+k = 1 − ρ
+
+2 = 1 − Rdes 
+
+> Q
+
+2 = ϵhash .
+
+Then Theorem 9 gives convergence of the seeded coupled DE for every ϵ < ϵ pot . Substituting 
+
+ρ = λ/ (2 j + λ) gives the integral family formulas. For each fixed (j, λ ), the remaining positivity inputs are exactly the finite algebraic certificate problems described in Section 6. We also performed numerical scans of the fixed-degree positivity condition over X/Z equal-rate degree families. First, we exhaustively enumerated all integer triples (jZ , j X , k ) = ( j, j +
+
+λ, 2j + λ) with 2 ≤ jZ < j X < k ≤ 30 . For each triple, we sampled 17 values of ϵ in the interval [0 .025 ϵhash , 0.975 ϵhash ], solved the Z-side and X-side constituent fixed-point equations by continuation from a 5 × 5 initial-value grid, and checked the constituent potentials at every located nontrivial fixed point. All 182 low-degree X/Z equal-rate triples passed this scan: no negative nontrivial constituent potential was found, and among the 4495 located nontrivial fixed points the smallest potential value was 0.209101665 .The exhaustive low-degree scan is arithmetically sparse near the endpoint rates, because the constraints jZ ≥ 2 and k ≤ 30 restrict the available rational rates. Therefore Figure 6 also plots about twenty approximately uniform rate representatives. For target rates ri = i/ 21 , i = 1 , . . . , 20 ,we choose an X/Z equal-rate triple (jZ , j X , k ) = ( j, j + λ, 2j + λ) with |λ/ (2 j + λ) − ri| ≤ 0.02 ,minimizing k under this constraint. This gives representatives with 5 ≤ k ≤ 60 . The largest degrees occur only near the high-rate endpoint, where jZ ≥ 2 forces Rdes  
+
+> Q
+
+≤ 1 − 4/k . The representative scan did not locate nontrivial fixed points; its role is to display rate coverage with low degrees, while the exhaustive k ≤ 30 scan above supplies the nontrivial potential samples. Together these scans give numerical evidence for the X/Z equal-rate family across the rate range, while the exact statement remains the finite Sturm/resultant certificate problem in Proposition 3. 
+
+Numerical DE example. For (jZ , j X , k ) = (4 , 8, 12) , Theorem 8 gives ϵpot = 1 /3. We iterated the seeded tail-biting coupled DE in Theorem 9 with L = 1024 , w = 16 , a seed interval satisfying 
+
+|S| = w = 16 , and ϵ = 0 .3325 = 0 .9975 ϵpot . The shaded sections in Figures 7 and 8 are the seed sections. The curve at iteration 0 is the initial visible-erasure profile ϵi, so it is rectangular. For positive iterations, the plotted quantities are the Z-side and X-side residuals rZ and rX from (16) and (18), computed with the coupled check-to-variable averages in Theorem 9. Both profiles converged to zero by iteration 240240 in this computation. 25 0.0 0.1 0.2 0.3 0.4 0.5 
+
+threshold hash 
+
+0.0 
+
+0.2 
+
+0.4 
+
+0.6 
+
+0.8 
+
+1.0 
+
+> design rate  Rdes
+> Q
+> (7, 8, 15)
+> (4, 5, 9)
+> (3, 4, 7)
+> (2, 3, 5)
+> (3, 5, 8)
+> (4, 7, 11)
+> (2, 4, 6)
+> (3, 7, 10)
+> (2, 5, 7)
+> (4, 11, 15) (3, 10, 13)
+> (2, 7, 9)
+> (2, 8, 10)
+> (2, 10, 12) (2, 12, 14)
+> (2, 14, 16)
+> (2, 18, 20)
+> (2, 23, 25)
+> (2, 33, 35)
+> (2, 58, 60)
+
+R = 1 2
+
+low-degree representatives Figure 6: Low-degree X/Z equal-rate degree triples used to display approximate rate coverage in the threshold-rate plane. The representatives are chosen near ri = i/ 21 , i = 1 , . . . , 20 , with 
+
+|Rdes 
+
+Q − ri| ≤ 0.02 and minimal k, giving k ≤ 60 . The horizontal axis is ϵhash = j/ (2 j + λ), and the vertical axis is Rdes 
+
+Q = λ/ (2 j + λ). The dotted line is R = 1 − 2ϵ.0 200 400 600 800 1000 
+
+> section index
+> 0.0
+> 0.1
+> 0.2
+> 0.3
+> Z-side residual  rIC
+> Z
+
+Z side, = 0.3325, L = 1024, w = 16 
+
+Figure 7: Z-side seeded spatially coupled DE for (jZ , j X , k ) = (4 , 8, 12) , L = 1024 , w = 16 , |S| = w,and ϵ = 0 .3325 . The vertical axis is rZ in (16). The plotted curves start at iteration 0 and then proceed in increments of 10000 iterations. 0 200 400 600 800 1000 
+
+> section index
+> 0.0
+> 0.1
+> 0.2
+> 0.3
+> X-side residual  rIC
+> X
+
+X side, = 0.3325, L = 1024, w = 16 
+
+Figure 8: X-side seeded spatially coupled DE for the same parameters as Figure 7. The vertical axis is rX in (18). The plotted curves start at iteration 0 and then proceed in increments of 10000 
+
+iterations. 26 8 Conclusion and Future Work 
+
+For fixed finite Z-side, X-side, and check degrees, we isolated the hard-erasure recursion associated with the punctured sparse CSS representation, decomposed it into Z-side and X-side constituent systems, and proved seeded spatial-coupling saturation to ϵpot = min {jZ /k, 1 − jX /k }. In the X/Z equal-rate specialization jZ +jX = k, this threshold equals ϵpot = ϵhash = (1 −Rdes  
+
+> Q
+
+)/2. Equivalently, the rate-parametrized X/Z equal-rate family (jZ , j X , k ) = ( j, j + λ, 2j + λ) has Rdes  
+
+> Q
+
+= λ/ (2 j + λ)
+
+and ϵpot = j/ (2 j + λ) = (1 − Rdes  
+
+> Q
+
+)/2, subject to the same constituent positivity certificates. The scope of this theorem is deliberately deterministic and asymptotic at the DE level. The seed in Theorem 9 is an ideal boundary condition: on a seed interval S, all message-erasure components 
+
+a, b, c, d, e are fixed to zero, equivalently the local channel parameter is replaced by ϵi = 0 on those sections. A finite CSS realization of this complete DE seed is not provided here. Such a realization would need operations on the visible CSS code, or on an enlarged CSS code with additional known degrees of freedom, that make all sparse-representation messages in the seed sections known while preserving CSS commutation and the syndrome interface in (4). Shortening or puncturing only selected visible coordinates would define a different finite ensemble whose DE must be analyzed separately. The result should also be read as a bitwise DE threshold statement, not as a finite-length block-error theorem. The residuals rZ and rX are per-coordinate residual erasure probabilities. For a finite code of visible length n, block success requires the whole residual ambiguity to be CSS-stabilizer equivalent to zero with probability tending to one. This calls for finite-length ingredients beyond the present paper: a concentration or replacement argument connecting the deterministic recursion to the intended random finite ensemble, a scaling choice for the gap to threshold, chain length, coupling width, seed, and number of iterations, and a final CSS logical-success criterion. Classical iterative-decoding analyses compare the weak-sense, bit-error limit with the strong-sense, block-error limit [34]; adapting that bridge to the present CSS erasure setting is a separate finite-length problem. Another useful next step is to develop Sturm/interval certificates for PZ and PX
+
+into an exact certification method for broader X/Z equal-rate degree families. 
+
+# References 
+
+[1] A. R. Calderbank and P. W. Shor, “Good quantum error-correcting codes exist,” Physical Review A , vol. 54, no. 2, pp. 1098–1105, 1996. [2] A. M. Steane, “Error correcting codes in quantum theory,” Physical Review Letters , vol. 77, no. 5, pp. 793–797, 1996. [3] R. G. Gallager, “Low-density parity-check codes,” IRE Transactions on Information Theory ,vol. 8, no. 1, pp. 21–28, 1962. [4] T. Richardson and R. Urbanke, Modern Coding Theory . Cambridge University Press, 2008. [5] D. J. C. MacKay and R. M. Neal, “Near Shannon limit performance of low density parity check codes,” Electronics Letters , vol. 32, no. 18, pp. 1645–1646, 1996. [6] C.-H. Hsu and A. Anastasopoulos, “Capacity-achieving codes with bounded graphical complex-ity and maximum likelihood decoding,” IEEE Transactions on Information Theory , vol. 56, no. 3, pp. 992–1006, 2010. 27 [7] J.-P. Tillich and G. Zémor, “Quantum LDPC codes with positive rate and minimum distance proportional to the square root of the blocklength,” IEEE Transactions on Information Theory ,vol. 60, no. 2, pp. 1193–1202, 2014. [8] P. Panteleev and G. Kalachev, “Asymptotically good quantum and locally testable classical LDPC codes,” in Proceedings of the 54th Annual ACM SIGACT Symposium on Theory of Computing , ser. STOC 2022. Association for Computing Machinery, 2022, pp. 375–388. [9] M. Hagiwara, K. Kasai, H. Imai, and K. Sakaniwa, “Spatially coupled quasi-cyclic quantum LDPC codes,” in Proceedings of the 2011 IEEE International Symposium on Information Theory , 2011, pp. 638–642. [10] I. Andriyanova, D. Maurice, and J.-P. Tillich, “Spatially coupled quantum LDPC codes,” in 
+
+Proceedings of the 2012 IEEE Information Theory Workshop , 2012, pp. 327–331. [11] S. Yang and R. Calderbank, “Spatially-coupled QLDPC codes,” Quantum , vol. 9, p. 1693, 2025. [12] A. J. Felstrom and K. S. Zigangirov, “Time-varying periodic convolutional codes with low-density parity-check matrix,” IEEE Transactions on Information Theory , vol. 45, no. 6, pp. 2181–2191, 1999. [13] M. Lentmaier, A. Sridharan, K. S. Zigangirov, and J. Daniel J. Costello, “Terminated LDPC convolutional codes with thresholds close to capacity,” in Proceedings of the 2005 IEEE Inter-national Symposium on Information Theory , 2005, pp. 1372–1376. [14] M. Lentmaier, A. Sridharan, J. Daniel J. Costello, and K. S. Zigangirov, “Iterative decoding threshold analysis for LDPC convolutional codes,” IEEE Transactions on Information Theory ,vol. 56, no. 10, pp. 5274–5289, 2010. [15] D. G. M. Mitchell, A. E. Pusane, K. S. Zigangirov, and J. Daniel J. Costello, “Asymptotically good LDPC convolutional codes based on protographs,” in Proceedings of the 2008 IEEE International Symposium on Information Theory , 2008, pp. 1030–1034. [16] D. G. M. Mitchell, M. Lentmaier, and J. Daniel J. Costello, “Spatially coupled LDPC codes constructed from protographs,” IEEE Transactions on Information Theory , vol. 61, no. 9, pp. 4866–4889, 2015. [17] S. Kudekar, T. J. Richardson, and R. L. Urbanke, “Threshold saturation via spatial coupling: Why convolutional LDPC ensembles perform so well over the BEC,” IEEE Transactions on Information Theory , vol. 57, no. 2, pp. 803–834, 2011. [18] A. Yedla, Y.-Y. Jian, P. S. Nguyen, and H. D. Pfister, “A simple proof of threshold saturation for coupled vector recursions,” in Proceedings of the 2012 IEEE Information Theory Workshop ,2012, pp. 25–29. [19] K. Kasai and K. Sakaniwa, “Spatially-coupled MacKay-Neal codes and Hsu-Anastasopoulos codes,” IEICE Transactions on Fundamentals of Electronics, Communications and Computer Sciences , vol. E94-A, no. 11, pp. 2161–2168, 2011, arXiv:1102.4612 [cs.IT]. [20] D. G. M. Mitchell, K. Kasai, M. Lentmaier, and J. Daniel J. Costello, “Asymptotic analysis of spatially coupled MacKay-Neal and Hsu-Anastasopoulos LDPC codes,” in Proceedings of the 2012 International Symposium on Information Theory and its Applications , 2012, pp. 337–341. 28 [21] N. Obata, Y.-Y. Jian, K. Kasai, and H. D. Pfister, “Spatially-coupled multi-edge type LDPC codes with bounded degrees that achieve capacity on the BEC under BP decoding,” in Proceed-ings of the 2013 IEEE International Symposium on Information Theory , 2013, pp. 2433–2437. [22] T. Okazaki and K. Kasai, “Spatially-coupled MacKay-Neal codes with no bit nodes of degree two achieve the capacity of BEC,” in Proceedings of the 2014 IEEE International Symposium on Information Theory , 2014, pp. 506–510, arXiv:1401.7289 [cs.IT]. [23] M. Fukushima, T. Okazaki, and K. Kasai, “Spatially-coupled MacKay-Neal codes universally achieve the symmetric information rate of arbitrary generalized erasure channels with mem-ory,” in Proceedings of the 2015 IEEE International Symposium on Information Theory , 2015, pp. 899–903, arXiv:1501.06736 [cs.IT]. [24] K. Kasai, “Finite-degree quantum LDPC codes reaching the Gilbert–Varshamov bound,” 2026, arXiv:2603.24588 [quant-ph]. [25] N. Delfosse and G. Zémor, “Linear-time maximum likelihood decoding of surface codes over the quantum erasure channel,” Physical Review Research , vol. 2, no. 3, p. 033042, 2020. [26] S. Lee, M. Mhalla, and V. Savin, “Trimming decoding of color codes over the quantum erasure channel,” in Proceedings of the 2020 IEEE International Symposium on Information Theory ,2020, pp. 1886–1890. [27] N. Connolly, V. Londe, A. Leverrier, and N. Delfosse, “Fast erasure decoder for hypergraph product codes,” Quantum , vol. 8, p. 1450, 2024. [28] M. Gökduman, H. Yao, and H. D. Pfister, “Erasure decoding for quantum LDPC codes via belief propagation with guided decimation,” in Proceedings of the 2024 60th Annual Allerton Conference on Communication, Control, and Computing , 2024, pp. 1–8, arXiv:2411.08177 [cs.IT]. [29] H. Yao, M. Gökduman, and H. D. Pfister, “Cluster decomposition for improved erasure decod-ing of quantum LDPC codes,” IEEE Journal on Selected Areas in Information Theory , vol. 6, pp. 176–188, 2025. [30] K.-Y. Kuo and Y. Ouyang, “Degenerate quantum erasure decoding,” npj Quantum Informa-tion , vol. 12, p. 75, 2026. [31] G. Pech, M. Gökduman, H. Yao, and H. D. Pfister, “Stabilizer-assisted inactivation decoding of quantum error-correcting codes with erasures,” 2026, arXiv:2601.14236 [cs.IT]. [32] B. C. A. Freire, F.-M. L. Régent, and A. Leverrier, “Quantum Maxwell erasure decoder for qLDPC codes,” 2026, arXiv:2601.10713 [quant-ph]. [33] C. H. Bennett, D. P. DiVincenzo, and J. A. Smolin, “Capacities of quantum erasure channels,” 
+
+Physical Review Letters , vol. 78, no. 16, pp. 3217–3220, 1997. [34] M. Lentmaier, D. Truhachev, K. S. Zigangirov, and J. Daniel J. Costello, “An analysis of the block error probability performance of iterative decoding,” IEEE Transactions on Information Theory , vol. 51, no. 11, pp. 3834–3855, 2005. 29

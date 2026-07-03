@@ -1,0 +1,244 @@
+Title: Design rules for fault-tolerant multi-gate teleportation
+
+URL Source: https://arxiv.org/pdf/2607.01342v1
+
+Published Time: Fri, 03 Jul 2026 00:04:49 GMT
+
+Number of Pages: 4
+
+Markdown Content:
+# Design rules for fault-tolerant multi-gate teleportation 
+
+Mathys Rennela 
+
+Unitary Foundation, France 
+
+Abstract —Multi-gate teleportation (MGT) packages n remote gates into a single ebit via a 1-ebit fan-out quantum circuit, saving n−1
+
+entangled pairs relative to sequential gate teleportation. The cost is a correlated failure mode: a single network fault propagates through the fan-out tree, injecting a weight-n Pauli error. We derive a design rule for fault-tolerant packet sizes, ncorr 
+
+> max
+
+(d) = 
+
+⌈d/ 2⌉ for rotated surface codes of distance d with a correlation-aware decoder ( nnaive  
+
+> max
+
+= ⌊d/ 2⌋ without), bounding how many gates can be packaged whilst preserving fault tolerance. Simulation with PyMatching shows that the standard MWPM decoder built from the packet circuit’s noise model naturally corrects the correlated error: at network-to-local noise ratios γ = pnet /p gate up to 100 ,the packet matches or surpasses the per-link sequential LER at moderate-to-high γ, with the advantage growing with both γ
+
+and d, whilst reducing the entanglement cost from n ebits to 1.Packetisation wins when the network is the bottleneck ( γ ≫ 1); at γ ≈ 1 the n−1 extra local fan-out gates offset the network savings. No custom decoder is required: the circuit-level noise model already encodes the correlation. These results enable noise-aware distributed circuit compilers to favour fan-out packetisation without sacrificing fault tolerance. 
+
+I. I NTRODUCTION 
+
+Distributed quantum computing (DQC) promises to scale the computational power of quantum processors by interconnecting them. A basic paradigm of DQC is to partition a monolithic circuit into modules which communicate via remote gates, typically implemented by teleportation over an ebit (most often, a shared Bell pair) [ 1], [ 2]. For a circuit requiring n non-local CNOTs between the same pair of modules, sequential teleportation consumes n ebits. Multi-gate teleportation (MGT) collapses this to a single ebit by packaging the n gates into a 
+
+packet : one non-local Bell pair drives a local CNOT fan-out tree that distributes the control to all n targets [ 3 ]. The resource savings are clear ( n−1 ebits saved), but the noise profile is not. A single failure on the Bell pair propagates through the fan-out tree, injecting a weight-n correlated Pauli error rather than n independent weight-1 errors. This correlated failure raises a basic question: when does the ebit savings survive fault-tolerant quantum error correction? 
+
+The decisive parameter is the network-to-gate noise ratio 
+
+γ = pnet /p gate . When γ ≳ 1, the network error dominates and the correlated weight-n error becomes the bottleneck. Whether an MGT packet remains fault-tolerant, and whether a decoder can exploit the known correlation structure, depends on the interplay between γ, the code distance d, and the packet size 
+
+n.
+
+Related work 
+
+Recent works establish noise thresholds for distributed surface and qLDPC codes [ 4], [ 5], [ 6 ], [ 7 ], [ 8], [ 9], [ 10 ], including Shalby et al. [ 11 ] who use the same γ parameter for surface-code teleportation interfaces. All address single -gate teleportation under independent per-link noise; none models a single gate failure injecting a weight-n correlated error. On the resource side, Loke [ 12 ] showed that GHZ-based fan-out reduces O(n2) non-local resources to O(n),and compiler frameworks [ 13 ] minimise non-local gate counts as a communication-cost proxy, but neither accounts for the correlated noise that fan-out introduces. This paper connects the two threads, accounting for noise and communication cost simultaneously. 
+
+Contributions 
+
+1) Error model. A single network failure in a 1-ebit fan-out MGT packet injects a weight-n contiguous Pauli error (section II). The correlated structure is forced by the 1-ebit fan-out bottleneck and is independent of the teleportation interface. 2) Design rule. The well-known MWPM failure threshold at weight ⌈d/ 2⌉ [14 ], [ 15 ] implies a maximum safe packet size ncorr max (d) = ⌈d/ 2⌉ with a correlation-aware decoder, or nnaive max (d) = ⌊d/ 2⌋ without (section III). The correlation-aware decoder extends the bound by one because the correlated error appears as a single low-weight edge. 3) Numerical results. Detector-error-model (DEM)-level simulation with PyMatching [ 16 ] under a simplified circuit-level depolarising model (section IV) shows that a naive decoder cannot exploit the correlation: the LER gap between the naive and correlation-aware decoders grows with code distance at moderate-to-high γ. However, the standard MWPM decoder built from the packet circuit’s DEM closes the gap and extends the correctable packet size by one: the packet matches or surpasses the per-link sequential baseline (each link at rate pnet ) at d ∈ { 5, 7, 9}
+
+at moderate-to-high γ, with the advantage growing with both γ and d. No custom decoder construction is required: the gap closes because the natural DEM already encodes the packet structure. 
+
+Assumptions: Simplified circuit-level depolarising noise (gate noise only); the Eisert–Jacobs–Papadopoulos–Plenio (EJPP) protocol [ 2 ] for quantitative claims; rotated surface codes. Qualitative conclusions are interface-independent by structural argument. II. E RROR MODEL 
+
+Consider a sequence of consecutive CNOT gates, sharing the same control qubit. A same-control multi-gate teleportation 
+
+> arXiv:2607.01342v1 [quant-ph] 1 Jul 2026
+
+q
+
+t1
+
+t2
+
+t3Fig. 1. Fan-out decomposition of a same-control MGT packet of 3 CNOTs. A single non-local CNOT (q → t1) (red) is the only operation that crosses the network; all other gates are local fan-out CNOTs (blue). The total entanglement cost is one ebit, independent of n.
+
+(MGT) packet is formed by a single non-local CNOT (q →
+
+t1), preceded and followed by local fan-out CNOTs for 
+
+i = 2 , . . . , n , as shown in fig. 1. The non-local CNOT can for example be executed via the EJPP protocol [ 2], which consumes one ebit of entanglement and two rounds of classical communication. The total entanglement cost of an MGT packet is therefore one ebit, independent of the number of targets n.An X error on q before the non-local CNOT (q → t1)
+
+propagates as Xq → Xq Xt1 , and each subsequent local fan-out CNOT (t1 → tk) copies Xt1 onto tk. The result is a weight-
+
+(n+1) error Xq Xt1 · · · Xtn ; restricting to the target register, this is a contiguous weight-n X string. An X error on t1
+
+(between the non-local step and the fan-out) produces the same weight-n target string without q. Faults on downstream targets tk (k > 1) remain localised. Thus a single network failure injects a weight-n correlated X error; that is, an all-or-nothing event that mimics a logical error chain on the logical 
+
+¯X operator. Note that under depolarising network noise with per-Pauli rate pnet , the dangerous errors on control q include both 
+
+Xq and Yq = iX q Zq : the X component of Y propagates identically through CNOT (q → t1) to produce the same weight-
+
+n target string, whilst the Z component commutes forward and remains on q alone (see below). Therefore, the effective rate for producing the weight-n X string is 2pnet /3 rather than 
+
+pnet /3.
+
+Z errors behave asymmetrically and remain secondary: a Z
+
+error on q commutes through the non-local CNOT and stays localised, while a Z error on a downstream target tk propagates backward as a weight-2 localised error Zt1 Ztk . No Z error produces a weight-n string. The same-target MGT packet (dual configuration) has the opposite behaviour: a Z error on the target produces a weight-n Z string on the controls, while X
+
+errors remain benign. Without loss of generality, the remainder of this paper treats same-control MGT. The weight-n correlated error mechanism extends beyond CNOT to all controlled-Clifford gates. The Clifford property ensures that Pauli propagation is closed under conjugation, so a Pauli error on the control before the non-local step produces a weight-n Pauli string on the targets (the specific Pauli type may differ per gate, but the weight and contiguity are identical). Note that the weight-n correlated error is forced by the 1-ebit fan-out bottleneck, not by the non-local gate implementation protocol specifically: any 1-ebit scheme has a single classical-or-quantum crossing, and an error there is broadcast to all n targets via the local fan-out tree. The present analysis is therefore interface-independent. However, whilst the quantitative claims in this paper are computed for the EJPP protocol [ 2], other quantum interconnect approaches may carry additional resource overhead [11]. III. A NALYTIC DESIGN RULE 
+
+We established that a single quantum link failure in a MGT packet produces a weight-n correlated error, but how large can a packet be before this correlated error breaks fault tolerance? We derive the answer from the correctability condition [ 17 ] and the MWPM degenerate syndrome failure mechanism, leading to a design rule that depends on whether the decoder is built from the packet circuit’s DEM. 
+
+Decoder-independent correctability bound 
+
+A quantum code of distance d can correct any error of weight at most ⌊(d − 1) /2⌋ = ⌊d/ 2⌋ for odd d (as used through-out) [ 17 ]. For two weight-n errors Ea, E b with n ≤ ⌊ d/ 2⌋, the product E†
+
+> a
+
+Eb has weight at most 2⌊d/ 2⌋ = d − 1 < d and therefore cannot be a nontrivial logical operator. This bound is decoder-independent and geometry-independent: a packet of size n ≤ ⌊ d/ 2⌋ is correctable regardless of where the target qubits are located. 
+
+Naive decoder: failure at n = ⌈d/ 2⌉
+
+Now consider the failure mechanism at n = ⌈d/ 2⌉. Place a weight-n X error E = Q 
+
+> j∈S
+
+Xqj on a contiguous subset S of the minimum-weight logical ¯X operator L. Define its comple-ment E′ = Q 
+
+> j∈L\S
+
+Xqj on the remaining d − ⌈ d/ 2⌉ = ⌊d/ 2⌋
+
+qubits. Since E · E′ = ¯X commutes with all stabilizers, E and 
+
+E′ produce a degenerate pair of identical syndromes. Because 
+
+|E| = ⌈d/ 2⌉ exceeds the correctable weight ⌊d/ 2⌋ while 
+
+|E′| = ⌊d/ 2⌋ does not, a naive MWPM decoder (built from the base DEM, without the correlated-error edge) selects E′
+
+as the minimum-weight correction. The residual E · E′ = ¯X
+
+is a logical failure: an error of weight ⌈d/ 2⌉ is uncorrectable whenever its complement along a logical operator has weight 
+
+⌊d/ 2⌋. This mechanism is purely algebraic: it depends on the stabilizer structure, not on the matching-graph geometry. 
+
+Correlation-aware decoder: extension to n = ⌈d/ 2⌉
+
+The failure mechanism above assumes the decoder treats the weight-n correlated error as n independent gate-error edges. A correlation-aware decoder (which includes the correlated error as a single CORRELATED_ERROR edge) assigns it a weight of − ln pnet rather than n · (− ln pgate ). At n = ⌈d/ 2⌉,the complement E′ has weight ⌊d/ 2⌋ · (− ln pgate ) in the matching graph. Whenever γ ≥ 1, the single packet edge is cheaper: − ln pnet ≤ − ln pgate < ⌊d/ 2⌋ · (− ln pgate ), so the correlation-aware decoder prefers the correct correction E,leaving no residual. Computational confirmation at d=5 shows the correlation-aware LER at n=3 remains at the gate-noise floor ( ∼ 10 −4) for all γ ∈ { 1, 10 , 100 }, whilst the naive decoder fails ( LER → 0.01 –0.1). However, this extension is limited to n = ⌈d/ 2⌉: at n > 
+
+⌈d/ 2⌉, no lower-weight complement exists, and both decoders fail ( LER ∼ 10 −3–10 −1, growing with γ). 
+
+Design rule 
+
+Combining the bounds gives two design rules for MGT packet size: 
+
+nnaive 
+
+> max
+
+(d) = 
+
+ d
+
+2
+
+
+
+, ncorr 
+
+> max
+
+(d) = 
+
+ d
+
+2
+
+
+
+(1) for odd d, where nnaive  
+
+> max
+
+applies to a decoder built from the base DEM and ncorr  
+
+> max
+
+to a correlation-aware decoder. For 
+
+d = 5 , 7, 9, 11 , this gives ncorr  
+
+> max
+
+= 3 , 4, 5, 6. The decoder-independent correctability floor is ⌊d/ 2⌋ in both cases; exceed-ing ncorr  
+
+> max
+
+forces a degenerate syndrome with no lower-weight complement. The upper bound requires worst-case placement: all n targets lie on a minimum-weight logical operator. Off-chain placements produce shorter complements and are strictly easier to decode; we take the central on-chain placement as the canonical worst case throughout. Only one Pauli type per configuration is dangerous (weight-n X on targets for same-control, weight-nZ on controls for same-target); the benign type’s worst case is a weight-2 localised error, correctable for all d ≥ 5.For packets exceeding ncorr 
+
+> max
+
+, a hybrid k-ary fan-out tree restores fault tolerance at the cost of k ebits: each of k bridge qubits fans out to a subgroup of ≈ n/k targets, reducing the worst-case error weight from n to ≈ n/k , with kmin =
+
+⌈n/ ⌈d/ 2⌉⌉ interpolating between the 1-ebit fan-out ( k=1 ) and fully sequential teleportation ( k=n). IV. P ACKET FAULT -T OLERANCE PERFORMANCE 
+
+The packet architecture saves n−1 ebits per logical CNOT (section II), but a single network failure injects a corre-lated weight-n error. We compare the packet model (single 
+
+CORRELATED_ERROR (pnet ), weight n) against the per-link sequential baseline ( n independent X_ERROR (pnet ) per link), which is the physically honest comparison: pnet is the per-link rate (section II), and each ebit is an independent channel use. The ratio γ = pnet /p gate parametrises the network-to-gate noise ratio; pgate = 10 −3 throughout. When the decoder does not account for the correlated error, the relative cost grows with code distance at moderate-to-high 
+
+γ (see LER base in table I). However, this gap is an artefact of the decoder’s DEM, not of the packet architecture. The packet circuit’s DEM naturally includes the correlated error as a single edge (the correlated error appears automatically in the DEM’s construction). Build-ing the MWPM decoder from this DEM closes the gap: table I shows that the correlation-aware packet LER ( LER pkt ) drops                                                                                                                                                                                              
+
+> TABLE I PACKET LER WITH THE STANDARD MWPM DECODER ,USING THE CORRELATION -AGNOSTIC DEM ( LER base )AND THE CORRELATION -AWARE DEM ( LER pkt ), COMPARED WITH THE PER -LINK SEQUENTIAL BASELINE (LER seq ,nINDEPENDENT FAULTS AT RATE pnet
+> EACH ). T HE RATIO LER pkt /LER seq DROPS WELL BELOW 1AT HIGH γ,
+> WHERE THE SEQUENTIAL BASELINE ACCUMULATES nINDEPENDENT NETWORK FAULTS WHILE THE CORRELATION -AWARE DECODER ABSORBS THE SINGLE PACKET FAULT AT THE GATE -NOISE FLOOR . A LL AT
+> pgate = 10 −3;LER base AND LER pkt USE 10 8SHOTS (d=5 ,d=7 AT
+> γ≤10 ,AND ALL d=9 ), WHILE LER seq AND THE REMAINING POINTS USE
+> 10 6SHOTS .
+> dnγLER base LER pkt LER seq pkt/seq 5219.2×10 −57.1×10 −56.9×10 −51.03 5210 1.9×10 −47.4×10 −57.0×10 −51.06 5230 4.1×10 −47.7×10 −58.2×10 −50.94 52100 1.3×10 −37.9×10 −51.9×10 −40.41 7312.05 ×10 −55.9×10 −65.2×10 −61.13 7310 1.7×10 −45.3×10 −65.5×10 −60.97 7330 4.8×10 −45.2×10 −68.0×10 −60.65 73100 1.6×10 −35.9×10 −63.5×10 −50.17 9412.04 ×10 −54.4×10 −72.0×10 −60.22 9410 1.9×10 −44.2×10 −71.0×10 −60.42 9430 5.8×10 −44.0×10 −7<10 −5—94100 1.9×10 −33.5×10 −73.0×10 −60.12
+
+to the gate-noise floor, γ-independent, because the decoder absorbs the single packet fault. Against the per-link sequential baseline ( n independent faults at rate pnet each), the packet matches or surpasses sequential at moderate-to-high γ, with the advantage growing with both γ and d. At low γ (γ ≈ 1), the packet is slightly worse (ratio ≤ 1.13 ): the network noise is comparable to gate noise, so the packet’s n−1 additional local fan-out CNOTs contribute gate noise without the network savings yet being decisive, while the sequential baseline has no extra local gates. At high γ, the sequential baseline accumulates 
+
+n independent network faults whose contribution grows with γ,while the correlation-aware decoder absorbs the single packet fault at the gate-noise floor. All sweeps use pinned random seeds for reproducibility. V. C ONCLUSION 
+
+Multi-gate teleportation [ 3] saves n−1 ebits by packaging n
+
+remote CNOTs behind a single non-local crossing, at the cost of a correlated failure mode: a single network fault produces a weight-n Pauli error (section II). Two design rules govern fault-tolerant MGT for rotated surface codes. First , the packet size must satisfy n ≤ ncorr 
+
+> max
+
+(d) = ⌈d/ 2⌉ when using a correlation-aware decoder, or the stricter n ≤ nnaive 
+
+> max
+
+(d) = ⌊d/ 2⌋ with a naive decoder (section III). The correctability floor n ≤ ⌊ d/ 2⌋
+
+is decoder-independent; the failure threshold is MWPM-specific. Beyond ncorr 
+
+> max
+
+, a degenerate syndrome with no lower-weight complement forces both decoders to fail. Second , the decoder must be built from the packet circuit’s DEM, which encodes the correlated error as a single edge (section IV). This not only closes the LER gap but extends the correctable regime by one: the correlation-aware decoder corrects n = ⌈d/ 2⌉ because the single correlated-error edge (weight − ln pnet ) is cheaper than the complement path ( ⌊d/ 2⌋ independent gate-error edges) at any γ ≥ 1. Without this correlation awareness, the packet’s LER penalty grows with code distance at moderate-to-high γ;with it, the packet matches or surpasses the per-link sequential baseline at moderate-to-high γ—at worst slightly worse for low d and low γ (where the n−1 extra local fan-out gates dominate), decisively lower at high γ or high d, where the sequential baseline accumulates n independent network faults while the decoder absorbs the single packet fault. The correlated error originates from the 1-ebit bottleneck, not the teleportation interface: any scheme that packages n gates behind a single non-local crossing (EJPP, measurement-based, or CAT-state) shares the same failure mode, so the conclusions are interface-independent. For packets exceeding ncorr 
+
+> max
+
+, a k-ary fan-out tree restores fault tolerance at the cost of k ebits: each of k bridge qubits fans out to a subgroup of ≈ n/k targets, reducing the worst-case error weight from n to ≈ n/k , with 
+
+kmin = ⌈n/ ⌈d/ 2⌉⌉ interpolating between the 1-ebit fan-out (k=1 ) and fully sequential teleportation ( k=n). 
+
+Limitations and future work: The simplified depolarising model (gate noise only) underestimates absolute LER by 3–
+
+5× relative to the full four-channel model, though relative comparisons are unaffected. The packet’s LER advantage over per-link sequential appears at γ ≳ 10 (table I); at γ ≈ 1 the packet incurs a small penalty ( ≤ 13% ) from the extra local fan-out gates. Recent photonic experiments report teleported CNOT gate fidelities of ∼ 87% (error rate ∼ 10 −1) [ 18 ], and distributed architectures routinely consider entanglement-generation error rates of ∼ 5% [19 ]; with pgate = 10 −3, these correspond to γ ∈ [50 , 100] , squarely in the regime where packetisation outperforms sequential teleportation. Injecting the full pnet rather than 2pnet /3 makes the reported packet LER conservative. The simulation places the packet error at round 0, giving the decoder maximal syndrome information; a final-round injection would represent the hardest decoding scenario. The quantitative claims are computed for the EJPP protocol [ 2 ] under rotated surface codes with MWPM decoding; the qualitative conclusions extend by structural argument to any surface code and any minimum-weight decoder. The nmax 
+
+bound applies to any CSS code, but the simulation evidence is limited to rotated surface codes; extending to qLDPC codes [ 4 ], [ 6], biased noise, and full circuit-level noise is deferred to future work. Integrating the design rules into distributed circuit compilers [20], [21], [22], [23], [24] would test whether they translate into measurable resource savings. ACKNOWLEDGEMENTS 
+
+This work has been supported by the Mozilla Foundation. AI assistance (GLM-5.2, Mimo-V2.5) was used for copy-editing, proofreading, and formatting, and helped with numerical data generation and analysis. All scientific content and conclusions are the sole responsibility of the author. DATA AVAILABILITY 
+
+The detector error models (DEMs) underlying all simulations in this work are publicly available on Zenodo at 10.5281/zen-odo.21110299. REFERENCES [1] D. Gottesman and I. L. Chuang, “Demonstrating the viability of universal quantum computation using teleportation and single-qubit operations,” 
+
+Nature , vol. 402, pp. 390–393, 1999. [2] J. Eisert, K. Jacobs, P. Papadopoulos, and M. B. Plenio, “Optimal local implementation of nonlocal quantum gates,” Phys. Rev. A , vol. 62, p. 052317, 2000. [3] P. Andrés-Martínez and C. Heunen, “Automated distribution of quantum circuits via hypergraph partitioning,” Physical Review A , vol. 100, no. 3, 2019. [Online]. Available: http://dx.doi.org/10.1103/PhysRevA. 100.032308 [4] S. Shaw and N. Rengaswamy, “Networked realization of quantum ldpc codes,” 2026. [5] J. Stack, M. Wang, and F. Mueller, “Transversal fault tolerant distributed quantum computing operations,” 2025. [6] N. K. Chandra, E. Kaur, R. Nejabati, and K. P. Seshadreesan, “Distributed quantum error correction with bivariate bicycle codes in a modular architecture,” 2026. [Online]. Available: https://arxiv.org/abs/2605.04663 [7] N. Benchasattabuse, M. Hajdušek, and R. V. Meter, “Space-time tradeoffs of pauli-based computation in distributed qldpc architectures,” 2026. [Online]. Available: https://arxiv.org/abs/2605.03854 [8] E. Kaur, S. Pouryousef, N. K. Chandra, H. Shapourian, J. Zhao, R. Kompella, and R. Nejabati, “Impact of network constraints on fault-tolerant distributed quantum computing,” 2026. [9] D. Márton, P. Colmenarez, M. Bödeker, and M. Müller, “Lattice surgery-based logical state teleportation via noisy links,” 2025. [10] H. Jacinto, E. Gouzien, and N. Sangouard, “Network requirements for distributed quantum computation,” Phys. Rev. Res. , vol. 8, p. 013205, Feb 2026. [Online]. Available: https://link.aps.org/doi/10.1103/v9ln-c4v2 [11] M. A. Shalby, R. Wang, and D. Sedov, “Optimized noise-resilient surface code teleportation interfaces,” 2025. [12] S. W. Loke, “On distributed quantum computing with distributed fan-out operations,” 2026. [13] M. Gragera Garces and M. Haghparast, “Distributed quantum circuit optimisation: Evaluating global and local encodings,” 2026. [14] A. G. Fowler, “Optimal complexity correction of correlated errors in the surface code,” 2013. [15] S. Bravyi and A. Vargo, “Simulation of rare events in quantum error correction,” Phys. Rev. A , vol. 88, p. 062308, 2013. [16] O. Higgott and C. Gidney, “Sparse Blossom: correcting a million errors per core second with minimum-weight matching,” Quantum ,vol. 9, p. 1600, Jan. 2025. [Online]. Available: https://doi.org/10.22331/ q-2025-01-20-1600 [17] E. Knill and R. Laflamme, “Theory of quantum error-correcting codes,” 
+
+Phys. Rev. A , vol. 55, pp. 900–911, 1997. [18] K.-C. Chang, X. Cheng, F. Ribuot-Hirsch, M. C. Sarihan, Y. Chen, J. G. F. Flores, M. Yu, P. G.-Q. Lo et al. , “Quantum teleportation of an elemental silicon nanophotonic CNOT gate,” Optica Quantum , vol. 3, p. 381, 2025. [19] L. Jiang, J. M. Taylor, A. S. Sørensen, and M. D. Lukin, “Distributed quantum computation based on small quantum registers,” Phys. Rev. A ,vol. 76, p. 062323, 2007. [20] T. J. Yoder, E. Schoute, P. Rall, E. Pritchett, J. M. Gambetta, A. W. Cross, M. Carroll, and M. E. Beverland, “Tour de gross: A modular quantum computer based on bivariate bicycle codes,” 2025. [Online]. Available: https://arxiv.org/abs/2506.03094 [21] M. Bandini, D. Ferrari, S. Carretta, and M. Amoretti, “Optimized compilation for distributed quantum computing,” 2026. [Online]. Available: https://arxiv.org/abs/2602.24062 [22] R. Mengoni, W. Nadalin, M. Rennela, J. Rotureau, T. Darras, J. Laurat, E. Diamanti, and I. Lavdas, “Efficient gate reordering for distributed quantum compiling in data centers,” 2025. [Online]. Available: https://arxiv.org/abs/2507.01090 [23] K. Liu, B. Foxman, G.-L. R. Anselmetti, and Y. Ding, “Assessing system capabilities and bottlenecks of an early fault-tolerant bicycle architecture,” 2026. [Online]. Available: https://arxiv.org/abs/2604.20013 [24] F. Burt, K.-C. Chen, and K. K. Leung, “Entanglement-efficient distribu-tion of quantum circuits over large-scale quantum networks,” in 2025 IEEE International Conference on Quantum Computing and Engineering (QCE) , vol. 01, 2025, pp. 1111–1122.

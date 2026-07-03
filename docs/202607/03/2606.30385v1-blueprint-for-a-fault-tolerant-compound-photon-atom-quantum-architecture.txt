@@ -1,0 +1,738 @@
+Title: Blueprint for a fault-tolerant compound photon-atom quantum architecture
+
+URL Source: https://arxiv.org/pdf/2606.30385v1
+
+Published Time: Tue, 30 Jun 2026 02:26:12 GMT
+
+Number of Pages: 29
+
+Markdown Content:
+# Blueprint for a fault-tolerant compound photon–atom quantum architecture 
+
+Geva Arwas, 1 Doron Azoury, 1 Daniel Azses, 1 Orel Bechler, 1 Dana Ben Porath, 1 Barak Dayan, 1, 2 David Dentelski, 1 Yaron Jarach, 1 Nadav Kandel, 1 Aviad Landau, 1 Yair Margalit, 1 Alexander Poddubny, 1, 3 Michael Slutsky, 1, ∗ and Konstantin Yavilberg 1
+
+> 1
+
+Quantum Source Labs, Ness Ziona 74036, Israel 
+
+> 2
+
+AMOS and Department of Chemical Physics, Weizmann Institute of Science, Rehovot 76100, Israel 
+
+> 3
+
+Department of Physics of Complex Systems, Weizmann Institute of Science, Rehovot 76100, Israel 
+
+(Dated: June 30, 2026) Fault-tolerant quantum computing requires architectures that simultaneously address scala-bility, connectivity, and error correction under realistic noise constraints. We present a com-pound photonic–atomic quantum computing platform that uses cavity quantum electrodynamics (cavity QED) to realize near-deterministic entangling operations between flying photonic qubits and stationary atomic qubits. Photons enable long-range connectivity and massive scalability through measurement-based quantum computing (MBQC), whereas atoms provide reusable, near-deterministic resources for photon generation and entanglement. This combined approach solves the vast inefficiency of purely photonic quantum computing platforms, which rely on highly probabilistic operations. The central primitive is a symmetrized version of the Duan–Kimble photon–atom controlled-phase (CZ) gate, which is robust against experimental imperfections and facilitates high fidelity. We present a comprehensive platform based on single 87 Rb atoms coupled to optical cavities, including protocols for state preparation, measurement, photon generation, and entangling operations on timescales of tens of nanoseconds. At the architectural level, we show how large-scale cluster states suitable for MBQC can be generated efficiently with effectively unrestricted qubit connectivity and reduced resource overhead through atomic reuse. We analyze fault-tolerant operation based on the Raussendorf–Harrington–Goyal (RHG) lattice and introduce cluster-state generation schemes tailored to the compound hardware. A hardware-aware noise model captures asymmetric loss processes and correlated errors between the photonic and atomic subsystems. Logical memory simulations yield a photon-loss threshold of approximately 2.6% per physical gate, corresponding to ∼ 15% total loss over a photon trajectory. Beyond mem-ory, we demonstrate that the full Clifford gate set—logical Hadamard, phase, and CNOT—can be implemented transversally or fold-transversally within the RHG framework, achieving thresholds matching the value for the identity channel. We further propose two complementary routes to non-Clifford resource-state preparation, based on code teleportation and magic state cultivation, both reformulated within the foliated cluster-state architecture. 
+
+CONTENTS 
+
+I. Introduction 2A. Background 2B. The proposed solution, or why yet another modality? 2II. Physical layer 4A. The unit cell 4B. Theoretical model 41. Qubit space 42. Description of the model 4C. Entangling gate 6D. State preparation and measurement (SPAM) 7E. Single-photon generation 8F. Level engineering 8III. Fault tolerant memory channel 9A. Hardware architecture elements 9B. Fault tolerance and MBQC 9C. Generation schemes for compound photon–atom hardware 10 D. Error model 11 E. FT memory channel simulations 13  
+
+> ∗michael@qs-labs.com
+
+IV. Fault-tolerant quantum gates 14 A. Clifford gates 14 B. Magic state preparation in the MBQC framework 16 V. Summary 17 Acknowledgments 18 A. Simulation details for RHG memory and Clifford channels 18 B. RHG lattice as fault-tolerant memory channel 19 1. Construction 19 2. Foliation 19 a. Single-qubit teleportation 19 b. Surface-code foliation 19 3. RHG as a cluster state 20 4. Logical state 20 5. Error correction 21 C. Bond-loss propagation 22 D. Clifford set in RHG lattice 24 1. S gate 25 2. CNOT gate 26 References 26 
+
+> arXiv:2606.30385v1 [quant-ph] 29 Jun 2026
+
+2  
+
+> I. INTRODUCTION A. Background
+
+Utility-scale fault-tolerant quantum computers are expected to require millions of physical qubits in or-der to bridge the “quantum chasm” [1, 2] between the error rates of 10 −3–10 −4 of current state-of-the-art qubits and gates, to the < 10 −12 error rates re-quired for useful quantum applications [2, 3]. This necessitates encoding quantum information into fault-tolerant logical elements, using 10 2−10 3 physical qubits per logical element. Accordingly, algorithms involv-ing a few thousand high-quality logical qubits are ex-pected to involve ∼ 10 6 physical qubits on realisti-cally noisy hardware [2, 3]. Equally vital to the fault-tolerant operation is the connectivity, namely the abil-ity to perform entangling gates between distant phys-ical qubits [4]. High connectivity facilitates efficient quantum error-correction codes and fault-tolerant logi-cal gates, and provides greater flexibility in circuit com-pilation by removing spatial constraints on logical two-qubit gates [4–6]. Modern matter-based quantum computing platforms encounter substantial barriers to scalability for techni-cal and fundamental reasons. Superconducting-qubit platforms are challenged by the need to overcome the coupling constraints of planar architectures and go be-yond nearest-neighbor interactions [7–11]. In trapped-ion systems, motional-mode crowding and degraded gate performance constitute a major hurdle for en-tangling operations between distant qubits [12, 13]. Neutral-atom platforms offer reconfigurable connectiv-ity through physical qubit shuttling, but at a sub-stantial cost in clock speed. Shuttling operations and mid-circuit measurements result in quantum error cor-rection (QEC) round times of several milliseconds— roughly three orders of magnitude slower than in super-conducting platforms—and introduce a logical-depth overhead that grows with transport distance [14–16]. In addition, the number of matter-based qubits that can be maintained in a single controlled environment is limited. Scaling to millions of qubits therefore requires modular architectures, where reliable inter-module con-nections become an additional major challenge [17]. Photonic qubits, and specifically dual-rail photonic qubits — encoded, for example, in path or polariza-tion degrees of freedom — circumvent many of the scaling limitations inherent to matter-based platforms [18–20]. As photons do not interact with one another and couple only weakly to their environment, photonic qubits exhibit exceptionally low decoherence, requir-ing neither cryogenic temperatures nor ultra-high vac-uum. Single-qubit gates can be implemented with high fidelity using linear optical components [21–23], and op-tical fiber delay lines serve as near-noise-free quantum memories [24]. Once inter-qubit entanglement is es-tablished, qubit connectivity in photonic architectures is effectively unrestricted, considerably clarifying the path toward fault-tolerant quantum computation, us-ing measurement-based (MBQC) and fusion-based ap-proaches [25–29]. However, attaining this inter-qubit entanglement, namely the construction of the required entangled photonic states (known as cluster or graph states [30, 31]) is the main bottleneck of the photonic approach. Without the mediation of single quantum emitters, single photons cannot be deterministically generated or entangled, as linear optics operations and even Kerr-type interactions cannot provide the required nonlinearity [32, 33]. Single-photon sources based on parametric photon-pair generation [34–39] are inher-ently probabilistic, as are linear-optics based entan-gling gates [21, 40–43]. Furthermore, high-fidelity entangling operations require photons from indepen-dent sources to be mutually indistinguishable, imposing stringent demands on source quality [44, 45]. Over-all, scaling such platforms to utility-scale operation re-quires heralded protocols with active multiplexing, in-curring an overhead of roughly six orders of magnitude in source and gate resources [42, 46].  
+
+> B. The proposed solution, or why yet another modality?
+
+Our compound photon–atom architecture, summa-rized in Box 1, provides large-scale deterministic gener-ation and entanglement of photonic qubits through an atom-mediated gate-based approach [47]. The core unit of our system is a single 87 Rb atom trapped within the mode of a high-finesse optical cavity tuned near the D1
+
+transition. Harnessing high-finesse small mode-volume microresonators (see details in Sec. II A), the system operates in the high-cooperativity regime, where ap-propriately prepared atomic and photonic states can interact with near-unit probability [48, 49]. In partic-ular, a high-fidelity symmetric CZ gate is implemented using a modified Duan–Kimble protocol [47, 50, 51], assisted by external laser control fields, as detailed in Sec. II C. In the next section, we present in detail the princi-pal quantum protocols required to construct the build-ing blocks of fault-tolerant quantum computation from these core units. For now, we simply assume that these building blocks are already in place and focus instead on the high-level architectural features that make this system a promising approach to fault-tolerant quantum computation. In this architecture, a large fraction of the physical qubits are photonic. As in fully photonic approaches, computation is naturally carried out within the MBQC framework. However, near-deterministic photon–atom CZ gates allow cluster-state generation without the vast resource overhead required with probabilistic linear-optics entangling operations. In addition, the same atom-cavity system can serve as a near-deterministic single-photon source using vacuum-stimulated Raman adiabatic passage (vSTIRAP) [52–56], avoiding the low (∼ 10 −2) efficiency associated with heralded probabilis-tic single photon generation protocols. Furthermore, this architecture provides effectively unrestricted qubit connectivity, enabling flexible implementations of ad-vanced quantum error-correction codes, such as quan-tum low-density parity-check (qLDPC) codes [10, 57– 60], as well as nonlocal logical gates and optimized fault-tolerant circuit compilations. Moreover, the fact 3Compound photon–atom architecture. The RHG lattice (right) is assembled from pho-ton cycles (left): a single photon is generated on demand, subjected to a sequence of near-deterministic photon–atom CZ gates, and measured in the X basis with single-photon detectors. 
+
+Motivation. Useful fault-tolerant quantum com-putation will require millions of physical qubits operating well below threshold, together with the 
+
+connectivity to entangle distant qubits efficiently. These demands sit in tension across existing plat-forms. Matter-based qubits offer strong control and high gate fidelity but limited connectivity and, in the neutral-atom case, slow measurement cycles that bound the error-correction clock rate. Photonic qubits supply long-range connectivity and are naturally compatible with measurement-based quantum computation (MBQC), but the absence of deterministic entangling operations with linear optics necessitates highly probabilistic protocols, resulting in massive resource overhead. 
+
+Architecture. This work proposes a compound 
+
+photon–atom architecture that resolves this ten-sion by directly combining the two qubit types. The architecture exploits the complementary roles of photonic and atomic qubits. While both carry logical information, photons provide mod-ularity and long-range connectivity across the system, whereas atoms serve as reusable entan-glement sites and short-term quantum memo-ries. In our implementation, the atomic qubits are realized as single 87 Rb atoms trapped in high-finesse Fabry–P´ erot cavities. The central primitive is a near-deterministic photon–atom controlled-phase (CZ) gate implemented in the high-cooperativity cavity-QED regime via a dual-rail Duan–Kimble protocol. A symmetrized con-figuration suppresses loss-imbalance errors inde-pendently of cavity parameters, while a level-engineering scheme removes unwanted transi-tions. The same unit cell performs heralded state preparation and measurement via vacuum-stimulated Raman adiabatic passage and serves as an on-demand single-photon source, all on timescales of tens of nanoseconds. Since entan-glement is generated through direct photon–atom interaction, the architecture requires neither stringent photon indistinguishability nor addi-tional overhead to boost probabilistic gates. Cluster states for MBQC are assembled into the Raussendorf–Harrington–Goyal (RHG) lat-tice, whose bipartite structure maps naturally onto the compound photon–atom hardware. 
+
+Noise model and memory threshold. Ahardware-aware noise model captures asymmet-ric photon-loss processes and, crucially, bond-loss propagation : a lost photon corrupts neigh-boring stabilizer checks through the absence of scheduled entangling gates. A loss-conditioned detector-error-model formalism retains linear-ity while faithfully representing these correla-tions, enabling efficient minimum-weight perfect-matching decoding with optimal distance scaling. Memory simulations yield a photon-loss threshold of ≈ 2.6% per physical gate on the atomic corre-lation surface, corresponding to ≈ 15% total loss over a photon trajectory. 
+
+Logical gates. The full logical Clifford set— Hadamard, phase, and CNOT gates—is realized within the RHG framework using the native non-local connectivity of the platform. Each gate is implemented transversally or fold-transversally, achieves a threshold matching the memory chan-nel, and requires no extra logical qubits or error-correction rounds. We further present two com-plementary routes to non-Clifford T-gate imple-mentation, both formulated natively within the MBQC framework. 
+
+Outlook. By uniting photonic scalability and connectivity with matter-qubit controllability and gate operation in the tens of nanoseconds, the compound platform offers a concrete route to large-scale fault tolerance — with natural extensions toward qLDPC codes and a useful timing degree of freedom that, conferred by atomic short-term memory, relaxes switching and classical-processing requirements.  
+
+> Box 1. Compound photon–atom architecture overview.
+
+4that the atomic qubits can be reset and reused after measurement allows efficient resource optimization that minimizes the number of required cavities and the as-sociated optical-control infrastructure by more than an order of magnitude, as discussed in Sec. III C. Finally, a major advantage over neutral-atom and trapped-ion architectures is the ability to perform cavity-enhanced entangling gates and state-preparation and measurement (SPAM) operations on ∼ 10 ns timescales, yielding orders-of-magnitude speedups (es-pecially in measurement), placing this architecture in a regime comparable to superconducting qubits [61]. At the same time, the long coherence time of the atoms allows using them as dynamic memories, providing this compound architecture with a useful temporal degree of freedom, and accordingly relaxing requirements on control and classical processing.   
+
+> II. PHYSICAL LAYER A. The unit cell
+
+The unit cell is the elementary cavity-QED module of the architecture. It consists of a single 87 Rb atom trapped in an optical resonator, as shown in Fig. 1(a). The cell is complemented by a set of optical control fields required for coherent manipulation, atom trap-ping, and cooling. The unit cell acts as a reusable node for all principal operations of the platform, includ-ing atomic state preparation and measurement, single-photon generation, and photon–atom entangling gates. The cavity is a single-sided Fabry–P´ erot resonator, formed by two opposing micro-mirrors [62, 63]. One mirror is flat and serves as the input–output coupler, while the second mirror is curved with a radius of cur-vature of R ∼ 30 μm. The cavity is locked to the ru-bidium D1 transition at 795 nm, with a cavity length of approximately L ∼ 25 μm. The cavity supports the fundamental TEM 00 spatial mode with two degener-ate orthogonal polarization eigenmodes. In the parax-ial approximation, the spatial dependence of the mode amplitude is given by 
+
+E(r, z ) ∝ e−r2/w 2(z)
+
+w(z) sin 
+
+
+
+kz + kr 2
+
+2R(z)
+
+
+
+, (1) where w(z) and R(z) are the beam radius and wavefront radius of curvature of the mode at z, and k is the mode wave number. By choosing the input-output mirror to be flat we enable near-unity mode overlap between the incoming mode and the mode of the cavity, a crucial parameter in Fabry–P´ erot micro-cavities [64]. The decay of the cavity field in both modes is char-acterized by the rate κ = κe + κi, where κe denotes the cavity input-output coupling, and κi captures the in-trinsic loss mechanisms, specifically the scattering and absorption effects of the mirrors. Assuming realistic mirror coating performance [63], we can achieve val-ues as low as κi/2π ≈ 3 MHz. This corresponds to an optimal external coupling of κe/2π ≈ 360 MHz (see Sec. II C). We note that the above parameters and those that will follow are set according to the projected values of our system. To load an atom to the cavity, atoms are first cooled in a magneto-optical trap (MOT), and then loaded and further cooled into an optical dipole trap using 1D po-larization gradient cooling (PGC). The trap is a far-detuned 1D optical lattice formed by a lower frequency TEM 00 mode, providing strong confinement in all three dimensions.   
+
+> B. Theoretical model
+> 1. Qubit space
+
+The atomic qubit is encoded in two internal states of the ground-state manifold of the 87 Rb atom. In our implementation, we choose |F = 1 , m F = ±1⟩ as the computational basis states (see Fig. 1(a)). Once this choice is made, all other atomic ground-state lev-els are regarded as leakage. While, in principle, any two ground-state sublevels can serve as a qubit basis, our choice is motivated by the specific advantages and constraints of the cavity-QED platform. The selected atomic qubit states are energetically degenerate, there-fore can couple selectively to the two orthogonal cavity modes. This allows us a straightforward cavity-based (and therefore ∼ 10 ns-fast) implementation of the re-quired set of quantum operations. This choice never-theless involves tradeoffs. In typical neutral-atom ar-chitectures, the two mF = 0 hyperfine “clock” states are often preferred as the computational basis because of their resilience to magnetic noise and correspond-ingly longer coherence times. In our MBQC-based scheme, the atom performs only a short set of rapid en-tangling operations (see sec III C), and is not required to support extremely long coherence times. Accord-ingly, in this setting, the speedup enabled by having both atomic qubit states accessible to cavity-enhanced operations makes this tradeoff favorable. The photonic qubit is encoded in a dual-rail basis, in which a single-photon excitation occupies one of two orthogonal optical modes, |0p⟩, |1p⟩ each with a well-defined spatial path, polarization, and temporal mode. In our implementation, these modes are realized pri-marily as two distinct spatial rails. Single-qubit oper-ations are implemented by coherent mixing of the two rails using linear optical elements [21–23], while active optical components are used for fast routing. A ma-jor advantage of our compound-qubit approach is that all entangling operations are based on direct photon– atom interactions, and do not rely on interference be-tween independently generated photons such as fusion operations [28], therefore not requiring indistinguish-able photons.  
+
+> 2. Description of the model
+
+As described in Sec. II A, the fundamental building block of our system is a 87 Rb atom coupled to a Fabry– P´ erot cavity. The atomic level structure relevant to the protocols considered here, corresponding to the D1 line, is shown in Fig. 1(b). We denote the 5 S1/2 ground-state manifold by Mg , and the 5 P1/2 excited-state manifold 5                     
+
+> Figure 1. (a) The unit cell structure. A 1D PGC beam (light-green) loads and cools the atom into the optical lattice dipole trap (purple). The flat mirror is used for input-output coupling. Additional beams, such as π-polarized (red and green) are used for several protocols and level engineering. (b) 87 Rb atom level structure. The general structure of the D1line (5 S1/2↔5P1/2) is depicted. The hyperfine splitting of the ground and excited states are shown, together with the allowed dipole transitions, driven by π(red dashed arrow), and σ±polarized light (blue/orange arrows). The atomic qubit space
+> |F= 1 , m F=±1⟩in the ground state is also shown. The green arrows indicate the laser-induced coupling between the 5P1/2and the higher 6 S1/2states utilized for the level-engineering process.
+
+by Me. To characterize the optical coupling between these manifolds, we introduce the q-polarized atomic lowering operator: ˆDq = X
+
+> α∈M g
+
+X
+
+> β∈M e
+
+c(q) 
+
+> αβ
+
+|α⟩ ⟨ β| , (2) where q = 0 , ±1 correspond to π and σ± polarized tran-sitions, respectively. The coefficients c(q) 
+
+> αβ
+
+are the dipole matrix elements, normalized to the value of d — the reduced dipole moment of the D1 transition. We model the atom–cavity unit cell as an open quan-tum system subject to dissipative processes, including photon leakage from the cavity and atomic spontaneous emission. The dynamics are described by the Lindblad master equation ˙ρ = −i[H, ρ ] + Lκi [ρ] + Lγ [ρ]. (3) Here the cavity dissipation is captured by the Lκi term with intrinsic rate κi, while atomic spontaneous emis-sion is described by Lγ with field decay rate γ/ 2π ≈
+
+2.87 MHz. Throughout this work, we set ℏ = 1. The coherent atom–cavity dynamics are generated by the Hamiltonian 
+
+H = Ha + Hc + Hint + Hdrive (t). (4) The cavity Hamiltonian Hc includes two degenerate po-larization modes with the frequency ωc:
+
+Hc = ωc
+
+
+
+a†
+
+> +
+
+a+ + a†−a−
+
+
+
+, (5) where a+ (a−) is the annihilation operator for the σ+
+
+(σ−) mode. The atomic Hamiltonian Ha describes the internal energy-level structure of the atom, as shown in Fig. 1(b). The atom-cavity interaction has the form of a generalized Jaynes–Cummings Hamiltonian, written in the rotating-wave-approximation: 
+
+Hint = g
+
+
+
+a† 
+
+> +
+
+ˆD+ + a†− ˆD− + h.c. 
+
+
+
+. (6) Here, g = E0d is the atom–cavity interaction strength, with E0 the cavity field amplitude at the position of the atom (see Eq. 1). Using the geometrical and phys-ical parameters discussed above, by placing the atom where E0 is maximized, we obtain g/ 2π ∼ 360 MHz. We choose the atomic quantization axis to be aligned with the cavity axis, such that the cavity modes couple directly to the atomic σ± transitions. We have performed a comprehensive analysis which, in addition to the atom–cavity dynamics described above, accounts also for the quantized atomic motion within the trapping potential. This entails both the kinetic contribution associated with the trapped atom and the spatial dependence of the atom–cavity coupling strength, g(ˆr), arising from the inhomogeneous cavity field. While a detailed description of these effects is beyond the scope of the present work, our analysis in-dicates that they do not qualitatively alter the main results. Note that temporal and mode-dependent re-coil effects give rise to infidelity in systems involving photonic Bell-state measurements [65–67], and are not relevant in our setting. Finally, the various protocols implemented in our sys-tem involve a classical coherent drive applied to selected atomic transitions, described by Hdrive (t). We leave the explicit form of this term unspecified, as it depends on the particular protocol under consideration. It is useful to define a dimensionless quantity C =
+
+g2/κγ , known as the cooperativity, which quantifies the strength of coherent atom–cavity interactions relative to the intrinsic loss mechanisms and therefore serves 6as a key figure of merit for the system. Throughout this work, we use the notation C to denote the specific cooperativity of the transition relevant to each protocol, avoiding the need to specify explicitly the various dipole matrix elements. The interaction of single-photon pulses with the atom–cavity system is treated using the input–output formalism. We assume that the cavity couples to a con-tinuum of external electromagnetic modes through its partially transmitting mirror. We introduce the input and output field operators in vector form as ain (t) and 
+
+aout (t) respectively, and similarly for the cavity modes 
+
+a(t). Each vector has two components corresponding to the two degenerate photonic modes of the system. These obey the relation [68, 69]: 
+
+aout (t) = ain (t) + √2κea(t). (7) Owing to the symmetry of the cavity the choice of ba-sis is not unique, and any linear combination of the two modes can be a valid and useful choice which satisfies the above equation. The polarization chan-nels associated with these modes can be separated and routed into independent fibers or on-chip waveguides using polarization-selective optical components inte-grated into the surrounding photonic interface.  
+
+> C. Entangling gate
+
+The photon–atom CZ gate constitutes a central el-ement of our architecture and serves as the primary building block for the generation of cluster states in MBQC. Our implementation employs a dual-rail encod-ing, in which each rail represents a distinct basis state of the photonic qubit. Although the CZ gate is symmet-ric with respect to the choice of control qubit, the atom constitutes the natural control in our implementation. The ability to perform arbitrary single-qubit rotations on the photonic mode enables straightforward conver-sion of the CZ gate into a CNOT gate by applying Hadamard operations to the photonic qubit. The photon–atom CZ gate is implemented using a dual-rail variant of the Duan–Kimble scheme [50]. The 
+
+|1p⟩ rail is routed through the cavity and can interact with the atom, whereas the |0p⟩ rail bypasses the cav-ity and remains completely decoupled from the atomic state (see Fig. 2). The key idea is that the phase ac-quired by a photon reflected from the cavity depends on the atomic qubit state, due to selective coupling of the σ± cavity modes, each to only one of the two atomic qubit states. In the atom–cavity configuration considered here, this condition is not naturally satis-fied, because both qubit states are coupled not only to the edge excited states but also to the common ex-cited state |F ′ = 2 , m F = 0 ⟩ (see Fig. 1(b)). How-ever, these unwanted transitions can be efficiently sup-pressed through the use of a properly designed control field [47]. This level engineering scheme will be detailed in Sec. II F. Here, we restrict our analysis to the four atomic states interacting with the cavity and are rele-vant to the operation of the gate. When an incoming photon excites a cavity mode that is not coupled to an atomic transition, the reflection amplitude, which satisfies Eq. (7), is 
+
+rc = 1 − 2κe
+
+κ , (8) which corresponds to the bare-cavity response. In the ideal limit κe → κ, this expression approaches rc → − 1. If, however, the photon excites a cavity mode that in-teracts with the atom [70], the photon’s reflection am-plitude is given by 
+
+ra = 1 − 2κe
+
+κ
+
+ 11 + C
+
+
+
+, (9) which approaches ra → 1 in the limit of infinite coop-erativity. Choosing the |1p⟩ rail photon to couple to the σ−
+
+cavity mode, the photon–atom basis states are mapped such that |1p, 0a⟩ → ra|1p, 0a⟩ and |1p, 1a⟩ → rc|1p, 1a⟩.The states corresponding to the non-interacting rail, 
+
+|0p, 0a⟩ and |0p, 1a⟩, remain unchanged. In the ideal limit, this realizes the desired photon–atom CZ gate. The difference between the two reflection amplitudes, i.e. asymmetric photonic loss, can be a major source of infidelity. For instance, the state |1p, +a⟩ will be mapped to 
+
+|1p, +a⟩ → |1p, −a⟩ + rc + ra
+
+2 |1p, +a⟩ , (10) where the second term is a coherent phase error. One way to reduce this error is to choose a cavity coupling κe
+
+in which the scattering amplitudes are balanced, rc =
+
+−ra. This optimal coupling is given by 
+
+κopt  
+
+> e
+
+= κi
+
+p1 + Ci, (11) where Ci = g2/κ iγ is the intrinsic cooperativity. In this case, the CZ gate efficiency can be conveniently expressed in terms of Ci. For an incoming |+p⟩ =(|0p⟩ + |1p⟩)/√2 photon state, and assuming the non-interacting |0p⟩ rail is ideal, the efficiency is given by: 
+
+η = 12 1 + C2
+
+> i
+
+ 1 + √1 + Ci
+
+4
+
+!
+
+. (12) For our system parameters, this yields an efficiency of 
+
+η ≈ 98 .4%. While optimizing the cavity output cou-pling already suppresses the error due to asymmetric photonic loss (with respect to the atomic qubit state), a more robust approach is to use the symmetrized ver-sion of the protocol, described below. An inherent advantage of our configuration is that the degeneracy of the cavity modes enables several equivalent implementations of the CZ gate within the same system, depending on which cavity mode is ex-cited. This mode can be chosen via optical compo-nents operating on the cavity input, represented by Uin 
+
+in Fig. 2(b). After the interaction, the two modes are transformed by ˆUout , which, in the case of a single-sided cavity, corresponds to the backward-propagating transformation of ˆUin . Choosing the photonic |1p⟩ rail to excite the σ− cavity mode instead of the σ+ mode, effectively exchanges the roles of the atomic |0p⟩ and 
+
+|1p⟩ states. 7         
+
+> Figure 2. CZ gate description. (a) The atomic level struc-ture shows the two transitions relevant to the gate oper-ation. Each transition couples a qubit state to its corre-sponding excited state via σ−(orange) or σ+(blue), while transitions through the central excited state are suppressed by the level-engineering field, shown in green. (b) Schemat-ics of the quantum channels involved in the interaction. The
+> |0p⟩rail does not interact with the atom, whereas the |1p⟩
+> rail interacts with a superposition of the two cavity modes defined by the unitary transformation ˆUin .At the output the modes are transformed by ˆUout .For the CZ gate, ˆUin
+> is chosen such that the output channel is orthogonal to the input channel.
+
+A particularly appealing option is a symmetric CZ configuration [71], in which the incoming photon ex-cites the linear ( σ+ + σ−) polarization, such that both atomic qubit states interact with the cavity mode. Fol-lowing the interaction, the cavity photon will be in the orthogonal linearly polarized ( σ+ − σ−) mode, and re-flected to a different output channel. As before, the sign of the reflection amplitude is controlled by the atomic state. Here, the absolute values are the same for both states, such that |1p, 0a⟩ → rsym |1p, 0a⟩ and 
+
+|1p, 1a⟩ → − rsym |1p, 1a⟩, where rsym is given by 
+
+rsym = ra − rc
+
+2 = κe
+
+κ
+
+ C
+
+1 + C
+
+
+
+. (13) In this configuration, both atomic qubit states interact with the cavity symmetrically, which suppresses errors due to loss imbalance, regardless of the cavity and atom parameters. Lastly, the |0p⟩ rail, which was assumed ideal so far, also suffers loss due to optical propagation and routing elements. Any imbalance between the total losses of the two rails leads again to an effective phase error. To mitigate this effect, the photonic loss must be balanced according to the full optical path, taking into account all entangling gates the photonic qubit undergoes. One way to achieve this is to place some of the entangling operations on the |0p⟩ photonic rail. Logically, this op-eration is equivalent to conjugating these CZ gates by photonic bit flips, i.e. Xp CZ Xp. 
+
+> D. State preparation and measurement (SPAM)
+
+Preparation of the atom in the qubit subspace can be achieved via a measurement-based state preparation: a photon–atom Bell state [72, 73] is first generated using vSTIRAP, and the photonic qubit is then measured in the desired basis, thereby projecting the atom onto the corresponding target state. The protocol begins by optically pumping the atom to the |F = 1 , m F = 0 ⟩ state. A π-polarized pulse, resonant with the D1 transition F = 1 → F ′ = 2 then drives the atom to the excited state |F ′ = 2 , m F =0⟩, as can be seen in Fig. 3(a). The excited state is symmetrically coupled via the cavity to the two qubit states |F = 1 , m F = ±1⟩, resulting in the emission of a cavity photon. The photon’s polarization is thereby entangled with the atomic qubit, yielding the Bell state: 
+
+|ψp, ψ a⟩ = 1
+
+√2 (|σ+, 0⟩ + |σ−, 1⟩) , (14) where the |σ±⟩ photon states correspond to the out-going fields of the a± cavity modes. Measurement of the outgoing photon projects the atom onto the corre-sponding qubit state. In particular, measuring the pho-ton in the X basis prepares the atom in either |+⟩ or 
+
+|−⟩ . For cluster-state generation, both outcomes can be accepted, since they differ only by a known Pauli-frame update and therefore do not require post-selection. The preparation is naturally heralded: successful detection of the emitted photon signals successful state prepara-tion, while failed attempts can be identified and dis-carded. More generally, by choosing the photonic mea-surement basis appropriately, one can prepare arbitrary atomic-qubit states, such as T -state, without requiring direct single-qubit rotations on the atom. The choice of measurement basis can be achieved using optical com-ponents, represented by ˆU in Fig. 3(c), that operate on the cavity output. Atomic state measurement is performed by coher-ently mapping the atomic qubit onto a photonic qubit encoded in the cavity output modes. In this way, atomic-state measurement is reduced to photonic mea-surement. Similar to state preparation, atomic-state measurement is also based on a vSTIRAP process. The atom starts in the computational subspace and is then driven by a π-polarized pulse to the excited states |F ′ = 2 , m F = ±1⟩. These excited states are coherently coupled by the cavity modes to the state 
+
+|F = 1 , m F = 0 ⟩ (see Fig. 3(b)). A successful opera-tion emits a single photon while transferring the atom to |F = 1 , m F = 0 ⟩. The polarization of the emitted photon carries the atomic-qubit information and can subsequently be measured in any desired basis. This photon may also be routed into subsequent gate oper-ations before being detected. In the following sections, we will refer to this process as STAP (State Transfer from Atom to Photon). The atomic state preparation and measurement pro-tocols are complementary by design, which is expected to improve overall performance. First, both protocols use the same optical path to the detectors, eliminat-ing relative phase ambiguities between preparation and measurement photons that would otherwise lead to co-8herent errors. Second, the final atomic state following a successful measurement coincides with the required initial state for atomic preparation. This feature is nat-urally compatible with MBQC, where qubits undergo a repeated sequence of preparation, entanglement, and measurement.       
+
+> Figure 3. Atomic state preparation and measurement pro-tocols. In (a) the excitation of the driven atom (red arrows) from |F= 1 , m F= 0 ⟩is followed by a coherent transition (blue/orange) into the atom qubit–space. Similarly in (b), the driven atom transitions out of the qubit-space. Both processes are schematically summarized in (c), which shows the two emitted cavity modes (blue/orange). A unitary op-eration ˆUdictates the measurement basis.
+
+At the unit-cell level, the efficiency of the prepara-tion and measurement protocols is determined by the probability that the atom-cavity Raman process emits a photon to the desired output mode. For atomic mea-surement, the emission efficiency is given by [70] 
+
+η ≃ κe
+
+κCC + 1 . (15) The ratio κe/κ gives the probability that a cavity pho-ton exits through the designated output mode, while 
+
+C/ (1 + C) gives the probability of atomic emission into the cavity mode rather than into free space. For the state-preparation protocol, the corresponding expres-sion is obtained by formally replacing C → 2C, due to the two cavity-enhanced decay paths. The end-to-end efficiencies of the full protocols additionally include propagation loss, routing loss, and detector inefficiency. Using the projected cavity-QED parameters presented in Secs. II A and II B, the cavity-limited contribution corresponds to efficiencies of η ≈ 96 .9% for state prepa-ration and η ≈ 97 .6% for atomic state measurement (taking into account the different C of the two pro-cesses). A major source of error in the SPAM protocols is multi-photon emission from the cavity. Ideally, each successful attempt emits exactly one photon and leaves the atom in the desired final state. However, in this configuration the atom may be re-excited within the same optical pulse after a photon has already been emitted, leading to multi-photon events and/or resid-ual population outside the intended state. Such multi-photon events can produce unheralded preparation or measurement errors if only one of the emitted pho-tons is detected. These errors can be significantly mit-igated using multi-stage STIRAP schemes and opti-mized pulse shapes that suppress re-excitation path-ways while preserving high efficiency, as confirmed by our analysis, which is beyond the scope of this manuscript.  
+
+> E. Single-photon generation
+
+The atom–cavity unit cell can also serve as a single-photon source based on vSTIRAP, in a Λ configu-ration [55]. The atom is initially prepared in the state |F = 2 , m F = 2 ⟩ by optical pumping. A π-polarized pulse drives the transition to the excited state 
+
+|F ′ = 2 , m F = 2 ⟩, which is then coherently transferred to |F = 1 , m F = 1 ⟩ while emitting a photon into the 
+
+σ+ cavity mode. Since the initial and final states dif-fer in energy by approximately 6 .8 GHz (see Fig. 1(b)), re-excitation is strongly suppressed, enabling the gen-eration of high-purity single-photon pulses. The effi-ciency, which is given by the same expression as for state preparation in Eq. (15), evaluates to η ≈ 98 .4%. To calculate this we used the cooperativity relevant to the transition in the process above. The temporal mode of the emitted photon is con-trolled by the shape of the drive pulse. However, the cavity-QED parameters set a lower limit on the pulse length. If the drive is too fast, the atom–cavity dy-namics can no longer follow adiabatically, the temporal mode of the emitted photon is distorted, and the gen-eration efficiency is reduced. The relevant requirement is that the pulse width τ remains long compared with the slowest response time of the system, 
+
+τ ≫ max 
+
+ 1
+
+κ , κg2
+
+
+
+, (16) which is 1 /κ in the strong-coupling regime, and κ/g 2 in the fast cavity regime. Note that as long as this limit is met, neither the exact shape of the pulse nor its tempo-ral purity affect the entangling gate fidelity [47]. Using the parameters presented in Secs. II A and II B, this re-quirement is satisfied for τ ∼ 10 ns. A similar photonic pulse-length requirement applies across the platform, including in atom state preparation, measurement, and the CZ gate. In practice, this condition is naturally sat-isfied, since the same unit cell is used for all protocols, and therefore operates on a common set of characteris-tic timescales. Furthermore, the fact that all modules are identical enables changing their roles dynamically, depending on higher-level design considerations.  
+
+> F. Level engineering
+
+Here we use the term level engineering to denote the controlled reshaping of the atom excited-state struc-ture by an auxiliary control field. In our implementa-tion, this is achieved optically, by coupling the 5 P1/2
+
+manifold to the higher-lying 6 S1/2 manifold using a 1324 nm laser [47]. This manifold has a similar hy-perfine structure to the 5 S1/2 (see Fig. 1(b)), and a linewidth ˜ γ/ 2π ≈ 1.73MHz. Specifically, we apply a 9
+
+π-polarized field resonant with the F ′ = 2 → F ′′ = 1 transition. This hybridizes the mF = −1, 0, 1 states of the two manifolds, producing a dressed-state splitting of order ±Ω, where Ω is the Rabi frequency induced by the control field. By contrast, the mF = ±2 states are only weakly affected, acquiring a small shift of order 
+
+−Ω2/δ due to their off-resonant coupling to the F ′′ = 2 levels, where δ ≈ 1.6 GHz is the hyperfine splitting of 6S1/2.For the CZ gate, the goal of this procedure is to suppress the unwanted transitions from the qubit sub-space to the |F ′ = 2 , m F = 0 ⟩ level, while retaining the desired coupling to |F ′ = 2 , m F = ±2⟩. In the presence of the level-engineering field, the correspond-ing cooperativity of the unwanted transition is effec-tively reduced to C → C γ/γ eff with γeff = γ + Ω 2/˜γ,similar to what occurs in electromagnetically induced transparency configuration [74]. Consequently, the un-wanted atomic transition becomes effectively decoupled once Cγ/γ eff ≪ 1, or equivalently when Ω ≫ pCγ ˜γ. (17) With our working parameters, Ω /2π ∼ 200 MHz will satisfy this condition. Such a level-engineering scheme has already been demonstrated experimentally in our system, and will be reported in a forthcoming publica-tion.  
+
+> III. FAULT TOLERANT MEMORY CHANNEL
+
+With the physical properties of individual qubits and gates established, we now turn to how these compo-nents are assembled into a functional quantum com-puting architecture. In this section we describe the hardware elements, cluster-state generation schemes, and fault-tolerance framework that together connect the physical layer to reliable logical computation.  
+
+> A. Hardware architecture elements
+
+Fig. 4 illustrates the principal architectural ele-ments required to implement measurement-based quan-tum computation (MBQC) on compound photon–atom quantum hardware. As described in Sec. II A, unit cells (UCs) implement entangling gates, generate single photons, and per-form state preparation and measurement (SPAM) on trapped atoms. Each UC has one input and one output, and UCs are interconnected by routing manifolds that dynamically realize the connectivity patterns required for cluster-state generation. These cluster states can be generated in different ways depending on atomic-resource usage, error budget, computational through-put, and other architectural trade-offs. Sec. III C presents two representative generation schemes. Although the bipartite photon–atom cluster states considered here are symmetric with respect to the two qubit types, their generation is most naturally described from the photonic perspective. A typical 
+
+photon cycle consists of: (1) single-photon generation; (2) a sequence of photon–atom controlled-phase (CZ) gates; and (3) photon measurement in the X basis using single-photon detectors (SPDs). After traversing a UC, a photon may be routed to an-other UC, a delay line, or an SPD. The routing configu-ration changes between photon cycles and, when delay lines are used, may also change within a cycle. Each atom participates in multiple photon cycles. Once all entangling operations involving a given atom have been completed, its state is transferred to a photon, as de-scribed in Sec. II D. The photon is then routed to an SPD for measurement. The classical control system manages routing, pho-ton generation, atom preparation and measurement, and orchestration tasks such as monitoring and diag-nostics. In parallel, the SPDs produce a large stream of measurement data, which is processed into error-correction syndromes and supplied to real-time decod-ing algorithms running on high-performance classical hardware, as discussed below.  
+
+> B. Fault tolerance and MBQC
+
+Fault-tolerant quantum error-correcting codes allow quantum computers to compute reliably despite imper-fections in qubits, gates, and measurements. In a fault-tolerant scheme, errors are repeatedly detected and cor-rected so that they neither propagate uncontrollably nor accumulate beyond the code capacity. When the physical error rate is below threshold, increasing the code size can in principle suppress logical errors to the level required for large-scale computation, thereby con-necting the noisy physical layer to reliable logical com-putation. The basic fault-tolerant primitive is a logical memory channel: a protected identity operation implemented either in the circuit-based (CBQC) or measurement-based (MBQC) model [75]. In matter-based architec-tures, this primitive is usually realized in CBQC by repeated stabilizer measurements on persistent qubits. These measurements extract error syndromes while pre-serving the encoded logical information. Photon-rich architectures are more naturally de-scribed in MBQC. Since photons propagate, cannot be measured repeatedly, and cannot be stored for long times without loss, computation is performed by preparing a large entangled cluster state and measuring it layer by layer [29]. Each measured layer is consumed, while the encoded quantum information is teleported forward, and products of measurement outcomes pro-vide the syndrome information needed for fault toler-ance. Foliation provides the bridge between these two pic-tures [76]: repeated syndrome-measurement rounds in CBQC are represented in MBQC as successive mea-surements of a three-dimensional cluster state, through which logical information is teleported forward while error information is accumulated and decoded. In this representation, data qubits carry the propagated logical information, while syndrome-like (SL) qubits are measured to produce the error-correction checks. The canonical example is the Raussendorf–Harrington– 10   
+
+> Figure 4. High-level hardware architecture concept of a photon–atom MBQC system. Unit cells generate photonic qubits, mediate photon–atom entanglement, and perform atomic SPAM operations. Reconfigurable routing manifolds and delay lines establish the temporal and spatial connectivity required for cluster-state generation. Photons are ultimately measured by single-photon detectors, while a classical control and processing layer coordinates system operation and performs real-time error-correction decoding based on detector outcomes.
+
+Goyal (RHG) lattice [27, 77], which realizes the surface code as a three-dimensional cluster state, as shown in Fig. 5. Its high iid measurement loss threshold of ap-proximately 25%, low node degree, compatibility with optimized decoders, and well-established framework for logical operations make it a natural candidate for our architecture. Appendix B reviews the RHG construc-tion, foliation structure, logical encoding, and error-correction procedure.  
+
+> C. Generation schemes for compound photon–atom hardware
+
+A generation scheme specifies how the target clus-ter state, here the RHG lattice, is assembled from the native hardware operations. The physical qubits are atoms and photons, and the allowed operations are atom initialization, photon generation, photon– atom CZ gates, photon measurement, and STAP. The STAP operation transfers the state of an atom to an emitted photon, for example to enable atomic mea-surement (see Sec. II D). Photons may also be routed through switches and, when required, through single-qubit gates. Throughout this work, we refer to all of these elementary operations collectively as physical gates . We model all gates as lossy except atom initial-ization, where loss is heralded and corrected before any interaction. Optical path loss between gates is assigned to the subsequent gate. We use a bipartite generation scheme , assigning one part of the cluster-state graph to photons and the other to atoms, as shown in Fig. 5(b). Each bulk photon is initialized, interacts with four atoms via CZ gates, and is measured. Atomic qubits participate in the corre-sponding CZ interactions and are measured indirectly: their final states are first transferred to emitted photons using STAP and then measured. The gate ordering is constrained by the different operational constraints of photons and atoms. Photons complete their CZ in-teractions in a single pass, whereas atoms can partic-ipate in only one CZ gate at a time. Based on these gate-scheduling constraints, we implement the bipartite generation scheme approximately layer by layer. Two RHG layers require about six photon cycles, where one cycle is the interval in which a photon completes all of its gates, as shown in Fig. 6. The scheme uses O(d2)active atoms, with measured atoms recycled in later steps. The parameter d denotes the number of qubits along each spatial row or column and sets the error-correction distance of the RHG lattice. After STAP, the atom is left outside the qubit sub-space in the initial state used for the atomic state-preparation protocol. To recycle an atom, it is then reinitialized in a fully heralded process to |+⟩ or |−⟩ ,as described in Sec. II D. The additional delay is not limiting, because unmeasured atoms can serve as short-term memory while recycled atoms complete reinitial-ization. This short-term memory also provides flex-ibility in the generation schedule: photon generation and routing can be delayed until the relevant atomic resources are ready, relaxing the required routing and switching rates. Inspired by interleaving ideas from Refs. [24, 28], the atomic space overhead can be reduced from O(d2)to O(d) using the interleaved generation scheme illus-trated in Fig. 7. This scheme combines STAP opera-tions, which transfer atomic states to photons before 11                
+
+> (a) (b) Figure 5. A d= 3, t= 3 RHG construction starting and ending with dual layers, corresponding to logical |0⟩Linitialization and measurement. Circles denote qubits. Dashed gray lines indicate CZ gates in the time direction, while solid gray lines indicate CZ gates within each spatial layer. The number of data qubits along each spatial row or column is d, the error-correction code distance, and tis the number of spatial layers stacked along the time direction. The horizontal shaded cap indicates a logical correlation surface, whose value is determined by the combined X-basis measurement outcomes of the glowing qubits. (a) Generic data–SL coloring: orange qubits are data qubits and red qubits are syndrome-like (SL) qubits. (b) Bipartite photon–atom coloring: cyan qubits are photons and dark-blue qubits are atoms. In the configuration shown, the correlation surface is supported on atoms, although the complementary photon-supported surface can be chosen instead. See Appendix B for details.
+
+all required CZ gates are complete, with delay lines that store the emitted photons between subsequent CZ interactions. The lattice is generated row by row, so only O(d) atoms are active at any time. Conceptually, once an atom in row r completes its role, it is reused in row r + 1. Physically, this is implemented by re-configuring the optical switches. To avoid delays due to atomic reinitialization, one may use O(d) additional atoms, prepared in parallel during row generation. As shown in Fig. 7, each row of SL qubits (defined in Appendix B) is initialized as atoms before its first CZ interaction, remains atomic throughout its CZ gates, and is then measured, freeing the atoms for reuse. The data-qubit sequence is best described in terms of two adjacent layers. Data qubits from layer n exit the delay line as photons and interact both with the neighboring SL row in layer n and with the corresponding row of data qubits in layer n + 1; the latter are initialized as atoms before these inter-layer CZ gates. The layer-n
+
+data qubits are then measured as photons, while the atomic layer-n+1 data qubits are converted to photons and routed into delay lines. The freed atoms are reused in the next row. This sequence repeats row by row and layer by layer. The initial layer in Fig. 7 should be understood as beginning from the photonic stage of the cycle. This reduction in atomic footprint comes at the cost of optical memory. The scheme requires one delay line per data qubit, each of length O(d), since a layer con-tains d rows and each row requires constant processing time. Thus, the O(d) reduction in active atoms is ex-changed for an O(d) delay-line overhead. Since delay lines are lossy, this can increase photon loss and the logical error rate, especially at larger code distances.  
+
+> D. Error model
+
+The compound architecture considered here carries quantum information jointly in photonic and atomic qubits, which are subject to different noise mechanisms and error-propagation pathways. The error model must therefore distinguish between photonic and atomic de-grees of freedom while also accounting for correlated errors arising from photon–atom interactions. Photonic qubits are modeled as lossy during prop-agation, cavity coupling, and measurement. We ne-glect photonic Pauli noise in this work because pho-ton loss is expected to be the dominant error mecha-nism [44, 78, 79]. In addition, our photon–atom CZ protocol does not rely on multi-photon interference be-tween indistinguishable photons, reducing sensitivity to the mode-mismatch errors that are central in linear-optical photonic schemes. Atomic loss and intrinsic atomic noise are also neglected, as they are expected to be much rarer than photon loss, and are left for fu-ture study. Nevertheless, photon loss can still induce effective atomic errors. Atomic readout is performed by transferring the atomic state onto a photonic one before measurement, so loss of the photon acts as a readout error. Similarly, photon loss during a photon–atom CZ interaction can remove an intended bond and induce correlated Pauli errors on neighboring atoms. We distinguish between physical qubit loss , such as photon loss in an optical path [80–83], and bond loss , in which an intended entangling operation fails [84, 85]. In our architecture, physical photon loss can induce bond loss: if a photon is lost before completing its sched-uled CZ gates, the remaining bonds involving that pho-ton are absent. These missing bonds distort neighbor-ing stabilizers, randomize syndrome information, and corrupt the associated correlation surfaces, an effect 12 T=5 
+
+−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−→
+
+Time 
+
+Figure 6. Time progression of the bipartite generation scheme. Time advances from left to right within each row and from the upper row to the lower row. Six consecutive time steps are shown. At each step, three adjacent RHG layers are displayed, labeled from left to right as n, n + 1, and n + 2. Empty lattice sites are shown in light gray, atoms in dark blue, and photon qubits in cyan. Cyan edges indicate CZ gates performed in the current time step, while black qubits and edges indicate measured qubits and previously performed CZ gates. Because each atom participates in at most one CZ gate per time step, the intra-layer CZ gates in layer n are completed over two photon cycles, T = 1 , 2. The data qubits in layer n + 1 then perform four CZ gates over T = 3 , . . . , 6: two intra-layer gates within layer n + 1 and two inter-layer gates connecting to layers n and n + 2. The SL qubits in layer n + 2 are then introduced as photons, and the sequence repeats. 
+
+−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−→
+
+Time 
+
+Figure 7. Time progression of the interleaved generation scheme. Time advances from left to right. Four consecutive time steps are shown, each involving two adjacent RHG layers: layer n on the left and layer n + 1 on the right. Empty lattice sites are shown in light gray, atoms in dark blue, and photon qubits in cyan. Cyan edges indicate CZ gates performed in the current time step, while black qubits and edges indicate measured qubits and previously performed CZ gates. Photons stored in delay lines are shown in purple, with delay-line symbols above them. Data photons from layer n perform CZ gates with neighboring atomic SL qubits and atomic data qubits in layer n + 1. The layer-n + 1 atomic data qubits are then transferred to photons and routed into delay lines. 
+
+we call bond-loss propagation . Although known era-sures can be partially handled by modifying the affected checks, bond-loss propagation requires an explicit loss-aware model because it can corrupt neighboring checks without producing a direct measurement signature. See Appendix C for a stabilizer-level explanation. Many approaches approximate bond loss by intro-ducing independent Pauli errors on qubits that partic-ipate in entangling gates with a lost qubit. Although simple, such approximations generally overestimate the damage caused by a missing bond [86–88]. More refined loss-aware methods condition the decoder on the loca-tion and timing of loss events [89–91]. See Appendix C for more details on the simulation and decoding of bond 13 loss. In this work, we exploit two key architectural fea-tures: photon loss is heralded at measurement, and each photon interacts with only a bounded number of atoms before being measured. Following Ref. [89], we partition each photon trajectory into intervals between successive CZ gates and assign a conditional probability that the photon was lost in each interval. Conditioned on loss in a given interval, all later CZ gates involving that photon are replaced by correlated Pauli Z errors on the corresponding neighboring atoms, consistent with the loss-propagation analysis of Refs. [92, 93]. This replacement can be understood as an effective Pauli representation of the uncertainty induced by photon loss. Since photon loss can be treated as an unobserved projection, the photon state after the loss event is un-known. If the photon would subsequently have par-ticipated in CZ gates, this unknown state propagates through those gates as correlated Z-type uncertainty on the neighboring atoms. For details, see Appendix C and Fig. 20. This construction yields a detector error model in which loss-induced correlations are represented by con-ditional correlated Z errors. Because each photon has bounded degree, the induced errors remain spatially and temporally local, avoiding the severe effective-distance degradation associated with more pessimistic loss approximations. Numerically, we sample heralded loss configurations and, for each configuration, sample the associated conditional correlated-Z error. As shown in Fig. 21, this loss-aware model preserves optimal dis-tance scaling in our simulations.  
+
+> E. FT memory channel simulations
+
+We begin with fault-tolerant memory-channel simu-lations of the RHG lattice to evaluate our loss-aware decoder under the circuit-level noise model. The log-ical qubit is encoded in the three-dimensional cluster state and propagated for d layers. Logical failure is determined by comparing the inferred logical observ-able with the ideal outcome, and the logical error rate (LER) is estimated as a function of the physical loss probability and code distance d.The RHG lattice is bipartite, and therefore naturally matches the photon–atom structure of our hardware: one partite set can be assigned to photons and the other to atoms, as shown in Fig. 5. In this placement, the two complementary logical correlation surfaces can be cho-sen to be supported on different physical subsystems, one on photons and the other on atoms. Throughout this section and Sec. IV A, we report results for the bi-partite generation scheme described in Sec. III C and illustrated in Fig. 6. We next use the circuit-level error model summarized in Table I. All cavity-mediated operations and photon detection are assigned a single photon-loss parameter p.For cavity-mediated operations, p represents an effec-tive loss probability combining the cavity efficiency η of Eq. 15, averaged over different gates, with optical path losses between consecutive gates. Photon-detection loss is set to the same value for simplicity. Since atomic measurement consists of STAP followed by photon de-tection, we assign it a loss probability of 2 p.         
+
+> Photon Atom Initialization p0CZ (photon–atom) p0STAP –p
+> Measurement p2p
+> Table I. Error model used in the threshold simulations. We focus solely on photon loss as this is the most probable error mechanism. For simplicity, all gates are modeled with a single photon loss parameter p, except atom measurement as it includes both STAP and photon detection.
+
+We first consider a logical correlation surface sup-ported entirely on photonic qubits. Since atoms are assumed not to be lost during CZ gates, photon loss does not induce bond-loss propagation on this sur-face. Loss events are therefore effectively iid-like, with probabilities determined by the number of lossy opera-tions involving each photon. A bulk photon undergoes six lossy operations: initialization, four CZ gates, and measurement. Thus, the effective loss probability is 
+
+peff = 1 − (1 − p)6 = 6 p − 15 p2 + O(p3). Equating this with the RHG iid loss threshold of approximately 25% gives p ≃ 4.7%, consistent with the threshold observed in Fig. 8(a). The complementary case is a correlation surface sup-ported entirely on atomic qubits. Here, errors arise mainly from photon-loss-induced bond loss, with an ad-ditional contribution from measurement loss, yielding a lower threshold of ∼ 2.6% per physical gate, as shown in Fig. 8(b). Although photons are lossy and atoms are not, the photonic correlation surface performs better because photon loss is directly heralded, whereas the induced bond-loss location is not. Moreover, a photon’s total loss probability scales with its number of opera-tions, while the effective bond-loss probability seen by an atom scales with the operations of its neighboring photons, which is larger. For a general logical state, the correlation surface spans both atomic and photonic qubits. To probe this case, we simulate logical Y -state memory. Since the photonic threshold is substantially higher, logical errors from the photonic part of the correlation surface are negligible at the atomic threshold. Consequently, both the overall threshold and the LER are dominated by the atomic component, as shown in Fig. 8(c). The photon-loss threshold of ∼ 2.6% per physical gate is comparable to the predicted ∼ 97–98% effi-ciencies of the protocols presented in Sec. II A. How-ever, those efficiency estimates do not include optical path loss and finite-fidelity effects, and practical fault-tolerant computation requires operation below thresh-old. These considerations motivate further work on op-timized hardware protocols, improved decoding strate-gies, and error-correction schemes better matched to the hardware noise model. 14 0.0400 0.0425 0.0450 0.0475 0.0500 0.0525 0.0550     
+
+> Circuit loss probability p
+> 10 −2
+> 10 −1
+> Logical error rate
+> d= 7
+> d= 9
+> d= 11
+
+(a) 0.020 0.022 0.024 0.026 0.028 0.030 0.032     
+
+> Circuit loss probability p
+> 10 −3
+> 10 −2
+> 10 −1
+> Logical error rate
+> d= 7
+> d= 9
+> d= 11
+
+(b) 0.020 0.022 0.024 0.026 0.028 0.030 0.032     
+
+> Circuit loss probability p
+> 10 −3
+> 10 −2
+> 10 −1
+> Logical error rate
+> d= 7
+> d= 9
+> d= 11
+
+(c) Figure 8. Memory simulation of the RHG lattice under the circuit-level loss model of Table I for (a) logical X with a photon-supported correlation surface, (b) logical X with an atom-supported correlation surface, and (c) logical Y ,whose correlation surface spans both atomic and photonic qubits. The photon-supported case has a higher threshold, consistent with an effectively iid loss process over the six lossy operations of each bulk photon. The atom-supported case is dominated by photon-loss-induced bond loss during photon–atom interactions, giving a threshold of approxi-mately 2 .6% per physical gate. Near this threshold, the logical Y simulation is dominated by the atomic component and closely matches the atom-supported logical X case. The y-axis is logarithmic to make low-error differences visible. 
+
+IV. FAULT-TOLERANT QUANTUM GATES A. Clifford gates 
+
+Clifford gates map Pauli operators to Pauli oper-ators under conjugation and are therefore central to stabilizer-based quantum error correction. A standard route to fault-tolerant logical Clifford gates is transver-sality, where each physical qubit in a code block un-dergoes an independent single-qubit operation or in-teracts only with the corresponding qubit of another block. This locality prevents single faults from spread-ing within a code block. However, not every code ad-mits transversal implementations of the full Clifford group, since this depends on the code symmetries, sta-bilizers, and boundary conditions. In the surface code, Clifford operations can be implemented in an almost transversal manner: X, Z, and CNOT are realized through local or pairwise interactions, while Hadamard (H) and phase ( S) require folded or geometric con-structions, effectively acting transversally on a rotated or mirrored code [94–99]. We extend these ideas to the RHG cluster-state architecture, where the photon-mediated nonlocal connectivity of compound photon– atom hardware enables logical H, S, and CNOT within MBQC. As detailed in Appendix D, all three gates are realized through gate-specific variants of a unified connectivity-based strategy. The logical Hadamard gate, shown in Fig. 9, is im-plemented by introducing a domain wall in the RHG lattice. Instead of inserting a primal layer after a dual layer, we insert a second dual layer with CZ connec-tions rotated by 90 ◦. This exchanges the logical XL and 
+
+ZL correlation surfaces, realizing the logical Hadamard without additional qubits or gates beyond those of the memory construction. Consequently, its logical error rate is essentially indistinguishable from that of the identity channel [100]. The logical phase gate S, shown in Fig. 10, is im-plemented by a fold-transversal construction. Data qubits in the primal layer are connected by CZ gates to their mirror images across the diagonal, while di-agonal qubits are measured in an alternating Y + or 
+
+Y − basis. This implements XL → YL = iX LZL. On the gate layer, primal checks are redefined by incor-porating SL qubits from the dual checks, which can-cel the additional Z contributions acquired by pri-mal data qubits from the CZ and S operations. The dual checks remain unchanged. Because the redefined checks include additional SL qubits, the resulting syn-drome graph contains hyperedges that are not directly compatible with MWPM. Following Refs. [101, 102], these hyperedges can be decomposed into matching-compatible subgraphs, enabling efficient MWPM de-coding. See Appendix A for details. Compared with state injection, which is non-fault-tolerant and requires either doubling the number of qubits per layer or adding O(d) time steps [100, 103], the fold-transversal construction uses only one addi-tional CZ gate per data qubit in a single layer, with no extra qubits or time steps. The main hardware con-straint is that the diagonal CZ gates couple same-type qubits, conflicting with the bipartite structure of our 15 FIG. 6  OP.1                          
+
+> Figure 9. Implementation of the logical Hadamard gate Hon the RHG lattice, illustrated for d= 3. Two consecutive dual layers are connected by CZ gates with a 90 ◦-rotated pattern, mapping rows of the first layer to columns of the second. Dashed orange curves indicate the rotated CZ connections. The white Zoperators acquired on qubits in the first layer by the corresponding data qubits of the second layer are canceled when the associated X-basis measurements are multiplied together with the red SL qubit measurement in the first layer, forming a valid check. The rotated connectivity exchanges the logical XLand ZLcorrelation surfaces and implements a domain wall between dual and primal check types. a
+> S†
+> S†
+> SSS
+> 1b4523
+> Figure 10. Implementation of the logical phase gate Son the RHG lattice, illustrated for the transformation |+⟩L→|y+⟩Lat distance d= 3. Data qubits in the primal layer are connected to their mirror partners across the diago-nal by additional CZ gates, shown as orange curved lines. Qubits on the diagonal are measured in alternating Sand
+> S†bases. The white X-basis measurements indicate an ex-ample check, which is extended after the gate by including the stabilizer centered at the qubit b.
+
+architecture. This can be resolved either by using a mediating photon or atom to realize the effective entan-gling operation, or by using the STAP gate to convert half of the atoms to photons. The logical CNOT, shown in Fig. 11, is implemented transversally by applying pairwise CZ gates between the primal layer of the control block and the dual layer of the target block. This realizes XcL → XcLXtL and 
+
+ZtL → ZcLZtL, while leaving ZcL and XtL invariant. The checks on the gate layers are redefined by incorporat-ing SL qubits from the opposite check sublattice in the other block, which cancel the additional Z contri-butions acquired by the data qubits. Compared with lattice surgery, which requires an ancilla logical patch of size O(d2) and O(d) syndrome-measurement rounds per joint measurement [100], this implementation uses a single layer of pairwise CZ gates between the two ex-isting logical blocks, with no additional logical qubit and only O(1) temporal overhead. Because these gates are implemented transversally or fold-transversally, their error-correction structure closely mirrors that of the memory channel. We use the bipartite photon–atom generation scheme of Sec. III C, illustrated in Fig. 6. The only additional physical error sources are the extra CZ gates required by the logical S
+
+and CNOT gates, which are confined to a single layer containing O(d2) qubits. As explained in Appendix A, using the decoding framework of Refs. [101, 102], all logical Clifford gates can be decoded efficiently with MWPM. As shown in Fig. 12, all gates achieve thresh-olds of ∼ 2.6%, matching the memory-channel thresh-old in Fig. 8. Although the thresholds are unchanged, the additional CZ operations and modified syndrome graphs increase the LER below threshold. For the phase gate, this increase is about 10–15% relative to the logical-Y memory-channel baseline, while remaining well below lattice-surgery-based implementations [100]. The effect is more pronounced for the two-qubit CNOT channel, whose logical error rate is approximately 1 .5– 2 times the naive estimate obtained by combining the memory-channel error rates of the two logical blocks. This is still about a factor of two lower than the ex-pected LER of lattice-surgery-based CNOT gate based on its larger space-time volume [100]. In both cases, the transversal or fold-transversal implementation avoids the large additional space-time overhead associated with lattice surgery. These results confirm that the fault-tolerance properties of the RHG construction are preserved across the Clifford set. 16 Target (dual) Control (primal)        
+
+> Figure 11. Transversal implementation of the logical CNOT gate on the RHG lattice. The operation is realized by pairwise physical CZ gates, shown as dashed orange lines, between the primal layer of the control logical qubit and the dual layer of the target qubit. For clarity, only a subset of the two RHG blocks is shown, and the gate is depicted in the first layers, corresponding to logical Bell-pair generation. The same construction can also be applied to existing logical qubits. In the figure, the target ZLcorrelation surface acquires an additional Zstring on the primal layer of the control, which propagates through the structure and cancels when continued through the successive dual layers of the control block. The resulting Bell-pair correlation surface, ZcLZtL, is shown in light gray, with the glowing qubits indicating its support.
+> B. Magic state preparation in the MBQC framework
+
+Unlike physical qubits, logical qubits encoded in quantum error-correcting codes generally do not sup-port arbitrary rotations transversally or otherwise fault-tolerantly. Logical circuits are therefore typi-cally compiled into the Clifford+ T gate set, where the non-Clifford T gate is implemented by gate telepor-tation using a high-fidelity magic state, followed by measurement-dependent Clifford corrections. We summarize two complementary routes for prepar-ing non-Clifford resource states in our MBQC archi-tecture: a code-teleportation-based route and a direct MBQC adaptation of magic state cultivation. Both protocols are expressed in a foliated cluster-state rep-resentation using the native operations of the plat-form, namely CZ gates, |+⟩ initialization, and single-qubit measurements. In both cases, the construction tracks detector sets, correlation surfaces, and condi-tional Pauli corrections, and evaluates the resulting protocols under circuit-level noise with postselection and decoding for a Y state. The numerical values quoted below should be viewed as architecture-level benchmarks, with the full technical construction pre-sented in forthcoming work [104]. All quoted numeri-cal benchmarks in this section are obtained at physical error rate p = 10 −3.The first route builds on the code-teleportation pro-tocol of Ref. [105], which transfers a magic state from the distance-3 qRM code to the distance-3 Steane code. The qRM code supplies a transversal non-Clifford T
+
+gate, while a transversal CNOT between the codes teleports the logical magic state to the Steane-code block. We then convert this state into a surface-code resource by combining Bell-pair growth to a distance-5 color code, a T -check gadget that filters faulty magic states [106], color-code-to-surface-code lattice surgery [107], and diagonal surface-code growth [108] up to distance 11. Flag-qubit gadgets are included in the stabilizer-extraction circuits following Ref. [109]. In the present implementation, we postselect on any non-trivial syndrome or flag event, except during diagonal growth where logical-gap postselection is used [110]. The CBQC protocol is then compiled into a bipar-tite MBQC cluster-state form native to our architec-ture. As an architecture-level benchmark, this end-to-end construction yields an LER of ∼ 8 × 10 −9 with an acceptance rate of ∼ 0.2% for Y -state simulation. The main overhead is the lattice-surgery step, whose accep-tance rate is ∼ 0.3%. We expect substantial room for optimization because this step uses only ∼ 90 qubits per syndrome-measurement round. The second route adapts magic state cultivation di-rectly to MBQC [106]. We reformulate the injection, code-growth, T -check, and escape stages within the fo-liated framework. Injection is implemented using Bell-pair constructions, growth is performed by extending the foliated lattice while preserving the stabilizer struc-ture, and the T -check is translated into a graph-state construction that detects both local and logical faults. The cultivation protocol achieves an LER of approxi-mately 2 × 10 −6 at distance 3 with an acceptance rate of about 60%, improving to ∼ 3 × 10 −9 at distance 5 with an acceptance rate of ∼ 15%. The final escape stage transfers the state from the color-code region to a larger matchable code for efficient decoding. For ex-17 0.020 0.022 0.024 0.026 0.028 0.030 0.032     
+
+> Circuit loss probability p
+> 10 −3
+> 10 −2
+> 10 −1
+> Logical error rate
+> d= 7
+> d= 9
+> d= 11
+
+(a) 0.020 0.022 0.024 0.026 0.028 0.030 0.032     
+
+> Circuit loss probability p
+> 10 −3
+> 10 −2
+> 10 −1
+> Logical error rate
+> d= 7
+> d= 9
+> d= 11
+
+(b) 0.020 0.022 0.024 0.026 0.028 0.030 0.032     
+
+> Circuit loss probability p
+> 10 −2
+> 10 −1
+> Logical error rate
+> d= 7
+> d= 9
+> d= 11
+
+(c) Figure 12. Logical-channel simulations on the RHG lat-tice under the circuit-level loss model of Table I for (a) the Hadamard gate H, (b) the phase gate S, and (c) the CNOT gate. The gates are implemented transversally or fold-transversally and introduce only additional lossy CZ opera-tions confined to a single layer. Their thresholds match the memory-channel threshold of Fig. 8, while the additional CZ operations and modified syndrome graphs increase the LER below threshold. The y-axis is logarithmic to make low-error differences visible. Simulation details are provided in Appendix A 
+
+ample, converting from dcolor = 5 to dsurface = 7 yields an LER of ∼ 8.6 × 10 −9 with an acceptance rate of 
+
+∼ 20%. These results indicate that MBQC can support both code-teleportation-based and cultivation-based prepa-ration of non-Clifford resource states with competi-tive logical error rates. The two routes offer comple-mentary tradeoffs: code teleportation is more direct and modular, while cultivation is more efficient from a topological-code perspective. The present implementa-tions are not yet fully optimized; in particular, detector construction in dynamically changing foliated codes, gate ordering, hook-type boundary errors, acceptance rules, and photon loss remain important directions for further study. 
+
+V. SUMMARY 
+
+We have presented a blueprint for a compound photon–atom architecture for fault-tolerant quantum computation, combining the long-range connectivity and scalability of photonic systems with the controlla-bility and deterministic interactions enabled by cavity-coupled atomic qubits. The central ingredient is a near-deterministic photon–atom CZ gate implemented us-ing cavity QED and a modified Duan–Kimble protocol, which circumvents the probabilistic entangling limita-tions of linear-optical photonic approaches while pre-serving the advantages of measurement-based quantum computation. At the physical layer, we described a cavity-based im-plementation using single 87 Rb atoms coupled to high-cooperativity optical resonators. The platform sup-ports the elementary operations required for large-scale quantum computing, including single-photon genera-tion, photon–atom entangling gates, heralded atomic state preparation and measurement via STAP. We fur-ther introduced level-engineering techniques that sup-press unwanted transitions and allow improved gate schemes. The architecture naturally enables operation times on the order of tens of nanoseconds, offering sub-stantial speed advantages over many existing platforms. At the architectural level, we showed how the com-pound quantum hardware supports large-scale cluster-state generation for MBQC. Because photons pro-vide effectively unrestricted connectivity, the architec-ture avoids many geometric constraints associated with local-interaction platforms. At the same time, atomic-qubit reuse significantly reduces the number of cavi-ties and active control components. We introduced two generation schemes for the RHG lattice, bipartite and interleaved, and analyzed the tradeoff between spatial overhead and photonic delay requirements. We further developed a fault-tolerant framework based on foliated cluster-state constructions such as the RHG lattice. A key contribution is a hardware-aware simulation framework tailored to compound photon– atom systems, explicitly incorporating asymmetric loss processes and correlated errors induced by photon loss during photon–atom interactions. This framework inte-grates recent ideas in loss-aware decoding and MWPM-based Clifford-gate decoding, preserving linearity at the detector-error-model level while retaining the rel-evant loss-induced correlations. Numerical simulations demonstrate photon-loss thresholds of ∼ 2.6% per physical gate, equivalent to ∼ 15% total loss over a 18 photon trajectory, with optimal scaling of the LER be-low threshold. Beyond quantum memory, we showed that the full Clifford gate set can be implemented fault-tolerantly in the RHG framework using the native connectivity of the architecture. Logical Hadamard, phase, and CNOT gates admit transversal or fold-transversal MBQC re-alizations and can be decoded efficiently with MWPM-based techniques. Their thresholds match the logical identity channel, with gate-dependent LER increases from the additional lossy CZ operations and modified syndrome graphs. The overhead is limited to O(d2)CZ gates and requires no additional logical qubits or RHG lattice layers. Together, these results show that RHG fault tolerance is preserved under logical Clifford operations. Finally, we investigated two complementary ap-proaches for non-Clifford resource-state preparation in MBQC: code teleportation and magic state cultiva-tion. By reformulating these protocols within a fo-liated cluster-state framework, we demonstrated that MBQC can support high-fidelity preparation of logi-cal non-Clifford states while maintaining compatibility with realistic decoding and hardware constraints. Nu-merical results indicate strong logical-error suppression with scaling consistent with the expected distance de-pendence. Overall, the architecture presented here provides a concrete pathway toward scalable, fault-tolerant quan-tum computation based on compound photon–atom interactions. While substantial experimental and en-gineering challenges remain, including large-scale op-tical integration, improved cavity fabrication, switch-ing infrastructure, and full system-level optimization, the combination of deterministic entangling opera-tions, fast timescales, flexible connectivity, and na-tive compatibility with MBQC makes this approach a compelling candidate for large-scale quantum com-puting. Looking ahead, the same long-range connec-tivity may enable efficient implementations of qLDPC codes [10, 57–60] with little additional experimental overhead. The combination of fast photonic gates and short-term atomic memory may also provide a useful timing degree of freedom, allowing future implemen-tations to balance total runtime against the required switching, control, and classical-processing rates. The framework developed in this work establishes both the physical and fault-tolerant foundations for future gen-erations of compound photonic–atomic quantum pro-cessors. 
+
+> ACKNOWLEDGMENTS
+
+We thank Juval Bechar, Omri Davidson, Itamar Sela, and Nimrod Shenker for fruitful discussions and valu-able comments on the manuscript. B.D. holds the Dan Lebas and Roth Sonnewend Professorial Chair of Physics. 
+
+> Appendix A: Simulation details for RHG memory and Clifford channels
+
+All error-correction simulations are performed in a custom simulation environment based on STIM [111] sampling and MWPM decoding with PyMatching [112– 114]. The simulator implements our architecture-specific loss-aware decoding procedure described in Sec. III D and Appendix C. When shown, error bars indicate the standard error of the mean. In most cases, they are smaller than the marker size and are therefore omitted. Thresholds are estimated from the finite-size crossing points. For the logical S and CNOT simulations, where the modified detector definitions produce syndrome graphs containing hyperedges, we use a custom pre-decoder following the method of Ref. [101]. Ref. [101] proves that, for surface-code circuits with transversal and fold-transversal Clifford gates, each reliable logical Pauli product admits a matchable syndrome subgraph ob-tained by selecting same-basis checks along the back-propagation path of that product through the Clifford circuit. For the memory-channel simulations shown in Fig. 8, we use the circuit-level loss model of Table I. For the iid benchmark shown in Fig. 18, we instead use an iid measurement-loss model. In both cases, the RHG lat-tice contains t = d noisy layers, where d is the code dis-tance. Logical-Y memory is simulated using two addi-tional capping layers, giving a total of d + 2 layers. The first and last layers are treated as noiseless boundary layers, and the loss model is applied only to the central 
+
+d layers. These caps implement the logical-S boundary transformation, corresponding to perfect injection and measurement, so that only the memory channel itself is simulated. Each data point uses at least 3000 loss real-izations and 10 ,000 decoding iterations per realization. For all Clifford-gate simulations shown in Fig. 12, we use the circuit-level loss model of Table I. For the logical-H simulation shown in Fig. 12(a), we use 
+
+t = d layers and no capping layers. The construction starts from an RHG lattice and implements the logical Hadamard by rotating the coordinates of the final two layers, realizing the logical mapping X 7 → Z. The first-layer data qubits are atoms. Each data point uses at least 3000 loss realizations and 10 ,000 decoding itera-tions per realization. For the logical-S simulation shown in Fig. 12(b), we use t = d layers and no capping layers. The fold-transversal S operation is implemented on the third layer from each temporal boundary, corresponding to layers 2 and t − 3 in zero-based indexing. The first-layer data qubits are atoms. Each data point uses at least 3000 loss realizations and 10 ,000 decoding itera-tions per realization. For the logical-CNOT simulation shown in Fig. 12(c), we simulate control and target RHG blocks with d + 2 and d + 3 total layers, respectively. The first two layers of both blocks and the final target layer are treated as noiseless boundary layers, leaving exactly d noisy lay-ers in each block. Using one-based indexing, transver-sal CNOT connections are applied between layer d of the two blocks, so the CNOT-connection layer is noisy. 19 Logical S operations are applied as boundary transfor-mations on the first control layer and final target layer. The control block starts from a primal layer and the tar-get block from a dual layer, with opposite photon–atom assignments: the first-layer data bipartition is assigned to atoms in the control block and to photons in the target block. With these choices, the initial stabilizer 
+
+YcZt is propagated through the CNOT to the measured stabilizer XcYt. These stabilizers were chosen to yield a nontrivial correlation surface. Each data point uses at least 1000 loss realizations and 10 ,000 decoding iter-ations per realization.  
+
+> Appendix B: RHG lattice as fault-tolerant memory channel 1. Construction
+
+The RHG lattice, introduced by Raussendorf, Har-rington, and Goyal, was the first three-dimensional fault-tolerant topological quantum code supporting a universal gate set [27]. Fig. 5 shows an example with 
+
+d = 3 and t = 3. The parameter d is the spatial linear size of the lattice and sets the error-correction distance, defined as the minimum weight of a nontriv-ial logical operator. The parameter t is the number of spatial layers stacked along the time direction. All qubits are initialized in |+⟩, and CZ gates are applied according to the lattice connectivity, with dotted and solid lines denoting inter- and intra-layer connections, respectively. The resulting graph is an FCC-like three-dimensional cluster state. Logical information is prop-agated by measuring all qubits in the X basis, except for the Y - and magic state measurements required for the phase S and non-Clifford T gates. See Sec. IV A and Sec. IV B. For error-correction distance d, up to (d−1) /2 errors can be corrected. Each spatial layer con-tains d2 +( d−1) 2 +d(d−1) physical qubits. Throughout this Appendix, d is assumed odd unless stated other-wise. We call layers with rough top and bottom boundaries 
+
+primal layers. These are the odd layers in Fig. 5, taking time to run from left to right, and are characterized by top and bottom boundaries containing d qubits. The remaining layers are dual layers, whose top and bottom boundaries contain 2 d − 1 qubits; see also Fig. 4 of Ref. [115]. We call qubits connected to the next layer in time data qubits, as they propagate logical information forward. Qubits with only intra-layer connections are called syndrome-like (SL) qubits.   
+
+> 2. Foliation
+> a. Single-qubit teleportation
+
+A key feature of MBQC is that quantum informa-tion can be teleported using only single-qubit measure-ments [77]. The basic circuit is shown in Fig. 13: astate |ψ⟩ is teleported to an ancilla prepared in |+⟩ by entangling the two qubits with a CNOT gate and then                   
+
+> |ψ⟩
+> |+⟩Xm|ψ⟩
+> Figure 13. Single-qubit teleportation circuit. The input state |ψ⟩is entangled with a |+⟩ancilla using a CNOT gate. Measuring the input qubit in the Zbasis teleports the state to the ancilla, up to the measurement-dependent Pauli correction Xm, where m∈ { 0,1}.=HH
+> Figure 14. Circuit equivalence between CNOT and CZ gates.
+
+measuring the input qubit in the Z basis. Depend-ing on the measurement outcome, a Pauli-X correction may be required. This construction naturally general-izes to the teleportation of single- and two-qubit gates. Since our construction uses only CZ gates, we replace the CNOT with its circuit equivalent: a CZ gate conju-gated by Hadamard gates on the target qubit, as shown in Fig. 14. This substitution has a natural interpretation in the layered cluster-state picture. Data qubits in the first, dual, layer are prepared in |0⟩, while those in the next, primal, layer are prepared in |+⟩. Applying H to the first layer maps these qubits to |+⟩, after which CZ gates are applied between adjacent layers. Measuring the first layer in the X basis is then equivalent to a Z-basis measurement preceded by H, which teleports the encoded information forward. Thus, a CZ gate between a |+⟩ state and an arbitrary state |ψ⟩, followed by an 
+
+X-basis measurement of |ψ⟩, implements single-qubit teleportation of H |ψ⟩. 
+
+> b. Surface-code foliation
+
+The canonical surface-code construction defines the code space using two stabilizer types, X-type and Z-type, whose parities are measured by ancilla qubits coupled to neighboring data qubits. An example is shown in Fig. 15(a), where orange circles denote data qubits, and the X- and Z-type stabilizers are indicated schematically by gray X’s and red Z’s [116]. The ver-tical and horizontal directions have different boundary types, which later determine the orientation of the log-ical operators and correlation surfaces. Crucially, the two stabilizer-measurement stages correspond directly to the dual and primal RHG layers. The correspondence between the surface code and the RHG lattice is obtained by viewing a dual layer and the following primal layer as one unit cell. All qubits in the dual layer are initialized in |+⟩. The CZ pat-tern between SL and data qubits then acts effectively as a CNOT layer, with the data qubits serving as con-trols, as shown in Figs. 14 and 15(b). Measuring the SL qubits in the X basis completes the extraction of the Z-20 ZZZZZZXXXXXX 
+
+> (a)
+> (b)
+> (c) Figure 15. (a) The surface code on a square lattice. (b, c)
+> Z- and X-type stabilizer measurement circuits, respectively.
+
+type stabilizers. CZ gates between adjacent layers then teleport each data-qubit state to its counterpart in the primal layer, together with an additional Hadamard op-eration. A CZ pattern between SL and data qubits in the primal layer, followed by X-basis measurements of the SL qubits, is therefore equivalent to measuring the 
+
+X-type stabilizers of the same data qubits. These two stages, first in the dual layer and then in the primal layer, constitute one complete round of syndrome mea-surements in the circuit-based surface-code picture. More generally, any two-dimensional CSS code can be foliated into a three-dimensional cluster state [76], where formal definitions of CSS codes are given in Refs. [117, 118]. This is achieved by converting the 2D code into a cluster-state representation and stacking al-ternating dual and primal layers, each corresponding to one stabilizer type. The construction applies naturally to CSS codes because their X- and Z-type stabilizers are distinct. The RHG lattice is therefore the surface-code instance of this broader foliation procedure. Nev-ertheless, it can also be understood directly from the cluster-state perspective, without assuming prior famil-iarity with the surface code. This viewpoint is devel-oped in the next section.  
+
+> 3. RHG as a cluster state
+
+The previous section related the RHG lattice to a fo-liated surface code, explaining the motivation for the construction and how the code arises from stacked surface-code layers. We now describe the same ob-ject directly as a three-dimensional topological cluster state [119]. This complementary viewpoint is useful be-cause the propagation of logical information, the role of single-qubit measurements, and the structure of the error-correction checks are most naturally expressed in cluster-state language. A cluster state is defined by its construction: all qubits are initialized in |+⟩, and CZ gates are applied according to the desired graph connectivity. The re-sulting state has, for every qubit i, a stabilizer 
+
+Si = Xi
+
+Y 
+
+> j∈N(i)
+
+Zj , (B1) where the product runs over all qubits j connected to 
+
+i by a CZ gate. Graphically, qubits are vertices and CZ connections are edges, so directly connected qubits are nearest neighbors in the cluster-state graph. Inter-preting Fig. 5 in this language, each RHG qubit is the center, or X component, of a stabilizer of the form in Eq. B1, with Z operators on its neighbors. In Sec. B 5, we explain how these local stabilizers are multiplied to construct the error-correction checks. Single-qubit measurements also determine how the cluster state evolves. As discussed above, X-basis mea-surements teleport logical information forward while preserving the remaining cluster-state structure. By contrast, a Z-basis measurement disconnects the mea-sured qubit from the cluster by removing its CZ bonds to neighboring qubits. This follows directly from the Gottesman–Knill stabilizer update rules, according to which stabilizers that anticommute with the measure-ment are removed [120]. Consequently, Z-basis mea-surements are redundant in cluster-state computation: any qubit intended to be measured in the Z basis can simply be omitted from the graph.  
+
+> 4. Logical state
+
+To understand how logical information is stored and propagated in the RHG lattice, we distinguish between two objects: the logical operator and the correlation surface . A logical operator is a one-dimensional prod-uct of single-qubit Pauli operators defined on a given layer. A correlation surface is a two-dimensional prod-uct over single-qubit measurement outcomes that al-lows the value of this logical operator to be inferred as it propagates through the cluster. In Fig. 5, the corre-lation surface is shown as a horizontal shaded cap. The glowing circles mark the qubits whose X-basis measure-ment outcomes contribute to the correlation surface as-sociated with the logical operator. In MBQC, the correlation surface is the experimen-tally accessible object: by multiplying its measurement outcomes from one boundary to the other and apply-ing the corresponding error-correction procedure, one 21 infers the value of the logical operator. Since all RHG qubits are measured in the X basis, the lattice construc-tion must ensure that the relevant correlation surfaces consist only of single-qubit X measurements. Following the surface-code convention, we define the logical |+⟩L state by starting from a primal layer. In the foliated interpretation, the SL qubits of this layer measure the Z-type stabilizers of the underlying surface code, so transversal initialization of the data qubits in 
+
+|+⟩ mirrors the standard surface-code preparation of 
+
+|+⟩L. In the cluster-state picture, each of the d data qubits i along a vertical line in the primal layer has a stabilizer containing an Xi factor and Z operators on its neighboring qubits. Restricting first to intra-layer contributions, multiplying these stabilizers along the line cancels the neighboring Z factors and leaves a length-d product of physical X operators. For the initialized |+⟩L state, this product has a deterministic value. It represents the initial logical operator XL and forms the starting line of the correlation surface that propagates this logical information through the cluster. As in the surface code, this deterministic surface arises only for the corresponding logical eigenstate, not for a general encoded state. When the primal layer is connected to a dual layer, the stabilizers contributing to this vertical product ac-quire additional Z factors on adjacent dual-layer qubits. These factors must be eliminated from any measur-able correlation surface. This is achieved by sandwich-ing the dual layer between two primal layers, so that the additional Z contributions cancel. The resulting vertical correlation surface extends across both primal layers and contains 2 d single-qubit X measurements. As logical information is propagated through successive dual-primal layer pairs, this correlation surface extends through the lattice while remaining composed solely of 
+
+X-basis measurement outcomes. As in the surface code, the logical operator ZL is de-fined as a horizontal string of physical Z operators act-ing on the data qubits of the primal layer, perpendicular to the string XL and its correlation surface. This oper-ator anti-commutes with the correlation surface associ-ated with XL as they share only a single qubit, thereby flipping its value and hence the sign of the logical state — switching |+⟩L to |−⟩ L, as expected. The corre-sponding ZL correlation surface is a horizontal string of X operators in the dual layer, shown as glowing cir-cles on the cap in Fig. 5, which propagates ZL forward in time. Since the qubits in the primal layer are mea-sured in the X-basis, the value of ZL is intrinsically random, reflecting the standard quantum uncertainty of a |+⟩L eigenstate. To initialize the logical state |0⟩L
+
+instead, one begins in the dual layer. Although all phys-ical qubits are still prepared in |+⟩, their propagation includes an additional Hadamard gate, making the pri-mal layer effectively equivalent to initializing all phys-ical qubits in |0⟩ — the standard |0⟩L initialization of the surface code. The same relation can be explained from the com-plementary dual-layer viewpoint. Suppose the memory begins with a dual layer followed by a primal layer. A vertical string of physical Z operators on data qubits in the dual layer represents the logical operator XL.S1 = X 1 Za Zb Zc ZdS2 = X 2 Za Ze Zf Zg... S1 S2 S3 S4 S5 S6 =X 1 X 2 X 3 X 4 X 5 X 6  
+
+> Figure 16. Each cube of the RHG lattice supports a check composed solely of single-qubit Xmeasurements, obtained by multiplying cluster-state stabilizers. Qubits that do not participate in this check belong to checks of the complemen-tary type.
+
+If these dual-layer qubits were explicitly measured in the Z basis, their product, together with the neighbor-ing X-basis measurements in the following primal layer, would form a stabilizer constraint. Since Z-basis mea-surements are redundant in a cluster state, these qubits can instead be omitted from the graph. The logical in-formation carried by this unrealized Z string is then inferred from the measurable product of neighboring 
+
+X-basis outcomes in the primal layer. Thus, the logical operator can be viewed as an un-measured Pauli string on an initial layer, while the cor-relation surface is the measurable product of X-basis outcomes that propagates its value through the cluster. Their product forms a stabilizer of the cluster state, al-lowing the logical observable to be inferred from the measured correlation surface after error correction [87].  
+
+> 5. Error correction
+
+The error-correction procedure in the RHG lattice is a three-dimensional generalization of the surface-code procedure. See Ref. [119] for a review. The main differ-ence is that RHG error correction uses only single-qubit measurements, all performed in the X basis, rather than explicit ancilla-based stabilizer measurements. As a result, instead of mixed X- and Z-type stabilizer measurements, we construct checks . Each check is ob-tained by multiplying several cluster-state stabilizers over a two-dimensional membrane enclosing a three-dimensional cube, as illustrated in Fig. 16. Each bulk qubit participates in two checks, while boundary qubits can be viewed as connected to ficti-tious checks outside the boundary. Consequently, Z
+
+errors are detected in close analogy with the surface code; see Fig. 5. Not all qubits in a cube participate in a given check because the RHG lattice is a CSS-type con-struction with two complementary check types. Qubits absent from one check type participate in the other. Since only X-basis measurements are performed, the directly detectable errors are Z errors. The two check types therefore do not correspond to detecting Z and X
+
+errors, as in the surface code. Rather, they correspond to the two complementary RHG check sublattices, as-sociated with the two orientations of logical correlation 22 |+⟩ Mx
+
+Figure 17. Quantum circuit showing how an X error propa-gates through cluster-state CZ gates into multiple Z errors and an X error immediately before the X-basis measure-ment, which can be ignored. 
+
+surfaces. It is nevertheless sufficient to correct Z errors. As explained in Ref. [119], X errors are either irrelevant, if they occur immediately after |+⟩ initialization or just before X-basis measurement, or propagate through CZ gates into equivalent Z errors once the qubit is entan-gled, as shown in Fig. 17. Having established the check structure, we present error-correction simulation results for the generic case of iid measurement loss. We first consider a logical cor-relation surface supported on one partite subgraph of the RHG lattice. Independent measurement loss then reproduces the known bond-percolation threshold of approximately 0 .25 [121], as shown in Fig. 18(a). Since a general logical state in the RHG lattice can have support on both complementary correlation surfaces, we also simulate the logical YL = ( |0⟩L + i |1⟩L)/√2state, whose correlation surface spans both subgraphs, as shown in Fig. 18(b). The threshold is unchanged, while the larger correlation surface increases the finite-size LER by a factor of order unity, approximately 1 .5near threshold in our simulations. 
+
+Appendix C: Bond-loss propagation 
+
+In the main text, we distinguish between physical qubit loss and bond loss. Here we explain how physical photon loss can induce bond loss, how the resulting errors propagate to neighboring checks, and how this effect is incorporated into our detector error model. In MBQC, a lost qubit or missing entangling bond can randomize the associated check. For example, if qubit 1 in Fig. 16 is lost, its X-basis measurement outcome is unknown, and the corresponding checks are corrupted. A similar effect occurs when the qubit remains present but one of its entangling gates fails. Fig. 19 illustrates this mechanism in the presence of time-ordered CZ gates. Consider one complete check 
+
+C1 = X1X2X3X4X5X6, and part of a neighboring check C2 = X2X7X8. Suppose that qubit g inter-acts with its neighbors in the order green–red–blue. If qubit g is eventually found to be lost, the effect on the checks depends on when the loss occurred. If the loss occurred only at measurement, all earlier bonds were successfully created, and the standard checks re-main valid. By contrast, if the loss occurred before 0.22 0.24 0.26 0.28     
+
+> Measurement loss probability p
+> 0.00
+> 0.05
+> 0.10
+> 0.15
+> 0.20
+> 0.25
+> 0.30
+> Logical error rate
+> d= 7
+> d= 9
+> d= 11
+
+(a) 0.22 0.24 0.26 0.28     
+
+> Measurement loss probability p
+> 0.00
+> 0.05
+> 0.10
+> 0.15
+> 0.20
+> 0.25
+> 0.30
+> 0.35
+> 0.40
+> Logical error rate
+> d= 7
+> d= 9
+> d= 11
+
+(b) Figure 18. Memory-channel simulation on the RHG lat-tice with an iid measurement-only loss model for (a) logical 
+
+X, whose correlation surface is supported on one partite subgraph, and (b) logical Y , whose correlation surface com-bines the logical X and Z correlation surfaces. Both cases recover the known RHG loss threshold of ∼ 25%. The LER at threshold is about 6%–7% for logical X and roughly 1 .5times larger for logical Y , reflecting the larger correlation surface and finite size effects. Unlike the hardware-inspired circuit-level model used in the main text, this iid model as-signs equal measurement-loss probabilities to all qubits and serves as a generic RHG benchmark. 
+
+or during CZ 2,g , the green bond exists, while the red and blue bonds are absent. In that case, the check C1
+
+acquires a dangling operator Zg and is no longer an accessible X-type check because qubit g was lost. APauli-frame simulation that predefines the checks and then inserts single-qubit losses without modifying the bond structure would incorrectly treat C1 as valid, lead-ing to overoptimistic error-correction simulations. This is the essence of bond-loss propagation: a lost photon can corrupt neighboring checks through the absence of scheduled entangling gates, even when the neighboring qubits themselves are not physically disturbed. With-out modifying the decoding process, this bond-loss in-formation is inaccessible to the decoder, leading to de-graded decoding performance in experiments. A naive way to model this effect is to apply inde-pendent Pauli errors to every qubit that was scheduled to interact with the lost photon. Earlier approaches used fully depolarizing or fully dephasing channels on 23 X843214563                    
+
+> X7
+> ZcX4
+> X6
+> X5
+> ZgX2
+> X1
+> X3ZeZfZdZbZaX843214563
+> X7
+> ZcX4
+> X6
+> X5
+> ZgX2
+> X1
+> X3ZeZfZdZbZa
+> Figure 19. Time ordering of CZ operations. If qubit gis lost, the loss time is ambiguous: it may have occurred dur-ing measurement, in which case all intended bonds remain intact, or during one of the CZ gates, in which case the gates performed during and after the loss fail, removing the associated bonds and corrupting additional checks.
+
+the qubits adjacent to a missing bond [86, 87]. This is simple, but it generally overestimates the damage caused by bond loss because missing bonds do not nec-essarily induce independent errors on all neighboring qubits. Instead, the physical process is often better de-scribed as a correlated dephasing event acting on the set of qubits affected by the same loss event [122]. Ap-plying independent dephasing to affected neighbors can incorrectly randomize checks that should remain valid, whereas a correlated dephasing event preserves cancel-lations between added Z operators when the relevant 
+
+X-basis measurement outcomes are multiplied. Corre-lated dephasing therefore provides a more faithful ef-fective model of bond-loss propagation and gives the decoder more reliable information. Several refined approaches incorporate loss informa-tion into the decoding problem. Ref. [89] tracks the possible time of loss relative to the gate order and passes this information to the decoder as modified edge weights. Other approaches incorporate loss configura-tions directly into the detector error model (DEM), al-lowing the decoder to condition on loss events [90]. This can capture correlated Pauli errors induced by miss-ing bonds, but the effect of loss on the DEM is gen-erally nonlinear: it cannot be represented by simply XOR-composing detector sets, as is possible for inde-pendent Pauli noise. Moreover, when later entangling gates involving the lost qubit are physically omitted rather than replaced by a Pauli channel, the result-ing circuit may involve gauge-like degrees of freedom whose treatment in STIM is subtle [123, 124]. The Pauli-envelope formalism offers another route by as-sociating each loss event with the set of compatible Pauli configurations [91]. This restores linearity at the level of the detector description, but matching-based decoders must project the envelope onto an effective graph, which can degrade performance and reduce the effective distance. Following Ref. [89], our approach is designed to retain the useful linear structure of a Pauli DEM while cap-turing the correlations induced by loss. It relies on two architectural features. First, photon loss is heralded at measurement. Second, each photon interacts with only a bounded number of atoms before being measured. We therefore partition each photon trajectory into intervals separated by its scheduled CZ gates. Conditioned on the photon being detected as lost, each interval is as-signed the conditional probability that the photon was lost during that part of its trajectory. If the loss is as-signed to a given interval, all subsequent CZ gates in-volving that photon are replaced by a correlated Pauli 
+
+Z error acting on the atoms that would have interacted with it. This represents the fact that, after loss, the photon can be treated as having undergone an unob-served projection, so the remaining scheduled interac-tions are represented by correlated Z-type uncertainty on the neighboring atoms, consistent with Refs. [92, 93]. More explicitly, suppose that after loss in interval 
+
+k, the photon would have interacted with atoms in the set Sk. The remaining scheduled interactions are repre-sented by USk = Q 
+
+> a∈Sk
+
+CZ p,a . Since CZ p,a = |0⟩⟨ 0|p ⊗
+
+Ia + |1⟩⟨ 1|p ⊗ Za, an unobserved projection of the pho-ton leaves an unknown classical value b ∈ { 0, 1}, which applies ( ZSk )b to the atoms, where ZSk = Q 
+
+> a∈Sk
+
+Za.Averaging over the unknown value gives the correlated dephasing channel ESk (ρ) = 12 ρ + 12 ZSk ρZ Sk , which is a correlated Z error channel on the atoms in Sk.An example is shown in Fig. 20. A single dual-rail photon, initialized in |+⟩, undergoes four scheduled CZ gates with different atoms. Since bond-loss propagation affects only qubits that interact with the lost photon, the photon trajectory is divided into sections between these interactions. Each section is assigned the condi-tional probability that the photon was lost there, con-ditioned on the fact that the photon is absent at mea-surement. The table in Fig. 20 lists the corresponding correlated Z errors induced on the atoms involved in subsequent interactions. For clarity, the figure assumes that loss occurs only during entangling gates, but the construction extends directly to additional loss mech-anisms. For example, if initialization loss occurs with probability pI , the first interval probability is modified to pI + p(1 − pI ), and the remaining conditional prob-abilities are renormalized. We implement this loss model using a two-level Monte Carlo procedure. First, we sample N heralded photon-loss configurations according to the physical loss model. Each sampled configuration specifies which photons are found to be lost at measurement. For each configuration, we construct the resulting DEM and run 
+
+M Monte Carlo shots. In each shot, the simulator sam-ples one of the mutually exclusive candidate loss loca-tions along each lost photon trajectory, together with the corresponding correlated Pauli error on the atoms affected by subsequent missing CZ gates. The mutually exclusive candidate locations are en-coded in STIM using CORRELATED ERROR and ELSE CORRELATED ERROR instructions [111]. This produces a ladder of conditional events for each lost photon, ensur-ing that exactly one loss interval is selected in a given realization. The probabilities in the ladder are chosen so that the cumulative distribution reproduces the de-sired conditional probabilities for the loss location. In 24 FIG. 12 
+
+## H (BS) H (BS)              
+
+> 1234
+> Z₁Z₂Z₃Z₄ Affected atoms Dual Rail Probability for Z error
+> Z₂Z₃Z₄ Z₃Z₄ Z₄
+> p
+> 2[1-(1-p) 4]2[1-(1-p) 4]2[1-(1-p) 4]2[1-(1-p) 4]
+> (1−p)p (1−p) 2p(1−p) 3p
+
+Figure 20. A dual-rail photonic qubit interacts sequentially with four atoms, shown as blue circles. The interactions implement CZ gates in the indicated order. The table lists the conditional probabilities that the photon was lost at each interaction, modeled as loss occurring immediately before that interaction, conditioned on the photon being found lost at measurement. It also shows the corresponding correlated Z errors induced on atoms involved in subsequent interactions. The additional factor of 2 in the probabilities arises because the photon is initialized in the X basis and therefore occupies the |1⟩ rail with probability 1 /2. 
+
+this way, STIM samples a single consistent loss history for each lost photon while propagating the correspond-ing correlated Pauli errors to the detector record. After this replacement, the model is expressed en-tirely in terms of Pauli error mechanisms and can be de-coded using standard minimum-weight perfect match-ing. We use STIM to sample detector events and Py-Matching [112] to perform MWPM decoding. Although the procedure involves an outer sampling over loss con-figurations, the high symmetry of the underlying codes reduces the number of effectively distinct configura-tions. In practice, a few thousand sampled loss con-figurations are sufficient for convergence in our simu-lations, which we verify by estimating the logical error rate with 95% confidence intervals. Importantly, even under the full circuit-level loss model, our loss-aware de-coder achieves optimal distance scaling for the logical error rate. That is, below threshold, the logical error rate decreases with the code distance d, as confirmed numerically in Fig. 21. 
+
+Appendix D: Clifford set in RHG lattice 
+
+The Hadamard gate is defined by 
+
+H = 1
+
+√2
+
+1 11 −1
+
+
+
+,
+
+and satisfies HX = ZH . A logical Hadamard must therefore exchange the logical XL and ZL operators, or equivalently their correlation surfaces. As explained in Sec. B 2, physical information prop-agated from one RHG layer to the next acquires a Hadamard due to the cluster-state teleportation rule. This propagation alone is not a logical Hadamard. The reason is that the information associated with a log-ical correlation surface is stored as a string of physi-cal Z operators on the next layer, rather than being mapped to the complementary logical correlation sur-face. As in the surface code, a true logical Hadamard therefore requires an additional exchange of the logical directions [94]. 2.00 1.95 1.90 1.85          
+
+> log 10 (p)
+> 6.5
+> 6.0
+> 5.5
+> 5.0
+> 4.5
+> 4.0
+> 3.5
+> 3.0
+> log 10  (LER)
+> d= 5, = 1.02
+> d= 7, = 1.05
+> d= 9, = 1.07
+> d= 11, = 1.08
+
+Figure 21. Below-threshold scaling of the logical error rate for the RHG memory-channel simulation under the circuit-level loss model of Table I. The numerical data are fit to the expected form pL(p) = pL(pth )( p/p th )βd for p ≪ pth ,where pL denotes the LER, pth is the threshold, d is the code distance, and β is a fitting parameter. We obtain β ≈
+
+1 for all simulated distances, confirming optimal distance scaling of the decoder. Each point uses at least 50 ,000 loss realizations and 10 ,000 decoding iterations per realization. Error bars show the standard error of the mean. 
+
+Using the nonlocal connectivity of our architecture, we implement this exchange by rotating the CZ connec-tivity rather than moving the qubits. The construction is illustrated in Fig. 9. Starting from a dual layer, corre-sponding to logical |0⟩L initialization, we insert another dual layer instead of the usual primal layer. The CZ connections to this second dual layer are rotated by 90 ◦
+
+relative to the standard RHG connectivity. In the RHG lattice, XL is represented by a vertical string of physical Z operators on data qubits in a dual layer, while the ZL correlation surface is a horizontal string of physical X measurements in the dual layer. After the 90 ◦ rotation, the horizontal correlation sur-face in the first dual layer determines the vertical Z
+
+string, and hence XL, in the second dual layer. Con-versely, the vertical Z string representing XL in the 25 first dual layer determines a horizontal X correlation surface representing ZL in the second. Thus, the ro-tated connectivity exchanges the roles of XL and ZL.The rotation also shifts the geometric placement of the logical representatives. For example, the upper row representing ZL in the first dual layer determines the left column representing XL in the second dual layer, while the left column representing XL in the first dual layer determines the bottom row representing ZL in the second. Unlike in the surface code, different representa-tives of the same logical operator in the RHG lattice are related by nondeterministic, but known, single-qubit 
+
+X-basis measurement outcomes [119]. The conven-tional placement of the logical operators can therefore be restored in software by multiplying the correlation surface with the appropriate measurement outcomes. The checks remain well defined after the rotation. Each check still contains six single-qubit X measure-ments, but its type is exchanged: primal checks become dual checks and vice versa. In the language of topolog-ical defects, the logical Hadamard is implemented by a domain wall [100]. Importantly, this construction re-quires no additional qubits or gates. It is implemented entirely by modifying the CZ-connectivity pattern, so its logical error rate is essentially that of the identity channel [100], as shown in Fig. 12(a).  
+
+> 1. S gate
+
+The phase gate is a π/ 2 rotation about the Z axis, 
+
+1 00 i
+
+
+
+.
+
+Under conjugation, it maps X to Y = iXZ . A logical 
+
+S gate must therefore implement XL → YL = iX LZL
+
+while preserving the stabilizer structure. A simple approach is to inject a logical YL ∝ | 0⟩L +
+
+i |1⟩L resource state and use gate teleportation. In the RHG lattice, such a state can be initialized by a single-qubit Y -basis measurement [115]. This procedure is not fault tolerant, since the Y -basis measurement is not protected by checks, and therefore requires further distillation. Instead, we use a fold-transversal construc-tion, following surface-code proposals based on diago-nal reflection symmetry [95, 96, 98, 99, 125]. In this approach, the code is reflected along its diagonal mir-ror symmetry, and corresponding pairs of qubits on op-posite sides of the fold are entangled, while physical S
+
+and S† gates are applied to the qubits lying along the diagonal. In the RHG formulation, the fold-transversal S gate is implemented on a primal layer. As shown in Fig. 10, data qubits are connected by CZ gates to their mirror partners across the diagonal, while qubits on the di-agonal are measured in alternating Y + and Y − bases, corresponding to physical S and S† operations. To see the action of the gate, consider the original XL corre-lation surface, which may be written as X1X2X3. The diagonal operation maps X1 to Y1, while the additional CZ gates, for example CZ 2,4 and CZ 3,5, extend the correlation surface by adding Z4Z5. The resulting de-terministic operator is therefore Y1X2X3Z4Z5, which represents YL = XLZL, since ZL is the horizontal logi-cal Z string on the primal layer. The stabilizer checks must be modified consistently with this transformation. For example, consider a check that before the gate contains C = X1X4Xa. After the fold-transversal operation, the check transforms to ˜C = ( iX 1Z1)( −iX aZa)X4Z2. Multiplying ˜C by the stabilizer XbZ1ZaZ2 centered at qubit b cancels the extra Z factors and restores an X-only check, now extended by the measured qubit Xb. The alternat-ing pattern of S and S† on the diagonal ensures that the phase factors from Y = iXZ cancel within each check, preserving the stabilizer structure and fault tol-erance [125]. This implementation has two main costs. First, each data qubit in the gate layer participates in one additional CZ gate. This introduces extra loss, but only within a single layer rather than throughout the bulk. Second, the modified checks produce hyper-edges in the syndrome graph, so the detector error model is not directly matchable. As discussed in Ap-pendix A, these hyperedges can be decomposed into matching-compatible subgraphs [101, 102]. Conse-quently, the logical S gate remains efficiently decodable with MWPM and achieves a threshold comparable to the identity channel, with only a modest increase in logical error rate, as shown in Fig. 12(b). The main hardware-specific complication is that the diagonal CZ gates couple qubits of the same type, which conflicts with the bipartite photon–atom interaction pattern of the native architecture. This complication is confined to the gate layer. Same-type effective CZ operations can be mediated using the opposite qubit type. For two atoms, a medi-ating photon can sequentially interact with both atoms, with an intermediate Hadamard on the photon, thereby producing the required effective entangling operation. Conversely, a mediating atom can generate the corre-sponding effective operation between photons. These mediated links are lossier than native photon–atom CZ gates, but they occur only in the single layer where the 
+
+S gate is implemented. Previous analyses of confined layers of extra-lossy entangling gates indicate that such layers can toler-ate substantially larger loss, by factors of order 5–10, while producing only modest threshold or LER degra-dation [126, 127]. The additional loss can also be re-duced by using a STAP-based implementation: the up-per triangular part of the gate layer is initialized as atoms and the rest as photons, the required diagonal CZ gates are performed, and STAP is then applied to the atoms. Motivated by these considerations, our sim-ulations use a simplified model in which same-type di-agonal links are allowed directly in the relevant layer and are assigned the same loss probability as native photon–atom links. A full mediated-link simulation is left for future work. The fold-transversal construction is substantially more resource efficient than local-connectivity alterna-tives. In the logical-block construction of Ref. [100], the rotated-planar-code phase gate has spatial foot-print 2 d2 for 2 d syndrome-measurement rounds, giv-ing space-time volume 4 d3. A more sophisticated in-26 place approach due to Gidney [103] avoids expanding the patch bounding box, but implements the operation through diagonal twist motion and modified syndrome-measurement rounds, with a Y -basis initialization or measurement primitive requiring d/ 2 + O(1) syndrome-measurement rounds. By contrast, with nonlocal con-nectivity the RHG fold-transversal S gate requires only one additional CZ gate per data qubit in a single layer, with no additional logical qubits and no additional time steps.  
+
+> 2. CNOT gate
+
+The only two-qubit gate required to complete the Clifford set is CNOT. It is defined by 
+
+
+
+1 0 0 00 1 0 00 0 0 10 0 1 0
+
+ .
+
+In surface-code and RHG architectures, the two stan-dard fault-tolerant implementations are lattice surgery, which uses merge-and-split operations through joint stabilizer measurements [94, 115, 128], and transver-sal CNOT, which uses pairwise interactions between physical qubits of the two logical blocks. We use the nonlocal connectivity of the compound architecture to implement the transversal version. Pair-wise CZ gates are applied between the primal layer of the control logical block and the dual layer of the tar-get logical block. This implements the required logical transformations XcL → XcLXtL and ZtL → ZcLZtL while leaving ZcL and XtL invariant. One of these transforma-tions, IcZtL → ZcLZtL, is illustrated in Fig. 11 The checks on the affected layers must be redefined consistently with the transversal CZ layer. For exam-ple, consider data qubits on the primal layer of the con-trol block that participate in the same check. Because each interacts transversally with the target block, their stabilizers acquire additional Z factors. These extra contributions are canceled by incorporating the appro-priate SL qubit from the dual layer of the target block, preserving the check and making the logical transfor-mation fault tolerant. A logical CZ can be implemented similarly by connecting the two logical blocks through the rotated dual-layer geometry used for the Hadamard construction in Fig. 9. Compared with lattice surgery, the transversal construction has much smaller space-time overhead. Lattice-surgery CNOT implementations require an ad-ditional logical ancilla patch of size O(d2) and O(d)syndrome-measurement rounds for each joint logical measurement, such as XX and ZZ , although some optimized circuits require only one of these measure-ments [129]. By contrast, the transversal CNOT uses a single layer of pairwise CZ gates between the two ex-isting logical blocks. It requires no additional logical block and only O(1) temporal overhead. As with the fold-transversal S gate, the transversal CNOT introduces an additional layer of CZ gates and relies on nonlocal connectivity. Unlike the S gate, how-ever, it is compatible with the bipartite structure of the native hardware, because the added CZ gates cou-ple qubits of opposite type. The resulting detector er-ror model still contains hyperedges. As discussed in Appendix A, these can be decomposed into matching-compatible subsets, allowing the decoding problem to be treated with MWPM [101, 102]. As shown in Fig. 12(c), this preserves the memory-channel thresh-old, but increases the LER.                                                  
+
+> [1] J. Preskill, Crossing the quantum chasm: From NISQ to fault tolerance (2023). [2] J. Eisert and J. Preskill, Mind the gaps: The fraught road to quantum advantage, arXiv preprint arXiv:2510.19928 (2026). [3] C. Gidney, How to factor 2048 bit RSA integers with less than a million noisy qubits, arXiv preprint arXiv:2505.15917 (2025). [4] L. Z. Cohen, I. H. Kim, S. D. Bartlett, and B. J. Brown, Low-overhead fault-tolerant quantum com-puting using long-range connectivity, Science Ad-vances 8(2022). [5] N. Baspin and A. Krishna, Connectivity constrains quantum codes, Quantum 6, 711 (2022). [6] D. Filippov, P. Yang, and P. Murali, Architecting dis-tributed quantum computers: Design insights from resource estimation, arXiv preprint arXiv:2508.19160 (2026). [7] M. Mohseni, A. Scherer, K. G. Johnson, O. Wertheim, M. Otten, N. Anand, N. A. Aadit, Y. Alexeev, G. Ben-Shach, K. M. Bresniker, et al. , How to build a quantum supercomputer: Scaling from hundreds to millions of qubits, arXiv preprint arXiv:2411.10406 (2024). [8] A. Megrant and Y. Chen, Scaling up superconducting quantum computers, Nature Electronics 8, 549 (2025). [9] K. Wang, Z. Lu, C. Zhang, G. Liu, J. Chen, Y. Wang, Y. Wu, S. Xu, X. Zhu, F. Jin, Y. Gao, Z. Tan, Z. Cui, N. Wang, Y. Zou, A. Zhang, T. Li, F. Shen, J. Zhong, Z. Bao, Z. Zhu, Y. Han, Y. He, J. Shen, H. Wang, J.-N. Yang, Z. Song, J. Deng, H. Dong, Z.-Z. Sun, W. Li, Q. Ye, S. Jiang, Y. Ma, P.-X. Shen, P. Zhang, H. Li, Q. Guo, Z. Wang, C. Song, H. Wang, and D.-L. Deng, Demonstration of low-overhead quantum error correction codes, Nature Physics , 1 (2026). [10] S. Bravyi, A. W. Cross, J. M. Gambetta, D. Maslov, P. Rall, and T. J. Yoder, High-threshold and low-overhead fault-tolerant quantum memory, Nature
+> 627 , 778 (2024). [11] M. Mathews, L. Pahl, D. Pahl, V. L. Addala, C. Tang, W. D. Oliver, and J. A. Grover, Placing and routing quantum LDPC codes in multilayer superconducting hardware, npj Quantum Information (2026). [12] K. A. Landsman, Y. Wu, P. H. Leung, D. Zhu, N. M. Linke, K. R. Brown, L. Duan, and C. Monroe, Two-qubit entangling gates within arbitrarily long chains of trapped ions, Phys. Rev. A 100 , 022332 (2019). [13] W. Johnson and B. Ruzic, Nonlinear coupling between motional modes in trapped ion quantum processors, arXiv preprint arXiv:2510.07590 (2025). [14] S. J. Evered, D. Bluvstein, M. Kalinowski, S. Ebadi, T. Manovitz, H. Zhou, S. H. Li, A. A. Geim, T. T.
+
+27 
+
+Wang, N. Maskara, et al. , High-fidelity parallel en-tangling gates on a neutral-atom quantum computer, Nature 622 , 268 (2023). [15] B. W. Reichardt, A. Paetznick, D. Aasen, I. Basov, J. M. Bello-Rivas, P. Bonderson, R. Chao, W. van Dam, M. B. Hastings, R. V. Mishmash, et al. , Fault-tolerant quantum computation with a neutral atom processor, arXiv preprint arXiv:2411.11822 (2024). [16] S. Khan, S. Sethi, K. Sahay, Y. Lin, J. Alnas, S. Kurapati, A. Anand, J. M. Baker, and K. R. Brown, Architecting early fault-tolerant neutral atoms systems with quantum advantage, arXiv preprint arXiv:2604.19735 (2026). [17] J. Kn¨ orzer, X. Liu, B. F. Schiffer, and J. Tura, Dis-tributed quantum information processing: A review of recent progress, arXiv preprint arXiv:2510.15630 (2025). [18] M. AbuGhanem, Toward scalable fault-tolerant pho-tonic quantum computers, The Journal of Supercom-puting 82 , 51 (2026). [19] H. Zhu, T. Chen, H. Ma, Z. Zhao, J. Guo, Q. Liang, Y. Tu, T. He, W. Luo, B. Wang, et al. , Recent progress towards large-scale integrated photonic quantum com-putation, npj Nanophotonics 3, 20 (2026). [20] J. E. Bourassa, R. N. Alexander, M. Vasmer, A. Patil, I. Tzitrin, T. Matsuura, D. Su, B. Q. Baragiola, S. Guha, G. Dauphinais, et al. , Blueprint for a scalable photonic fault-tolerant quantum computer, Quantum 
+
+5, 392 (2021). [21] P. Kok, W. J. Munro, K. Nemoto, T. C. Ralph, J. P. Dowling, and G. J. Milburn, Linear optical quantum computing with photonic qubits, Rev. Mod. Phys. 79 ,135 (2007). [22] T. Rudolph, Why I am optimistic about the silicon-photonic route to quantum computing, APL photonics 
+
+2 (2017). [23] J. Romero and G. Milburn, Photonic quantum com-puting, arXiv preprint arXiv:2404.03367 (2024). [24] H. Bombin, I. H. Kim, D. Litinski, N. Nick-erson, M. Pant, F. Pastawski, S. Roberts, and T. Rudolph, Interleaving: Modular architectures for fault-tolerant photonic quantum computing, arXiv:2103.08612 (2021). [25] R. Raussendorf and H. J. Briegel, A one-way quantum computer, Phys. Rev. Lett. 86 , 5188 (2001). [26] R. Raussendorf, J. Harrington, and K. Goyal, A fault-tolerant one-way quantum computer, Ann. Phys. 321 ,2242 (2006). [27] R. Raussendorf, J. Harrington, and K. Goyal, Topo-logical fault-tolerance in cluster state quantum com-putation, New J. Phys. 9, 199 (2007). [28] S. Bartolucci, P. Birchall, H. Bombin, H. Cable, C. Dawson, M. Gimeno-Segovia, E. Johnston, K. Kiel-ing, N. Nickerson, M. Pant, et al. , Fusion-based quan-tum computation, Nat. Commun. 14 , 912 (2023). [29] H. J. Briegel, D. E. Browne, W. D¨ ur, R. Raussendorf, and M. Van den Nest, Measurement-based quantum computation, Nat. Phys. 5, 19 (2009). [30] H. J. Briegel and R. Raussendorf, Persistent entan-glement in arrays of interacting particles, Phys. Rev. Lett. 86 , 910 (2001). [31] M. Hein, J. Eisert, and H. J. Briegel, Multiparty en-tanglement in graph states, Phys. Rev. A 69 , 062311 (2004). [32] J. H. Shapiro, Single-photon kerr nonlinearities do not help quantum computation, Phys. Rev. A 73 , 062305 (2006). [33] A. N. Poddubny, S. Rosenblum, and B. Dayan, How single-photon switching is quenched with multiple Λ– level atoms, Phys. Rev. Lett. 133 , 113601 (2024). [34] D. C. Burnham and D. L. Weinberg, Observation of simultaneity in parametric production of optical pho-ton pairs, Phys. Rev. Lett. 25 , 84 (1970). [35] P. G. Kwiat, E. Waks, A. G. White, I. Appel-baum, and P. H. Eberhard, Ultrabright source of polarization-entangled photons, Physical Review A 
+
+60 , R773 (1999). [36] T. B. Pittman, B. C. Jacobs, and J. D. Franson, Sin-gle photons on pseudodemand from stored paramet-ric down-conversion, Physical Review A 66 , 042303 (2002). [37] J. E. Sharping, K. F. Lee, M. A. Foster, A. C. Turner, B. S. Schmidt, M. Lipson, A. L. Gaeta, and P. Kumar, Generation of correlated photons in nanoscale silicon waveguides, Optics Express 14 , 12388 (2006). [38] C. Reimer, L. Caspani, M. Clerici, M. Ferrera, M. Kues, M. Peccianti, A. Pasquazi, L. Razzari, B. E. Little, S. T. Chu, D. J. Moss, and R. Morandotti, Integrated frequency comb source of heralded single photons, Optics Express 22 , 6535 (2014). [39] J. W. Silverstone, D. Bonneau, K. Ohira, N. Suzuki, H. Yoshida, N. Iizuka, M. Ezaki, C. M. Natarajan, M. G. Tanner, R. H. Hadfield, V. Zwiller, G. D. Mar-shall, J. G. Rarity, J. L. O’Brien, and M. G. Thomp-son, On-chip quantum interference between silicon photon-pair sources, Nature Photonics 8, 104 (2014). [40] D. E. Browne and T. Rudolph, Resource-efficient lin-ear optical quantum computation, Phys. Rev. Lett. 
+
+95 , 010501 (2005). [41] M. Varnava, D. E. Browne, and T. Rudolph, How good must single photon sources and detectors be for efficient linear optical quantum computation?, Phys. Rev. Lett. 100 , 060502 (2008). [42] Y. Li, P. C. Humphreys, G. J. Mendoza, and S. C. Benjamin, Resource costs for fault-tolerant linear op-tical quantum computing, Phys. Rev. X 5, 041007 (2015). [43] S. Bartolucci, P. M. Birchall, M. Gimeno-Segovia, E. Johnston, K. Kieling, M. Pant, T. Rudolph, J. Smith, C. Sparrow, and M. D. Vidrighin, Creation of entangled photonic states using linear optics, arXiv preprint arXiv:2106.13825 (2021). [44] M. L. Chan, A. A. Capatos, P. Lodahl, A. S. Sørensen, and S. Paesani, Practical blueprint for low-depth pho-tonic quantum computing with quantum dots, arXiv preprint arXiv:2507.16152 (2025). [45] T. Pollet, V. Guilloux, D.-D. Tran, A. Pishchagin, S. Wein, J. A. Sulpizio, W. Hease, P. Stepanov, P. Steindl, N. Margaria, et al. , Near-identical pho-tons from distant quantum dot-cavity devices, arXiv preprint arXiv:2604.25615 (2026). [46] S. Bartolucci, T. Bell, H. Bombin, P. Birchall, J. Bulmer, C. Dawson, T. Farrelly, S. Gartenstein, M. Gimeno-Segovia, D. Litinski, Y. Liu, R. Knegjens, N. Nickerson, A. Olivo, M. Pant, A. Patil, S. Roberts, T. Rudolph, C. Sparrow, D. Tuckett, and A. Veitia, Comparison of schemes for highly loss tolerant pho-tonic fusion based quantum computing, arXiv preprint arXiv:2506.11975 (2025). [47] Z. Aqua and B. Dayan, Atom-mediated determinis-tic generation and stitching of photonic graph states, PRX Quantum 6, 010340 (2025). [48] R. J. Thompson, G. Rempe, and H. J. Kimble, Ob-servation of normal-mode splitting for an atom in an optical cavity, Phys. Rev. Lett. 68 , 1132 (1992). [49] S. Haroche and J.-M. Raimond, Exploring the Quan-tum: Atoms, Cavities, and Photons , Oxford Graduate Texts (Oxford University Press, New York, 2013). 28 
+
+[50] L.-M. Duan and H. J. Kimble, Scalable photonic quan-tum computation through cavity-assisted interactions, Phys. Rev. Lett. 92 , 127902 (2004). [51] A. Reiserer, N. Kalb, G. Rempe, and S. Ritter, A quantum gate between a flying optical photon and a single trapped atom, Nature 508 , 237 (2014). [52] N. V. Vitanov, A. A. Rangelov, B. W. Shore, and K. Bergmann, Stimulated Raman adiabatic passage in physics, chemistry, and beyond, Rev. Mod. Phys. 
+
+89 , 015006 (2017). [53] M. Hennrich, T. Legero, A. Kuhn, and G. Rempe, Vacuum-stimulated Raman scattering based on adi-abatic passage in a high-finesse optical cavity, Phys. Rev. Lett. 85 , 4872 (2000). [54] A. Kuhn, M. Hennrich, and G. Rempe, Determinis-tic single-photon source for distributed quantum net-working, Phys. Rev. Lett. 89 , 067901 (2002). [55] A. Kuhn and D. Ljunggren, Cavity-based single-photon sources, Contemporary Physics 51 , 289 (2010). [56] A. Reiserer and G. Rempe, Cavity-based quantum networks with single atoms and optical photons, Rev. Mod. Phys. 87 , 1379 (2015). [57] B. Vasic, V. Savin, M. Pacenti, S. Borah, and N. Raveendran, Quantum low-density parity-check codes, arXiv preprint arXiv:2510.14090 (2025). [58] P. Panteleev and G. Kalachev, Asymptotically good quantum and locally testable classical LDPC codes, in 
+
+Proceedings of the 54th annual ACM SIGACT sympo-sium on theory of computing (2022) pp. 375–388. [59] A. Leverrier and G. Z´ emor, Quantum tanner codes, in 
+
+2022 IEEE 63rd Annual Symposium on Foundations of Computer Science (FOCS) (IEEE, 2022) pp. 872– 883. [60] T.-C. Lin and M.-H. Hsieh, Good quantum LDPC codes with linear time decoder from lossless ex-panders, arXiv preprint arXiv:2203.03581 (2022). [61] Y.-Y. Jiang, C. Deng, H. Fan, B.-Y. Li, L. Sun, X.-S. Tan, W. Wang, G.-M. Xue, F. Yan, H.-F. Yu, Y.-S. Zhang, Y.-R. Zhang, and C.-L. Zou, Advancements in superconducting quantum computing, National Sci-ence Review 12 , nwaf246 (2025). [62] D. Hunger, T. Steinmetz, Y. Colombe, C. Deutsch, T. W. H¨ ansch, and J. Reichel, A fiber Fabry–P´ erot cavity with high finesse, New Journal of Physics 12 ,065038 (2010). [63] H. Pfeifer, L. Ratschbacher, J. Gallego, C. Saavedra, A. Faßbender, A. Von Haaren, W. Alt, S. Hofferberth, M. K¨ ohl, S. Linden, and D. Meschede, Achievements and perspectives of optical fiber Fabry–P´ erot cavities, Applied Physics B 128 , 29 (2022). [64] J. Gallego, S. Ghosh, S. K. Alavi, W. Alt, M. Martinez-Dorantes, D. Meschede, and L. Ratschbacher, High-finesse fiber Fabry–P´ erot cavities: stabilization and mode matching analysis, Applied Physics B 122 , 47 (2016). [65] S. Kikura, R. Inoue, H. Yamasaki, A. Goban, and S. Sunami, Taming the recoil effect in cavity-assisted quantum interconnects, PRX Quantum 6, 040351 (2025). [66] Y. Yu, S. Saha, M. Shalaev, G. Toh, J. O’reilly, I. Goetting, A. Kalakuntla, and C. Monroe, Entanglement-fidelity limits of photonically net-worked atomic qubits from recoil and timing, Physical Review A 113 , 012620 (2026). [67] J. Apol´ ın and D. P. Nadlinger, Recoil-induced er-rors and their correction in photon-mediated entan-glement between atomic qubits, PRX Quantum 7,010326 (2026). [68] C. W. Gardiner and M. J. Collett, Input and out-put in damped quantum systems: Quantum stochastic differential equations and the master equation, Phys. Rev. A 31 , 3761 (1985). [69] H. J. Carmichael, Quantum trajectory theory for cas-caded open systems, Phys. Rev. Lett. 70 , 2273 (1993). [70] A. Reiserer and G. Rempe, Cavity-based quantum networks with single atoms and optical photons, Rev. Mod. Phys. 87 , 1379 (2015). [71] O. Nagib, P. Huft, A. Safari, and M. Saffman, Robust atom-photon gate for quantum information process-ing, Phys. Rev. A 109 , 032602 (2024). [72] J. Volz, M. Weber, D. Schlenk, W. Rosenfeld, J. Vrana, K. Saucke, C. Kurtsiefer, and H. Weinfurter, Observation of entanglement of a single photon with a trapped atom, Phys. Rev. Lett. 96 , 030404 (2006). [73] T. Wilk, S. C. Webster, A. Kuhn, and G. Rempe, Single-atom single-photon quantum interface, Science 
+
+317 , 488 (2007). [74] R. Finkelstein, S. Bali, O. Firstenberg, and I. Novikova, A practical guide to electromagnetically induced transparency in atomic vapor, New J. Phys. 
+
+25 , 035001 (2023). [75] B. M. Terhal, Quantum error correction for quantum memories, Rev. Mod. Phys. 87 , 307 (2015). [76] A. Bolt, G. Duclos-Cianci, D. Poulin, and T. Stace, Foliated quantum error-correcting codes, Phys. Rev. Lett. 117 , 070501 (2016). [77] K. Fujii, Quantum Computation with Topological Codes: from qubit to topological fault-tolerance , Vol. 8 (Springer, 2015). [78] PsiQuantum team, A manufacturable platform for photonic quantum computing, Nature 641 , 876 (2025). [79] H. Aghaee Rad, T. Ainsworth, R. N. Alexander, B. Al-tieri, M. F. Askarani, R. Baby, L. Banchi, B. Q. Bara-giola, J. E. Bourassa, R. Chadwick, et al. , Scaling and networking a modular photonic quantum computer, Nature 638 , 912 (2025). [80] S. D. Barrett and T. M. Stace, Fault–tolerant quan-tum computation with very high threshold for loss errors, Phys. Rev. Lett. 105 , 200502 (2010). [81] A. G. Fowler, Coping with qubit leakage in topological codes, Phys. Rev. A 88 , 042308 (2013). [82] J. Ghosh, A. G. Fowler, J. M. Martinis, and M. R. Geller, Understanding the effects of leakage in super-conducting quantum-error-detection circuits, Phys. Rev. A 88 , 062329 (2013). [83] J. Ghosh and A. G. Fowler, Leakage-resilient approach to fault-tolerant quantum computing with supercon-ducting elements, Phys. Rev. A 91 , 020302 (2015). [84] Y. Li, S. D. Barrett, T. M. Stace, and S. C. Benjamin, Fault–tolerant quantum computation with nondeter-ministic gates, Phys. Rev. Lett. 105 , 250502 (2010). [85] J. M. Auger, H. Anwar, M. Gimeno-Segovia, T. M. Stace, and D. E. Browne, Fault-tolerant quantum computation with nondeterministic entangling gates, Phys. Rev. A 97 , 030301 (2018). [86] A. C. Whiteside and A. G. Fowler, Upper bound for loss in practical topological-cluster-state quantum computing, Phys. Rev. A 90 , 052316 (2014). [87] A. C. Whiteside, Classical Processing for Topological Quantum Error Correction , Ph.D. thesis, The Univer-sity of Melbourne (2017). [88] H. Perrin, S. Jandura, and G. Pupillo, Quantum er-ror correction resilient against atom loss, Quantum 9,1884 (2025). [89] S. Gu, Y. Vaknin, A. Retzker, and A. Kubica, Opti-mizing quantum error correction protocols with era-29 
+
+sure qubits, arXiv preprint arXiv:2408.00829 (2024). [90] G. Baranes, M. Cain, J. P. B. Ataides, D. Bluvstein, J. Sinclair, V. Vuleti´ c, H. Zhou, and M. D. Lukin, Leveraging qubit loss detection in fault-tolerant quan-tum algorithms, Phys. Rev. X 16 , 011002 (2026). [91] P. Liu, S. J. S. Tan, E. Huang, U. A. Acar, H. Zhou, and C. Zhao, Achieving optimal-distance atom-loss correction via Pauli envelope, arXiv preprint arXiv:2603.04156 (2026). [92] C.-C. Yu, Z.-H. Chen, Y.-H. Deng, M.-C. Chen, C.-Y. Lu, and J.-W. Pan, Processing and decoding Rydberg decay error with MBQC, arXiv preprint arXiv:2411.04664 (2025). [93] C.-C. Yu, Y.-H. Deng, C.-Y. Lu, M.-C. Chen, and J.-W. Pan, Locating Rydberg decay error in the SWAP leakage reduction circuit protocol, Phys. Rev. A 113 ,042451 (2026). [94] D. Horsman, A. G. Fowler, S. Devitt, and R. Van Me-ter, Surface code quantum computing by lattice surgery, New J. Phys. 14 , 123011 (2012). [95] J. E. Moussa, Transversal Clifford gates on folded sur-face codes, Phys. Rev. A 94 , 042316 (2016). [96] M. A. Webster, A. O. Quintavalle, and S. D. Bartlett, Transversal diagonal logical operators for stabiliser codes, New J. Phys. 25 , 103018 (2023). [97] K. H. Wan, M. Webber, A. G. Fowler, and W. K. Hensinger, An iterative transversal CNOT decoder, arXiv preprint arXiv:2407.20976 (2024). [98] N. P. Breuckmann and S. Burton, Fold-transversal Clifford gates for quantum codes, Quantum 8, 1372 (2024). [99] Z.-H. Chen, M.-C. Chen, C.-Y. Lu, and J.-W. Pan, Transversal logical Clifford gates on the rotated sur-face code with reconfigurable neutral atom arrays, Phys. Rev. Lett. 136 , 130601 (2026). [100] H. Bombin, C. Dawson, R. V. Mishmash, N. Nicker-son, F. Pastawski, and S. Roberts, Logical blocks for fault-tolerant topological quantum computation, PRX Quantum 4, 020303 (2023). [101] M. Cain, D. Bluvstein, C. Zhao, S. Gu, N. Maskara, M. Kalinowski, A. A. Geim, A. Kubica, M. D. Lukin, and H. Zhou, Fast correlated decoding of transversal logical algorithms, arXiv preprint arXiv:2505.13587 (2025). [102] M. L. Turner, E. T. Campbell, O. Crawford, N. I. Gillespie, and J. Camps, Scalable decoding protocols for fast transversal logic in the surface code, arXiv preprint arXiv:2505.23567 (2025). [103] C. Gidney, Inplace access to the surface code Y basis, Quantum 8, 1310 (2024). [104] Quantum Source, Magic state preparation in an MBQC framework (2026), in preparation. [105] L. Daguerre and I. H. Kim, Code switching revis-ited: Low-overhead magic state preparation using color codes, Phys. Rev. Research 7, 023080 (2025). [106] C. Gidney, N. Shutty, and C. Jones, Magic state cul-tivation: growing T states as cheap as CNOT gates, arXiv preprint arXiv:2409.17595 (2024). [107] H. Poulsen Nautrup, N. Friis, and H. J. Briegel, Fault-tolerant interface between quantum memories and quantum processors, Nat. Commun. 8 (2017). [108] Y. Li, A magic state’s fidelity can be superior to the operations that created it, New Journal of Physics 17 ,023037 (2015). [109] C. Chamberland and M. E. Beverland, Flag fault-tolerant error correction with arbitrary distance codes, Quantum 2, 53 (2018). [110] H. Bomb´ ın, M. Pant, S. Roberts, and K. I. Seetharam, Fault-tolerant postselection for low-overhead magic state preparation, PRX Quantum 5 (2024). [111] C. Gidney, STIM: a fast stabilizer circuit simulator, Quantum 5, 497 (2021). [112] O. Higgott, Pymatching: A python package for de-coding quantum codes with minimum-weight perfect matching, arXiv preprint arXiv:2105.13082 (2021). [113] O. Higgott and C. Gidney, PyMatching v2, GitHub repository (2022). [114] O. Higgott and C. Gidney, Sparse Blossom: correcting a million errors per core second with minimum-weight matching, Quantum 9, 1600 (2025). [115] D. Herr, A. Paler, S. J. Devitt, and F. Nori, Lat-tice surgery on the Raussendorf lattice, Quantum Sci. Technol. 3, 035011 (2018). [116] A. G. Fowler, M. Mariantoni, J. M. Martinis, and A. N. Cleland, Surface codes: Towards practical large-scale quantum computation, Phys. Rev. A 86 , 032324 (2012). [117] A. R. Calderbank and P. W. Shor, Good quantum error-correcting codes exist, Phys. Rev. A 54 , 1098 (1996). [118] A. M. Steane, Simple quantum error-correcting codes, Phys. Rev. A 54 , 4741 (1996). [119] A. G. Fowler and K. Goyal, Topological cluster state quantum computing, arXiv preprint arXiv:0805.3202 (2008). [120] S. Aaronson and D. Gottesman, Improved simulation of stabilizer circuits, Phys. Rev. A 70 , 052328 (2004). [121] C. D. Lorenz and R. M. Ziff, Precise determination of the bond percolation thresholds and finite-size scaling corrections for the sc, fcc, and bcc lattices, Phys. Rev. E 57 , 230 (1998). [122] C.-C. Yu, Z.-H. Chen, Y.-H. Deng, C.-Y. Lu, M.-C. Chen, and J.-W. Pan, Taming Rydberg de-cay with measurement-based quantum computation, Phys. Rev. Lett. 136 , 160601 (2026). [123] C. Gidney, Comment on “precise definition of a DE-TECTOR in STIM”, Quantum Computing Stack Ex-change (2024), comment posted March 13, 2024. Ac-cessed May 5, 2026. [124] C. Gidney, How to get STIM DEM for non-deterministic detectors/observables?, Quantum Com-puting Stack Exchange (2026), answer posted April 15, 2026. Accessed May 5, 2026. [125] Z. Wang, Surface code error correction during logical operations , Master’s thesis, TU Delft (2023). [126] J. Ramette, J. Sinclair, N. P. Breuckmann, and V. Vuleti´ c, Fault-tolerant connection of error-corrected qubits with noisy links, npj Quantum In-formation 10 , 58 (2024). [127] J. Stack, M. Wang, and F. Mueller, Transversal fault– tolerant distributed quantum computing operations, arXiv preprint arXiv:2504.05611 (2026). [128] C. Chamberland and E. T. Campbell, Universal quantum computing with twist-free and temporally encoded lattice surgery, PRX Quantum 3, 010331 (2022). [129] Y. Akahoshi, R. Toshio, J. Fujisaki, H. Oshima, S. Sato, and K. Fujii, Runtime reduction in lat-tice surgery utilizing time-like soft information, arXiv preprint arXiv:2510.21149 (2025).

@@ -1,6 +1,9 @@
 * <a class="dpr-sidebar-root-link" href="#/">首页</a>
 * <a class="dpr-sidebar-root-link dpr-sidebar-noactive-link" href="javascript:void(0)" data-dpr-hash="#/tutorial/README">使用教程</a>
 * Daily Papers
+  * 2026-07-06 <!--dpr-date:20260706-->
+    * 速读区
+      * <a class="dpr-sidebar-item-link dpr-sidebar-item-structured" href="#/202607/06/2606.31428v1-the-limits-of-erasure-based-postselection-for-quantum-error-mitigation" data-sidebar-item="{&quot;title&quot;: &quot;The limits of erasure-based postselection for quantum error mitigation&quot;, &quot;link&quot;: &quot;https://arxiv.org/abs/2606.31428v1-the-limits-of-erasure-based-postselection-for-quantum-error-mitigation&quot;, &quot;score&quot;: &quot;6.0&quot;, &quot;tags&quot;: [{&quot;kind&quot;: &quot;query&quot;, &quot;label&quot;: &quot;qec-decoding&quot;}], &quot;evidence&quot;: &quot;基于擦除后选择的误差修正，与量子纠错解码相关&quot;}">The limits of erasure-based postselection for quantum error mitigation</a>
   * 2026-07-03 <!--dpr-date:20260703-->
     * 精读区
       * <a class="dpr-sidebar-item-link dpr-sidebar-item-structured" href="#/202607/03/2606.32001v1-spatially-coupled-mackay-nealhsu-anastasopoulos-css-codes-achieve-the-quantum-erasure-hashing-bound-by-seeded-bp-decoding" data-sidebar-item="{&quot;title&quot;: &quot;Spatially Coupled MacKay-Neal/Hsu-Anastasopoulos CSS Codes Achieve the Quantum-Erasure Hashing Bound by Seeded BP Decoding&quot;, &quot;link&quot;: &quot;https://arxiv.org/abs/2606.32001v1-spatially-coupled-mackay-nealhsu-anastasopoulos-css-codes-achieve-the-quantum-erasure-hashing-bound-by-seeded-bp-decoding&quot;, &quot;score&quot;: &quot;9.0&quot;, &quot;tags&quot;: [{&quot;kind&quot;: &quot;query&quot;, &quot;label&quot;: &quot;qec-decoding&quot;}], &quot;evidence&quot;: &quot;通过种子BP解码的空间耦合CSS码，在量子擦除信道上达到散列界&quot;}">Spatially Coupled MacKay-Neal/Hsu-Anastasopoulos CSS Codes Achieve the Quantum-Erasure Hashing Bound by Seeded BP Decoding</a>

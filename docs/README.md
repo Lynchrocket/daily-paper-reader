@@ -6,22 +6,24 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-07-05
-- 运行时间：2026-07-05 20:40:21 UTC
+- 最新运行日期：2026-07-06
+- 运行时间：2026-07-06 21:48:51 UTC
 - 运行状态：成功
-- 本次总论文数：0
+- 本次总论文数：1
 - 精读区：0
-- 速读区：0
+- 速读区：1
 
 ### 今日简报（AI）
-> 今日无新推荐，系统未产出可展示论文。
-- 详情：[/202607/05/README](/202607/05/README)
+今日速读一篇探讨量子误差缓解中擦除后选择方法局限性的论文（6.0分）。研究指出擦除后选择存在理论边界，并非万能方案。建议量子计算实践者关注零噪声外推等替代缓解技术。
+- 详情：[/202607/06/README](/202607/06/README)
 
 ### 精读区论文标签
 - 本次无精读推荐。
 
 ### 速读区论文标签
-- 本次无速读推荐。
+1. [The limits of erasure-based postselection for quantum error mitigation](/202607/06/2606.31428v1-the-limits-of-erasure-based-postselection-for-quantum-error-mitigation)  
+   标签：评分：6.0/10、query:qec-decoding
+   evidence：基于擦除后选择的误差修正，与量子纠错解码相关
 
 
 <div class="dpr-home-promo-card">

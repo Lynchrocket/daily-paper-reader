@@ -1,0 +1,541 @@
+Title: The limits of erasure-based postselection for quantum error mitigation
+
+URL Source: https://arxiv.org/pdf/2606.31428v1
+
+Published Time: Wed, 01 Jul 2026 00:53:54 GMT
+
+Number of Pages: 14
+
+Markdown Content:
+# The limits of erasure-based postselection for quantum error mitigation 
+
+## Sam J. Griffiths ∗ , Jamie Friel †
+
+## , and Brian Vlastakis ‡
+
+## Oxford Quantum Circuits (OQC), United Kingdom, RG2 9LH June 2026 
+
+# Abstract 
+
+In both classical and quantum error correction, her-alded erasures are known to be easier to tolerate than unheralded general stochastic errors. Whilst an estab-lished benefit of loss-dominant quantum architectures such as photonic qubits, this fact has received renewed interest, with a pivot towards reconstructing other ar-chitectures to be erasure-dominant, such as dual-rail transmons. This work investigates exploiting these ‘erasure qubits’ in the near term by using postselection as a technique for error mitigation, wherein circuit shots detecting any erased qubits are discarded from the com-putational ensemble and repeated. Firstly, we outline a numerical framework for representing circuit-level era-sure noise and present ‘erado’, an open-source library capable of simulating erasure noise and postselection. Secondly, we investigate the effects of both erasure noise and noise in the erasure checks themselves on the quan-tum Fourier transform (QFT), in the additional pres-ence of gate depolarising noise. A worked example is provided of postselection fully mitigating against the erasure channel for erasure check error rates less than 3.0%. We also show how a postselected dual-rail system can surpass a fundamental noise floor at the kiloquop scale where a comparable single-rail system cannot, jus-tifying this approach in the NISQ regime before (and, perhaps, combined with) the practical arrival of QEC. 
+
+> ∗sgriffiths@oqc.tech
+> †jfriel@oqc.tech
+> ‡bvlastakis@oqc.tech
+
+# 1 Introduction 
+
+A central challenge in many quantum computing architectures – and especially in superconducting qubits – is the presence of energy relaxation pro-cesses, commonly characterised by the T1 lifetime [1]. In conventional architectures, this decay mech-anism manifests as an unheralded amplitude damp-ing channel, introducing stochastic errors that di-rectly contribute to logical failure rates [2]; the error mechanism is unheralded in that we cannot directly know if or where discrete stochastic er-rors are induced, requiring algorithmic inference via error-correcting codes [3]–[5]. This places strin-gent requirements on coherence, calibration, and ultimately the overhead required for quantum er-ror correction (QEC). In this work, we consider an approach based on erasure-aware qubit encodings, in which dominant relaxation events are heralded (that is, can be de-tected) and conditionally removed from the compu-tational ensemble, i.e. postselection [6]. In a dual-rail encoding, two physical modes are used to repre-sent a single logical qubit, enabling the detection of prevailing loss mechanisms through a single end-of-line measurement [7], [8]. This provides a practical route to mitigating the dominant source of noise in such systems, not only in their fault-tolerant future when combined with QEC, but also in the noisy intermediate-scale (NISQ) regime, wherein active QEC remains challenging for current hardware ca-pabilities. In Section 2, technical background is introduced: we formally define the dual-rail codespace, describe an erasure noise model appropriate for relaxation-1
+
+> arXiv:2606.31428v1 [quant-ph] 30 Jun 2026
+
+dominant systems, explain the propagation of era-sures through circuits, and analyse the role of im-perfect erasure detection in postselection. In Section 3, we overview our simulational tech-niques developed for benchmarking the effects of noise parameters upon the performance and cost of erasure-based postselection. We have published this codebase as erado , an open-source Qiskit-based [9] library providing tools for the simulation of erasure noise and postselection with arbitrary quantum circuits. 1
+
+In Section 4, we demonstrate these techniques in a series of results using the quantum Fourier transform (QFT) as a case study; in particular, we explore how the overhead of postselection scales with the size of the circuit, as well as how the mean fidelity with and without postselection is af-fected by erasure noise, erasure check noise and gate depolarising noise. Finally, we also show how postselected dual-rail systems can outperform con-ventional single-rail systems, accounting for qubit idling at the kiloquop scale. 
+
+# 2 Background 
+
+## 2.1 Erasure noise 
+
+In classical information theory, an error most con-ventionally takes the form of a bit flip at an un-known (or ‘unheralded’) location, where the binary symmetric channel is a noise model which flips each bit to the opposite state with uniform probability. A linear code with distance d can detect up to d −1flip errors, or correct up to ⌊(d − 1) /2⌋ flip errors [3]. 2 In contrast, an erasure is the loss of state (i.e. neither 0 nor 1) at a known (or ‘heralded’) location, where the equivalent binary erasure channel erases each bit with uniform probability [10]. As the lo-cation is known, an appropriate code/decoder can correspondingly correct up to d − 1 erasures. In quantum information theory, unheralded stochastic noise generalises to a statistical ensemble of Pauli operators acting on the logical subspace: 
+
+P(ρ) =(1 − pX − pY − pZ )ρ (1) + pX XρX + pY Y ρY + pZ ZρZ .   
+
+> 1https://github.com/oqc-community/erado
+> 2A code’s distance is the minimum Hamming distance be-tween any two codewords, which is equivalent to the weight of the smallest undetectable error.
+
+A special case is the depolarising channel, wherein the probability associated with each Pauli operator is equal, such that the state ρ is mapped towards the maximally-mixed state [2]: 
+
+D(ρ) = (1 − p)ρ + p
+
+3 (XρX + Y ρY + ZρZ ) (2) = (1 − p)ρ + p I
+
+2 . (3) Correspondingly, an erasure is distinguished from Pauli noise by the fact that the location (and, often, the time) of the error is known; rather than requiring inference by decoding stabiliser measure-ments, erasure events provide classical informa-tion indicating that a qubit has left the compu-tational subspace. Erasure-dominance can thus be a desirable system property, with highly-efficient codes [11], [12] and decoders [13], [14] designed for this noise channel. This has been considered an advantage of quantum architectures with natural erasure-dominance, such as dual-rail optical qubits, wherein photon loss is a major error mechanism [7]. 
+
+## 2.2 Modelling dual-rail qubits 
+
+In conventional superconducting devices such as transmons, the primary error mechanisms are time-varying amplitude damping and phase damping, characterised by time constants T1 and T2 respec-tively, such that depolarisation is a dominant noise channel [1], [2]. Contrastingly, leakage into non-computational states is less statistically significant. 
+
+Erasure qubits are instead engineered such that leakage events are both dominant and heralded [15]. For example, transmons can be used to construct the dual-rail encoded dimon qubit (DDQ) [8]; as a direct analogue of a dual-rail photonic qubit, it encodes one logical qubit into two physical modes 
+
+|ab ⟩, such that the computational basis can be de-fined as 
+
+|0L⟩ = |10 ⟩ , |1L⟩ = |01 ⟩ , (4) where |10 ⟩ denotes a single excitation in mode a
+
+with none in mode b, and vice versa. The logical codespace is therefore the single-excitation mani-fold 
+
+C = span {| 10 ⟩, |01 ⟩} . (5) A key feature of this encoding is that thermal (i.e. spin–lattice T1) relaxation corresponds to loss 2of excitation, such that the energy transitions 
+
+|10 ⟩ 7 → | 00 ⟩ , |01 ⟩ 7 → | 00 ⟩ , (6) take the system out of the logical subspace C.Thus, any decay into the noncomputational ground state |e⟩ = |00 ⟩ is an erasure event. This can be in-terpreted as a physical error-detecting code for the erasure channel. 3
+
+We can therefore define the erasure subspace as 
+
+E = span {| e⟩} = span {| 00 ⟩} , (7) and note that thermal relaxation becomes a de-tectable leakage process C → E.This erasure noise channel may similarly be writ-ten explicitly in an operator–sum form as 
+
+E(ρ) = (1 − pe)E0ρE† 
+
+> 0
+
++ peE1ρE† 
+
+> 1
+
+, (8) 
+
+E0 = I , (9) 
+
+E1 = |e⟩⟨ 10 | + |e⟩⟨ 01 | , (10) where the erasure rate pe is the uniform probability with which each dual-rail qubit transitions into the erased state |e⟩. Conditioned on no erasure, resid-ual noise may still act as an effective Pauli channel within the logical codespace C, such that a conve-nient overall phenomenological noise model takes the form 
+
+N (ρ) = (1 − pe)P(ρ) + peE1ρE† 
+
+> 1
+
+, (11) capturing the physically-relevant regime in which erasures dominate but a background of Pauli-type errors remain. A crucial distinction between erasure noise and Pauli noise is that erasures induce conditional cir-cuit evolution; once a qubit has left the computa-tional subspace, subsequent gates no longer corre-spond to meaningful logical operations. Take UL to be any unitary matrix representing a coherent oper-ation within the logical subspace C (i.e. a quantum circuit gate) such that 
+
+UL : C → C , (12) i.e. UL|ψ⟩ = |ϕ⟩ , |ϕ⟩ ∈ C ∀| ψ⟩ ∈ C . (13)     
+
+> 3Note that this is not a linear code, as Cis not closed under addition (readily apparent from the fact that the all-zero state is not a codeword).
+
+Then, in our model, we treat the dynamics of the system after an erasure out of C as 
+
+UL|e⟩ = |e⟩ (14) such that the erased state |e⟩ is stabilised by all logical operators UL; that is, all subsequent op-erations act trivially on the erased state. Oper-ationally, this corresponds to replacing all circuit gates on an erased qubit with no-ops. More generally, for an erasure qubit with arbitrarily-sized E,
+
+UL : E → E , (15) such that the orthogonal subspaces C and E are disjoint under logical operators. This model captures the physical intuition that once the encoded excitation is lost, the logical in-formation is irrecoverable – it cannot be restored by the remainder of the circuit. Importantly, this con-ditional structure must be handled carefully when performing circuit-level simulations or constructing detector–error models (DEMs) [16]. 
+
+## 2.3 Postselection 
+
+Postselection is the reduction of a probability dis-tribution conditioned on the outcome of some event(s); as a hypothetical computational fea-ture, it has been shown to significantly improve the complexity space of nondeterministic algo-rithms – both classical and quantum – by con-ditioning the outcome ensemble upon successful or otherwise-desired states. More formally, the classical bounded-error probabilistic polynomial-time complexity class BPP is improved to BPP path 
+
+with postselection [17], and the equivalent quantum class BQP improved to PostBQP (which is equal to the large PP ) [6]. In this work, we investigate the practical applica-tion of this conceptual technique as error mitigation for the erasure channel, in which we simply reject circuit shots for which any erasure events were de-tected. Let us consider the experimentally-motivated setting where erasure detection is performed ex-actly once at the end of circuit execution, a.k.a. 
+
+end-of-line (EOL). In the ideal limit of perfect era-sure detection, postselection removes all T1 events, 3yielding behaviour approaching an infinite-T1 de-vice, up to re-excitations. A primary objective of this paper is to quantify how closely practical dual-rail systems can approach this limit. In realistic devices, erasure detection is imper-fect. We model errors on the end-of-line erasure checks (one bit per logical qubit) as a binary asym-metric channel with the following parameters: (i) false positive (0 7 → 1) rate pfp ;(ii) false negative (1 7 → 0) rate pfn .False positives cause successful runs to be rejected, reducing sampling efficiency, whilst false negatives cause unsuccessful runs to be allowed into the ac-cepted ensemble, limiting the overall improvement in logical fidelity. These effects therefore define a trade-off between improved error suppression and sampling overhead, with the utility of postselection depending critically on both the physical erasure rate and the fidelity of erasure checks. The remainder of this paper develops quantita-tive models of this improvement, explores the role of imperfect erasure detection, and compares the resulting performance against the infinite-T1 limit. 
+
+# 3 Numerical techniques 
+
+## 3.1 Circuit sampling/transpilation 
+
+In this section, we outline the techniques used in our open-source erasure–postselection codebase 
+
+erado , which implements a circuit-level noise simu-lation capable of applying heralded erasure dynam-ics to arbitrary quantum circuits. Two equivalent implementations of this model are provided, both of which are illus-trated in Figure 1. The first of these (the 
+
+ErasureCircuitSampler ) enforces erasure noise by deleting gates affected by erasure events from the circuit (Figure 1a). This approach directly models the conditional circuit evolution induced by loss: once a qubit is erased, subsequent operations acting on that qubit no longer implement meaning-ful dynamics within the computational subspace and are therefore treated as no-ops. Rather than inserting additional operations or markers into the circuit, the sampler generates a modified circuit for each shot by removing the gates that would act on erased degrees of freedom. The principal benefit is that no additional overhead is introduced into the circuit representation itself; the principal drawback is that circuits are sampled and simulated on a per-shot basis. The second of these (the ErasurePass ) instead implements a circuit transpilation pass which adds a classical register containing the Boolean erasure state of each qubit, and wraps all gates in classi-cal logic such that they only execute conditionally on none of the qubit arguments being erased (Fig-ure 1b). The principal benefit is that this yields a single precomputed circuit which fully implements the noise model across all shots; the principal draw-back is that the addition of classical logic signifi-cantly slows down the simulation of quantum cir-cuits. With either implementation, this model occu-pies a complementary regime to simulational tech-niques based on stabilisers and detector–error mod-els (DEMs) [18]. It captures conditional dynam-ics intrinsic to erasure processes and supports ar-bitrary Qiskit circuits (and backends, in the case of the circuit sampler), at the cost of either per-shot circuit sampling or the introduction of classi-cal control flow. This makes it well-suited to near-term studies of erasure-aware primitives, postselec-tion strategies, and the impact of imperfect erasure checks; meanwhile, scalable DEM-based pipelines remain essential for large-distance QEC studies and broad architectural exploration. In the remainder of this paper, of these two implementations, we refer to and use the 
+
+ErasureCircuitSampler for numerically charac-terising erasure-induced behaviour in circuits (em-pirically, it outperformed the erasure transpiler pass in overall runtime on our high-performance computing platforms). 
+
+## 3.2 Sampling semantics 
+
+We assume a uniform erasure rate pe applied across the circuit execution. The circuit sampler sup-ports two closely-related semantics controlled by a Boolean option erasure before gates :(i) post-gate erasure , where erasure is inflicted im-mediately after a gate acts; (ii) pre-gate erasure , where erasure is inflicted im-mediately before a gate acts. 4DELETED 
+
+ERASURE 
+
+# q0
+
+# q1
+
+# q2
+
+3
+
+# meas 
+
+H
+
+X
+
+S
+
+Z X
+
+0 1 2(a) Example shot with the erasure circuit sampler. An erasure is stochastically induced on q0 and q1 by the first CX gate, so all subsequent gates touching these qubits are deleted from the circuit representation. If   
+
+> If
+> If
+> If
+> If If If
+
+q0
+
+q1
+
+q2
+
+q_eraser 
+
+meas 0
+
+meas 1
+
+meas 2
+
+erased 0
+
+erased 1
+
+erased 2    
+
+> 0x0
+> 0x0 0x0
+> 0x0
+> 0x0 0x0
+> 0x0
+> H
+> |0
+> X
+> |0|0|0
+> S
+> |0
+> Z
+> |0
+> X
+> |0
+
+... 
+
+(b) The same base circuit (cropped for clarity) instead transformed by the erasure transpiler pass. An additional classical register stores an erasure flag for each data qubit. An auxiliary qubit qeraser populates erasures indepen-dently onto these wires via an auxiliary bit-flip channel with rate pe on its measurement operations. All gates on data qubits are then conditioned on all qubit arguments having unset erasure flags. 
+
+Figure 1: Illustrations of the two equivalent erasure noise models implemented in erado with a toy circuit example. 5These two conventions represent common physi-cal interpretations (e.g. erasure associated with idle evolution, versus erasure associated with driven op-erations) and allow sensitivity studies to bracket hardware-dependent timing assumptions. In both cases, once an erasure event occurs on a qubit, all subsequent gates that touch that qubit are removed from the shot circuit. For multi-qubit gates, this deletion rule naturally removes any operation for which one participant has been erased. Take a circuit represented as an ordered collec-tion of gates G which, as a tuple, can be defined as a set of index–operator pairs ( t, U ) in the form 
+
+G = {(1 , U 1), (2 , U 2), . . . , (|G|, U |G|)} . (16) We denote the gate index with t as it is hereinafter used interchangeably with the more general concept of time, under our chosen circuit timing convention. Each element in G is therefore a candidate location for an erasure event. For each shot σ, the sam-pler stochastically draws a vector of independent erasure flags ⃗e σ = ( eσ t | t ∈ [1 . . |G|], e σ t ∼ Bernoulli( pe)) ,
+
+(17) yielding a set of erasure locations for each shot Ωσ = {t | eσ t = 1 } . (18) 
+
+## 3.3 Deletion lookup table (LUT) 
+
+To avoid computing deletion sets repeatedly over many shots, the ErasureCircuitSampler precom-putes a lookup table (LUT) at construction time. Given an input circuit, we enumerate the ordered gate representation G and, treating each element as a candidate erasure location, cache the set of downstream gates which would be deleted. Formally, each erasure event at location t maps to a deletion set 
+
+τ (t) ⊆ [t . . |G|] , (19) consisting of all gate indices t′ ≥ t where the sup-port of Ut′ includes any of the qubits in the support of the deleted gate Ut (if using post-gate erasure, the above subset and inequality become strict). The lookup table therefore enables O(1) retrieval of the relevant deletion set for each sampled era-sure event, reducing the problem of shot genera-tion to set union and filtering. This design is par-ticularly effective for parameter sweeps, since the lookup table depends only on circuit structure and erasure timing convention, and thus can be reused across many runs with different erasure rates, back-end configurations, or analysis modes. 
+
+## 3.4 Shot generation and execution 
+
+For each shot σ, an erasure-sampled circuit Gσ is constructed by deleting from G the union of dele-tion sets implied by the erasure locations Ω σ ; that is, the tuple of all deleted gate locations Dσ is 
+
+Dσ =
+
+(
+
+(t′, U t′ ) t′ ∈ [
+
+> t∈Ωσ
+
+τ (t)
+
+)
+
+, (20) such that 
+
+Gσ = G \ Dσ . (21) The ErasureCircuitSampler implementing era-sure noise as gate deletion means that the resulting shot circuit Gσ contains only a subset of the orig-inal circuit primitives, introducing no additional operations, measurements or classical control flow (in contrast to the ErasurePass ). In this sense, the method enforces conditional ‘no-op’ dynamics without modifying the gate set. 
+
+## 3.5 Randomness and concurrency 
+
+The ErasureCircuitSampler implements re-producible stochastic sampling through amultiprocessing-safe random number genera-tor (RNG) interface (MultiprocessingRNG ). Importantly, the seed method controls the en-tropy used to generate erasure patterns, and also correctly overrides the seed behaviour of the backend used for simulating circuit shots. This ensures that both erasure sampling and circuit execution are reproducible and stable under par-allel execution, enabling deterministic reruns and statistically-valid comparisons across parameter sweeps. Because shots are independent, this method is embarrassingly parallel; in practice, we distribute shots across worker processes. By aggregating de-sired results 4 via multiprocessing-safe optional call-backs, we also avoid the need to store full shot-level 
+
+> 4(e.g. accepted/rejected proportions, logical state mea-surements and circuit fidelities)
+
+6traces (unless required for debugging or other de-tailed analysis). Finally, since erasure-aware simulation can oc-casionally produce pathological cases for cer-tain backends or compilation settings (e.g. ex-treme deletion patterns, backend-specific slow-downs or system-level multiprocessing limits), the ErasureCircuitSampler supports a per-shot 
+
+timeout parameter, which upper-bounds the al-lowed execution time for a single shot before ter-mination. This provides robust behaviour in large Monte Carlo simulations and prevents a small num-ber of outliers from dominating total runtime. 
+
+# 4 Results 
+
+## 4.1 Model and metrics 
+
+In these results, we study the effects of noise channels and postselection on the performance of a linear-connectivity quantum Fourier transform (QFT) construction, as given in [19]. Arbitrarily but consistently, all circuits are transpiled to the universal basis gate set {RZ, √X, CX }. For a num-ber of qubits n ∈ [2 . . 16], the number of gates |G|
+
+in this QFT construction scales quadratically as 
+
+|G| = 3 n2 − 2n + 2 . (22) The erasure rate pe is the uniform probability with which any of the |G| gates in the circuit in-flicts an erasure upon any of its qubit arguments. This is equivalent to an amplitude damping chan-nel with emission rate pe, where pe models ther-mal relaxation by assuming the time-varying form 1 − e−t/T 1 [2]. For example, a gate time t = 500 ns and a physical relaxation time T1 = 50 μs equates to an erasure rate pe ≈ 0.010. Erasure check noise is modelled with a single er-ror rate q for simplicity, encompassing both false positives and false negatives as q = pfp = pfn . Un-heralded Pauli noise is modelled as a depolarising channel with 1-qubit gate error rate p1Q = 0 .001 and 2-qubit rate p2Q = 0 .010. When postselection is enabled, the simulation runs until the number of accepted shots sa equals some target (e.g. 5000 shots). This leads to a num-ber of rejected shots sr , with total shots s = sa +sr .The rejection rate R is thus defined as the propor-2 4 6 8 10 12 14 16 Number of qubits, n
+
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0Rejection rate,  R
+> noisy checks & noisy circuit noisy checks ideal checks ideal checks (theoretical)
+> pe=q=0.005
+> pe=q=0.010
+> pe=q=0.005
+> pe=q=0.010
+
+(a) 2 4 6 8 10 12 14 16 Number of qubits, n
+
+> 10 0
+> 10 1
+> 10 2
+> 10 3
+> Overhead,  s/s a
+> noisy checks & noisy circuit noisy checks ideal checks ideal checks (theoretical)
+> pe=q=0.005
+> pe=q=0.010
+> pe=q=0.005
+> pe=q=0.010
+
+(b) 
+
+Figure 2: Cost of postselection for QFT with 5000 target shots. The trends show erasure noise with ideal checks (green), erasure noise with check noise (orange), and erasure noise with check noise and gate depolarising noise (blue). Note how false pos-itives dominate to strictly increase the rejection rate over ideal checks. Error bars for rejection rate show the 95% confidence interval, calculated via the Clopper-Pearson method for binomial proportions. 7tion of rejected shots: 
+
+R = sr
+
+s = 1 − sa
+
+s . (23) A shot is rejected if any qubits are erased, such that the theoretical rejection rate scales binomially as 
+
+R = 1 − (1 − pe)|G| . (24) Correspondingly, we define the overhead of postse-lection as the proportion of total shots to accepted shots s/s a. The theoretical trend for the overhead is derived by combining Equations 23 and 24: 
+
+ssa
+
+= (1 − pe)−| G| (25) 
+
+∈ (1 − pe)−O(n2) . (26) Therefore, we can say that this postselection prob-lem scales exponentially, in that its overhead scales with a polynomial exponent in n (as per the com-plexity class EXPTIME ). We verify these theoreti-cal trends for the rejection rate and overhead em-pirically in Figure 2. Finally, the per-shot circuit fidelity F is defined conventionally as 
+
+F (|ψ⟩, |Ψ⟩) = |⟨ ψ|Ψ⟩| 2 , (27) where |ψ⟩ is the end-of-line statevector snapshot of the simulation (before final measurements) and |Ψ⟩
+
+is the ideal statevector representation calculated di-rectly from the circuit definition for each n.
+
+## 4.2 Interaction of noise models 
+
+The impact of postselection on the fidelity F of the QFT algorithm is presented in Figure 3; in par-ticular, we observe how erasure and postselection impacts the fidelity with respect to the limit of 
+
+T1 → ∞ , i.e. the regime where pe = 0 and the re-maining unheralded Pauli errors (i.e. our gate depo-larising channel) alone constitute the noise model. The fidelity for this regime is included across all three subfigures – note that this is a deterministic reference series, calculable directly via a density-matrix representation of the circuit: 
+
+|Ψ⟩ = ( U|G| . . . U 2U1)|0⟩⊗n , (28) 
+
+ρ = |Ψ⟩⟨ Ψ| , (29) 
+
+F (ρ, D(ρ)) = 
+
+
+
+tr 
+
+q√ρD(ρ)√ρ
+
+2
+
+. (30) 2 4 6 8 10 12 14 16 Number of qubits, n  
+
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0Fidelity,  F
+> mean min with postselection without postselection
+> T1→ ∞
+> with postselection without postselection
+> T1→ ∞
+
+(a) Ideal checks and ideal circuit. Note how postselec-tion definitionally yields F = 1 .0. 2 4 6 8 10 12 14 16 Number of qubits, n  
+
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0Fidelity,  F
+> mean min with postselection without postselection
+> T1→ ∞
+> with postselection without postselection
+> T1→ ∞
+
+(b) Noisy checks and ideal circuit. Note the small-but-nonzero effect of false negatives upon mean fidelity. 2 4 6 8 10 12 14 16 Number of qubits, n  
+
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0Fidelity,  F
+> mean min with postselection without postselection
+> T1→ ∞
+> with postselection without postselection
+> T1→ ∞
+
+(c) Noisy checks and noisy (depolarising) circuit. Note how postselection approximately achieves T1 → ∞ , ex-cepting false negatives. 
+
+Figure 3: Mean and minimum circuit fidelity for QFT with 5000 target shots, with and without postselection, for pe = 0 .005 and q = 0 .010. The 
+
+T1 → ∞ reference is equivalent to a standalone de-polarising model (i.e. pe = q = 0). Error bars for mean fidelity (here and hereinafter) show the 95% confidence interval, calculated via Student’s t dis-tribution of the standard error of the mean (SEM). 8Firstly, Figure 3a shows the impact of postselec-tion on QFT with pe = 0 .005 perfect erasure checks (q = 0) and no depolarising noise. With perfect postselection, the mean (and minimum) fidelity is by definition improved to exactly 1.0, because era-sures constitute the sole noise channel, which is per-fectly mitigated. Secondly, Figure 3b shows the same simulation but with imperfect erasure checks, where q = pfp =
+
+pfn = 0 .010. Here, we can see how false nega-tives have a distinct but small impact on the ex-pected F = 1 .0 result with postselection, by er-roneously allowing shots experiencing erasure into the accepted ensemble. Note again that in con-trast, false positives do not affect the fidelity, but instead drive up the rejection rate/overhead (as is demonstrated starkly in Figure 2). Thirdly, Figure 3c shows the same simulation but with imperfect erasure checks and unheralded gate depolarising noise ( p1Q = 0 .001 , p 2Q = 0 .010). Two key points are immediately apparent from this data: (i) without postselection, the erasure and depo-larising channels have stacking negative effects on fidelity; (ii) with postselection, the erasure channel is mit-igated such that the mean fidelity accurately matches lim T1→∞ F , excepting false negatives. To summarise, this data shows the dynamics of adding in three different ‘layers’ of noise channel: (i) gate-deleting erasure noise; (ii) classical bit-flip noise on the erasure checks; (iii) gate depolarising noise as unheralded Pauli er-ror. It is clear that postselection fully mitigates the era-sure channel, such that F = 1 .0 in the absence of other channels and F = F (ρ, D(ρ)) in the presence of a depolarising channel D, with an apparently minor impact by false negatives when q = 0 .010. In the next two subsections, we consider the following emergent questions: by how much does postselection improve fidelity with the full noise model (Section 4.3), and how close to lim T1→∞ F
+
+can we get with imperfect-check postselection (Sec-tion 4.4)? 2 4 6 8 10 12 14 16 Number of qubits, n                        
+
+> 0.0
+> 0.1
+> 0.2
+> 0.3
+> 0.4Fidelity gain, ∆ F
+> pe= 0 .010 , q = 0 .005
+> pe= 0 .010 , q = 0 .010
+> pe= 0 .005 , q = 0 .010
+> pe= 0 .005 , q = 0 .005
+> pe= 0 .010 , q = 0 .005
+> pe= 0 .010 , q = 0 .010
+> pe= 0 .005 , q = 0 .010
+> pe= 0 .005 , q = 0 .005 246810 12 14 16 Number of qubits, n
+> 10 0
+> 10 1
+> 10 2
+> Relative fidelity gain
+
+Figure 4: Gain in mean circuit fidelity for QFT achieved with postselection. For the absolute fi-delity gain ∆ F (top), the curves are fitted via non-linear least-squares regression on the difference be-tween two reverse logistic (i.e. sigmoid) functions, as in Figure 3c (with error bars propagated accord-ingly), with their approximated maxima shown. The relative gain (bottom) shows the quotient rather than the difference. 9q ∆FT1→∞ 
+
+0.005 0.0022 ± 0.0095 0.010 −0.0010 ± 0.0095 0.015 −0.0073 ± 0.0095 0.050 −0.0219 ± 0.0095 Table 1: Drop in mean circuit fidelity for pe = 0 .010 and n = 7 for QFT with 10,000 target shots (as seen in Figure 5). Note that for q < 0.030, ∆ FT1→∞ is within error of zero. 
+
+## 4.3 Fidelity gain with postselection 
+
+Figure 3 shows how – for both the erasure and de-polarising channels – the mean fidelity decays with a reverse sigmoid (i.e. S-shaped) curve as n in-creases. Of particular interest is how postselection under gate depolarising noise shallows this curve compared to no postselection (Figure 3c), appear-ing to yield a gap of maximum magnitude at ex-actly one point. This gap therefore corresponds to the maximum absolute gain in circuit fidelity ∆ F
+
+achieved with postselection. To study this further, we repeat the simulation for four different combinations of pe and q and plot ∆F as a function of n in Figure 4. As we may in-tuit from the sigmoids by inspection, ∆ F (n) takes the form of a unimodal bell-shaped curve. 5 For each series, we fit the curve as a difference of two reversed logistic functions and maximise this func-tion, yielding arg max 
+
+> n
+
+∆F ≈ 7 , pe = 0 .010 , (31) arg max 
+
+> n
+
+∆F ≈ 8 , pe = 0 .005 . (32) In other words, as pe increases, the maximum fi-delity gain from postselection also increases, but occurs for lower n. Equivalently, the relative fi-delity gain increases monotonically with n.
+
+## 4.4 Approaching the limit of T1 → ∞ 
+
+Taking pe = 0 .010 and n = 7 as an example ‘sweet spot’ of maximum fidelity gain from the previous section (Figure 4), let us now consider the question of how effectively postselection mitigates against the erasure channel given imperfect erasure checks.          
+
+> 5In fact, the integral of any unimodal bell-shaped curve is sigmoidal by definition. 0.00.10.20.30.40.5Erasure check error rate, q
+> 0.0
+> 0.1
+> 0.2
+> 0.3
+> 0.4
+> 0.5
+> 0.6Fidelity,  F
+> T1→ ∞
+> pe= 0 .010 , n = 7
+
+Figure 5: Mean circuit fidelity for QFT with 10,000 target shots, for pe = 0 .010 and n = 7. As the check error rate q tends to zero, postselection per-fectly mitigates the erasure channel, leaving only the gate depolarising channel. The curve fit is a ‘quadratic decay’ of the form F = d−(aq 2 +bq +c), approximating the polynomial structure in the bi-nomial expansion of false-negative events. For these values, due to gate depolarising noise, the expected fidelity with perfect postselection (from Equation 30) is lim  
+
+> T1→∞
+
+F ≈ 0.6021836859864419 . (33) In Figure 5, we plot the mean circuit fidelity and sweep the full entropy space of the erasure check error rate 0 ≤ q ≤ 0.5, observing that lim  
+
+> q→0
+
+F = lim  
+
+> T1→∞
+
+F . (34) As q increases, F decays from lim T1→∞ F by a poly-nomial factor arising from the binomial expansion of false-negative events. From this data, we indicate in Table 1 the drop in mean circuit fidelity (compared to perfect posts-election) caused by some realistic NISQ-era bench-marks for q, noting that for q < 0.030, ∆ FT1→∞ is within error of zero. 6 These values are consistent with the small influence of imperfect checks under the erasure channel seen between Figures 3a and Figures 3b. 
+
+## 4.5 Quantum operation benchmarks 
+
+The number of gates |G| is a key metric in de-scribing the scale of quantum computation in prac-tice, popularly given the unit quop as a parallel 
+
+> 6See Figure 3 for error calculation.
+
+10 n |G| p1Q p2Q ∆F
+
+5 149 0.016 0.050 0.03330360 10 514 0.004 0.013 0.07587702 15 1029 0.002 0.005 0.14007602 Table 2: Depolarising error budgets for QFT in the 100 quop, 500 quop and 1 kquop regimes. The im-provement in mean fidelity from single-rail to post-selected dual-rail models (as seen in Figure 6) is listed as ∆ F .to the classical flop (i.e. quantum operations ver-sus floating-point operations ) [20]. We conclude our results with datasets representative of practi-cal 100 quop, 500 quop and 1 kquop regimes. To compare the performance of postselected dual-rail qubits against conventional systems of comparable specifications, we replace the era-sure channel with an amplitude damping channel (whilst keeping the gate depolarising channel con-stant). As this amplitude damping channel takes an emission rate equal to the erasure rate pe, it models the same physical relaxation time T1 as a single-rail qubit. Additionally, we account for decoherence caused by qubit idling; this is a significant source of noise, which can be mitigated by techniques such as dy-namical decoupling , wherein circuit-preserving op-erations are performed on qubits during idle peri-ods [21]. To model idling error in our simulations, noisy identity gates representing discrete idle oper-ations are populated in the circuit using a modified dynamical decoupling scheduler (see Appendix A). Without idle operations, for some select n, the number of gates |G|(n) in the QFT construction as per Equation 22 is 
+
+|G|(5) = 67 , (35) 
+
+|G|(10) = 282 , (36) 
+
+|G|(15) = 647 . (37) With idle operations added using our representa-tion, these benchmarks increase to 
+
+|G|(5) = 149 , (38) 
+
+|G|(10) = 514 , (39) 
+
+|G|(15) = 1029 , (40) thus corresponding to the 100 quop, 500 quop and 1 kquop regimes, respectively. 5 10 15 Number of qubits, n
+
+> 10 −1
+> Fidelity,  F
+> single-rail dual-rail
+
+Figure 6: Mean circuit fidelity for QFT with sa =1000 target shots for both single-rail and postse-lected dual-rail qubits, assuming pe = 0 .008 and 
+
+q = 0 .005. The dashed horizontal line marks a 1/√1000 ≈ 3% fidelity benchmark [22]. Table 2 lists the depolarising error budgets. Idling error is included, such that the datapoints correspond to 100 quop, 500 quop and 1 kquop. Figure 6 compares the mean fidelity for QFT between these single-rail and postselected dual-rail models. Across both models, we assume an emis-sion rate pe = 0 .008 (approximately corresponding to a gate time t = 500 ns and physical relaxation time T1 = 60 μs) with accepted shots sa = 1000. In the dual-rail case, we assume an erasure check error rate q = 0 .005. The depolarising error rates p1Q and p2Q , listed in Table 2, are chosen for different n as rough es-timates of practical error budgets, such that the factor in overall fidelity is no worse than 50% due to 1Q gate error, and 20% due to 2Q gate error. We can see in Figure 6 that transitioning from the single-rail to the postselected dual-rail model consistently increases the mean fidelity, with this increase ∆ F listed in Table 2. In particular, we take a fidelity benchmark of 1 /√sa ≈ 0.03, as an estimate of the noise floor resulting from shot noise as a Poisson process [22]. For n = 15, the single-rail model falls short of this minimum-required fidelity at F ≈ 0.023, but the postselected dual-rail model comfortably surpasses it at F ≈ 0.163. 
+
+# 5 Conclusion 
+
+In this work, we have presented a theoretical and simulational framework for the use of postselection 11 with erasure-dominant qubits, e.g. dual-rail trans-mons. Acknowledging that the overhead of post-selection scales exponentially due to the rejection rate (Equation 25; Figure 2), we have demonstrated empirically how postselection can accurately miti-gate the erasure channel in terms of mean circuit fidelity for QFT, even in the presence of noisy era-sure checks (Figure 3). We have shown how the gain in fidelity achieved by postselection on such dual-rail systems increases with the erasure rate pe (or, equivalently, decreases against the physical relaxation time T1), with the maximum gain emerging at smaller circuit sizes as 
+
+pe increases (Figure 4). We have also shown how the fidelity converges polynomially to the limit of 
+
+T1 → ∞ (in which only the gate depolarising chan-nel remains), with the difference from this limit ar-riving within error of zero for erasure check error rate q < 0.030 (Figure 5; Table 1). Finally, we have shown that a conventional single-rail system does not surpass an estimate of the fundamental noise floor for QFT in the kilo-quop regime, whereas a comparable postselected dual-rail system does (Figure 6; Table 2). We be-lieve these results may justify the use of erasure-based postselection as a near-term strategy for error mitigation, before (and, perhaps, combined with) the practical arrival of scalable quantum fault-tolerance. 
+
+# Acknowledgements 
+
+This work was supported by the Innovate UK Quantum Missions pilot competition 10148061 DE-CIDE: Dimon error correction integrated into a data-centre environment. We also thank Bryn Bell and Ailsa Keyser for their contributions and reviews. 
+
+# A Modelling idling error 
+
+Dynamical decoupling (DD) is a technique in which a sequence of quantum operations (e.g. XX) that composes to the identity – and thus does not al-ter the overall circuit – is inserted into idle periods and acts to mitigate decoherence caused by qubit idling [21]. A DD scheduler is provided as a circuit transpiler pass by the qiskit-ibm-runtime pack-age [9]. To simulate idling error in our simulations in Section 4.5, we use this transpiler pass to insert identity gates on qubits during idle periods; these identity gates are subject to all of the same noise channels we consider as the circuit gates. This circuit transformation is implemented in 
+
+erado by first performing an as-late-as-possible (ALAP) scheduling pass, and then performing a DD scheduling pass. We set every circuit gate to be exactly 1 unit of time in duration, and every iden-tity gate inserted by the DD scheduler to be 0.8 units of time, with sequence min length ratios 
+
+equal to 1.0. With a DD sequence of II, the sched-uler would therefore insert nothing into an idle pe-riod of 1 unit, and an II sequence into an idle period of 2 units or greater. In order to fill arbitrarily-long idle periods with arbitrarily-many identity operators, we populate the list of possible DD sequences with even-weight sequences of repeated I gates in descending priority. Given a maximum idle sequence length k, where k
+
+is necessarily even, the ordered list of possible idle sequences is (I k, Ik−2, . . . , I2) . (41) Resultingly, the number of identity gates inserted into an idle period of length t units of time is equal to min 
+
+
+
+t
+
+ t
+
+2
+
+
+
+, k 
+
+
+
+. (42) In a relatively sparse circuit such as QFT, in-creasing the number of qubits n notably increases the total amount of time spent idling by each qubit. We therefore use k as a parameter to tune the den-sity of idling gates populated into the circuit rep-resentation for increasingly large n. For example, a value of k = 14 is used in Section 4.5 to most closely map |G| to the three operational regimes discussed, which also broadly agrees with ParityQC QFT compilations [23]. This is justified from the perspective of DD as a technique, wherein the mit-igation achieved by aggressively populating DD se-quences forms a trade-off with infidelity in the se-quence gates themselves. 12 References 
+
+[1] J. J. Burnett et al., “Decoherence bench-marking of superconducting qubits,” npj Quantum Information , vol. 5, no. 1, p. 54, Jun. 26, 2019, issn : 2056-6387. doi : 10 . 1038/s41534-019-0168-5 
+
+[2] M. A. Nielsen and I. L. Chuang, Quan-tum Computation and Quantum Information ,10th Anniversary Edition. Cambridge Uni-versity Press, Dec. 9, 2010, isbn : 978-1-107-00217-3. doi : 10.1017/CBO9780511976667 
+
+[3] F. J. MacWilliams and N. J. A. Sloane, 
+
+The Theory of Error-Correcting Codes . Else-vier, 1977, 788 pp., isbn : 978-0-444-85010-2. Google Books: nv6WCJgcjxcC .[4] A. R. Calderbank and P. W. Shor, “Good quantum error-correcting codes exist,” Phys-ical Review A , vol. 54, no. 2, pp. 1098–1105, Aug. 1, 1996, issn : 1050-2947, 1094-1622. 
+
+doi : 10 . 1103 / PhysRevA . 54 . 1098 arXiv: 
+
+quant-ph/9512032 .[5] E. Dennis, A. Kitaev, A. Landahl, and J. Preskill, “Topological quantum memory,” 
+
+Journal of Mathematical Physics , vol. 43, no. 9, pp. 4452–4505, Sep. 2002, issn : 0022-2488, 1089-7658. doi : 10.1063/1.1499754 
+
+arXiv: quant-ph/0110143 .[6] S. Aaronson, “Quantum computing, postse-lection, and probabilistic polynomial-time,” 
+
+Proceedings of the Royal Society A: Mathe-matical, Physical and Engineering Sciences ,vol. 461, no. 2063, pp. 3473–3482, Sep. 5, 2005, issn : 1364-5021. doi : 10.1098/rspa. 2005.1546 arXiv: quant-ph/0412187 .[7] P. Kok, W. J. Munro, K. Nemoto, T. C. Ralph, J. P. Dowling, and G. J. Mil-burn, “Linear optical quantum computing with photonic qubits,” Reviews of Modern Physics , vol. 79, no. 1, pp. 135–174, Jan. 24, 2007. doi : 10 . 1103 / RevModPhys . 79 . 135 
+
+arXiv: quant-ph/0512071 .[8] J. Wills, M. T. Haque, and B. Vlastakis, “Error-detected coherence metrology of adual-rail encoded fixed-frequency multimode superconducting qubit,” Jun. 18, 2025. doi :
+
+10.48550/arXiv.2506.15420 arXiv: 2506. 15420 [quant-ph] , pre-published. [9] A. Javadi-Abhari et al., “Quantum comput-ing with Qiskit,” Jun. 19, 2024. doi : 10 . 48550 / arXiv . 2405 . 08810 arXiv: 2405 . 08810 [quant-ph] , pre-published. [10] D. J. C. MacKay, Information Theory, In-ference and Learning Algorithms . Cambridge University Press, Sep. 25, 2003, 694 pp., isbn :978-0-521-64298-9. Google Books: AKuMj4PN_ EMC .[11] I. S. Reed and G. Solomon, “Polynomial codes over certain finite fields,” Journal of the Society for Industrial and Applied Math-ematics , vol. 8, no. 2, pp. 300–304, Jun. 1960. 
+
+doi : 10.1137/0108018 
+
+[12] M. Grassl, T. Beth, and T. Pellizzari, “Codes for the quantum erasure channel,” Physical Review A , vol. 56, no. 1, pp. 33–38, Jul. 1, 1997. doi : 10.1103/PhysRevA.56.33 arXiv: 
+
+quant-ph/9610042 .[13] N. Delfosse and G. Z´ emor, “Linear-time maximum likelihood decoding of surface codes over the quantum erasure channel,” 
+
+Physical Review Research , vol. 2, no. 3, p. 033 042, Jul. 9, 2020. doi : 10 . 1103 / PhysRevResearch . 2 . 033042 arXiv: 1703 . 01517 [quant-ph] .[14] S. J. Griffiths and D. E. Browne, “Union-find quantum decoding without union-find,” 
+
+Physical Review Research , vol. 6, no. 1, p. 013 154, Feb. 9, 2024. doi : 10 . 1103 / PhysRevResearch . 6 . 013154 arXiv: 2306 . 09767 [quant-ph] .[15] A. Kubica, A. Haim, Y. Vaknin, H. Levine, F. Brand˜ ao, and A. Retzker, “Erasure qubits: Overcoming the T1 limit in superconducting circuits,” Physical Review X , vol. 13, no. 4, p. 041 022, Nov. 1, 2023. doi : 10 . 1103 / PhysRevX . 13 . 041022 arXiv: 2208 . 05461 [quant-ph] .[16] P.-J. H. S. Derks, A. Townsend-Teague, A. G. Burchards, and J. Eisert, “Designing fault-tolerant circuits using detector error models,” 
+
+Quantum , vol. 9, p. 1905, Nov. 6, 2025. doi :
+
+10 . 22331 / q - 2025 - 11 - 06 - 1905 arXiv: 
+
+2407.13826 [quant-ph] .13 [17] Y. Han, L. A. Hemaspaandra, and T. Thier-auf, “Threshold computation and crypto-graphic security,” SIAM Journal on Com-puting , vol. 26, no. 1, pp. 59–78, Feb. 1997, issn : 0097-5397. doi : 10 . 1137 / S0097539792240467 
+
+[18] C. Gidney, “Stim: A fast stabilizer circuit simulator,” Quantum , vol. 5, p. 497, Jul. 6, 2021. doi : 10 .22331 /q - 2021- 07- 06- 497 
+
+arXiv: 2103.02202 [quant-ph] .[19] A. G. Fowler, S. J. Devitt, and L. C. L. Hol-lenberg, “Implementation of Shor’s algorithm on a linear nearest neighbour qubit array,” 
+
+Quantum Information & Computation , vol. 4, no. 4, pp. 237–251, Jul. 1, 2004, issn : 1533-7146. arXiv: quant-ph/0402196 .[20] J. Preskill, “Beyond NISQ: The megaquop machine,” ACM Transactions on Quantum Computing , vol. 6, no. 3, 18:1–18:7, Apr. 29, 2025. doi : 10.1145/3723153 arXiv: 2502. 17368 [quant-ph] .[21] P. Krantz, M. Kjaergaard, F. Yan, T. P. Or-lando, S. Gustavsson, and W. D. Oliver, “A quantum engineer’s guide to superconduct-ing qubits,” Applied Physics Reviews , vol. 6, no. 2, p. 021 318, Jun. 17, 2019, issn : 1931-9401. doi : 10.1063/1.5089550 arXiv: 1904. 06560 [quant-ph] .[22] I. G. Hughes and T. P. A. Hase, Measure-ments and Their Uncertainties: A Practical Guide to Modern Error Analysis . Oxford Uni-versity Press, Jul. 1, 2010, 160 pp., isbn : 978-0-19-956633-4. Google Books: zEK1DwAAQBAJ .[23] B. Klaver et al., “SWAP-less implementation of quantum algorithms,” Physical Review A ,vol. 113, no. 1, p. 012 443, Jan. 29, 2026. doi :
+
+10 . 1103 / 2wzk - fnhx arXiv: 2408 . 10907 [quant-ph] .14

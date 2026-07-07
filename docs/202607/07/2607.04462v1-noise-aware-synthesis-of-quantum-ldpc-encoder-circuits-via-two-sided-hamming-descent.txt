@@ -1,0 +1,1087 @@
+Title: Noise-Aware Synthesis of Quantum LDPC Encoder Circuits via Two-Sided Hamming Descent
+
+URL Source: https://arxiv.org/pdf/2607.04462v1
+
+Published Time: Tue, 07 Jul 2026 02:22:39 GMT
+
+Number of Pages: 33
+
+Markdown Content:
+# Noise-Aware Synthesis of Quantum LDPC Encoder Circuits via Two-Sided Hamming Descent 
+
+Aditya Sodhani ∗ and Keshab K. Parhi †
+
+Department of Electrical and Computer Engineering, University of Minnesota, Minneapolis, Minnesota, USA 
+
+Abstract 
+
+Quantum low-density parity-check (LDPC) codes are a promising route to fault-tolerant quantum computation, but their use requires efficient preparation of encoded states. Standard encoder constructions generate circuits through fixed algebraic procedures, yet the resulting circuit can contain substantial redundancy. We formulate LDPC encoder preparation as a circuit-resynthesis problem: given the linear-reversible matrix implemented by the encoder’s CNOT block, we seek a lower-cost equivalent circuit that can be routed efficiently on the target hardware and which mitigates noise. We propose a novel optimization approach referred as two-sided Hamming descent and a noise-aware optimization pipeline for this task. Across several families of Calderbank-Shor-Steane (CSS) LDPC encoders, including Bivariate Bicycle, hypergraph-product, and entanglement-assisted codes, the proposed pipeline produces substantially smaller and shallower encoder circuits than the standard constructions and the synthesis baselines considered, cutting gate counts by 53 .8% in aggregate across the benchmark and by up to 68% on the Bivariate Bicycle family. The gains remain visible after routing, where the two-qubit depth is reduced by up to 71% and translate into higher-fidelity state preparation under circuit-level noise. On the Bivariate Bicycle family, live-range scheduling further reduces routed preparation failure by up to 13 .7% without adding two-qubit gates to the selected circuit. These results indicate that encoder-matrix resynthesis, combined with hardware-calibrated selection and scheduling, is an effective compiler-level tool for preparing quantum LDPC code states. 
+
+Keywords: quantum LDPC codes, encoder synthesis, linear reversible circuits, CNOT optimization, two-sided Hamming descent, noise-aware optimization, circuit depth, commutation-aware scheduling, Bivariate Bicycle codes, fault-tolerant quantum computing. 
+
+# 1 Introduction 
+
+Quantum low-density parity-check (LDPC) codes are central to practical fault-tolerant quantum computation [ 1 ,2 , 3]. Bivariate Bicycle (BB) codes have recently been proposed for superconducting hardware and shown to achieve a high pseudo-threshold under circuit-level noise [ 4 ]. Hypergraph-product (HGP) codes [ 5 ]provide the first constant-rate family with polynomial distance and underlie subsequent asymptotically good constructions [ 6 , 7 , 8]. Entanglement-assisted quasi-cyclic LDPC (EA QC-LDPC) codes extend these constructions to settings with pre-shared entanglement [ 9, 10 , 11 ]. Realizing any of these codes begins with 
+
+> ∗
+
+sodha005@umn.edu 
+
+> †
+
+Corresponding author: parhi@umn.edu 
+
+1
+
+> arXiv:2607.04462v1 [quant-ph] 5 Jul 2026
+
+the same operational step. An encoder circuit maps unencoded qubits into a valid encoded state, the first step of the fault-tolerant stack. A noisier encoder injects more error into this initial logical state before the error-correction cycle begins, so high-fidelity preparation is a prerequisite for fault-tolerant performance [ 4]. The BB, HGP, and EA QC-LDPC families are all Calderbank-Shor-Steane (CSS) [ 12 , 13 ] constructions, and their encoder circuits consist of Hadamard gates on a subset of qubits followed by a CNOT subsequence that entangles the qubits into the stabilizer state [ 14 , 15 , 16 , 17 ]. The standard constructions for this task are the Cleve-Gottesman (CG) reduction [ 14 ] for standard CSS codes and the Sharma-Kumar-Garani (SKG) construction [ 18 ] for EA codes. Both construct the encoder circuit from the code’s parity-check matrix along a fixed algebraic path (reduced row echelon form with deterministic column ordering). Their fixed elimination paths guarantee a valid encoder through systematic construction, but they are not hardware-aware optimizers. They do not minimize CNOT count, circuit depth, routing overhead, or the noise exposure of the prepared state. The resulting circuits should therefore be optimized before hardware execution [19]. Quantum circuit optimization techniques fall into two broad categories. The first category, gate-level optimization , includes peephole optimizers such as Qiskit O3 [ 20 ], TKET [ 21 ], the continuous-parameter optimizer of Nam et al. [22 ], and NISQ-oriented passes [ 23 ], which apply local circuit identities. This category also includes automated identity generation [ 24 ], which discovers such identities algorithmically, and ZX-calculus and Clifford-template pipelines [ 25 , 26 , 27 ], which rewrite circuits at a higher level of abstraction. The second category, whole-circuit resynthesis , discards the input gate sequence and rebuilds the circuit directly from the linear-reversible transformation 𝑀 . The Patel–Markov–Hayes (PMH) algorithm achieves an asymptotically optimal 𝑂 (𝑛 2/log 𝑛 ) CNOT count [ 28 ], and later refinements include greedy, Gaussian-elimination-based, A ∗, beam-search, and learning-based approaches [ 29 , 30 , 31 , 32 , 33 , 34 ], as well as connectivity-aware methods such as Steiner-tree synthesis [ 35 ] and PermRowCol [ 36 ], and nearest-neighbor-compliant circuit design [ 37 ]. For these methods, exact synthesis is feasible only for very small instances ( 𝑛 ≲ 7), via SAT/QBF encodings [ 38 , 39 ], breadth-first search over the GL (𝑛, F2) Cayley graph [ 40 ], or meet-in-the-middle database search [ 41 ]. Similar approaches have also been proposed for encoder circuit optimization of nonbinary codes in prime dimensions [42]. For the encoder-preparation problem studied here, both categories leave important gaps. Gate-level optimizers only make local changes, so they can remove local redundancy but not the global overhead that the fixed-order CG/SKG construction [ 14 , 18 ] builds into the encoder. Whole-circuit resynthesis can in principle remove that overhead, but existing methods optimize gate count alone, and the strongest of them are greedy: at each step they choose the gate that removes the most 1s from the matrix they are simplifying (its weight). On the dense matrices that CSS LDPC encoders produce, this weight barely changes from one move to the next, so the search loses its descent direction and recovers only part of the available reduction. This loss of ground is already measurable in the strongest prior synthesizers. The cost-minimization greedy approach of Schaeffer and Perkowski [ 43 ] and its systematic development by Goubault de Brugière et al. [ 29 ] are fragile precisely on the dense, structured matrices that CSS LDPC encoders produce. At BB-code scale their strict-descent variants stall on a majority of restarts, and the surviving variants leave 8–25% of the achievable reduction unrealized. The same loss of descent direction also makes them slower for two reasons: stalled restarts produce nothing, and the runs that do converge take more steps. Three further gaps cut across both categories. First, the depth these methods report is the depth of the gates taken in the order the synthesizer outputs them. Commuting gates could be reordered into fewer parallel layers, so this gate-list depth overstates the true parallel cost. Second, the gate-count gains assume a fully connected device on which any qubit can act on any other, whereas real hardware connects each qubit to only a few neighbors, so an LDPC code laid out on that limited graph needs extra gates to bring distant qubits together. Third, count and depth are only proxies for the quantity that ultimately matters, the preparation error of the encoded state under hardware noise. Fewer gates or fewer layers do not by themselves give a lower-error encoder, since the error also depends on how long qubits sit idle and on the extra gates that routing inserts. Prior synthesizers optimize count, and at best depth, but none selects or schedules the encoder to reduce this error directly, so no existing 2method is noise-aware from end to end. Our approach is to treat encoder preparation as a single, noise-aware resynthesis problem that closes these gaps together. To this end, we propose a novel two-sided Hamming descent optimization approach and develop a complete pipeline for this resynthesis proble. Because exact CNOT-count minimization is NP-hard [ 44 ], we rebuild each encoder from its target matrix 𝑀 with a heuristic objective that keeps a useful descent direction on these dense matrices, then carry the result through depth compression, routing, and hardware-calibrated selection and scheduling so that the encoder is optimized for the error it will actually incur on the target device. Our central contribution is the six-stage noise-aware encoder pipeline shown in Figure 1. The main contributions are as follows. 1. Two-sided Hamming descent. We synthesize the encoder matrix 𝑀 by reducing a residual matrix to the identity using both row and column transvections. Candidate moves are scored by their Hamming-distance reduction and their effect on the circuit depth. Multistart feature explores different synthesis paths, and every resulting circuit is verified against the encoder matrix 𝑀 . This cuts CNOT counts by 
+
+53 .8% in aggregate and by up to 68% on the Bivariate Bicycle family, beating implementations of the strongest published greedy baselines by 7.6–24 .6% on every BB code (Sections 3.1–3.2). 2. Commutation re-layering. We reorder commuting CNOT gates while preserving the precedence constraints between noncommuting gates, place them in disjoint-qubit layers, and verify the result, giving a commutation-aware depth that never exceeds the gate-list ASAP depth. This commutation-aware depth is within 1.05 –1.17 × of a per-circuit lower bound at zero CNOT cost (Section 3.3). 3. Count–depth Pareto frontier and routing. Rather than select a single circuit immediately after synthesis, we retain the non-dominated circuits from the layer-penalty sweep, then re-layer and route each on the code-native coupling graph, so its physical gate count, depth, and idle structure can be evaluated before selection. On the BB-native biplanar architecture this reduces routed two-qubit count by 51 .6–57 .3% and routed two-qubit depth by 55 .7–71 .1% (Sections 4.5–4.8). 4. Noise-aware selection and live-range scheduling. We select the routed candidate that minimizes a hardware-calibrated preparation cost combining two-qubit-gate exposure and idle exposure. We then schedule it as late as its dependencies permit, with each qubit prepared immediately before its first use. This cuts idle exposure without changing the routed CNOT list or its implemented transformation. It lowers routed preparation failure on 16 of 17 codes, by up to 34 .7% (Sections 3.4–3.5, 4.10–4.12). 
+
+Overview. Section 2 introduces the encoder-matrix model, transvection notation, and the circuit-cost metrics used throughout the paper, including gate-list ASAP depth and commutation-aware depth. Section 3 presents the full optimization pipeline: two-sided Hamming descent, commutation-aware scheduling and verification, noise-aware post-routing selection, and live-range scheduling. Section 4 evaluates the pipeline on CSS LDPC encoder families, comparing against standard constructions, published greedy methods, and general-purpose compilers, and then studies routing, circuit-level noise, hardware-aware selection, and comparisons. Section 5 discusses the mechanisms behind the improvements, the scope of the method, and its limitations. 
+
+# 2 Preliminaries 
+
+2.1 Encoders, transvections, and the word metric 
+
+For a CSS code specified by check matrices 𝐻 𝑋 and 𝐻 𝑍 , the Cleve–Gottesman (CG) and Sharma–Kumar– Garani (SKG) constructions produce an encoder of the form 𝑈 = 𝐶 · 𝐻 ⊗𝑆 , where 𝐻 ⊗𝑆 denotes a layer of 3LOGICAL SYNTHESIS   
+
+> HARDWARE -AWARE ADAPTATION
+> CSS LDPC
+> code
+> Executable
+> encoder
+> Two -sided Hamming
+> descent
+> (synthesize CNOT circuit)
+> Commutation
+> re -layering
+> (compress depth)
+> Count –depth
+> Pareto frontier
+> (candidate circuits)
+> Route (SABRE)
+> (route all candidates)
+> Noise -aware
+> selection
+> (match routed cost to device)
+> Live -range
+> scheduling
+> (just -in -time reset)
+> 123
+> 456
+> noise -aware stage
+
+Figure 1: Our six-stage noise-aware encoder pipeline. 
+
+Hadamard gates applied to a prescribed subset 𝑆 of qubits and 𝐶 is a CNOT circuit. The CNOT block 
+
+𝐶 realizes a linear reversible transformation 𝑀 ∈ GL (𝑛, F2). Throughout, 𝑀𝑥 denotes matrix–vector multiplication over F2, and computational-basis strings are ordered as 𝑞 0𝑞 1 · · · 𝑞 𝑛 −1. The induced CNOT unitary is 𝑈 𝑀 = Í𝑥 ∈F𝑛  
+
+> 2
+
+|𝑀𝑥 ⟩⟨ 𝑥 |, so 𝑀 determines the action of 𝐶 on every computational-basis state and, by linearity, on the entire Hilbert space. For a gate CNOT ( 𝑗 →𝑖 ), the associated transvection is 𝑇 𝑖 𝑗 = 𝐼 + 𝑒 𝑖 𝑒 ⊤
+
+> 𝑗
+
+(with 𝑖 ≠ 𝑗 ), which acts on the current matrix as the elementary row operation 𝑅 𝑖 ← 𝑅 𝑖 ⊕ 𝑅 𝑗 . If the CNOT gates in 𝐶 are the transvections 𝑇 (1) , . . . , 𝑇 (𝑘 ) in temporal order, then the implemented matrix is 
+
+𝑀 = 𝑇 (𝑘 ) · · · 𝑇 (1) , with the first-applied gate appearing as the rightmost factor. Hence any two CNOT circuits implementing the same 𝑀 realize the same quantum unitary, even if their gate counts, depths, or gate orderings differ. Figure 2 illustrates this on three qubits: the one-gate circuit CNOT (2→0) and the time-ordered sequence CNOT (2→1), CNOT (2→0), CNOT (2→1) both implement 𝑀 = 𝐼 + 𝑒 0𝑒 ⊤ 
+
+> 2
+
+. The first maps |001 ⟩ directly to |101 ⟩ and the second routes |001 ⟩ ↦ → | 011 ⟩ ↦ → | 111 ⟩ ↦ → | 101 ⟩, in agreement on all computational-basis states. Replacing 𝐶 by any shorter CNOT circuit with the same binary matrix therefore preserves the encoder exactly. The same principle is the algebraic basis of CNOT synthesis: on four qubits, Figure 3 gives two decompositions of the matrix 
+
+𝑀 =
+
+
+
+1 0 0 10 1 0 10 0 1 10 0 0 1
+
+
+
+.
+
+Sequence A uses five CNOT gates and Sequence B uses three, yet both build the same transformation from the identity, so the shorter sequence is an exact replacement for the longer one. Appendix C records the per-step matrices for this example. Removing such redundancy while preserving the implemented matrix is the synthesis problem formalized in this work. We write 𝑠 (𝑀 ) for the minimum number of transvections whose product is 𝑀 , equivalently the distance from 𝑀 to the identity in the Cayley graph of GL (𝑛, F2) generated by 
+
+{𝑇 𝑖 𝑗 : 𝑖 ≠ 𝑗 }. Because every transvection is an involution (it is its own inverse, 𝑇 2 
+
+> 𝑖 𝑗
+
+= 𝐼 ) and the generating set is closed under transpose, with 𝑇 ⊤ 
+
+> 𝑖 𝑗
+
+= 𝑇 𝑗𝑖 , the word metric satisfies 𝑠 (𝑀 ) = 𝑠 (𝑀 −1) = 𝑠 (𝑀 ⊤). We therefore 4q0
+
+> q1
+> q2
+> (a) Sequence A
+> 1 CNOT
+> q0
+> q1
+> q2
+> (b) Sequence B
+> 3 CNOTs
+
+Figure 2: The same matrix 𝑀 = 𝐼 + 𝑒 0𝑒 ⊤ 
+
+> 2
+
+on three qubits is realized by CNOT circuits of different length, hence by the same unitary. (a) one gate; (b) three gates. Filled dots are controls, ⊕ targets. q0
+
+> q1
+> q2
+> q3
+> (a) Sequence A
+> 5 CNOTs
+> q0
+> q1
+> q2
+> q3
+> (b) Sequence B
+> 3 CNOTs
+
+Figure 3: The same four-qubit matrix 𝑀 is implemented by two CNOT circuits of different gate count, so the shorter one replaces the longer. (a) five gates; (b) three gates. Filled dots are controls, ⊕ targets. 
+
+state the optimization problem as follows: given the matrix 𝑀 extracted from a CG/SKG encoder, find a short transvection word for 𝑀 .
+
+2.2 Circuit cost metrics 
+
+Beyond word length, we use two hardware-sensitive costs. The two-qubit depth of a circuit is its as-soon-as-possible (ASAP) depth: the number of layers when gates on disjoint qubit pairs may share a layer. The routed cost on a coupling graph is the two-qubit gate count and depth after a routing pass inserts the SWAP gates the device connectivity requires. 
+
+Two notions of depth. Two metrics measure the parallel cost of a CNOT sequence. The gate-list ASAP depth 
+
+schedules the gates in their listed order, placing each in the earliest layer where both its qubits are free; it is what most synthesis tools report, but it depends on that ordering. The commutation-aware depth instead schedules the gates subject only to their genuine ordering constraints, since two CNOTs commute unless the control of one is the target of the other (Section 3.3). The commutation-aware depth never exceeds the gate-list ASAP depth, and it no longer depends on how commuting gates are ordered, though it still depends on the synthesized sequence. The count and frontier tables (Tables 1 and 5) report gate-list depth to match prior work, while the depth table and the routed comparison (Tables 6 and 8) report commutation-aware depth (see Section 4). 
+
+# 3 The synthesizer: two-sided Hamming descent 
+
+3.1 Two-sided moves 
+
+Many prior compilers and optimizers operate directly on the gate list generated by CG/SKG encoder circuits. The synthesizer we propose instead operates on a residual matrix (the part of 𝑀 still to be eliminated). Let 5𝐸 𝑖 𝑗 = 𝑇 𝑖 𝑗 = 𝐼 + 𝑒 𝑖 𝑒 ⊤ 
+
+> 𝑗
+
+denote the transvection associated with CNOT ( 𝑗 →𝑖 ). A gate assigned to the end of a circuit left-multiplies the circuit matrix, whereas a gate assigned to the beginning right-multiplies it. Thus a target matrix 𝑀 can be reduced from both sides: the algorithm may either remove a final gate by a row operation or remove an initial gate by a column operation. At every step the algorithm maintains a residual matrix 𝐴 , a front sequence 𝑅 , and a back sequence 𝐿 .The front sequence contains gates already assigned to the beginning of the circuit, while the back sequence contains gates assigned to the end. These quantities satisfy the invariant 
+
+𝐴 = 𝐿 −1 𝑀 𝑅 −1, equivalently 𝑀 = 𝐿 𝐴𝑅. 
+
+Initially 𝐴 = 𝑀 and 𝐿 = 𝑅 = 𝐼 . A back move chooses a candidate final gate and updates 𝐴 ← 𝐸 𝑖 𝑗 𝐴 , the elementary row operation 𝑅 𝑖 ← 𝑅 𝑖 ⊕ 𝑅 𝑗 on the residual. A front move chooses a candidate initial gate and updates 𝐴 ← 𝐴𝐸 𝑖 𝑗 , the elementary column operation 𝐶 𝑗 ← 𝐶 𝑗 ⊕ 𝐶 𝑖 . Synthesis terminates when 𝐴 = 𝐼 . At that point we have removed the residual completely, and the final circuit is the stored front sequence followed by the reverse of the stored back list, as described in Algorithm 1. One-sided descent is obtained as the special case in which only back moves are allowed. The relevance of the two-sided space for CSS encoder synthesis is structural. The CG and SKG constructions follow fixed column-ordering choices during elimination, and these choices often leave column-shaped redundancy in the encoder matrix. Column moves can remove this structure directly, whereas a row-only descent must realize the same correction indirectly through additional row operations. Figure 4 illustrates the two-sided construction. q0
+
+> q1
+> q2
+
+# A            
+
+> =L−1 MR −1
+> M=LAR
+> front sequence Rback sequence L
+> column op
+> A←AE ij
+> row op
+> A←Eij AA→I
+
+Figure 4: The two-sided move space reduces the residual 𝐴 to the identity from both ends. Front (column-operation) and back (row-operation) moves act on 𝐴 while maintaining 𝑀 = 𝐿 𝐴𝑅 . See Section 3.1. 
+
+3.2 Hamming objective, depth penalty, and multistart 
+
+Algorithm 1 is a single procedure with five visible parts, banner-labeled A through E in the pseudocode, which we walk through in order. 
+
+Part A: multistart under permutation conjugation. Greedy descent is landscape-sensitive, so the synthesizer restarts 𝑅 = 50 times. In restart 𝑟 , a seeded random permutation matrix 𝑃 relabels the qubits and the synthesizer rebuilds the residual 𝐴 ← 𝑃𝑀 𝑃 ⊤. Permutation conjugation preserves CNOT count because 𝑃𝑇 𝑖 𝑗 𝑃 ⊤ = 𝑇 𝑃 (𝑖 ),𝑃 ( 𝑗 ) , so it maps transvections to transvections, and any decomposition found under the relabeling carries back to one of the same length on 𝑀 (Appendix B). This relabeling changes which row and column moves appear locally best, so different restarts follow genuinely distinct descent paths. Random tie-breaking among equal scores adds further diversity. 
+
+Part B: residual objective and move scoring. Inside each restart the synthesizer reduces the residual 𝐴 to the identity over the two-sided move space of Section 3.1. A back move is a row addition and a front move is a 6Algorithm 1 Two-sided Hamming descent 
+
+Require: target 𝑀 ∈ GL (𝑛, F2); layer penalty 𝜇 ; restart count 𝑅 
+
+Ensure: a matrix-verified gate list, shortest over the 𝑅 restarts  
+
+> 1:
+
+best ← ∅ 
+
+// Part A: multistart restart loop under permutation conjugation  
+
+> 2:
+
+for restart 𝑟 = 1, . . . , 𝑅 do  
+
+> 3:
+
+draw seed permutation 𝑃 ; 𝐴 ← 𝑃𝑀 𝑃 ⊤; front ← [] ; back ← []  
+
+> 4:
+
+while 𝐴 ≠ 𝐼 do 
+
+// Part B: score every move by its count change Δ 
+
+> 5:
+
+𝐷 ← 𝐴 ⊕ 𝐼  
+
+> 6:
+
+Δ𝑅 [𝑖, 𝑗 ] ← ∥ 𝐷 𝑖 ⊕ 𝐴 𝑗 ∥1 − ∥ 𝐷 𝑖 ∥1, all 𝑖 ≠ 𝑗 ⊲ back gate CNOT ( 𝑗 →𝑖 ): 𝐴 𝑖 ← 𝐴 𝑖 ⊕ 𝐴 𝑗  
+
+> 7:
+
+Δ𝐶 [ 𝑗, 𝑖 ] ← ∥ 𝐷 :, 𝑗 ⊕ 𝐴 :,𝑖 ∥1 − ∥ 𝐷 :, 𝑗 ∥1, all 𝑖 ≠ 𝑗 ⊲ front gate CNOT ( 𝑗 →𝑖 ): 𝐴 :, 𝑗 ← 𝐴 :, 𝑗 ⊕ 𝐴 :,𝑖 
+
+// Part C: add the exact per-side depth penalty 𝜇  
+
+> 8:
+
+score ← Δ + 𝜇 · [ move opens a new layer on its side ]
+
+// Part D: commit the move (count-first fallback; strict-descent stall)  
+
+> 9:
+
+if min (Δ𝑅 , Δ𝐶 ) ≥ 0 then fail restart 𝑟 ⊲ strict-descent stall  
+
+> 10:
+
+end if  
+
+> 11:
+
+if min (score ) ≥ 0 then  
+
+> 12:
+
+apply the best raw Δ < 0 move ⊲ fallback past the depth penalty  
+
+> 13:
+
+else  
+
+> 14:
+
+apply the minimum-score move (random tie-break)  
+
+> 15:
+
+end if  
+
+> 16:
+
+update 𝐴 ; append/prepend the gate to its side  
+
+> 17:
+
+end while 
+
+// Part E: assemble, relabel, and verify against 𝑀  
+
+> 18:
+
+𝐶 ← (front + reversed back), relabeled by 𝑃 −1 
+
+> 19:
+
+assert matrix (𝐶 ) = 𝑀 ; if |𝐶 | < |best | then best ← 𝐶 ⊲ exact-𝑀 verification  
+
+> 20:
+
+end for  
+
+> 21:
+
+return best 
+
+column addition. Each adds one CNOT gate, the back move at the end of the circuit and the front move at the beginning. Progress is measured by the Hamming distance to the identity ℎ( 𝐴 ) = ∥ 𝐴 ⊕ 𝐼 ∥1, the number of entries where 𝐴 differs from 𝐼 . For a candidate move, Δ is its exact effect on ℎ( 𝐴 ), so Δ < 0 means the move brings the residual closer to the identity. The back-move table Δ𝑅 records this change for every row addition and the front-move table Δ𝐶 for every column addition, as written in the pseudocode. All 2𝑛 (𝑛 − 1) moves are scored in one batch with bit-packed popcounts, costing 𝑂 (𝑛 3/𝑤 ) word operations per step (with machine width 𝑤 ). A single restart commits one gate per step and decreases ℎ( 𝐴 ) each time, so with ℎ( 𝐴 ) ≤ 𝑛 2 it uses at most 𝑛 2 gates by strict descent and costs 𝑂 (𝑛 5/𝑤 ) word operations end to end. 
+
+Part C: the layer penalty 𝜇 and the count–depth trade-off. We track the circuit’s real depth as it grows, updating it directly from the layers formed by the gates chosen so far rather than approximating it from a heuristic such as critical-path length. Because the circuit grows from both ends, each end keeps its own running ASAP layer count, tracking which qubits are occupied in the current layer and how many layers deep that end is. A move can join its side’s current layer when neither of its qubits is already used there, adding a CNOT gate without increasing depth. If it instead needs a new layer, we add a penalty 𝜇 to its score, giving 
+
+score = Δ + 𝜇 · [ move opens a new layer on its side ], where Δ is the change in the Hamming objective ℎ( 𝐴 ).Setting 𝜇 = 0 optimizes count alone, while larger 𝜇 prefers moves that keep the circuit shallower. Sweeping 
+
+𝜇 ∈ { 0.5, 1, 2, 4, 8, 16 } traces a count–depth Pareto frontier in a single framework. A small penalty can even 7lower the final count: on BB [[ 72 , 12 , 6]] the count improves from 297 at 𝜇 = 0 to 290 at 𝜇 = 0.5. The reason is that a small 𝜇 stops the greedy descent from piling gates onto the same qubits just to lower the count quickly, since those moves make the circuit deeper and often leave more gates to remove later. Avoiding them guides the search toward decompositions that are both shorter and more parallel. During the descent, the per-side layer counts serve only as a running depth estimate to guide move selection. They are not the final reported depth. Because the circuit is built from both ends, we track the front and back sequences separately and schedule each sequence ASAP as it grows. This gives the exact ASAP depth of each partial sequence. When synthesis terminates, the final circuit is the front sequence followed by the reversed back sequence. Reversing a sequence does not change its layer count, so the sum of the two per-side depths is an upper bound on the gate-list depth of the final circuit. This bound can be loose, because a fresh ASAP schedule of the concatenated circuit can place gates from the reversed back sequence into layers left unused by the front sequence. For this reason, the 𝜇 penalty is only used to guide move selection during synthesis. The reported gate-list depth is always recomputed from the final concatenated circuit, while the commutation-aware depth is computed separately by the scheduling pass in Section 3.3. 
+
+Part D: move selection and stall handling. The restart continues only while there is a move that strictly decreases the unpenalized Hamming objective. If all entries of Δ𝑅 and Δ𝐶 are nonnegative, no row or column transvection makes progress toward the identity. The restart is then declared stalled. Otherwise, the synthesizer commits one move. If the layer penalty makes every penalized score nonnegative, the algorithm ignores the penalty for that step and applies the best move with Δ < 0. If at least one penalized score is negative, it applies a minimum-score move, breaking ties at random. Thus the depth penalty guides the descent, but it does not interfere with Hamming-distance progress. 
+
+Part E: assembly, relabeling, and verification. When the residual reaches 𝐴 = 𝐼 , the descent is complete. The final circuit is obtained by concatenating the stored front sequence with the reversed back sequence. We then relabel the gates by 𝑃 −1, which maps the restart labeling back to the original qubit labels. We then recompute the binary matrix implemented by the final gate list. If this matrix is not exactly 𝑀 , the run is discarded. Among the runs that pass this equality check, the synthesizer keeps the shortest circuit. This circuit is reproducible from its (𝜇, seed ) pair. In our experiments, every code and every value of 𝜇 produced at least one exact decomposition of 𝑀 . For 𝜇 = 0, twelve of the seventeen codes converged in all fifty restarts. The densest EA instance was the hardest case: at 𝜇 = 0 only five of fifty restarts converged, and those runs produced a valid 203 -gate decomposition; the 201 -gate circuit reported in Table 1 for this code comes from the 𝜇 = 0.5 sweep. Prior greedy methods [ 43 , 29 ] score each move by how much it reduces the matrix weight, the number of 1s it contains, using objectives such as hsum, hprod, and the variants Hsum and Hprod. Because every permutation matrix minimizes these scores equally, the descent has no reason to prefer the identity and can stall at a different permutation. In contrast, our synthesizer uses distance to the identity as the descent objective, combines it with a soft layer penalty, and explores multiple equivalent labelings through permutation-conjugation multistart. Section 4.4 evaluates these changes directly on LDPC encoder matrices. 
+
+3.3 Commutation-aware scheduling and verification 
+
+The layer penalty 𝜇 in Section 3.2 influences which moves are chosen during synthesis, but it does not define the final depth of the circuit. The depth of a fixed CNOT list depends on the order in which the gates are scheduled. Since many CNOT gates commute, the gate-list ASAP depth can overestimate the parallel cost of the synthesized circuit. We therefore apply a separate commutation-aware scheduling pass after synthesis. For two gates CNOT (𝑐 1 → 𝑡 1) and CNOT (𝑐 2 → 𝑡 2), noncommutation arises only when the control of one gate is the target of the other, that is, when 𝑐 1 = 𝑡 2 or 𝑐 2 = 𝑡 1. If neither condition holds, the two gates may be reordered without changing the implemented linear transformation. Thus, for a CNOT sequence, the only ordering constraints that must be preserved are the precedence relations between noncommuting pairs. 8Algorithm 2 Commutation-aware scheduling and verification 
+
+Require: gate list 𝐶 = (𝑔 1, . . . , 𝑔 𝑚 ) with matrix (𝐶 ) = 𝑀 
+
+Ensure: layer map ℓ(·) and commutation-aware depth 𝑑 ; reordered 𝐶 ′ equal to 𝐶 
+
+// Part A: per-qubit precedence indices (no explicit graph)  
+
+> 1:
+
+lc [𝑞 ] ← 0 and lt [𝑞 ] ← 0 for all qubits 𝑞 ⊲ last layer 𝑞 is used as a control, as a target 
+
+// Part B: greedy ASAP layering, one gate per qubit per layer  
+
+> 2:
+
+mark every qubit free in every layer  
+
+> 3:
+
+for each gate 𝑔 𝑘 = CNOT (𝑐 𝑘 → 𝑡 𝑘 ) in gate-list order do  
+
+> 4:
+
+ℓ ← 1 + max (lc [𝑡 𝑘 ], lt [𝑐 𝑘 ]) ⊲ after all noncommuting predecessors, in 𝑂 (1) 
+
+> 5:
+
+while 𝑐 𝑘 or 𝑡 𝑘 is busy in layer ℓ do  
+
+> 6:
+
+ℓ ← ℓ + 1 ⊲ both qubits must be free in the layer  
+
+> 7:
+
+end while  
+
+> 8:
+
+ℓ(𝑔 𝑘 ) ← ℓ; mark 𝑐 𝑘 , 𝑡 𝑘 busy in layer ℓ; lc [𝑐 𝑘 ] ← max (lc [𝑐 𝑘 ], ℓ ); lt [𝑡 𝑘 ] ← max (lt [𝑡 𝑘 ], ℓ ) 
+
+> 9:
+
+end for  
+
+> 10:
+
+𝑑 ← max 𝑘 ℓ(𝑔 𝑘 ) ⊲ commutation-aware depth 
+
+// Part C: verify the reordering preserves the unitary  
+
+> 11:
+
+𝐶 ′ ← gates of 𝐶 sorted by (ℓ(𝑔 𝑘 ), 𝑘 ) 
+
+> 12:
+
+assert matrix (𝐶 ′) = 𝑀 ⊲ exact-𝑀 matrix check  
+
+> 13:
+
+assert tableau (𝐶 ′) = tableau (𝐶 ) ⊲ Clifford-tableau equality at zero CNOT cost  
+
+> 14:
+
+return (𝐶 ′, 𝑑 )
+
+Gates that commute may be moved across one another, subject to the hardware rule that a qubit participates in at most one two-qubit gate in a layer. Algorithm 2 implements this scheduling pass. Conceptually, it builds a dependency graph whose vertices are the CNOT gates and whose directed edges point from an earlier gate to a later noncommuting gate. In the implementation, this graph is not constructed explicitly. Instead, the scheduler maintains two arrays. The value lc [𝑞 ] stores the latest layer containing a gate that used qubit 𝑞 as a control, and lt [𝑞 ] stores the latest layer containing a gate that used 𝑞 as a target. For a new gate CNOT (𝑐 → 𝑡 ), all earlier noncommuting predecessors are captured by the layer 1 + max {lc [𝑡 ], lt [𝑐 ]} . Starting from this layer, the scheduler places the gate in the earliest layer in which both 𝑐 and 𝑡 are free. It then updates lc [𝑐 ] and lt [𝑡 ]. This gives a near-linear-time greedy ASAP schedule of the synthesized sequence: the per-gate precedence bound is 𝑂 (1),and the busy-layer scan adds at most 𝑂 (𝑑 ) per gate for output depth 𝑑 .The resulting layer order is used only after verification. We sort the gates by their assigned layers, recompute the matrix of the reordered circuit over F2, and require that it equals the original encoder matrix 𝑀 .We also check Clifford-tableau equality between the original and reordered circuits. These checks ensure that scheduling changes only the timing of the gates, not the implemented encoder. The pass therefore reduces depth at zero CNOT cost and preserves exact equality with the target encoder matrix. We do not claim that this greedy schedule is globally depth-optimal. Even for a fixed CNOT sequence, minimizing the number of layers under commutation and one-gate-per-qubit constraints is a constrained scheduling problem [ 45 , 46 ]. We therefore report the depth produced by the greedy schedule. As a useful a posteriori lower bound, any schedule of a fixed sequence must have depth at least max (𝛿, 𝜆 ), where 𝛿 is the maximum number of gates incident on any qubit and 𝜆 is the length of the longest chain of pairwise precedence constraints induced by noncommuting gates. Section 4.6 compares the schedules against this lower bound. 93.4 Noise-aware selection 
+
+The 𝜇 -sweep of Section 3.2 does not give only one circuit. It gives a set of circuits with different CNOT-count and depth trade-offs (Section 4.5). Some circuits use fewer gates, while others have smaller depth. The best choice depends on the target hardware. On a device where idle errors are large, a shallower circuit may be better because qubits spend less time waiting. On a device where two-qubit gate errors dominate, a lower-count circuit may be better because it uses fewer gates. For this reason, we do not choose a circuit before routing. Instead, we first route every Pareto-frontier candidate onto the target coupling graph (Section 4.7). We then score the routed circuits using a simple first-order hardware-noise model and select the circuit with the lowest estimated preparation cost. Routing before selection is important. Routing can change the physical two-qubit count, the depth, and the idle time of each circuit. Therefore, the best logical circuit before routing may not be the best physical circuit after routing. By selecting only after routing, the final choice reflects the actual hardware cost. For a routed circuit 𝐶 , we estimate the preparation error by adding the error contributions from all places where faults can occur, 
+
+E ( 𝐶 ) =∑︁ 
+
+> 𝑔 ∈𝐶
+
+𝑝 𝑔 +∑︁   
+
+> (𝑞,𝑡 ) ∈ idle (𝐶 )
+
+𝑝 idle (𝑞, 𝑡 ) + ∑︁   
+
+> 𝑟 ∈reset (𝐶 )
+
+𝑝 reset (𝑟 ). (1) These terms correspond to two-qubit gates, idle qubit-layers, and reset operations. In our experiments we use a uniform-noise model: every two-qubit gate has error rate 𝑝 2q , every idle qubit-layer has error rate 𝑝 idle , and reset is treated as ideal. Under this model the cost becomes 
+
+E ( 𝐶 ; 𝜅 ) = 𝑁 (𝐶 ) + 𝜅 𝐼 lr (𝐶 ), 𝜅 = 𝑝 idle 
+
+𝑝 2q 
+
+. (2) Here 𝑁 (𝐶 ) is the routed two-qubit gate count, and 𝐼 lr (𝐶 ) is the idle exposure after live-range scheduling. Thus the score balances two costs: using more two-qubit gates and leaving qubits idle for more layers. For a routed circuit of depth 𝐷 (𝐶 ), the live-range idle exposure is 
+
+𝐼 lr (𝐶 ) =∑︁ 
+
+> 𝑞
+
+ 𝐷 (𝐶 ) − 𝑓 (𝑞 ) + 1 − 2 𝑁 (𝐶 ), (3) where 𝑓 (𝑞 ) is the first layer in which qubit 𝑞 is used. This formula counts only the layers after the qubit becomes active. Since each qubit is reset just before its first use (Section 3.5), it does not accumulate idle error before layer 𝑓 (𝑞 ). The subtraction 2 𝑁 (𝐶 ) removes the two active qubit slots used by each two-qubit gate, leaving only idle qubit-layers. We use this scheduled idle exposure rather than the simpler ASAP estimate 𝑛 𝐷 (𝐶 ) − 2 𝑁 (𝐶 ). This is important because two routed circuits can have similar depth but different first-use layers. After just-in-time reset, those circuits can therefore have different idle exposure. Using 𝐼 lr (𝐶 ) makes the selection rule match the circuit schedule that is executed, and Section 4.12 gives a case where this schedule-aware score selects a lower-failure candidate that the ASAP-idle score misses. The ratio 𝜅 = 𝑝 idle /𝑝 2q is the only hardware-dependent input. When 𝜅 is close to zero, two-qubit gate errors dominate, so the best circuit is usually the one with the smallest routed two-qubit count. As 𝜅 increases, idle error becomes more important, and a circuit with more gates can become better if it has much lower scheduled idle exposure. For two routed candidates 𝐶 𝑎 and 𝐶 𝑏 , the value of 𝜅 where the preferred choice changes is 
+
+𝜅 ★ = 𝑁 (𝐶 𝑏 ) − 𝑁 (𝐶 𝑎 )
+
+𝐼 lr (𝐶 𝑎 ) − 𝐼 lr (𝐶 𝑏 ) , (4) when the numerator and denominator have the same sign. If this condition does not hold, then one candidate is better than the other for all 𝜅 under the first-order score. Because routing can change gate count, depth, and 10 Algorithm 3 Noise-aware post-routing selection from the count–depth Pareto frontier 
+
+Require: frontier F = {𝐶 1, . . . , 𝐶 𝐹 }; coupling graph 𝐺 on 𝑛 phys qubits; device ratio 𝜅 
+
+Ensure: the routed frontier circuit of least first-order preparation cost  
+
+> 1:
+
+𝑏𝑒𝑠𝑡 ← ∅ ; 𝑒 ★ ← +∞  
+
+> 2:
+
+for each circuit 𝐶 ∈ F do  
+
+> 3:
+
+𝑅 ← Route (𝐶, 𝐺 ) ⊲ best-of-𝑠 SABRE onto the native graph (Section 4.7)  
+
+> 4:
+
+(ℓ, 𝑑 ) ← Schedule (𝑅 ); 𝑓 (𝑞 ) ← min {ℓ(𝑔 ) : 𝑔 acts on 𝑞 } ⊲ ASAP layers, Algorithm 2  
+
+> 5:
+
+𝐼 ← Í𝑞 (𝑑 − 𝑓 (𝑞 ) + 1) − 2 |𝑅 | ⊲ idle-exposure surrogate for ranking; executed value from Algorithm 4  
+
+> 6:
+
+𝑒 ← | 𝑅 | + 𝜅 𝐼 ⊲ first-order routed cost, (2)  
+
+> 7:
+
+if 𝑒 < 𝑒 ★ then  
+
+> 8:
+
+𝑒 ★ ← 𝑒 ; 𝑏𝑒𝑠𝑡 ← 𝑅  
+
+> 9:
+
+end if  
+
+> 10:
+
+end for  
+
+> 11:
+
+return 𝑏𝑒𝑠𝑡 
+
+idle exposure in different ways, the best routed circuit is not necessarily the logical circuit with the fewest CNOT gates (Section 4.10). Algorithm 3 applies this post-routing selection rule to the full Pareto frontier. For each candidate it routes the circuit onto the target coupling graph, schedules the routed circuit, computes its live-range idle exposure, and evaluates the first-order cost in (2) . After all candidates have been scored, it returns the routed circuit with the lowest estimated preparation cost. Although the model keeps only first-order error contributions, it matches the full simulation results well. Across the Pareto frontier, its predicted costs are strongly correlated with the preparation-failure rates measured in Stim[ 47 ], with Pearson correlation between 0.90 and 0.99 . We also tested a more detailed propagation-aware version of the score, in which each fault location is weighted by whether the propagated fault anticommutes with the live stabilizers and therefore changes the prepared encoded state. This refinement gives nearly the same choices as the first-order score of (2) , differing only by a few percent. 
+
+3.5 Live-range scheduling 
+
+The commutation-aware scheduler of Section 3.3 reduces the number of circuit layers. This lowers the number of layers in which idle errors can occur. However, depth alone does not determine the total idle exposure. What matters is the number of qubit-layers in which initialized qubits are present but not used. A qubit does not accumulate idle error before it is initialized. If the qubit is kept in the reset state, or if a reset is applied immediately before its first gate, then any earlier error is removed. We therefore use just-in-time initialization. Each qubit is prepared only when it is about to be used for the first time. We also schedule the first use of each qubit as late as the circuit dependencies allow. This keeps qubits out of the decohering part of the circuit for as long as possible. Let ℓ(𝑔 ) be the layer assigned to gate 𝑔 , and let 𝑑 be the circuit depth. For each qubit 𝑞 , define 
+
+𝑓 (𝑞 ) = min {ℓ(𝑔 ) : 𝑔 acts on 𝑞 }, (5) the first layer in which 𝑞 participates in a gate. Under just-in-time reset, qubit 𝑞 contributes to idle exposure only from layer 𝑓 (𝑞 ) through layer 𝑑 . Thus the total idle exposure is 
+
+𝐼 lr =∑︁ 
+
+> 𝑞
+
+ 𝑑 − 𝑓 (𝑞 ) + 1 − 2𝑁, (6) 11 Algorithm 4 Live-range scheduling with just-in-time reset 
+
+Require: gate list 𝐶 on qubits {0, . . . , 𝑛 − 1} with Hadamard set 𝑆 and matrix (𝐶 ) = 𝑀 
+
+Ensure: just-in-time-preparation schedule that reduces idle exposure at equal or lower commutation-aware depth 
+
+// Part A: as-late-as-possible schedule by reflecting the reversed sequence  
+
+> 1:
+
+(ℓ𝑅 , 𝑑 ) ← Schedule (reverse (𝐶 )) ⊲ ASAP layers and depth, Algorithm 2  
+
+> 2:
+
+ℓ(𝑔 ) ← 𝑑 + 1 − ℓ𝑅 (𝑔 ) for every gate 𝑔 ⊲ reflect to an ALAP schedule of depth 𝑑 
+
+// Part B: first-use layer and just-in-time preparation  
+
+> 3:
+
+for each qubit 𝑞 ∈ { 0, . . . , 𝑛 − 1} do  
+
+> 4:
+
+𝑓 (𝑞 ) ← min {ℓ(𝑔 ) : 𝑔 acts on 𝑞 } ⊲ 𝑑 +1 if 𝑞 is unused  
+
+> 5:
+
+prepare 𝑞 (reset, and Hadamard if 𝑞 ∈ 𝑆 ) in layer 𝑓 (𝑞 ) − 1 ⊲ just-in-time initialization  
+
+> 6:
+
+end for 
+
+// Part C: idle exposure and verification  
+
+> 7:
+
+𝐼 ← Í𝑞 
+
+ 𝑑 − 𝑓 (𝑞 ) + 1 − 2 |𝐶 | ⊲ idle qubit-layers after first use  
+
+> 8:
+
+assert matrix (𝐶 ) = 𝑀 ⊲ gate list and depth unchanged  
+
+> 9:
+
+return schedule ℓ(·) , preparations, idle exposure 𝐼 
+
+where 𝑁 is the number of two-qubit gates. The first term counts the live layers of all qubits after initialization. The subtraction 2𝑁 removes the two active qubit slots used by each two-qubit gate, leaving only idle qubit-layers. For a fixed depth 𝑑 , minimizing 𝐼 lr is the same as maximizing Í𝑞 𝑓 (𝑞 ). In other words, we want each qubit’s first use to occur as late as possible. Algorithm 4 obtains this schedule by first scheduling the reversed gate list as soon as possible and then reflecting the layers. This gives an as-late-as-possible schedule at equal or lower depth (the reflected schedule inherits the depth of the ASAP schedule of the reversed gate list, which the order-sensitive greedy scheduler made equal or slightly smaller than the forward depth on every circuit we tested). The algorithm then places the reset, and the Hadamard preparation when needed, immediately before the qubit’s first use. This scheduling pass does not change the gate list; it reschedules at the commutation-aware depth or lower (equal or lower on every circuit we tested). It only changes when qubits are initialized and when gates are placed within the same dependency constraints. Therefore, it can be applied both to a logical circuit and to a routed circuit after swap expansion. In the full pipeline, live-range scheduling is the final stage: it is applied to the routed circuit chosen by the noise-aware selection of Section 3.4, and because it changes neither the gate count nor the depth, it improves fidelity without affecting the selection. 
+
+# 4 Results and Analysis 
+
+4.1 Setup 
+
+Benchmarks. We evaluate the pipeline on seventeen CSS encoders from three families: four BB codes [ 4 ], five HGP codes, and eight EA QC-LDPC codes. For each code, we first generate the reference encoder using the corresponding CG/SKG construction. We then extract its CNOT block and represent it by its binary linear-reversible matrix 𝑀 . All synthesis results are compared against this same algebraic target 𝑀 . For the EA codes, the encoder acts on the message qubits together with the shared entanglement (ebit) qubits, so the number of qubits it spans is not directly given by the code’s parameters. We therefore read each block size from the dimension of its target matrix 𝑀 . The four BB codes are the standard [[ 72 , 12 , 6]] , [[ 90 , 8, 10 ]] ,
+
+[[ 108 , 8, 10 ]] , and [[ 144 , 12 , 12 ]] instances of Bravyi et al. [ 4 ], defined over the bivariate polynomial ring 
+
+F2 [𝑥, 𝑦 ]/( 𝑥 ℓ − 1, 𝑦 𝑚 − 1) by two weight-three check polynomials 𝐴 and 𝐵 . The five HGP instances are built from small classical seed codes, the [7, 4, 3] Hamming code, the length-3 and length-4 repetition codes, and two additional classical codes with parameters [5, 2] and [6, 3], leading to the HGP codes [[ 58 , 16 ]] , [[ 13 , 1]] ,12 [[ 25 , 1]] , [[ 34 , 10 ]] , and [[ 45 , 9]] . The eight EA instances are QC-LDPC entanglement-assisted codes from the constructions of [ 9 , 10 , 11 ]. For each code, 𝑝 and ℓ denote the circulant size and lift, and the integer after the semicolon gives the number of ebits. For example, EA [[ 25 , 16; 1 ]] has 𝑝 = 5, ℓ = 1, and one ebit. The CG/SKG construction uses a fixed left-to-right column-elimination order. When a baseline circuit implements 
+
+𝑀 only up to a qubit permutation, we record that permutation and relabel the circuit, so every reported circuit implements the exact target matrix 𝑀 . Logical synthesis results are reported for all seventeen codes. Routing and routed-noise experiments focus on the BB-native biplanar architecture, with HGP and EA native-routing results reported separately. 
+
+Synthesis protocol. For the main synthesis runs, we use two-sided Hamming descent with 𝑅 = 50 
+
+permutation-conjugation restarts for each 𝜇 ∈ { 0, 0.5, 1, 2, 4, 8, 16 }. The reported output for a code is the best circuit from this sweep. Its CNOT count is used for Table 1 and its count–depth trade-off for Table 5. To isolate the effect of the two-sided move space, we also evaluate a one-sided variant in which column moves are disabled while the objective, multistart protocol, and matrix verification remain unchanged. We test this one-sided synthesizer in two forms: a count-optimized version (the lowest count over the 𝜇 -grid) and a depth-aware version. Tables 1 and 5 compare against the relevant one-sided configuration. 
+
+Routing protocol. Our main routing experiments route the BB family on the BB-native biplanar coupling map of [ 4 ]. This is a degree-6 Tanner-graph architecture with 2𝑛 physical qubits in which the encoder acts on the 𝑛 data qubits and the 𝑛 check-plane vertices provide routing space for swap insertion. The HGP and EA codes are routed on their native Tanner graphs in Section 4.8. Each logical circuit is routed using SABRE [ 48 ]with ten random seeds at optimization level 2. We apply the same commutation-aware re-layering pass and the same routing protocol to both the CG/SKG baseline and the synthesized circuits, so the routed comparison reflects the quality of the synthesized circuit. 
+
+Layout convention. Routing a logical circuit onto the coupling graph requires an initial layout, a mapping from logical qubits to physical qubits, and it inserts swap gates to bring interacting qubits together. We let SABRE choose this initial layout freely, so it can place frequently interacting qubits near one another. The inserted swap s permute the qubits, so the logical-to-physical mapping at the end of the circuit differs from the initial one. We accept this output permutation rather than appending further swap s to undo it. We use this same layout-free convention for both the CG/SKG baseline and our synthesized circuits. Thus, in the routed-depth and routed-noise tables, we do not force the logical qubits back to canonical data-qubit positions. This convention is valid when the downstream syndrome-extraction schedule follows the routed placement. In that case, the final permutation can be absorbed by relabeling. This relabeling has no gate cost. We also checked the cost of restoring the canonical data-plane positions. In this case, the restoration problem becomes token swapping on the biplanar graph. The restoration costs are comparable for the baseline and for our circuits: 177 versus 188 , 260 versus 259 , 330 versus 314 , and 450 versus 480 swaps on the four BB codes. Even if this restoration cost is added to both circuits as a worst case, the routed two-qubit count reduction remains 43 .2–50 .5% . Therefore, the routed advantage is not an artifact of accepting SABRE’s output permutation. The routed depth in Table 8 and the routed noise in Table 11 are reported in the layout-free setting. We bound the count cost of restoring the canonical data and check roles, but we do not separately report restored-layout depth or noise. These routed-depth and routed-noise results should therefore be read as layout-free preparation results. The canonical-role memory schedule is left to the architecture layer. Finally, every circuit reported below is verified to implement the target matrix 𝑀 exactly. All experiments are deterministic given the recorded seeds. 13 4.2 CNOT counts across the benchmark 
+
+Table 1 shows the primary logical CNOT-count comparison across the seventeen-code benchmark. The column “Base” is the CNOT count of the CG/SKG reference encoder. The column “1-sided” is the count-optimized one-sided variant of our synthesizer, obtained by disabling column moves and taking the best over the 𝜇 -grid. The column “Ours” is the best circuit found by two-sided Hamming descent over the full 𝜇 -grid with 𝑅 = 50 
+
+restarts. The value in parentheses is the corresponding ASAP depth. Bold entries in the “Ours” column mark strict improvements over the one-sided variant.                                                                                                                              
+
+> Table 1: Logical CNOT counts across the seventeen-code benchmark. Code 𝑛 Base 1-sided Ours (depth) BB [[ 72 ,12 ,6]] 72 638 361 290 (50) BB [[ 90 ,8,10 ]] 90 855 510 388 (54) BB [[ 108 ,8,10 ]] 108 1164 631 491 (51) BB [[ 144 ,12 ,12 ]] 144 2422 1075 775 (80) HGP [[ 58 ,16 ]] 58 183 157 149 (11) HGP [[ 45 ,9]] 45 99 92 92 (8) HGP [[ 34 ,10 ]] 34 72 69 68 (8) HGP [[ 25 ,1]] 25 51 44 41 (7) HGP [[ 13 ,1]] 13 20 19 19 (5) EA [[ 9,4; 1 ]] 10 17 14 14 (7) EA [[ 25 ,16; 1 ]] 26 38 33 33 (10) EA [[ 25 ,8; 1 ]] 26 89 65 59 (14) EA [[ 49 ,36; 1 ]] 50 82 73 73 (14) EA [[ 49 ,12; 1 ]] 50 338 223 201 (24) EA [[ 121 ,100; 1 ]] 122 218 202 201 (22) EA [[ 6,2,2; 2 ]] 811 99EA [[ 8,2; 2 ]] 10 13 10 10
+> Aggregate 6310 3587 2913
+
+Across all seventeen encoders, two-sided Hamming descent reduces the CG/SKG total from 6310 to 2913 
+
+CNOT gates, a 53 .8% aggregate reduction. The largest reductions occur on the BB family. The four BB counts decrease by 54 .5% , 54 .6% , 57 .8% , and 68 .0% , respectively. This family accounts for most of the aggregate reduction: it contributes 5079 of the 6310 baseline gates and falls by 61 .7% . The sparser HGP and EA instances also improve, but by a smaller aggregate amount, from 1231 to 969 gates, or 21 .3% . The routed and routed-noise results below are therefore reported on the BB codes. The one-sided comparison shows the benefit of allowing both row and column moves. The full two-sided sweep improves ten of the seventeen instances relative to the one-sided synthesizer and ties the remaining seven. The largest gains again occur on the BB family, where the reductions relative to the one-sided variant are 
+
+19 .7% , 23 .9% , 22 .2% , and 27 .9% . Outside the BB family, the two-sided method improves EA [[ 49 , 12; 1 ]] 
+
+by 9.9% , EA [[ 25 , 8; 1 ]] by 9.2% , HGP [[ 25 , 1]] by 6.8% , and HGP [[ 58 , 16 ]] by 5.1% . It also gives smaller strict improvements on HGP [[ 34 , 10 ]] and EA [[ 121 , 100; 1 ]] . The tied cases are not convergence failures. Several are small encoders that are already near their minimum count. 
+
+4.3 General-purpose synthesizers and global resynthesis 
+
+We next compare the proposed synthesizer with general-purpose synthesis and optimization tools. The goal is to test whether the reductions in Table 1 can be obtained by existing compiler pipelines. We evaluate four representative methods. The Patel–Markov–Hayes (PMH) linear-reversible synthesizer [ 28 ] is applied directly 14 to the matrix 𝑀 , and we sweep its block-size parameter. Qiskit at optimization level 3 [ 20 ] is applied to the CG/SKG encoder circuit. t|ket ⟩ [ 21 ] is applied using FullPeephole and CliffordSimp . PyZX [ 49 , 26 ]is applied with full_reduce to the full Hadamard-plus-CNOT encoder. Table 2 reports the BB-family comparison, and Appendix A presents the corresponding table for all seventeen benchmark codes.                                             
+
+> Table 2: Comparison with general-purpose synthesis and optimization tools on BB codes. Code CG base PMH [28] Qiskit-O3 t|ket ⟩[21] PyZX [49] Ours BB [[ 72 ,12 ,6]] 638 494 638 638 438 290
+> BB [[ 90 ,8,10 ]] 855 681 855 855 560 388
+> BB [[ 108 ,8,10 ]] 1164 996 1164 1164 775 491
+> BB [[ 144 ,12 ,12 ]] 2422 1428 2422 2422 1480 775
+
+No general-purpose method matches the proposed synthesizer on any BB code. PMH is the strongest linear-reversible method in this group. It reduces the CG/SKG counts, but its best circuits still use 1.70 –2.03 ×
+
+as many gates as ours. It removes some construction overhead without removing the column-order redundancy captured by the two-sided move space. Qiskit-O3 and t|ket ⟩ leave the CG/SKG CNOT count unchanged on all four BB encoders. Their local, peephole-style passes cannot remove the global redundancy that the fixed CG/SKG construction builds into these encoder matrices. PyZX gives the strongest general-purpose global resynthesis result in this comparison. It improves substantially over the CG/SKG construction, but its two-qubit counts remain 1.44 –1.91 × larger than ours on the BB family. Since the PyZX counts include both CNOT and cz gates, this is a favorable comparison for PyZX: it is allowed to use a more general Clifford representation, while our synthesizer remains in the pure-CNOT linear-reversible setting. Even with this extra freedom, the proposed synthesizer gives the smallest two-qubit count for every BB code in Table 2. The full seventeen-code comparison in Appendix A shows the same pattern. No general-purpose method beats the proposed synthesizer on any instance. The only ties occur on small and sparse codes: PyZX matches the 19 -gate result on HGP [[ 13 , 1]] , and t|ket ⟩ matches the 9-gate result on EA [[ 6, 2, 2; 2 ]] . Away from these small cases, the general-purpose tools remain above the proposed synthesizer, with the largest gaps on the dense, column-structured BB matrices. These results suggest that the gains in Table 1 are not just generic compiler cleanups. They come from resynthesizing the exact linear-reversible target 𝑀 using a two-sided transvection objective tailored to the structure of CSS encoder matrices. Other synthesis families are not directly competitive at these block sizes: learning-based and reinforcement-learning approaches [ 33 ] are designed for small or training-limited regimes, while exact and A ∗-based methods [ 30 , 39 ] target small-𝑛 
+
+optimal synthesis. 
+
+4.4 Head-to-head comparison against strongest published greedy methods 
+
+We next compare two-sided Hamming descent against implementations of the strongest published greedy baselines. The comparison uses the BB family, where the encoder matrices are dense and the weight-based greedy objectives are most likely to lose a useful descent direction. All methods are run under the same budget: 𝑅 = 50 restarts, the same machine, the same random tie-breaking rule, and the same underlying implementation. The baselines use the interleaved row/column move space with the hsum, hprod, Hsum, and Hprod cost functions of [ 43 , 29 ]. They are allowed to synthesize up to an output permutation, while our synthesizer is required to implement the exact target matrix 𝑀 . This gives the baselines a slightly easier target than the exact 𝑀 our synthesizer must implement. In Table 3, each baseline entry reports the best CNOT count found, with the number of converged restarts shown in parentheses. The word “stall” means that no restart converged under strict descent. The “Best” 15 column is the best count among the four baseline variants, and the “Gain” column is Gain = (Best −Ours )/ Best ,where “Ours” is the count-best circuit selected from the 𝜇 -sweep with 𝑅 = 50 . For the hprod family, we evaluated both the original row-weight column scoring rule and a strengthened, inverse-augmented version that converges more often. Table 3 reports the better value in each case, so this choice favors the baselines. Under the original hprod scoring rule, the hprod family stalls on all fifty restarts for BB [[ 72 , 12 , 6]] and BB 
+
+[[ 144 , 12 , 12 ]] . It reaches only 474 and 635 gates on BB [[ 90 , 8, 10 ]] and BB [[ 108 , 8, 10 ]] , respectively.                                                 
+
+> Table 3: Matched-budget comparison with published greedy baselines on BB codes. Baselines of [43, 29] Code hsum Hsum hprod Hprod Best Ours Gain BB [[ 72 ,12 ,6]] stall 314 (9/50) stall 349 (50/50) 314 290 7.6%
+> BB [[ 90 ,8,10 ]] stall stall 435 (5/50) 474 (30/50) 435 388 10 .8%
+> BB [[ 108 ,8,10 ]] stall stall stall 635 (40/50) 635 491 22 .7%
+> BB [[ 144 ,12 ,12 ]] stall stall stall 1028 (37/50) 1028 775 24 .6%
+
+The proposed synthesizer improves on the strongest baseline variant for every BB code. The reduction ranges from 7.6% on BB [[ 72 , 12 , 6]] to 24 .6% on BB [[ 144 , 12 , 12 ]] . The separation is the largest on the larger BB instances, which are the main dense structured matrices targeted by this work. The comparison is restricted to the BB family because it is the relevant stress test for these greedy objectives. On the denser BB matrices, the weight-based objectives often stall. On the smaller and sparser HGP and EA encoders, both methods often reach the same near-minimal count, so the head-to-head is less informative. The advantage is not caused by the breadth of the 𝜇 -sweep. At the strictly matched single configuration, with 𝜇 = 0 and count-only scoring, our counts are 297 , 388 , 491 , and 775 on the four BB codes. These compare with the strongest baseline counts of 314 , 435 , 635 , and 1028 , giving a 5.4% to 24 .6% reduction. On BB [[ 90 , 8, 10 ]] , BB [[ 108 , 8, 10 ]] , and BB [[ 144 , 12 , 12 ]] , the matched count already equals our reported count in Table 3. On BB [[ 72 , 12 , 6]] , the sweep improves the matched count only from 297 to 290 . Thus most of the gain comes from the Hamming-distance objective and the two-sided move space, not from a wider search. The table also shows a reliability gap. Ten of the sixteen baseline configurations stall on all fifty restarts. For 𝑛 ≥ 108 , only Hprod produces any converged baseline circuit. In contrast, the proposed objective produced a circuit for every code and every synthesis configuration used in Table 1, and it converges where these baselines stall even at the strictly matched single configuration. This indicates that the improvement is not only a lower final count, but also a more reliable descent direction on these matrices. The runtime results are consistent with this behavior. Producing the best baseline circuit requires running all four cost-function variants, since most stall and the surviving one is not known in advance. Table 4 compares the proposed synthesizer at its matched single configuration against this full four-variant sweep, at 𝑅 = 50 restarts on one machine and a shared numerical core. The proposed synthesizer is 3.4 to 10 .5× faster, with the largest gap on the densest code BB [[ 144 , 12 , 12 ]] , where every baseline variant stalls while our configuration produces a 
+
+775 -gate circuit in 102 seconds. We attribute the gap to fewer descent steps, fewer wasted stalled restarts, and integer-only scoring. The comparison is conservative in two ways. First, for the hprod family, we report the stronger value whenever the strengthened variant improves on the original implementation. Second, the published baselines are allowed to synthesize up to an output permutation, while our method is verified against the exact target 𝑀 ,so we compare the baselines on CNOT count only. Both choices favor the baselines. 16 Table 4: Synthesis runtime on BB codes: the proposed synthesizer at its matched single configuration versus the full four-variant baseline sweep ( 𝑅 = 50 restarts, one machine, shared numerical core). Code Ours (s) Baselines, all variants (s) Speedup BB [[ 72 , 12 , 6]] 23.7 81.6 3.4×                  
+
+> BB [[ 90 ,8,10 ]] 15.3 104.1 6.8×
+> BB [[ 108 ,8,10 ]] 29.7 186.2 6.3×
+> BB [[ 144 ,12 ,12 ]] 102.1 1074.9 10 .5×
+
+4.5 Count–depth Pareto frontiers 
+
+The layer-penalty sweep produces a set of circuits rather than a single output. Each value of 𝜇 can lead to a different descent path. Each point in Table 5 is a distinct circuit with its own CNOT count and two-qubit depth. The parameter 𝜇 acts during synthesis, penalizing moves that open a new ASAP layer. It therefore changes the gate sequence itself, rather than only reordering the gates of a circuit that is already built.                                                                                   
+
+> Table 5: Selected count–depth points from the one-sided, depth-greedy [ 32 ], and two-sided Pareto frontiers on BB codes. Code One-sided baseline Depth-greedy [32] Ours (selected points) BB [[ 72 ,12 ,6]] (361 ,50 ),(374 ,29 ),(402 ,26 )(401 ,44 ),(411 ,39 )(290 ,50 ),(304 ,28 ),(317 ,24 )
+> BB [[ 90 ,8,10 ]] (510 ,66 ),(511 ,30 ),(536 ,28 )(544 ,43 )(388 ,54 ),(408 ,28 ),(444 ,24 )
+> BB [[ 108 ,8,10 ]] (631 ,50 ),(666 ,32 ),(706 ,30 )(702 ,52 ),(719 ,48 )(491 ,51 ),(494 ,34 ),(524 ,28 )
+> BB [[ 144 ,12 ,12 ]] (1075 ,61 ),(1100 ,49 ),(1157 ,47 )(1110 ,67 ),(1144 ,63 )(775 ,80 ),(790 ,47 ),(814 ,36 ),(845 ,34 )
+
+The two-sided frontier improves the one-sided variant on all four BB codes. At matched or lower depth, the two-sided circuits use substantially fewer CNOT gates. For example, BB [[ 90 , 8, 10 ]] improves from 
+
+(536 , 28 ) to (408 , 28 ), and BB [[ 144 , 12 , 12 ]] improves from (1157 , 47 ) to (790 , 47 ). The depth-extreme points show the same trend: the two-sided sweep reaches depths 24 , 24 , 28 , and 34 , compared with 26 , 28 ,
+
+30 , and 47 for the selected one-sided points. Thus the layer penalty is not simply buying depth by adding many gates. It exposes alternative decompositions that are both shorter and more parallel. We also compare with the greedy depth method of Goubault de Brugière et al. [ 32 ]. Sweeping its four cost functions over many restarts traces a depth frontier on each BB code, shown in Figure 5. Our frontier dominates it on both count and depth for every code, including BB [[ 144 , 12 , 12 ]] , where the depth-greedy method converges on only a minority of restarts. For example, our (317 , 24 ) is shorter and shallower than its best point (411 , 39 ) on BB [[ 72 , 12 , 6]] , and our (845 , 34 ) dominates its (1110 , 67 ) and (1144 , 63 ) on BB 
+
+[[ 144 , 12 , 12 ]] .
+
+4.6 Commutation-aware depth 
+
+The depths in Table 5 and Figure 5 are gate-list ASAP depths (the depth of the CNOT gate list produced by the synthesizer, before any commutation-aware reordering), scheduled in the order returned by the synthesizer. That order is not unique because many CNOT gates commute and can be moved without changing the implemented matrix, so we apply the commutation-aware scheduling pass of Section 3.3 and verify the reordered circuit. Table 6 reports the result on the BB codes. On the count-best circuit the number of CNOT gates is unchanged, while the depth decreases from 50 , 54 , 51 , and 80 to 28 , 26 , 28 , and 31 , a 1.8–2.6×
+
+reduction at zero CNOT cost, with the implemented transformation confirmed by matrix and Clifford-tableau checks. Across the 𝜇 sweep, the lowest commutation-aware depth per code is 20 , 22 , 23 , and 27 .17 300 350 400 450 500 550 600 650 
+
+> CNOT count
+> 30
+> 40
+> 50
+> 60
+> two-qubit depth
+
+BB [[72, 12, 6]]     
+
+> 400 500 600 700 800
+> CNOT count
+> 30
+> 40
+> 50
+> 60
+> 70
+> two-qubit depth
+
+BB [[90, 8, 10]]       
+
+> 500 600 700 800 900 1000 1100
+> CNOT count
+> 30
+> 40
+> 50
+> 60
+> 70
+> 80
+> 90
+> two-qubit depth
+
+BB [[108, 8, 10]]        
+
+> 750 1000 1250 1500 1750 2000 2250 2500
+> CNOT count
+> 40
+> 60
+> 80
+> 100
+> 120
+> two-qubit depth
+
+BB [[144, 12, 12]]  
+
+> CG/SKG baseline
+> one-sided ablation front
+> depth-greedy [28]
+> ours: -sweep Pareto front
+
+Figure 5: Count–depth Pareto frontiers on the four BB codes. The two-sided front (blue, ours) dominates the one-sided ablation front (orange), the depth-greedy method of [ 32 ] (green), and the CG/SKG construction (gray) on both count and depth for every BB code. The depth-greedy front is the Pareto-optimal subset of that method’s four cost functions over many restarts. 
+
+Table 6: Commutation-aware depth on the BB codes. For each code we show the count-best circuit (its CNOT count, gate-list ASAP depth, and depth after the commutation-aware re-layering of Section 3.3) and the shallowest circuit from the 𝜇 -sweep (its re-layered depth and the per-circuit lower bound max (𝛿, 𝜆 ), ratio in parentheses). Count-best circuit Depth-best circuit Code CNOTs ASAP depth comm.-aware comm.-aware lower bound BB [[ 72 , 12 , 6]] 290 50 28 20 19 ( 1.05 ×)BB [[ 90 , 8, 10 ]] 388 54 26 22 19 ( 1.16 ×)BB [[ 108 , 8, 10 ]] 491 51 28 23 22 ( 1.05 ×)BB [[ 144 , 12 , 12 ]] 775 80 31 27 23 ( 1.17 ×)
+
+18 The improvement is not only relative to the original gate-list order. We also re-layer the one-sided variant under the same scheduler. Its count-best commutation-aware depths are 30 , 35 , and 36 on BB [[ 72 , 12 , 6]] , BB 
+
+[[ 90 , 8, 10 ]] , and BB [[ 108 , 8, 10 ]] , against our 28 , 26 , and 28 , and on BB [[ 144 , 12 , 12 ]] , where it converges on only a few restarts, its count-best circuit re-layers to depth 50 against our 31 . The two-sided circuits therefore remain shallower under the commutation-aware metric, as well as under gate-list ASAP depth. We also re-layer the depth-greedy circuits of Goubault de Brugière et al. [ 32 ] under the same scheduler, a symmetric comparison on the commutation-aware metric. Table 7 reports the shallowest re-layered depth each method reaches, and ours is shallower on every code where the depth-greedy method converges. On these dense matrices the layer constraint also drives the depth-greedy method to higher CNOT counts than even the count-oriented greedy of Section 4.4, so it is dominated on count as well as depth. The same paper also gives a divide-and-conquer construction that reaches provably optimal depth, but it ignores gate count and does so only by using several times more CNOTs. That trades away the low gate count that matters for encoder preparation, so we do not benchmark it here.                           
+
+> Table 7: Shallowest commutation-aware depth on the BB codes after re-layering by the scheduler of Section 3.3: two-sided Hamming descent versus the depth-greedy method of [ 32 ]. The “n/c” entry marks not converged: on BB
+> [[ 144 ,12 ,12 ]] the depth-greedy method converges on too few restarts to report a shallowest-depth value. Code Ours Depth-greedy [32] BB [[ 72 ,12 ,6]] 20 28
+> BB [[ 90 ,8,10 ]] 22 32
+> BB [[ 108 ,8,10 ]] 23 33
+> BB [[ 144 ,12 ,12 ]] 27 n/c
+
+The schedules are close to the per-circuit lower bound max (𝛿, 𝜆 ) of Section 3.3, with 𝛿 the maximum qubit gate-degree and 𝜆 the longest noncommuting chain. On the depth-extreme circuits this bound is 19 , 19 ,
+
+22 , and 23 , so the schedules are within 1.05 –1.17 × of it. We do not claim the greedy scheduler is globally optimal. The remaining gap is mainly a property of the synthesized gate list, and closing it further would require a decomposition with a smaller maximum qubit degree, which is the role of synthesis rather than scheduling. For the remaining experiments, we report commutation-aware depth as the depth metric for the synthesized and routed circuits. 
+
+4.7 Hardware-routed results 
+
+We next route the BB frontier circuits on the BB-native biplanar architecture of [ 4 ], the degree-6 Tanner-graph coupling map with 2𝑛 physical qubits. Every circuit uses the same protocol, best-of-ten SABRE layout and routing at optimization level 2, with no topology bias during synthesis. This is a post-routing selection experiment. Each Pareto-frontier candidate and the CG/SKG baseline are re-layered by the commutation-aware scheduler and then routed, using the same pipeline for both. Any difference in routed cost therefore reflects the quality of the synthesized circuits, not the post-processing. As in the setup, we let the routed circuit end in any qubit order, since for state preparation that permutation is just a free software relabeling. These are therefore layout-free results. We route every candidate and select the best rather than biasing synthesis toward the coupling graph. We tested that alternative directly: connectivity-aware synthesis variants, from hard connectivity constraints to soft and learned distance biases, all routed to higher cost than routing-then-selection on the same candidates. The reason is mechanical. A routing swap is stateful, so moving a qubit closer helps every later gate, whereas a distance penalty applied during synthesis re-pays that transport cost locally at each step, without the amortization. Table 8 reports the routed Pareto extremes (count-best and depth-best) for both the baseline (CG/SKG) and ours, each entry a pair of routed two-qubit count and depth. Routing depends on gate order, so we route 19 Table 8: Routed count–depth extremes on the BB-native biplanar architecture ( 2𝑛 physical qubits, best-of-ten SABRE at optimization level 2). Entries are (routed two-qubit count, routed two-qubit depth). Code Base count-best Base depth-best Ours count-best Ours depth-best BB [[ 72 , 12 , 6]] (2716 , 676 ) (3076 , 463 ) (1279 , 194 ) (1322 , 184 )
+
+BB [[ 90 , 8, 10 ]] (3997 , 944 ) (4562 , 555 ) (1935 , 329 ) (2269 , 246 )
+
+BB [[ 108 , 8, 10 ]] (5696 , 1375 ) (6719 , 883 ) (2560 , 312 ) (2560 , 312 )
+
+BB [[ 144 , 12 , 12 ]] (11312 , 2193 ) (15724 , 1680 ) (4827 , 528 ) (4986 , 486 )
+
+each candidate in its commutation-aware scheduled order rather than its raw emitted order. This carries the depth improvement through routing instead of letting the router undo it. On the count-best BB [[ 72 , 12 , 6]] 
+
+circuit, re-layering before routing lowers the routed depth from 263 to 194 , a 26% drop, so the improved logical order survives routing rather than being undone by it. Against the symmetrically routed CG/SKG baseline, our circuits reduce routed two-qubit count by 
+
+51 .6–57 .3% and routed two-qubit depth by 55 .7–71 .1% . Our best routed depths are 184 , 246 , 312 , and 
+
+486 layers on the four BB codes, against the re-layered baseline’s 463 , 555 , 883 , and 1680 , for example 
+
+(3076 , 463 ) → ( 1322 , 184 ) on BB [[ 72 , 12 , 6]] and (15724 , 1680 ) → ( 4986 , 486 ) on BB [[ 144 , 12 , 12 ]] .Routing the full 𝜇 -sweep, rather than the count-best circuit alone, supplies the depth-favorable representatives, since the depth-best routed circuit is not always the logical count-best one. On BB [[ 90 , 8, 10 ]] , for instance, the frontier reaches routed depth 246 while the count-best routed circuit has depth 329 .
+
+4.8 Code-native routing beyond the BB family 
+
+The biplanar architecture of Section 4.7 is not a generic device. It is the BB code’s own Tanner-graph coupling map , one physical qubit per data qubit and one per check, with a coupler wherever a check acts on a qubit (𝐻 [𝑘, 𝑑 ] = 1). For the bivariate-bicycle structure this is the degree-6, thickness-2 biplanar graph of [ 4 ], and Figure 6 shows the construction. Every CSS LDPC code has such a native coupling map, built the same way from its own 𝐻 𝑋 and 𝐻 𝑍 . This is exactly the connectivity a device needs to measure the code’s stabilizers. Routing the encoder on this graph is therefore the realistic hardware target. The HGP and EA codes do not share the BB biplanar graph, but each has its own native Tanner graph, so we route every HGP and EA encoder on its own code-native coupling map under the identical best-of-ten SABRE protocol. data             
+
+> qubits
+> check
+> qubits
+> edge a check acts on that qubit (H[k,d] = 1)
+> wired onto the chip: BB degree-6 biplanar; HGP/EA each code its own graph
+> d0d1d2d3d4
+> c0c1c2
+
+Figure 6: Code-native Tanner-graph coupling map for a CSS code. Data qubits and check nodes are physical qubits, with an edge wherever 𝐻 [𝑘, 𝑑 ] = 1. The check qubits provide routing space matched to the code’s locality. 
+
+20 Table 9: Routed HGP and EA results on code-native Tanner-graph coupling maps. Entries are baseline (CG/SKG) →
+
+ours. Code count base →ours count ↓ depth base →best depth ↓
+
+HGP [[ 13 , 1]] 36 → 28 22 .2% 15 → 13 13 .3% 
+
+HGP [[ 25 , 1]] 116 → 101 12 .9% 30 → 34 −13 .3% 
+
+HGP [[ 34 , 10 ]] 193 → 178 7.8% 50 → 40 20 .0% 
+
+HGP [[ 45 , 9]] 314 → 279 11 .1% 69 → 70 −1.4% 
+
+HGP [[ 58 , 16 ]] 618 → 493 20 .2% 143 → 116 18 .9% 
+
+EA [[ 6, 2, 2; 2 ]] 24 → 18 25 .0% 20 → 9 55 .0% 
+
+EA [[ 8, 2; 2 ]] 17 → 11 35 .3% 10 → 13 −30 .0% 
+
+EA [[ 9, 4; 1 ]] 39 → 31 20 .5% 37 → 17 54 .1% 
+
+EA [[ 25 , 16; 1 ]] 74 → 61 17 .6% 34 → 25 26 .5% 
+
+EA [[ 25 , 8; 1 ]] 259 → 172 33 .6% 74 → 58 21 .6% 
+
+EA [[ 49 , 36; 1 ]] 130 → 110 15 .4% 49 → 31 36 .7% 
+
+EA [[ 49 , 12; 1 ]] 1183 → 749 36 .7% 226 → 163 27 .9% 
+
+EA [[ 121 , 100; 1 ]] 314 → 277 11 .8% 95 → 47 50 .5% 20 0 20 40 60 
+
+> routed two-qubit reduction vs CG/SKG baseline (%)
+> HGP[[13,1]]
+> HGP[[25,1]]
+> HGP[[34,10]]
+> HGP[[45,9]]
+> HGP[[58,16]]
+> EA[[6,2,2;2]]
+> EA[[8,2;2]]
+> EA[[9,4;1]]
+> EA[[25,16;1]]
+> EA[[25,8;1]]
+> EA[[49,36;1]]
+> EA[[49,12;1]]
+> EA[[121,100;1]]
+
+Count advantage transfers to code-native connectivity (all 13 codes) 
+
+> family
+> HGP
+> EA
+> count
+> depth (best)
+
+Figure 7: Routed two-qubit reductions on the code-native Tanner graphs of the HGP and EA codes. Routed count falls on every code, and routed depth-best falls on ten of thirteen. 
+
+21 Table 9 and Figure 7 report the result. The routed two-qubit count falls on all thirteen HGP and EA codes, by 7.8 to 36 .7% . Thus the count advantage transfers to code-native connectivity beyond the BB family, in the same layout-free setting used for the BB result. Taken as the better of the count-best and depth-aware circuits, the routed depth falls on ten of the thirteen codes, by up to 55% . On the remaining three it is neutral or at most a few layers higher, since their short routed circuits make the depth percentage sensitive to individual SWAP placements. Routing the same encoders instead on a generic degree-3 heavy-hex device compresses the count reduction, because the SABRE SWAP overhead on a sparse device unrelated to the code is a large floor common to both circuits. The code-native graph is the architecture these codes are built for, so it is the fair and favorable comparison. 
+
+4.9 Preparation failure under circuit-level noise 
+
+Gate count and depth are useful proxies, but the final question is whether the synthesized encoders prepare the target state more reliably on noisy hardware. We test this directly with Stim [ 47 ]. For each encoder, we simulate the full preparation circuit, consisting of the Hadamard layer followed by the CNOT block. We apply a two-qubit depolarizing channel of strength 𝑝 after every CNOT gate [ 50 , 51 ] and keep single-qubit gates noiseless. This isolates the noise source most directly affected by CNOT synthesis. The input is the all-zero computational state. For EA codes, this input includes both the message and ebit registers. After the circuit, we measure all stabilizer generators of the ideal output state, obtained from the noiseless circuit tableau. This check is stronger than checking only the code stabilizers, because it also detects logical deviations from the intended encoded state. For each run we measure the stabilizers of the ideal prepared state, each of which should return +1. If any returns −1, the state has deviated, so we count the run as a failure. These stabilizers determine the state completely, so the reported rate is exactly the probability of preparing a state other than the ideal state. It counts any deviation from the ideal prepared state, including errors that a later decoder might correct. It is therefore not a post-decoding logical failure rate. A 𝑝 = 0 self-test gives zero failures for every circuit. Each reported failure rate is estimated from at least 20000 runs. Table 10 reports four representative codes covering the BB, HGP, and EA families, and Figure 8 plots the corresponding failure rates against the two-qubit depolarizing strength 𝑝 . The synthesized encoders prepare the correct state more often than the CG/SKG baseline in every case. The improvement is largest on the BB codes, where the CNOT reductions are also largest. As 𝑝 decreases, the suppression approaches the CNOT-count ratio. For BB [[ 72 , 12 , 6]] , the suppression improves from 1.90 × at 𝑝 = 10 −3 to 2.17 ×
+
+at 𝑝 = 10 −4, approaching the count ratio 2.20 . For BB [[ 144 , 12 , 12 ]] , it improves from 1.73 × to 2.89 ×,approaching the count ratio 3.13 . This is the expected behavior when single-fault events dominate: at lower physical error rates, reducing the number of two-qubit gates translates almost directly into higher preparation fidelity. The low-depth circuits have nearly the same failure rates as the count-best circuits. On the BB examples, these circuits are 41 –44% shallower than the count-best gate-list schedules, but their failure rates differ only by a few percent under this gate-error-only model. Thus the depth reduction does not noticeably hurt fidelity here. Its main benefit appears when idle errors are included, as discussed below. The practical effect is largest on the hardest preparations. At 𝑝 = 10 −3, the BB [[ 144 , 12 , 12 ]] baseline fails on 90 .8% of runs, while the synthesized count-best encoder fails on 52 .4% . Under strict post-selection on deviation-free preparation, this corresponds to about 10 .9 attempts per success for the baseline and 2.1 for the synthesized encoder. This ratio is an upper bound on preparation overhead, since a decoder could absorb some of the correctable residual errors that this stabilizer-state test counts as failures. The previous experiment isolates two-qubit gate noise. We also test two richer noise models. The first is a full circuit-level model [ 4]. It adds single-qubit depolarizing noise of strength 𝑝 /10 after every Hadamard and on every idle qubit in each layer. It also adds an 𝑋 error of strength 𝑝 before readout as a measurement-error 22 Table 10: Preparation-failure rates under two-qubit depolarizing noise. The count ratio is the baseline-to-ours CNOT ratio and suppression ratio is the baseline-to-ours failure ratio. The “ours (depth 𝑁 )” rows are low-depth points from the same 𝜇 -sweep frontier; the two BB rows also appear in Table 5. Code Circuit CNOTs 𝑝 = 10 −3 3 × 10 −4 10 −4
+
+BB [[ 72 , 12 , 6]] 
+
+baseline 638 0.454 0.165 0.0589 ours (count) 290 0.239 0.080 0.0272 ours (depth 28) 304 0.252 0.084 0.0306 
+
+count / suppression ratio 2.20 1.90 × 2.07 × 2.17 ×
+
+BB [[ 144 , 12 , 12 ]] 
+
+baseline 2422 0.908 0.515 0.2105 ours (count) 775 0.524 0.201 0.0729 ours (depth 47) 790 0.534 0.206 0.0779 
+
+count / suppression ratio 3.13 1.73 × 2.57 × 2.89 ×
+
+HGP [[ 58 , 16 ]] 
+
+baseline 183 0.158 0.046 0.0163 ours (count) 149 0.130 0.038 0.0149 ours (depth 9) 150 0.124 0.042 0.0146 
+
+count / suppression ratio 1.23 1.21 × 1.21 × 1.10 ×
+
+EA [[ 49 , 12; 1 ]] 
+
+baseline 338 0.277 0.092 0.0336 ours (count) 201 0.180 0.059 0.0202 ours (depth 23) 206 0.185 0.059 0.0193 
+
+count / suppression ratio 1.68 1.54 × 1.56 × 1.67 ×10 −4 10 −3      
+
+> p
+> 10 −1
+> 10 0
+> preparation-failure rate
+> BB [[72, 12, 6]]
+> (suppression 2.2 × at 10 −4 )
+> 10 −4 10 −3
+> p
+> BB [[144, 12, 12]]
+> (suppression 2.9 × at 10 −4 )
+> 10 −4 10 −3
+> p
+> HGP [[58, 16]]
+> (suppression 1.1 × at 10 −4 )
+> 10 −4 10 −3
+> p
+> EA [[49, 12; 1]]
+> (suppression 1.7 × at 10 −4 )
+> CG/SKG baseline ours (count-best) ours (depth-knee)
+
+Figure 8: Preparation-failure rate versus two-qubit depolarizing strength 𝑝 for four representative codes. The synthesized circuits outperform the CG/SKG baselines at every noise level, and the gap approaches the CNOT-count ratio as 𝑝 
+
+decreases. 
+
+proxy. Under this model, depth becomes important because idle layers also contribute errors. Scheduling the count-best circuit at its commutation-aware depth instead of its gate-list depth lowers the BB full-model failure rate by 1.2–1.5×. For example, at 𝑝 = 10 −3, the rate drops from 0.47 to 0.38 on BB [[ 72 , 12 , 6]] , and from 0.84 to 0.69 on BB [[ 144 , 12 , 12 ]] . The second enrichment is a routed noise model. We use the circuits routed on the BB biplanar architecture from Section 4.7. Each swap is decomposed into three CNOT gates, and two-qubit depolarizing noise is applied after every physical two-qubit gate. The ideal-output stabilizers are built from the same routed circuit, so the final SABRE layout permutation is handled exactly. Table 11 shows that the advantage is robust. Adding idle, single-qubit, and measurement noise reduces the suppression on the BB codes because these extra faults create a common error floor for both circuits. For example, BB [[ 144 , 12 , 12 ]] changes from 2.89 × suppression in the count-only model to 1.92 × in the full model. The advantage is not removed, however, and the synthesized encoder still prepares the correct state 23 Table 11: Preparation-failure suppression under fuller and routed noise models at 𝑝 = 10 −4.Code count-only full model routed BB [[ 72 , 12 , 6]] 2.17 × 1.57 × 1.93 ×                                                  
+
+> BB [[ 144 ,12 ,12 ]] 2.89 ×1.92 ×1.79 ×
+> HGP [[ 58 ,16 ]] 1.10 ×1.37 ×–EA [[ 49 ,12; 1 ]] 1.67 ×1.78 ×–
+> Table 12: Role of each pipeline stage. Stage Purpose Changes Hardware input? CNOT list? depth? Hamming-residual resynthesis build shorter exact encoder yes yes no Commutation-aware re-layering reduce verified depth no yes no Frontier generation keep count–depth candidates no no no Routing (SABRE) map to native coupling graph yes, via swap syes graph Noise-aware selection choose lowest-cost routed circuit no no noise model Live-range scheduling reduce idle exposure no no no Stim validation estimate preparation failure no no noise model
+
+more often on every reported code and noise model. The routed model gives 1.79 –1.93 × suppression on the BB codes, so the fidelity gain is not only a fully connected, count-only effect. It remains visible after routing and after the output permutation is handled in the stabilizer check. 
+
+4.10 Comparing the count-optimal and noise-aware pipelines 
+
+We now compare two pipeline configurations. The first is a count-optimal configuration. It selects the count-best circuit, routes it, and schedules the routed circuit at its commutation-aware depth. This is the natural baseline after synthesis, routing, and re-layering. The second is the full noise-aware configuration. It routes every candidate, scores each routed circuit using the first-order cost of Algorithm 3, selects the routed circuit of lowest estimated preparation cost, and then applies live-range scheduling. The selected circuit need not be the logical count-best circuit, because routing can change both the physical CNOT count and the idle structure. Live-range scheduling then changes only the timing of resets and gates. It preserves the selected routed CNOT list and its two-qubit depth. Figure 9 shows the two configurations. Table 12 summarizes which stages change the circuit and which use hardware or noise information. We evaluate the full pipeline on all seventeen codes using routed Stim simulation at idle-to-gate ratio 
+
+𝜅 = 0.1 and physical error rate 𝑝 = 10 −4. Each code is routed on its native CSS Tanner-graph coupling map, which is the biplanar graph for the BB family. The baseline is the count-best routed circuit. The full pipeline uses schedule-aware selection followed by live-range scheduling. Each reported rate is estimated from at least 
+
+200 observed failures. Table 13 shows that the full pipeline lowers preparation failure on 16 of the 17 codes. The largest reduction is 34 .7% on EA [[ 121 , 100; 1 ]] . The only non-improving case is EA [[ 8, 2; 2 ]] , a very small circuit with only eleven routed gates, where the difference is within statistical noise. The dominant contribution comes from live-range scheduling. This stage reduces idle exposure without changing the selected routed circuit. Schedule-aware selection gives an additional benefit only when the routed frontier has multiple useful candidates. On four single-candidate instances, selection is trivial. On multi-candidate instances, it can matter substantially. The largest added selection benefit is 15 .3% on HGP [[ 45 , 9]] .The selected circuit is not always the logical count-best circuit. Routing can change the physical count and 24 Count -optimal configuration  Noise -aware configuration 
+
+> Two -sided Hamming descent
+> synthesize CNOT circuit
+> Commutation re -layering
+> compress depth
+> Count –depth Pareto frontier
+> select count -best
+> Route (SABRE)
+> native hardware graph
+> Executable encoder
+> Two -sided Hamming descent
+> synthesize CNOT circuit
+> Commutation re -layering
+> compress depth
+> Count –depth Pareto frontier
+> candidate circuits
+> Route (SABRE)
+> route all candidates
+> Noise -aware selection
+> argmin N + κI (routed)
+> Live -range scheduling
+> ALAP + just -in -time reset
+> Executable encoder
+
+Figure 9: The two pipeline configurations compared here. The count-optimal configuration selects the count-best circuit before routing. The noise-aware configuration routes the frontier, selects the lowest-cost routed candidate, and then applies live-range scheduling. 
+
+idle exposure in a nonmonotone way. For example, on BB [[ 144 , 12 , 12 ]] , the logical count-best circuit routes to 5263 CNOT gates, while a slightly larger logical circuit routes to 5224 CNOT gates. This is why selection is performed after routing rather than before routing. Sections 4.11 and 4.12 separate the two noise-aware stages. Section 4.11 measures the effect of live-range scheduling, and Section 4.12 measures the effect of schedule-aware selection. 
+
+4.11 Live-range scheduling: minimizing idle exposure 
+
+Section 3.5 introduced live-range scheduling. The idea is to delay each qubit’s preparation until its first use. This keeps the qubit out of the decohering part of the circuit for as long as possible. The pass does not add gates or change the selected routed CNOT list. It only changes when qubits are initialized and how the same dependencies are scheduled. Across the seventeen-code benchmark, live-range scheduling removes 28 –71% of the idle exposure of the commutation-aware schedule. This is measured at identical CNOT count and equal-or-lower depth. Under the full noise model of Section 4.9, with idle and measurement errors and idle-to-gate ratio 0.1, this reduces preparation failure on 16 of the 17 codes. The largest reduction from this stage alone is 22 .9% . On the four 25 Table 13: Preparation-failure rate of the count-best routed circuit versus the full noise-aware pipeline.                                                                                              
+
+> Code count-best routed full pipeline reduction BB [[ 72 ,12 ,6]] 0.308 0.243 21 .2%
+> BB [[ 90 ,8,10 ]] 0.440 0.376 14 .6%
+> BB [[ 108 ,8,10 ]] 0.539 0.481 10 .6%
+> BB [[ 144 ,12 ,12 ]] 0.826 0.772 6.5%
+> HGP [[ 13 ,1]] 0.0080 0.0069 13 .5%
+> HGP [[ 25 ,1]] 0.0181 0.0149 17 .6%
+> HGP [[ 34 ,10 ]] 0.0366 0.0312 14 .9%
+> HGP [[ 45 ,9]] 0.0651 0.0513 21 .3%
+> HGP [[ 58 ,16 ]] 0.0964 0.0931 3.3%
+> EA [[ 6,2,2; 2 ]] 0.0033 0.0030 10 .7%
+> EA [[ 8,2; 2 ]] 0.0023 0.0023 −0.7%
+> EA [[ 9,4; 1 ]] 0.0058 0.0046 21 .6%
+> EA [[ 25 ,16; 1 ]] 0.0138 0.0101 27 .0%
+> EA [[ 25 ,8; 1 ]] 0.0331 0.0270 18 .4%
+> EA [[ 49 ,12; 1 ]] 0.1414 0.1206 14 .7%
+> EA [[ 49 ,36; 1 ]] 0.0253 0.0213 15 .8%
+> EA [[ 121 ,100; 1 ]] 0.0896 0.0585 34 .7%
+
+BB codes, the reduction is 5.9–8.5% . The largest gains occur on sparse EA codes. These circuits often bring many qubits into use only late in the preparation, so just-in-time reset removes a large amount of pre-use idle exposure. For example, live-range scheduling improves EA [[ 121 , 100; 1 ]] by 22 .9% and EA [[ 25 , 16; 1 ]] by 
+
+17 .2% .On BB [[ 72 , 12 , 6]] , the live-range schedule has the same depth as the commutation-aware schedule. This gives a fixed-count and fixed-depth test of the idle-exposure effect. In a 20000 -run simulation, the preparation-failure rate falls from 0.388 to 0.343 at idle ratio 0.1, a 11 .6% reduction with 9.4𝜎 significance. 1
+
+At idle ratio 0.2, it falls from 0.457 to 0.409 , a 10 .4% reduction with 9.6𝜎 significance. The benefit becomes more important after routing. Routing inserts swap chains that often leave many qubits waiting while others are moved. Thus routing increases idle exposure more strongly than it increases the logical gate count. We test this with routed Stim simulations at 𝑝 = 10 −4 and idle-to-gate ratio 0.1. Each swap is expanded into three CNOT gates. The ideal-output stabilizers are built from the routed circuit so that the final SABRE placement is handled exactly. 
+
+Table 14: Effect of live-range scheduling on routed BB preparation failure. Code routed CNOTs depth commutation live-range reduction BB [[ 72 , 12 , 6]] 1421 225 → 221 0.307 0.268 12 .9% (8.7𝜎 )BB [[ 90 , 8, 10 ]] 2134 297 → 288 0.436 0.376 13 .7% (12 .2𝜎 )BB [[ 108 , 8, 10 ]] 2903 319 → 306 0.527 0.481 8.8% (9.3𝜎 )BB [[ 144 , 12 , 12 ]] 5162 557 → 527 0.798 0.747 6.4% (12 .2𝜎 )
+
+Table 14 shows that live-range scheduling lowers routed preparation failure on all four BB codes. The reductions range from 6.4% to 13 .7% , and every point is significant at 8.7𝜎 or higher. These improvements are obtained after routing, as the final pass of the pipeline. We apply live-range scheduling after routing rather than before routing. A schedule computed on the logical circuit can be disrupted by swap insertion. In contrast, once the circuit has been routed, the first physical interaction of each qubit is fixed up to later delays.                   
+
+> 1Significance is the two-proportion 𝑧 -score 𝑑 /SE ,where 𝑑 is the difference in estimated failure rates and SE =√︁
+> 𝑝 1(1−𝑝 1)/ 𝑁 +𝑝 2(1−𝑝 2)/ 𝑁 over 𝑁 runs.
+
+26 Table 15: Frontier circuit selected by the routed first-order cost as the idle-to-gate ratio 𝜅 varies, on the BB biplanar architecture. Code 𝜅 =0 0.01 0.03 0.1 0.3 1.0                                    
+
+> BB [[ 72 ,12 ,6]] (290,28) (294,24) (294,24) (297,22) (297,22) (297,22) BB [[ 90 ,8,10 ]] (394,22) (394,22) (394,22) (388,26) (450,19) (450,19) BB [[ 108 ,8,10 ]] (491,28) (491,28) (491,28) (491,28) (491,28) (491,28) BB [[ 144 ,12 ,12 ]] (781,30) (781,30) (781,30) (781,30) (781,30) (882,27)
+
+Computing the reset timing after routing therefore captures the full idle-exposure benefit without requiring a connectivity-aware router. The remaining routed overhead is mostly the swap overhead, which multiplies the CNOT count by 4.9–6.6× on these BB codes. This is a placement and routing cost, separate from scheduling. Finally, live-range scheduling assumes that just-in-time reset is sufficiently reliable. We test this by adding an 𝑋 error of rate 𝑝 reset to each reset at the first-use layer, against a baseline with perfect initial reset, and sweep 𝑝 reset ∈ { 0, 10 −5, 10 −4, 3×10 −4, 10 −3, 3×10 −3, 10 −2} at 𝑝 = 10 −3 and idle ratio 0.1. The advantage persists through 𝑝 reset = 10 −3 on all four BB codes, so the break-even reset error 𝑝 ★ 
+
+> reset
+
+lies between 10 −3
+
+and 3×10 −3. At 𝑝 reset = 10 −3, live-range scheduling still improves over the perfect-initial-reset baseline by 
+
+1.8–3.2% , and at 𝑝 reset = 10 −4 the improvement is 7–10% . The pass becomes harmful by 3×10 −3, where reset errors outweigh the idle savings. Thus the benefit is real for high-fidelity reset and correctly disappears when reset is too noisy. 
+
+4.12 Noise-aware selection from the count–depth Pareto frontier 
+
+We next test the post-routing selection rule of Section 3.4. For each BB code, we route every candidate on the count–depth frontier and score the routed circuit using the first-order cost E ( 𝐶 ; 𝜅 ) of (2) (Algorithm 3). The parameter 𝜅 is the idle-to-gate error ratio. When 𝜅 = 0, the score chooses the routed circuit with the fewest physical two-qubit gates. As 𝜅 increases, scheduled idle exposure becomes more important, and the selected point can move to a different part of the frontier. Table 15 shows the selected logical circuit as 𝜅 is swept over {0, 0.01 , 0.03 , 0.1, 0.3, 1.0}. Each entry is the logical pair of CNOT count and depth for the candidate selected after routing and scoring. The selected circuit is often not the logical count-best or the logical depth-best circuit. It can be an interior frontier point. This happens because the selection is made after routing, and routing can change the physical count and idle structure in a way that is not monotone in the logical count. For example, on BB [[ 90 , 8, 10 ]] 
+
+and BB [[ 144 , 12 , 12 ]] , the selected candidate at 𝜅 = 0 is not the logical count-best circuit. The idle term also needs to match the schedule that will be executed. We therefore score the circuit using the live-range idle exposure 𝐼 lr of (2) , rather than the simpler ASAP-idle estimate. This distinction changes the selected circuit on BB [[ 90 , 8, 10 ]] . There, the schedule-aware score lowers preparation failure from 0.381 to 0.372 , a 
+
+2.4% reduction with 3.1𝜎 significance over 60000 runs. On the other three BB codes, the schedule-aware and simpler scores select the same candidate. Thus, noise-aware selection is a free post-processing step over the frontier. It does not add gates. It only chooses which routed candidate is passed to the live-range schedule of Section 4.11. 
+
+# 5 Discussion and Conclusion 
+
+Our results rest on two ideas: resynthesizing the encoder into a shorter exact circuit, and then adapting that circuit to the target hardware with noise-aware selection and live-range scheduling. We begin with the resynthesis. Standard CSS encoder constructions such as CG and SKG follow fixed algebraic elimination 27 paths. These paths guarantee a valid encoder, but they can leave substantial redundant CNOT structure in the linear-reversible block, which is especially visible on the dense, structured encoder matrices produced by quantum LDPC codes. We treated encoder preparation as an exact matrix-resynthesis problem. Two-sided Hamming descent helps because it removes this redundancy from both ends of the residual matrix: a row-only descent must correct column-shaped structure indirectly through row operations, whereas the two-sided move space also allows column operations and attacks the structure left by a fixed column-elimination order directly. This is why the gains are largest on the BB codes and the denser EA instances, while small encoders already near their minimum mostly tie the one-sided baseline. The distance-to-identity objective matters for the same reason. Weight-based greedy objectives become flat on dense encoder matrices because many moves change the matrix weight by nearly the same amount, whereas ∥ 𝐴 ⊕ 𝐼 ∥1 keeps a direct measure of progress toward the target identity residual and gives the search a useful descent direction on these structured matrices. Across the seventeen-code benchmark, the resulting pipeline reduces the aggregate CNOT count by 53 .8% 
+
+relative to CG/SKG, with reductions of 54 .5–68 .0% on the BB family. It also beats implementations of the strongest published greedy baselines on every BB code by 7.6–24 .6% . These circuits are exact replacements: every reported logical circuit is verified by recomputing the matrix it implements and checking equality with the target encoder transformation 𝑀 . The later stages turn these logical improvements into hardware-relevant ones. Commutation-aware re-layering removes order-dependent depth at zero CNOT cost, reaching within 
+
+1.05 –1.17 × of a per-circuit lower bound. Routing all candidates on the BB-native biplanar architecture reduces routed two-qubit count by 51 .6–57 .3% and routed two-qubit depth by 55 .7–71 .1% . The noise-aware stages then select the routed frontier point that best matches the device error balance and apply live-range scheduling to reduce idle exposure, lowering routed preparation failure on 16 of the 17 benchmark codes by up to 34 .7% without changing the selected routed CNOT list. Overall, the results show that encoder-matrix resynthesis is an effective compiler-level tool for quantum LDPC state preparation. By combining two-sided search, commutation-aware scheduling, post-routing hardware adaptation, and live-range scheduling, the pipeline produces smaller, shallower, and lower-noise encoder circuits while preserving the target encoded state exactly. 
+
+# A General-purpose synthesizers across the full benchmark 
+
+Table 16 extends Table 2 to all seventeen codes. PMH is the best over its block-size sweep; Qiskit -O3 and 
+
+t|ket ⟩ act on the CG/SKG encoder; PyZX entries are total two-qubit gates. No method beats our synthesizer on any code; the only ties are on the two smallest, sparsest instances (PyZX matches our 19 on HGP [[ 13 , 1]] ,and t|ket ⟩ matches our 9-gate result on EA [[ 6, 2, 2; 2 ]] ). Elsewhere the methods cluster within a few gates of one another and above ours; the separation is a dense-encoder phenomenon. 
+
+# B Relabeling invariance under permutation conjugation 
+
+Each restart conjugates the target by a permutation matrix 𝑃 (Section 3.2); we record why this changes only the descent path and never the achievable CNOT count. Write 𝑃 (·) for the induced permutation, so 
+
+𝑃𝑒 𝑘 = 𝑒 𝑃 (𝑘 ) . Since 𝑃𝑃 ⊤ = 𝐼 , the transvection 𝑇 𝑖 𝑗 = 𝐼 + 𝑒 𝑖 𝑒 ⊤ 
+
+> 𝑗
+
+satisfies 
+
+𝑃 𝑇 𝑖 𝑗 𝑃 ⊤ = 𝑃𝑃 ⊤ + ( 𝑃𝑒 𝑖 )( 𝑃𝑒 𝑗 )⊤ = 𝐼 + 𝑒 𝑃 (𝑖 ) 𝑒 ⊤    
+
+> 𝑃 (𝑗 )
+
+= 𝑇 𝑃 (𝑖 ),𝑃 ( 𝑗 ) ,
+
+so conjugation relabels the two qubits of a CNOT without creating or removing gates. A decomposition 
+
+𝑀 = Î𝑘 𝑇 𝑎 𝑘 𝑏 𝑘 therefore maps to 𝑃𝑀 𝑃 ⊤ = Î𝑘 𝑇 𝑃 (𝑎 𝑘 ),𝑃 (𝑏 𝑘 ) with the same number of factors, and conversely a length-𝐿 decomposition of 𝑃𝑀 𝑃 ⊤ gives 𝑀 = 𝑃 ⊤ (𝑃𝑀 𝑃 ⊤)𝑃 of length 𝐿 by the same identity applied with 
+
+𝑃 −1. A circuit found for the relabeled residual thus transfers back to 𝑀 at the same count by undoing the 28 Table 16: No general-purpose synthesizer beats our synthesizer on any of the seventeen codes. All linear circuits are matrix-verified to exact 𝑀 ; PyZX (Clifford) is verified by stabilizer tableau, with total two-qubit gates reported. Code 𝑛 CG PMH -O3 tket PyZX Ours BB [[ 72 , 12 , 6]] 72 638 494 638 638 438 290 
+
+BB [[ 90 , 8, 10 ]] 90 855 681 855 855 560 388 
+
+BB [[ 108 , 8, 10 ]] 108 1164 996 1164 1164 775 491 
+
+BB [[ 144 , 12 , 12 ]] 144 2422 1428 2422 2422 1480 775 
+
+HGP [[ 58 , 16 ]] 58 183 153 183 183 153 149 
+
+HGP [[ 45 , 9]] 45 99 93 99 99 93 92 
+
+HGP [[ 34 , 10 ]] 34 72 72 72 72 71 68 
+
+HGP [[ 25 , 1]] 25 51 45 51 51 43 41 
+
+HGP [[ 13 , 1]] 13 20 20 20 20 19 19 
+
+EA [[ 9, 4; 1 ]] 10 17 16 17 16 16 14 
+
+EA [[ 25 , 16; 1 ]] 26 38 36 38 37 37 33 
+
+EA [[ 25 , 8; 1 ]] 26 89 78 89 89 69 59 
+
+EA [[ 49 , 36; 1 ]] 50 82 78 82 81 79 73 
+
+EA [[ 49 , 12; 1 ]] 50 338 274 338 336 243 201 
+
+EA [[ 121 , 100; 1 ]] 122 218 210 218 217 210 201 
+
+EA [[ 6, 2, 2; 2 ]] 8 11 12 11 9 14 9
+
+EA [[ 8, 2; 2 ]] 10 13 13 13 12 13 10 
+
+relabeling, the 𝑃 −1 step in Part E of Algorithm 1. Restarts under different 𝑃 explore genuinely different greedy paths at no cost to the optimum. 
+
+# C Step-by-step transformation of the worked example 
+
+For the four-qubit example of Figure 3, we record the cumulative matrix after each gate, starting from 𝑀 0 = 𝐼 4
+
+and applying each CNOT (𝑐 →𝑡 ) as the row operation 𝑅 𝑡 ← 𝑅 𝑡 ⊕ 𝑅 𝑐 . Bit strings are ordered 𝑞 0𝑞 1𝑞 2𝑞 3. Both sequences terminate at the same 𝑀 .
+
+Sequence A (5 CNOTs): 
+
+𝑀 0 =
+
+ 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 
+
+ 𝑅 0←𝑅 0 ⊕𝑅 3
+
+−−−−−−−−−→
+
+ 1 0 0 1 0 1 0 0 0 0 1 0 0 0 0 1 
+
+ 𝑅 1←𝑅 1 ⊕𝑅 0
+
+−−−−−−−−−→
+
+ 1 0 0 1 1 1 0 1 0 0 1 0 0 0 0 1 
+
+ 𝑅 2←𝑅 2 ⊕𝑅 3
+
+−−−−−−−−−→
+
+ 1 0 0 1 1 1 0 1 0 0 1 1 0 0 0 1 
+
+ 
+
+> 𝑅 1←𝑅 1⊕𝑅 0
+
+−−−−−−−−−→
+
+ 1 0 0 1 0 1 0 0 0 0 1 1 0 0 0 1 
+
+ 𝑅 1←𝑅 1 ⊕𝑅 3
+
+−−−−−−−−−→
+
+ 1 0 0 1 0 1 0 1 0 0 1 1 0 0 0 1 
+
+
+
+= 𝑀. 
+
+Sequence B (3 CNOTs): 
+
+𝑀 0 
+
+> 𝑅 0←𝑅 0⊕𝑅 3
+
+−−−−−−−−−→
+
+ 1 0 0 1 0 1 0 0 0 0 1 0 0 0 0 1 
+
+ 𝑅 1←𝑅 1 ⊕𝑅 3
+
+−−−−−−−−−→
+
+ 1 0 0 1 0 1 0 1 0 0 1 0 0 0 0 1 
+
+ 𝑅 2←𝑅 2 ⊕𝑅 3
+
+−−−−−−−−−→
+
+ 1 0 0 1 0 1 0 1 0 0 1 1 0 0 0 1 
+
+
+
+= 𝑀. 
+
+Both reach the same 𝑀 . In Sequence A the two CNOT (0→1) gates (steps 2 and 4) both add row 0 to row 
+
+1, with row 0 unchanged between them since the intervening CNOT (3→2) acts on the disjoint row 2. They therefore commute through the intervening gate and cancel ( 𝑇 10 𝑇 23 𝑇 10 = 𝑇 23 ). Sequence A therefore realizes 
+
+𝑇 13 𝑇 23 𝑇 03 , identical to Sequence B. 29 References 
+
+[1] Peter W Shor. Scheme for reducing decoherence in quantum computer memory. Physical review A ,52(4):R2493, 1995. [2] Nikolas P Breuckmann and Jens Niklas Eberhardt. Quantum low-density parity-check codes. PRX quantum , 2(4):040101, 2021. [3] Joschka Roffe. Quantum error correction: an introductory guide. Contemporary Physics , 60(3):226–245, 2019. [4] Sergey Bravyi, Andrew W Cross, Jay M Gambetta, Dmitri Maslov, Patrick Rall, and Theodore J Yoder. High-threshold and low-overhead fault-tolerant quantum memory. Nature , 627(8005):778–782, 2024. [5] Jean-Pierre Tillich and Gilles Zémor. Quantum ldpc codes with positive rate and minimum distance proportional to the square root of the blocklength. IEEE Transactions on Information Theory , 60(2):1193– 1202, 2013. [6] Matthew B Hastings, Jeongwan Haah, and Ryan O’Donnell. Fiber bundle codes: breaking the n 1/2 polylog (n) barrier for quantum ldpc codes. In Proceedings of the 53rd Annual ACM SIGACT Symposium on Theory of Computing , pages 1276–1288, 2021. [7] Pavel Panteleev and Gleb Kalachev. Asymptotically good quantum and locally testable classical ldpc codes. In Proceedings of the 54th annual ACM SIGACT symposium on theory of computing , pages 375–388, 2022. [8] Anthony Leverrier and Gilles Zémor. Quantum tanner codes. In 2022 IEEE 63rd Annual Symposium on Foundations of Computer Science (FOCS) , pages 872–883. IEEE, 2022. [9] Pavan Kumar, Abhi Kumar Sharma, and Shayan Srinivasa Garani. Entanglement-assisted quantum quasi-cyclic ldpc codes with transversal logical operators. arXiv preprint arXiv:2501.07363 , 2025. [10] Mark M Wilde and Todd A Brun. Optimal entanglement formulas for entanglement-assisted quantum coding. Physical Review A—Atomic, Molecular, and Optical Physics , 77(6):064302, 2008. [11] Zhicheng Luo and Igor Devetak. Channel simulation with quantum side information. IEEE Transactions on Information Theory , 55(3):1331–1342, 2009. [12] Andrew M Steane. Error correcting codes in quantum theory. Physical Review Letters , 77(5):793, 1996. [13] A Robert Calderbank, Eric M Rains, Peter M Shor, and Neil JA Sloane. Quantum error correction via codes over gf (4). IEEE Transactions on Information Theory , 44(4):1369–1387, 1998. [14] Richard Cleve and Daniel Gottesman. Efficient computations of encodings for quantum error correction. 
+
+Physical Review A , 56(1):76, 1997. [15] Daniel Gottesman. The heisenberg representation of quantum computers. arXiv preprint quant-ph/9807006 , 1998. [16] Daniel Gottesman. Stabilizer codes and quantum error correction . California Institute of Technology, 1997. [17] Arijit Mondal and Keshab K Parhi. Quantum circuits for stabilizer error correcting codes: A tutorial. 
+
+IEEE Circuits and Systems Magazine , 24(1):33–51, 2024. 30 [18] Abhi Kumar Sharma, Pavan Kumar, and Shayan Srinivasa Garani. Encoding of entanglement-assisted quantum codes with fault-tolerant syndrome measurements. In GLOBECOM 2025-2025 IEEE Global Communications Conference , pages 2723–2728. IEEE, 2025. [19] Arijit Mondal and Keshab K Parhi. Optimization of quantum circuits for stabilizer codes. IEEE Transactions on Circuits and Systems I: Regular Papers , 71(8):3647–3657, 2024. [20] Matthew Treinish. Qiskit/qiskit-metapackage: Qiskit 0.44. 0. Zenodo , 2023. [21] Seyon Sivarajah, Silas Dilkes, Alexander Cowtan, Will Simmons, Alec Edgington, and Ross Duncan. t| ket>: a retargetable compiler for nisq devices. Quantum Science & Technology , 6(1):014003, 2021. [22] Yunseong Nam, Neil J Ross, Yuan Su, Andrew M Childs, and Dmitri Maslov. Automated optimization of large quantum circuits with continuous parameters. npj Quantum Information , 4(1):23, 2018. [23] Beatrice Nash, Vlad Gheorghiu, and Michele Mosca. Quantum circuit optimizations for nisq architectures. 
+
+Quantum Science and Technology , 5(2):025010, 2020. [24] Jessica Pointing, Oded Padon, Zhihao Jia, Henry Ma, Auguste Hirth, Jens Palsberg, and Alex Aiken. Quanto: Optimizing quantum circuits with automatic generation of circuit identities. Quantum Science and Technology , 9(4):045009, 2024. [25] Aleks Kissinger and John Van De Wetering. Reducing the number of non-clifford gates in quantum circuits. Physical Review A , 102(2):022406, 2020. [26] Ross Duncan, Aleks Kissinger, Simon Perdrix, and John Van De Wetering. Graph-theoretic simplification of quantum circuits with the zx-calculus. Quantum , 4:279, 2020. [27] Sergey Bravyi, Ruslan Shaydulin, Shaohan Hu, and Dmitri Maslov. Clifford circuit optimization with templates and symbolic pauli gates. Quantum , 5:580, 2021. [28] Ketan Markov, Igor Patel, and John Hayes. Optimal synthesis of linear reversible circuits. Quantum Information and Computation , 8(3&4):0282–0294, 2008. [29] Timothée Goubault De Brugière, Marc Baboulin, Benoît Valiron, Simon Martiel, and Cyril Allouche. Gaussian elimination versus greedy methods for the synthesis of linear reversible circuits. ACM Transactions on Quantum Computing , 2(3):1–26, 2021. [30] Mark Webster, Stergios Koutsioumpas, and Dan E Browne. Heuristic and optimal synthesis of cnot and clifford circuits. arXiv preprint arXiv:2503.14660 , 2025. [31] Dmitri Maslov and Willers Yang. Cnot circuits need little help to implement arbitrary hadamard-free clifford transformations they generate. npj Quantum Information , 9(1):96, 2023. [32] Timothee Goubault De Brugiere, Marc Baboulin, Benoît Valiron, Simon Martiel, and Cyril Allouche. Reducing the depth of linear reversible quantum circuits. IEEE Transactions on Quantum Engineering ,2:1–22, 2021. [33] Riccardo Romanello, Daniele Lizzio Bosco, Jacopo Cossio, Dusan Sutulovic, Giuseppe Serra, Carla Piazza, and Paolo Burelli. Cnot minimal circuit synthesis: A reinforcement learning approach. In 2025 IEEE International Conference on Quantum Artificial Intelligence (QAI) , pages 253–260. IEEE, 2025. 31 [34] Aditya Sodhani, Pavan Kumar, Shayan Srinivasa Garani, and Keshab K Parhi. Optimizing encoder circuits of entanglement-assisted quantum ldpc codes via beam search. arXiv preprint arXiv:2606.11468 ,2026. [35] Aleks Kissinger and Arianne Meijer-van de Griend. Cnot circuit extraction for topologically-constrained quantum memories. arXiv preprint arXiv:1904.00633 , 2019. [36] Arianne Meijer-van de Griend and Sarah Meng Li. Dynamic qubit allocation and routing for constrained topologies by cnot circuit re-synthesis. In International Conference on Quantum Physics and Logic .Open Publishing Association, 2023. [37] Arijit Mondal and Keshab K Parhi. An optimized nearest neighbor compliant quantum circuit for 5-qubit code. In 2024 58th Asilomar Conference on Signals, Systems, and Computers , pages 278–282. IEEE, 2024. [38] Sarah Schneider, Lukas Burgholzer, and Robert Wille. A sat encoding for optimal clifford circuit synthesis. In Proceedings of the 28th Asia and South Pacific Design Automation Conference , pages 190–195, 2023. [39] Irfansha Shaik and Jaco van de Pol. Optimal layout-aware cnot circuit synthesis with qubit permutation. 
+
+arXiv preprint arXiv:2408.04349 , 2024. [40] Jens Emil Christensen, Søren Fuglede Jørgensen, Andreas Pavlogiannis, and Jaco van de Pol. On exact sizes of minimal cnot circuits. In International Conference on Reversible Computation , pages 71–88. Springer, 2025. [41] Matthew Amy, Dmitri Maslov, Michele Mosca, and Martin Roetteler. A meet-in-the-middle algorithm for fast synthesis of depth-optimal quantum circuits. IEEE Transactions on Computer-Aided Design of Integrated Circuits and Systems , 32(6):818–830, 2013. [42] Aditya Sodhani and Keshab K Parhi. Encoder circuit optimization for non-binary quantum error correction codes in prime dimensions: An algorithmic framework. IEEE Transactions on Quantum Engineering , 2026. [43] Ben Schaeffer and Marek Perkowski. A cost minimization approach to synthesis of linear reversible circuits. arXiv preprint arXiv:1407.0070 , 2014. [44] Matthew Amy, Parsiad Azimzadeh, and Michele Mosca. On the controlled-not complexity of controlled-not–phase circuits. Quantum Science and Technology , 4(1):015002, 2019. [45] Dmitri Maslov and Ben Zindorf. Depth optimization of cz, cnot, and clifford circuits. IEEE Transactions on Quantum Engineering , 3:1–8, 2022. [46] Hochang Lee, Kyung Chul Jeong, and Panjin Kim. Quantum circuit optimization by graph coloring. 
+
+Quantum , 10:1996, 2026. [47] Craig Gidney. Stim: a fast stabilizer circuit simulator. Quantum , 5:497, 2021. [48] Gushu Li, Yufei Ding, and Yuan Xie. Tackling the qubit mapping problem for nisq-era quantum devices. In Proceedings of the twenty-fourth international conference on architectural support for programming languages and operating systems , pages 1001–1014, 2019. [49] Aleks Kissinger and John Van De Wetering. Pyzx: Large scale automated diagrammatic reasoning. 
+
+arXiv preprint arXiv:1904.04735 , 2019. 32 [50] Michael A Nielsen and Isaac L Chuang. Quantum computation and quantum information . Cambridge university press, 2010. [51] Austin G Fowler, Matteo Mariantoni, John M Martinis, and Andrew N Cleland. Surface codes: Towards practical large-scale quantum computation. Physical Review A—Atomic, Molecular, and Optical Physics ,86(3):032324, 2012. 33

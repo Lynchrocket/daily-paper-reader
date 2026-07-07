@@ -1,0 +1,836 @@
+Title: A Cross-Platform Analysis of High-Performance Quantum Error Correction Codes
+
+URL Source: https://arxiv.org/pdf/2607.04082v1
+
+Published Time: Tue, 07 Jul 2026 02:29:37 GMT
+
+Number of Pages: 13
+
+Markdown Content:
+# A Cross-Platform Analysis of High-Performance Quantum Error Correction Codes 
+
+Bryan Pan and Yufeng Xin 
+
+RENCI, University of North Carolina at Chapel Hill Chapel Hill, NC, USA 
+
+Abstract —The theory of quantum error correction was estab-lished decades ago. Yet the limitation of the quantum computing platforms in terms of noise level and available physical qubit count persists, which greatly hinders the development of scalable quantum computing systems. In this paper, we present analytical estimates of logical error rates of advanced QEC codes across leading hardware platforms and distributed quantum computing systems using a simple but unified framework. The analysis cap-tures two dominant contributors to logical error: code structure and two-qubit gate overhead. The framework provides a fast estimate of logical error rates and identification of dominating factors in different hardware platforms, such as circuit volume, routing overhead, inter-QPU operations, or asymmetric noise protection. We show that several qualitative trends observed in larger-scale simulations can be reproduced and interpreted analytically within this framework. We further demonstrate that the framework can be used to find the sweet spot design region of distributed QEC, which is critical for the design of distributed quantum computing systems. 
+
+I. I NTRODUCTION 
+
+Fault tolerance is essential for building large-scale quantum computing (QC) systems, as persistent physical noise remains a major obstacle. Efficient quantum error correction (QEC) is key to achieving fault tolerance once quantum hardware reaches sufficiently low physical error rates. However, since the number of high-quality physical qubits available within a single quantum processing unit (QPU) remains limited, distributed quantum computing (DQC) has been proposed as a path toward scaling quantum computation and QEC [1], [2]. In this paper, we present an analytical framework for estimating logical error rates of advanced QEC codes based on a simple probabilistic model. It captures two dominant contributors to logical error in a hardware platform: code structure and two-qubit gate overhead. Characterized by its coding rate and distance, a QEC code specifies how many logical qubits are encoded into a given set of physical qubits and the minimum number of physical errors required to induce a logical error. QPUs without fully connected physical qubit topology need extra SWAP gates, which will increase the number of two-qubit gates and thus the logical error rate. This is vital to the performance of QEC codes in distributed quantum computing systems, where inter-QPU communication links are typically much noisier than intra-QPU operations. Inherited from the rich classical error correction code fam-ilies, there exist a large number of QEC codes. Nevertheless, QEC differs fundamentally from classical error correction due to the unique nature of quantum information and noise; quantum states are continuous, cannot be copied due to the no-cloning theorem (making repetition codes much harder to implement), and collapse under direct measurement (requiring ancillas to extract information). Furthermore, unlike binary classical errors, which are typically modeled as bit flips, quantum errors include both bit flip and phase flip components, as well as their combinations and coherent superpositions. Thus, QEC must protect quantum information indirectly by encoding a logical qubit into an entangled state of many physical qubits and extracting error information and conduct-ing correction through syndrome measurements and decoding without disturbing the encoded state [3], [4], [5], [6]. The performance of QEC codes is highly dependent on the underlying hardware platforms and noise models, all have distinct physical error rates, gate fidelity, and physical qubit connectivity characteristics. The vast QEC code design space makes it difficult to compare different QEC codes across dif-ferent quantum computing platforms. A recent study evaluates major QEC code classes on leading hardware platforms using full-stack quantum circuit simulation [7]. While it provides highly detailed and realistic quantification, this approach faces fundamental limitations in expensive computational resources, obscure insights mapping the large code space and the hard-ware constraints, and difficult exploration of new code designs. Similar to full-stack simulations of QEC codes, our lightweight analytical framework aims to identify the logi-cal error rate given the physical error rates. It extends the basic binomial qubit error probability model by modeling logical failure as the probability that the number of faults in a QEC cycle exceeds the code’s correctable threshold. It abstracts the platform with key circuit-level parameters such as two-qubit gate count, physical error rate, and effective fault threshold. The model is readily extended to distributed QEC after explicitly separating intra-QPU and inter-QPU error sources, allowing for identifying tradeoff between increased connectivity and increased physical error rate on inter-QPU links. Additionally, we consider heterogeneous architectures with multiple classes of operations, further broadening the applicability of our framework. The key contribution of the paper is the feasible region analysis of five advanced QEC codes across three leading QPU hardware platforms and distributed quantum computing systems with a joint analytical framework. The framework pro-vides a fast estimate of logical error rates and identification of dominating factors across different hardware platforms, such 1
+
+> arXiv:2607.04082v1 [quant-ph] 5 Jul 2026
+
+as circuit volume, routing overhead, inter-QPU operations, or asymmetric noise protection. We show that qualitative trends observed in larger-scale simulations can be reproduced and interpreted analytically with this framework. We specifically demonstrate that the framework can be used to find the sweet spot design region of distributed QEC implementation. We emphasize that our analysis includes QEC codes that have not been covered in the referred simulation study. The remainder of this paper is organized as follows. In Section II, we first discuss advanced QEC codes and their structural differences. We then abstract leading hardware plat-forms and noise models relevant to QEC code performance. In Section III, we present our joint analytical framework with a focus on the distributed QEC. Section IV applies this frame-work to compare QEC codes across hardware regimes and compares qualitative trends with quantum simulation results. Finally, we discuss implications for distributed architectures and biased noise before concluding in Section V. II. A DVANCED QEC C ODES AND QC H ARDWARE 
+
+PLATFORMS 
+
+Shor’s seminal work heralded the development of stabi-lizer code regime that broke the curse of non-cloning and measurement collapsing nature of qubits. The discovery of the threshold theorem shows that the qubit error rate can be arbitrarily suppressed with the physical noise level of the system below a threshold. QEC codes can be concisely represented by [[ n, k, d ]] notation, where n is the number of physical qubits, k is the number of logical qubits, and d is the code distance. The code distance is defined as the minimum number of physical qubits in error to cause a logical error. A QEC code can correct up to t =  d−12
+
+ errors. We denote the effective minimum number of faults required for logical failure by κ = t + 1 . The coding rate is defined as R = kn ,which measures the efficiency of a QEC code in terms of the number of physical qubits required to encode a logical qubit. Stabilizers are operators that define and protect logical subspaces of a QEC code space, in which logical qubits are encoded with redundant physical qubits. A stabilizer code is constructed by a set of mutually commuting Pauli operators whose joint +1 eigenspace encodes the logical qubits. Each stabilizer acts on a subset of physical qubits. When an error occurs, it anticommutes with one or more stabilizers, causing their measurement outcomes to flip from +1 to −1. These measurement results (the error syndrome) consist of informa-tion about the location of errors without directly measuring or disturbing the encoded quantum state. A decoder can then repeatedly measure the syndrome and correct errors without disturbing the logical information. In general, the preferred code is not the one with the best asymptotic properties on paper, but the one whose stabilizer structure aligns with the connectivity and noise characteristics of the underlying hardware [8], [9], [10], [11]. Distributed QC systems introduce more complex tradeoffs between the in-creased connectivity and noisier inter-QPU links. In this case, the preferred code is typically the one that can achieve the best error suppression with the fewest inter-QPU operations. 
+
+A. Advanced QEC Codes 
+
+Advanced QEC stabilizer codes are generally categorized into four primary families: topological codes, subsystem sta-bilizer codes, concatenated codes, and quantum low-density parity-check (qLDPC) codes [7]. We add Floquet codes as a distinct class characterized by time-dependent stabilizer measurements. In total, we analyze five QEC code families in this paper as summarized in Table I. 
+
+1. Topological codes encode logical information into a lattice and have both high error thresholds and a natural fit for hardware platforms with local connectivity, such as superconducting circuits. Topological codes typically require a large number of stabilizer measurements per cycle, resulting in high circuit volume but strong error suppression in sufficiently low noise regimes. We will analyze three major variants: surface, color, and XZZX surface topological codes [12], [13], [8], [14], [15]. 
+
+2. Subsystem Stabilizer Codes extend stabilizer codes by introducing additional degrees of freedom (gauge qubits), allowing stabilizer measurements to be decomposed into lower weight operators. This reduces measurement complexity and can significantly decrease circuit depth. This construction works well on architectures with flexible connectivity, such as trapped-ion systems. We will analyze three representative codes in this family: Bacon-Shor, Heavy-hex, and 2D Gauge Color codes [16], [17], [9], [18]. 
+
+3. Concatenated Codes encode logical qubits recursively by nesting one code within another. The concatenated Steane code is a canonical example, constructed by recursively encod-ing the [[7 , 1, 3]] Steane code. While concatenation obviously improves error suppression, it leads to exponential growth in qubit count and reduced coding rate. Concatenated codes trade locality for reduced circuit volume, which can make them advantageous in noisy or low connectivity environments. We will analyze the Concatenated Steane code in this paper [19]. 
+
+4. qLDPC Codes (Quantum low-density parity-check codes) are a class of stabilizer codes in which each stabi-lizer generator acts on only a small number of qubits, and each qubit participates in only a small number of stabilizers. Analogous to classical LDPC codes, it enables efficient de-coding algorithms. Unlike topological codes, qLDPC codes are not constrained by locality, so they can achieve constant coding rates. However, this advantage does require non-local interactions, so implementing qLDPC codes typically requires long-range connectivity or additional routing overhead that can significantly increase circuit volume on hardware with limited connectivity. We will analyze the Bivariate Bicycle code, the latest qLDPC code with constant encoding rates and relatively high error thresholds [20], [10], [21]. 
+
+5. Floquet Codes do not have fixed stabilizer measure-ments. Instead, they vary periodically in time, measuring sequences of low-weight Pauli operators according to a pre-defined schedule, from which the effective stabilizer struc-2Concatenated qLDPC Topological Subsystem Stabilizer Floquet     
+
+> Concatenated Steane Bivariate Bicycle Surface Color
+> XZZX Surface Bacon-Shor Heavy-hex Gauge Color (2D) Hyperbolic Semi-hyperbolic
+> TABLE I: Classification of quantum error-correcting codes.
+
+ture forms dynamically. This approach uses only weight-two measurements, significantly reducing circuit depth and two-qubit gate count compared to conventional stabilizer codes. Thus, Floquet codes are able to achieve beneficial tradeoffs between circuit volume and error suppression, particularly in regimes where two-qubit gate errors dominate. Perhaps the most promising Floquet topology is the hyperbolic or semi-hyperbolic one [11], [22], [23]. In this paper, we specifically analyze the EM3 Floquet variant associated with the Bolza surface construction [11]. 
+
+B. Leading QC Hardware Platforms 
+
+The primary types of hardware under extensive development for scalable quantum computing are trapped-ions, supercon-ducting platforms, and neutral atoms [24], [25], [26], [27]. The logical error is determined by the number of physical operations required to implement a QEC cycle, which is pri-marily affected by the physical qubit connectivity, in addition to the different noise characteristics. On a fully connected architecture, any two-qubit interaction required by the code can be executed directly, so the physical two-qubit gate count is close to the ideal circuit count. On sparse topologies, non-local interactions must be routed through SWAP networks, increasing the total number of two-qubit gates and therefore increasing possible faults. In this section, we describe the three main platforms with respect to the count of possible physical fault locations Nloc and their practical approximate per-location physical error rate ploc .
+
+1. Trapped-Ion systems are characterized by near all-to-all connectivity within a single QPU [24]. As a result, multi-qubit circuits can typically be executed without the need for SWAP-based routing. This high connectivity allows logical circuits to be implemented with minimal overhead, so the physical two-qubit gate count closely matches the logical requirement. Therefore, we approximate Nloc ≈ N2Q, where N2Q denotes the number of logical two-qubit gates. Furthermore, trapped-ion systems also achieve very high gate fidelities with error rates often reaching the 10 −4 level or below [28]. Single-qubit gate and state preparation and measurement (SPAM) errors are typically an order of magnitude lower, and therefore the contribution to logical failure is negligible. 
+
+2. Superconducting QPUs face the connectivity constraint that two-qubit gates can only be performed between adja-cent qubits, and non-local interactions must be implemented through sequences of SWAP operations, so superconducting qubits incur more connectivity overhead [25]. To model this, we can distinguish between the logical two-qubit gate count required by a QEC code and the physical two-qubit gate count after routing. Therefore, the total number of fault locations per QEC cycle can be approximated as Nloc ≈ N2Q + NSWAP +
+
+Nmeas , where NSWAP denotes the additional routing overhead induced by limited connectivity and Nmeas denotes the number of measurement error locations. 
+
+3. Neutral-Atom QPUs can support flexible connectiv-ity through qubit rearrangement and long-range Rydberg-mediated interactions [26], [27]. However, this flexibility often requires additional atom movement, scheduling constraints, or extra entangling operations, all of which can increase the total number of physical fault locations relative to the logical circuit description [29]. Thus, neutral-atom platforms typically incur additional movement and scheduling overhead relative to the idealized logical circuit, although the magnitude of this overhead is highly architecture and compiler dependent. As a result, the effective number of fault locations per QEC cycle may be substantially larger than the logical two-qubit gate count Nloc ≳ N2Q. Furthermore, neutral-atom systems currently tend to have noisier gates and more error sources than trapped-ion platforms, so the approximation of ploc with the two-qubit gate fault probability p2Q is often less accurate than in the trapped-ion case. 
+
+C. Realistic Noise Models 
+
+We consider both the standard symmetric depolarizing model as well as more realistic biased noise models observed in leading quantum hardware. 
+
+1. Symmetric Depolarizing Noise is a widely used model due to its simplicity. It assumes that each fault location fails independently with probability ploc . When a fault occurs, it results in a Pauli error drawn uniformly from {X, Y, Z }.
+
+Thus, bit flip and phase flip components occur symmetrically, although they are not strictly independent because a Y error contains both X and Z components. Under this assumption, no error type is favored over another. This model is widely used due to its simplicity, but it does not accurately reflect the behavior of most physical quantum systems, where different error channels often occur with different probabilities [6]. 
+
+2. Biased Noise. In particular, many qubit platforms typ-ically exhibit strongly biased noise where phase errors ( Z
+
+errors) occur far more frequently than bit-flip errors (X
+
+errors) [30], [15]. For simplicity, we neglect explicit Y -type error correlations. This approximation is sufficient for comparing how different effective X and Z distances respond to increasing bias. We represent this kind of noise using a new parameter η = pZ 
+
+> pX
+
+where pZ and pX denote the probabilities of phase and bit-flip errors respectively. Under biased noise, the total physical error probability is simply ploc = pX + pZ .
+
+We can also represent pX and pZ as functions of η by 
+
+pX (η) = ploc 
+
+1 + η , pZ (η) = ηp loc 
+
+1 + η .
+
+3It is well motivated to study moderate bias values such as 
+
+η ∼ 5 − 10 , as well as larger bias regimes in engineered architectures [31], [32], [33], [34]. 
+
+3. Heterogeneous Physical Error Rates. The previous models assume that every fault location has the same er-ror probability. Real hardware, however, typically has non-uniform error rates across qubits, couplers, and measurement channels. To model this, we let each physical location i fail independently with probability pi. The total number of faults is then a Poisson-binomial random variable rather than just a standard binomial random variable: 
+
+X =
+
+> Nloc
+
+X
+
+> i=1
+
+Xi, Xi ∼ Bernoulli( pi).
+
+The corresponding logical error probability is still the same 
+
+pL ≤ P[X ≥ κ].
+
+This distribution is more general, but its leading order behavior is still controlled by the total expected number of faults, 
+
+μ = E[X] = 
+
+> Nloc
+
+X
+
+> i=1
+
+pi.
+
+Thus, if two devices have the same average physical error rate and comparable variance, their logical error rates may be similar even if the individual qubits have different fidelities. This explains why non-uniform physical error distributions typically have a weaker effect than large changes in circuit volume or average error scale. III. A NALYTICAL MODEL FOR LOGICAL ERROR RATE 
+
+ESTIMATION 
+
+In our analytical model, factors contributing to the logical error rate are abstracted through two variables: the effective number of fault locations per correction cycle Nloc and the effective physical error probability per location, ploc . For a code [[ n, k, d ]] , increasing d improves error suppression by increasing κ, while hardware and implementation effects worsen performance by increasing either Nloc or ploc .
+
+We can decompose the effective circuit volume as 
+
+Nloc = Nnative + NSWAP + Nmeas + Nidle + Ninter ,
+
+where Nnative = N2Q is the number of native two-qubit operations required by the QEC circuit, NSWAP is the additional routing overhead induced by limited qubit connectivity, Nmeas 
+
+is the number of measurement-related fault locations, Nidle 
+
+accounts for memory or idle errors during syndrome extrac-tion, and Ninter counts inter-QPU operations in distributed architectures. In the simplest single-QPU trapped-ion case, 
+
+NSWAP and Ninter are negligible, so Nloc ≈ Nnative = N2Q.
+
+In connectivity-limited or distributed systems, however, these additional terms can significantly increase the logical error rate. 
+
+A. Base Model 
+
+Assuming the symmetric depolarizing noise model with independent fault location (a two-qubit gate, measurement, etc.) failure with probability ploc [35], [36], [4], [6], the number of faults X in a QEC cycle follows a binomial distribution 
+
+X ∼ Binomial( Nloc , p loc ). We further assume that the total number of two-qubit gates N2Q is a sufficient leading-order proxy for circuit size and error exposure. Then the binomial tail probability is a first-order estimate for the logical error probability: 
+
+pL ≤ P[X ≥ κ] = 
+
+> Nloc
+
+X
+
+> j=κ
+
+Nloc 
+
+j
+
+
+
+(ploc )j (1 − ploc )Nloc −j . (1) This base model essentially isolates the dominant contributors to logical failure, namely circuit volume and two-qubit gate fidelity under the assumption that two-qubit gates are the primary error source. Other significant sources of errors are ignored: stochastic Pauli error channels can be suppressed using dynamical decoupling, coherent errors are randomized away under twirling, SPAM errors are mitigable assuming measurement errors are not strongly or densely correlated, and ideally relaxation effects are small enough to neglect to leading order [37], [4], [6]. 
+
+B. Distributed QPUs 
+
+To extend our analysis to distributed codes, we start by assuming multiple identical QPUs and partition fault locations per cycle into intra-QPU and inter-QPU classes [38], [39], [22]. We let Nintra be the number of intra-QPU 2Q gates and 
+
+Ninter be the number of inter-QPU 2Q gates. Similarly, pintra 
+
+and pinter are the intra-QPU and inter-QPU 2Q gate errors respectively. Like in the single QPU case, we approximate pL
+
+by the probability that at least κ faults occur in one cycle. The number of inter-QPU faults and intra-QPU faults can also be represented by binomial distributions 
+
+X ∼ Binomial( Ninter , p inter ), Y ∼ Binomial( Nintra , p intra )
+
+and the total faults is simply Z = X +Y. We can then calculate the probability of m faults as 
+
+P[Z = m] = 
+
+> m
+
+X
+
+> j=0
+
+P[X = j]P[Y = m − j]
+
+where 
+
+P[X = j] = 
+
+Ninter 
+
+j
+
+
+
+pj
+
+> inter
+
+(1 − pinter )Ninter −j
+
+and 
+
+P[Y = m − j] = 
+
+ Nintra 
+
+m − j
+
+
+
+pm−j 
+
+> intra
+
+(1 − pintra )Nintra −(m−j).
+
+Our upper bound for logical error assuming failure for at least 
+
+κ faults is then 
+
+pL ≤
+
+> Ninter +Nintra
+
+X
+
+> m=κ
+> min( m,N inter )
+
+X
+
+> j=max(0 ,m −Nintra )
+
+P[X = j]P[Y = m − j]. (2) 4In practice, distributed quantum systems may consist of heterogeneous hardware modules with different physical error characteristics. For example, a system may combine trapped-ion modules with superconducting processors, or use photonic interconnects whose error rates differ significantly from local two-qubit gates. To account for this, suppose a QEC cycle contains C distinct classes of fault locations. What each class corresponds to is arbitrary, but some examples are two-qubit gates within QPU a, two-qubit gates within QPU b, or interconnect operations between QPU a and b. Let Nc denote the number of fault locations of class c per cycle, and let pc
+
+denote the corresponding physical error probability. Assuming all classes are independent, the number of faults contributed by class c is then just Xc ∼ Binomial( Nc, p c). The total number of faults in one cycle is Z = PCc=1 Xc. We then need to calculate P[Z ≥ κ] as the upper bound for pL. The probability generating function (PGF) for Z is 
+
+G(s) = 
+
+> C
+
+Y
+
+> c=1
+
+((1 − pc) + pcs)Nc .
+
+This is equivalent to a grouped Poisson-binomial model, where the total number of faults is the sum of independent Bernoulli or binomial contributions with different error prob-abilities [40]. The probability of observing exactly m faults is the coefficient of sm in G(s) : 
+
+P[Z = m] = [ sm]G(s),
+
+and therefore 
+
+pL ≤ P[Z ≥ κ] = 
+
+> Ntot
+
+X
+
+> m=κ
+
+[sm]G(s), N tot =
+
+> C
+
+X
+
+> c=1
+
+Nc. (3) It is useful to note that 
+
+P[Bin( Ntot , p min ) ≥ κ] ≤ pL ≤ P[Bin( Ntot , p max ) ≥ κ].
+
+where 
+
+pmin = min  
+
+> c
+
+pc, pmax = max  
+
+> c
+
+pc.
+
+Thus, a heterogeneous system behaves no better than a uniform device with error rate pmin and no worse than one with error rate pmax . Without having to calculate our expression for pL
+
+entirely, we can instead compute 
+
+E[Z] = 
+
+> C
+
+X
+
+> c=1
+
+Ncpc.
+
+If E[Z] ≪ κ, error suppression is possible, but if E[Z] ≳ κ, 
+
+logical failure becomes likely regardless of code structure. 
+
+C. Biased Noise 
+
+When we have biased noise, our formulation needs to be split into both the contribution from X errors and the contribution from Z errors [30], [15]. Let κX denote the minimum number of X faults required to cause logical failure and κZ denote the minimum number of Z faults required to cause logical failure. For symmetric codes, κX = κZ = κ, but codes such as XZZX surface codes can exhibit an effective distance that differs for the two error types. Let 
+
+X ∼ Binomial( Nloc , p X (η)) , Z ∼ Binomial( Nloc , p Z (η)) 
+
+denote the number of X and Z faults occurring in a QEC cycle. A logical failure occurs if either error type exceeds the corresponding fault threshold. Therefore, we can bound the logical error probability by 
+
+pL(η) ≤ P[X ≥ κX ] + P[Z ≥ κZ ]. (4) Using the binomial distribution, these probabilities become 
+
+P[X ≥ κX ] = 
+
+> Nloc
+
+X
+
+> j=κX
+
+Nloc 
+
+j
+
+
+
+pX (η)j (1 − pX (η)) Nloc −j ,
+
+and 
+
+P[Z ≥ κZ ] = 
+
+> Nloc
+
+X
+
+> j=κZ
+
+Nloc 
+
+j
+
+
+
+pZ (η)j (1 − pZ (η)) Nloc −j .
+
+When the noise is strongly biased ( η ≫ 1), the second term dominates the logical error rate. It is important to note that in every analytical model, the primary changing variable is Nloc .
+
+Therefore, when considering different noise models, the effec-tive fault location count Nloc should be scaled accordingly. IV. E VALUATION 
+
+We apply the analytical models to nine QEC code in-stances from the five families described in Section II-A. Rather than using idealized textbook definitions, the code parameters are taken from the ECCentric simulation study [7], as specified in Table II. ECCentric generates encoded memory circuits for each selected code, imposes specific distance choices and syndrome-measurement settings, and then reports implementation-dependent resource counts such as physical qubit totals and two-qubit gate counts based on those circuits.                                        
+
+> Code Distance dN2Qκ=t+ 1
+> Surface 11 1320 6Bacon-Shor 11 1320 6Color 11 1440 6Heavy-hex 11 1920 6Bivariate Bicycle (Gross) 12 2592 6Concatenated Steane 9961 5
+> XZZX Surface 11 1320 6Gauge Color (2D) ≈11 1092 6Floquet (EM3, Bolza m= 10 )14 2400 7
+> TABLE II: Code Parameters
+
+A. Single QPU 
+
+Unless otherwise stated, the single-QPU estimates use 
+
+Nloc = N2Q to isolate the effect of the physical two-qubit error rate. This approximation is most accurate for trapped-ion systems and should be viewed as an optimistic base-line for superconducting and neutral-atom platforms, where routing, measurement, idle-time, and movement overhead can increase Nloc . The single-QPU comparison therefore does not 5Fig. 1: Logical error estimates per round vs. two-qubit error rate for different QEC codes 
+
+optimize code distance under a fixed physical-qubit budget, rather it compares fixed benchmark instances. By contrast, the distributed-QPU sweeps in Section IV-B include a simplified capacity constraint, so any improvement from distribution should be interpreted as capacity-enabled distance growth rather than an intrinsic advantage of distributing a fixed-distance code. We evaluate logical error rates on three rep-resentative hardware platforms: trapped-ion hardware, using Quantinuum Apollo with p2Q = 1 .4 × 10 −4; superconducting hardware, using Willow with p2Q = 2 .8 × 10 −3; and neutral-atom hardware, using Flamingo with p2Q = 2 .0 × 10 −3 and Infleqtion with p2Q = 6 .5 × 10 −3. The results are reported in Table III. The results are consistent with the expected leading-order relationship between circuit volume and logical error suppres-sion. Across the three hardware types, codes with smaller 
+
+N2Q generally achieve lower logical error estimates because most benchmarked codes have similar κ. Gauge Color gives the lowest estimate due to its smaller circuit volume, while Heavy-hex, Bivariate Bicycle, and the higher-volume Floquet instance have larger estimates because their increased circuit volume outweighs their comparable or larger code distances. Surface, XZZX, and Bacon-Shor have identical estimates in this model because they share the same N2Q and κ. Their differences appear only after including code-specific effects such as biased noise, stabilizer structure, decoder behavior, or implementation-dependent overhead. Figure 1 further il-lustrates that the relative ordering of codes remains largely consistent in the low-error regime. To directly compare our analytical model with ECCentric, we evaluate the binomial model at p = 0 .004 , matching the noise level used in their experiments [7]. Under this regime, the analytical model predicts logical error rates in the range 
+
+∼ 0.3 − 0.9, with an average of approximately 0.57 across the codes considered. In contrast, ECCentric reports an average logical error rate of approximately 0.22 for Apollo hardware. Thus, at matched physical error rates, the analytical model is somewhat pessimistic rather than overly optimistic. The fact that our superconducting and neutral-atom estimates are often close to order 1 is also consistent with ECCentric: at com-parable physical error rates, full-stack circuit simulations also report a significant chance of logical failure for superconduting and neutral-atom quantum computers. This apparent pessimism arises because of two competing approximations: setting Nloc = N2Q is optimistic because it neglects overhead, but the binomial tail approximation is pessimistic because it treats every single event with at least κ faults as a logical failure. In an actual syndrome-extraction circuit, not all such fault sets are malignant. Some faults occur on ancillas or measurements without propagating into harmful data errors; some produce syndromes that are correctly decoded; some form degenerate or canceling error patterns; and some exceed the nominal fault threshold without implementing a logical operator. Therefore, the model’s bias depends on the hardware regime: for highly connected trapped-ion systems, where routing overhead is small, the pessimism of the binomial tail can dominate; for connectivity-limited platforms, the optimistic undercounting of Nloc may dominate instead. The discrepancy with ECCentric is expected because EC-Centric evaluates the full quantum computing stack, including mapping, routing, gate decomposition, syndrome structure, and decoder behavior, whereas our analytical model assumes independent faults and abstracts these effects into Nloc . For ex-ample, subsystem codes infer stabilizers from multiple gauge measurements, so a single physical fault can affect multiple inferred stabilizers. Similarly, Floquet codes can be sensitive to correlated faults and measurement schedule structure. These effects are captured by full-stack simulation but not by the binomial model. The variation across ECCentric topologies can still be interpreted within our framework as a topology-dependent scaling of Nloc . Connectivity-limited layouts require additional routing operations, increasing the effective circuit volume; even modest increases in routing overhead can significantly increase the logical failure probability. Thus, while the ana-lytical model does not reproduce all circuit and decoder-level effects, it captures the dominant scaling with circuit volume and physical error rate. It should therefore be interpreted as a leading-order predictor of logical error trends rather than a precise estimator. 
+
+B. Distributed QEC with Multiple QPUs 
+
+We assume that the distributed QC platform consists of q
+
+identical QPUs, each hosting a subset of the code patch, with stabilizer checks that cross QPU boundaries, resulting in inter-QPU operations. According to Equation 2, the index j counts the number of inter-QPU faults among the κ total faults. The purely intra-QPU contribution is the j = 0 term 
+
+T0 =
+
+Nintra 
+
+κ
+
+
+
+pκ
+
+> intra
+
+,
+
+6Code Q. Apollo pL per cycle Willow pL per cycle Flamingo pL per cycle Infleqtion pL per cycle Gauge Color 1.54 × 10 −8 8.96 × 10 −2 2.40 × 10 −2 7.12 × 10 −1                                                                                                  
+
+> Surface 4.67 ×10 −81.69 ×10 −15.19 ×10 −28.57 ×10 −1
+> XZZX 4.67 ×10 −81.69 ×10 −15.19 ×10 −28.57 ×10 −1
+> Bacon-Shor 4.67 ×10 −81.69 ×10 −15.19 ×10 −28.57 ×10 −1
+> Floquet (EM3, Bolza m= 10 )7.10 ×10 −85.08 ×10 −12.09 ×10 −19.95 ×10 −1
+> Color 7.77 ×10 −82.20 ×10 −17.21 ×10 −29.05 ×10 −1
+> Steane 3.25 ×10 −71.35 ×10 −14.57 ×10 −27.47 ×10 −1
+> Heavy-hex 4.13 ×10 −74.50 ×10 −11.90 ×10 −19.85 ×10 −1
+> Bivariate Bicycle (Gross) 2.31 ×10 −67.31 ×10 −14.16 ×10 −19.99 ×10 −1
+
+TABLE III: Logical error estimates per cycle for different codes for trapped-ion, superconducting, and neutral-atom platforms. 
+
+while the first correction involving one inter-QPU fault is 
+
+T1 =
+
+Ninter 
+
+1
+
+ Nintra 
+
+κ − 1
+
+
+
+pinter pκ−1 
+
+> intra
+
+.
+
+The ratio of these two terms is 
+
+T1
+
+T0
+
+= Ninter 
+
+κNintra − κ + 1 
+
+pinter 
+
+pintra 
+
+,
+
+showing that even a small number of inter-QPU operations can substantially increase the logical failure probability when 
+
+pinter ≫ pintra . In particular, the first inter-QPU correction remains small only if T1 
+
+> T0
+
+≪ 1. Typically, Nintra ≫ κ, so this condition simplifies to 
+
+Ninter ≪ Nintra 
+
+κpintra 
+
+pinter 
+
+.
+
+With current quantum technology, inter-QPU two-qubit gates are significantly noisier than intra-QPU gates, leading to realistic assumption of pinter = p and pintra = p/ 10 [7]. Thus, our original leading-order expression can be approximated as 
+
+pL ≈
+
+ p
+
+10 
+
+κ κX
+
+> j=0
+
+Ninter 
+
+j
+
+ Nintra 
+
+κ − j
+
+
+
+10 j . (5) The factor 10 j shows that terms containing more inter-QPU faults are weighted exponentially heavier than terms contain-ing only intra-QPU faults. These contributions are still scaled by the combinatorial factors, so whether the logical error is dominated by small or large j depends on the balance between the gate counts and the error rate ratio. In the more realistic regime where inter-QPU gates are much fewer than intra-QPU gates, the dominant corrections typically come from small j. 
+
+Given these observations, it is natural to ask why one would distribute a QEC code at all if distributed execution generally does not improve logical error rates relative to a comparable single-QPU case. The primary motivation for distribution is not improved error suppression, but scalability. Monolithic QPUs are limited by current hardware technology and therefore cap the maximum achievable device size. As a result, implementing large-distance QEC codes or hosting many logical qubits may require more physical qubits than can be produced on a single chip. Distributed architectures allow quantum systems to surpass these monolithic limits by inter-connecting multiple smaller QPUs. In this sense, distribution is often a necessity for realizing larger codes or workloads, even when it degrades logical performance relative to single-QPU execution. Distributed execution can still be reasonable for architectures or code families that are naturally modular, such as concatenated codes or certain Floquet constructions, where most check operations are local and inter-QPU operations appear only at higher layers or at sparse interfaces [38], [39], [22]. In such contexts, Ninter can remain small enough so that the distributed penalty is controlled. For heterogeneous distributed hardware, the same conclu-sion holds class-by-class: the dominant corrections come from the noisiest fault classes, not necessarily the most numerous ones. In the low-error regime, the leading-order contribution is 
+
+pL ≈ X 
+
+> m1+··· +mC=κmc≥0
+> C
+
+Y
+
+> c=1
+
+Nc
+
+mc
+
+
+
+pmc 
+
+> c
+
+.
+
+Therefore, even a small number of operations in a high-error class can dominate the logical error and make the code unsuitable for distribution. 
+
+1) Distributed Surface-Code Evaluation: We next use the analytical model for an illustrative scaling study to see whether distributed QEC can improve logical error rates when each individual QPU has a limited qubit capacity. We assume each QPU can host approximately 200 physical qubits and use a surface-code-like scaling model nphys (d) ≈ 2d2, [8], [39] so that the largest achievable odd distance on q QPUs is approximately 
+
+dmax (q) = max {d odd : 2 d2 ≤ 200 q}.
+
+We also use the parameters from the surface code instance in Table II. Since the d = 11 surface code circuit has 
+
+N2Q = 1320 , we approximate N2Q(d) ≈ 11 d2. To model the cost of distribution, we assume that the number of inter-QPU operations grows linearly with QPU count and with the boundary length of the code patch: 
+
+Ninter (q, d ) = αd (q − 1) 
+
+where α is a constant that represents the number of inter-QPU operations per boundary unit per QEC cycle. In this study, we use α = 4 as a representative boundary overhead parameter. The remaining two-qubit operations are treated as local intra-QPU operations, so 
+
+Nintra = N2Q(d) − Ninter .
+
+The logical error probability is then estimated as 
+
+pL = P[Xintra + Xinter ≥ κ]
+
+7Fig. 2: Distributed-QPU logical error estimate as a function of QPU count. Each QPU assumed to support 200 physical qubits, nphys ≈
+
+2d2, N 2Q ≈ 11 d2, and Ninter = 4 d(q − 1) .
+
+where 
+
+Xintra ∼ Binomial( Nintra , p intra ) Xinter ∼ Binomial( Ninter , p inter ).
+
+Figure 2 shows the resulting logical error estimates as a function of the number of QPUs for different interconnect noise ratios defined as 
+
+r = pinter /p intra 
+
+with pintra = 10 −4. When inter-QPU links are almost as reli-able as local gates, increasing the number of QPUs continues to reduce logical error because the larger achievable code distance dominates the added interconnect overhead. However, as inter-QPU links become noisier, the optimal QPU count decreases. For the representative case where 
+
+pintra = 10 −4, r = 10 ,
+
+under these assumptions, the model predicts a sweet spot around 
+
+q = 9 , d = 29 , κ = 15 .
+
+At this point, we have Nintra = 8323 and Ninter = 928 , so the expected number of physical faults per cycle is 
+
+μ = Nintra pintra + Ninter pinter = 1 .76 .
+
+The predicted logical error rate is pL ≈ 6.94 × 10 −10 . By comparison, the single-QPU case is limited to approximately 
+
+d = 9 and gives pL ≈ 4.30 × 10 −8. Thus, in this model, distribution improves the logical error rate by roughly a factor of 62 when the interconnect is ten times noisier than local gates. Table IV provides the numerical results with varying number of QPUs and fixed pintra = 10 −4 and r = 10 . The table shows how increasing the number of QPUs increases the maximum achievable code distance d, but also increases the number of noisy inter-QPU operations Ninter . The logical error rate initially decreases as the larger code distance increases the number of correctable faults. However, after approximately                                                                             
+
+> qdκNinter pL
+> 19504.30 ×10 −8
+> 213 752 5.83 ×10 −9
+> 317 9136 1.12 ×10 −9
+> 521 11 336 8.56 ×10 −10
+> 725 13 600 7.20 ×10 −10
+> 827 14 756 6.95 ×10 −10
+> 929 15 928 6.94 ×10 −10
+> 10 31 16 1116 7.17 ×10 −10
+> 12 33 17 1452 1.56 ×10 −9
+> 16 39 20 2340 3.95 ×10 −9
+> 20 43 22 3268 1.64 ×10 −8
+> 24 47 24 4324 6.30 ×10 −8
+
+TABLE IV: Distributed-QPU sweep for pintra = 10 −4 and r = 10 .                          
+
+> pinter /p intra Best qBest dMinimum pL
+> 123 47 2.80 ×10 −16
+> 323 47 1.43 ×10 −13
+> 10 929 6.94 ×10 −10
+> 30 194.30 ×10 −8
+
+TABLE V: Sweet spots for distributed QEC with pintra = 10 −4 under different interconnect noise ratios. 
+
+q = 9 , the benefit from increasing d is outweighed by the growing inter-QPU overhead. Table V summarizes the optimal QPU count for different interconnect ratios. When pinter is close to pintra , the best configuration uses many QPUs because distance growth domi-nates. When pinter = 10 pintra , the sweet spot occurs near q = 9 .
+
+When pinter = 30 pintra , distribution is no longer beneficial and the single-QPU configuration is optimal. These sweet spots should not be interpreted as universal optimal QPU counts. They are conditional on the simplified assumptions 
+
+nphys (d) ≈ 2d2, N 2Q(d) ≈ 11 d2, N inter = 4 d(q − 1) , and the chosen physical error rates. Their purpose is to show how the analytical framework can identify the point at which additional code distance no longer compensates for inter-QPU noise. 
+
+2) Distributed Bivariate-Bicycle Code Evaluation: We now construct an analogous distributed-QPU analytical model for the Bivariate Bicycle code. The purpose of this model is to compare a geometrically local topological code with a nonlocal qLDPC code under the same distributed binomial framework. In the surface-code analytical model, the pri-mary source of inter-QPU operations are checks crossing the boundaries between code patches, so the interconnect overhead scales approximately with the boundary length. By contrast, BB codes are qLDPC codes with nonlocal check structure [20], [10], [41]. Therefore, when a BB code block is partitioned across multiple QPUs, a finite fraction of the two-qubit operations in each syndrome extraction cycle may become inter-QPU operations [42], [43]. We use the benchmark BB instance from Table II. The Gross BB code instance has 
+
+d = 12 , N2Q = 2592 .
+
+These values should be interpreted as benchmark parameters rather than universal code parameters, as the two-qubit gate count depends on the syndrome extraction circuit and com-8pilation assumptions [7], [10]. We approximate the two-qubit gate count using the benchmark-normalized scaling relation 
+
+N BB 
+
+> 2Q
+
+(d) ≈ 2592 12 2 d2 = 18 d2
+
+and also assume a constant rate qLDPC-like physical-qubit scaling, 
+
+nBB phys (d) ≈ d2.
+
+This scaling is a proxy for the constant rate behavior of qLDPC codes [20], [10], [21]. Therefore, if each QPU supports approximately 200 physical qubits, the maximum achievable BB distance on q QPUs is modeled as 
+
+dBB 
+
+> max
+
+(q) = 
+
+jp 200 q
+
+k
+
+.
+
+The corresponding number of faults required for logical failure is then 
+
+κ(q) = 
+
+ dBB 
+
+> max
+
+(q) − 12
+
+
+
++ 1 .
+
+The key difference from the surface code model is the scaling of Ninter . For a balanced partition of a nonlocal BB circuit across q QPUs, the probability that a nonlocal two-qubit interaction crosses a QPU boundary is approximately 1 − 1/q. 
+
+We therefore model the number of inter-QPU operations as 
+
+Ninter (q, d ) = λ
+
+
+
+1 − 1
+
+q
+
+
+
+N BB 
+
+> 2Q
+
+(d),
+
+where 0 ≤ λ ≤ 1 is an embedding factor that represents how effectively the compiler and code layout keep checks within the same QPU. The case λ = 1 corresponds to an essentially random nonlocal embedding, while smaller values of λ represent more modular layouts where many BB checks remain intra-QPU [44], [42], [43]. The number of intra-QPU operations is then 
+
+Nintra (q, d ) = N BB 
+
+> 2Q
+
+(d) − Ninter (q, d ).
+
+As before, the logical error probability is estimated as 
+
+pL = P [Xintra + Xinter ≥ κ(q)] .
+
+Figure 3 shows the resulting logical error estimates as a function of QPU count for several interconnect noise ratios using pintra = 10 −4 and λ = 0 .25 . When r = 1 , inter-QPU operations are as reliable as local gates, so increasing the number of QPUs improves performance by allowing a larger-distance BB code. When r = 3 , there is still a distribution benefit, but the sweet spot occurs at a smaller QPU count. When r = 10 or r = 30 , distribution becomes unfavorable under this BB analytical model because the nonlocal checks create an interconnect penalty that scales with a fraction of the total circuit volume [42], [41]. For the representative case 
+
+pintra = 10 −4, r = 10 , λ = 0 .25 ,
+
+the model predicts that distribution is not beneficial. The best configuration is the single-QPU case with 
+
+q = 1 , d = 14 , κ = 7 ,
+
+Fig. 3: Distributed-QPU BB logical error estimate as a function of QPU count. The model uses pintra = 10 −4, N BB  
+
+> 2Q
+
+≈ 18 d2 and nBB phys ≈
+
+d2 with λ = 0 .25 .                                                                            
+
+> qdκNinter pL
+> 114 709.87 ×10 −8
+> 220 10 900 4.80 ×10 −6
+> 324 12 1728 1.77 ×10 −5
+> 531 16 3460 4.75 ×10 −5
+> 737 19 5280 1.88 ×10 −4
+> 840 20 6300 5.71 ×10 −4
+> 942 21 7056 8.84 ×10 −4
+> 10 44 22 7841 1.34 ×10 −3
+> 12 48 24 9504 2.99 ×10 −3
+> 16 56 28 13230 1.29 ×10 −2
+> 20 63 32 16967 3.28 ×10 −2
+> 24 69 35 20532 8.00 ×10 −2
+
+TABLE VI: Distributed-QPU BB sweep for pintra = 10 −4, r = 10 ,
+
+and λ = 0 .25 .
+
+giving 
+
+pL ≈ 9.87 × 10 −8.
+
+As shown in Table VI, increasing q increases the achievable BB distance, but it also rapidly increases Ninter , and the added distance does not compensate for the large number of noisy interconnect operations. Table VII summarizes the optimal QPU count for several interconnect noise ratios. When pinter is comparable to pintra ,
+
+the best configuration uses many QPUs because the increase in distance dominates the distributed overhead. When r = 3 ,
+
+the optimal configuration moves down to q = 5 . When r = 10 
+
+or r = 30 , the single-QPU configuration becomes optimal. This behavior is a sharp contrast to the surface code analytical model. For the surface code, the inter-QPU cost grows approximately as a boundary term, 
+
+N surface inter (q, d ) ∼ d(q − 1) ,
+
+whereas for the BB code it grows as a fraction of the full circuit volume, 
+
+N BB inter (q, d ) ∼ λ
+
+
+
+1 − 1
+
+q
+
+
+
+N BB 
+
+> 2Q
+
+(d).
+
+Thus, the surface code can benefit from distribution when the increase in code distance dominates the boundary overhead. In 9pinter /p intra Best q Best d Minimum pL                                  
+
+> 119 61 7.57 ×10 −12
+> 3531 6.87 ×10 −9
+> 10 114 9.87 ×10 −8
+> 30 114 9.87 ×10 −8
+> TABLE VII: Sweet spots for the distributed BB analytical model with pintra = 10 −4and embedding factor λ= 0 .25 .
+> Fig. 4: Sensitivity of the distributed BB analytical model to the nonlocal embedding factor λfor fixed pintra = 10 −4and r= 10 .
+
+contrast, BB codes require either highly reliable interconnects or a highly modular layout to benefit from distribution. To test the importance of the embedding assumption, Fig-ure 4 fixes r = 10 . and varies λ. Smaller values of λ
+
+correspond to better partitioning, fewer cross-QPU checks, or a more modular implementation of the BB check graph [44], [42], [43]. The plot shows that distributed BB performance is extremely sensitive to λ. When λ is sufficiently small, distribution can still be beneficial because the larger achievable distance is not overwhelmed by interconnect faults. However, once λ becomes moderately large, the inter-QPU operation count grows too quickly and the logical error rate worsens under distribution. The corresponding sweet spots are shown in Table VIII. At 
+
+r = 10 , only very small λ values allow distribution to improve performance. For λ = 0 .05 , the best configuration occurs at 
+
+q = 7 and d = 37 , giving pL ≈ 4.37 ×10 −9. For λ ≥ 0.10 , the model predicts that the single-QPU configuration is optimal. Overall, this model suggests that distributed BB codes have a different bottleneck from distributed surface codes. For surface codes, the main question is whether the interconnect overhead along patch boundaries is small enough to justify increasing the achievable distance. For BB codes, the main question is whether the nonlocal qLDPC check graph can be embedded so that only a small fraction of checks cross QPU boundaries. Therefore, distributed BB codes are most attractive when pinter ≈ pintra or when the effective embedding factor λ
+
+is very small. If inter-QPU gates are substantially noisier than local gates and λ is not small, then the same nonlocality that gives BB codes their constant rate properties can also make them costly to distribute [20], [10], [41], [42].                                            
+
+> λBest qBest dNinter Minimum pL
+> 0.05 737 1056 4.37 ×10 −9
+> 0.10 114 09.87 ×10 −8
+> 0.25 114 09.87 ×10 −8
+> 0.50 114 09.87 ×10 −8
+> 1.00 114 09.87 ×10 −8
+> TABLE VIII: Sweet spots for the BB embedding-factor sweep at fixed pintra = 10 −4and r= 10 .
+
+C. Biased Noise 
+
+The response of a quantum error-correcting code to biased noise depends on its effective distances against X and Z-type logical operators. For many symmetric stabilizer codes, the effective distances against X and Z errors are comparable or identical, so dX = dZ = d and 
+
+κX = κZ =
+
+ d − 12
+
+
+
++ 1 .
+
+The standard surface code, color codes, and concatenated Steane codes are all symmetric and have this property. For these codes, biased noise does not change the number of faults required for logical failure. Certain codes can exploit biased noise by effectively increasing their protection against the dominant error type [30], [15]. One example is the 
+
+XZZX surface code, whose stabilizer structure rotates the conventional surface code lattice so that dominant phase errors align with longer logical operators. In this case, we denote the effective distance against phase faults as 
+
+deff  
+
+> Z
+
+> d, 
+
+which increases the corresponding fault threshold 
+
+κeff  
+
+> Z
+
+=
+
+ deff  
+
+> Z
+
+− 12
+
+
+
++ 1 .
+
+This increase in the number of faults required to produce a logical error decreases the binomial tail associated with 
+
+Z faults and can therefore significantly reduce the logical error rate when η is large. Subsystem constructions such as Bacon-Shor codes can also benefit from biased noise when their lattice dimensions are chosen asymmetrically so that 
+
+dZ > d X [45]. For the purpose of this paper, we make the following assumptions about code distances given in Table IX. These parameters are not intended to represent optimized implementations of each code family. Instead, they provide a comparison between symmetric codes, which have comparable protection against X and Z errors, and bias-tailored codes, which are modeled as having increased effective distance against the dominant Z-type errors. It is then natural to ask at what levels of bias do cer-tain codes outperform others. Figure 5 presents four codes (Surface, Gauge Color, tailored Bacon-Shor, and XZZX )against η. We choose these four codes as representative examples of the main design classes relevant under biased noise: conventional symmetric topological codes (Surface), conventional symmetric non-surface stabilizer codes (Gauge Color), explicitly asymmetric subsystem codes (Bacon–Shor), 10 Code Nloc dX dZ (κX , κ Z )                               
+
+> Surface 1320 11 11 (6, 6) Gauge Color 1092 11 11 (6, 6) Bacon-Shor (asymmetric) 1320 715 (4, 8)
+> XZZX Surface 1320 11 19 (effective) (6, 10)
+> TABLE IX: Parameters used in the biased-noise logical error sim-ulations. Nloc denotes the number of fault locations per QEC cycle while dXand dZrepresent the effective logical distances against bit-flip and phase errors respectively.
+> Fig. 5: Logical error estimates per round pLvs bias ηfor a fixed two-qubit error rate of ploc = 10 −4.
+
+and bias-tailored topological codes (XZZX ). This set lets us isolate how noise bias favors codes with enhanced Z distance relative to standard symmetric ones. It is clear that within this model, codes tailored to more Z errors by having a higher 
+
+Z distance vastly outperform traditional codes at high levels of η. For systems that have η ∼ 10 or higher, these results suggest that biased codes are extremely attractive. V. C ONCLUSIONS 
+
+Choosing the right QEC codes for particular QPU platforms is one of the grand challenges to scale up quantum computing capabilities. In this work, we introduced a lightweight analyt-ical framework for estimating logical error rates of quantum error-correcting codes based on a binomial fault model. By modeling logical failure as the probability that the number of faults in a QEC cycle exceeds the code’s correctable threshold, we obtained simple, scalable expressions that depend primarily on circuit volume and physical error rates. This approach provides a fast complement to full-stack simulation while retaining the ability to capture leading-order performance trends across code families and hardware platforms [7]. When evaluating a set of QEC codes for a particular platform, this framework immediately presents which codes are practical without the need for simulation. Our analysis reveals several key insights. First, when com-paring codes with similar fault thresholds, circuit volume (captured by the number of fault locations or two-qubit gates) plays a dominant role in determining logical error rates. This suggests that, in realistic hardware regimes, reducing circuit complexity can be more impactful than increasing code distance. Second, we showed that many trends observed in large-scale simulation frameworks such as ECCentric can be understood within this simplified analytical model, indicating that much of the variation across codes and hardware arises from differences in effective circuit volume [7]. Third, in distributed quantum architectures, even a small number of high-error inter-QPU operations can dominate logical failure probability, emphasizing that scalability through distribution must be balanced against interconnect reliability [38], [39], [22]. We demonstrated this tradeoff for the surface code and BB code and showed that sweet spots for QPU count and code distance can be identified given different interconnect ratios. Finally, under biased noise, codes that provide asym-metric protection against dominant error channels, such as the XZZX surface code or tailored subsystem constructions, can achieve substantial performance gains over symmetric codes, highlighting the importance of hardware-specific code design [30], [15], [45]. The analytical framework presented in this work relies on several simplifying assumptions. First, we assume that fault events occur independently across circuit locations, which neglects correlated errors arising from crosstalk, leakage, or shared control signals. Second, we approximate logical failure as a threshold event determined solely by the number of faults, without modeling decoder-specific behavior or syn-drome structure. Third, we treat circuit volume through Nloc as the dominant contributor to logical error, implicitly assuming that two-qubit gate errors dominate over other error sources such as measurement or idle errors. These assumptions are most accurate in regimes with low physical error rates and weak correlations, such as high-fidelity trapped-ion systems. However, they may break down in architectures or codes with significant routing overhead, strong noise bias, or highly structured error propagation, such as subsystem and Floquet codes. As a result, the model should be interpreted as a leading-order predictor of logical error trends rather than a precise estimator. Future work can extend this analytical framework to incor-porate more realistic error mechanisms and decoder perfor-mance. One direction is to include correlated noise models, potentially through cluster expansions or probabilistic graph-ical models, to better capture error propagation in structured circuits [46], [47]. Another is to refine estimates of effective circuit volume by incorporating compilation, routing, and scheduling overheads, especially for connectivity-limited ar-chitectures [7], [29]. Additionally, integrating tensor-network-based approaches could provide a systematic way to model noise propagation and decoherence in large-scale QEC cir-cuits [48], [49]. Finally, combining this analytical framework with empirical calibration data from real hardware may en-able rapid, hardware-specific code selection and optimization without requiring full-scale simulation [50], [51]. 11 REFERENCES CITED [1] H. Chen, B. Du, and R. Li, “Qtest: A simulation testbed for distributed quantum computing and networking with deep reinforcement learning,” 
+
+IEEE Internet Computing , vol. 30, no. 1, pp. 26–37, 2026. [2] Y. Xin and L. Zhang, “Towards a high-performance quantum data center network architecture,” in ICC 2025 - IEEE International Conference on Communications , 2025, pp. 2400–2405. [3] W. K. Wootters and W. H. Zurek, “A single quantum cannot be cloned,” 
+
+Nature , vol. 299, no. 5886, pp. 802–803, 1982. [Online]. Available: https://doi.org/10.1038/299802a0 [4] M. A. Nielsen and I. L. Chuang, Quantum Computation and Quantum Information: 10th Anniversary Edition . Cambridge University Press, 2010. [5] D. Gottesman, “Stabilizer codes and quantum error correction,” 1997. [Online]. Available: https://arxiv.org/abs/quant-ph/9705052 [6] J. Roffe, “Quantum error correction: an introductory guide,” 
+
+Contemporary Physics , vol. 60, no. 3, p. 226–245, Jul. 2019. [Online]. Available: http://dx.doi.org/10.1080/00107514.2019.1667078 [7] A. ´ Swierkowska, J. Pflieger, E. Giortamis, and P. Bhatotia, “Eccentric: An empirical analysis of quantum error correction codes,” 2025. [Online]. Available: https://arxiv.org/abs/2511.01062 [8] A. G. Fowler, M. Mariantoni, J. M. Martinis, and A. N. Cleland, “Surface codes: Towards practical large-scale quantum computation,” 
+
+Physical Review A , vol. 86, no. 3, Sep. 2012. [Online]. Available: http://dx.doi.org/10.1103/PhysRevA.86.032324 [9] C. Chamberland, G. Zhu, T. J. Yoder, J. B. Hertzberg, and A. W. Cross, “Topological and subsystem codes on low-degree graphs with flag qubits,” Phys. Rev. X , vol. 10, p. 011022, Jan 2020. [Online]. Available: https://link.aps.org/doi/10.1103/PhysRevX.10.011022 [10] S. Bravyi, A. W. Cross, J. M. Gambetta, D. Maslov, P. Rall, and T. J. Yoder, “High-threshold and low-overhead fault-tolerant quantum memory,” Nature , vol. 627, no. 8005, p. 778–782, Mar. 2024. [Online]. Available: http://dx.doi.org/10.1038/s41586-024-07107-7 [11] O. Higgott and N. P. Breuckmann, “Constructions and performance of hyperbolic and semi-hyperbolic floquet codes,” 
+
+PRX Quantum , vol. 5, no. 4, Nov. 2024. [Online]. Available: http://dx.doi.org/10.1103/PRXQuantum.5.040327 [12] A. Kitaev, “Fault-tolerant quantum computation by anyons,” Annals of Physics , vol. 303, no. 1, p. 2–30, Jan. 2003. [Online]. Available: http://dx.doi.org/10.1016/S0003-4916(02)00018-0 [13] E. Dennis, A. Kitaev, A. Landahl, and J. Preskill, “Topological quantum memory,” Journal of Mathematical Physics , vol. 43, no. 9, p. 4452–4505, Sept. 2002. [Online]. Available: http://dx.doi.org/10.1063/1.1499754 [14] H. Bombin and M. A. Martin-Delgado, “Topological quantum distillation,” Physical Review Letters , vol. 97, no. 18, Oct. 2006. [Online]. Available: http://dx.doi.org/10.1103/PhysRevLett.97.180501 [15] J. P. Bonilla Ataides, D. K. Tuckett, S. D. Bartlett, S. T. Flammia, and B. J. Brown, “The xzzx surface code,” Nature Communications , vol. 12, no. 1, Apr. 2021. [Online]. Available: http://dx.doi.org/10.1038/s41467-021-22274-1 [16] D. Bacon, “Operator quantum error-correcting subsystems for self-correcting quantum memories,” Physical Review A, vol. 73, no. 1, Jan. 2006. [Online]. Available: http://dx.doi.org/10.1103/PhysRevA.73.012340 [17] H. Bombin, “Topological subsystem codes,” Physical Review A, vol. 81, no. 3, Mar. 2010. [Online]. Available: http://dx.doi.org/10.1103/PhysRevA.81.032301 [18] H. Bomb´ ın, “Gauge color codes: optimal transversal gates and gauge fixing in topological stabilizer codes,” New Journal of Physics , vol. 17, no. 8, p. 083002, Aug. 2015. [19] A. M. Steane, “Multiple-particle interference and quantum error correction,” Proceedings of the Royal Society of London. Series A: Mathematical, Physical and Engineering Sciences ,vol. 452, pp. 2551 – 2577, 1996. [Online]. Available: https://api.semanticscholar.org/CorpusID:8246615 [20] J.-P. Tillich and G. Zemor, “Quantum ldpc codes with positive rate and minimum distance proportional to the square root of the blocklength,” 
+
+IEEE Trans. Inf. Theor. , vol. 60, no. 2, p. 1193–1202, Feb. 2014. [Online]. Available: https://doi.org/10.1109/TIT.2013.2292061 [21] T. J. Yoder, E. Schoute, P. Rall, E. Pritchett, J. M. Gambetta, A. W. Cross, M. Carroll, and M. E. Beverland, “Tour de gross: A modular quantum computer based on bivariate bicycle codes,” 2025. [Online]. Available: https://arxiv.org/abs/2506.03094 [22] E. Sutcliffe, B. Jonnadula, C. L. Gall, A. E. Moylett, and C. M. Westoby, “Distributed quantum error correction based on hyperbolic floquet codes,” 2025. [Online]. Available: https://arxiv.org/abs/2501.14029 [23] A. Fahimniya, H. Dehghani, K. Bharti, S. Mathew, A. J. Koll´ ar, A. V. Gorshkov, and M. J. Gullans, “Fault-tolerant hyperbolic floquet quantum error correcting codes,” 2024. [Online]. Available: https://arxiv.org/abs/2309.10033 [24] C. D. Bruzewicz, J. Chiaverini, R. McConnell, and J. M. Sage, “Trapped-ion quantum computing: Progress and challenges,” Applied Physics Reviews , vol. 6, no. 2, May 2019. [Online]. Available: http://dx.doi.org/10.1063/1.5088164 [25] M. Kjaergaard, M. E. Schwartz, J. Braum¨ uller, P. Krantz, J. I.-J. Wang, S. Gustavsson, and W. D. Oliver, “Superconducting qubits: Current state of play,” Annual Review of Condensed Matter Physics ,vol. 11, no. 1, p. 369–395, Mar. 2020. [Online]. Available: http://dx.doi.org/10.1146/annurev-conmatphys-031119-050605 [26] L. Henriet, L. Beguin, A. Signoles, T. Lahaye, A. Browaeys, G.-O. Reymond, and C. Jurczak, “Quantum computing with neutral atoms,” Quantum , vol. 4, p. 327, Sept. 2020. [Online]. Available: http://dx.doi.org/10.22331/q-2020-09-21-327 [27] D. Bluvstein, S. J. Evered, A. A. Geim, S. H. Li, H. Zhou, T. Manovitz, S. Ebadi, M. Cain, M. Kalinowski, D. Hangleiter, J. P. Bonilla Ataides, N. Maskara, I. Cong, X. Gao, P. Sales Rodriguez, T. Karolyshyn, G. Semeghini, M. J. Gullans, M. Greiner, V. Vuleti´ c, and M. D. Lukin, “Logical quantum processor based on reconfigurable atom arrays,” 
+
+Nature , vol. 626, no. 7997, p. 58–65, Dec. 2023. [Online]. Available: http://dx.doi.org/10.1038/s41586-023-06927-3 [28] J. P. Gaebler, T. R. Tan, Y. Lin, Y. Wan, R. Bowler, A. C. Keith, S. Glancy, K. Coakley, E. Knill, D. Leibfried, and D. J. Wineland, “High-fidelity universal gate set for 9Be + ion qubits,” 
+
+Phys. Rev. Lett. , vol. 117, p. 060505, Aug. 2016. [Online]. Available: https://link.aps.org/doi/10.1103/PhysRevLett.117.060505 [29] H. Wang, P. Liu, D. B. Tan, Y. Liu, J. Gu, D. Z. Pan, J. Cong, U. A. Acar, and S. Han, “Atomique: A quantum compiler for reconfigurable neutral atom arrays,” in Proceedings of the 51st Annual International Symposium on Computer Architecture , ser. ISCA ’24. IEEE Press, 2025, p. 293–309. [Online]. Available: https://doi.org/10.1109/ISCA59077.2024.00030 [30] D. K. Tuckett, A. S. Darmawan, C. T. Chubb, S. Bravyi, S. D. Bartlett, and S. T. Flammia, “Tailoring surface codes for highly biased noise,” 
+
+Physical Review X , vol. 9, no. 4, Nov. 2019. [Online]. Available: http://dx.doi.org/10.1103/PhysRevX.9.041031 [31] D. K. Tuckett, S. D. Bartlett, and S. T. Flammia, “Ultrahigh error threshold for surface codes with biased noise,” Physical Review Letters , vol. 120, no. 5, Jan. 2018. [Online]. Available: http://dx.doi.org/10.1103/PhysRevLett.120.050505 [32] P. Aliferis, F. Brito, D. P. DiVincenzo, J. Preskill, M. Steffen, and B. M. Terhal, “Fault-tolerant computing with biased-noise superconducting qubits: a case study,” New Journal of Physics , vol. 11, no. 1, p. 013061, Jan. 2009. [Online]. Available: http://dx.doi.org/10.1088/1367-2630/11/1/013061 [33] Y. Seis, B. J. Brown, A. S. Sørensen, and J. F. Goodwin, “Improving trapped-ion-qubit memories via code-mediated error-channel balancing,” 
+
+Physical Review A , vol. 107, no. 5, May. 2023. [Online]. Available: http://dx.doi.org/10.1103/PhysRevA.107.052417 [34] J. E. Martinez, P. Schnabl, J. O. del Moral, R. Dastbasteh, P. M. Crespo, and R. M. Otxoa, “Leveraging biased noise for more efficient quantum error correction at the circuit-level with two-level qubits,” 2025. [Online]. Available: https://arxiv.org/abs/2505.17718 [35] D. Aharonov and M. Ben-Or, “Fault-tolerant quantum computation with constant error rate,” SIAM Journal on Computing ,vol. 38, no. 4, pp. 1207–1282, 2008. [Online]. Available: https://doi.org/10.1137/S0097539799359385 [36] P. Aliferis, D. Gottesman, and J. Preskill, “Quantum accuracy threshold for concatenated distance-3 codes,” 2005. [Online]. Available: https://arxiv.org/abs/quant-ph/0504218 [37] J. J. Wallman and J. Emerson, “Noise tailoring for scalable quantum computation via randomized compiling,” Physical Review A, vol. 94, no. 5, Nov. 2016. [Online]. Available: http://dx.doi.org/10.1103/PhysRevA.94.052325 [38] N. H. Nickerson, J. F. Fitzsimons, and S. C. Benjamin, “Freely scalable quantum technologies using cells of 5-to-50 qubits with very lossy and noisy photonic links,” Phys. 
+
+12 Rev. X, vol. 4, p. 041041, Dec 2014. [Online]. Available: https://link.aps.org/doi/10.1103/PhysRevX.4.041041 [39] J. Ramette, J. Sinclair, N. P. Breuckmann, and V. Vuleti´ c, “Fault-tolerant connection of error-corrected qubits with noisy links,” npj Quantum Information , vol. 10, p. 58, 2024. [Online]. Available: https://www.nature.com/articles/s41534-024-00855-4 [40] Y. Hong, “On computing the distribution function for the poisson binomial distribution,” Computational Statistics and Data Analysis , vol. 59, pp. 41–51, 2013. [Online]. Available: https://www.sciencedirect.com/science/article/pii/S0167947312003568 [41] N. Berthusen, D. Devulapalli, E. Schoute, A. M. Childs, M. J. Gullans, A. V. Gorshkov, and D. Gottesman, “Toward a 2d local implementation of quantum low-density parity-check codes,” 
+
+PRX Quantum , vol. 6, no. 1, Jan. 2025. [Online]. Available: http://dx.doi.org/10.1103/PRXQuantum.6.010306 [42] N. K. Chandra, E. Kaur, R. Nejabati, and K. P. Seshadreesan, “Distributed quantum error correction with bivariate bicycle codes in a modular architecture,” 2026. [Online]. Available: https://arxiv.org/abs/2605.04663 [43] E. Tham, M. Ye, I. Khait, J. Gamble, and N. Delfosse, “Distributed fault-tolerant quantum memories over a 2xl array of qubit modules,” 2025. [Online]. Available: https://arxiv.org/abs/2508.01879 [44] M. H. Shaw and B. M. Terhal, “Lowering connectivity requirements for bivariate bicycle codes using morphing circuits,” Physical Review Letters , vol. 134, no. 9, Mar. 2025. [Online]. Available: http://dx.doi.org/10.1103/PhysRevLett.134.090602 [45] P. Aliferis and J. Preskill, “Fault-tolerant quantum computation against biased noise,” Physical Review A , vol. 78, no. 5, Nov. 2008. [Online]. Available: http://dx.doi.org/10.1103/PhysRevA.78.052331 [46] M. McEwen, D. Kafri, Z. Chen, J. Atalaya, K. J. Satzinger, C. Quintana, P. V. Klimov, D. Sank, C. Gidney, A. G. Fowler, F. Arute, K. Arya, B. Buckley, B. Burkett, N. Bushnell, B. Chiaro, R. Collins, S. Demura, A. Dunsworth, C. Erickson, B. Foxen, M. Giustina, T. Huang, S. Hong, E. Jeffrey, S. Kim, K. Kechedzhi, F. Kostritsa, P. Laptev, A. Megrant, X. Mi, J. Mutus, O. Naaman, M. Neeley, C. Neill, M. Niu, A. Paler, N. Redd, P. Roushan, T. C. White, J. Yao, P. Yeh, A. Zalcman, Y. Chen, V. N. Smelyanskiy, J. M. Martinis, H. Neven, J. Kelly, A. N. Korotkov, A. G. Petukhov, and R. Barends, “Removing leakage-induced correlated errors in superconducting quantum error correction,” Nature Communications , vol. 12, no. 1, Mar. 2021. [Online]. Available: http://dx.doi.org/10.1038/s41467-021-21982-y [47] N. C. Brown and K. R. Brown, “Leakage mitigation for quantum error correction using a mixed qubit scheme,” Physical Review A, vol. 100, no. 3, Sept. 2019. [Online]. Available: http://dx.doi.org/10.1103/PhysRevA.100.032325 [48] A. J. Ferris and D. Poulin, “Tensor networks and quantum error correction,” Physical Review Letters , vol. 113, no. 3, July 2014. [Online]. Available: http://dx.doi.org/10.1103/PhysRevLett.113.030501 [49] C. T. Chubb, “General tensor network decoding of 2d pauli codes,” 2021. [Online]. Available: https://arxiv.org/abs/2101.04125 [50] Google, “Quantum error correction below the surface code threshold,” 
+
+Nature , vol. 638, no. 8052, pp. 920–926, Feb. 2025. [Online]. Available: https://doi.org/10.1038/s41586-024-08449-y [51] J. Bausch, A. W. Senior, F. J. H. Heras, T. Edlich, A. Davies, M. Newman, C. Jones, K. Satzinger, M. Y. Niu, S. Blackwell, G. Holland, D. Kafri, J. Atalaya, C. Gidney, D. Hassabis, S. Boixo, H. Neven, and P. Kohli, “Learning high-accuracy error decoding for quantum processors,” Nature , vol. 635, no. 8040, p. 834–840, Nov. 2024. [Online]. Available: http://dx.doi.org/10.1038/s41586-024-08148-8 
+
+13

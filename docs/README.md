@@ -6,24 +6,30 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-07-06
-- 运行时间：2026-07-06 21:48:51 UTC
+- 最新运行日期：2026-07-07
+- 运行时间：2026-07-07 21:52:11 UTC
 - 运行状态：成功
-- 本次总论文数：1
-- 精读区：0
-- 速读区：1
+- 本次总论文数：3
+- 精读区：3
+- 速读区：0
 
 ### 今日简报（AI）
-今日速读一篇探讨量子误差缓解中擦除后选择方法局限性的论文（6.0分）。研究指出擦除后选择存在理论边界，并非万能方案。建议量子计算实践者关注零噪声外推等替代缓解技术。
-- 详情：[/202607/06/README](/202607/06/README)
+今日精读两篇量子计算论文，分别聚焦延迟稳定化ZX演算与高性能量子纠错码跨平台分析。最值得关注的是量子纠错码在不同硬件平台上的性能对比，以及ZX-Calculus的理论新进展。建议优先阅读这两篇论文，以把握量子计算底层工具与实用纠错方案的最新动态。
+- 详情：[/202607/07/README](/202607/07/README)
 
 ### 精读区论文标签
-- 本次无精读推荐。
+1. [The Delayed Stabilizer ZX-Calculus](/202607/07/2607.04015v1-the-delayed-stabilizer-zx-calculus)  
+   标签：评分：8.0/10、query:qec-code
+   evidence：延迟稳定子ZX演算用于无限平移不变稳定子量子纠错码
+2. [A Cross-Platform Analysis of High-Performance Quantum Error Correction Codes](/202607/07/2607.04082v1-a-cross-platform-analysis-of-high-performance-quantum-error-correction-codes)  
+   标签：评分：8.0/10、query:qec-code
+   evidence：跨平台量子纠错码分析，包括逻辑错误率
+3. [Noise-Aware Synthesis of Quantum LDPC Encoder Circuits via Two-Sided Hamming Descent](/202607/07/2607.04462v1-noise-aware-synthesis-of-quantum-ldpc-encoder-circuits-via-two-sided-hamming-descent)  
+   标签：评分：8.0/10、query:qec-code
+   evidence：量子LDPC编码器电路优化
 
 ### 速读区论文标签
-1. [The limits of erasure-based postselection for quantum error mitigation](/202607/06/2606.31428v1-the-limits-of-erasure-based-postselection-for-quantum-error-mitigation)  
-   标签：评分：6.0/10、query:qec-decoding
-   evidence：基于擦除后选择的误差修正，与量子纠错解码相关
+- 本次无速读推荐。
 
 
 <div class="dpr-home-promo-card">

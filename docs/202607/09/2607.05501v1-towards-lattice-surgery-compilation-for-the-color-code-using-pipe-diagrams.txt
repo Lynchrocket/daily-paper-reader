@@ -1,0 +1,499 @@
+Title: Towards Lattice Surgery Compilation for the Color Code Using Pipe Diagrams
+
+URL Source: https://arxiv.org/pdf/2607.05501v1
+
+Published Time: Wed, 08 Jul 2026 00:03:28 GMT
+
+Number of Pages: 20
+
+Markdown Content:
+## Towards Lattice Surgery Compilation for the Color Code Using Pipe Diagrams 
+
+Laura S. Herzog, 1, ∗ Gilad Kishony, 2 Robert Wille, 1, 3 and Austin Fowler 
+
+> 1
+
+Chair for Design Automation, Technical University of Munich, Germany 
+
+> 2
+
+Classiq Technologies, Tel Aviv, Israel 
+
+> 3
+
+MQSC, Garching near Munich, Germany 
+
+Pipe diagrams have emerged as a powerful framework for flexible lattice surgery compilation and spacetime optimization for the surface code. In contrast, analogous compilation techniques for color code architectures remain largely unexplored, despite the color code’s favorable properties, includ-ing reduced qubit overhead and transversal single-qubit Clifford gates. In this work, we develop a pipe diagram representation for the triangular color code on the 6.6.6 lattice and establish its correspondence to ZX-diagrammatic descriptions of computation. We present distance-independent constructions of color code pipe diagrams together with explicit realizations of correlation surfaces, stabilizers, and syndrome extraction circuits. This framework enables both macroscopic optimiza-tion of logical computations in spacetime and microscopic compilation to executable syndrome extraction circuits. We demonstrate the potential for compact spacetime embeddings with the color code’s geometry. These results provide a foundation for automated lattice surgery compilation and diagrammatic optimization in color code architectures. 
+
+I. INTRODUCTION 
+
+Large-scale quantum computation based on quantum error correction requires automated methods across mul-tiple levels of abstraction. These processes are com-monly referred to as compilation . Within the framework of topological quantum error-correcting codes and under the assumption of two-dimensional architectures, lattice surgery [1–3] has emerged as a standard method for im-plementing logical gates. Given a logical quantum circuit in the Clifford+T gate set, compilation must be addressed on at least two dis-tinct levels of abstraction. On the microscopic level , one has to specify how logical qubits are encoded into patches of a given topological code and distance d, how lattice surgery operations are implemented, and how syndrome extraction is performed efficiently. Compilation on this microscopic level aims to construct syndrome extraction circuits automatically. On the macroscopic level , compi-lation is typically formulated as a mapping and routing problem, where lattice surgery operations are scheduled to maximize parallelism of gate execution [4–8]. Traditionally, macroscopic compilation is treated as a process in which the protocol of executing a single gate with lattice surgery is fixed in advance. Then, compila-tion aims to schedule these fixed building blocks as ef-ficiently as possible, i.e., leading to a low-depth sched-ule. However, a more fine-grained perspective allows for greater flexibility in executing logical gates with lattice surgery, where the implementations of specific gates are not fixed beforehand but can instead be arranged and optimized in spacetime using pipe diagrams [9] as an in-termediate representation. Pipe diagrams provide a pow-erful abstraction for representing and optimizing lattice  
+
+> ∗laura.herzog@tum.de
+
+surgery protocols and have been extensively developed in the context of the surface code, supported by tools such as tqec [10]. Despite the prominence of the surface code [11], it is not the only viable topological code that supports univer-sal fault-tolerant computation on planar quantum com-puters through lattice surgery. In particular, the color code [12] offers several advantageous features, includ-ing transversal implementation of all single-qubit Clif-ford gates and lower qubit overhead in comparison to the surface code. The decoding problem is much more demanding for the color code, although rapid progress has been made on this problem [13–17]. These considerations motivate the extension of pipe diagram-based compilation techniques beyond the sur-face code to other code families, in particular to color codes. In this work, we propose a foundation for color code-based pipe diagrams that enable the development of automated compilation methods on the microscopic and macroscopic levels. Specifically, we establish a distance-independent pipe diagram representation for the trian-gular color code on the 6.6.6 lattice, alongside with ex-plicit constructions for stabilizers, correlation surfaces and syndrome extraction given arbitrary distance d. We present examples of macroscopic and microscopic compi-lation that highlight the potential of this approach. Fig. 1 displays the steps of compilation in this frame-work following an example of a toy logical circuit. Start-ing with a logical circuit (i), it is translated to a ZX diagram (ii), which is in turn optimized (iii). Then, the optimized ZX diagram (which may no longer resemble a quantum circuit) is embedded as a corresponding pipe diagram (iv), here for the color code, in spacetime with minimal overhead. This constitutes macroscopic compi-lation. The pipe diagram is then compiled down to a physical-qubit-level circuit along with a construction of correlation surfaces corresponding to logical observables arXiv:2607.05501v1 [quant-ph] 6 Jul 2026 2abca' b' c' abca' b' c' abca' b' c' (i) Logical Circuit (ii) Translate to ZX Diagram (iii) Optimize ZX Diagram (iv) Translate to Pipe Diagram (v) Syndrome Extraction and Simulations      
+
+> FIG. 1. Overview of steps in compilation using pipe diagrams. Starting with a logical circuit (i) it is translated into a ZX diagram (ii). A ZX diagram can be optimized in different ways and made more compact with diagrammatic reasoning (iii). Afterwards, this ZX diagram is embedded in 3D spacetime as a color code pipe diagram (iv). The distance-independent pipe diagram can be translated into specific stabilizers for given dalongside its explicit correlation surfaces from which one can receive a syndrome extraction circuit and perform simulations (v). Figure (v) displays an example cutout and timestep within the syndrome extraction.
+
+for given distance d, which constitutes microscopic com-pilation. These circuits may then be simulated. The remainder of this paper is structured as follows. Sec. II provides the necessary background on topologi-cal codes, previously established pipe diagrams for the surface code, the ZX calculus, and related work. We proceed with the definition of lattice surgery between color code patches and correlation surfaces and how these microscopic definitions can be represented as distance-independent pipe diagrams that can, in turn, be repre-sented as ZX diagrams in Sec. III. This is followed by a discussion of examples for macroscopic compilation in Sec. IV that highlight the benefits of pipe diagrams in general and for the color code specifically. Afterwards, we discuss how to perform syndrome extraction in this setting and showcase proof-of-principle simulation results in Sec. V. We conclude in Sec. VI.   
+
+> II. BACKGROUND A. Related Work
+
+A large body of work on lattice surgery compilation follows a paradigm of fixed logical gate realizations, in which lattice surgery primitives for logical operations – such as CNOT gates or T -state injections – are defined beforehand. Compilation then amounts to scheduling these predefined building blocks in order to obtain a low-depth implementation of a given logical quantum circuit. In this context, the surface code has emerged as the pre-dominant platform for studying lattice surgery compi-lation [4–6, 18–20]. Many of these approaches can be understood as solving mapping and routing problems on planar graphs, where the goal is to realize the required logical circuit in low depth. An alternative perspective is provided by pipe diagram 
+
+approaches [10, 21–23], which allow for a more flexible and fine-grained description of lattice surgery computa-tions. Rather than relying on a fixed set of predefined lattice surgery constructions for individual gates, pipe di-agrams describe computation through the consistent flow of Pauli operators across a spacetime structure. This al-lows to reduce spacetime volume by focusing on the topo-logical structure of the computation instead of plugging together predefined gate instructions. This viewpoint en-ables greater freedom in arranging operations and can lead to improved spacetime volume. This is also due to the fact that pipe diagrams can be translated to ZX diagrams and in ZX diagrams a notion of spatial and temporal direction does not exist – thus, at the level of ZX diagrams, there is a lot of flexibility in deforming the structure and hence, also a great deal of flexibility for the resulting pipe diagram. Pipe diagram methods have been studied extensively in the context of the sur-face code, with tools such as tqec [10] providing concrete realizations of this paradigm. In contrast, comparatively few works address lat-tice surgery compilation for the color code. Exist-ing approaches in this setting predominantly follow the paradigm of fixed logical gate operations [7, 8]. Addi-tional ideas related to lattice surgery and compilation for color codes appear in [24, 25]. However, they do not constitute automated compilation frameworks. Conse-quently, there exists a gap in the literature in extending the pipe diagram representation from the surface code to color code architectures.  
+
+> B. Surface Code and Color Code
+
+Topological quantum error-correcting codes [12, 26, 27] are defined by placing qubits on a manifold – in what follows, we consider the two-dimensional setting. Stabi-lizers [28] of the code are associated with faces and data qubits with vertices on a 2D tiling. Most importantly, stabilizers are local objects on that tiling, while logical information is encoded in a non-local manner. This local-ity makes such codes particularly suitable for quantum hardware with nearest-neighbor planar connectivity, such as superconducting quantum computers. 3XLZ L                             
+
+> XZ
+> (a) XL/Z LX/Z (b)
+> FIG. 2. (a) d= 7 rotated surface code, where Xstabilizers are red faces and Zstabilizers are blue faces. A representative of the XLand ZLare displayed with white and gray nodes respectively. Note that the logical operators are perpendicular to each other. (b) d= 7 color code on a hexagonal tiling with data qubits on the vertices. Each face defines both an
+> Xand Zstabilizer on the incident qubits. Both XLand
+> ZLlogical operators are supported on the boundaries of the triangular region, with an example displayed with gray nodes. An instance of an equivalent “star-shaped” XLor ZLoperator is displayed by white nodes.
+
+The surface code [11, 29, 30] is the most extensively studied example of a topological code. It is defined on a two-dimensional lattice with local X-type and Z-type stabilizers that are usually placed in a checkerboard pat-tern. Logical operators on a logical patch are string-like operators that connect opposite boundaries of the patch. An example of the rotated surface code for d = 7 is dis-played in Fig. 2a. In the surface code, logical XL and ZL
+
+operators are supported on strings that run along differ-ent, perpendicular directions . This geometric asymmetry directly constrains how logical qubits can be connected and how multi-qubit operations are implemented. The color code [12, 31] is another prominent topologi-cal code, defined on a trivalent, three-colorable lattice in which each face supports both X-type and Z-type stabi-lizers. An example of the triangular color code on the 6.6.6 lattice for d = 7 is shown in Fig. 2b. In particu-lar for color codes, logical XL and ZL operators can be supported on the same data qubits. Due to the structure of the lattice, logical Pauli operators are available in all directions, rather than being restricted to perpendicular orientations. Logical operators can also be represented with support on a ‘star-shaped’ pattern as shown in white in Fig. 2b, which respects the rotational symmetry of the code patch [32]. In general, one can consider a logical op-erator as ‘star-shaped’ if it contains Paulis on all three sides of the code patch that are not placed on the corners of the patch. These Pauli operators constitute the end-points of three strings that join in a point in the bulk. A special case is d = 3 where the ‘star-shaped’ operator consists of Pauli operators at the middle of each bound-ary only. This difference in logical operator structure has im-portant implications for logical compilation using these a b c 
+
+> FIG. 3. Surface code pipe diagram representing the movement of a logical qubit (a). X-type walls and correlation surfaces are shown in red (dark), and Z-type are shown in blue (light). For better visibility, the front walls are removed from the figure to display the X-type correlation surface (b) and the Z-type correlation surface (c).
+
+codes. While the surface code imposes more geomet-ric constraints on logical connectivity and thus routing, the color code enables more flexible connections between logical qubits. Nevertheless, the spatial connectivity of logical color code patches of this kind is described by a 3-valent graph – as each patch has three sides – while the surface code’s spatial connectivity is described by a 4-valent graph – as each patch has four sides. Furthermore, the color code also offers reduced data qubit overhead compared to the surface code. Most importantly, the color code admits transversal implementations of single-qubit Clifford gates, such as the H and S gates. In con-trast, the surface code requires code deformation [33] for the H gate and injection for the S gate [11, 34]. Thus, gates that must be performed physically in the surface code, can be performed in software in the color code [35] or via transversal physical implementation, which can be done much more quickly than deformation and in-jection, as no repeated rounds of syndrome extraction are required. Considering the application of general Clif-ford gates, the color code thus has potential for reduced spacetime overhead in comparison to the surface code.  
+
+> C. Pipe Diagrams for the Surface Code
+
+Pipe diagrams are a well-established, distance-independent representation that is used throughout the lattice surgery-based literature for surface codes, with their modern form first displayed in [36]. This section only briefly summarizes the idea of pipe diagrams, while the reader should consult, e.g., Ref. [9] for more details. A memory experiment of a surface code can be depicted as a cube, where the vertical height corresponds to d
+
+rounds of stabilizer measurements in time. The horizon-tal walls represent initialization and measurement bases (blue for Z and red for X) while vertical walls repre-4sent the 1D boundaries of the surface code patch in time. One can consider Fig. 2a as the top-down view on such a cube, where the boundaries in 2D constitute vertical walls in 3D which are colored by the color of the adja-cent plaquettes, i.e., if a XL can end at a boundary, the corresponding 3D wall is red and vice versa. An example of a simple pipe diagram in the surface code is displayed in Fig. 3. All three objects display the same operation with correlation surfaces explicitly shown in (b) and (c). On the bottom left cube of the 3D object, the computation starts with d rounds of syn-drome extraction. It is connected by a vertical pipe to another cube above it. The pipes in the pipe diagram indicate that neighboring cubes are connected together rather than both terminating at opposite faces. Pipes do not occupy a physical volume and are only drawn as if they do for better visibility. As a next step, the cur-rent patch is merged with a newly initialized patch on the right, and subsequently the ‘old’ patch is measured out, which is indicated by the top horizontal walls. This constitutes a movement to a new position. As no logi-cal operation is performed, this can also be considered a deformed memory experiment. Throughout this pro-cess, the walls and their colors represent the behaviour of logical operators. Most importantly, lattice surgery induces fundamen-tally random outcomes (in the absence of errors) that must be tracked and taken into account for the final out-comes. This tracking is covered by correlation surfaces 
+
+which represent the flow of Pauli operators through the structure, which is shown in Fig. 3b,c. Along those corre-lation surfaces, one has to track the parities of measure-ment outcomes, λX (along the red surface) and λZ (along the blue surface), and adjust the final logical operators accordingly, i.e., X′ 
+
+> L
+
+= ( −1) λX XL and Z′ 
+
+> L
+
+= ( −1) λZ ZL.Note that tracking of correlation surfaces is, in princi-ple, a code-agnostic concept that emerges due to lattice surgery. Thus, only the specific shape of the correlation surfaces emerges from the structure of logical operators in the given topological code and will be different for color codes.  
+
+> D. ZX Calculus
+
+The ZX calculus [37, 38] can be viewed as a useful lan-guage for lattice surgery [39], i.e., each pipe diagram can be translated into a ZX diagram that can be altered ac-cording to the rules of the ZX calculus – such alterations can yield a reduction in spacetime overhead for the final pipe diagram. Furthermore, ZX diagrams are an alternative repre-sentation that guides one to observe the Pauli flow [40] through the structure, as Pauli matrices can be repre-sented within that framework as shown in Fig. 4a. Con-sidering the pipe diagram from Fig. 3 with open ports (i.e., no specified initialization and measurement proce-dure at the temporal beginning and end of the diagram), (a) (c) (b) (d) = Pauli Z = Pauli X ===( )(f) (id)         
+
+> FIG. 4. ZX rules for pipe diagrams. (a) Representation of Pauli Xand Zmatrices within the ZX calculus. Blue (light) nodes are Z spiders, and red (dark) nodes are X spiders. (b) ZX diagram of Fig. 3 with open ports. (c,d) Propagation of Pauli operators through a red rank-4 junction. ZX Rules follow the labels as established in [37].
+
+it can be represented as a ZX diagram as displayed in Fig. 4b. Pushing a Pauli X and Z operator through this structure via π-copy ( π) and spider fusion ( f ) rules yields the same correlation surfaces as displayed in Fig. 3b,c. Moreover, utilizing the identity removal ( id ) rule shows that this pipe diagram was nothing more than an iden-tity gate – i.e., despite of moving the patch in space, no logical operation was applied. While this example displays simple correlation sur-faces, the behaviour becomes more intricate for more complex structures. Considering a single red phaseless ZX node with four legs as in Fig. 4c,d, one can push through the Pauli Z and X operators accordingly. For a Pauli of the opposite color (Fig. 4c), the Pauli “spreads”, while for a Pauli of the same color (Fig. 4d) the Pauli can “decide” which way it goes. This behaviour is indicated in a more abstracted representation on the right, where blue and red lines indicate the behaviour of the Pauli operators. Both figures work exactly the same way with node colors interchanged. Note that the ZX diagram is a code-independent view, and thus the same rules apply for the surface code and color code. However, the codes differ in how many legs can be directly embedded for a single node due to dif-ferent geometrical constraints. Note that a general ZX-diagram may not be directly embedded in spacetime, e.g., if the degree of a node is too high. In such cases, it may be necessary to add nodes and edges to enable the com-pilation to a pipe diagram. 5                  
+
+> FIG. 5. Standalone prisms that represent separate memory experiments of a single patch with drounds of syndrome ex-traction. The color of the horizontal walls determines the initialization and measurement bases. Red (dark) indicates initialization of data qubits in |+⟩and measurement in the
+> Xbasis. Blue (light) indicates initialization in |0⟩and mea-surement in the Zbasis. As XLand ZLrepresentatives can both terminate on vertical walls, vertical walls do not receive a color assignment.
+> III. PIPE DIAGRAMS FOR THE COLOR CODE A. Standalone Prism
+
+A memory experiment of a single color code patch (Fig. 2b) can be represented in a distance-independent way by a prism with an equilateral triangular base (Fig. 5). Similarly to the surface code pipe diagrams, the extension into the vertical direction represents d rounds of syndrome extraction, given a distance d color code patch. The colors of the horizontal faces indicate the prepara-tion and measurement bases, respectively. If time flows from bottom to top, the lower horizontal face indicates the preparation basis, i.e. red (dark) for |+⟩ preparation of data qubits while blue (light) stands for |0⟩ preparation of data qubits. In turn, the top horizontal face displays the measurement basis – red for an X-basis measurement of the data qubits and blue for Z.In contrast to the surface code pipe diagrams, verti-cal walls do not have colors in the color code case. This is due to the fundamentally different structures of log-ical operators between surface and color codes. While the surface code has perpendicular XL and ZL opera-tors, which terminate at defined boundaries of the patch and necessitate colorings of vertical walls; the color code offers a more flexible logical operator structure: Both XL
+
+and ZL operators can be placed along any of the three boundaries (Sec. II B). Thus, they are less restricted, which makes a coloring of vertical walls superfluous for a single patch in spacetime.  
+
+> B. Vertical Pipe
+
+To represent logical computations with pipe diagrams, prisms must be connected by pipes as can be seen in the example in Fig. 6. To connect prisms along the time axis, vertical pipes are added. For the same reasoning as above, the vertical walls do not receive a color. How-abcde(i) (ii) (iii) 
+
+> FIG. 6. Pipe diagram representing a logical movement in the color code (i). For better visibility, the front wall is removed from the figure to display the Z-type correlation surface (ii) and the X-type correlation surface (iii).
+
+ever, an adaption to the representation of vertical pipes is applied as soon as logical single-qubit Clifford gates are applied (Sec. III F). Since logical operators in the color code can take so many different forms, there is also freedom to choose the representation of the logical operator through time, i.e., the vertical correlation surface in a vertical pipe. The present work adopts “star-shaped” (Sec. II B) logical op-erators as the default choice on both the microscopic level and for the distance-agnostic representation.  
+
+> C. Horizontal Pipe
+
+Choosing the “star-shaped” operator representatives as the default representation is particularly important as soon as horizontal pipes come into play. Choosing “star-shaped” operators is advisable as they allow for straightforward construction of correlation surfaces com-pared to other logical operator choices, which would re-quire vertical correlation surfaces (in horizontal pipes) being constructed on a case-by-case basis. For instance, choosing one of the logical operators along a boundary of the color code patch would lead to string operators through the structure with peculiar shape that have to be constructed on a case-by-case basis due to the involved domain walls in space. Furthermore, “star-shaped” log-ical operators allow for a representation in the distance-agnostic pipe diagram, which is rotation symmetric such that drawing the distance-independent correlation sur-faces becomes particularly elegant. This is detailed in the following by explaining the choice of lattice surgery scheme. Considering lattice surgery between logical patches via semi-transparent domain walls (STDWs) [41], horizontal pipes in a pipe diagram convey information about the initialization and measurement of auxiliary data qubits between the patches as well as information about the logical operators – merging multiple logical color code 6* * **** * * ********* * * ******                   
+
+> FIG. 7. Merge of two d= 7 color code patches. Plaquettes with pink outlines represent single-type Xstabilizers. Pink lines represent weight-2 X-type stabilizers. Any other pla-quette is both an Xand Ztype stabilizer generator. How the
+> ZLoperator can be extended is displayed by the dark blue structure. The Xstabilizer product representing XLXLof the previously split patches is displayed by red asterisks.
+
+patches breaks the otherwise existing identical support of 
+
+XL and ZL operators. This section explains how lattice surgery is done in this work on the level of stabilizers and how the pipe diagram picture emerges from it. Consider Fig. 7 in which two d = 7 color code patches are merged into one joint code. The plaquettes defined by the 6.6.6 lattice determine the X and Z stabilizers. How-ever, those plaquettes at the interface of both patches with pink outlines define single-type stabilizers – in this example, X stabilizers. Note that weight-2 X-type stabi-lizers are indicated by pink lines. These single-type sta-bilizers define an STDW [41] that connects the patches in a proper manner. The domain walls dictate how string operators can pass through it – in this case, orange Z-type anyons can pass through the domain wall, while blue and green such anyons cannot pass through it. Or-ange X-type anyons condense in the domain wall and it is transparent for green and blue such anyons. Note that lattice surgery for color codes can be done in a variety of ways [3, 24, 41]. We choose this specific tech-nique because it does not require stabilizers with weight 
+
+> 6 and it allows placing an arbitrary number of triangles on the 6.6.6 lattice without the need to deform the sub-strate [7]. Furthermore, it allows to do ZLZL and XLXL
+
+measurements separately based on the specific choice of single-type stabilizers in the STDW. One could imagine working with fully transparent domain walls as well in order to measure XLXL and ZLZL simultaneously. How-ever, such a scheme would not give us the control over the choice of logical operators that is needed to realise logical computation based on the ZX picture (Sec. III E). Due to the aforementioned interplay between anyons and the domain wall, it is desirable to choose “star-shaped” ZL representatives to extend over multiple patches (indicated in dark blue in Fig. 7) as these guaran-tee the correct anyon type available at the domain wall. Note that in this setting, a ZL operator is forced to ex-tend throughout the whole merged structure as its any-onic excitations cannot condense at the domain wall due to its single-type X stabilizers. For consistency, also XL
+
+and X′ 
+
+> L
+
+operators at the respective patches are chosen as “star-shaped”. However, their anyonic excitations can condense at the domain wall such that they are not forced to extend through the structure, as is the case for the 
+
+ZL. They propagate with a horizontal correlation sur-face, equivalent to an XLXL measurement. The XLXL
+
+measurement outcome of previously separate patches (or the parity λX that changes XL to X′
+
+> L
+
+) can be determined by the product of merged stabilizers belonging to the set 
+
+CS X indicated by red asterisks in Fig. 7. The explicit construction of those horizontal correlation surfaces is de-tailed in Sec. III D. This specific stabilizer product has trivial action in the bulk and is nontrivial at the data qubits of the X(′) 
+
+> L
+
+representatives, as Xn = 1 for even 
+
+n and Xn = X for odd n. This means that each data qubit that is not part of the logical operator representa-tive is “touched” an even number of times by stabilizers in CS X . For a standard lattice surgery step that merely measures XLXL, one begins with two separate patches and initializes the data qubits in between the patches in 
+
+|0⟩. Then, the merged stabilizers are measured and sub-sequently split again by measuring split stabilizers and the data qubits at the interface in the Z basis. An anal-ogous construction applies if bases are interchanged with 
+
+Z-type single-type stabilizers at the interface. From this, the abstraction to horizontal pipes emerges. To illustrate this, consider Fig. 6, which represents the logical movement of a color code patch from one posi-tion to another position. Starting with stabilizer mea-surements of the initial patch (a), one proceeds with the initialization of data qubits at the interface and in the second patch in the state |0⟩ (b). This is followed by d
+
+rounds of syndrome extraction for the merged code (c) as displayed previously in Fig. 7. Then, the initial patch and the interface qubits are measured in the Z basis (d), and the movement is completed and followed in this case by another d rounds of syndrome extraction of the new patch (e). Thus, this is naturally depicted by certain colorings of the pipe diagram’s faces. The horizontal pipe has blue horizontal walls that indicate initialization and measure-ment in Z basis. The same holds for the neighboring prisms. The vertical walls of the horizontal pipe are col-ored in red as a ZL operator could not terminate at this pair of walls due to the single-type X stabilizers at the interface. From this, the structure of the correlation sur-faces in the pipe diagram also emerges: while the X and 
+
+Z correlation surfaces remain the same for single-patch memory, they have different structures as soon as hori-zontal pipes are added. The red correlation surface has to terminate at the red walls such that it horizontally con-nects the first and second patch, which is represented by the stabilizer product indicated by red asterisks in Fig. 7. We denote the subset of these stabilizers as CS X . In turn, the Z correlation surface remains fully vertical, as the ZL string operator representative has to be extended between both patches as shown in Fig. 7. Z-type anyons 7***** * *** ** *************** ** ************** * **** * **** * * * ** ********* * * * * * * ****** **** **** * * *******
+
+# abcd eforange STDW green STDW a''' a'' a' f''' f'' f' 12green/orange sublattice             
+
+> FIG. 8. Horizontal Xcorrelation surface for a sequence of
+> d= 7 triangular color code patches. Each plaquette is an X
+> and Z-type stabilizer except for the plaquettes and weight-2 stabilizers marked in pink, which are only X-type stabilizers. Boundary patches are defined by patch aand f, while bulk patches are defined by b, c, d, e .
+
+cannot condense at the interface; only X-type anyons can do this, thus the extension of the ZL is inevitable. Note that the whole discussion above works analo-gously with X and Z stabilizers interchanged. Further-more, note that this fundamental qualitative difference between horizontal and vertical pipes is a key difference between color code pipe diagrams and surface code pipe diagrams. The latter can be rotated, such that the roles of spatial and temporal pipes are interchanged – this can-not be done in the color code case anymore due to the different geometry and different roles of vertical and hor-izontal pipes.   
+
+> D. Explicit Correlation Surfaces for Given d
+
+While in the surface code case horizontal correlation surfaces, i.e. subsets of stabilizers CS X/Z , can be cho-sen to be just one of the two colors in the checkerboard pattern, as X and Z stabilizers are assigned to one of these colors each – the construction for color codes with STDWs is more intricate due to the different structure of the underlying 6.6.6 lattice, which is 3-colorable. Fur-* * * ** ******** * **** * * ********* * * ** * * * * ******** * ***** * ***** * * * *****      
+
+> FIG. 9. Given different choices of sublattices for the stabilizer subset CS X, different choices for adding stabilizers from the STDW to CS Xmust be made. A dotted line indicates that a triangle side is “free”, i.e., the product of CS Xmust be trivial on those sides. The open side without a dotted line is assumed to be connected to another, not depicted, bulk patch. If adjacent bulk patches use different sublattices, weight-2 stabilizers have to be taken into account (left two figures). If the sublattice is chosen to be the same in the adjacent patches, weight-2 stabilizers are not needed (right two figures).
+
+thermore, the color code is self-dual such that a simple assignment as in the surface code case is not possible. In the current setup, triangles of fixed distance d tesse-late the 6.6.6 lattice with connections by STDWs. Single-type stabilizers at the intersection are chosen to be either 
+
+X- or Z-type depending on the type of lattice surgery that is aimed to be performed. Vertical correlation sur-faces of connected “star-shaped” operators can be gener-ated by fixing a seed “star-shaped” operator at some ran-domly chosen patch. Since the tessellation of triangular patches is governed by the triangle group – generated by reflections along the sides of the triangles – the seed op-erator can be reflected across patch boundaries, guaran-teeing consistent connectivity throughout the structure. Reflections guarantee that the “star-shaped” operators are connected in such a way that anyonic properties are respected when a string operator propagates through an STDW. Note that the anyonic properties (described in Sec. III C) also force the operators of the vertical correla-tion surface to be extended throughout the whole struc-ture as they cannot terminate at the STDW. It is worth emphasizing that if a logical operator along a boundary of the patch was chosen as seed operator in-stead, such a simple reflection-based construction would not be possible, as their anyons would not automatically match the required behaviour dictated by the STDW – a case-by-case construction would be necessary. 
+
+Horizontal correlation surfaces require a slightly more complex construction as displayed in Fig. 8 for a set of consecutive color code patches. The generalization to connected patches that are not placed strictly consec-utively is straightforward and is explained in the next paragraph. Note that one can assign each STDW a color of the 6.6.6 lattice, which is the color of the single-type stabilizers at the interface between patches. One can construct the stabilizer product constituting the X-type horizontal correlation surface in the following way, by distinguishing the bulk and the boundary patches: 81. The bulk is formed by all color code patches along the path that are supposed to have trivial action. In Fig. 8, the patches marked with b, c, d, e are bulk patches. 2. In the given structure, each bulk patch has two sides that are connected to another patch via an STDW, and one of the triangle’s sides is “free”. To choose the correct subset of stabilizers for the horizontal X-type correlation surface CS X , one has to determine the “color” of the adjacent STDWs. The color of the STDW is determined by the color of the single-type plaquettes on the 3-colored 6.6.6 lattice. Consider, for instance, patch d. It has a green and orange STDW such that we choose the green/orange sublattice and add it to CS X . This choice guarantees trivial action on the “free” side of the patch, as its data qubits are “touched” twice by stabilizers in CS X .3. After the stabilizer subset is chosen from the bulk’s patches, one has to determine which stabilizers from the STDW are included in the subset as well. There are multiple possibilities, in particular if the sublattice differs between adjacent bulk patches. These possibilities are shown in Fig. 9. 4. After the correct stabilizers from the bulk patches and STDWs are added to the subset, one has to take care of the two boundary patches. One can say that the star operators ‘split’ the patch into three thirds. In Fig. 8, one can see three sections of stabilizers in the boundary patch a and f indicated by a′, a ′′ , a ′′′ and f ′, f ′′ , f ′′′ respectively. One needs to add stabilizers into the subset which are neigh-bors of an STDW, here a′, a ′′ and f ′, f ′′ . Consider patch a, which has two free sides as it is a boundary patch. The product of stabilizers in CS X has to act trivially everywhere except on the location of the “star-shaped” operator XL. This can be reached by adding stabilizers from a′ based on the colors along the side marked with a 1. The blue/green sublat-tice guarantees that the product’s action is trivial on the free side but is not trivial on the star oper-ator. The same holds for a′′ with the orange/green sublattice based on the free side 2. 5. Then, also the subset from the STDW adjacent to each boundary patch has to be chosen accordingly, such that trivial action is guaranteed everywhere except the star operator. For this, a mixture of Fig. 9 is applied. While this example had the structure of a chain of triangular color code patches, the structures can differ from such shapes as, for instance, shown in Fig. 10. Astructure can allow for multiple different paths of the horizontal correlation surface as shown in Fig. 10b. If this is the case, the discussion from above only changes slightly, as “free” sides have to be made trivial in the    
+
+> (a)
+> (b) FIG. 10. (a) “Spreading” of a ZLoperator (=vertical corre-lation surface). (b) “Choice” of path through structure of the
+> XLoperator (=horizontal correlation surface).
+
+product of CS X by adding weight-2 stabilizers to the set as shown on the lower side of the middle patch. Note that while the explicit geometric construction is instructive, the elements of CS X can also be found by solving a linear equation. Given the check matrix HX ∈
+
+FrX ×n 
+
+> 2
+
+with the number of data qubits n and the number of X-type stabilizers rX as well as a vector ℓX ∈ Fn
+
+> 2
+
+in which each entry is nonzero if a data qubit is part of the pair of logical operators, one can solve for the vector cs X ∈ FrX 
+
+> 2
+
+describing the stabilizers involved in the subset CS X following HTX cs X = ℓX .Fig. 10a displays a vertical correlation surface (blue) which is retrieved by reflections as explained above. Note that the vertical correlation surface (a) spreads through-out the structure and the horizontal correlation surface (b) “decides” for a particular path. This behavior is linked to ZX diagrams that have a direct relation to such structures. 9abcd     
+
+> FIG. 11. Pipe diagram of a rank-5 junction (a) of a blue ZX node (d). The spreading Xcorrelation surface is displayed in (b) and an example “choice” of the Zcorrelation surface is displayed in (c).
+> E. ZX Junctions
+
+The behaviour of ZL and XL in the microscopic struc-ture in Fig. 10 matches what is expected from the emerg-ing pipe diagram representation and the correspondence to ZX diagrams. Representing the middle patch with open ports both in space and time with interchanged roles of Z and X yields the pipe diagram shown in Fig. 11a. Exactly as in the microscopic discussion above, the vertical correlation surface “spreads” throughout the whole structure (Fig. 11b), while a horizontal correla-tion surface through spatial pipes “decides” on a path (Fig. 11c). This represents the logic from Fig. 4, which enables a correspondence between pipe diagrams and ZX diagrams. Thus, one can construct distance-independent correla-tion surfaces based on graphical rules derived from the microscopic picture that match the desired ZX structure. Whenever we encounter a prism that is connected to hori-zontal pipes with blue vertical walls, this is representative for a blue ZX node. In turn, a red correlation surface in the horizontal pipes has to be aligned vertically, such that it connects to the red horizontal walls (Fig. 11b). Fur-thermore, due to single-type Z stabilizers in the STDWs, the X correlation surface cannot terminate at any of the horizontal pipes and therefore “spreads” through the whole structure. As a vertical correlation surface cannot simply terminate at an arbitrary point, it also extends through the top and bottom vertical pipes. In contrast, the blue correlation surface has to “decide” on a path with one example displayed in Fig. 11c. This is because this correlation surface is forced to be horizontal within the horizontal pipe as it has to terminate in the blue ver-tical walls. Alternatively to the displayed example, it is, for instance, also possible to extend a purely vertical blue correlation surface through the vertical pipes without go-ing through the horizontal pipes. This is possible because in this setup, the ZL star operator can terminate at all the neighboring domain walls due to the involved single-  
+
+> FIG. 12. Multiple junctions with a total of n= 11 open legs as pipe diagram of the color code (top) and the same ZX diagram embedded in the surface code (bottom).
+
+type Z stabilizers. This discussion holds for interchanged colors as well. If a prism terminates the diagram at the end of a tem-poral pipe, the ZX node color is uniquely defined by the opposite color of the measurement/initialization of the prism; if a prism is connected by two temporal pipes only, the ZX node’s color is ambiguous. Finally, if the prism connects to at least one horizontal pipe in the bulk, its color follows that of the vertical walls of the horizontal pipes. Finally, the structure of the color code allows ZX nodes with degree up to 5 to be directly embedded in spacetime. For the surface code, one can directly embed a degree-4 node. Higher-degree nodes need to be split up into multi-ple junctions in spacetime. To embed a degree n ZX junc-tion in 3D spacetime, there are ksc = ⌈ n−22 ⌉ surface code junctions necessary. For the color code however there are 
+
+kcc = ⌈ n−23 ⌉ junctions necessary. Thus, ksc ≥ kcc . An example for n = 11 is shown for both codes in Fig. 12. Overall, this means that the spatiotemporal connectivity of a color code is described by a 5-valent graph, while it is a 4-valent graph for the surface code. The ZX representation is the key for macroscopic com-pilation with pipe diagrams as the ZX representation al-lows for optimizations and thus a low spacetime overhead embedding in spacetime can be sought. 10  
+
+> F. Full Clifford Gate Set
+
+In the next section (Sec. IV A) we will show that such a lattice surgery architecture allows us to recreate the logical CNOT gate. In addition, the color code has the feature that any Clifford gate on a single logical qubit can be applied transversally. Together with the CNOT, this enables universal Clifford computation. Explicitly, the single-qubit Clifford group is generated by the H and S gates; the logical H is equivalent to ap-plying a physical Hadamard on each data qubit, while the logical S gate is implemented by a combination of physical S and S† gates. It is possible to find a bicol-oration of the data qubits on the color code patch. The bicoloration partitions the data qubits into two sets; the set that includes the corner qubits of the patch receives an S gate, while the other set receives an S† gate [25, 42]. Under the assumption that arbitrary physical single-qubit gates can be applied on the hardware architecture, one can assume that a sequence of S, S † and H can be directly applied to some data qubit. Therefore, given any prism of d rounds of syndrome extraction, one can add an arbitrary logical Clifford gate within the very first or last of the d rounds of syndrome measurements. This comes at an insignificant spacetime cost and does not generate correlated errors on data qubits. This can be represented as a black plane in a pipe as shown in Fig. 13, where one can consider the physical single-qubit gates to be applied either in the first or last round of syndrome extraction of the prisms this pipe connects. Note that this is a significant benefit of the color code in comparison to the surface code, where for log-ical Hadamard gates code deformation [1, 43] is required in general and S gates require complex YL state prepa-ration or Y -basis measurement circuits [34]. Even though we will stick to temporal execution of single-qubit Clifford gates in this paper, it should be noted that it is possible to perform e.g. a spatial Hadamard nevertheless in the color code as shown in Fig. 14. Such a procedure maps the X operator to a 
+
+Z and vice versa. To achieve this, mixed-type stabiliz-ers are required as shown in the figure: The single-type stabilizers (pink outline) are mixed X and Z stabilizer in-dicated by the dark grey (X) and light grey (Z) dots. The double-type stabilizers with black outlines are adapted to two mixed-type stabilizers as shown in the top left corner of the figure. In a similar manner, one can apply an S gate as well by redefining the mixed-type stabilizers. An S gate trans-forms Paulis as SXS † = Y and SZS † = Z which has to be reflected in the behavior of the logical operators. The single-type stabilizers with pink outlines are chosen to have X Pauli operators on dark grey nodes and Y Pauli operators on light grey nodes. In turn, the double-type stabilizers with black outlines contain a pure Z stabilizer as well as a mixed-type stabilizer with X on dark grey and Y on light grey nodes. This transforms the hori-zontal correlation surface to turn from X to Y , and the       
+
+> FIG. 13. Transversal Sand Hgates are displayed as black plane in a pipe. The single-qubit gates are assumed to be applied in the last or first round of the prisms it connects.
+
+# * * **** * * ***** * * ******
+
+> =Z =X
+
+# *
+
+# *
+
+# *
+
+# *            
+
+> FIG. 14. Execution of a spatial Hadamard gate, that swaps the roles of Xand Z-type correlation surface requires mixed-type stabilizers. The single-type stabilizers in the interface with pink outlines are marked with additional dots that indi-cate a Z(light grey) or an X(dark grey) at the data qubits. To make this a valid stabilizer code, additional mixed-type stabilizers are necessary, indicated by a black outline. On each of those locations, two stabilizers are placed: The one shown in the figure, as well as one with interchanged roles of
+> Xand Z, as indicated at the top left corner of the figure. This stabilizer structure causes the horizontal correlation surface (indicated by red, blue, and mixed asterisks) to change color, as well as the vertical correlation surface (indicated by the string operator) to change color as well.
+
+vertical Z correlation surface remains as it is. However, it is not apparent how a reliable ZX correspondence can be established with spatial S gates, which is why we stick to general single-qubit Cliffords executed in the temporal direction.  
+
+> IV. MACROSCOPIC COMPILATION
+
+Having defined the representation of pipe diagrams for the color code, one can utilize it and perform logical, macroscopic compilation. This section covers multiple examples of how low spacetime volume representations of specific logical operations can be found. We start with the CNOT gate in Sec. IV A and continue with a dense representation of three CNOT gates in Sec. IV B. We finish with a specific comparison between the surface code and color code pipe diagrams in Sec. IV C as well as a 11  
+
+> FIG. 15. The CNOT gate in terms of a ZX diagram together with four different correlation surfaces.
+> FIG. 16. Two variations of the CNOT gate by embedding into pipe diagram via adding ZX nodes with the (id) rule.
+
+summary of the benefits and deficits of the color code in Sec. IV D.  
+
+> A. CNOT Gate
+
+To create a pipe diagram that represents a CNOT gate, one starts with its representation in the ZX calculus as shown in Fig. 15. The aim is to find a pipe diagram that has low spacetime overhead and reflects the same behaviour of the Pauli operators. At first, we aim for a representation that has temporal open ports only, i.e., a diagram with standard time order-ing. With this in mind, one has to add two more identity nodes to the ZX diagram. Two equivalent constructions for corresponding pipe diagrams are possible, as shown in Fig. 16. By explicitly drawing the correlation surfaces in the pipe diagram following the logic of the propaga-tion of horizontal and vertical correlation surfaces (not shown here), one can observe exactly the same behav-ior as in the original ZX diagram of the CNOT gate. Furthermore, this structure directly resembles the typi-cal measurement-based scheme for the CNOT gate [2, 3] as each horizontal pipe can be considered as a ZLZL or 
+
+XLXL measurement. As drawn in Fig. 16 (left), the structure occupies a spacetime volume given by three prisms in space ( s = 3) and two prisms in time ( t = 2), giving ST V naive = s · t =6. In this section, however, we adopt a less conservative         
+
+> FIG. 17. By allowing open spatial ports, one can create a CNOT gate pipe diagram with only two involved nodes. abca' b' c' abca' b' c'
+> abcabca' b' c' a' b' c'
+> FIG. 18. Three consecutive CNOT gates as a circuit and translated into a ZX diagram (left). Naively stacking the two variations of a single CNOT gate from Fig. 16 onto each other, respectively (middle, right).
+
+count: the prisms in the lower left and upper right, which are not connected to horizontal pipes, are not strictly necessary to reproduce the logic of the computation, so we exclude them from the count. They are just identities entering the open ports. This gives an effective spacetime volume of ST V = 4 for the CNOT gate representation. However, by lifting the constraint of having tempo-ral open ports only, one can allow spatial open ports, which further reduces the overhead down to ST V = 2 as displayed in Fig. 17. Again, correlation surfaces can be drawn in the pipe diagram, which represent the structure of the respective ZX diagram. Thus, lifting the usual no-tion of space and time helps to reduce the overall space-time volume [44].  
+
+> B. Multiple CNOT Gates
+
+In order to understand the strength of the pipe dia-grams, consider an example of three CNOT gates that are supposed to be applied as seen in Fig. 18 (left), both as a circuit and as a ZX diagram. For the moment, let 12 bcb' a' ac' bcb' a' ac' a(i) (ii) (iii) (iv) bca' b' c' abcb' c' a'  
+
+> FIG. 19. Having reduced the 3 CNOTs in terms of ZX di-agrams via spider fusion (f) and rearranging the nodes, one has to determine how to embed this compact ZX diagram in spacetime.
+
+# abca' b' c' 
+
+> FIG. 20. Given the ZX diagram from Fig. 19, a direct trans-lation into a pipe diagram is possible.
+
+us assume that we aim for a representation with tem-poral open ports with usual time ordering first. Given the knowledge of the previous section, the construction of a CNOT as a pipe diagram, one can naively stack the CNOT gates as drawn in Fig. 16 onto each other as shown in Fig. 18 (middle, right). From the fact that we count only the effectively necessary prisms into the spacetime volume, it is already imminent that this representation is taking up far more volume than necessary. Ignoring this for the moment for illustrative purposes and con-sidering the structures as drawn, they yield an effective 
+
+ST V = 18 (middle) and ST V = 16 (right). As a next step, we reduce the required spacetime vol-ume by exploiting the properties of the pipe diagram rep-resentation. While it is possible to directly transform the given pipe diagrams from Fig. 18 (middle, right), the subsequent description follows the logic from Fig. 1 for il-lustrative purposes. Given the ZX diagram of the desired computation Fig. 18 (left), one can apply spider fusion (f) two times and rearrange the nodes and wires to ar-rive at the representation in Fig. 19(i). This is a very compact representation of the computation; however, to b cab' a' c' abca' b' c' 
+
+> FIG. 21. An example correlation surface of the compact ZX diagram with temporal ports only and its equivalent in the final pipe diagram.
+
+embed it in spacetime (with open temporal ports) it is advisable to transform the ZX diagram with the avail-able spacetime structure in mind. In the case of the color code, nodes can be placed on a hexagonal lattice in the spatial plane, with time flowing from bottom to top. Thus, Fig. 19(ii) is a first step towards that direc-tion in which we align the nodes along a spatial plane and the incoming and outgoing open wires are aligned along the temporal direction. Similarly to the case of the construction of the CNOT gate as a spacetime diagram (Sec. IV A), one needs to add identity nodes, i.e. aux-iliary patches, to enable the translation of the structure into a pipe diagram. To enable this, Fig. 19(iii) further positions the nodes in space, taking the positions of aux-iliary nodes into account. Finally, Fig. 19(iv) displays a ZX diagram with nodes aligned on a hexagonal lattice on the spatial plane, which can be directly translated into a pipe diagram. The respective pipe diagram is shown in Fig. 20. The spacetime volume of this computation is much smaller than the volume of the naive, sequential appli-cation of CNOT gates. Either by counting the prisms that are not trivially ending in an open port in Fig. 20 or the nodes in Fig. 19(iv), one can conclude that the effective spacetime volume occupied by this structure is 
+
+ST V = 10. Note that the same spacetime volume can be reached by using a pipe diagram for the surface code. To sanity-check the pipe diagram’s logic, one can explicitly draw the correlation surfaces and compare whether they coincide with the correlation surface given by the ZX diagram. An example correlation surface in both structures is shown in Fig. 21. However, this construction is not minimal in spacetime volume. As the roles of space and time can be lifted to some extent in the picture of pipe diagrams, one can em-bed the compact ZX diagram in spacetime with lower 
+
+ST V as soon as we allow not only temporal open ports but also spatial open ports. Starting from the same com-pact ZX diagram in Fig. 22(i), one adds two identity nodes, as horizontal pipes can only connect nodes of the same color in the bulk [45], and places the open ports in 13 aa abbbcc ca' a' a' b' b' b' c' c' c' 
+
+> (iii) (ii) (i)
+> FIG. 22. With the compact ZX diagram of the 3 CNOTs (i) one can embed the ZX diagram in space more directly if open ports in space and time are allowed (ii, iii).
+
+ab ca' b' c' abca' b' c'  
+
+> FIG. 23. An example correlation of the compact ZX diagram with spatial and temporal open ports and its equivalent in the final pipe diagram. For better visibility some walls are removed.
+
+space and time accordingly as shown in Fig. 22(ii). This directly translates to the pipe diagram in Fig. 22(iii). A sanity-check of an example correlation surface is shown in Fig. 23. The spacetime volume of this computation is reduced down to ST V = 6. Also in the surface code, a pipe diagram with spatial and temporal open ports can be reduced down to ST V = 6. One should note that such reductions in spacetime vol-ume are a degree of freedom that is often ignored in lat-tice surgery compilation literature [4, 7, 8] that assumes a fixed lattice surgery implementation of the CNOT gate and thus just naively stacks the gates as shown in Fig. 18. In terms of pipe diagrams, reductions of the spacetime volume are apparent and arise naturally.  
+
+> C. Single-Qubit Cliffords
+
+As pointed out previously in Sec. III F, color codes have the decisive benefit that they admit a transversal applica-tion of logical single-qubit Clifford gates, generated by S
+
+and H gates. To illustrate the benefit in an explicit exam-     
+
+> FIG. 24. CNOT gate together with single-qubit Clifford gates on the target qubit for the surface code (top) and the color code (bottom). The diagrams amount to the unitary U=
+> S(1) H(1) S(1) CN OT (0 ,1) S(1) H(1) S(1).
+
+ple, consider the logical quantum circuit defined by the unitary U = S(1) H(1) S(1) CN OT (0 , 1) S(1) H(1) S(1). A low-overhead representation for the surface code, as shown in Fig. 24 (top), can be found by using the version of the CNOT gate that has two open spatial and two open temporal pipes. One applies the S and H gates along the spatial direction via Y -basis measurements as introduced in Fig. 9 of [34], indicated by a green half-cube each. The Hadamard gates can also be applied in the spatial direc-tion indicated by a yellow band within the connecting pipes. Such a spatial Hadamard can be performed by using mixed Z- and X-type stabilizers at the interface of two patches. Note that the Y basis measurement for performing an S gate is not agnostic about the wall col-ors of the involved pipes and cubes, which is the reason why the implementation on the left and right sides of the spatial Hadamards has to be different, respectively. One has to ensure that the cube in which the S gate “enters” has to be equivalent to a blue ZX node. To fulfill this requirement, the spacetime overheads for S gates at dif-ferent points in the diagram differ. Overall, this diagram amounts to a spacetime volume of ST V = 8 + 4 · 12 = 10 by counting the cubes and half-cubes. If this gate sequence is embedded in a larger quantum circuit, it may be necessary to rotate the altered bound-aries back to the original orientation, which can be done via patch deformation (e.g. by forming an L-bend). On 14 the other hand, the induced flip of wall colors may also help to find a more efficient representation locally. For the color code, a low-overhead construction of U
+
+can be done by using the compact CNOT gate with open spatial ports and by adding vertical pipes with a black plane, which represent multiple transversal gate applica-tions as shown in the bottom of Fig. 24. By counting the prisms included in this diagram, the spacetime volume is 
+
+ST V = 4 [46]. Overall, this small example displays that there is po-tential to reduce overhead for single-qubit Clifford gates by using the color code.  
+
+> D. Summary of Benefits and Deficits of the Color Code
+
+This summarizes how pipe diagrams can be created for the color code setup with triangular patches on the 6.6.6 code. At this point let us summarize the overall benefits and deficits of the color code in comparison to the surface code, beyond the previously discussed benefit of transversal S and H gates. For a d = 2t + 1 color code patch, there are 
+
+q = 3 t2 + 3 t + 1 data qubits involved. In comparison, for the rotated surface code q = 4 t2 +4 t+1. In particular for large-scale computations any difference in the number of qubits will be relevant for the practicality of a quantum error correcting code. Ultimately, the qubit overhead needed to reach a given logical error rate is what mat-ters – and since color code decoding is harder, it is still an open question in decoding research which scheme is effectively more efficient regarding the qubit count. Furthermore, in larger scale computations the fact that higher-rank junctions are possible in the color code in contrast to the surface code (Sec. III E) opens interesting directions for future investigation. A related aspect is the fact that the color code allows to access both Z and X
+
+logical operators from each side of the triangle, while the surface code allows access only to one type of logical op-erator. Thus, patch rotations are never necessary for the color code. Nevertheless, one should also mention that the color code patches are placed on a 3-valent connec-tivity graph in space, while the surface code patches can be placed on a 4-valent connectivity graph in space. The spatiotemporal connectivity of a given pipe diagram is, however, described by a 5-valent graph for the color code and a 4-valent graph for the surface code. Furthermore, note that in the color code only two nodes of the same color can be directly connected horizontally in the bulk of a diagram, which may add spacetime overhead. The interplay of these aspects for larger scale computations is left for future studies. Even though the current discussion is restricted to Clif-ford operations only, we note that magic state cultiva-tion [47] is considerably easier for the color code than for the surface code, as one can skip the grafting procedure. The major reason why the surface code remains the predominant code in quantum error correction research is: The decoding problem is much easier and quicker to solve for the surface code due to its matchability. Color codes lack the property of matchability, which makes them much harder and, in particular, slower to decode. However, there is progress towards making color code decoding competitive in the context of real-time decod-ing [48].  
+
+> V. MICROSCOPIC COMPILATION: SYNDROME EXTRACTION FOR COLOR CODES
+
+The choice of syndrome extraction scheme can signif-icantly impact the performance of a quantum error cor-recting code, as the physical implementation introduces error mechanisms that are not visible at the stabilizer level of abstraction. In particular, so-called hook er-rors – errors arising from the particular order of physical CNOT gates during stabilizer measurements – pose a se-rious challenge and must be carefully addressed in the syndrome extraction circuit.  
+
+> A. Syndrome Extraction
+
+In the surface code, the geometric structure of the sta-bilizers and logical operators allows to reduce the im-pact of hook errors by reordering the CNOT gates dur-ing syndrome extraction in such a way that hook errors propagate perpendicular to the respective logical oper-ator – such that they cannot do harm, as for instance explained in [49]. Alternatively, using a different sched-ule, hook errors can be oriented along diagonals of the surface code plaquettes such that they never align with logical operators which always traverse horizontally or vertically [50]. As explained before, the color code does not have the structure of perpendicular logical operators, such that a similar strategy cannot be applied here. In-stead, other strategies are applied, such as incorporating flag qubits [51]. However, more compact circuits such as the superdense syndrome extraction scheme and the inline folding scheme [16] can be beneficial in compari-son. It has also been shown recently that all malign hook errors in the bulk of the color code can be avoided by using different gate schedules for plaquettes of different colors [52]. The superdense and folding schemes are adopted in the current setup. Similar to [16], we place the physi-cal data qubits on a square lattice with nearest-neighbor connectivity as shown in Fig. 25. Additionally, we as-sume diagonal nearest-neighbor connectivity between se-lected qubits at the lattice. The figure shows a cutout of arbitrarily large color code patches at the location of an STDW: Pink outlines depict single-type stabilizers of weight-6 or weight-2, where black circles at the vertices 15 
+
+> FIG. 25. Physical data and auxiliary qubits are assumed to have nearest-neighbor connectivity on a square lattice with a few diagonal couplings. Data qubits are marked with a black circle and auxiliary qubits with black crosses. The plaquettes or lines in pink depict single-type stabilizers along an STDW.
+
+of the grid depict physical data qubits and black crosses are physical auxiliary qubits. For the double-type stabi-lizers, it is straightforward to adopt the superdense syn-drome extraction scheme [16], which requires two auxil-iary qubits per patch. In this scheme, the two auxiliary qubits are entangled in a Bell state such that CNOT gates between the auxiliary and data qubits can be ap-plied such that the nearest-neighbor restrictions remain satisfied. Both the X and Z stabilizers can be measured with entangling and disentangling the auxiliary qubits once. With distance d on the stabilizer level, also the circuit level distance is ˜d = d. The single-type stabi-lizers along the STDW of weight-3, -5 and -6 can be handled with the same scheme, but with shorter sched-ules, as only one stabilizer is measured instead of two. The situation changes fundamentally when the single-type weight-2 stabilizers are considered: While all other stabilizers have a pair of physical auxiliary qubits that are assigned to them, this is not the case for the single-type weight-2 stabilizers. Using auxiliary qubits that are already utilized by other stabilizers either requires lifting the nearest-neighbor constraint (if the auxiliary qubits of single-type, higher weight stabilizers are supposed to be used) or making the schedule deeper (if auxiliary qubits of double-type stabilizers are supposed to be used), which scales with the rounds of syndrome extraction. As none of the possibilities is desirable, we choose to use the in-line folding [16] scheme for the single-type weight-2 sta-bilizers, which does not require any auxiliary qubits and works solely on the data qubits. The explicit circuits for this scheme in the present case are shown in Fig. 26. Even though this scheme can reduce the circuit-level distance to ˜d = ⌈d/ 2⌉, we choose this type of syndrome extraction    
+
+> FIG. 26. Folding syndrome extraction purely on data qubits for weight-2 stabilizers without usage of auxiliary qubits for Z
+> stabilizer measurement (top) and Xstabilizer measurement (bottom).
+
+as compactness of the circuits plays a crucial role for the performance as well [16]. Furthermore, the distance is only reduced in the two-dimensional regions occupied by the STDWs, such that the effect on the logical error rate is expected to diminish at large distances. Combining both the superdense and inline folding scheme can be done with maximally a constant (distance-independent) time overhead of a single time step [53]. For a schematic on how both schemes can be interleaved, con-sider Fig. 27. The top row schematically shows the steps during superdense syndrome extraction: One starts with the initialization of the auxiliary qubits in the |+⟩ and 
+
+|0⟩ states respectively (“Init. aux.”), which is followed by the entangling CNOT between the auxiliary qubits (“Bell CNOT”). Then, the CNOT gates between data and auxiliary qubits (“SE CNOT”) are applied. The number of timesteps in that step is t = k with k = 6 for a weight-6 double-type stabilizer. This is followed by the disentangling CNOT gate on the auxiliaries (“Bell CNOT”) and is concluded with a measurement in X and 
+
+Z bases respectively (“Meas. aux.”), which yields the syndrome measurement’s outcome for the X and Z sta-bilizers. After the black vertical line, a new round of syndrome extraction begins. The bottom row of Fig. 27 shows how the three steps of the inline folding for weight-2 single-type stabilizers can be interleaved, where “fold CNOT”, “Meas. data” and again “fold CNOT” refers to the three steps as shown in Fig. 26. As the gates in these steps act on the data qubits, the steps must be performed simultaneously with steps of the superdense scheme that act on the auxiliary qubits only to avoid conflicts. The earliest possible way is shown in the figure – which overlaps with the next round of syndrome ex-traction by a single timestep. Thus, the combination of schemes can maximally lead to a single timestep overhead (independent of d) if the single-type stabilizers have to be measured at the end of the overall computation. Fur-thermore, note that for the double-type stabilizers during the superdense scheme, one has to apply X gates based on classical feedback, which is not taken into account in 16 
+
+> FIG. 27. How the superdense and folding syndrome extraction scheme are interleaved such that only a constant time overhead is generated. Abbreviations are explained in the main text.
+
+the present considerations, as we assume that Pauli gates are not executed physically but tracked in software. Finally, note that syndrome extraction using only the connectivity of the square lattice is certainly possible, though potentially at the cost of increased circuit depth.  
+
+> B. Simulations
+
+We simulate the aforementioned syndrome extrac-tion scheme for chosen examples of pipe diagrams with 
+
+stim [54]. The respective circuits for the equivalent pipe diagrams in the surface code are generated with tqec [10] and decoded with correlated pymatching [55, 56]. The syndrome extraction circuits for the color code are de-coded with the tesseract decoder [57]. Throughout the simulations, we employ the uniform circuit-level depo-larizing noise model, i.e., with the same probability p,idling qubits depolarize, after each 1- and 2-qubit gate there is 1- and 2-qubit depolarization, as well as flipped measurement results and reset errors. Simulation re-sults and code to reproduce the results can be found at 
+
+https://github.com/LSHerzog/tqec .Simulation data for the movement of a single patch, similar to Fig. 6, is shown in Fig. 28. There are two possibilities to move a patch by one position since there are two possible alignments of the colors on the horizon-tal pipe as well as two different initialization and mea-surement possibilities. For both options, one can either simulate the behaviour of the XL or ZL operator, such that there are four options in total, which are shown in the figure. Shaded regions show hypotheses with likeli-hoods within a factor 1000 of the maximum likelihood hypothesis, given the sampled data [58]. As expected, the surface code performs better overall. However, these simulations are not intended to make a statement about the superiority or inferiority of either code — decoder performance plays a significant role in this comparison, and optimizing decoders is beyond the scope of this work. Rather, the results are meant to serve as a proof-of-principle, illustrating that logical computa-tion with the color code remains a viable and worthwhile endeavor. One can observe that 28b and 28d, in particular for 
+
+d = 3 and d = 5, the difference between the surface code’s and color code’s performance differs significantly more than in the case of 28a and 28c. For this, it is vital to know which type of correlation surface is taken into ac-count: The first pair corresponds to a pipe diagram with a horizontal correlation surface in the horizontal pipe, while the latter pair corresponds to a vertical correlation surface in the horizontal pipe. As mentioned in the pre-vious section already, the folding scheme for the weight-2 stabilizers decreases the overall circuit-level distance and creates problematic spatial errors. Thus, these er-rors propagate perpendicularly in comparison to the ver-tical correlation surface and can therefore induce flips in the correlation surface’s measurement results. Thus, the circuit-level distance is reduced ˜d = ⌈d/ 2⌉. This mech-anism does not apply if a horizontal correlation surface is taken into account, where the circuit level distance ˜d = d with the distance d of the separate patches. This mechanism may be the reason for the higher difference for d = 3 and d = 5 if a vertical correlation surface is present. However, this primarily applies to low distances and is expected to diminish for high distances, as this effect happens only along the STDW but not within the whole bulk of the color code patches. A CNOT gate with temporal open ports is simulated in Fig. 29. One can observe that 29b and 29d for both the surface and color code have the tendency to achieve lower error rates than 29a and 29c due to the fact that in 17 10 4 10 3 10 2 10 1         
+
+> Physical Error Rate
+> 10 9
+> 10 8
+> 10 7
+> 10 6
+> 10 5
+> 10 4
+> 10 3
+> 10 2
+> 10 1
+> 10 0
+> Logical Error Rate
+> Surface Code d=3
+> Surface Code d=5
+> Surface Code d=7
+> Color Code d=3
+> Color Code d=5
+> Color Code d=7
+
+(a) 10 4 10 3 10 2 10 1        
+
+> Physical Error Rate
+> 10 7
+> 10 6
+> 10 5
+> 10 4
+> 10 3
+> 10 2
+> 10 1
+> 10 0
+> Logical Error Rate
+> Surface Code d=3
+> Surface Code d=5
+> Surface Code d=7
+> Color Code d=3
+> Color Code d=5
+> Color Code d=7
+
+(b) 10 4 10 3 10 2 10 1         
+
+> Physical Error Rate
+> 10 9
+> 10 8
+> 10 7
+> 10 6
+> 10 5
+> 10 4
+> 10 3
+> 10 2
+> 10 1
+> 10 0
+> Logical Error Rate
+> Surface Code d=3
+> Surface Code d=5
+> Surface Code d=7
+> Color Code d=3
+> Color Code d=5
+> Color Code d=7
+
+(c) 10 4 10 3 10 2 10 1       
+
+> Physical Error Rate
+> 10 6
+> 10 5
+> 10 4
+> 10 3
+> 10 2
+> 10 1
+> 10 0
+> Logical Error Rate
+> Surface Code d=3
+> Surface Code d=5
+> Surface Code d=7
+> Color Code d=3
+> Color Code d=5
+> Color Code d=7
+
+(d) 
+
+FIG. 28. Comparison of logical error rates between the surface code and color code for a movement for all four possibilities of movement setups of this kind. For the color code, the tesseract decoder was used, and for the surface code, correlated pymatching. The pipe diagram from Fig. 6 represents the cases (c) and (d) for different initialization and measurement, respectively. 
+
+the first pair, the correlation surface is smaller and hence errors from correlation surfaces in horizontal pipes are not entering. Furthermore, there is no significant differ-ence between 29a and 29c as both contain both a verti-cal and a horizontal correlation surface in the horizontal pipes each. Thus, the effects of the vertical correlation surface in the horizontal pipe cannot be differentiated. 
+
+VI. CONCLUSION 
+
+In this work, we developed a pipe diagram represen-tation for the triangular color code on the 6.6.6 lattice based on a lattice surgery scheme with semi-transparent domain walls, valid for arbitrary code distance d. From this microscopic construction, distance-independent pipe diagrams emerge alongside constructions of correlation surfaces, and we showed how these connect to a ZX-diagrammatic description of the computation. Building on these foundations, we presented examples of macro-scopic compilation that illustrate the potential of this approach, in particular with the availability of transver-sal single-qubit Clifford gates. Also the higher-degree ZX nodes in the color code may be a benefit in this pic-ture. At this stage, however, it is not yet possible to make a general statement about whether the color code or the surface code performs better in terms of spacetime overhead; this work is intended as a proof-of-principle exploration of pipe diagrams for a code beyond the sur-face code. We further proposed a syndrome extraction scheme for this setup and showed via simulation that the resulting logical error rates are reasonable in comparison 18 10 3 10 2 10 1   
+
+> Physical Error Rate
+> 10 3
+> 10 2
+> 10 1
+> Logical Error Rate
+> Surface Code d=3
+> Surface Code d=5
+> Surface Code d=7
+> Color Code d=3
+> Color Code d=5
+> Color Code d=7
+
+(a) 10 3 10 2 10 1    
+
+> Physical Error Rate
+> 10 3
+> 10 2
+> 10 1
+> Logical Error Rate
+> Surface Code d=3
+> Surface Code d=5
+> Surface Code d=7
+> Color Code d=3
+> Color Code d=5
+> Color Code d=7
+
+(b) 10 3 10 2 10 1   
+
+> Physical Error Rate
+> 10 3
+> 10 2
+> 10 1
+> Logical Error Rate
+> Surface Code d=3
+> Surface Code d=5
+> Surface Code d=7
+> Color Code d=3
+> Color Code d=5
+> Color Code d=7
+
+(c) 10 3 10 2 10 1     
+
+> Physical Error Rate
+> 10 4
+> 10 3
+> 10 2
+> 10 1
+> Logical Error Rate
+> Surface Code d=3
+> Surface Code d=5
+> Surface Code d=7
+> Color Code d=3
+> Color Code d=5
+> Color Code d=7
+
+(d) 
+
+FIG. 29. Comparison of logical error rates between the surface code and color code for a logical CNOT gate with the different available logical operators. For the color code, the tesseract decoder was used, and for the surface code, correlated pymatching. The pipe diagram in Fig. 16 (right) displays what is simulated here. 
+
+to the surface code, though faster and more accurate de-coders will be necessary to make this comparison more conclusive. Future work should explore pipe diagram constructions based on other lattice surgery schemes, such as those of [24], which are not considered here. Moreover, ex-ploring topological codes with multiple logical qubits en-coded per patch or color codes on lattices other than the 6.6.6 lattices would be worthwhile to explore too. Furthermore, alternative syndrome extraction schemes should be explored and quantitatively compared. A fur-ther important direction is the development of fully auto-mated software for both microscopic compilation, includ-ing syndrome extraction circuit generation, and macro-scopic compilation, i.e., the compact embedding of ZX diagrams as pipe diagrams in spacetime [21, 22]. Finally, this work is restricted to Clifford operations; incorporat-ing T gates into the color code pipe diagram framework will be an important next step towards universal fault-tolerant computation. 
+
+ACKNOWLEDGMENTS 
+
+L.H. thanks Lucas Berent, Aleksander Kubica, Tom Peham, Ludwig Schmid, and Erik Weilandt for helpful discussions and feedback on the project. 3D figures were created with SketchUp. We used Piper Draw by Wal-rus Computing to check surface code diagrams in the process of this work. L.H. and R.W. acknowledge fund-ing from the European Research Council (ERC) under the European Union’s Horizon 2020 research and inno-vation program (grant agreement No. 101001318) and 19 Millenion (grant agreement No. 101114305). This work was part of the Munich Quantum Valley, which is sup-ported by the Bavarian state government with funds from the Hightech Agenda Bayern Plus. This work was funded by the Deutsche Forschungsgemeinschaft (DFG, German Research Foundation, No. 563402549). Furthermore, this work was supported by the BMFTR under grant number 13N17298 (SYNQ). 
+
+[1] H. Bombin and M. A. Martin-Delgado, Quantum mea-surements and gates by code deformation, Journal of Physics A: Mathematical and Theoretical 42 , 095302 (2009). [2] D. Horsman, A. G. Fowler, S. Devitt, and R. V. Meter, Surface code quantum computing by lattice surgery, New J. Phys. 14 , 123011, publisher: IOP Publishing. [3] A. J. Landahl and C. Ryan-Anderson, Quantum comput-ing by color-code lattice surgery (2014), arXiv:1407.5103 [quant-ph]. [4] A. Molavi, A. Xu, S. Tannu, and A. Albarghouthi, Dependency-aware compilation for surface code quantum architectures, Proceedings of the ACM on Programming Languages 9, 57–84 (2025). [5] M. Beverland, V. Kliuchnikov, and E. Schoute, Surface code compilation via edge-disjoint paths, PRX Quantum 
+
+3, 020342 (2022), publisher: American Physical Society. [6] G. Watkins, H. M. Nguyen, K. Watkins, S. Pearce, H.-K. Lau, and A. Paler, A high performance compiler for very large scale surface code computations, Quantum 8, 1354 (2024), arXiv:2302.02459. [7] L. S. Herzog, L. Berent, A. Kubica, and R. Wille, Lat-tice surgery compilation beyond the surface code, in 2025 IEEE International Conference on Quantum Computing and Engineering (QCE) , Vol. 01 (2025) pp. 489–500. [8] L. S. Herzog, L. Berent, A. Kubica, and R. Wille, Exploit-ing movable logical qubits for lattice surgery compilation (2025), arXiv:2512.04169 [quant-ph]. [9] A. Fowler, Surface code quantum compu-tation, https://drive.google.com/file/d/ 1gCNpSdvE7Xtnf6Onh05vz9PX_WkjNv2r/view (2025), unpublished manuscript. [10] A. Suau, Y. Zhang, P. Thakre, Y. Zhao, K. Dubey, J. A. Bolanos, A. Schelpe, T. Hao, P. Seitz, G. G. Guerreschi, A. E. A. P´ erez, R. Stahn, J. Lenssen, B. Reid, and A. Fowler, tqec: A python package for topological quan-tum error correction, Journal of Open Source Software 
+
+11 , 9142 (2026). [11] A. G. Fowler, M. Mariantoni, J. M. Martinis, and A. N. Cleland, Surface codes: Towards practical large-scale quantum computation, Phys. Rev. A 86 , 032324 (2012), arXiv:1208.0928. [12] H. Bombin and M. A. Martin-Delgado, Topological quan-tum distillation, Phys. Rev. Lett. 97 , 180501 (2006), quant-ph/0605138. [13] S. Koutsioumpas, T. Noszko, H. Sayginel, M. Webster, and J. Roffe, Colour codes reach surface code perfor-mance using vibe decoding (2025), 2508.15743 [quant-ph]. [14] A. Kubica and N. Delfosse, Efficient color code decoders in d ≥ 2 dimensions from toric code decoders, Quantum 
+
+7, 929 (2023). [15] C. Chamberland, A. Kubica, T. J. Yoder, and G. Zhu, Triangular color codes on trivalent graphs with flag qubits, New Journal of Physics 22 , 023019 (2020). [16] C. Gidney and C. Jones, New circuits and an open source decoder for the color code (2023), arXiv:2312.08813 [quant-ph]. [17] S.-H. Lee, A. Li, and S. D. Bartlett, Color code decoder with improved scaling for correcting circuit-level noise, Quantum 9, 1609 (2025), arXiv:2404.07482. [18] A. Silva, X. Zhang, Z. Webb, M. Kramer, C.-W. Yang, X. Liu, J. Lemieux, K.-W. Chen, A. Scherer, and P. Ron-agh, Multi-qubit Lattice Surgery Scheduling, in 19th Conference on the Theory of Quantum Computation, Communication and Cryptography (TQC 2024) , Leibniz International Proceedings in Informatics (LIPIcs), Vol. 310, edited by F. Magniez and A. B. Grilo (Schloss Dagstuhl – Leibniz-Zentrum f¨ ur Informatik, Dagstuhl, Germany, 2024) pp. 1:1–1:22. [19] D. Herr, F. Nori, and S. J. Devitt, Lattice surgery transla-tion for quantum computation, New J. Phys. 19 , 013034 (2017), publisher: IOP Publishing. [20] M. Zhu, H. Fu, J. Wu, C. Zhang, W. Xie, and X.-Y. Li, Ecmas: Efficient circuit mapping and scheduling for sur-face code, in 2024 IEEE/ACM International Symposium on Code Generation and Optimization (CGO) (2024) pp. 158–169. [21] J. Zhou, Y. Liu, E. Decker, J. Kalloor, M. Wei-den, K. Chen, C. Iancu, and G. Li, Topols: Lattice surgery compilation via topological program transforma-tions (2026), arXiv:2601.23109 [quant-ph]. [22] TQEC Community, Topologiq: Algorithmic lattice surgery, https://github.com/tqec/topologiq (2025), accessed: 2026-05-15. [23] D. B. Tan, M. Y. Niu, and C. Gidney, A sat scalpel for lattice surgery: Representation and synthesis of subrou-tines for surface-code fault-tolerant quantum computing, in 2024 ACM/IEEE 51st Annual International Sympo-sium on Computer Architecture (ISCA) (2024) pp. 325– 339. [24] F. Thomsen, M. S. Kesselring, S. D. Bartlett, and B. J. Brown, Low-overhead quantum computing with the color code, Phys. Rev. Res. 6, 043125, publisher: American Physical Society. [25] D. Litinski, M. S. Kesselring, J. Eisert, and F. v. Oppen, Combining topological hardware and topological soft-ware: Color code quantum computing with topological superconductor networks, Phys. Rev. X 7, 031048 (2017), arXiv:1704.01589. [26] H. Bombin, Topological subsystem codes, Phys. Rev. A 
+
+81 , 032301 (2010), publisher: American Physical Society. [27] H. Bomb´ ın, Topological codes, in Quantum Error Correc-tion , edited by D. A. Lidar and T. A. Brun (Cambridge University Press, 2013) p. 455–481. [28] D. E. Gottesman, Stabilizer Codes and Quantum Error Correction , Ph.D. thesis (1997). [29] A. Kitaev, Fault-tolerant quantum computation by anyons, Annals of Physics 303 , 2–30 (2003). 20 
+
+[30] E. Dennis, A. Kitaev, A. Landahl, and J. Preskill, Topological quantum memory, Journal of Mathematical Physics 43 , 4452–4505 (2002). [31] A. Kubica, The ABCs of the Color Code: A Study of Topological Quantum Codes as Toy Models for Fault-Tolerant Quantum Computation and Quantum Phases Of Matter , Ph.D. thesis (2018). [32] Note, however, in general, a ‘star-shaped’ logical operator does not necessarily require a strict symmetry of 2 π/ 3rotations. The constructions of this work do not explicitly rely on a strict rotational symmetry. [33] A. G. Fowler and C. Gidney, Low overhead quantum com-putation using lattice surgery (2019), arXiv:1808.06709 [quant-ph]. [34] C. Gidney, Inplace Access to the Surface Code Y Basis, Quantum 8, 1310 (2024). [35] M. E. Beverland, A. Kubica, and K. M. Svore, Cost of universality: A comparative study of the overhead of state distillation and code switching with color codes, PRX Quantum 2, 020341 (2021). [36] C. Gidney and A. G. Fowler, Efficient magic state facto-ries with a catalyzed ccz to 2 t transformation, Quantum 
+
+3, 135 (2019). [37] J. v. d. Wetering, ZX-calculus for the working quantum computer scientist (2020), arXiv:2012.13966. [38] A. Kissinger and J. van de Wetering, Picturing Quan-tum Software: An Introduction to the ZX-Calculus and Quantum Compilation (Preprint, 2024). [39] N. de Beaudrap and D. Horsman, The ZX calculus is a language for surface code lattice surgery, Quantum 4, 218 (2020), arXiv:1704.08670. [40] J. C. Magdalena de la Fuente, J. Old, A. Townsend-Teague, M. Rispler, J. Eisert, and M. M¨ uller, XYZ ruby code: Making a case for a three-colored graphical cal-culus for quantum error correction in spacetime, PRX Quantum 6, 010360 (2025). [41] M. S. Kesselring, J. C. Magdalena de la Fuente, F. Thom-sen, J. Eisert, S. D. Bartlett, and B. J. Brown, Anyon condensation and the color code, PRX Quantum 5,010342 (2024), publisher: American Physical Society. [42] A. Kubica and M. E. Beverland, Universal transversal gates with color codes: A simplified approach, Phys. Rev. A 91 , 032330, publisher: American Physical Society. [43] C. Vuillot, L. Lao, B. Criger, C. G. Almud´ ever, K. Ber-tels, and B. M. Terhal, Code deformation and lattice surgery are gauge fixing, New J. Phys. 21 , 033028 (2019), publisher: IOP Publishing. [44] A few words on simulating such structures are in order here. Simulations of pipe diagrams require a deterministic observable, i.e., a correlation surface with deterministic measurement outcomes. To achieve this, one usually adds prisms/cubes at the open ports of a pipe diagram. While diagrams ending temporally are straightforward to sim-ulate, diagrams ending spatially require a more careful construction of the correlation surface such that a deter-ministic measurement result can be guaranteed. [45] Of course, if a spatial Hadamard was applied within a spatial pipe, blue and red prisms can be connected also in the bulk of a diagram. But this adds logical action which is not desired here. [46] Note that the application of spatial gates would possibly further reduce the spacetime volume. [47] C. Gidney, N. Shutty, and C. Jones, Magic state cultiva-tion: growing t states as cheap as CNOT gates (2024), 2409.17595. [48] S. Koutsioumpas and J. Roffe, Vibe Decoding Quantum Error Correction with CUDA. [49] T. J. Yoder and I. H. Kim, The surface code with a twist, Quantum 1, 2 (2017), arXiv:1612.04795. [50] G. Kishony and A. Fowler, Surface code off-the-hook: diagonal syndrome-extraction scheduling (2026), arXiv:2602.09099 [quant-ph]. [51] C. Chamberland, A. Kubica, T. J. Yoder, and G. Zhu, Triangular color codes on trivalent graphs with flag qubits, New Journal of Physics 22 , 023019 (2020). [52] G. Kishony and A. Fowler, Color code off-the-hook: avoiding hook errors with a single auxiliary per plaquette (2026), arXiv:2603.28852 [quant-ph]. [53] One timestep is defined by a multitude of gates that can be applied in parallel, i.e., with disjoint physical qubit overlap. [54] C. Gidney, Stim: a fast stabilizer circuit simulator, Quan-tum 5, 497 (2021). [55] O. Higgott and C. Gidney, Sparse Blossom: correcting a million errors per core second with minimum-weight matching, Quantum 9, 1600 (2025). [56] A. G. Fowler, Optimal complexity correction of corre-lated errors in the surface code (2013), arXiv:1310.0863 [quant-ph]. [57] L. Aghababaie Beni, O. Higgott, and N. Shutty, Tesser-act: A search-based decoder for quantum error correction (2025), arXiv:2503.10988 [quant-ph]. [58] An explanation of binomial confidence intervals in stim can be found here.

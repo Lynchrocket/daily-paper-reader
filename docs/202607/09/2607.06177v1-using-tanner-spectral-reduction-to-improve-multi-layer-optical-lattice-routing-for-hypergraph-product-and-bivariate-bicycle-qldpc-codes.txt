@@ -1,0 +1,1098 @@
+Title: Using Tanner Spectral Reduction to Improve Multi-Layer Optical Lattice Routing for Hypergraph-Product and Bivariate Bicycle qLDPC Codes
+
+URL Source: https://arxiv.org/pdf/2607.06177v1
+
+Published Time: Wed, 08 Jul 2026 00:54:39 GMT
+
+Number of Pages: 24
+
+Markdown Content:
+# Using Tanner Spectral Reduction to Improve Multi-Layer Optical Lattice Routing for Hypergraph-Product and Bivariate Bicycle qLDPC Codes 
+
+## Joshua M. Courtney 
+
+University of Georgia, Department of Physics and Astronomy July 6, 2026 
+
+We characterize the Tanner graph spectrum of hypergraph-product (HGP) / lifted-product (LP) codes and bivariate-bicycle (BB) codes, informing qubit routing for three-dimensional reconfigurable qubit architectures. Syndrome-extraction routing depth on HGP/LP Tanner graphs reduces to a single SVD on the base parity-check matrix, us-ing a spectral ratio βHGP = (1 + βbase )/2 where βbase = σ2(H)/σ 1(H) for the base parity-check matrix, and a diameter identity DT = 2 Dbase where Dbase is the base Tanner graph diameter. Fourier spectral reduction reveals that the BB Tanner graph spectrum equals the union, over the l × m grid of characters of Zl × Zm, of the sin-gular values of a single 2 × 2 symbol matrix built from the two defining polynomials. This reduces spectral analysis from an O(( lm )3) diagonalization of the 4lm -node Tan-ner graph to lm independent 2 × 2 SVDs. These results compose into a multi-layer three-dimensional AOL routing protocol with one-time setup cost TValiant = O(log N )
+
+atom rearrangements amortizable over a memory experiment of R rounds. For a Tan-ner graph chromatic index χ′ and Llayers stacked AOL planes, the per-syndrome-cycle depth is ⌈χ′/L layers ⌉ AOL pattern activations with no atom motion, an 8× step-count reduction at Llayers ≥ χ′ = 8 . Contingent on multi-layer AOL hardware, this yields an estimated ∼ 50 –300 × per-cycle wall-clock advantage over a single-layer AOD baseline (degrading to ∼ 5–100 × under AOD-crosstalk overhead), reducing to equality in the single-layer limit. This paper therefore presents a route toward practical routing im-provement for future quantum hardware incorporating multi-layer reconfigurable qubit architectures. 
+
+# 1 Introduction 
+
+Recent demonstrations of quantum low-density parity check (qLDPC) code architectures [1–3] substantially reduce physical-qubit overhead for fault-tolerant quantum computation compared to surface codes, realizing a constant overhead [4]. These works use routing primitives moving qubits between data and ancilla positions across each syndrome extraction cycle. While syndrome-extraction circuit depth (number of CNOT layers) is well-understood for these codes [5, 6], atom-rearrangement depth required to support each circuit layer has yet to be characterized in terms of the underlying Tanner graph spectrum. Impetus for this characterization stems from both hardware runtime bottlenecks in atom/ion reconfigurations and assessing the potential advantage of incorporating an effective third dimension to reduce routing overhead in neutral atom and trapped ion qubit architectures. We give a closed-form formula βHGP = (1+ βbase )/2 and an exact diameter identity DT = 2 Dbase 
+
+for hypergraph-product/lifted-product (HGP/LP) code Tanner graphs (Sec. 3). Using Fourier diagonalization (Theorem 3.6), we reduce the bivariate bicycle (BB) Tanner graph spectrum to 
+
+lm independent 2 × 2 singular-value decompositions, and prove that no scalar (1 + βbase )/2-style 
+
+Joshua M. Courtney: Joshua.Courtney1@uga.edu 
+
+1arXiv:2607.06177v1 [quant-ph] 7 Jul 2026 one-liner holds for BB codes. We give a syndrome-extraction protocol and depth bound for a 2D acousto-optic deflector (AOD) atom array augmented with Llayers stacked 3D acousto-optic lens (AOL) planes, applicable uniformly to HGP, LP, and BB codes (Sec. 4). Section 5 gives a numerical comparison to Xu et al. [2]’s scheme on the published HGP code family, under matched amortization assumptions, with BB codes (Sec. 6.1) measured in the same framework. We connect to two recent qLDPC architectures, situated among a growing body of neutral-atom qLDPC layout and routing work [7–10]. Xu et al. [2] implement HGP/LP codes on reconfigurable atom arrays with 2D divide-and-conquer scrambling. Bravyi et al. [1] demonstrate bivariate bicycle (BB) codes on superconducting hardware whose Tanner graph decomposes into two edge-disjoint planar subgraphs (Sec. 6). We refer to and pipeline Algorithm 3 from Xu et al. [2], requiring 
+
+2δc = 8 atom rearrangements per syndrome cycle on single-layer AOD hardware (constant in N ). Our scheme on multi-layer 3D AOL with Llayers stacked planes requires ⌈2δc/L layers ⌉ AOL pattern activations per cycle (also constant in N ), with no atom motion in the application phase. The one-time setup cost TValiant to bring atoms into canonical positions grows as Θ(log N ) but amortizes over the R ≳ 10 3 syndrome rounds of a memory experiment. The per-cycle speedup is Llayers for 
+
+Llayers ≤ χ′ = 8 and saturates at 8× for Llayers ≥ 8. Both schemes are O(1) per cycle in atom-array reconfigurations, and the multi-layer architecture contributes a constant-factor advantage. For non-QC HGP/LP codes, both schemes remain applicable, since Xu et al. [2]’s Algorithm 1 handles arbitrary 1D permutations as well as shifts, while our AOL patterns are arbitrary matchings rather than shifts, but remain pre-storable on Bluvstein [11]-style hardware. With König-optimal edge coloring, χ′(GT ) = 2 δc for both QC and non-QC bases. The only non-QC cost becomes an offline preprocessing burden of computing and storing χ′ AOL patterns (Sec. 5.5). Table 1 situates the multi-layer AOL protocol against existing routing regimes for syndrome extraction at qLDPC scale. 
+
+Routing scheme Per-cycle cost Setup cost Applicable codes Hardware demon-strated Grid + nearest-neighbor shuttling 
+
+Θ( √N ) atom mo-tions — surface code yes [11] Single-layer AOD, Xu et al. Alg. 3 [2] 
+
+2δc atom motions — HGP / LP yes [2, 11] Two edge-disjoint planar overlays [1] 
+
+χ′(GBB  
+
+> T
+
+) = 6 cou-plings — Bravyi BB codes only yes (superconduct-ing) [1] Multi-layer 3D AOL, this work, Llayers ≥
+
+χ′
+
+1 AOL pattern acti-vation 
+
+TValiant =
+
+O(log N )
+
+HGP / LP / BB partial (Llayers ≲ 2
+
+today [11]) 
+
+Table 1: Four-regime comparison of syndrome-extraction routing schemes. Per-cycle costs are constant in 
+
+N for all qLDPC schemes (surface-code grid scales as Θ( √N )). Our scheme adds a one-time TValiant =
+
+O(log N ) setup cost that amortizes to negligible per cycle within the first few rounds of a memory experiment (Theorem 4.1). The setup-cost constant kemp = TValiant / log 2 N is empirically ≈ 0.55 across the validated range N ≤ 100 ,000 (Table 3). BB codes [1] achieve a lower per-cycle constant ( χ′BB = 6 vs. χ′HGP ,(3 ,4) = 8 )by construction, as reflected in the saturation point (Sec. 6.1). 
+
+# 2 Background 
+
+## 2.1 Ramanujan graphs and routing 
+
+Following previous work [12], a d-regular graph G is Ramanujan [13–15] if its non-trivial eigenvalues satisfy |λi| ≤ 2√d − 1 for i̸ = 1 , N . Random regular graphs are nearly Ramanujan [16] (see also the expander survey [17]). The spectral ratio β = λ⋆/d where λ⋆ = max( |λ2|, |λN |) controls the routing depth via Valiant’s two-phase scheme [18, 19]. There we find that for a d′-regular Ramanujan graph 
+
+G on N ≥ 16 vertices with spectral ratio β:
+
+rt( G) ≤ 4( d′ + 6) 
+
+d′ log 2(1 /β ) log 2 N + 19 log 2 N, (1) 
+
+2acting as a tight bound in the worst case but loose by ∼ 25 × for HGP code Tanner graphs (see Sec. 4.3). 
+
+## 2.2 HGP and LP qLDPC code Tanner graphs 
+
+For a classical parity-check matrix H (size m × n) with bipartite Tanner graph Gbase , the HGP code HGP[ H, H ′] (Tillich–Zémor [20], generalizing the quantum hypergraph-product construction of Kovalev–Pryadko [21]) has N = nn ′ + mm ′ data qubits, mX = mn ′ X-checks, and mZ = nm ′
+
+Z-checks. We focus on the self-product case H = H′ throughout this paper. The full Tanner graph GT is bipartite, with qubits on one side and all checks on the other. We index nodes as L-qubits (v, w ) ∈ V × V, R-qubits (c, c ′) ∈ C × C, 
+
+X-checks (c, w ) ∈ C × V, Z-checks (v, c ′) ∈ V × C, 
+
+where V = {1, . . . , n } are variable nodes and C = {1, . . . , m } are check nodes of Gbase . Edges follow the standard HGP definition. LP codes [22] are HGP codes built from a ZL voltage cover of a base H. The lifted-product and balanced-product constructions [22–24] and quantum Tanner/expander codes [25–27] are the route to asymptotically good qLDPC codes. The lifted matrix Hlift has size mL × nL , and the LP Tanner graph is HGP[ Hlift , H lift ].
+
+## 2.3 Atom-array hardware: 2D AOD and 3D AOL 
+
+We take the hardware model of a 2D atom array on an L × L grid ( N = L2 atoms), with acousto-optic deflectors (AOD) providing arbitrary atom-pair connectivity through coherent transport [2, 11], building on the reconfigurable Rydberg-array platform [28–33]. 3D acousto-optic lattices (AOL) augment this with multiple stacked “layers” of independent AOD patterns, denoted here as Llayers , a premise supported by demonstrated 3D atom-array assembly [34] and by recent 3D acousto-optic transport hardware [35–37]. In previous work (Xu et al. [2]), atom rearrangement uses a divide-and-conquer 1D scrambling algorithm achieving arbitrary permutations in O(log L) recursive levels. Each level requires parallel atom motion of distance up to L = √N , with per-level wall-clock ∼ 3 ms at N ∼ 10 4 scaling as O(N 1/4) under constant-acceleration physics. This ∼ 3 ms figure is a long-range cubic-spline transport time (Xu et al. Methods Eq. 7, a ∼ 500 μm sweep; cf. the 3 ms AOD rearrangement sweep of Endres et al. [38]), taken as the cost for the one-time full-array scrambling of the setup phase. We distinguish this transport time from the short-range per-gate move used inside a syndrome cycle, whose demonstrated characteristic time is ∼ 200 μs ( 0.55 μm μs−1 cubic-velocity profile) [11, 39]. 
+
+## 2.4 Comparison baseline 
+
+Per Xu et al. [2] Algorithm 3, pipelining requires 2δc rearrangement layers per syndrome cycle, where δc is the chromatic index of the underlying classical parity-check Tanner graph. For a 
+
+(3 , 4) -biregular base, δc = 4 , giving: 
+
+T Xu et al. cycle = 2 δc = 8 , (2) 
+
+constant in N for fixed code structure. Each per-cycle rearrangement layer is a short-range data ↔ancilla move, whose demonstrated characteristic wall-clock is ∼ 200 μs [11, 39], giving 
+
+8 × 200 μs ≈ 1.6 ms per syndrome cycle at N ∼ 10 4. Gate-depth count of 16 entangling layers (“ 4δc” in their notation) is a separate quantity from the rearrangement-layer count. 
+
+# 3 Spectral Characterization of qLDPC Tanner Graphs 
+
+This section presents structural results for the Tanner graphs of two qLDPC families. 
+
+33.1 Spectrum decomposition (Result 1a) 
+
+Proposition 3.1. For an HGP code HGP[ H, H ] with rank r base parity-check matrix H, every eigenvalue of the full Tanner graph adjacency matrix AGT lies in the multiset 
+
+spec( AGT ) ⊆ {± (σi ± σj ) : 1 ≤ i, j ≤ r} ∪ {± σk : 1 ≤ k ≤ r} ∪ { 0} (3) 
+
+where σ1 ≥ · · · ≥ σr > 0 are the nonzero singular values of H. We refer to the first set as product modes and to the second set as boundary modes .Proof. The Tanner graph is bipartite between qubits and checks, so its adjacency is AGT = ( 0 BBT 0
+
+)
+
+with B the qubit-to-check biadjacency, and spec( AGT ) = {± σ : σ ∈ sv( B)} ∪ { 0}. Using the HGP stabilizer blocks HX = ( H ⊗ In | Im ⊗ HT ) and HZ = ( In ⊗ H | HT ⊗ Im) (Tillich–Zémor [20]), 
+
+B = ( HTX | HTZ ) decomposes over the two qubit sectors ( Q0 = V × V , Q1 = C × C), and a direct computation (Appendix A) gives 
+
+BB T =
+
+((HT H) ⊗ In + In ⊗ (HT H) 2 HT ⊗ HT
+
+2 H ⊗ H (HH T ) ⊗ Im + Im ⊗ (HH T )
+
+)
+
+.
+
+Fix the SVD H = ∑ 
+
+> k
+
+σk ukwTk (Hw k = σkuk, HT uk = σkwk, 1 ≤ k ≤ r). For each ordered pair 
+
+(i, j ) with σi, σ j > 0, the two-dimensional space span { wi ⊗ wj , u i ⊗ uj } is BB T -invariant, and in this basis 
+
+BB T ∣∣(i,j ) =
+
+(σ2 
+
+> i
+
++ σ2 
+
+> j
+
+2σiσj
+
+2σiσj σ2 
+
+> i
+
++ σ2
+
+> j
+
+)
+
+, eigenvalues (σi ± σj )2,
+
+so B has singular values σi + σj and |σi − σj | (the product modes ). When one factor is a kernel/cokernel direction of H (σj = 0 ) the off-diagonal coupling vanishes and wi ⊗ wj0 (resp. 
+
+ui ⊗ uj0 ) is an eigenvector with eigenvalue σ2 
+
+> i
+
+, giving singular value σi (the boundary modes 
+
+±σk); pairs of kernel/cokernel directions give the zero modes. Collecting these accounts for the full multiset (3). The complete arithmetic, including the mixed-product identities (HT ⊗ In)( Im ⊗
+
+HT ) = HT ⊗ HT that produce the factor 2, is given in Appendix A. 
+
+Across nine random (3 , 4) -biregular bases at n = 12 (HGP code on 441 nodes), we account for all eigenvalues by the multiset of Eq. (3) . Full-rank H (rank r = m = 9 ) gives 75-84% product-mode eigenvalues, while rank-deficient H (e.g., r = 7 or 8) gives 56-76% product-modes with the remainder split between boundary and zero modes. The mean product fraction over the tested seeds is ≈ 70 ± 9% . Figure 1 visualizes this decomposition for the [[225 , 9, 4]] instance, and every measured eigenvalue lands on a predicted product or boundary position from the multiset Eq. (3) .
+
+## 3.2 Closed-form spectral ratio (Result 1b) 
+
+Theorem 3.2. For an HGP code HGP[ H, H ] whose base parity-check matrix H has a simple top singular value ( σ1(H) > σ 2(H), i.e. βbase = σ2(H)/σ 1(H) < 1), the non-trivial bipartite spectral ratio of the Tanner graph GT is 
+
+βHGP = 1 + βbase 
+
+2 . (4) 
+
+Equivalently, the spectral gap is halved: 1 − βHGP = (1 − βbase )/2.Proof. By hypothesis σ1(H) > σ 2(H), so βbase < 1 and the top singular value is simple. (The excluded boundary case σ1 = σ2 is βbase = 1 , where the base graph is not a spectral expander and the routing bound of Eq. (1) is vacuous and of no interest for routing.) By Proposition 3.1 the Tanner spectrum is the multiset of Eq. (3). Its Perron eigenvalue is the product mode with 
+
+i = j = 1 , namely 2σ1(H). Because σ1 is simple, no other pair (i, j ) attains σi + σj = 2 σ1, so this Perron value is itself simple. The non-trivial second eigenvalue (in absolute value, excluding the ±2σ1 Perron pair) is the maximum over: 1. Product modes ±(σi + σj ) with (i, j )̸ = (1 , 1) : maximum is σ1 + σ2.2. Product modes ±(σi − σj ): maximum is σ1 − σr ≤ σ1.
+
+40
+
+5
+
+10 
+
+15 
+
+20 
+
+25 
+
+30 
+
+35         
+
+> eigenvalues per bin
+> HGP[[225, 9, 4]] Tanner-graph spectrum Proposition 3.1: all 441 eigenvalues matched (0 unmatched)
+> product ±( i±j)[333, 76%]
+> boundary ± k[108, 24%]
+> zero [0, 0%]
+
+6 4 2 0 2 4 6 8
+
+eigenvalue 
+
+> predicted
+> product positions
+> predicted
+> boundary positions
+
+Figure 1: Spectrum decomposition of the HGP code [[225 , 9, 4]] (seed 1, full-rank base H). Top: histogram of all 441 Tanner graph eigenvalues, stacked by Proposition 3.1 classification, as product modes ±(σi ± σj ) (blue, 333 eigenvalues, 76% ) and boundary modes ±σk (orange, 108 eigenvalues, 24% ). Zero unmatched eigenvalues. Bottom: the predicted multiset positions as tick marks, aligned with the top-panel histogram. 
+
+3. Boundary modes ±σk: maximum is σ1.For σ2 > 0, σ1 + σ2 > σ 1, so the product mode dominates. Then 
+
+βHGP = σ1 + σ2
+
+2σ1
+
+= 1 + σ2/σ 1
+
+2 = 1 + βbase 
+
+2 .
+
+For the rank-1 edge case ( σ2 = 0 , i.e., βbase = 0 ), the second eigenvalue reduces to the boundary mode σ1, giving βHGP = 1 /2 = (1 + 0) /2.
+
+Numerically, we evidence this result with double-precision matching across 26 instances span-ning base sizes n ∈ { 12 , 16 , 20 , 24 } and LP-style lift orders ( L ∈ { 2, 3, 4, 5, 6, 8}). For example, on the [[225, 9, 4]] HGP code: βbase = 0 .7609 predicts βHGP = 0 .8804 to all measured digits, implicating computability of the full Tanner graph spectral structure from a single SVD on the base parity-check matrix. The closed form feeds directly into the routing-depth bound, making the “single SVD” claim quantitative. 
+
+Corollary 3.3 (A base SVD determines the HGP routing depth) . Under the hypotheses of Theo-rem 3.2, substituting βHGP = (1 + βbase )/2 into the routing-depth bound (1) gives 
+
+rt( GT ) ≤
+
+(
+
+4( d′ + 6) 
+
+d′ log 2
+
+( 21+ βbase 
+
+) + 19 
+
+)
+
+log 2 N. (5) 
+
+Hence the routing depth of the N -node HGP Tanner graph is determined by the single base ratio 
+
+βbase = σ2(H)/σ 1(H), i.e. by one SVD of the (much smaller) base parity-check matrix H, with no diagonalization of GT itself. Proof. Immediate from Eq. (1) with β = βHGP and log 2(1 /β HGP ) = log 2
+
+(2/(1 + βbase )) by Theo-rem 3.2. 
+
+Remark 3.4 (Genericity of the simple-σ1 hypothesis) . The hypothesis σ1(H) > σ 2(H) is generic rather than restrictive: a repeated top singular value is a non-generic coincidence, and it was simple in every random (c, r )-biregular base we tested. It holds throughout the Ramanujan regime 
+
+βbase < 1 that the routing application targets. 
+
+53.3 Diameter identity (Result 2) 
+
+Theorem 3.5. For an HGP code HGP[ H, H ] where the classical Tanner graph Gbase of H is connected with diameter Dbase ≥ 1, the full Tanner graph GT has diameter 
+
+DT = 2 Dbase . (6) 
+
+Proof. Upper bound. Every node u ∈ VGT has well-defined projections 
+
+(π1(u), π 2(u)) ∈ VGbase × VGbase .
+
+Every edge (u, u ′) ∈ EGT satisfies one of πi(u) = πi(u′) for i ∈ { 1, 2}, with the other coordinate’s pair forming an edge in Gbase . For any two HGP nodes u, u ′, take a shortest base-graph path in coordinate 1 (length ≤ Dbase ) followed by a shortest path in coordinate 2 (length ≤ Dbase ). Each base-edge corresponds to one edge in GT , giving a total ≤ 2Dbase .
+
+Lower bound. We exhibit an L-qubit, R-qubit, or X/Z-check pair (u0, u k) with 
+
+dGbase (π1(u0), π 1(uk)) = dGbase (π2(u0), π 2(uk)) = Dbase .
+
+Following case-by-case by the parity of the diameter realizer in the bipartite base graph Gbase :
+
+• Dbase realized by V-V pair (p, q ). Take u0 = ( p, p ), uk = ( q, q ) ∈ L (L-qubits). Both projections give Dbase .
+
+• Dbase realized by C-C pair (p, q ). Take u0 = ( p, p ), uk = ( q, q ) ∈ R (R-qubits). 
+
+• Dbase realized by V-C pair (p, q ). Take u0 = ( p, q ) ∈ Z and uk = ( q, p ) ∈ X . Then π1(u0) = p,
+
+π1(uk) = q, dGbase (p, q ) = Dbase , and similarly for π2.In each case we bound the length of an arbitrary GT -path u0 = x0, x 1, . . . , x ℓ = uk, which shows no shorter route exists. By the edge structure recalled in the upper bound, every step xtxt+1 changes one projection coordinate, by an edge of Gbase : call it type-1 if it fixes π1 (moving π2 along a Gbase -edge) and type-2 if it fixes π2. The coordinate π2 changes only on type-1 steps, so the images 
+
+π2(x0), π 2(x1), . . . , π 2(xℓ), with consecutive repeats deleted, form a Gbase -walk from π2(u0) to 
+
+π2(uk). Its length equals the number of type-1 steps, which is therefore ≥ dGbase (π2(u0), π 2(uk)) = 
+
+Dbase . Symmetrically the number of type-2 steps is ≥ dGbase (π1(u0), π 1(uk)) = Dbase . Since every step has one type, ℓ ≥ 2Dbase . As u0, u k were chosen with both projection distances equal to Dbase ,this gives DT ≥ 2Dbase . Combined with the upper bound, DT = 2 Dbase .
+
+For random (c, r )-biregular base graphs, Dbase = O(log n/ log dbase ) where NHGP = Θ( n2), so 
+
+DT = 2 Dbase = O
+
+(
+
+log √NHGP 
+
+)
+
+= O(log NHGP ).
+
+The constant in front of log NHGP is 1/ log dbase via the base graph’s expansion, which is tighter than the generic diameter bound’s constant 1/ log 2(1 /β HGP ), improving the constant on a mutual 
+
+O(log N ) scaling. 
+
+## 3.4 Spectral reduction for bivariate-bicycle codes 
+
+The results above rest on the hypergraph-product structure HX = ( H ⊗ I | I ⊗ HT ). As it stands, the results above do not extend to bivariate-bicycle (BB) codes. Those are built from two commut-ing circulant polynomials rather than a product of a base code with itself. BB codes nonetheless carry a different abelian symmetry, being the translation group Zl × Zm of the underlying torus. This yields an analogous reduction of the routing-relevant spectrum via Fourier diagonalization. A BB code [1] on n = 2 lm qubits (and its multivariate generalization [40]) is specified by two polynomials 
+
+A(x, y ), B (x, y ) ∈ F2[x, y ]/(xl − 1, y m − 1) ,
+
+acting as lm × lm circulant 0/1 matrices A, B . Its Calderbank-Shor-Steane (CSS) check matrices are HX = ( A | B) and HZ = ( BT | AT ), so 
+
+H =
+
+( A BBT AT
+
+)
+
+, (7) 
+
+6as the qubit-to-check biadjacency of the Tanner graph (size 2lm × 2lm ). The nonzero eigenvalues of the bipartite Tanner adjacency are ±σi(H).
+
+Theorem 3.6 (BB Tanner spectral reduction) . Let ωl = e2πi/l , ωm = e2πi/m , and for each character (a, b ) ∈ Zl × Zm define the polynomial evaluations 
+
+ˆA(a, b ) = ∑
+
+> (i,j )∈A
+
+ωia l ωjb m , ˆB(a, b ) = ∑
+
+> (i,j )∈B
+
+ωia l ωjb m , (8) 
+
+and the 2 × 2 Hermitian-coupled symbol matrix 
+
+M (a, b ) = 
+
+( ˆA(a, b ) ˆB(a, b )ˆB(a, b ) ˆA(a, b )
+
+)
+
+. (9) 
+
+Then the full nonzero Tanner graph spectrum of the BB code is 
+
+spec( AGT ) \ { 0} = ⋃
+
+> (a,b )∈Zl×Zm
+
+{ ±s1(a, b ), ±s2(a, b ) }, (10) 
+
+where s1(a, b ) ≥ s2(a, b ) ≥ 0 are the two singular values of M (a, b ). The routing-relevant spec-tral ratio βBB is obtained from lm independent 2 × 2 singular-value decompositions, an O(lm )
+
+computation in place of the O ((lm )3) diagonalization of the 4lm -node Tanner graph. Proof. The two-dimensional Fourier transform F = Fl ⊗ Fm (unitary, with Fl the l-point FFT) diagonalizes all circulants in F2[x, y ]/(xl − 1, y m − 1) lifted to the reals. For the polynomial A,
+
+F AF ∗ = diag (a,b ) ˆA(a, b ),
+
+since χa,b (i, j ) = ωia l ωjb m is a simultaneous eigenvector of all torus translations. Transposition of a circulant reverses each translation, so 
+
+F A T F ∗ = diag (a,b ) ˆA(a, b ),
+
+and likewise for B. Applying the block-unitary diag( F, F ) to H of Eq. (7) simultaneously diago-nalizes all four blocks. After the permutation that groups the two copies of each character (a, b ),the result is block-diagonal with the 2 × 2 blocks M (a, b ) of Eq. (9). Singular values are invariant under the unitaries F and grouping permutation, so the singular spectrum of H is the disjoint union of the singular spectra of M (a, b ). The bipartite Tanner adjacency has eigenvalues ±σi(H)
+
+together with zeros from the qubit/check count imbalance, giving Eq. (10). 
+
+Unlike Theorem 3.2, the BB ratio βBB has no closed form depending only on individual block ratios βA, β B . The Perron value σ1 = s1(0 , 0) = wA + wB (where wA, w B are the polynomial weights) is fixed by the weights, but the second-largest singular value is attained at a nonzero character (a, b ) whose location depends on monomial exponents. If we assert a transplanted form 
+
+βBB = (1 + max( βA, β B )) /2,
+
+we overshoot the four published Bravyi codes by 0.12 –0.17 and the result fails to hold numerically for non-degenerate codes. We check Theorem 3.6 against direct diagonalization of the full Tanner adjacency across 52 BB codes, including the four published Bravyi instances [1] and 48 random codes spanning polynomial weights w ∈ { 2, 3, 4} (Tanner max-degree ∆ = 2 w ∈ { 4, 6, 8}) and torus sizes up to lm = 144 
+
+(NGT = 576 ). The maximum eigenvalue discrepancy over the whole sweep was 3.1 × 10 −14 .An independent re-derivation taking the singular values of the explicit check matrix (7) (rather than the Tanner adjacency) agreed to 5.6 × 10 −14 on a fresh sample up to NGT = 800 . For the published Bravyi codes the reduction reproduces the measured ratios of Sec. 6.1 ( βBB =0.667 , 0.872 , 0.828 , 0.828 ) to all reported digits. As with the product-code results, the routing-relevant spectrum of a BB code is computable without ever instantiating the full Tanner graph, making spectral screening of BB polynomial families tractable at scales where full diagonalization is infeasible. 
+
+73.5 Random-voltage Ramanujan fraction for LP codes 
+
+For LP codes built from random voltage assignments on a fixed 3 ×5 base support mask (mirroring the family in Xu et al. [2]), we measured the fraction of voltage assignments yielding Ramanujan-Tanner graphs (Feng–Li bipartite condition σ2 ≤ √c − 1 + √r − 1 on the lifted classical Tanner graph) across a sweep of lift orders L ∈ { 2, . . . , 16 }.
+
+L NLP Ramanujan fraction (mean ± std) Mean βlift (mean ± std) 2 136 87 .3% ± 1.1% 0.824 ± 0.003 
+
+3 306 96 .9% ± 0.9% 0.839 ± 0.003 
+
+4 544 84 .3% ± 1.6% 0.866 ± 0.003 
+
+5 850 89 .9% ± 1.1% 0.867 ± 0.002 
+
+6 1224 79 .0% ± 3.3% 0.887 ± 0.003 
+
+8 2176 74 .2% ± 1.7% 0.895 ± 0.001 
+
+12 4896 66 .8% ± 3.1% 0.910 ± 0.002 
+
+16 8704 57 .6% ± 2.1% 0.917 ± 0.002 
+
+Table 2: Random-voltage Ramanujan fraction for LP codes. Each cell aggregates over 5 master seeds ×
+
+500 voltage samples per seed (2500 trials total per (L, N LP ) pair). Reported uncertainties are the cross-seed standard deviation. 
+
+This phenomenon is also found in Courtney [12] Sec. 7’s covering-tower analysis on the Fano plane (94% Ramanujan at k = 2 ), supporting random-voltage code search as a practical strategy for producing routing-friendly LP code instances. 
+
+# 4 Multi-Layer AOL Routing Protocol 
+
+## 4.1 Algorithm 
+
+We apply a one-time Valiant routing on the union of Llayers overlay graphs to canonical 2D-grid positions, followed by R syndrome cycles in which each chromatic color of GT is loaded into one of the stacked AOL planes and fired in parallel. The protocol is stated as Algorithm 1 and illustrated in Figure 2. initial atom        
+
+> positions
+> Valiant routing
+> on Gunion
+> TValiant =O(log N)
+> atom motions canonical 2D
+> grid positions
+> A. Setup phase (once)
+> canonical positions
+> (reused each cycle)
+> activate ′(GT)/ Llayers AOL
+> patterns per cycle
+> no atom
+> motion
+> Llayers
+> stacked
+> AOL planes
+> B. Syndrome cycle (R times)
+> one color =
+> one AOL pattern
+> color 1
+> color 2
+> color 3
+> color 4
+
+Figure 2: Multi-layer 3D AOL routing protocol (Algorithm 1, Sec. 4.1). A. Setup phase: atoms initialized in arbitrary positions are Valiant-routed on the multi-layer overlay Gunion = ⋃Llayers  
+
+> ℓ=1
+
+Gℓ to canonical 2D-grid positions supporting Tanner graph GT chromatic decomposition. One-time cost TValiant = O(log N ) atom motions (Theorem 4.1). B. Syndrome cycle (repeated R times): from the canonical positions, each of χ′(GT )
+
+chromatic colors of a GT edge coloring is loaded into one of Llayers stacked AOL planes. The Llayers planes fire simultaneously, completing all χ′ colors in ⌈χ′(GT )/L layers ⌉ serial AOL pattern activations. No atom motion in this phase. For Llayers ≥ χ′ the per-cycle cost saturates to a single AOL pattern activation, predicting a 
+
+∼ 50 –300 × wall-clock advantage over Xu et al. [2] Algorithm 3 in the canonical-position memory-experiment regime (Sec. 6.2). 
+
+8Algorithm 1. MultiLayerRoute (C, R)
+
+Input: HGP/LP code C with Tanner graph GT , number of syndrome rounds R, hardware specs 
+
+(Llayers , d 0).
+
+Output: parallel atom-rearrangement schedule for R rounds. 1. Setup phase (executed once): (a) Build Gunion = ∪Llayers  
+
+> ℓ=1
+
+Gℓ where each Gℓ is a random d0-regular overlay graph on the data atoms. (b) Apply Valiant–LMR routing [18, 41–43] on Gunion to permute atoms to canonical 2D-grid positions supporting the chromatic decomposition of GT . Depth: TValiant (Gunion ) atom rearrangements. 2. Syndrome cycle (repeated R times, no atom motion): for each batch of Llayers chromatic colors, activate the Llayers pre-computed AOL pattern channels and apply CZ gates simulta-neously. Depth: ⌈χ′(GT )/L layers ⌉ AOL pattern activations. 
+
+Total depth: Ttotal = TValiant (Gunion ) + R · ⌈ χ′/L layers ⌉.
+
+Per-cycle depth (amortized): Ttotal /R = ⌈χ′/L layers ⌉ + TValiant /R → ⌈ χ′/L layers ⌉.
+
+## 4.2 Amortization theorem 
+
+Theorem 4.1. Let HGP[ H, H ] be a quasi-cyclic (block-circulant) HGP code with chromatic in-dex χ′(GT ), on a hardware platform supporting Llayers stacked AOL planes. Algorithm 1 has the following cost decomposition for a memory experiment of R syndrome rounds: 
+
+Tsetup = TValiant (Gunion ) (one-time) ,Tper-cycle = ⌈χ′(GT )/L layers ⌉ (repeated R times) ,Ttotal /R = ⌈χ′(GT )/L layers ⌉ + TValiant /R. 
+
+(11) 
+
+The per-cycle term is constant in N . The setup term grows as Θ(log N ) but contributes 
+
+TValiant /R → 0 as R grows. Proof sketch. Setup phase: one Valiant–LMR routing brings atoms to canonical 2D positions sup-porting the HGP product structure, paid once at the start of the memory experiment. Per cycle: the chromatic decomposition of GT is implementable by AOL pulse patterns with no atom motion (atoms remain in canonical positions between cycles). For a quasi-cyclic base H this consists of χ′ shift operations on the canonical 2D grid. With Llayers stacked planes, Llayers different shifts execute in parallel, completing all χ′ colors in ⌈χ′/L layers ⌉ serial pulse rounds. The atoms do not need to be re-routed between syndrome rounds because canonical positions are preserved by the ancilla measurement-and-reset cycle. 
+
+The shift-based decomposition is simplest when H is quasi-cyclic. Each chromatic color of GT
+
+is implementable as a single axis-aligned translation on the 2D embedding, giving a simple shift pattern to each AOL plane. For non-QC codes (e.g., HGP from random biregular bases), chromatic colors are arbitrary matchings rather than shifts. By König’s theorem [44] (see also Vizing [45] and [46]), χ′(GT ) = ∆( GT ) = 2 δc, being constructible in polynomial time by repeated bipartite matching on the ∆-regular extension [47]. Theorem 4.1’s ⌈χ′/L layers ⌉ bound holds. Computing optimal coloring and storing χ′ arbitrary AOL trap patterns (vs. a single shift template) is an offline precomputation. Per-cycle wall-clock comparisons across QC and non-QC families are reported in Sec. 5.5. The mechanism mirrors Xu et al.’s product coloration but exploits multi-layer parallelism in the application phase. 
+
+## 4.3 Tightened analytical bound for TValiant (Gunion )
+
+Courtney [12] gives an analytical bound on TValiant that is empirically loose by ∼ 25 × for HGP code Tanner graphs (Sec. 5). The looseness has roughly equal contributions from the diameter bound 
+
+9and a generic Chernoff bound on edge congestion. Theorem 3.5 addresses the diameter bound and gives DT = 2 Dbase rather than the generic O(log N/ log(1 /β )) . We conjecture a tightened Chernoff bound using the HGP path-decomposition structure: 
+
+Conjecture 4.2. Per-phase edge load Xe for HGP[ H, H ] under random uniform Valiant scattering satisfies 
+
+P(Xe > c log 2 N ) ≤ N −3c/ 2 (12) 
+
+with constant c ≈ 1 (vs. Courtney [12] c = 9 ). Any type-1 edge e in row w can appear on the canonical path of source u1 → σ(u1) only when π2(u1) = w, restricting the support of Xe to 
+
+n = √N contributions rather than N .
+
+The above conjecture’s constant ( c ≈ 1) comes from a Bernstein-type argument [48, 49] (bounded-difference methods [50] give a comparable tail) with the variance bound Var( Xe) ≤ E[Xe]
+
+from negative association of permutation indicators [51, 52]. A constant c < 1 may require a non-Bernstein technique (e.g., heat-kernel methods directly exploiting the spectrum-decomposition of Proposition 3.1). We cast our focus to establish Conjecture 4.2 as a theorem conditioned on explicit hypotheses on routing structure. Hypotheses (H1) and (H3) are satisfied by HGP under the canonical 2D routing decomposition (Lemma 4.4 and the negative-association argument below). Hypothesis (H2) requires the per-source expectation to be O(1 /|Se|) rather than O(1) . This requires a routing scheme with O(log N ) canonical paths via check-node bridges (discussed after Lemma 4.5). The conjecture as originally stated is strongly conditioned on H2, while a rigorous construction for HGP is left to future work. 
+
+Theorem 4.3 (Tightened Chernoff bound for sparse routing, conditional on (H1)–(H3)) . Let Xe
+
+denote the load on edge e of GT in one Valiant routing phase on HGP[ H, H ] with random uniform intermediate σ ∈ Sym( V ). The hypotheses are: (H1) Path-support. There exists a set Se ⊆ V of size |Se| ≤ s such that Xe = ∑ 
+
+> u∈Se
+
+I(e) 
+
+> u
+
+where each I(e) 
+
+> u
+
+∈ { 0, 1} is the indicator of edge e appearing on the canonical path from u to σ(u).(H2) Per-source bound. For each u ∈ Se, P(I(e) 
+
+> u
+
+= 1) ≤ p with sp ≤ μ0 for an absolute constant 
+
+μ0.(H3) Variance control. The indicators are negatively associated under the uniform-permutation measure on σ, so Var( Xe) ≤ E[Xe] ≤ μ0.Then for any c > 0,
+
+P(Xe ≥ c log 2 N ) ≤ N −3c/ (2 ln 2) ≤ N −3c/ 2 for all c > 0 and N > 1. (13) 
+
+Taking a union bound over the |E(GT )| ≤ ∆( GT ) · N/ 2 = O(N ) edges, the maximum edge load satisfies 
+
+P(max  
+
+> e
+
+Xe ≥ c log 2 N ) ≤ N 1−3c/ (2 ln 2) → 0 for any c > 2(ln 2) /3 ≈ 0.46 . (14) 
+
+Proof. Apply Bernstein’s inequality [48, 49] to Xe = ∑ 
+
+> u∈Se
+
+I(e) 
+
+> u
+
+, a sum of bounded random vari-ables with |I(e) 
+
+> u
+
+| ≤ 1 a.s. Bernstein gives 
+
+P(Xe ≥ E[Xe] + t) ≤ exp 
+
+(
+
+− t2
+
+2(Var( Xe) + t/ 3))
+
+(15) for any t > 0. By hypotheses (H2)–(H3), E[Xe] ≤ μ0 and Var( Xe) ≤ μ0. We work in log space throughout the proof and convert at the end. Set a target threshold T = c ln N and t = T − E[Xe] ≥ T − μ0. In the regime T ≫ μ0
+
+(the asymptotic regime, since μ0 = O(1) by (H2) while T → ∞ ), the Bernstein denominator is dominated by the t/ 3 term: 2( μ0 + t/ 3) → 2t/ 3. The numerator is t2 → T 2. Substituting: 
+
+P(Xe ≥ T ) ≤ exp 
+
+(
+
+− T 2
+
+2t/ 3
+
+)
+
+· (1 + o(1)) ≤ exp( −3T / 2) · (1 + o(1)) as T → ∞ .
+
+10 Substituting T = c ln N gives P(Xe ≥ c ln N ) ≤ N −3c/ 2 asymptotically. Converting to log 2 N units via T = c log 2 N = ( c/ ln 2) · ln N , i.e., the natural-log constant becomes c/ ln 2 :
+
+P(Xe ≥ c log 2 N ) ≤ N −3( c/ ln 2) /2 = N −3c/ (2 ln 2) ,
+
+yielding (13). Since 1/ ln 2 ≈ 1.44 > 1, the bound N −3c/ (2 ln 2) ≤ N −3c/ 2 holds for all c > 0 and 
+
+N > 1. The union bound (14) follows since |E(GT )| ≤ O(N ) for sparse Tanner graphs (max degree 
+
+≤ 2δc). 
+
+The asymptotic constant 3/2 in P(Xe ≥ c ln N ) ≤ N −3c/ 2 is the standard Bernstein constant for sums of bounded variables when the t/ 3 term dominates the variance. If we use the Azuma– Hoeffding inequality (with 1/2 instead of 1/3 in the variance proxy), we find 
+
+P(Xe ≥ c ln N ) ≤ N −c2/(2 μ0),
+
+quadratic for c ln N ≤ μ0. In the asymptotic regime c ln N ≫ μ0, the linear Bernstein bound dominates. 
+
+Lemma 4.4 (Hypothesis (H1) for HGP) . For HGP[ H, H ] with canonical path decomposition into a row-segment followed by a column-segment, a type-1 edge e in row w (an edge changing the second coordinate within row w) satisfies hypothesis (H1) with Se = {u : u1 = w} and |Se| = n2 =√N − m2 = O(√N ). Symmetrically for type-2 edges. Proof. The path from source u = ( a1, a 2) to intermediate σ(u) = ( b1, b 2) concatenates (i) a row-segment in row a1 from column a2 to column b2, and (ii) a column-segment in column b2 from row 
+
+a1 to row b1. A type-1 edge e in row w appears in segment (i) when a1 = w. So, I(e) 
+
+> u
+
+= 0 for any source u with u1̸ = w, and the support of Xe is restricted to {u : u1 = w}. Set cardinality is the number of qubits in row w, equaling n2 for an L-block row or m2 for an R-block row. 
+
+Lemma 4.5 (Per-source HGP bound under canonical 2D routing) . For HGP[ H, H ] with uniform-random intermediate σ and the typical row-then-column path decomposition, per-source probability is bounded by P(I(e) 
+
+> u
+
+= 1) ≤ 1/2 for any source u ∈ Se. The average over Se satisfies 
+
+¯p = 2 j(n2 − j)/n 22 ≤ 1/2,
+
+where j is the column position of edge e. The expected load is 
+
+E[Xe] = |Se| · ¯p = 2 j(n2 − j)/n 2 ≤ n2/2 = O(√N ).
+
+Proof. With source u = ( w, a 2) ∈ Se (with e at column position j in row w), edge e is on the row-segment iff b2 and a2 are on opposite sides of the split {j, j + 1 }, where σ(u) = ( b1, b 2). For 
+
+b2 ∼ Unif( V2):
+
+P(I(e) 
+
+> u
+
+= 1) = 
+
+{
+
+(n2 − j)/n 2 if a2 ≤ jj/n 2 if a2 > j. 
+
+Each branch is ≤ 1/2 when j is at the row midpoint, while in general each branch is ≤ 1. Averaging over a2 ∈ V2 uniform: 
+
+¯p = ( j(n2 − j) + ( n2 − j)j)/n 22 = 2 j(n2 − j)/n 22,
+
+maximized at j = n2/2 to give ¯p = 1 /2.
+
+Lemma 4.5 gives μ0 = O(√N ) for the canonical 2D routing scheme, not satisfying hypothesis (H2)’s requirement μ0 = O(1) . Substituting μ0 = O(√N ) into Equation (15) with t = c ln N gives a bound that decays as 
+
+exp( −(c ln N )2/O (√N + c ln N )) ,
+
+useful only when c ln N ≫ √N , i.e., for N ≲ eO(√N ), failing to give O(log N ) routing depth bound asymptotically. Therefore Theorem 4.3 holds only conditionally on (H1)–(H3): hypothesis (H2) is not verified by canonical 2D routing for HGP. 
+
+11 Verifying (H2) for HGP would require a routing scheme whose canonical paths have length 
+
+O(log N ) rather than O(√N ). As an example, routing through check-node bridges exploiting the spectral expansion of GT . We have not constructed such a scheme rigorously and this remains the obstacle to strengthening Theorem 4.3. Numerical evidence (Sec. 5) shows TValiant ≈ 0.5 log 2 N in the tested regime N ∈ [10 2, 10 3]. While this suggests that the desired routing scheme exists, it is no proof. Regarding (H3), negative association of permutation indicators I(e) 
+
+> u
+
+under uniform σ is a stan-dard fact: if any two indicators I(e) 
+
+> u1
+
+, I (e) 
+
+> u2
+
+are sub-additively coupled (intuitively, both being 1 forces specific values of σ on u1 and u2, restricting the permutation more than each individually), then their covariance is non-positive. Then, the Joag-Dev-Proschan [51] machinery applies, giving 
+
+Var (∑ I(e)
+
+> u
+
+) ≤ ∑ Var( I(e) 
+
+> u
+
+) ≤ ∑ E[I(e) 
+
+> u
+
+] = E[Xe].
+
+If a routing scheme satisfying (H1)–(H3) is constructed for HGP, Eq. 14 would convert to the routing-depth bound, i.e. TValiant (GT ) ≤ c log 2 N for any c > 2/(3 ln 2) ≈ 0.46 with high probability. Taking c = 1 would give the conjectured constant. The empirical TValiant ≈ 0.5 log 2 N
+
+measurement (Sec. 5) is consistent with this range, suggesting a sufficient routing scheme exists. We leave its explicit construction (likely a check-node-bridge routing exploiting the spectral expansion of GT ) to future work. 
+
+# 5 Numerical Comparison 
+
+## 5.1 Methodology 
+
+We measure the number of parallel atom-rearrangement steps per syndrome extraction cycle, comparing both schemes on the Xu et al. [2] HGP code family from their Figure 3a. Related routing/architecture baselines for reconfigurable atom arrays include Constantinides et al. [9] and Zhou et al. [10]. Both schemes target the same hardware (2D AOD + Llayers stacked AOL) and the same metric. Our results are reproducible from the codebase associated with this work, given in the data availability section. To represent Xu et al.’s method we apply Eq. (2) (constant 8 rearrangement layers per cycle for (3 , 4) -biregular HGP bases). We use Theorem 4.1 with TValiant measured directly via Valiant routing on the union of Llayers random d0 = 8 -regular graphs. 
+
+## 5.2 Empirical kemp measurement 
+
+We measure the empirical Valiant routing constant kemp := TValiant / log 2 N on multi-layer overlay graphs, tabulated in Table 3. For Llayers = 8 : kemp ≈ 0.554 ± 0.032 (5-seed mean ± std across 
+
+N ∈ [11 ,025 , 100 ,000] ). For Llayers = 16 : kemp ≈ 0.514 ± 0.022 . These are ∼ 30 × tighter than the Courtney [12] bound’s ∼ 21 for the same Llayers = 8 case. Our measurements validate N -independence of kemp directly over N ∈ [225 , 100 ,000] (a span of ∼ 2.6 decades). We do not claim validation beyond this range: the rows at N ≥ 10 6 in Table 5 are conjectured extrapolation, resting on the observed N -independence together with the asymptotic scaling of Theorem 4.1. 
+
+## 5.3 Head-to-head depth comparison 
+
+In a memory experiment (no logical gates between syndrome rounds), per-cycle cost dominates for the head-to-head with Xu et al.’s Algorithm 3, which itself reports a per-cycle count. Setup cost TValiant (Gunion ) is reported separately in Table 3 and is paid before the syndrome-cycle loop begins. For a memory experiment of R rounds, the total cost per cycle amortized over the run is 
+
+⌈χ′/L layers ⌉ + TValiant /R → ⌈ χ′/L layers ⌉ for large R.
+
+## 5.4 Engineering-N comparison and asymptotic regime 
+
+Per-cycle step counts for both schemes are constant in N . The setup cost TValiant grows as 
+
+kemp log 2 N but is paid only once per memory experiment. Table 5 reports both. 
+
+12 N Llayers deff βunion TValiant (median) kemp 
+
+Initial range ( N ≤ 1225 ): 
+
+225 4 32 0.332 6 0.77 225 8 64 0.238 5 0.64 225 16 128 0.169 4 0.51 625 4 32 0.345 7 0.75 625 8 64 0.245 5 0.54 625 16 128 0.173 5 0.54 1225 4 32 0.345 7 0.68 1225 8 64 0.245 6 0.59 1225 16 128 0.174 5 0.49 
+
+Engineering-N extension: 
+
+11,025 8 64 0.248 8 0.596 11,025 16 128 0.176 7 0.521 25,000 8 64 0.248 8 0.548 25,000 16 128 0.176 8 0.548 45,000 8 64 0.248 9 0.582 45,000 16 128 0.176 8 0.518 60,000 8 64 0.248 8 0.504 60,000 16 128 0.176 8 0.504 100,000 8 64 0.248 9 0.542 100,000 16 128 0.176 8 0.482 
+
+Table 3: Empirical kemp = TValiant / log 2 N across union graph sizes and AOL layer counts. The constant tends to decrease with Llayers (better spectral gap; the trend is monotone in the mean but not within every N row, where integer median-TValiant values introduce quantization noise) and is stable across N ∈ [225 , 100 ,000] . The lower block ( N ≥ 11 ,025 ) extends the original Table 5.1 measurements, with five independent random-overlay seeds per cell. Aggregated across the extension: kemp (Llayers =8) = 0 .554 ± 0.032 , kemp (Llayers =16) = 0 .514 ± 0.022 .The βunion entries in the lower block are the Friedman-bound predictions 2√deff − 1/d eff for the d0 = 8 , L-layer union. 
+
+Both schemes have O(1) per-cycle cost in atom-array reconfiguration count. The constant for Xu et al. is 2δc = 8 under their single-layer AOD architecture. The constant for ours is 
+
+⌈χ′/L layers ⌉ = ⌈2δc/L layers ⌉, which decreases linearly in Llayers until the cap χ′ = 2 δc is reached. For Llayers ≥ χ′ = 8 , the per-cycle cost is 1, providing an 8× improvement over Xu et al.’s per-cycle cost, constant in N . The improvement is purely from L-plane parallelism in the AOL stack, an architectural feature absent from Xu et al.’s framework, which works according to presently existing quantum hardware. If their algorithm were extended to multi-layer AOL, it would also achieve ⌈8/L layers ⌉ per cycle, and in that head-to-head the two schemes tie on this metric. Our spectral framework’s separate contributions are (i) explicit chromatic-decomposition cost predic-tion χ′(GT ) = 2 δc for any HGP/LP code via König’s theorem, applicable to both QC and non-QC families (König-optimal coloring gives χ′ = 2 δc in both cases; Sec. 5.5), and (ii) explicit charac-terization of TValiant via βHGP = (1 + βbase )/2 for rare cases where setup cost matters (e.g., active computation with frequent logical gates, where atoms cannot remain canonical between cycles). These costs sit naturally against the recent routing lower bounds of Constantinides et al. [9], who prove that current single-plane parallel-AOD designs require Ω( √N log N ) steps to realize general permutations, give a matching O(√N log N ) protocol, and show that a hardware upgrade reduces this to Θ(log N ). Our one-time setup cost TValiant = Θ(log N ) leverages a constructed upgrate of multi-layer overlays. The per-syndrome-cycle cost is O(1) rather than O(√N log N ), since syndrome extraction reuses fixed canonical positions and never re-solves a general permutation after setup. At the architecture level, Zhou et al. [10] report a transversal reconfigurable-atom design whose runtime speedup scales with the code distance d, being orthogonal to and composable with the per-cycle rearrangement savings analyzed here, which target atom-motion depth underlying each transversal layer rather than the logical-gate schedule. 
+
+13 Xu et al. Ours per cycle, Llayers =Family Base N Alg. 3 2 4 8 16 HGP[H,H], (3,4)-biregular random 225 8 4 2 1 1
+
+HGP[H,H], (3,4)-biregular random 625 8 4 2 1 1
+
+HGP[H,H], (3,4)-biregular random 1225 8 4 2 1 1
+
+LP[B,L], (3,4)-biregular circ. L = 4 784 8 4 2 1 1
+
+LP[B,L], (3,4)-biregular circ. L = 12 7056 8 4 2 1 1
+
+LP[B,L], (3,5)-biregular circ. L = 4 1024 10 5 3 2 1
+
+LP[B,L], (3,5)-biregular circ. L = 12 9216 10 5 3 2 1
+
+LP[B,L], (3,5)-biregular circ. L = 20 25600 10 5 3 2 1                           
+
+> Table 4: Per-syndrome-cycle parallel atom-rearrangement steps, amortized over many cycles. Lower is better. Xu et al.’s pipelined Algorithm 3 requires 2δcatom rearrangements per cycle, where δcis the maximum degree of the base bipartite graph. Ours requires ⌈2δc/L layers ⌉AOL pattern activations per cycle (zero atom motion). For (3 ,4) -biregular bases δc= 4 so Xu et al. = 8 and per-cycle speedup at Llayers = 8 is 8×. For (3 ,5) -biregular bases (an alternative parameter regime in Xu et al.’s family) δc= 5 so Xu et al.= 10 and per-cycle speedup at
+> Llayers = 16 is 10 ×. Computed by direct simulation. See Data Availability for code repository. König-tightness is verified by explicit edge coloring at L= 4 ,8via repeated bipartite max matching.
+
+## 5.5 Non-quasi-cyclic HGP codes: applicability of both algorithms 
+
+The amortization theorem (Theorem 4.1) gives a ⌈χ′/L layers ⌉ per-cycle bound under the QC hy-pothesis. For non-QC HGP codes (random biregular bases), chromatic colors are arbitrary match-ings instead of axis-aligned shifts. In this section, we examine empirically whether the multi-layer-AOL advantage degrades, and whether Xu et al.’s Algorithm 3 retains applicability. 
+
+Xu et al.’s Algorithm 3 on non-QC. Xu et al.’s Algorithm 1 (1D divide-and-conquer scram-bling) takes an arbitrary target 1D permutation as input and does not require the input to be a cyclic shift. Their Algorithm 2 then composes Algorithm 1 with parallel CZ gates over the chromatic decomposition of the base bipartite graph. Algorithm 3 pipelines this across X and Z syndromes. None of these algorithmic steps require the base check matrix H to be quasi-cyclic. The 2δc = 8 rearrangement layers per cycle is determined by König’s theorem on the base graph (max degree = δc), independent of QC structure. The QC structure simplifies per-layer atom-motion trajectories (axis-aligned shifts admit short, parallel cubic-spline motion) without altering Algorithm 3’s applicability or layer count. 
+
+Our multi-layer scheme on non-QC. The chromatic decomposition χ′(GT ) = 2 δc holds by König’s theorem for any bipartite Tanner graph, QC or otherwise. The Llayers -fold parallelism in the application phase requires χ′ pre-loaded AOL patterns, one per color. For QC bases, each pattern is a simple shift, expressible as a single AOD frequency-tone update. For non-QC bases each pattern is an arbitrary matching on the canonical 2D grid and requires an arbitrary multi-tone AOD configuration. This is pre-storable on modern neutral-atom architectures, which demonstrate pattern switching between distinct codes “without additional calibrations,” incurring only a one-time setup cost in computing and storing the patterns [53]. For both QC and non-QC HGP codes, χ′(GT ) = ∆( GT ) = 2 δc by König’s theorem. Optimal coloring is constructible in polynomial time with the standard algorithm: extend GT to a ∆-regular bipartite multigraph by adding fake edges between sub-∆-degree vertices (Hall’s theorem guarantees feasibility), then iteratively extract ∆ perfect matchings through repeated bipartite maximum matching, stripping fake edges from each color. 
+
+Findings. We find that Xu et al.’s Algorithm 3 applies to non-QC HGP codes with no algorithmic modification. Layer count remains 2δc = 8 for (3 , 4) -biregular bases. Wall-clock per cycle is 
+
+≈ 1.6 ms across QC and non-QC at N ∼ 10 3–10 4 using the demonstrated ∼ 200 μs short-range move. We achieve χ′ = 8 in both cases via König-optimal coloring, retaining an 8× advantage 
+
+14 per cycle setup ( Llayers = 16 ) per-cycle 
+
+N log 2 N Xu et al. Ours L=16 TValiant amortized over R=10 4 speedup 225 7.8 8 1 4 4×10 −4 8.0×
+
+1,225 10.3 8 1 5 5×10 −4 8.0×
+
+10 4 13.3 8 1 7 7×10 −4 8.0×
+
+10 5 16.6 8 1 8 8×10 −4 8.0×
+
+10 6 19.9 8 1 10 10 −3 8.0×
+
+10 9 29.9 8 1 15 1.5×10 −3 8.0×
+
+10 12 39.9 8 1 20 2×10 −3 8.0×
+
+Table 5: Engineering-N per-cycle and amortized setup costs. Xu et al.’s Algorithm 3 requires 8 atom rear-rangements per cycle (constant in N ). Ours requires ⌈χ′/L layers ⌉ = ⌈8/16 ⌉ = 1 AOL pattern activation per cycle (constant in N ). The one-time setup cost TValiant = kemp log 2 N amortizes to negligible over a typical 
+
+R ∼ 10 4 memory experiment. Per-cycle speedup is 8× for all N in the practical range, with a cap of χ′ = 8 
+
+(the chromatic index of the Tanner graph by König’s theorem). Rows up to N = 100 ,000 are directly measured (Table 3; König-tightness in Table 6 verified to N = 122 ,500 ). The rows from N = 10 6 to N = 10 12 are asymptotic extrapolations of the kemp ≈ 0.55 constant (via Theorem 4.1) and the χ′ = ∆ = 8 König identity beyond the validated range. Extrapolation rests on observed N -independence of kemp across the validated two-order-of-magnitude span. 
+
+(pure step-count) in the pessimistic atom-motion scenario and a ∼ 50 –300 × advantage in the pre-stored AOL scenario (Sec. 6.2). König-optimal coloring gives χ′ = 8 regardless of QC structure. The non-QC cost is an offline preprocessing burden (computing the optimal coloring, generating 
+
+χ′ AOL trap patterns) paid once per code and amortized across syndrome rounds, minimizing non-QC overhead. 
+
+# 6 Discussion and Future Work 
+
+## 6.1 Bravyi BB codes: direct measurement 
+
+The bivariate bicycle (BB) codes of Bravyi et al. [1] have Tanner graphs that decompose into two edge-disjoint planar subgraphs, forming a 2-layer overlay structure. Subsequent work develops their logical operators and fold-transversal gates [54], connectivity-lowering morphing circuits [55], matching decoders [56], modular architectures [57], and layouts of (generalized/coprime) bicycle codes on cold atoms [58, 59]. As previously stated, BB codes are constructed from two commuting circulant polynomials 
+
+A(x, y ), B (x, y ) ∈ F2[x, y ]/(xl − 1, y m − 1) .
+
+Their routing-relevant Tanner graph spectrum is governed by the Fourier reduction of Theorem 3.6. The resulting χ′ and βBB values are collected in Table 8. BB codes have χ′ = 6 vs. χ′ = 8 for (3 , 4) -biregular HGP/LP, shifting down the saturation point of the multi-layer-AOL: Llayers = 6 AOL planes suffice to collapse per-cycle cost to a single pattern activation. Wall-clock improvement at Llayers = 6 is identical to the Llayers = 8 HGP/LP case, ≈ 50 –300 × versus Xu et al. [2] Algorithm 3 (Sec. 6.2). The trade-off is that BB codes have a smaller demonstrated code family than HGP/LP and lack the random-base flexibility we exploit in Sec. 3.5 for LP code search. 
+
+## 6.2 Wall-clock comparison on multi-layer 3D AOL 
+
+Our step-count comparison treats each reconfiguration uniformly, but Xu et al.’s atom rearrange-ments and our AOL pattern activations differ by more than an order of magnitude in wall time. The critical quantity is the per-cycle move time. Syndrome-cycle rearrangements are short-range data ↔ancilla moves, whose demonstrated characteristic wall-clock is τmove ≈ 200 μs ( 0.55 μm μs−1
+
+cubic-velocity profile) [11, 39]; equivalently, AOD trap transfers with atom motion are 50 –100 μsover 1–2 μm. The long-range 3 ms cubic-spline time (0.7 ms AOD trap transfer plus 2.3 ms 
+
+15 Code family QC? N ∆( GT ) König coloring tight? LP[ 3×4 base, Llift = 4 ] yes 784 8 yes ( χ′ = 8 )LP[ 3×4 base, Llift = 8 ] yes 3136 8 yes ( χ′ = 8 )random (3 , 4) -biregular, n = 16 , seed 1 no 784 8 yes ( χ′ = 8 )random (3 , 4) -biregular, n = 24 , seed 3 no 1764 8 yes ( χ′ = 8 )random (3 , 4) -biregular, n = 32 , seed 1 no 3136 8 yes ( χ′ = 8 )random (3 , 4) -biregular, n = 48 , seed 2 no 7056 8 yes ( χ′ = 8 )
+
+Extended sweep (this work, 2026-05): 
+
+LP[ 3×4 base, Llift = 15 ] yes 11,025 8 yes ( χ′ = 8 )random (3 , 4) -biregular, n = 60 , seeds 1, 2 no 11,025 8 yes ( χ′ = 8 )LP[ 3×4 base, Llift = 20 ] yes 19,600 8 yes ( χ′ = 8 )random (3 , 4) -biregular, n = 80 , seeds 1, 2 no 19,600 8 yes ( χ′ = 8 )LP[ 3×4 base, Llift = 25 ] yes 30,625 8 yes ( χ′ = 8 )random (3 , 4) -biregular, n = 100 , seeds 1, 2 no 30,625 8 yes ( χ′ = 8 )LP[ 3×4 base, Llift = 35 ] yes 60,025 8 yes ( χ′ = 8 )random (3 , 4) -biregular, n = 140 , seeds 1, 2 no 60,025 8 yes ( χ′ = 8 )LP[ 3×4 base, Llift = 50 ] yes 122,500 8 yes ( χ′ = 8 )random (3 , 4) -biregular, n = 200 , seeds 1, 2 no 122,500 8 yes ( χ′ = 8 )             
+
+> Table 6: König-optimal coloring is achieved for both QC and non-QC HGP Tanner graphs across N∈
+> [784 ,122 ,500] .The polynomial-time algorithm yields χ′= ∆ = 2 δc= 8 in every test case. Greedy edge coloring is loose by 1–2 colors on random bipartite graphs but is not the relevant algorithm. The extended-sweep rows (lower block) push to N= 122 ,500 , covering the engineering regime targeted by Xu et al.’s LP families.
+
+trajectory; Xu Methods Eq. 7, a ∼ 500 μm sweep) applies only to the one-time full-array setup 
+
+scrambling and to the Endres-2016-era rearrangement sweep [38], not to the per-cycle short-range move; importing it into the per-cycle term is the misattribution corrected here. From Bluvstein et al. Methods [11], the demonstrated per-row Raman-AOD reprogramming time without atom motion is 5–8 μs per row, with “several 10s of μs for an arbitrary pattern of rotations.” The AWG synchronization jitter is < 10 ns, confirming electronics are not the bottleneck (Raman pulse duration is). For our scheme’s application phase, atoms remain canonical and only AOL frequency patterns change, so the relevant cost is the per-pattern reprogramming time τAOL ∈ [5 , 30] μs ( ∼ 30 μs conservative midrange). We summarize the wall-clock comparison below: 
+
+TXu et al., cycle = 8 × τmove = 8 × 200 μs ≈ 1.6 ms 
+
+Tours, cycle (Llayers ≥ 8) = 1 × τAOL ∈ [5 , 30] μs
+
+Tours, setup /R = TValiant × 3 ms /R 
+
+The underlying per-layer physical ratio τmove /τ AOL ≈ 200 /[5 –30] = 7 –40 ×; combined with the 
+
+χ′ = 8 → 1 chromatic-layer collapse (an architectural feature of the AOL stack absent from single-layer AOD), the per-cycle advantage is 1.6 ms /[5 –30] μs ≈ 50 –300 × in the canonical-position regime. A larger factor survives only where a per-cycle rearrangement genuinely requires full-array long-range transport. The setup cost contributes kemp log 2 N · 3 ms once per memory experiment (long-range moves, legitimately ∼ 3 ms each), which becomes negligible per cycle for R ≳ 10 , the considered regime of Xu et al. (memory threshold). Figure 3 visualizes the per-cycle wall-clock as a function of Llayers for the four code families considered here. 
+
+Caveat: AOL crosstalk and L scaling. Bluvstein et al. demonstrate up to ∼ 80 addressable gate sites in their entangling zone with “minimal two-qubit cross-talk” between sites [11]. Corre-sponding parallel two-qubit entangling-gate fidelity has advanced from 99 .5% on up to 60 atoms in parallel [60] to a leakage-corrected 0.9971(5) for the time-optimal Rydberg CZ gate (with 0.999 
+
+projected) [61, 62]. The maximum number of independently pre-stored AOL patterns that are simultaneously addressable without per-pattern recalibration is not quantified in the published 
+
+16 per-cycle wall-clock (ms) Code family QC? N χ′ Xu et al. Alg. 3 Ours, motion Ours, prestored LP[ 3×4 base, Llift = 8 ] yes 3136 8 1.60 0.200 0.030 random (3 , 4) -biregular, no 3136 8 1.60 0.200 0.030 
+
+n = 32 
+
+random (3 , 4) -biregular, no 7056 8 1.60 0.200 0.030 
+
+n = 48 
+
+Table 7: QC vs. non-QC per-cycle wall-clock comparison with König-optimal coloring throughout. Values assume the demonstrated short-range per-cycle move of ∼ 200 μs [11, 39]: Xu et al.’s 2δc = 8 layers give 
+
+8 × 200 μs = 1 .6 ms, while our scheme fires a single chromatic batch at Llayers ≥ χ′. “Ours, motion” assumes physical atom motion per chromatic batch with no pre-storing ( 1 × 200 μs). “Ours, prestored” uses pre-stored AOL patterns at 30 μs per pattern switch (Bluvstein et al. Methods). (An earlier version of this table quoted a per-family worst-case long-range cubic-spline motion model of ∼ 3 ms per layer, giving 19 –28 ms for Xu and 
+
+2.6–5.9 ms for our motion column. Those figures overestimate the demonstrated short-range per-cycle cost by ∼ 15 × and are superseded here.) Xu et al.’s Algorithm 3 applies to both QC and non-QC; QC structure simplifies trajectory geometry but not the 2δc = 8 layer count. Our scheme achieves the same χ′ = 8 chromatic decomposition in both cases via König-optimal coloring. 
+
+Code (Bravyi Table 1) NGT ∆( GT ) χ′(GT ) (König) λ1 βBB per cycle, Llayers ≥ 6[[72 , 12 , 6]] 144 6 6 6.000 0.667 1
+
+[[90 , 8, 10]] 180 6 6 6.000 0.872 1
+
+[[144 , 12 , 12]] 288 6 6 6.000 0.828 1
+
+[[288 , 12 , 18]] 576 6 6 6.000 0.828 1
+
+Table 8: Direct spectral and chromatic measurements on Bravyi et al.’s published BB codes [1]. Every case is König-tight ( χ′ = ∆ = 6 ). Per-cycle cost under our multi-layer AOL protocol saturates to 1 AOL pattern activation at Llayers ≥ χ′BB = 6 , lower than the saturation point for (3 , 4) -biregular HGP/LP ( Llayers ≥ 8). 
+
+βBB is the non-trivial bipartite spectral ratio of the Tanner graph (Perron pair excluded). Each βBB value is reproduced to machine precision by the 2 × 2 Fourier reduction of Theorem 3.6. 
+
+work. We estimate Llayers ≲ 10 with current hardware before AOD intermodulation overhead becomes significant. Scaling to Llayers ≥ 8 for the speedup-saturating regime of χ′/L layers = 1 
+
+requires modest hardware extension. If multi-pattern operation costs f ∈ [3 , 10] × overhead per AOL switch, per-cycle wall-clock advantage decreases to ∼ 5–100 ×.
+
+Hardware assumptions. The wall-clock advantage in this regime depends on two assumptions extrapolated from current ∼ 80 -site demonstrations [11]: (R2-A) No atom motion in the application phase , i.e., the χ′ CNOT layers are implemented as pure AOL pattern switches with no atom shuttling between switches, requiring the multi-layer AOL hardware to provide Llayers independent, simultaneously-addressable pattern channels. (R2-B) AOL pattern reprogramming at Llayers = 8 
+
+operates in 5–30 μs per pattern ; this is consistent with the 5–8 μs per row and “several 10s of μsfor an arbitrary pattern” demonstrated by Bluvstein et al. Methods. This assumption is backed by demonstrated 3D-AOD hardware: Picard & Endres [37] report a three-dimensional acousto-optic deflector switching focus at 100 kHz ( 10 μs) with a 2 μs rise time, and note that longitudinal-mode TeO 2 crystals ( 4200 m/s acoustic velocity) support > 600 kHz ( ∼ 1.6 μs) switching, placing our assumed 5–30 μs window squarely within measured 3D-AOD performance. Scaling beyond 
+
+Llayers ≈ 10 may still incur AOD intermodulation overhead requiring per-pattern recalibration. 
+
+## 6.3 Engineering recommendations by hardware generation 
+
+Table 9 translates per-cycle and setup costs derived above into per-generation design guidance for hardware groups building qLDPC architectures on neutral-atom platforms. The most important practical message is that per-cycle advantage is a step-function in Llayers :zero at Llayers = 1 , growing linearly to χ′ at Llayers = χ′, then constant beyond. Hardware 
+
+17 1 2 4 6 8 16 32 
+
+Llayers (independent AOL pattern channels) 
+
+10 1
+
+10 0               
+
+> per-cycle wall-clock (ms)
+> BB
+> HGP, LP 3, 4
+> LP 3, 5
+> saturation cliff at L layers =′:HGP (3, 4)-biregular ( ′= 8)
+> LP (3, 4)-biregular ( ′= 8)
+> LP (3, 5)-biregular ( ′= 10)
+> Bravyi BB ( ′= 6)
+> Xu Alg.~3 single-layer AOD ( 1.6 ms, ′= 8)
+> single AOL pattern floor (30 s)
+
+Figure 3: Per-cycle wall-clock vs. number of stacked AOL pattern channels Llayers , for four qLDPC code families: HGP and LP from (3 , 4) -biregular bases ( χ′ = 8 ), LP from (3 , 5) -biregular bases ( χ′ = 10 ), and Bravyi BB codes ( χ′ = 6 , Sec. 6.1). Markers are measured per-cycle counts ⌈χ′/L layers ⌉ converted to wall-clock at the conservative τAOL = 30 μs per pre-stored pattern from Bluvstein et al. Methods. The two horizontal references are Xu et al. Algorithm 3’s ∼ 1.6 ms / cycle on single-layer AOD ( 8 × 200 μs short-range moves; dashed) and the single-AOL-pattern floor at 30 μs (dotted). Saturation cliffs at Llayers = χ′ are marked with colored vertical lines: BB ( χ′ = 6 ) saturates first, then HGP / LP-3×4 (χ′ = 8 ), then LP-3×5 (χ′ = 10 ). 
+
+roadmaps may target Llayers ∈ [6 , 8] as the first regime where our scheme materially beats single-layer AOD on per-cycle wall-clock. 
+
+## 6.4 Limitations 
+
+Both schemes are O(1) per cycle in atom-array reconfiguration count. Setup costs for multi-layer AOL scheme presented here grow as O(log N ) but amortize over the rounds of a memory experiment. The per-cycle speedup is constant in N , capped by χ′ = 2 δc.We predict wall-clock advantage at moderate N , but this is heavily dependent on hardware assumptions. (R2-A and R2-B above) currently demonstrated only at Llayers ≤ 2. Further, for non-quasi-cyclic HGP codes, the chromatic colors are arbitrary matchings rather than shifts. König-optimal coloring (constructible in polynomial time) gives χ′ = 2 δc for both QC and non-QC bases, so the per-cycle bound ⌈χ′/L layers ⌉ is unchanged. The cost stays offline, where χ′ arbitrary AOL trap patterns must be precomputed and stored, vs. one shift template for the QC case (Sec. 5.5). With no 3D parallelism, per-cycle step count does not change. The Llayers × speedup materi-alizes at Llayers ≥ 2 and saturates at 8× for Llayers ≥ χ′ = 8 on (3 , 4) -biregular bases. Wall-clock advantage is amplified by the short-range atom-motion vs. AOL-reprogramming time ratio (200 μsvs. 5–30 μs per Bluvstein et al. Methods, a 7–40 × per-layer ratio), giving the ∼ 50 –300 × per-cycle wall-clock advantage figure at Llayers = 8 (Sec. 6.2). 
+
+## 6.5 Future hardware directions 
+
+A genuine asymptotic wall-clock advantage of O(N 1/4) over Xu et al. would emerge if the multi-layer overlay is implemented via photonic interconnects with O(μs ) switching that is independent of physical atom-motion distance. The required hardware is far from current state of the art. 
+
+18 Hardware gener-ation 
+
+Llayers available Recommended code family Per-cycle wall-clock Caveats / required up-grades 
+
+Current (Blu-vstein et al. 2024 [11]) 
+
+1–2 (3 , 4) -biregular HGP or Bravyi BB 
+
+∼ 1.6 ms (matches Xu et al. Alg. 3 [2]) No multi-layer advan-tage at Llayers ≤ 2;both schemes equiva-lent at this generation 
+
+Near-term 
+
+(2026–2028) 
+
+4 (3 , 4) -biregular HGP / LP, or Bravyi BB 
+
+∼ 0.06 ms (pre-stored AOL) 
+
+∼ 27 × pre-stored per-cycle wall-clock advan-tage at Llayers = 4 for 
+
+χ′ = 8 HGP/LP ( 4×
+
+step-count in the atom-motion scenario); for BB ( χ′ = 6 ) similar 
+
+Target (2028– 2030) 
+
+≥ 8 for HGP/LP, 
+
+≥ 6 for BB 
+
+(3 , 4) /(3 , 5) 
+
+HGP/LP or Bravyi BB 
+
+∼ 30 μs (sin-gle AOL pat-tern, saturated) 
+
+8× (HGP/LP) or 6×
+
+(BB) step-count ad-vantage, i.e. ∼ 50 –
+
+300 × pre-stored wall-clock; saturation cliff at 
+
+Llayers = χ′
+
+Long-term 
+
+(photonic, Sec. 6.5) 
+
+O(log N ) via pho-tonic links all of the above ∼ 30 μsper cycle; 
+
+setup/asymptotic 
+
+O(log N ) vs. Xu et al.’s 
+
+O(N 1/4)
+
+Entanglement rate and fault-tolerance threshold already met in proposals [63, 64]; binding gap is parallel channel count (1–2
+
+vs. O(log N )) and photonic–array inte-gration 
+
+Table 9: Engineering recommendations for qLDPC routing on neutral-atom hardware as a function of the number of independent AOL pattern channels Llayers available. Per-cycle wall-clock numbers use the demonstrated 
+
+∼ 200 μs short-range atom-move time [11, 39] (so Xu Alg. 3 = 8 × 200 μs ≈ 1.6 ms) and the ∼ 30 μspre-stored AOL pattern reprogramming time from Bluvstein et al. Methods [11] (conservative midrange of the demonstrated 5–30 μs per pattern); the ∼ 3 ms long-range cubic-spline time of Xu et al. Methods [2] Eq. 7 applies to the one-time setup scrambling. All near-term and target rows require the hardware assumptions R2-A and R2-B (Sec. 6.2). 
+
+First, we would require a per-pair photonic-mediated entanglement rate ≥ 333 Hz at ≥ 99% 
+
+fidelity. This target is substantially more attainable than current cavity-mediated two-atom opera-tions ( ∼ 52% deterministic fidelity, rising to ∼ 76% with error detection [65]) might suggest: cavity-coupled Yb proposals project a Bell-pair rate of 1.0×10 5 s−1 at average fidelity ≈ 0.999 [63] (a the-ory estimate). Fault tolerance is compatible with nonlocal Bell-pair error as high as ∼ 10% without distillation [64, 66], with multiplexed Bell-pair rates in the 1–50 MHz range. The entanglement-rate requirement is met in such proposals, making the binding constraint be fidelity compounded with parallel channel count and integration scale, described below. Second, we would need Llayers = O(log N ) ≈ 14 parallel photonic channels per atom array (current: 1–2) [67], and networked integration across ≥ 10 4 atoms. Array sizes have advanced rapidly toward this scale: 6,100 coherent qubits with 12.6 s coherence [68] and continuous operation of a 3,000-qubit system [69] are now demonstrated, alongside 3D atom-array assembly [34] and 3D acousto-optic transport [35, 36]. Summarily, the binding gap is parallel channel count ( 1–2 demonstrated vs. O(log N ) ≈ 14 
+
+required) and the integration of photonic links with qLDPC-scale arrays. As such, we frame this research as a long-term direction toward robust, industrial-scale fault-tolerant quantum compu-tation rather than a near-term hardware target. The theoretical advantage if these capabilities materialize is T photonic us /T AOD Xu et al. = O(log N/N 1/4) → 0 as N → ∞ .On a single-layer AOD architecture (no AOL stack), both schemes share the same ∼ 8×200 μs =1.6 ms per cycle (short-range moves), with the same constant. The multi-layer 3D AOL architecture 
+
+19 is the regime where our scheme provides per-cycle improvement, scaling as Llayers until the cap at 
+
+χ′ = 8 is reached. A shifted-Cayley overlay analysis shows that a purely geometric construction with atom motion only cannot break the N 1/4 wall-clock barrier, regardless of how the layers are designed, for two reasons. Dominant motion cost is the largest-shift layer, requiring full-array atom motion of distance ∼ √n = N 1/4 under constant-acceleration transport. The resulting union graph has spectral ratio β that grows toward 1 with N (β = 0 .75 at n = 16 , rising to β = 0 .89 at n = 512 ), so it is not asymptotically Ramanujan and the routing-depth bound of Eq. (1) does not itself reach 
+
+O(log N ). Escaping the barrier therefore requires a switching mechanism whose cost is independent of physical motion distance, such as the photonic interconnects discussed above. 
+
+## 6.6 Future theory directions 
+
+Alongside the apparent gap in hardware demonstration, confirmation of Conjecture 4.2 would close the remaining ∼ 5× gap between our analytical bound and empirical measurement. We propose using a refined Chernoff bound that exploits the HGP path-decomposition structure (rows and columns are statistically independent under uniform permutation). Theorem 4.3 holds conditionally on hypotheses (H1)–(H3). Hypotheses (H1) and (H3) are satisfied by the canonical row-then-column 2D routing scheme on HGP (Lemma 4.4 and the negative-association remark following Lemma 4.5). Hypothesis (H2) states that the per-source bound P(I(e) 
+
+> u
+
+= 1) ≤ p satisfies sp ≤ μ0 for an absolute constant μ0 = O(1) . This is not satisfied by the canonical 2D scheme, where Lemma 4.5 gives μ0 = O(√N ) instead. Numerical observation of TValiant ≈ 0.5 log 2 N at validated N up to 10 5 (Table 3) is consistent with the conclusion of Theorem 4.3 at constant c ≈ 1, which would follow from H2-satisfying canonical paths. We leave constructing such a scheme rigorously for future work. We propose a plausible construction, as a check-node-bridge routing where each canonical path traverses O(log N ) check-node “bridge” edges chosen to exploit the spectral expansion of 
+
+GT (Proposition 3.1). Closing this problem would upgrade Theorem 4.3 from conditional to un-conditional for HGP and would recover the ∼ 5× analytical-vs-empirical gap currently noted as Conjecture 4.2. 
+
+# 7 Conclusion 
+
+We present a closed-form characterization of the routing-relevant Tanner graph spectrum for HGP/LP qLDPC codes ( βHGP = (1+ βbase )/2 and DT = 2 Dbase ), together with a structural decom-position of spec( GT ) into product modes and boundary modes (Proposition 3.1). For multi-layer 3D AOL hardware we construct and numerically validate a routing protocol with per-syndrome-cycle depth TValiant (Gunion ) + ⌈χ′/L layers ⌉ under a quasi-cyclic hypothesis (Theorem 4.1). Classical simulation of both schemes on identical HGP and LP codes (spanning (3 , 4) - and (3 , 5) -biregular bases) shows that Xu et al.’s pipelined Algorithm 3 requires 2δc atom rearrangements per syndrome cycle (constant in N , where δc is the maximum degree of the base bipartite graph). Our multi-layer scheme requires ⌈2δc/L layers ⌉ AOL pattern activations per cycle. Using Xu et al.’s (3 , 4) -biregular parameters, the per-cycle step-count advantage at Llayers ≥ 8 is 8×, capped by χ′(GT ) = 2 δc = 8 (König’s theorem on the bipartite Tanner graph). In wall-clock terms, the ratio between the demonstrated ∼ 200 μs short-range per-cycle atom move (Bluvstein et al. Methods [11, 39]) and 5–30 μs AOL pattern reprogramming, combined with the χ′ = 8 → 1 layer collapse, yields a per-cycle wall-clock advantage of ∼ 50 –300 × in the memory-experiment regime (a 7–40 × per-layer physical ratio × the 8× chromatic collapse). Summarily, we provide a closed-form spectral characterization of HGP/LP Tanner graphs serv-ing as a code-design tool, with the diameter identity DT = 2 Dbase and ratio βHGP = (1 + βbase )/2.We recognize that the χ′(GT ) = 2 δc chromatic decomposition admits Llayers -fold parallelism on multi-layer 3D AOL hardware, with both schemes equally able to exploit this when reformulated. Though we give no hardware demonstration, we numerically validate that this multi-layer-AOL advantage is robust across QC and non-QC HGP/LP families. König-optimal coloring (polynomial-
+
+20 time constructible) gives χ′ = 2 δc for both QC and non-QC bases, so there is no per-cycle algo-rithmic non-QC penalty. 
+
+# Data and code availability 
+
+All numerical results, together with the code that generates every figure and table in this work and the shifted-Cayley overlay sweep discussed in Sec. 6.5, are available in this Github repository. The author used Claude (Anthropic) to assist in drafting code comments and documentation for the codebase. 
+
+# Competing interests 
+
+The author declares no competing interests. 
+
+# A Block-SVD of the HGP Tanner biadjacency 
+
+We prove Proposition 3.1 by an explicit singular-value decomposition of the qubit-to-check biad-jacency B of HGP[ H, H ].
+
+Biadjacency block form. Let H be m × n. The HGP code has qubit sectors Q0 = V × V
+
+(dim n2) and Q1 = C × C (dim m2), and check sectors X = C × V (dim mn , X-checks) and 
+
+Z = V × C (dim nm , Z-checks). With the stabilizer matrices HX = ( H ⊗ In | Im ⊗ HT ) and 
+
+HZ = ( In ⊗ H | HT ⊗ Im) (Tillich–Zémor [20]), the biadjacency B = ( HTX | HTZ ), arranged as (qubit sector) rows × (check sector) columns, is 
+
+B =
+
+(HT ⊗ In In ⊗ HT
+
+Im ⊗ H H ⊗ Im
+
+)
+
+, (16) 
+
+where the row blocks are Q0, Q1 and the column blocks are X , Z.
+
+The Gram matrix BB T . Using the mixed-product rule (A ⊗ B)( C ⊗ D) = ( AC ) ⊗ (BD )
+
+throughout, the diagonal blocks are 
+
+(BB T )00 = ( HT H) ⊗ In + In ⊗ (HT H), (BB T )11 = ( HH T ) ⊗ Im + Im ⊗ (HH T ),
+
+and the off-diagonal block is, using (HT ⊗ In)( Im ⊗ HT ) = HT ⊗ HT and (In ⊗ HT )( HT ⊗ Im) = 
+
+HT ⊗ HT ,
+
+(BB T )01 = ( HT ⊗ In)( Im ⊗ HT ) + ( In ⊗ HT )( HT ⊗ Im) = 2 HT ⊗ HT , (BB T )10 = 2 H ⊗ H. 
+
+This is the factor of 2 quoted in the main text; it arises because both the X - and Z-check columns of B couple Q0 to Q1 identically. 
+
+Diagonalization. Take the SVD H = ∑rk=1 σk ukwTk with orthonormal left/right singular vec-tors uk ∈ Rm, wk ∈ Rn, so 
+
+Hw k = σkuk , HT uk = σkwk , HT H w k = σ2
+
+> k
+
+wk , HH T uk = σ2
+
+> k
+
+uk.
+
+Extend {wk} to an orthonormal basis of Rn by kernel vectors ( σ = 0 ) and {uk} likewise by cokernel vectors. For an ordered pair (i, j ) with σi, σ j > 0, the two-dimensional subspace Sij =span { wi ⊗ wj (∈ Q 0), u i ⊗ uj (∈ Q 1) } is invariant under BB T :
+
+(BB T )00 (wi ⊗wj ) = ( σ2 
+
+> i
+
++σ2 
+
+> j
+
+) wi ⊗wj , (BB T )01 (ui ⊗uj ) = 2 ( HT ui)⊗(HT uj ) = 2 σiσj wi ⊗wj ,
+
+and symmetrically on Q1. Hence 
+
+BB T ∣∣Sij =
+
+(σ2 
+
+> i
+
++ σ2 
+
+> j
+
+2σiσj
+
+2σiσj σ2 
+
+> i
+
++ σ2
+
+> j
+
+)
+
+, with eigenvalues (σi + σj )2 and (σi − σj )2.
+
+21 Thus B has singular values σi + σj and |σi − σj | (the product modes ). If one factor is a ker-nel/cokernel direction ( σj = 0 ), the coupling term 2σiσj vanishes and wi ⊗ wj0 (respectively 
+
+ui ⊗ uj0 ) is an eigenvector of BB T with eigenvalue σ2 
+
+> i
+
+, i.e. a singular value σi of B (the boundary modes ). If both factors are kernel/cokernel directions the eigenvalue is 0 (zero modes). These sub-spaces are mutually orthogonal and their dimensions sum to n2 + m2 = dim( Q0 ⊕ Q 1), exhausting 
+
+sv( B).Since spec( AGT ) = {± σ : σ ∈ sv( B)} ∪ { 0}, the Tanner adjacency spectrum is contained in 
+
+{± (σi ± σj ) : 1 ≤ i, j ≤ r} ∪ {± σk : 1 ≤ k ≤ r} ∪ { 0},
+
+being the multiset (3) , proving Proposition 3.1. The Perron value is 2σ1 (pair (1 , 1) ), and when σ1
+
+is simple it is the unique product mode equal to 2σ1, which is used in the proof of Theorem 3.2. 
+
+# References 
+
+[1] S. Bravyi, A. W. Cross, J. M. Gambetta, D. Maslov, P. Rall, and T. J. Yoder, Nature 627 ,778 (2024). [2] Q. Xu, J. P. Bonilla Ataides, C. A. Pattison, N. Raveendran, D. Bluvstein, J. Wurtz, B. Vasić, M. D. Lukin, L. Jiang, and H. Zhou, Nature Physics 20 , 1084 (2024). [3] N. P. Breuckmann and J. N. Eberhardt, PRX quantum 2, 040101 (2021). [4] D. Gottesman, arXiv preprint arXiv:1310.2984 (2013). [5] M. A. Tremblay, N. Delfosse, and M. E. Beverland, Physical Review Letters 129 , 050504 (2022). [6] N. Delfosse, M. E. Beverland, and M. A. Tremblay, arXiv preprint arXiv:2109.14599 (2021). [7] L. Pecorari, S. Jandura, G. K. Brennen, and G. Pupillo, Nature Communications 16 , 1111 (2025). [8] C. Poole, T. Graham, M. Perlin, M. Otten, and M. Saffman, arXiv preprint arXiv:2404.18809 (2024). [9] N. Constantinides, A. Fahimniya, D. Devulapalli, D. Bluvstein, M. J. Gullans, J. Porto, A. M. Childs, and A. V. Gorshkov, arXiv preprint arXiv:2411.05061 (2024). [10] H. Zhou, C. Duckering, C. Zhao, D. Bluvstein, M. Cain, A. Kubica, S.-T. Wang, and M. D. Lukin, in Proceedings of the 52nd Annual International Symposium on Computer Architecture 
+
+(2025) pp. 1432–1448. [11] D. Bluvstein, S. J. Evered, A. A. Geim, S. H. Li, H. Zhou, T. Manovitz, S. Ebadi, M. Cain, M. Kalinowski, D. Hangleiter, et al. , Nature 626 , 58 (2024). [12] J. M. Courtney, Permutation routing on ramanujan hypergraphs with applications to neutral atom quantum architectures (2026), arXiv:2605.02498 [quant-ph] . [13] A. Lubotzky, R. Phillips, and P. Sarnak, Combinatorica 8, 261 (1988). [14] A. W. Marcus, D. A. Spielman, and N. Srivastava, SIAM Journal on computing 47 , 2488 (2018). [15] G. A. Margulis, Problemy peredachi informatsii 24 , 51 (1988). [16] J. Friedman, A proof of Alon’s second eigenvalue conjecture and related problems (American Mathematical Soc., 2008). [17] S. Hoory, N. Linial, and A. Wigderson, Bulletin of the American Mathematical Society 43 ,439 (2006). [18] L. G. Valiant, SIAM journal on computing 11 , 350 (1982). [19] L. G. Valiant and G. J. Brebner, in Proceedings of the thirteenth annual ACM symposium on Theory of computing (1981) pp. 263–277. [20] J.-P. Tillich and G. Zémor, IEEE Transactions on Information Theory 60 , 1193 (2013). [21] A. A. Kovalev and L. P. Pryadko, Physical Review A—Atomic, Molecular, and Optical Physics 
+
+88 , 012311 (2013). [22] P. Panteleev and G. Kalachev, IEEE Transactions on Information Theory 68 , 213 (2021). [23] N. P. Breuckmann and J. N. Eberhardt, IEEE Transactions on Information Theory 67 , 6653 (2021). [24] P. Panteleev and G. Kalachev, in Proceedings of the 54th annual ACM SIGACT symposium on theory of computing (2022) pp. 375–388. 
+
+22 [25] A. Leverrier and G. Zémor, in 2022 IEEE 63rd Annual Symposium on Foundations of Com-puter Science (FOCS) (IEEE, 2022) pp. 872–883. [26] A. Leverrier, J.-P. Tillich, and G. Zémor, in 2015 IEEE 56th Annual Symposium on Founda-tions of Computer Science (IEEE, 2015) pp. 810–824. [27] I. Dinur, M.-H. Hsieh, T.-C. Lin, and T. Vidick, in Proceedings of the 55th annual ACM symposium on theory of computing (2023) pp. 905–918. [28] M. Saffman, T. G. Walker, and K. Mølmer, Reviews of modern physics 82 , 2313 (2010). [29] A. Browaeys and T. Lahaye, Nature Physics 16 , 132 (2020). [30] H. Bernien, S. Schwartz, A. Keesling, H. Levine, A. Omran, H. Pichler, S. Choi, A. S. Zibrov, M. Endres, M. Greiner, et al. , Nature 551 , 579 (2017). [31] S. Ebadi, T. T. Wang, H. Levine, A. Keesling, G. Semeghini, A. Omran, D. Bluvstein, R. Samajdar, H. Pichler, W. W. Ho, et al. , Nature 595 , 227 (2021). [32] P. Scholl, M. Schuler, H. J. Williams, A. A. Eberharter, D. Barredo, K.-N. Schymik, V. Lien-hard, L.-P. Henry, T. C. Lang, T. Lahaye, et al. , Nature 595 , 233 (2021). [33] D. Barredo, S. De Léséleuc, V. Lienhard, T. Lahaye, and A. Browaeys, Science 354 , 1021 (2016). [34] D. Barredo, V. Lienhard, S. De Leseleuc, T. Lahaye, and A. Browaeys, Nature 561 , 79 (2018). [35] Y.-H. Lu, N. Song, T. Xiang, J. Ho, T.-C. Lee, Z. Yan, and D. M. Stamper-Kurn, Optica Quantum 4, 241 (2026). [36] Z. Guo, R. A. van Herk, E. J. Vredenbregt, and S. J. Kokkelmans, arXiv preprint arXiv:2510.09398 (2025). [37] L. R. Picard and M. Endres, arXiv preprint arXiv:2510.07633 (2025). [38] M. Endres, H. Bernien, A. Keesling, H. Levine, E. R. Anschuetz, A. Krajenbrink, C. Senko, V. Vuletic, M. Greiner, and M. D. Lukin, Science 354 , 1024 (2016). [39] D. Bluvstein, H. Levine, G. Semeghini, T. T. Wang, S. Ebadi, M. Kalinowski, A. Keesling, N. Maskara, H. Pichler, M. Greiner, et al. , Nature 604 , 451 (2022). [40] L. Voss, S. J. Xian, T. Haug, and K. Bharti, Physical Review A 111 , L060401 (2025). [41] F. T. Leighton, B. M. Maggs, and S. B. Rao, Combinatorica 14 , 167 (1994). [42] T. Leighton, B. Maggs, and A. W. Richa, Combinatorica 19 , 375 (1999). [43] E. Upfal, Journal of the ACM (JACM) 39 , 55 (1992). [44] D. König, Mathematische Annalen 77 , 453 (1916). [45] V. G. Vizing, Diskret analiz 3, 25 (1964). [46] R. Diestel, in Graph theory (Springer, 2024) pp. 179–226. [47] R. Cole, K. Ost, and S. Schirra, Combinatorica 21 , 5 (2001). [48] S. Bernstein, Ann. Sci. Inst. Sav. Ukraine, Sect. Math 1, 38 (1924). [49] S. Boucheron, G. Lugosi, and P. Massart, Concentration Inequalities: A Nonasymptotic Theory of Independence (Oxford University Press, 2013). [50] C. McDiarmid et al. , Surveys in combinatorics 141 , 148 (1989). [51] K. Joag-Dev and F. Proschan, The Annals of Statistics , 286 (1983). [52] D. P. Dubhashi and D. Ranjan, BRICS Report Series 3 (1996). [53] D. Bluvstein, A. A. Geim, S. H. Li, S. J. Evered, J. P. Bonilla Ataides, G. Baranes, A. Gu, T. Manovitz, M. Xu, M. Kalinowski, et al. , Nature 649 , 39 (2026). [54] J. N. Eberhardt and V. Steffan, IEEE Transactions on Information Theory 71 , 1140 (2024). [55] M. H. Shaw and B. M. Terhal, Physical review letters 134 , 090602 (2025). [56] K. Sahay, D. J. Williamson, and B. J. Brown, arXiv preprint arXiv:2602.22770 (2026). [57] T. J. Yoder, E. Schoute, P. Rall, E. Pritchett, J. M. Gambetta, A. W. Cross, M. Carroll, and M. E. Beverland, arXiv preprint arXiv:2506.03094 (2025). [58] M. Wang and F. Mueller, Quantum 10 , 2009 (2026). [59] J. Viszlai, W. Yang, S. F. Lin, J. Liu, N. Nottingham, J. M. Baker, and F. T. Chong, in 
+
+2025 IEEE International Conference on Quantum Computing and Engineering (QCE) , Vol. 1 (IEEE, 2025) pp. 688–699. [60] S. J. Evered, D. Bluvstein, M. Kalinowski, S. Ebadi, T. Manovitz, H. Zhou, S. H. Li, A. A. Geim, T. T. Wang, N. Maskara, et al. , Nature 622 , 268 (2023). [61] R. B.-S. Tsai, X. Sun, A. L. Shaw, R. Finkelstein, and M. Endres, PRX Quantum 6, 010331 (2025). 
+
+23 [62] M. Peper, Y. Li, D. Y. Knapp, M. Bileska, S. Ma, G. Liu, P. Peng, B. Zhang, S. P. Horvath, A. P. Burgers, et al. , Physical Review X 15 , 011009 (2025). [63] Y. Li and J. D. Thompson, PRX Quantum 5, 020363 (2024). [64] J. Sinclair, J. Ramette, B. Grinkemeyer, D. Bluvstein, M. D. Lukin, and V. Vuletić, Physical Review Research 7, 013313 (2025). [65] B. Grinkemeyer, E. Guardado-Sanchez, I. Dimitrova, D. Shchepanovich, G. E. Mandopoulou, J. Borregaard, V. Vuletić, and M. D. Lukin, Science 387 , 1301 (2025). [66] J. Ramette, J. Sinclair, N. P. Breuckmann, and V. Vuletić, npj Quantum Information 10 , 58 (2024). [67] L. Li, X. Hu, Z. Jia, W. Huie, W. K. C. Sun, Aakash, Y. Dong, N. Hiri-O-Tuppa, and J. P. Covey, Nature Physics 21 , 1826 (2025). [68] H. J. Manetsch, G. Nomura, E. Bataille, X. Lv, K. H. Leung, and M. Endres, Nature 647 , 60 (2025). [69] N.-C. Chiu, E. C. Trapp, J. Guo, M. H. Abobeih, L. M. Stewart, S. Hollerith, P. L. Stroganov, M. Kalinowski, A. A. Geim, S. J. Evered, et al. , Nature 646 , 1075 (2025). 
+
+24

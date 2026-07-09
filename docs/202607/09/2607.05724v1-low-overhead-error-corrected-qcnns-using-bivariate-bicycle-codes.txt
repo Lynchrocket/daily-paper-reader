@@ -1,0 +1,499 @@
+Title: Low-Overhead Error-Corrected QCNNs Using Bivariate Bicycle Codes
+
+URL Source: https://arxiv.org/pdf/2607.05724v1
+
+Published Time: Wed, 08 Jul 2026 00:20:40 GMT
+
+Number of Pages: 10
+
+Markdown Content:
+# Low-Overhead Error-Corrected QCNNs Using Bivariate Bicycle Codes 
+
+Alejandro Rosales and Animesh Yadav 
+
+School of Electrical Engineering and Computer Science Ohio University, Athens, OH, USA 
+
+{ar993823, yadava }@ohio.edu 
+
+Abstract —Quantum convolutional neural networks (QCNNs) combine the power of quantum computing and classical CNN for computational speedup in classification tasks. However, noise levels on state-of-the-art quantum devices remain too high for practical QCNN execution. In addition, despite the reliable surface code providing a method for error rates below a threshold value, they have a prohibitively large qubit cost. Recently introduced bivariate bicycle (BB) codes are of particular interest for their high error threshold, constant encoding rate, and linear code distance. Through simulation with realistic hardware noise sources, we demonstrate that a 4-qubit unprotected QCNN fails to converge and exhibits a worse learning rate compared to numerical simulations. Addressing both limitations, we propose a distance-4 BB quantum error-correction (QEC) technique for QCNNs. In doing so, we validate that our low-overhead QEC technique for QCNNS represents a step toward practical QCNNs. 
+
+Index Terms —Quantum Convolutional Neural Networks, Bi-variate Bicycle Codes, Quantum Error Correction, NISQ 
+
+I. I NTRODUCTION 
+
+Advancements in machine learning (ML) have made it a crucial technology across various domains, from signal pro-cessing to healthcare, with applications such as speech recog-nition, computer vision, and drug discovery. However, ML procedures suffer from gradient vanishing in high-dimensional parameter spaces [1], [2] and quadratic sample sizes and train-ing time for certain tasks [3]. On the other hand, quantum com-puting (QC) shows exponential computational speedups [4]– [6]. The combination of these two technologies, termed quan-tum machine learning (QML), promises processing of data in exponentially large feature spaces [7], [8] by leveraging quantum effects like superposition and entanglement, and more efficient navigation of high-dimensional optimization landscapes via quantum-enhanced optimization [9]. Although QML holds significant promise, the limited qubit counts of current noisy intermediate-scale quantum (NISQ) devices pose substantial challenges. Furthermore, these devices suffer from high physical error rates introduced by noise sources including stray electromagnetic fields, cosmic rays, and thermal and temporal decoherence of quantum states [10]. Quantum error correction (QEC) is a method for protecting fragile quantum information while controlling qubits to induce a desired computation. For over two decades, the topological toric code has served as the canonical model for topological quantum error correction. [11]. The code encodes two logical qubits into a d × d lattice of physical qubits, with the total qubit count scaling as n = 2 d2, where d is the code distance. With minimum distance d, the code can correct up to  d−12
+
+
+
+arbitrary single-qubit errors. The toric code thus provides reliable protection of quantum information, however it suffers from inefficient encoding rates that makes scaling to hundreds of logical qubits prohibitively resource-intensive. Recent ad-vances in quantum Low-Density Parity-Check (qLDPC), most notably the bivariate bicycle (BB) code [12], have emerged as a promising alternative. The constant encoding rate of BB codes enables fault-tolerant quantum memory with constant space overhead [12], [13], making them an attractive candi-date for scalable architectures. However, a key open problem remains for the BB code is that it has yet to support fault-tolerant computation, particularly for deep-circuit algorithms and poses an obstacle to real-world QML use cases. To this end, we introduce a constant-overhead QEC protocol that integrates with QML, particularly, quantum convolutional neural networks (QCNN). QCNNs are the quantum counter-part of classical convolutional neural networks (CNNs). These classical supervised learning architecture trains on labeled data to learn a mapping between inputs and their respective labels. QCNNs extend this framework by leveraging quan-tum properties such as quantum parallelism, to accelerate computation. However, practical QCNN execution on NISQ hardware is severely hindered by quantum decoherence and gate noise, which degrades the loss landscape and therefore compromise training and inference. The proposed constant-overhead QEC protocol directly mitigates these impairments, enabling more reliable and practical QCNN deployment on near-term quantum devices. 
+
+A. Related Work 
+
+In [14], the authors introduced a QCNN architecture that incorporated the multi-scale entanglement renormalization ansatz (MERA) with QEC, demonstrating QCNNs for quan-tum phase recognition (QPR) of 1D symmetry-protected topo-logical (SPT) phases and designing a QEC scheme. Their QCNN uses O(log N ) variational parameters for input sizes of N qubits. However, there is still a gap for QEC codes for error correction on deep circuits, like the QCNN, while being practical. In [12], the authors proposed the BB code that requires n
+
+ancillary qubits, a depth-7 syndrome measurement circuit, and a degree-6 qubit connectivity graph, enabling efficient error arXiv:2607.05724v1 [cs.LG] 7 Jul 2026 correction with minimal overhead. Their code demonstrated reduced hardware requirements compared to the surface code and making fault-tolerant quantum memory feasible for near-term quantum processors. The application of the BB code for quantum computation is a high barrier, given the BB code works for Clifford gates only, unlike the Non-Clifford gates in the QCNN. In [15], the authors demonstrated low-overhead qLDPC codes, a distance-3 qLDPC code and a distance-4 BB code utilizing periodic execution of the syndrome extraction circuit. The work of [16] addresses the classical simulability and computational hardness of the functions of quantum models. The key distinction is that our research addresses trainability on physical hardware and how hardware noise introduces a stochastic, non-unitary perturbation at each circuit evaluation, degrading the fidelity of gradient estimates and making gra-dient estimates unreliable. This is orthogonal to questions of whether the learned function is classically hard to simulate or evaluate. 
+
+B. Contributions 
+
+Motivated by the the application of low-overhead BB code on a real 32 long-range-coupled NISQ transmon circuit [15], and the computational speed of machine learning training by the QCNN [14], we apply the distance 4 qLDPC codes for the QCNN. Specifically, we propose a distance-4 BB code [12] combined with a Feed-Forward Neural Network (FFNN) as an error correction technique for the 4-qubit QCNN [14]. We integrate a constant encoding rate, linear code distance BB code that offers an error threshold of 0.3 % for the standard circuit-based noise model to allow for low-overhead scaling to large QCNNs. Next, we compare the QCNN with the new QEC method against an unprotected 4 qubit QCNN in simulation at various NISQ error rates. We observed that the QCNN with the BB code achieves satisfactory results, which shows the implementation achieves a constant encoding rate and linear code distance offered by the BB code, with low qubit, online overhead for error correction. We further show that the QEC protocol can be sustained under low-overhead additional qubit resource requirement while reducing learning loss and improving convergence.. The rest of the paper is organized as follows. Section II presents the key background concepts described in our model implementation and the experiments conducted. Section III presents the proposed BB coded QCNN. Section IV present and discuss the results, comparing them to a plain QCNN architecture, and Section V concludes the paper along with some directions for future research. II. B ACKGROUND 
+
+A. Quantum Convolutional Neural Network 
+
+Classical CNNs has provided a successful ML framework for image recognition and are widely used to approximate functions due to their ability to capture hierarchical features [4], [17]. A QCNN is a quantum counterpart to the classi-cal CNN that exploits quantum properties, such as quantum  
+
+> (a) (b)
+
+Fig. 1: (a) Points show a 64 × 64 test set of ground states over h1 and h2 for a Hamiltonian with J = 1. Phase-boundary points (blue and red diamonds) come from infinite-size density-matrix renormalization group (DMRG). Colors indicate the circuit’s expectation values found via evolutionary search for N = 4 spins using initial, untrained weights. (An artifact can be seen, possibly because of the low qubit spin state.) (b) Uses the same test set and with trained weights after 100 iterations. parallelism, to optimize computation. The QCNN architecture efficiently implements a hierarchical structure of quantum many-body states represented as an inverse MERA [14]. The MERA is a tensor network that is designed to efficiently represent quantum many-body states using a hierarchical and multi-layer structure. It can compute low energy properties of the system, described as the ground state |ΨGS ⟩ ∈ C⊗N ⊆ H ,where H denotes the Hilbert space of a N -qubit system. Each layer τ of the MERA consists of disentanglers Uτ = NNτ 
+
+> i=1
+
+ui
+
+and isometries Wτ = NNτ 
+
+> i=1
+
+wi, where Nτ denotes the number of disentanglers and isometries in that layer, ui denotes the parameterized two-qubit unitary operator applied at the ith convolutional unit of layer τ , and wi denotes the correspond-ing isometric tensor at the reduced pooling subsystem. Nτ
+
+decreases with τ as sites are progressively coarse-grained. The transformation from a coarse-grained level to a finer-grained one is expressed as 
+
+Vτ = Uτ ◦ Wτ : HLτ −→ H Lτ −1 ,
+
+where HLτ = N 
+
+> s∈L τ
+
+Hs is the Hilbert space of the coarse-grained lattice at layer τ , with |L τ | < |L τ −1| as sites are progressively reduced. The operator ◦ denotes function composition, and Vτ is the output unitary fed into the next layer [18]. A QCNN can be thought of as a circuit-based ansatz of an inverse MERA with nested QEC. Learning occurs through gradual tuning of its initial unitary operations [14]. The QCNN acts on input states |ψα⟩ ∈ H L, where α = 1 , . . . , M indexes the training samples and HL ≡ H L0 denotes the full input Hilbert space before any coarse-graining, 
+
+HL = O
+
+> ℓ∈L
+
+Hℓ, (1) and Hℓ ∼= C2 is the local qubit Hilbert space at site ℓ.The state of an individual site ℓ in any given step of the process, can be represented by its reduced density matrix ρ[ℓ] = tr ¯ℓ(|Ψ⟩⟨ Ψ|) and obtained by tracing out all other sites 
+
+¯ℓ except ℓ. The target output for the QCNN is a realization of some state |ψα⟩, i.e., there is always a QCNN that recognizes an input state |ψα⟩ with some deterministic measurement outcome. The QCNN training procedure is supervised approximation process defined over a training set Ttrain and a testing set 
+
+Ttest , where a training sample ⃗x ∈ T train is provided to the algorithm together with its true label m(⃗x) ∈ { +1 , −1}. Here, 
+
+m : Ttrain ∪ T test → { +1 , −1} is the underlying true map. The true labels of the test set Ttest are not given to the algorithm, however, is given labeled training data {(⃗x, m (⃗x)) }⃗ x∈T train . The QCNN learns an approximate map ˜m : Ttrain → { +1 , −1}
+
+by minimizing a loss function assigns a penalty to deviations of ˜m(⃗x) from m(⃗x) across the training set. Following train-ing, the learned function ˜m is evaluated on unseen samples ⃗x ∈ T test , where the goal is to minimize the generalization error 
+
+E = Pr ⃗x∈T test [ ˜ m(⃗x)̸ = m(⃗x)] . The training procedure will be discussed more in Section III-A 
+
+B. Recognizing a 1D SPT Phase 
+
+A QCNN takes advantage of the layered structure of the MERA to classify phase, where the input layer takes in an unknown N -input quantum state. After the input layer, the hidden layers are the convolutional layer, pooling layer, and fully connected layer [14], similarly to the CNN. The convolutional layer is given as a quasi-local unitary UL and is applied in a translationally invariant manner for finite depth. During pooling, a portion of qubits is measured, and the outcome determines the unitary rotation VL applied to nearby qubits, allowing for nonlinearity through the reduction of degrees of freedom. Unitary layers, such as unitaries in the convolutional and fully layers, apply quasi-local operations to existing qubits, while isometry layers, like those in the pooling layer, remove qubits in a state before applying unitary transformations on nearby states. The number of convolution and pooling layers remains fixed throughout, while the model learns the unitaries. The convolution and pooling layers are applied d times. When the system is sufficiently small, a fully connected layer is applied on the remaining qubits as a unitary 
+
+F . The outcome of the circuit is measured and the prediction is obtained. The final operator measured by the circuit recognizes the SPT phase. The set of phases considered consists of ground states {| ψGS ⟩} corresponding to a family of Hamiltonians de-fined on an N -site spin- 12 chain with open boundary conditions 
+
+H = −J 
+
+> N−2
+
+X
+
+> i=1
+
+ZiXi+1 Zi+2 − h1
+
+> N
+
+X
+
+> i=1
+
+Xi − h2 
+
+> N−1
+
+X
+
+> i=1
+
+XiXi+1 ,
+
+(2) where Xi and Zi are Pauli operators acting on site i, J > 0 is the three-body interaction strength, h1 is the transverse field strength, and h2 is the nearest-neighbor coupling strength. The 
+
+Z2 ×Z2 symmetry protection of the Haldane chain is generated by global π-rotations of every spin around the X and Y axes, 
+
+Rx = Y
+
+> j
+
+eiπσ xj and Ry = Y
+
+> j
+
+eiπσ yj , (3) where σxj and σyj are the spin- 12 operators at site j.The one-parameter family of Hamiltonians considered for the Haldane phase, which is a SPT phase, is defined on a 1-dimensional chain of N spin-1 particles with open boundary conditions 
+
+HHaldane = JHNX
+
+> j=1
+
+Sj · Sj+1 + ω
+
+> N
+
+X
+
+> j=1
+
+ Szj
+
+2 , (4) where Sj denotes the vector of spin-1 operators at lattice site 
+
+j, JH > 0 represents the exchange coupling strength, and 
+
+ω ∈ R is the single-ion anisotropy parameter. The detection of the phase is as a measurement of the nonzero expected value ⟨Zm⟩ middle qubit m of the chain in the Z basis. Quantitatively, given a phase |ψα⟩ ∈ P , where 
+
+P denotes the set of ground states belonging to a given phase, the expected value is computed directly from the state vector as 
+
+⟨Zm⟩ = X
+
+> ℓ
+
+λm |⟨ ℓ|ψα⟩| 2, (5) where m =  N +1 2
+
+, and the sum runs over all computational basis states |ℓ⟩, and λm ∈ { +1 , −1}N is the eigenvalue of the Pauli-Z operator on the middle qubit in the basis state |ℓ⟩.
+
+C. Stabilizer Codes 
+
+QEC is crucial for protecting quantum information from background noise and gate errors that occur during processing. To achieve this, error correction protocols redundantly encode logical qubits into many physical qubits, some of which are ancilla qubits, to ensure errors can be detected and corrected. The ancilla qubits in a stabilizer code are repeatedly measured by parity check operators so that the wavefunction of the state of the logical qubits is not collapsed. The syndrome information is then used to detect and possibly correct errors that are believed to have occurred during processing. The number of errors that can be detected and corrected is dependent on the code. An [[ n, k, d ]] QEC code encodes k
+
+logical qubits into a QEC codeword of length n to protect the system during quantum processing, where the code distance 
+
+d determines the minimum number of physical qubit errors needed to cause a logical error. A code of distance d can correct up to  d−12
+
+ errors and detect up to d − 1 errors. The information protected by the stabilizer code is defined over a stabilizer group S, which is the Abelian subgroup of the Pauli group P ⊗n. This group does not include −I⊗n where I
+
+is the 2 × 2 identity matrix in P . The stabilizer group S has 
+
+n−k independent generators Si, i = 1 , ..., n −k. Each element in the stabilizer group S = ⟨S 1, S2, . . . , Sn−k⟩ is termed a stabilizer. The stabilizer generators perform distinct operations on the data qubits, however all stabilizer generators leave the encoded quantum state unchanged. D. Bivariate Bicycle Codes 
+
+The BB code is a type of Calderbank-Shor-Steane (CSS) stabilizer code that leverages bivariate polynomials over the quotient ring R = F2[x, y ]/(xℓ − 1, y m − 1) , where ℓ and 
+
+m are positive integers, and F2 = {0, 1} is the binary field. An [[ n, k, d ]] BB code QC( A, B ) is a CSS code defined by two polynomials A, B ∈ R, where QC( A, B ) denotes the associated quasi-cyclic code generated by the pair (A, B ), and has parameters 
+
+n = 2 ℓm, (6) 
+
+k = 2 · dim  ker( HX ) ∩ ker( HZ ) , (7) 
+
+d = min |v| : v ∈ ker( HX ) \ rs( HZ ) , (8) where HX and HZ are the parity-check matrices of the CSS code corresponding to the X-type and Z-type stabilizer checks, respectively, and H denotes a binary matrix. ker( H)
+
+denotes the set of vectors orthogonal to each row of H, rs( H)
+
+is the linear span of its rows, and |v| = Pni=1 vi is the Hamming weight of v ∈ Fn 
+
+> 2
+
+.
+
+1) Encoding Logical Qubits: The check matrices for a BB code denoted QC( A, B ) with length n = 2 ℓm is 
+
+HX = [ A | B] and HZ = [ BT | AT ], (9) where the vertical bar indicates stacking matrices horizontally, and T denotes matrix transpose. The bivariate polynomials are a pair of matrices 
+
+A = A1 + A2 + A3 and B = B1 + B2 + B3, (10) such that each matrix Ai and Bj is a power of x or y, while 
+
+dim HX = dim HZ = ( n/ 2) × 2. Each row v ∈ Fn 
+
+> 2
+
+in HX is a X-type operator, and similarly each row v ∈ Fn 
+
+> 2
+
+in HZ is a 
+
+Z-type operator, is defined as 
+
+X(v) = 
+
+> n
+
+Y
+
+> j=1
+
+Xvj 
+
+> j
+
+and Z(v) = 
+
+> n
+
+Y
+
+> j=1
+
+Zvj 
+
+> j
+
+, (11) respectively. The codes in Table 1 are described using the lin-ear subspace associated with check matrices and polynomials 
+
+A and B for high-rate, shown in [12], [15]. 
+
+2) Syndrome Extraction: The code standard QC( A, B )
+
+has a syndrome measurement (SM) circuit that continuously measures the syndrome of each check operator, which requires 
+
+n data qubits and n ancillary check qubits to record the measured syndromes, for a total of 2n physical qubits. The SM circuit only applies CNOTs to pairs of qubits that are connected in the Tanner graph. The SM circuit starts and ends with a code dependent ini-tialization and measurement cycle that determines the logical qubit initialization suited for the initial state and measuring logical qubits in a proper basis. The rest of the SM circuit is comprised of Nc number of syndrome cycles (SC) repeated throughout the circuit periodically, where each SC measures syndromes for all n check operators of the code.  
+
+> SC 1
+> Xchecks
+> CQCNN
+> Zchecks
+> N
+> Xϕ
+> C−1
+> QCNN
+> Zϕ
+> SC 2
+> |0⟩
+> |0⟩
+> |0⟩
+> |ψl⟩
+> |0⟩
+> fl
+> Encoding Decoding
+
+Fig. 2: QEC-QCNN circuit. 
+
+3) Decoding Algorithm: Consider a [[ n, k, d ]] BB code and an SM circuit U constructed with Nc syndrome cycles defined in the SM section. Error correction is performed using a classical algorithm that takes a measured error syndrome as input and returns an estimate of the Pauli error that occurred during computation on the data qubits, accounting for all faults provided by the SM circuit. Note that the syndrome circuit itself may contain measurement errors. A proper guess occurs if the estimated Pauli error is a subset of the actual Pauli error up to a product computed via the check operators. The SM step is followed by belief propagation with an ordered statistics postprocessing step decoder (BP-OSD) [12]. The unknown error for the linearized noise model used in the BB code is ξ, D which denotes the decoding matrix, and σ = sU |sF  (where the vertical bar indicates stacking matrices horizontally) is the measured error syndrome. Using information sets ranked according to their reliability, BP-OSD finds an information set I with the largest reliability. The output of BP-OSD is the solution of the system Dξ = σ
+
+based on the most reliable information set I. This information set is used as the solution for the minimum weight error 
+
+ξ∗ = ξ∗(s) ∈ { 0, 1}N optimization problem. The guess for the unknown logical syndrome is given as 
+
+sL = DLξ∗, (12) where L indexes the logical qubit degree-of-freedom. The BP-OSD decoder is applied separately to the decoding matrices 
+
+Dx and Dz , which are constructed from the parity-check matrices HX and HZ , respectively. The result is a guessed 
+
+X-type and Z-type errors Ex and Ez , where the guessed final error is E∗ = E∗
+
+> x
+
+E∗ 
+
+> z
+
+. This BP-OSD computes the upper bound for the code distance d. A large number of candidate BB codes with n = O(100) qubits is then searched that satisfy the criteria for the BB code given in the original paper [12]. 
+
+4) Error Correction: After executing a quantum circuit the syndrome measurement outcomes are processed using BP-OSD. Using the final guessed X-type Ex and Z-type error 
+
+Ez are used to correct the data qubits without measurement occurring. III. P ROPOSED BIVARIATE -B ICYCLE CODED QCNN In this section, we describe the parameters of the 4-distance BB code and the 4-qubit QCNN, followed by a description of how the QCNN is embedded within the BB code using transversal operations, ensuring that all QCNN operations remain within the protected code space. Finally, the Tanner graph topology of the trained network is used to correct errors in the QCNN. 
+
+A. Training the QCNN 
+
+We used the QCNN for quantum phase recognition (QPR) by applying it to a class of one-dimensional many-body systems. Specifically, the class considered is a Z2 × Z2 phase. The ground states were numerically obtained using an infinite-size DMRG algorithm, following the method outlined in [19] with a maximum bond dimension of 150 . The symmetry operators generating the Z2 × Z2 symmetry are 
+
+Xeven = Y
+
+> i∈even
+
+Xi and Xodd = Y
+
+> i∈odd
+
+Xi, (13) where Xi is the Pauli-X operator acting on site i. Each ground state energy density is obtained as a function of h2 for fixed h1.We then compute its second-order derivative to locate phase transitions. This approach to locating phase transitions via the second-order derivative of ground state energy densities follows [14]. As illustrated in Fig. 3, the QCNN circuit classifies whether the SPT phase exists as a |S = 1 | Haldane chain or has tran-sitioned to a |S = 1 | paramagnetic phase or antiferromagnetic phase. When ω is zero or sufficiently small relative to J, the ground state, the phase belongs to the SPT phase. The phase is antiferromagnetic when the staggered field h1 is sufficiently large relative to J, breaking the Z2 × Z2 symmetry of the SPT phase. The critical point is identified as h2/J = 0 .423 using infinite size DMRG numerical simulations. During training, the untrained model is given a classified training set Ttrain = {(|ψα⟩, y α) : α = 1 , ..., M }, where yα
+
+is the respective 0 or 1 binary classification for some input state |ψα⟩. The expected output of the QCNN is computed as f{Ui,V i,F } (|ψα⟩) (The expected output computation will be discussed more in Section III-C). The cost function of the model is computed using the mean-squared error (MSE) 
+
+MSE = 12M
+
+> M
+
+X
+
+> α=1
+
+ yi − f{Ui,V j ,F } (|ψα⟩)2 . (14) The QCNN is constructed using isometric tensors in the pooling layer, where measuring a qubit lowers degrees of freedom for feature extraction [14]. Since these measurement-based pooling operations are non-unitary and irreversible, standard quantum backpropagation cannot be applied through the full QCNN. An analytical gradient parameter-shift rule is used as an approximation scheme to compute the gradients, which provides unbiased gradient estimates for the variational unitary layers preceding the measurements. The model learns by iteratively optimizing all initially assigned unitaries until convergence via a finite-difference scheme given the MSE cost function. To calculate the gradient matrix M using the finite-difference scheme, the parameter-ized weights Θ in the QCNN circuit are perturbed by shifting 
+
+θj ∈ Θ by ±ϵ for each parameter in the quantum circuit. The weights are then updated via gradient descent as 
+
+Θ ← Θ − η M, (15) where η is the learning rate and M is the gradient matrix of the MSE with respect to Θ.We evaluate phase recognition performance using 40 spin- 12
+
+ground states sampled along the h2 axis ( h1 = 0 ), with QCNN weights trained from 0.616 to 0.174 after 100-iterations under ideal, noiseless statevector simulation. We will discuss the con-figuration of the simulation in Section IV. The trained model produces expectation values ⟨Zm⟩ that decrease monotonically from approximately 0.94 near h2 = 0 toward 0.28 at the far end of the paramagnetic region, yielding a smooth decision boundary consistent with the theoretical phase transition at 
+
+h2/J = 0 .423 .
+
+B. Optimizing Quantum Error Correction 
+
+The QEC code is a BB code with parameters [[18 , 4, 4]] ,where l = 3 and m = 3 , using [a1, a 2, a 3] = [1 , 0, 1] and 
+
+[b1, b 2, b 3] = [2 , 0, 2] . We derive the corresponding check matrices HX = [ A|B] and HZ = [ BT |AT ] and compute the code parameters k = 4 and d = 4 . The BB code circuit is then constructed in accordance with the architecture described in Section II-D. The feed-forward correction layer is trained and evaluated on stochastic Pauli noise injected into the [[18 , 4, 4]] BB code. Specifically, the four logical data qubits admit 24 = 16 distinct computational basis states, such that the training set is 
+
+Ftrain =  y ∈ { 0, 1}4 , (16) where each element y = ( y1, y 2, y 3, y 4) encodes which of the four logical qubits has suffered a bit-flip error. At each SPSA iteration, every pattern y ∈ F train is prepared by applying X
+
+gates to the mapped physical qubits. Concretely, the encoder uses ζ logical to map each basis state |y⟩, where y ∈ { 0, 1}4,to a codeword |y⟩ ∈ (C2)⊗11 via transversal gate operations. Given a physical quantum circuit C acting on 4 logical qubits, we construct a physically encoded circuit Cenc via the transversal gate operations. One classical register records the 11 bits data measurement outcomes, respectively. using propagated through the full syndrome-extraction and feed-forward correction circuit, and decoded to yield a predicted logical label ˆy.Given the logical state space is finite and small the loss in Eq. (17) is computed over all N = 16 patterns at every iteration, making each update equivalent to a full-batch gradient step over the complete input distribution. This exhaustive evaluation guarantees that the trained parameters ϕ
+
+are assessed on every failure mode of the code, and that a loss of 0 certifies perfect logical-state recovery across all possible single-layer error configurations. To correct errors, we augment the syndrome extraction circuit with a parametrized feed-forward layer. This layer introduces 2m trainable rotation angles ϕi ∈ [0 , 2π), where 
+
+Ry (ϕXi ) and Ry (ϕZi ) denote single-qubit y-axis rotation gates parameterized by the ith trainable angle corresponding to the X-check and Z-check ancilla qubits, respectively. These rotations are applied to the physical data qubits immediately following the syndrome vector, using controlled X and Z rotations. The objective used during training are the logical state or logical labels. The set of true logical labels {yi}Ni=1 and the corresponding predicted logical labels {ˆyi}Ni=1 given in Ftrain 
+
+returned by the decoder after circuit execution, the loss is given as 
+
+Loss (ϕ) = 1
+
+N
+
+> N
+
+X
+
+> i=1
+
+1[ˆ yi̸ = yi] , (17) where ϕ denotes the trainable parameters of the QEC feed-forward layer, distinct from the QCNN circuit parameters θ,and 1[·] denotes the indicator function. The loss therefore lies in [0 , 1] , with 0 indicating perfect correction and 1 indicat-ing every frame is mislabeled. This normalization gives the SPSA gradient estimator a stationary, bounded signal that is independent of the number of test cases and the code distance. The correction layer is embedded inside a quantum circuit evaluated by a noisy stochastic simulator. Since the loss function is a non-differentiable indicator function gradients of 
+
+Loss with respect to the trainable parameters ϕ cannot be computed analytically [20]. SPSA is therefore employed as the optimizer, such that at each iteration k, the algorithm evaluates the a single syndrome cycle circuit 3 times, regardless of the number of parameters p, making it practical for circuits with many syndrome checks. Each training iteration proceeds in four stages. 1) Center evaluation. The unperturbed circuit is evaluated to obtain the center-point loss Loss 0 = Loss (ϕ(k)),where, ϕ(k) is weight vector at the kth iteration and is recorded for the learning-rate adaptation rule described below. 2) Positive perturbation. A simultaneous perturbation vector ∆ ∈ {− 1, +1 }p is drawn independently and uniformly at random. The parameters are shifted to 
+
+ϕ(k) + c ∆ where, c = 0.2 rad is the perturbation magnitude, and the circuit is evaluated to obtain Loss +.3) Negative perturbation. The parameters are shifted to 
+
+ϕk − c ∆. Using the same realization of ∆, and the circuit is evaluated to obtain Loss −.4) Gradient step. The SPSA gradient estimate for param-eter i is 
+
+ˆgi = Loss + − Loss −
+
+2 c ∆i
+
+, (18) and a gradient descent step is applied 
+
+ϕk+1  
+
+> i
+
+= ( ϕik − αk ˆgi) mod 2 π, (19) where αk is the current learning rate. All parameters are updated simultaneously in a single step, with the base parameters restored from a snapshot taken before the perturbations were applied. Angles are wrapped modulo 
+
+2π throughout. The learning rate αk is adapted at every step by a bold-driver rule [21]. After the gradient step, the center-point loss Loss 0
+
+of the current iteration is compared against that of the previous iteration. If the loss has decreased, then the learning rate is increased by 1.05 , encouraging larger steps when progress is being made. If the loss has increased or remained constant, the learning rate is halved, contracting the search radius to 
+
+αk+1 =
+
+(1.05 αk if Loss (k)0 < Loss (k−1) 0 ,
+
+0.5 αk otherwise. (20) All trainable parameters are initialized to zero, correspond-ing to identity rotations on every check qubit. Under this initialization the correction layer has no effect on the circuit output, so the very first center-point evaluation measures the uncorrected logical error rate. Subsequent iterations introduce progressively stronger corrections as SPSA explores the pa-rameter space. A seeded random number generator is used for both the initialization procedure and the Bernoulli draws that produce the ∆ vectors, ensuring that training runs are exactly reproducible. The decoding offline stage uses BB code decoding matrices to decodes the linearized noise model using BP-OSD [12] by taking a measured error syndrome as input and outputting an estimated final error that occurred on the data qubits during computation. 
+
+C. Error Correction for QCNN 
+
+The QCNN suffers from the error-prone nature of quan-tum operations throughout the entirety of the circuit, so it naturally motivates the need for QEC. Our proposed QCNN architecture constructs the layers using transversal gate oper-ations that conform to the Tanner graph structure of the BB code, denoted CQCNN . Thus, allowing gates in each layer to preserve the code’s locality and operations to occur in the protected subspace. The variational parameters are continuous and therefore implement non-Clifford rotations, which cannot be implemented transversally in the BB data block, allowing for errors to propagate through the circuit. To mitigate this, while avoiding the high overhead of magic state injection (MSI), we employ a FFNN as a syndrome-based neural decoder interleaved between each convolutional, pooling, and fully connected layer of the QCNN and the next. Thus, rather than correcting the non-Clifford rotations themselves, the FFNN intercepts the X-syndromes and Z-syndromes produced by the BB code’s stabilizer checks after each noisy layer, and predicts per-qubit Pauli-X and Pauli-Z correction decisions before the next layer executes. This approach confines error propagation to within individual layers rather than allowing it to compound across the full circuit depth. Concretely, this correction occurs between each hidden layer, prior to the next variational layer, so that the parameter updates computed by SPSA reflect gradient estimates over a cleaner logical state rather than one corrupted by accumulated gate noise, as would occur if correction were deferred to end-of-circuit. This process circumvents the classical post-processing bot-tleneck of BP-OSD, where belief propagation would need to complete on the order of 1 μs [22], [23] for superconducting processors to keep pace with circuit execution. Current state-of-the-art decoders trade accuracy for latency to meet this tight decoding time budget [24], and BP-OSD does not meet this requirement at scale. Otherwise, physical qubits must sit idle between layers, during which T1 (energy relaxation) and 
+
+T2 (dephasing) processes accumulate additional errors on the quantum hardware. The FFNN’s learnable weights are one per edge of the BB code’s Tanner graph, such that the structure of the check and variable nodes respect the code’s locality, mirroring the same geometric constraints imposed on the transversal gates. Its input is the X-syndrome bit string extracted from stabilizer CX measurements on the [[18 , 4, 4]] BB code’s ancilla qubits, and its output is a binary correction vector indicating which physical data qubits require a corrective CX operation to return the logical state to the code space. Where, the [[18 , 4, 4]] 
+
+BB code’s stabilizer generators and logical operators are constructed following the procedure presented in [12] (see section III-B). The 4-spin SPT input state is encoded into an 18 -physical-qubit state representing the logical state |ψl⟩ of the [[18 , 4, 4]] 
+
+code. The encoding is performed by mapping the four physical input spins to logical qubit degrees of freedom according to the sparse parity-check structure of the code. For each logical circuit C, this procedure traverses every layer of the QCNN, including the input layer and final layer. The transversal operations then replaces each logical instruction with up to 
+
+|P c| × |P t| physical gates. For a code with block size n and a circuit of depth d containing g two-qubit gates, the encoded circuit has depth at most O(d) and gate count at most O(g·n2).Specifically, each gate G ∈ C acting on logical qubit qi is replaced by the transversal operation 
+
+G⊗|P i| = O
+
+> j∈P i
+
+Gj , (21) where Pi ⊆ { 0, 1, . . . , n − 1} is the set of physical qubit indices corresponding to the ith logical qubit under the code’s qubit mapping ζ : qi 7 → P i.A logical CNOT between control qubit qc and target qubit 
+
+qt is implemented transversally as 
+
+CNOT ⊗ = O 
+
+> j∈P c
+> k∈P t, j ̸=k
+
+CNOT j→k, (22) applying a physical CNOT from each control physical qubit to each target physical qubit, excluding self-connections. Gates involving stabilizer check qubits or reset operations are passed through without transversal expansion, as these are already defined at the physical level in the encoded circuit. The CQCNN then acts on the logical state, which undergoes noise N as. 
+
+fl = X
+
+> |ψl⟩∈{|± x,y,z ⟩}
+
+⟨ψl| M −1 
+
+> q
+
+(N (Mq (|ψl⟩⟨ ψl|))) |ψl⟩, (23) where Mq (M−1 
+
+> q
+
+) denotes the encoding (decoding) map of the BB code, |± x, y, z ⟩ are the ±1 eigenstates of the Pauli X,
+
+Y , Z operators, and fl is the logical output of 
+
+CQCNN , {Ui, V j , F }(|ψl⟩) . (24) The initial physical system two 9-qubit data registers DL
+
+and DR, one 9-qubit X-check ancilla register AX , and one 9-qubit Z-check ancilla register AZ . However, the transversal qubit mapping has two 9-qubit data registers DL and DR
+
+which are redundant. The four logical qubits map onto only 11 distinct physical qubit indices {0, . . . , 10 }, with qubits 
+
+{0, 2, 5, 6} shared across multiple logical qubits and the re-maining indices each carrying information unique to a single logical qubit. Consequently, the two data registers collapse into a single 11-qubit register D, reducing the full system from 36 to 29 qubits without loss of information. The encoder uses ζ to map each basis state |i⟩, where 
+
+i ∈ { 0, 1}4, to a codeword |i⟩ ∈ (C2)⊗11 via transversal gate operations. The evolved circuit is a Hilbert space of dimension 2ntotal , where ntotal = nleft + ddata + nright = 29 .Given 9 X-check ancillas, 11 data qubits, and 9 Z-check ancillas. Given the ancilla qubits are initialized to |0⟩ and, in the noiseless statevector simulation, remain unentangled with the data register, the data-qubit marginal state can be extracted without a partial trace. The reduced statevector is then decoded into the logical basis by iterating over all 2ddata computational basis states of the data register. The corresponding logical state is then determined by 
+
+v =    LX b mod 2  , (25) The complex amplitude αj is then accumulated into the entry of the logical statevector |ψl⟩ ∈ C2N
+
+indexed by 
+
+v = P 
+
+> k
+
+vk 2N −1−k, so that 
+
+|ψl⟩ = 
+
+> 2dphys −1
+
+X
+
+> j=0
+
+αj v(bj ) . (26) The resulting 2N -dimensional statevector is passed to the prediction stage, where the expectation value of the middle-qubit observable is evaluated to produce the final classification output. IV. E XPERIMENTAL RESULTS AND DISCUSSION 
+
+A. Simulation Setup 
+
+We let each gate type is subject to an independent error probability p, with errors injected as single- or two-qubit Pauli operators drawn uniformly from {I, X, Y, Z }. The two-qubit CNOT gates are assigned errors from the full 15-element two-qubit Pauli group {I, X, Y, Z }⊗2 \ { II }, with each error type drawn uniformly given that an error occurs with probability p. Idle qubit errors are inserted to maintain a consistent time boundary across all data qubits. Idle qubits are modeled per layer, such that any qubit not involved in an active gate receives a uniformly random Pauli error {I, X, Y, Z }
+
+with probability p, independently per qubit. Measurement operations are subject to a pre-measurement bit-flip, phase-flip, or Y -error at the same rate. Further, we implement a stochastic Pauli noise model applied at the circuit level [12]. The considered noise model configuration is used to sweep over physical error rates p ∈ { 0.0001 , 0.001 , 0.003 },which span the near-threshold regime relevant to NISQ-era demonstrations. This noise model approximates a symmetric depolarizing channel on each gate type and serves as a baseline for evaluating the robustness of our BB-code-protected QCNN against gate-level noise. All noise simulations used the same seeded random number generator for reproducibility. 
+
+B. Training and Evaluation 
+
+The 4-qubit QCNN was first trained under ideal statevector simulation using a dataset of 40 labeled ground states evenly spaced along the line h2 = 0, where the Hamiltonian is exactly solvable via the Jordan-Wigner transformation and labeled ±1 [25]. Training ran for 100 iterations using the finite-difference gradient scheme described in Section II-B. Fig. 3 plots and compares statevector training training loss for 4-qubit QCNN and 11-qubit transversal QCNN under error rates p ∈ { 0.0 %, 0.01 %, 0.1 %, 0.3 %}.
+
+Fig. 3: Statevector training loss vs iteration for 4-qubit QCNN and 11-qubit transversal QCNN. In Fig. 3a, under noiseless (i.e., p = 0 ) statevector training, the standard QCNN converges smoothly and monotonically from 0.616 at to 0.174 and reached a stable plateau by iteration 60. In comparison the transverse QCNN started at 1.442 and exhibits substantial loss variance during the first 55 iterations, with a quick peak exceeding 2.0 and recurring peaks near iterations 20 and 45. After iteration 55, the transversal circuit stabilizes and plateaus at 0.616 , with the lowest loss at iteration 19 of 0.19 and oscillating around losses of about 0.25 from iterations 20 to 60. This variability and performance gap of the transversal QCNN under noiseless conditions suggest struc-tural constraints due to the transversal gate set. We believe that the application of identical unitary operation fault-tolerantly across all physical reduces, the effective expressibility of the ansatz. Updates made to the weights are magnified by the repetition of the gates across many physical qubits. While this property is designed to minimize physical error rates on a logical qubit, it also causes large shifts for the finite-difference scheme when traversing the gradient. This can be seen by large steps taken during early-training, before plateauing after the learning loss was lowered, due to fine tuning from the bold driver. In Fig. 3b, for p = 0 .001 , the standard QCNN fails to learn and converge entirely. The loss starts at 0.632 and after 100 iterations is at 0.652 . The QCNN reaches its lowest loss of 
+
+0.42 at iteration 2, after which it never drops below a loss of 
+
+0.6. The transversal QCNN starts at 0.802 oscillates early on, however, start learning and descending around iteration 45, ending at 0.348 . The lowest loss recorded for the transversal QCNN was 0.224 at iteration 46. The transversal QCNN is noise-resilient by construction. Given the transversal QCNN learned better than the standard QCNN without noise, we believe the error corrected QCNN will train better, however, with limited hardware, we leave simulating 29 qubits on classical hardware for future research. In Fig. 3c, for p = 0 .003 , the highest noise level tested for training. The standard QCNN begins at a loss of 0.714 
+
+at iteration 1 and never improves in any sustained amount. We assume this is because the bold-driver schedule triggers repeated halving events from as early as iteration 3, collapsing the learning rate from 10 5 to below 10 −8 by iteration 100, at which point the loss reads 1.565 to a loss higher than the starting loss. In Fig. 3d, for p = 0 .003 , the transversal QCNN follows a similar loss volatility but exhibits markedly higher loss magni-tudes throughout. The initial loss started at 0.714 in iteration 1, the model oscillates chaotically across the full 100 iterations, with losses regularly exceeding 1.0 and peaking above 1.6
+
+on multiple occasions at iterations 8 and 38, respectively. The learning rate undergoes the same rapid collapse as the standard variant, falling below 10 −8 before iteration 100, and the final loss of 1.565 provides no improvement over initialization. Nei-ther architecture recovers a downward trend after the learning rate saturates near zero, and neither approaches the 0.348 
+
+final loss achieved by the transversal QCNN at p = 0 .001 .This shows that an error rate of p = 0.003 is too high for trainability of both the standard and transversal QCNN under the present finite-difference scheme configuration. The noise-resilience advantage of the transversal design observed at p = 0 .001 does not extend to this error rate. Fig. 4 plots the best-so-far training loss over 100 iterations for the standard QCNN (a) and transversal QCNN (b) under different NISQ noise levels p ∈ {0, 0.0001 , 0.001 , 0.003 }.Each plotted value reflects the lowest loss achieved up to that iteration rather than the raw per-iteration loss. Under noise-less conditions, the standard QCNN converges smoothly and monotonically to a final loss of approximately 0.174 , whereas all noisy variants stall early. At p = 0 .001 and p = 0 .003 Fig. 4: Training loss versus iteration (a) the 4-qubit QCNN and (b) the 11-qubit transversal QCNN. plateauing immediately near 0.62 and 0.57 respectively, and 
+
+p = 0 .0001 halting around 0.43 after a few iterations. All four noise levels for the transversal QCNN descend rapidly within the first 10 iterations and continue improving, with the noiseless curve reaching approximately 0.21 , p = 0 .0001 
+
+settling near 0.22 , and even the noisiest conditions ( p = 0 .001 
+
+and p = 0 .003 ) converging to losses of roughly 0.43 and 0.50 
+
+respectively. This contrast demonstrates that the transversal architecture retains trainability at noise levels that completely suppress learning in the standard QCNN, confirming its re-silience at NISQ-era error rates. 
+
+Fig. 5: The violin plots of QCNN predictions (blue) vs Transversal QCNN (orange). Values are normalized to the noise-free median. Fig. 5 shows violin plots of qubit prediction values for the standard QCNN (in blue) and logical prediction values for the transversal QCNN (in orange) across Pauli noise levels normalized to the noise-free statevector predictions. Each noise level has n = 50 predictions over 25 random seeds. At p = 0 .0001 , both architectures remain tightly concentrated near zero, indicating minimal deviation from the noiseless baseline, as noise increases to p > = 0 .001 , both distributions shift downward and broaden, reflecting degraded and increas-ingly variable predictions. The standard QCNN consistently produces a more compact and symmetric distribution with its median tracking closer to zero at lower noise levels, reaching approximately −1.05 at p = 0 .005 and −1.2 at p = 0 .01 . The transversal QCNN, by contrast, exhibits wider distributions with heavier tails extending well below −2 at higher noise levels, and while its median remains slightly higher than the standard QCNN at −0.7 and −0.6 for p = 0 .005 and p = 0 .01 
+
+respectively, this comes with substantially greater variance and outliers. It can be concluded that the transversal gate structure preserves higher median prediction quality at elevated noise levels at the cost of greater variance, and that this preservation of median predictions may allow the optimizer to identify clearer local minima during noisy training. 
+
+Fig. 6: 4-qubit QCNN prediction of an antiferromagnetic and paramagnetism phase with the trained model. The QCNN (blue) and the QEC-QCNN (orange) are shown. The QEC-QCNN 6 shows that the FFNN trained on Clifford gates over corrects for errors, and Non-Clifford Gates are not apart of the training data, and appear to the FFNN soft decoder as errors. This causes bit and phase flips to the entangled data, causing predictions to entropy to predictions of 1. To improve results, the FFNN soft decoder should be trained with the QCNN model, for noise-aware error correction, or trained on a pre-trained model. Thus, errors in application match errors seen during training. 
+
+C. Qubit Resource Analysis 
+
+The toric surface code encodes logical qubits into a physical qubit lattice with overhead scaling as n ∝ d2, achieving an error threshold of approximately 0.67% -0.81% under circuit-level depolarizing noise using gauge-fixing techniques [26], below which increasing d exponentially suppresses logical errors. However, encoding k = 4 logical qubits at distance 
+
+d = 4 requires roughly 64 physical qubits plus 400 –1,000 
+
+additional qubits per magic state distillation factory [27], [28] to supply the non-Clifford gates essential to QCNN variational layers at current gate error rates [29], placing total physical qubit requirements between 10 4 and 10 6 [30]– [32]. This is a prohibitive overhead for current hardware. By contrast, the [[18 , 4, 4]] BB code encodes the same 4 logical qubits into 29 physical qubits via a shared-index transversal mapping III-C, with non-Clifford corrections handled by the interleaved FFNN decoder, eliminating factory overhead at the cost of a lower error threshold ( ∼ 0.3% ). This makes it far better suited to near-term operation. V. C ONCLUSION AND FUTURE DIRECTIONS 
+
+In this study, we considered the problem of training insta-bility of QCNN observed under NISQ hardware noise. We proposed the integration of BB code to overcome this issue. The [[18 , 4, 4]] BB code provides a mapping for physical to logical qubits and spins via the sparse parity check matrices to transversally encode a 4-qubit QCNN into an 11-qubit QCNN logical structure. The transversal QCNN, by contrast, retains meaningful learning progress at p = 0 .001 , and converges to a final loss of 0.348, demonstrating that fault-tolerant encoding confers measurable noise resilience even without a fully trained decoder. At higher noise rates, such as p = 0 .003 ,neither architecture recovers. This indicates that the gradient landscape is too difficult for current QCNN models without meaningful error correction. These findings necessitate the joint error mitigation and error correction between the FFNN soft decoder and the transversal QCNN. When higher qubit counts become available, qLDPC codes with larger distances and more logical qubits can be applied to deeper QCNN models. Further, by co-training the decoder alongside the QCNN variational parameters, or by initializing from a pre-trained QCNN model, the correction layer can be exposed to the same error distribution encountered during inference, aligning the noise seen at training time with that seen in application. ACKNOWLEDGMENT 
+
+The authors would like to thank Jorma Kilpi and Olli Apilo of VTT Technical Research Centre of Finland for their insightful feedback to this work. REFERENCES [1] S. Hochreiter, “The vanishing gradient problem during learning recurrent neural nets and problem solutions,” International Journal of Uncertainty, Fuzziness and Knowledge-Based Systems , vol. 6, no. 2, pp. 107–116, 1998. [2] R. Pascanu, T. Mikolov, and Y. Bengio, “On the difficulty of training recurrent neural networks,” in Proceedings of the 30th International Conference on Machine Learning , 2013. [3] H.-Y. Huang, R. Kueng, and J. Preskill, “Information-theoretic bounds on quantum advantage in machine learning,” Physical Review Letters ,vol. 126, no. 19, p. 190505, 2021. [4] Y. LeCun, Y. Bengio, and G. Hinton, “Deep learning,” Nature , vol. 521, no. 7553, pp. 436–444, May 2015. [5] M. A. Nielsen and I. L. Chuang, Quantum Computation and Quantum Information: 10th Anniversary Edition . Cambridge, U.K.: Cambridge University Press, 2011. [6] M. Hirvensalo, Quantum Computing , 2nd ed. Berlin, Germany: Springer, 2001. [7] J. Biamonte et al. , “Quantum machine learning,” Nature , vol. 549, pp. 195–202, 2017. [8] V. Havl´ ıˇ cek et al. , “Supervised learning with quantum-enhanced feature spaces,” Nature , vol. 567, pp. 209–212, 2019. [9] J. R. McClean et al. , “Barren plateaus in quantum neural network training landscapes,” Nature Communications , vol. 9, p. 4812, 2018. [10] J. M. Gambetta, J. M. Chow, and M. Steffen, “Building logical qubits in a superconducting quantum computing system,” npj Quantum Infor-mation , vol. 3, pp. 1–7, 2017. [11] A. Y. Kitaev, “Fault-tolerant quantum computation by anyons,” Annals of Physics , vol. 303, no. 1, pp. 2–30, 2003. [12] S. Bravyi, A. W. Cross, J. M. Gambetta et al. , “High-threshold and low-overhead fault-tolerant quantum memory,” Nature , vol. 627, pp. 778– 782, 2024. [13] D. Gottesman, “Fault-tolerant quantum computation with constant over-head,” Quantum Information and Computation , vol. 14, no. 15–16, 2014. [14] I. Cong, S. Choi, and M. D. Lukin, “Quantum convolutional neural networks,” Nature Physics , vol. 15, no. 12, pp. 1273–1278, Dec. 2019. [15] K. Wang, Z. Lu, C. Zhang et al. , “Demonstration of low-overhead quantum error correction codes,” Nature Physics , vol. 22, pp. 308–314, 2026. [16] P. Bermejo et al. , “Quantum convolutional neural networks are effec-tively classically simulable,” PRX Quantum , vol. 7, no. 2, p. 020304, Apr. 2026. [17] Y. LeCun and Y. Bengio, “Convolutional networks for images, speech, and time-series,” in The Handbook of Brain Theory and Neural Net-works , 1995. [18] D. Pomarico, “Multiscale entanglement renormalization ansatz: Causal-ity and error correction,” Dynamics , vol. 3, no. 3, pp. 622–635, 2023. [19] I. P. McCulloch, “Infinite size density matrix renormalization group, revisited,” arXiv preprint arXiv:0804.2509 , 2008. [20] J. C. Spall, “Multivariate stochastic approximation using a simultaneous perturbation gradient approximation,” IEEE Transactions on Automatic Control , vol. 37, no. 3, pp. 332–341, 1992. [21] R. Battiti, “First- and second-order methods for learning: Between steepest descent and Newton’s method,” Neural Computation , vol. 4, no. 2, pp. 141–166, Mar. 1992. [22] Google Quantum AI and Collaborators, “Quantum error correction below the surface code threshold,” Nature , vol. 638, pp. 920–926, 2025. [23] L. Caune et al. , “Demonstrating real-time and low-latency quan-tum error correction with superconducting qubits,” arXiv preprint arXiv:2410.05202 , 2024. [24] J. Viszlai et al. , “Low latency GNN accelerator for quantum error correction,” arXiv preprint arXiv:2603.22149 , 2025. [25] S. Sachdev, Quantum Phase Transitions , 2nd ed. Cambridge, U.K.: Cambridge University Press, 2011. [26] O. Higgott and N. P. Breuckmann, “Subsystem codes with high thresh-olds by gauge fixing and reduced qubit overhead,” Physical Review X ,vol. 11, no. 3, 2021. [27] D. Litinski, “Magic state distillation: Not as costly as you think,” 
+
+Quantum , vol. 3, p. 205, Dec. 2019. [28] B. Eastin and E. Knill, “Restrictions on transversal encoded quantum gate sets,” Physical Review Letters , vol. 102, no. 11, p. 110502, 2009. [29] IBM Quantum, “IBM quantum delivers on 2022 100×100 performance challenge,” IBM Quantum Blog, Nov. 2024, accessed: 2024. [Online]. Available: https://www.ibm.com/quantum/blog/qdc-2024 [30] C. Gidney and M. Eker˚ a, “How to factor 2048 bit RSA integers in 8 hours using 20 million noisy qubits,” Quantum , vol. 5, p. 433, 2021. [31] J. Lee et al. , “Even more efficient quantum computations of chemistry through tensor hypercontraction,” PRX Quantum , vol. 2, p. 030305, 2021. [32] R. Babbush, J. R. McClean, M. Newman, C. Gidney, S. Boixo, and H. Neven, “Focus beyond quadratic speedups for error-corrected quan-tum advantage,” PRX Quantum , vol. 2, p. 010103, 2021.

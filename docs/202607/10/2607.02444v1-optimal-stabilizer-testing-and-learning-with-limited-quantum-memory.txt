@@ -1,0 +1,5029 @@
+Title: Optimal Stabilizer Testing and Learning with Limited Quantum Memory
+
+URL Source: https://arxiv.org/pdf/2607.02444v1
+
+Published Time: Fri, 03 Jul 2026 01:25:30 GMT
+
+Number of Pages: 66
+
+Markdown Content:
+# Optimal stabilizer testing and learning with limited quantum memory 
+
+Srinivasan Arunachalam 
+
+IBM Research Silicon Valley 
+
+Srinivasan.Arunachalam@ibm.com 
+
+Louis Schatzki 
+
+Dahlem Center for Complex Quantum Systems Freie Universit¨ at Berlin 
+
+real-louismares98@zedat.fu-berlin.de 
+
+July 3, 2026 
+
+Abstract 
+
+We study stabilizer state testing and learning with limited coherent quantum memory. Here an algorithm sequentially receives copies of an unknown n-qubit state, but may keep only 
+
+k qubits of coherent quantum memory between measurements. With unrestricted memory, seminal work of Gross, Nezami and Walter [GNW21] showed how to test n-qubit stabilizer states using 6 copies, which is dimension independent , unlike the learning complexity of Θ( n). We show that this testing-vs-learning separation is lost under memory constraints. More concretely we show that 1. The sample complexity of testing stabilizer states in the k-qubit memory framework is Θ( n − k). Our upper bound goes via a novel connection to the hidden shift problem and the lower bound is proven using a novel approach to average case bounds on likelihood ratios via combinatorics of the stochastic orthogonal group. 2. The sample complexity of learning stabilizer states with k qubits of memory, in the non-adaptive framework, is Θ( n2/k ). As a further application of our techniques, we prove an exponential lower bound for purity testing even when the memory may be left coherent throughout the protocol. Our main results identify coherent quantum memory as the resource enabling the usual separation between stabilizer testing and learning. In particular, even with k = 0 .99 n qubits of memory, there is no constant-copy stabilizer tester; furthermore for k = cn qubits of memory (for 0 < c < 1), stabilizer testing is as hard as learning, with both requiring Θ( n) copies. 
+
+1
+
+> arXiv:2607.02444v1 [quant-ph] 2 Jul 2026
+
+# Contents 
+
+1 Introduction 3
+
+1.1 Main results . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 41.2 Proof sketch of testing upper bound . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 61.3 Proof sketch of testing lower bound . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 81.4 Proof sketch of learning bounds . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 10 1.5 Discussion and open questions . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 11 
+
+2 Preliminaries 13 
+
+2.1 Paulis and Cliffords . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 13 2.2 Fourier analysis . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 15 2.3 Stochastic orthogonal group . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 16 
+
+3 Technical toolkit 17 
+
+3.1 Partial bell sampling . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 17 3.2 Ensembles corresponding to deg-2 phase states . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 20 3.3 Structure of protocols with quantum memory . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 21 
+
+4 Testing upper bound 24 
+
+4.1 Partial Bell sampling . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 24 4.2 The hidden-shift subroutine . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 24 4.3 The final tester . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 29 4.4 Conditional soundness of the graph test . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 30 4.5 Global soundness: finding a bad prefix . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 32 
+
+5 Testing lower bounds 36 
+
+5.1 Information Theoretic Lower Bounds . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 36 5.2 Construction of hard ensemble . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 38 5.3 Rewriting our phase state ensemble . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 39 5.4 Lower bound for testing . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 41 5.5 Proof of Lemma 5.8 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 44 
+
+6 Non-adaptive learning stabilizer states 52 
+
+6.1 Upper bounds . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 52 6.2 Lower bound . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 56 
+
+A Total variational distance for measures 62 B Purity Testing Lower Bound 63 
+
+21 Introduction 
+
+Learning and testing properties of unknown n-qubit quantum systems are fundamental problems in quantum information science. In quantum state tomography, the goal is to learn a classical descrip-tion of an unknown state given several copies of that state. In quantum property testing, the goal is instead to decide whether the unknown state satisfies a certain property , again given several copies of the state. While a full tomography would suffice for property testing as well, ideally testing requires far fewer samples. As we approach the era of small-scale fault-tolerant quantum comput-ers, we are entering the regime where such learning and testing algorithms may be implemented. However, even on these devices, a major bottleneck is the difficulty of realizing coherent quantum memory. Ideally we would like to restrict the algorithms to store only k of the n qubits coherently, while measuring the remaining qubits in arbitrary bases, where k is as small as possible. This captures a natural memory-limited streaming model for quantum data, where the algorithm sees many qubits but is only allowed to preserve a small coherent workspace between measurements. In this spirit, a flurry of works over the past few years have studied quantum algorithms under streaming and memory constraints [CCHL22, CGY24, CG25, HBC +22, AS25, GHYZ24, HH25, ACQ22, BCL20, CLHL22, LRZ23, BCS +25, AHS23, Ouf23, Car24, LN25, KGKB25, LA24, CLL24a, COZ +24, CZSJ22, HBvD +26]. One of the main messages from this bulk of work is that restrictions to single-copy measurements ( k = 0) often lead to large, potentially exponential, separations in sample complexity, suggesting that memory is not merely an implementation detail which can be removed for free, but rather a computational resource that can dramatically change the complexity of the problem. Although the tasks considered in these papers are very natural, the field still lacks a good understanding of the learning and testing complexity of the “simplest” family of states in a memory-limited setting, namely n-qubit stabilizer states .In this regard, a seminal result of Gross, Nezami, and Walter [GNW21] showed that stabilizer states can be tested using only 6 copies. This result was striking since it gave the first constant-copy tester for a natural class of states, and it showed that testing stabilizer states is vastly easier than learning them, for which the sample complexity is known to be Θ( n) by a result of Aaronson and Gottesman [AG09], later reproven using the Bell sampling framework by Montanaro [Mon17]. Both these learning and testing results crucially rely on a subroutine called Bell sampling , which takes two copies of the state and, for every i ∈ [n], measures qubits ( i, n + i) in the Bell basis. Since then, Bell sampling has become the basis of several algorithms in the field [GIKL23, GIKL26, CGY24, CGYZ25, AD25, HLK24, HG24, LOLH24, LOH22, LOH24] for a variety of tasks. Although Bell sampling is conceptually simple and extremely powerful, its standard implementation requires keeping one entire copy of the state coherent ( k = n) while the other is processed. Of course, it is desirable to store as few coherent qubits as possible, motivating the central questions of our work: 
+
+1. Can we obtain constant-copy testers with limited memory? 
+
+2. Is stabilizer testing always easier than learning even with limited memory? To tackle these questions, we consider a smooth interpolation between single-copy and two-copy measurements. That is, in each round a fresh copy of an input state |ψ⟩ is provided to the learn-ing/testing algorithm. On top of this input, the algorithm is allowed to maintain k qubits of coherent memory, interpolating between single-copy measurements ( k = 0) and two-copy measure-ments ( k = n). See Figure 1 for an illustration. As far as we are aware, this model has been studied substantially less than separations between single and multi-copy measurements. 3Figure 1: Protocol using k-qubits of memory and single-copy measurements. In each round a new copy of an input state ρ is loaded. There is also a coherent memory register of k-qubits. The operations in each round act on the memory and the input at that step. The channels applied may depend classically upon the prior observations. 
+
+1.1 Main results 
+
+Our main result is to settle both of these questions. Even with 0 .99 n qubits of coherent memory, Θ( n) copies are necessary and sufficient to test stabilizer states. Interestingly, with 0 .99 n qubits of memory, Θ( n) copies are also necessary and sufficient to learn an unknown stabilizer state. Thus, the 6-copy tester of [GNW21] crucially needs the additional n qubits of coherent memory. More generally, we prove that with k qubits of memory, the sample complexity of testing and learning stabilizer states is Θ( n−k) and O(n2/k ) respectively, the latter being tight for non-adaptive learners. This exhibits a curious difference in how the sample complexity scales with limited memory for the same class of states. Take k = 0, i.e., single-copy measurements. Then, testing requires Θ( n)samples but the best known learning algorithm requires O(n2) samples (with a matching lower bound for non-adaptive algorithms). As k grows towards n, the sample complexity of learning decreases at a much faster rate than that of testing and, for k = c · n with c < 1 a constant, both become Θ( n). See Figure 2 for an illustration. We now formally present our results and compare them with prior work. For notational conve-nience, throughout this paper we let Stab be the class of n-qubit stabilizer states. For a state |ψ⟩, let 
+
+FStab (|ψ⟩) := max  
+
+> |ϕ⟩∈ Stab
+
+|⟨ ψ|ϕ⟩| 2.
+
+be the fidelity of |ψ⟩ with respect to Stab (i.e., quantifies how close |ψ⟩ is to a stabilizer state). 
+
+Theorem 1.1. (Optimal testing bounds) Let k ≥ 0, ε > 0. There is an adaptive protocol that uses 
+
+k qubits of memory and O(( n−k)/ε ) copies of an unknown |ψ⟩ to distinguish between FStab (|ψ⟩) = 1 
+
+vs. FStab (|ψ⟩) ≤ 1 − ε. Also every such tester needs Ω( n − k) copies. 
+
+Prior work. There were two known results in this area. The first case is when k = n (i.e., 2 copy measurements) where there was a constant copy tester, hence the bound above is tight in this case. The second case is when k = 0 (i.e., single-copy protocols) where a striking work of Hinsche and Helsen [HH25] showed that O(n) copies are sufficient for testing, matching our upper bound and Ω( √n) copies are necessary. It seemed conceivable for a while that there was some sort of a birthday paradox argument, which could presumably result in an O(√n) upper bound for the single-copy case. Our main result first rules this out (answering a question of [HH25]) and cleanly 4O(1) n
+
+> Memory (k)
+> O(1)
+> n
+> n2
+> Sample complexity
+> Learning
+> Testing
+
+(a) With memory, the sample complexity for learning decreases at a faster rate than testing. O(1) (n) n o(n) n
+
+> Memory (k)
+> O(1)
+> n
+> Learning ÷ testing sample complexity
+
+(b) Ratio between learning and testing sample complexity as a function of memory qubits. For 
+
+k = cn , with 0 < c < 1, Θ( n) samples is neces-sary and sufficient for both learning and testing. 
+
+Figure 2: Sample complexity of learning and testing stabilizer states with limited quantum memory. interpolates between k = 0 and k = n. Further, our protocol scales with 1 /ε , improving the 1 /ε 2
+
+scaling from computational difference sampling [HH25] in the case of k = 0. As far as we know, the tight bound of Θ( n − k) that we prove for testing is the first fine-grained (instead of the exponential bounds often seen) separation proven for property testing in the k-qubits of memory model. 
+
+Theorem 1.2. (Optimal learning bounds) Let k ≥ 1. There is a non-adaptive protocol that uses 
+
+k qubits of memory and O(n2/k ) copies of an unknown |ψ⟩ ∈ Stab to learn |ψ⟩. Also, every non-adaptive protocol needs Ω( n2/k ) copies. 
+
+Prior work. The work of [AG09] learned stabilizer states with O(n) copies using an entangled measurement on all of them, which was simplified to require 2-copy measurements (i.e., k = n
+
+qubits of memory) by Montanaro [Mon17]. On the other end, the work of [AG09] and subsequent works of [GIKL25, CLL24b] showed how to learn stabilizer states using O(n3) copies and single-copy measurements. As far as we are aware, all these learning algorithms are adaptive ,1 i.e., future measurements depend on prior measurement outcomes. Our main contribution is two fold: (i) interpolate and give upper bounds for the range k = 1 to k = n; ( ii ) show that the upper bounds can be made non-adaptive , which is a more restrictive model of learning. As for lower bounds, information theoretically the results above are optimal: for entangled measurements, it takes O(n2) bits to specify a stabilizer state and one copy of a state has n qubits of information, implying a general Ω( n) lower bound evern for adaptive algorithms. For the single-copy case, a work of [ABDY23] showed that even to learn the subclass of degree-2 phase states, one needs Ω( n2)copies. We adapt their lower bound and are able to show that k qubits of memory implies a lower bound of Ω( n2/k ) for non-adaptive algorithms. 
+
+Role of Bell sampling. Like previous works, Bell sampling will still be a useful primitive for us. In particular, our protocols will Bell sample k qubits at a time. This works quite well for the learning algorithm which essentially Bell samples n/k distinct blocks of k qubits. One may hope that a similar strategy then suffices for testing. However, our tester is substantially different and inspired by the hidden shift problem instead. While the learning algorithm performs many Bell samples, the tester only Bell samples O(1 /ε ) times and does not use the memory further.  
+
+> 1Perhaps it is folklore this is improvable to O(n2), but we haven’t found any explicit reference/proof of this.
+
+5The remaining O(( n − k)/ε ) samples are used for single-copy measurements, serving as additional evidence that memory is less useful for testing than it is for learning. 
+
+Further results. Beyond the optimal testing and learning bounds, our lower-bound mechanism is versatile enough to prove further lower bounds, which we discuss now. In the task of purity testing, given an unknown state ρ, the goal is to decide if it is a pure state or the maximally mixed state. Prior works showed that the sample complexity with single-copy measurements is 2Ω( n) [CCHL22] and Ω(min {2n−k, 2n/ 2}) with k-qubits of memory [CGY24, GHYZ24]. However, for the latter bounds the authors require that the memory is measured every other round . We are able to use our techniques to remove that assumption and recover a 2 Ω( n−k) lower bound even when the memory may be coherent throughout the entire protocol. Also, our lower bound techniques seem to readily apply to other ensembles of states satisfying two ingredients (which we highlight after discussing the proof sketches and in Appendix B). These properties hold for stabilizer states, Haar random states, and could be of independent interest for analyzing other ensembles. 
+
+1.2 Proof sketch of testing upper bound 
+
+We briefly summarize the structure of the tester. Throughout the section we denote m = n − k
+
+for simplicity in notation. The central difficulty in our testing algorithm is that the tester has only k qubits of coherent memory, so it cannot directly Bell-sample all n qubits. Instead, our tester first obtains a partial Bell sample, which reveals a prefix of a Pauli label and leaves an 
+
+unknown suffix . Our key contribution will then be a single-copy algorithm that takes a prefix and checks for the existence of such a suffix (and could be used to learn this suffix as well). We do so via a novel connection to the hidden shift problem . We note here that state versions of the hidden subgroup problem have been studied recently, with applications to finding entanglement and learning stabilizer groups [BGTW25, HEC26]. However, these algorithms require multi-copy measurements (and reduce to Bell sampling for qubit states) while our protocol is single-copy and quite distinct from Bell sampling. Very recent work [GJMM26] considered state versions of the hidden shift problem given circuits for two states as well. 1. Partial Bell sampling. As always, a Pauli label is written as ( x, z ) ∈ Fn 
+
+> 2
+
+× Fn 
+
+> 2
+
+. Our partial Bell difference sampling subroutine takes two copies of the unknown state |ψ⟩, measures the last m qubits of both states in the computational basis and Bell-measures the first k
+
+qubits of both states. Repeating this a second time and adding the outcomes bitwise gives a distribution 
+
+Q(a, r ) = X
+
+> t∈Fm
+> 2
+
+(pψ ⋆ p ψ)( aXr, a Zt) ,
+
+which is the marginal over t of the standard Bell difference sampling distribution. For a stabilizer state, pψ is uniform on the unsigned stabilizer group Mψ. Hence if the prefix ( a, r )is observed, then there exists t∗ ∈ Fm 
+
+> 2
+
+such that (aXr, a Zt∗) ∈ Mψ . (1) 2. The hidden shift. For functions, the hidden shift problem is: given access to two unknown functions f and g on an Abelian group G such that there exists some t∗ such that f (x) = 
+
+g(x + t∗), find t∗. This problem has been well studied in quantum information as a special 6instance of the hidden subgroup problem with connections to lattice cryptography [VDHI06, CVD10, Reg04, Kup05, R¨ ot10, Sim97]. We will show that recovering t∗ can be viewed as a sort of generalization of the hidden shift problem over Fm 
+
+> 2
+
+. For the observed prefix ( a, r ), we define two Pauli families 
+
+Fa,r (t) := PaXr,a Zt, G(t) := Ik ⊗ Z(t).
+
+If Fa,r (t∗) is a stabilizer, then Fa,r (t∗) |ψ⟩ = λ |ψ⟩ for some λ ∈ {± 1}. Now compare any other completion t to this stabilizer prefix and the corresponding Pauli string Fa,r (t). Their product is, up to a phase, a pure Z operator on the missing m qubits: 
+
+Fa,r (t) = i(t−t∗)·rG(t + t∗).
+
+Applying this identity to |ψ⟩ gives 
+
+Fa,r (t) |ψ⟩ = λ i (t−t∗)·rG(t + t∗) |ψ⟩ .
+
+Thus, if a stabilizer completion t∗ exists (which it will if the unknown state is a stabilizer state), the indexed family t 7 → Fa,r (t) |ψ⟩ has the same action on |ψ⟩ as the reference family 
+
+t 7 → G(t) |ψ⟩, but shifted by t∗ and multiplied by phases. This precisely is the hidden-shift 
+
+structure that we exploit in our testing protocol, which is inspired by the usual Fourier sampling approach for the hidden subgroup problem. This Fourier sampling step can be realized with single-copy measurements 2 and returns lin-ear constraints involving t∗. Up to some technicalities with phases, sampling a stabilizer state returns (s1, b 1), . . . , (sN , b N ) ∈ Fm 
+
+> 2
+
+× F2 , (2) where bi = t∗ · si ⊕ sign( λ). In particular, the data lies entirely in the graph of the affine function s 7 → t∗ ·s⊕sign( λ). But, if |ψ⟩ is not a stabilizer state then no such t∗ need exist and, if not, then the samples do not lie in the graph of an affine function with high probability. Hence, the tester obtains O(m) samples and checks for affine consistency. 3. Bad prefixes and the role of random Cliffords. The affine-graph test has a conditional soundness guarantee: it rejects once the observed prefix has no large Pauli completion. The remaining question is why such prefixes should occur often. Without randomization, partial Bell sampling always examines the same coordinate split: the first k qubits are Bell-sampled, while the remaining n − k qubits are only partially observed. A non-stabilizer state could in principle have its large Pauli coefficients arranged so that, relative to this fixed split, many observed prefixes still look good. To deal with this, we observe that applying a random Clifford prevents this alignment by viewing the Pauli coefficients of |ψ⟩ in a random symplectic coordinate system. 4. Completing the tester. Conditioned on a bad prefix, the hidden-shift graph test rejects with constant probability. After applying a random Clifford, partial Bell difference sampling produces a bad prefix with probability Ω( ε). Repeating O(1 /ε ) independent outer rounds gives constant soundness error. Since each round uses O(m) = O(n − k) copies, the resulting sample complexity is 
+
+O
+
+ n − kε
+
+
+
+.  
+
+> 2We will give two realizations: one directly inspired by standard Fourier sampling that uses m+ 1 ancilla qubits (which are not coherent between rounds) and another ancilla-free implementation that only requires Clifford gates and measurements.
+
+71.3 Proof sketch of testing lower bound 
+
+In order to obtain our lower bounds, we consider the ensemble of random degree-2 phase states , a subset of stabilizer states: 
+
+|ψA⟩ = 1
+
+√2n
+
+X
+
+> x∈Fn
+> 2
+
+(−1) x⊤Ax |x⟩ (3) and show that distinguishing these states from the maximally mixed state (given k qubits of mem-ory requires Ω( n − k) samples. Our lower bound is proven using the so-called likelihood ratios, which have been used often to prove quantum testing/learning lower bounds with memory con-straints [CCHL22, CGY24, BCL20]. Ideally, we would show that for a POVM {E⃗x }⃗x representing a protocol with k-qubits of memory acting on t copies of the input state, the likelihood ratios defined as 
+
+L(⃗x) = EA
+
+Tr( E⃗x ψ⊗tA )
+
+Tr( E⃗x I/ 2nt ) = 2nt 
+
+Tr [E⃗x ] EA
+
+Tr( E⃗x ψ⊗tA ) .
+
+are lower bounded by 1 − δ for some small δ, which would imply that the distributions over transcripts ⃗x induced by the maximally mixed state and a uniformly random ψ A are close in total variation distance [CCHL22]. Recently Hinsche and Helsen [HH25] observed an obstacle in using this method though by showing the existence of product measurements with likelihood ratios that can be zero . Hence one cannot hope for a universal lower bound of 1 − δ. To avoid their counterexample, we instead prove that most likelihood ratios must be close to 1. This indeed is sufficient to prove hardness of distinguishing a random phase state from maximally mixed state. Our lower bounds will hinge upon proving that 
+
+E⃗x∼P mm 
+
+[|L(⃗x) − 1|] = o(1) , (4) when t = o(n−k). To bound the (average) likelihood ratios, the first step is to understand EA[ψ⊗tA ]. For this, we write out the ensemble average of t copies of a random |ψA⟩ and observe that the matrix elements are 
+
+EA(−1) P     
+
+> r(xr)⊤Ax r+P
+> r(yr)⊤Ay r
+
+= 1
+
+"X
+
+> r
+
+xr ⊗ xr = X
+
+> r
+
+yr ⊗ yr
+
+#
+
+.
+
+Further, these correlations survive only when the degree-2 statistics of the two t-tuples match, and the t-th moment of the ensemble decomposes into contributions indexed by orthogonal symmetries 
+
+O ∈ O t(F2), where Ot is the group of matrices O ∈ Ft×t 
+
+> 2
+
+such that O⊤O = OO ⊤ = I and R(O) is the representation of GL (t, F2) that appears in the Clifford commutant [GNW21] (see Section 2.3 for more details). We show that EA[ψ⊗tA ] is close in trace distance to the subnormalized state 
+
+σP := 12nt 
+
+X
+
+> O∈O t
+
+R(O) . (5) We then split Ot into two parts: Ot−1 (identified with all matrices that leave the first coordinate fixed) and its complement, Mt := Ot\O t−1. We now handle these two contributions separately. The contribution of Ot−1 will be handled recursively, so the main task is to prove that the Mt-contribution has negligible average bias. So, by triangle inequality, it suffices to bound 
+
+E⃗x∼P mm 
+
+"
+
+1
+
+Tr [E⃗x ]
+
+X
+
+> O∈M t
+
+Tr [R(O)E⃗x ]
+
+#
+
+= 12nt 
+
+X⃗x
+
+X
+
+> O∈M t
+
+Tr [R(O)E⃗x ] . (6) 8Bounding this quantity is the main combinatorial contribution. Before we describe how to bound this, we give an intuition for the setting where the tester has no memory. Consider k = 0 and 
+
+O = SWAP 1,2 ∈ M t. Then, the entire protocol can be represented with a collection of product states {φ⃗x }⃗x and 
+
+Tr 1[(SWAP 1,2 ⊗I3: t)( φx1 ⊗ I2: t)] = φx1 ⊗ I3: t , (7) and ∥Tr 1[(SWAP 1,2 ⊗I3: t)( φx1 ⊗ I2: t)] ∥1 = Tr [φx1 ]2 n(t−2) . That is, this contraction has reduced SWAP 1,2 ⊗I3: t from a unitary with trace norm 2 nt to some operator with trace norm decreased by at least a factor of 2 2n. See Figure 3 for an illustration. We essentially generalize this reduction in trace 
+
+Figure 3: Partially contracting a swap operation. By contracting the first register of SWAP 1,2 with an arbitrary rank 1 operator |ψ⟩ ⟨ ϕ|, the trace norm goes from 2 nt to 2 n(t−2) , where t is the number of tensor factors in the entire Hilbert space H⊗t.norm to not only the permutations but also to the operator P 
+
+> O∈M t
+
+R(O). Once we have bounded the contribution from Mt, the proof is completed by recursively bounding the contributions from 
+
+Mt−1 := Ot−1\O t−2 and so on. More rigorously, fix the first-round outcome x1. In the learning-tree representation of a k-memory protocol, the first round induces a map Vx1 : H → M from the first input copy into the 
+
+k-qubit memory space. After this first step, the protocol may continue adaptively, with future measurements depending on both x1 and the memory state. However, when we sum over all continuations ⃗x >1, the completeness of the remaining subtree allows us to upper bound the whole branch by a single trace norm. More formally, we bound the contribution of all transcripts beginning with x1 by 
+
+(Vx1 ⊗ I2: t) · X
+
+> O∈M t
+
+R(O) · (Vx1 ⊗ I2: t)†
+
+> 1
+
+.
+
+Thus, the bias of this entire branch of the learning tree is compressed into a trace-norm estimate for the operator P 
+
+> O∈M t
+
+R(O) after its first tensor factor has been passed through the k-qubit memory via the map Vx1 .This is useful precisely because every O ∈ M t moves the first basis vector e1, hence the corresponding operator R(O) couples the first copy to the remaining t − 1 copies. Once the first copy has been measured, this coupling can only be carried forward through the k-qubit memory. Intuitively, the first measurement destroys an n-qubit correlation, while the memory can preserve at most k qubits of it. The main technical lemma shows that this intuition remains valid even after summing coherently over all O ∈ M t: the possible interference among the many O ∈ M t terms costs only a 2 O(t) factor, yielding a bound of the form 12nt 
+
+X⃗x
+
+X
+
+> O∈M t
+
+Tr[ R(O)E⃗x ] ≤ 21−(n−k−3t)/2.
+
+9Once this moving-sector contribution is bounded, the remaining terms are those in Ot−1, namely the symmetries that fix the first copy. These have the same form as the original problem on t − 1copies. We therefore recurse over 
+
+Mj := Oj \ O j−1, j = t, t − 1, . . . , 2,
+
+and eventually show that the average likelihood ratio remains close to 1 whenever t = o(n − k). A key technical contribution in both reducing the task of distinguishing t copies of a random phase state |ψA⟩ from σP and proving that the contribution to likelihood ratios from Mt is small, is the combinatorial parameter rank( I + O), which is the logarithm of the number of bitstrings not fixed by O (i.e., number of x such that Ox ̸ = x). Interestingly, this appears in slightly different ways. For reducing to σP , it is useful for computing the dimension of a certain invariant subspace. For bounding the contribution from Mt, it appears when computing the kernels of certain linear maps resulting from taking partial contractions of operators in Mt. Either way, one needs to count the number of O’s such that rank( I + O) = r, which we show to be at most 2 rt , which scales with an exponent linear in t instead of t2. Note that the size of Ot scales as 2 t2
+
+and this is partly why previous lower bounds only were able to handle uptill t = Ω( √n). 
+
+For the purity testing lower bound. So far we sketched why distinguishing a random quadratic phase state from the maximally mixed state is hard. To conclude that stabilizer testing for pure states is hard, we will also prove hardness of distinguishing a Haar random state from the maxi-mally mixed state. We get this via noting that our lower bound requires two components that can be extended to other ensembles: (1 .) The tth moment of the ensemble is well approximated by a subgroup of binary orthogonal matrices. That is, 
+
+E
+
+> ψ
+
+[ψ⊗t] ≈ 12nt 
+
+X
+
+> O∈G≤O t
+
+R(O) . (8) (2 .) Being able to count the number of O ∈ G such that rank( I + O) = r. Given both of these ingre-dients, our lower bounds techniques can be used to show hardness of distinguishing a random ψ from 
+
+I/2n. When ψ is a Haar random state, property 1 above holds since Eψ[ψ⊗t] ∝ P 
+
+> π∈St
+
+R(π) [Har13]. For property 2, note that rank( I + π) = |π| is the Cayley distance on St induced by transposi-tions [Har23]. In particular, this is upper bounded by t2r for permutations, which is exponentially smaller in t compared to 2 rt which we have shown above for Ot.
+
+1.4 Proof sketch of learning bounds 
+
+Upper bound. We first describe the upper bound. For a stabilizer state |ψ⟩, our first goal is to recover the unsigned stabilizer group Mψ and then the stabilizer signs. Since the learner has only k
+
+qubits of coherent memory, it cannot perform a full Bell basis measurement on all n qubits. Instead, our learner partitions the qubits into blocks S of size at most k. For each block, we Bell-measure only the qubits in S across two copies and measure the remaining qubits in the computational basis. This gives samples of the form ( a, ΠS b), where ( a, b ) is distributed as a Bell sample from Mψ
+
+and Π S is the projection of the stabilizer tableau onto the S rows. To ensure that these samples are linearly independent, we perform this sampling a constant number of rounds with a random Clifford applied to the state in each round. With constant probability, a random Clifford puts the state in full-support form , i.e., a graph state, so its unsigned stabilizer group is 
+
+M = {(u, Bu ) : u ∈ Fn 
+
+> 2
+
+}
+
+10 for a symmetric matrix B. On this branch, a block Bell sample is exactly ( a, ΠS Ba ), where a is drawn uniform over Fn 
+
+> 2
+
+. Thus each sample gives a random linear equation for the row block Π S B.Taking O(n) samples per block makes the sampled a’s span Fn 
+
+> 2
+
+with high probability, so Π S B is recovered by Gaussian elimination. Repeating over O(n/k ) blocks recovers all of B, and hence M ,using O(n2/k ) copies. This only recovers the unsigned stabilizer group. To recover signs, we use a separate pre-committed layer of random stabilizer-basis measurements. For each random Clifford basis, the measurement reveals eigenvalues of a known random commuting Pauli subspace Ls. This deter-mines the signs for the Pauli strings in the intersection Ls ∩ Mψ, which is nontrivial with constant probability. With O(n) random Clifford basis measurements, the intersections span Mψ with high probability, which then fully determines the signs of all Paulis in Mψ. This sign-recovery stage costs only O(n) copies, so the total remains O(n2/k ). 
+
+Lower bound. For this, it again suffices to consider the smaller ensemble of real degree-2 phase states 
+
+|ψA⟩ = 2 −n/ 2 X
+
+> x∈Fn
+> 2
+
+(−1) xT Ax |x⟩ ,
+
+where A is a uniformly random upper-triangular matrix over F2. The parameter A contains Θ( n2)bits. A one-copy accessible-information calculation shows that any measurement on a single fresh copy reveals only O(1) bits about A. If the protocol also carries a k-qubit coherent memory, then one round can increase the information about A by at most O(k + 1) bits (this is where non-adaptivity is used). Thus, after T copies, the final transcript contains at most O(T (k + 1)) bits of information about A. On the other hand, any learner that identifies the state with constant success probability must identify A with constant success probability, and hence must obtain Ω( n2) bits of information by Fano’s inequality. Therefore 
+
+T (k + 1) = Ω( n2) = ⇒ T ≥ Ω( n2/k )for 1 ≤ k ≤ n. We remark that we use the non-adaptivity only in the part where we say each state reveals ≤ k qubits. 
+
+1.5 Discussion and open questions 
+
+Our work opens up a few natural questions for future research. 1. Tolerance in testing. In this work, we looked at testing stabilizer states in the usual property testing framework. More recently there have been works that have looked at tolerant testing [AD25, BvDH24, MT25], where the goal is to test if the unknown state is close 
+
+or far from stabilizer states. What is the complexity of tolerant testing with k qubits of memory? We believe that our tester could be used for a computationally inefficient tolerant tester by computing the largest correlation with any affine subspace, but is there an efficient tolerant tester? 2. Getting the optimal ε dependence. We improved the ε dependence for testing to 1 /ε , but is this optimal? Perhaps one method for proving a lower bound with ε dependence would be to take random quadratic functions and randomly perturb their outputs with, say, i.i.d Bernoulli noise. The corresponding ensemble average state would smoothly interpolate between a sum 11 over all of Ot (the case of quadratic phase states studied here) and only permutations (Haar random states). 3. Other ensembles of states . As previously mentioned, our lower bounds readily extend to Haar random states because t-copies of such a state can be represented by a subgroup of Ot.A similar statement may hold for, say, higher-degree phase states as well. One could hope to interpolate between the exponential hardness of Haar random states and the linear hardness of degree-2 phase states as a function of degree. This is potentially related to ε-dependence as discussed above. 4. Testing doped states. Apart from stabilizer states, there have been many recent works that have looked at learning and testing t-doped states, i.e., states produced by Clifford circuits along with t many T gates. Understanding the testing and learning complexity of these states with limited memory is a natural follow-up question. 5. Adaptive learning lower bound. Our lower bound for learning algorithms for stabilizer states only applies for non-adaptive algorithms. It is unclear how to extend our lower bounds for adaptive algorithms. As far as we are aware, there aren’t many techniques that are able to prove such lower bounds, so proving an adaptive learning lower bound for stabilizer states is an interesting question. 6. Continuous variable testing. Apart from the discrete set of stabilizer states, there have been many works that have looked at learning and testing Fermionic Gaussian states and Bosonic states [BMEL25, MH25, Mel26]. We leave open, the question of what is the optimal dependence of learning and testing these states with k qubits of memory. 
+
+Acknowledgment. We thank Marcel Hinsche, Jonas Helsen, Lennart Bittel, and Arkopal Dutt for several discussions during the initial stages of this project. Additionally, we thank Sergey Bravyi, Sitan Chen, the members of the Eisert group, and Sabee Grewal for helpful discussions. L.S. acknowledges funding from Munich Quantum Valley, Berlin Quantum, BMFTR (PasQUops, Hybrid++, QuSol), ERC (DebuQC), DFG (CRC 183, SPP 2514), and MATH+. 
+
+Use of LLM. In version 1 of this paper, we first had the following results: (i) Tight learning bound of Θ( n2/k )(ii ) Testing upper bound of O(n − k)(iii ) Testing lower bound of Ω( √n − k) (for adaptive testers); Ω( n − k) (for non-adaptive testers). Before uploading our paper on arXiv, we asked Claude if there was any immediate weakness in our lower bound and surprisingly it found a combinatorial lemma where our lower bounds were loose. Our prior lower bounds were proven using nearly the same steps, i.e., fixing parts of the transcript, partially contracting σP with the corresponding POVM aspects, and summing over the remaining rounds. For adaptive algorithms, we were using a double coset decomposition Ot−1\O t/Ot−1 to group elements of Ot together. Effectively, this amounted to a finer graining of Mt, and we then bounded each of the resulting terms using Lemma 5.12 and applied recursion to Ot−1 and so on. Claude’s suggestion was to simplify this argument by instead just bounding all of Mt instead of these distinct double cosets. To make this rigorous, we needed Lemma 5.13, an extension of Lemma 5.12, which was suggested by Claude. With everything, we were able to generalize our testing lower bound to the optimal Ω( n − k) for even adaptive testers . The entire proof has been rewritten and proofread by us (and any further mistakes are our own). 12 2 Preliminaries 
+
+2.1 Paulis and Cliffords 
+
+The 2-qubit Pauli matrices are defined as follows 
+
+I =
+
+1 00 1
+
+
+
+, X =
+
+0 11 0
+
+
+
+, Y =
+
+0 −ii 0
+
+
+
+, Z =
+
+1 00 −1
+
+
+
+It is well-known that the n-qubit Pauli matrices {I, X, Y, Z }n form an orthonormal basis for B(Cn). We write a Pauli label on n qubits as ( x, z ) ∈ Fn 
+
+> 2
+
+× Fn 
+
+> 2
+
+, where x is the X-label and z is the Z-label and use the Hermitian Pauli convention 
+
+Px,z := ix·z Zz Xx.
+
+These operators are often referred to as Weyl operators and it is not hard to see that these operators 
+
+{Px,z }x,z ∈Fn 
+
+> 2
+
+are orthonormal. For x, y ∈ F2n 
+
+> 2
+
+, where we write x = ( x1, x 2) with x1 denoting the first n bits of x and x2 denoting the last n bits (similarly for y = ( y1, y 2)), we define the symplectic inner product as [x, y ] = ⟨x1, y 2⟩ + ⟨x2, y 1⟩ mod 2 . (9) Here, all additions are over F2. Under this inner product, multiplication of Paulis takes the form 
+
+PuPv = i[u,v ](−1) uX·vZ Pu+v . (10) Observe that the Paulis Px,z and Px′,z ′ commute if and only if this symplectic inner product vanishes, i.e. uX · vZ = uZ · vX. Since a set of commuting Paulis corresponds to a set of elements of F2n
+
+> 2
+
+with [ u, v ] = 0, we can associate such sets with certain subspaces of F2n 
+
+> 2
+
+. Such subspaces will be isotropic, meaning that [ u, v ] = 0 for all u, v ∈ W . Maximal isotropic subspaces play an important role in studying stabilizer states. 
+
+Definition 2.1 (Lagrangian subspace) . A subspace M ≤ F2n 
+
+> 2
+
+is said to be Lagrangian if M = M ω,where ω denotes the symmplectic complement. Equivalently, 
+
+• For all x, y ∈ M , [x, y ] = 0 .
+
+• dim( M ) = n and hence M is a maximal isotropic subspace. 
+
+This, plus a sign function, defines a stabilizer state. 
+
+Definition 2.2 (Stabilizer state) . A pure n-qubit state |ψ⟩ is a stabilizer state if there exists a maximal Abelian subgroup of Pauli matrices such that P |ψ⟩ = ± | ψ⟩ for all P in this group. In the symplectic representation, |ψ⟩ is fully determined by: 1. A Lagrangian subspace Mψ ≤ F2n 
+
+> 2
+
+.2. A sign function χ : Mψ → {± 1} such that Pu |ψ⟩ = χ(u) |ψ⟩.
+
+For a stabilizer state |ψ⟩, we will use Mψ to denote the corresponding Lagrangian subspace. 
+
+Fact 2.3. Let Mψ ≤ F2n 
+
+> 2
+
+be a Lagrangian subspace and let χ : Mψ → {± 1} be the sign function of some stabilizer state with label space Mψ. Then for all u, v ∈ Mψ,
+
+χ(u + v) = ( −1) uX·vZ χ(u)χ(v),
+
+In particular, the values of χ on any spanning set of Mψ determine χ on all of Mψ.
+
+13 Proof. Since u, v ∈ Mψ commute, PuPv = ( −1) uX·vZ Pu+v = PvPu. Applying both sides to |ψ⟩ and using Pu |ψ⟩ = χ(u) |ψ⟩, Pv |ψ⟩ = χ(v) |ψ⟩, and Pu+v |ψ⟩ = χ(u + v) |ψ⟩ gives the identity. Iterating expresses χ on any element of Mψ as a product of values of χ on the spanning set, multiplied by known signs. We will also require a normal form for stabilizer states. 
+
+Fact 2.4. Every n-qubit stabilizer state can be written, up to global phase, as 
+
+|ψ⟩ = 1
+
+p|V |
+
+X
+
+> x∈V
+
+iℓ(x)(−1) q(x) |x⟩ ,
+
+where V ⊆ Fn 
+
+> 2
+
+is an affine subspace, ℓ : V → F2 is affine-linear, and q : V → F2 is quadratic. After a known affine change of variables sending V to Fr 
+
+> 2
+
+× { 0n−r}, the state has the form 
+
+|ψA,ℓ ⟩ = 2 −r/ 2 X
+
+> x∈Fr
+> 2
+
+iℓ·x(−1) xT Ax |x⟩ ⊗ | 0n−r⟩ ,
+
+where A ∈ Fr×r 
+
+> 2
+
+is upper triangular. On the active r qubits, the stabilizer label subspace is the graph 
+
+MB = {(u, Bu ) : u ∈ Fr
+
+> 2
+
+}, B = A + AT .
+
+The remaining information in the stabilizer state is the vector of signs of any generating set for this Lagrangian subspace. 
+
+We call a stabilizer state full-support if, in the normal form as defined above, its support is all of Fn 
+
+> 2
+
+, i.e., up to global phase, can be written as 2 −n/ 2 P 
+
+> x∈Fn
+> 2
+
+iℓ(x)(−1) q(x) |x⟩ , where ℓ is linear and 
+
+q is quadratic 
+
+Cliffords and stabilizers. Clifford unitaries are those generated by Hadamard gate Had =
+
+> 1√2
+
+1 11 −1
+
+
+
+, controlled-X gate and S =
+
+1 00 i
+
+
+
+gate. The output of Clifford circuits on the all 
+
+|0n⟩ input are always stabilizer states. Note that the Clifford group forms the normalizer of the Pauli group in the unitary group on n-qubits. That is CP uC† = ( −1) c(u)Pv for some v ∈ F2n
+
+> 2
+
+and quadratic function c. In the symplectic representation, conjugation by a Clifford unitary corresponds to multiplication by some matrix in Sp(2 n, F2). That is, u is mapped to Bu for 
+
+B ∈ Sp(2 n, F2). Further, the Clifford group acts transitively on the Pauli group. The following fact is a consequence of this. 
+
+Fact 2.5. Let M ≤ F2n 
+
+> 2
+
+be a uniformly random Lagrangian subspace and Z := {0} × Fn 
+
+> 2
+
+the all Z
+
+Lagrangian. Then, 
+
+Pr[dim( M ∩ Z ) = 0] = 
+
+> n
+
+Y
+
+> j=1
+
+(1 + 2 −j )−1 ≥ 0.4 . (11) 
+
+Proof. This fact, as well as extensions to larger intersections, was proved as Corollary 2 in [KG15]. We provide a proof here for convenience. The Clifford group acts transitively on Lagrangian subspaces through the usual symplectic representation. Since C is uniformly random, we have that C(M ) is uniformly distributed over all 14 Lagrangian subspaces. The number of such subspaces in F2n 
+
+> 2
+
+is Qnj=1 (2 j +1). Lagrangian subspaces such that M ∩ Z = {0} must take the form {(u, Bu ) : u ∈ Fn 
+
+> 2
+
+}, where B ∈ Fn×n 
+
+> 2
+
+is symmetric. There are 2 n(n+1) /2 symmetric matrices over F2. Therefore, Pr[dim( M ∩ Z ) = 0] = 2n(n+1) /2
+
+Qnj=1 (2 j + 1) =
+
+> n
+
+Y
+
+> j=1
+
+(1 + 2 −j )−1 ≥ 0.4 . (12) 
+
+Characteristic distribution. For an n-qubit pure state |ψ⟩, define the characteristic function and characteristic distribution 
+
+cψ(u) := 2 −n/ 2Tr (Puψ), pψ(u) := |cψ(u)|2 = 2 −n|⟨ ψ|Pu|ψ⟩| 2.
+
+If |ψ⟩ is a stabilizer state and Mψ ≤ F2n 
+
+> 2
+
+is the corresponding Lagrangian subspace, then 
+
+pψ(u) = 2 −n · 1[u ∈ Mψ].
+
+A partial converse holds. If pψ is concentrated well on some Lagrangian subspace M , then the stabilizer fidelity of |ψ⟩ cannot be too small. 
+
+Fact 2.6 ([GNW21, Theorem 3.3]; [GIKL24, Corollary 7.4]) . For any n-qubit quantum state |ψ⟩
+
+and a Lagrangian subspace M ⊂ F2n
+
+> 2
+
+FS (|ψ⟩) ≥ X
+
+> x∈M
+
+pψ(x) , FStab (|ψ⟩) := max  
+
+> |ϕ⟩∈ Stab
+
+|⟨ ψ|ϕ⟩| 2 .
+
+2.2 Fourier analysis 
+
+We will work with complex-valued Boolean functions f : Fn 
+
+> 2
+
+→ C. The inner product (or correlation) of two functions f, g : Fn 
+
+> 2
+
+→ C is given by 
+
+⟨f, g ⟩ = Ex[f (x)g(x)] . (13) Throughout this work we will work with the standard Fourier transform, wherein the Fourier decomposition of f is defined as 
+
+f (x) = X
+
+> S∈Fn
+> 2
+
+bf (S)χS (x) = X
+
+> S∈Fn
+> 2
+
+bf (S)( −1) ⟨S,x ⟩
+
+where χS (x) = ( −1) ⟨S,x ⟩ and the Fourier coefficients bf (S) ∈ C are defined as 
+
+bf (a) = 12n
+
+X
+
+> x∈Fn
+> 2
+
+(−1) ⟨a,x ⟩f (x).
+
+We define the convolutions of two functions f, g : Fn 
+
+> 2
+
+→ C as (f ⋆ g )( x) = Ez∈Fn 
+
+> 2
+
+[f (x)g(x + z)] . (14) We will require the following characterization of the Fourier transform of the characteristic distribution of a pure state |ψ⟩.15 Fact 2.7 ([GIKL25, Proposition 8.4]) . For a pure state |ψ⟩, the standard Fourier transform of the characteristic distribution is given by 
+
+pψ(aX, a Z) = X
+
+> bX,b Z∈Fn
+> 2
+
+bpψ(bX, b Z)( −1) aX·bX+aZ·bZ , (15) 
+
+where the Fourier coefficients are 
+
+bpψ(bX, b Z) = 12n pψ(bZ, b X) . (16) 
+
+2.3 Stochastic orthogonal group 
+
+We will repeatedly use the stochastic orthogonal group and a specific representation of this group. 
+
+Definition 2.8 (Stochastic orthogonal group) . The stochastic orthogonal group Ot is the subgroup of matrices in Ft×t 
+
+> 2
+
+such that OO ⊤ = O⊤O = I. Equivalently, ⟨x, y ⟩ = ⟨Ox, Oy ⟩ for all x, y ∈ Ft
+
+> 2
+
+.
+
+This group has a defining representation on C2t
+
+given by 
+
+r(O) |x⟩ = |Ox ⟩ , (17) where x ∈ Ft
+
+> 2
+
+. In particular, this is a permutation module. This can be readily extended to a representation on ( C2n
+
+)⊗t which we will make extensive usage of. This representation is 
+
+R(O) := r(O)⊗n , (18) where r(O) is understood to act transversally on a collection of t qubits, one from each copy of 
+
+C2n
+
+. To make this explicit, consider the state |x⟩ = ⊗i |xi⟩ in ( C2n
+
+)⊗t. To this state associate a matrix 
+
+X := 
+
+
+
+−x1−−x2−
+
+...
+
+−xt−
+
+ ∈ Ft×n 
+
+> 2
+
+. (19) Then, R(O) acts by permuting these basis states according to OX .It is worthwhile to mention here that this group is intimately connected to the commutant of the Clifford group. In particular, the seminal work [GNW21] showed that, when t − 1 ≤ n, the Clifford commutant is spanned by R(L) where L is a stochastic Lagrangian subspace (the characterization of the commutant was then extended to arbitrary t [BEL +25]). Here R(L) = r(L)⊗n with r(L) = P 
+
+> (x,y )∈L
+
+|x⟩ ⟨ y|, which may not be a unitary. To each O ∈ O t there is an associated Lagrangian subspace LO := ( Ox, x ). Then, R(LO) = R(O) as described above, which is a unitary. Our lower bound for testing sidesteps dealing with the non-unitary elements of the Clifford commutant. We will need the following fact which shows that stochastic orthogonal matrices act transitively on certain equivalence classes of binary matrices X ∈ Ft×n 
+
+> 2
+
+(again, think of X as encoding |x⟩ = ⊗ | xi⟩). 
+
+Lemma 2.9. Let n > t and X, Y ∈ Ft×n 
+
+> 2
+
+be full rank matrices. Then, X⊤X = Y ⊤Y if and only if there is a matrix O ∈ Ft×t 
+
+> 2
+
+such that OY = X and OO ⊤ = O⊤O = I.Proof. Since X has full row rank, it has a right inverse, which we will denote by X−R. Similarly, 
+
+X⊤ has a left inverse, which is ( X−R)⊤. Hence, 
+
+I = ( X−R)⊤Y ⊤Y X −R . (20) Define O := ( X−R)⊤Y ⊤, which is orthogonal, completes the proof. 16 Figure 4: Partial Bell sampling using a quantum memory. Part of the input state |ψ⟩ is measured in the computational basis while the rest is copied onto the k-qubit memory. In this figure, |ψ⟩ is a 3 qubit state and there are 2 memory qubits. Then, a fresh sample of |ψ⟩ is loaded and a Bell sample is performed between the stored qubits and the corresponding qubits of the new copy. 
+
+# 3 Technical toolkit 
+
+3.1 Partial bell sampling 
+
+Bell sampling is a well-known subroutine that has been used often in stabilizer learning and testing. We briefly describe that first subroutine before describing the “partial” version of it. 
+
+Bell sampling. As its name suggests, Bell sampling on the state |ψ⟩ ⊗ | ϕ⟩ corresponds to measuring |ψ⟩ ⊗ | ϕ⟩ in the Bell basis i.e., the orthonormal basis of ( Wx ⊗ I) |Φ+⟩ with |Φ+⟩ being the state of n EPR pairs (over 2 n qubits) |Φ+⟩ := 2 −n/ 2 P 
+
+> x∈Fn
+> 2
+
+|x⟩ | x⟩. The measurement outcome from Bell sampling is thus a 2 n bit string x ∈ F2n 
+
+> 2
+
+that corresponds to a Weyl operator Wx. It was observed by Montanaro [Mon17] that one can learn an n-qubit stabilizer state using O(n) samples from Bell sampling on |ψ⟩⊗2. Similarly, Bell difference sampling corresponds to Bell sampling on 
+
+|ψ⟩⊗2 twice to produce outcomes x, y ∈ F2n 
+
+> 2
+
+and then returning z = x + y. Bell difference sampling was proposed in [GNW21] for intolerant testing stabilizer states. 
+
+Fact 3.1. Let |ψ⟩ be an n-qubit pure state. If we perform a full n-qubit Bell measurement on two copies of |ψ⟩, then the output Pauli label u ∈ F2n 
+
+> 2
+
+is distributed according to the characteristic distribution 
+
+pψ(u) = 2 −n |⟨ ψ|Pu|ψ⟩| 2 .
+
+A caveat of both Bell sampling and Bell difference sampling however is that they require having 
+
+n qubits of quantum memory. Since the primary focus of this work is algorithms with k < n qubits of memory, we introduce partial bell sampling , wherein one measures part of two copies of a state in the Bell basis and the rest in the computational basis. We define this protocol in Algorithm 1 and illustrate it in Figure 4. Similarly, partial Bell difference sampling (Algorithm 2) corresponds to partial Bell sampling |ψ⟩ twice to obtain outcomes ( a1, r 1) and ( a2, r 2) and returns ( a1 +a2, r 1 +r2). 
+
+Lemma 3.2. Let P kψ denote the distribution induced on (a, r ), where a ∈ F2k 
+
+> 2
+
+and r ∈ Fn−k 
+
+> 2
+
+, by 
+
+17 Algorithm 1: Partial Bell sampling using k qubits of memory 
+
+Input: Two copies of |ψ⟩.
+
+Output: (a, r ) with a ∈ F2k 
+
+> 2
+
+and r ∈ Fm 
+
+> 2
+
+. 
+
+> 1
+
+Store the first k qubits of one copy of |ψ⟩; 
+
+> 2
+
+Measure the remaining m qubits in the computational basis, obtaining z0 ∈ Fm 
+
+> 2
+
+; 
+
+> 3
+
+Load another copy of |ψ⟩; 
+
+> 4
+
+Bell-sample its first k qubits against the k qubits in memory, obtaining a ∈ F2k 
+
+> 2
+
+; 
+
+> 5
+
+Measure the remaining m qubits in the computational basis, obtaining zi ∈ Fm 
+
+> 2
+
+; 
+
+> 6
+
+return (a, z 0 ⊕ z1); 
+
+partial Bell sampling from a pure state ψ. Then, 
+
+P kψ (a, r ) = X
+
+> t∈Fn−k
+> 2
+
+pψ(aXr, a Zt) . (21) 
+
+Proof. To the outcome ( a, r ) we can associate the POVM aspect 
+
+|Φa⟩ ⟨ Φa| ⊗ X
+
+> x
+
+|x, x + r⟩ ⟨ x, x + r| , (22) where |Φa⟩ = 2 −n/ 2 P
+
+> y
+
+(−1) y·aZ |y, y + aX⟩ is a Bell state on the first k qubits. We now sum over Bell states on the remaining n − k qubits to obtain 
+
+X
+
+> t∈Fn−k
+> 2
+
+|Φr,t ⟩ ⟨ Φr,t | = X
+
+> x,y
+
+12n−k |x, x + r⟩ ⟨ y, y + r| X
+
+> t
+
+(−1) t·(x+y) = X
+
+> x
+
+|x, x + r⟩ ⟨ x, x + r| . (23) Hence, the POVM aspect corresponding to outcome ( a, r ) can be written as P 
+
+> t
+
+|ΦaZr,a Xt⟩ ⟨ ΦaZr,a Xt|.
+
+Corollary 3.3. Let Qkψ denote the distribution on (a, r ), where a ∈ F2k 
+
+> 2
+
+and r ∈ Fn−k 
+
+> 2
+
+, induced by partial Bell difference sampling from a pure state ψ. Then, 
+
+Qkψ(a, r ) = X
+
+> t∈Fn−k
+> 2
+
+(pψ ⋆ p ψ)( aXr, a Zt) . (24) 
+
+Proof. By Lemma 3.2, the distribution is given by 
+
+Qkψ(a, r ) = X
+
+> b∈F2k
+> 2
+
+X
+
+> s∈Fn−k
+> 2
+
+P kψ (b, s )P kψ (a + b, s + r) (25) = X
+
+> b∈F2k
+> 2
+
+X
+
+> s,u ∈Fn−k
+> 2
+
+pψ(bXs, b Zu)
+
+X
+
+> t∈Fn−k
+> 2
+
+pψ(( aX + bX)( s + r), (aZ + bZ)t
+
+ . (26) Relabeling t with t + u completes the proof. We will require one more result about partial Bell sampling. 18 Lemma 3.4. Let H be a subspace of F2k 
+
+> 2
+
+× Fn−k 
+
+> 2
+
+. The probability of observing an element of H
+
+from partial Bell difference sampling is 
+
+Qkψ(H) = |H|2n−k X 
+
+> a∈(H×Z n−k)ω
+
+p2
+
+> ψ
+
+(a) , (27) 
+
+where H × Z n−k = {(bXr, b Zt) | (b, r ) ∈ H, t ∈ Fn−k 
+
+> 2
+
+} is all possible Z completions of strings in H
+
+and ω denotes the symplectic complement. Proof. By Corollary 3.3, we have that 
+
+Qkψ(H) = X
+
+> (b,r )∈H
+
+X
+
+> t∈Fn−k
+> 2
+
+(pψ ⋆ p ψ)( bXr, b Zt)= X
+
+> (b,r )∈H
+
+X
+
+> t∈Fn−k
+> 2
+
+X
+
+> v,w ∈Fn
+> 2
+
+pψ(v, w )pψ(v + bXr, w + bZt)= X
+
+> (b,r )∈H
+
+X
+
+> t∈Fn−k
+> 2
+
+X
+
+> v,w ∈Fn
+> 2
+
+ X
+
+> c,d ∈Fn
+> 2
+
+bpψ(c, d )( −1) v·c+w·d
+
+ X
+
+> c,d ∈Fn
+> 2
+
+bpψ(c′, d ′)( −1) (v+bXr)·c′+( w+bZt)·d′
+
+
+
+= X
+
+> v,w ∈Fn
+> 2
+
+X
+
+> c,d ∈Fn
+> 2
+
+X
+
+> c′,d ′∈Fn
+> 2
+
+bpψ(c, d )bpψ(c′, d ′)( −1) v·(c+c′)+ w·(d+d′) X
+
+> (b,r )∈H
+
+X
+
+> t∈Fn−k
+> 2
+
+(−1) c′·bXr+d′·bZt ,
+
+where bpψ is the standard Fourier transform of the characteristic function. Now, the summations over H and t can be combined by noting that this is equivalent to summing over H × Z n−k. That is, we sum over aXr and aZt for ( a, r ) ∈ H and arbitrary t. We now appeal to the fact that 
+
+X
+
+> w∈W
+
+(−1) ⟨x,w ⟩ = |W |I{x ∈ W ⊥} ,
+
+for any inner product on a vector space V over F2, subspace W ⊆ V , and arbitrary element x ∈ V .Using this fact, we have that 
+
+X
+
+> (b,r )∈H
+
+X
+
+> t∈Fn−k
+> 2
+
+(−1) c′·bXr+d′·bZt = |H × Z n−k|I{(c′, d ′) ∈ (H × Z n−k)⊥}
+
+= |H|2n−kI{(c′, d ′) ∈ (H × Z n−k)⊥} ,
+
+where ⊥ here indicates the orthogonal complement with respect to the standard inner product. Since v and w are unconstrained, summing over these terms introduces the factors 2 nδc,c ′ and 2nδd,d ′ . Hence, we are left with 
+
+Qkψ(H) = |H|23n−k X 
+
+> (v,w )∈(H×Z n−k)⊥
+
+bpψ(v, w )2 = |H|2n−k X 
+
+> (v,w )∈(H×Z n−k)ω
+
+bpψ(v, w )2 ,
+
+where we have used the fact that bpψ(v, w ) = 12n pψ(w, v ) (Fact 2.7). 19 3.2 Ensembles corresponding to deg-2 phase states 
+
+Let A be uniformly distributed over upper-triangular matrices in Fn×n 
+
+> 2
+
+, and define 
+
+|ψA⟩ := 2 −n/ 2 X
+
+> x∈Fn
+> 2
+
+(−1) xT Ax |x⟩ .
+
+That is, |ψA⟩ is a degree 2 phase state. It is not hard to see that these states form a 1-design. 
+
+Fact 3.5. Let A be a uniformly random upper triangle matrix in Fn×n 
+
+> 2
+
+. Then, 
+
+E
+
+> A
+
+[|ψA⟩ ⟨ ψA|] = I
+
+2n . (28) 
+
+Proof. By direct expansion, 
+
+E
+
+> A
+
+[|ψA⟩ ⟨ ψA|] = 12n
+
+X
+
+> x,y
+
+E
+
+> A
+
+h
+
+(−1) x⊤Ax +y⊤Ay i
+
+|x⟩ ⟨ y| (29) 
+
+. (30) If x̸ = y, there is some index i such that xi = 0 yet yi = 1. Since Ai,i is 0 and 1 with equal probability, the off diagonal terms vanish. Now we consider the ensemble corresponding to the t-fold tensor products of the states |ψA⟩.To that end, the lemma below characterizes the entries of this ensemble matrix. 
+
+Lemma 3.6. For every ⃗x,⃗ y ∈ (F n 
+
+> 2
+
+)t, we have that 
+
+EA[( −1) ⃗x ⊤A⃗ x+⃗y ⊤A⃗ y ] = I
+
+X
+
+> r∈[t]
+
+xr ⊗ xr = X
+
+> r∈[k]
+
+yr ⊗ yr
+
+ ,
+
+where the expectation is over a uniformly random upper triangular A ∈ Fn×n 
+
+> 2
+
+,⃗x ⊤A⃗ x = P
+
+> i
+
+(xi)⊤Ax i,and x ⊗ x ∈ Fn2
+
+.Proof. Writing ⃗x = ( x 1, . . . , x k), the proof follows from first observing that ⃗x ⊤A⃗ x +⃗y ⊤A⃗ y = X
+
+> i
+
+(xi)⊤Ax i + X
+
+> i
+
+(yi)⊤Ay i
+
+= X
+
+> i
+
+X
+
+> k≤ℓ
+
+(xi)kAk,ℓ (xi)ℓ + X
+
+> i
+
+X
+
+> k,ℓ
+
+(yi)kAk,ℓ (yi)ℓ
+
+= X
+
+> k≤ℓ
+
+Ak,ℓ 
+
+X
+
+> i
+
+
+
+(xi ⊗ xi)k,ℓ + ( yi ⊗ yi)k,ℓ 
+
+
+
+,
+
+20 where ( x ⊗ x)k,ℓ = xkxℓ. So we have that 
+
+EA
+
+h
+
+(−1) ⃗x ⊤A⃗ x+⃗y ⊤A⃗ y i
+
+= EA
+
+h
+
+(−1)  
+
+> P
+> k,ℓ Bk,ℓ
+> P
+> i
+
+
+
+> (xi⊗xi)k,ℓ +( yi⊗yi)k,ℓ
+
+i
+
+= EA
+
+h Y 
+
+> k≤ℓ
+
+(−1) Ak,ℓ 
+
+> P
+> i
+
+
+
+> (xi⊗xi)k,ℓ +( yi⊗yi)k,ℓ
+
+i
+
+= Y
+
+> k≤ℓ
+
+EB
+
+h
+
+(−1) Ak,ℓ 
+
+> P
+> i
+
+
+
+> (xi⊗xi)k,ℓ +( yi⊗yi)k,ℓ
+
+i
+
+= Y
+
+> k≤ℓ
+
+h X 
+
+> i
+
+xi ⊗ xi
+
+ 
+
+> k,ℓ
+
+=
+
+ X 
+
+> i
+
+yi ⊗ yi
+
+
+
+> k,ℓ
+
+i
+
+= I
+
+h X 
+
+> i
+
+xi ⊗ xi = X
+
+> i
+
+yi ⊗ yi
+
+i
+
+,
+
+where the final indicator used that ( x ⊗ x)k,ℓ = ( x ⊗ x)ℓ,k .Then, we have that 
+
+ρP := EA[ψ⊗tA ] = 12nt 
+
+X⃗x,⃗ y∈(F n 
+
+> 2)t
+
+I
+
+h X 
+
+> r∈[t]
+
+xr ⊗ xr = X
+
+> r∈[t]
+
+yr ⊗ yri
+
+|⃗x⟩⟨ ⃗y|
+
+Next, we note that the space ⃗x,⃗ y ∈ (F n 
+
+> 2
+
+)t simplifies significantly when restricted to the space P 
+
+> r∈[t]
+
+xr ⊗ xr = P 
+
+> r∈[t]
+
+yr ⊗ yr. To see this, consider ⃗x and stack the bitstrings as the row of a matrix X ∈ Ft×n 
+
+> 2
+
+. That is, 
+
+X =
+
+
+
+−x1−−x2−
+
+...
+
+−xn−
+
+ .
+
+Then, one can verify that ( P 
+
+> i
+
+xi ⊗xi)k,ℓ = ( X⊤X)k,ℓ . Let Y correspond to ⃗y. Then, P 
+
+> r∈[t]
+
+xr ⊗xr =
+
+P 
+
+> r∈[t]
+
+yr ⊗ yr if and only if X⊤X = Y ⊤Y . Later when we invoke these ensembles of states, we argue that these ⃗x = ( x 1, . . . , x t) ∈ (Fn 
+
+> 2
+
+)t are linearly independent and using Lemma 2.9 one can argue that Y is related to X by an orthogonal transformation. We discuss this in more detail when discussing the testing lower bounds in Section 5.3. 
+
+3.3 Structure of protocols with quantum memory 
+
+Now we detail the structure of protocols which use repeated copies of some unknown state and also a k-qubit quantum memory. At round i, the algorithm is given a fresh copy of the unknown state 
+
+ρ and the memory is in the state ηi. Let H denote the Hilbert space for the input ( ρ) and M the Hilbert space for the memory. Then, the algorithm may perform an arbitrary channel 
+
+N : B(Hin ⊗ M ) → B (M) .
+
+This accounts for any operation on the inputs at round i that may or may not leave the memory qubits coherent. This is illustrated in Figure 1. We will formalize this model with a version of the learning tree framework, following the exposition of [CCHL22]. 21 Definition 3.7 (Tree representation for bounded memory protocols) . The state of an algorithm that uses t rounds and a k-qubit memory can be modeled as a tree T where each node ⃗x <i indicates the history of the algorithm thus far. Further: 
+
+• Each node ⃗x <i is associated with a state η⃗x <i for the memory (which depends on the input states ρ and the transcript thus far). 
+
+• For every child node ⃗x ≤i =⃗x <i xi of ⃗x <i , there is a linear, completely positive, and trace non-increasing map 
+
+T xi⃗x i<i : B(Hin ⊗ H m) → B (Hm)
+
+such that η⃗x ≤i = T xi⃗x <i (ρ ⊗ η⃗x <i ).
+
+• Fixing a node ⃗x <i , P 
+
+> xi∈N⃗x<i
+
+T xi⃗x <i is a CPTP channel. Here N⃗x <i is all children of ⃗x <i .
+
+• In the final round, the entire system is measured with some POVM {Ext⃗x <t }xt , where xt is the final outcome. 
+
+Note that T xi⃗x <i may depend on the transcript at step i (⃗x <i ). Hence, this captures all protocols that may adaptively use single-copy measurements augmented with k-qubits of coherent memory. The class of protocols captured in Definition 3.7 is a bounded memory version of a quantum casual tester/strategy. Closely related formalisms include quantum strategies and co-strategies, quantum combs, and memory channels [CDP09, GW07, KW05]. In this work we use an equivalent representation via Kraus operators and a tree structure as this allows us to explicitly work with maps acting on the coherent memory. We will now show that we can put any such protocol into a standard form, which will be convenient for our proofs. If there is no quantum memory, it is known that the entire protocol can be represented with a collection of product states {w⃗x ψ⃗x } such that P⃗x wℓψ⃗x = I⊗t. Here each ψ⃗x
+
+represents a specific leaf node in the learning tree T . With quantum memory, this standard form no longer applies. However, we can show that a similar statement holds with the Kraus operators for each map in the protocol. 
+
+Lemma 3.8 (Standard form for learning tree) . Let T be the learning tree for an algorithm using 
+
+k-qubits of memory. Then, it is without loss of generality to assume that 1. Each map T xi⃗x <i is composed of a single Kraus operator: 
+
+T xi⃗x <i (ρ ⊗ η⃗x <i ) = Kxi⃗x <i (ρ ⊗ η⃗x <i )( Kxi⃗x <i )† .
+
+Then, P 
+
+> xi∈N⃗x<i
+
+(Kxi⃗x <i )†Kxi⃗x <i = Iin ⊗ Im for all ⃗x <i ∈ T . Also, the final measurement round can be assumed to be composed entirely of rank one aspects. 2. The initial state of the memory is some fixed pure state |η0⟩.Proof. We prove each item separately. 
+
+Item 1. Say that T xi⃗x <i has the set of Kraus operators {Kxi,j⃗ x <i }j such that T xi⃗x <i (ρ ⊗ η⃗x <i ) = 
+
+P 
+
+> j
+
+Kxi,j⃗ x <i (ρ ⊗ η⃗x <i )( Kxi,j⃗ x <i )†. To each operator Kxi,j⃗ x <i we can associate a new node ⃗x ≤i; j, and thus 22 split T xi⃗x <i into some number of new nodes and maps T xi,j⃗ x <i with a single Kraus operator. Clearly the resulting protocol could simulate the original protocol. A similar argument holds for the POVM applied to the memory at the end of the protocol: take a spectral decomposition refined into rank one operators Ext⃗x <t = P 
+
+> j
+
+wj φℓ,j v . We can associate a new leaf node to each operator in this sum and simulate the original protocol. Going forward, we thus denote the final measurement by w⃗x φ⃗x .
+
+Item 2. At the start, it is without loss of generality to assume that the memory state η0 is a pure state because the maps in the first round {T x1 
+
+> x0
+
+}x1 could all first involve a preparation channel acting on the memory. A consequence of this normal form is that we can define operators that represent the protocol and allow us to map inputs to states of the memory. 
+
+Definition 3.9. Let [i : j] = {i, i + 1 , . . . , j } be an interval of integers. For a transcript ⃗x 1: j , we define the forward operators as 
+
+V⃗x i:j⃗x <i : Hi:j ⊗ M → M :: 
+
+> j
+
+O
+
+> ℓ=i
+
+|ϕℓ⟩ ⊗ | η⟩ 7 → Kxj⃗x <j 
+
+
+
+|ϕj ⟩ ⊗ Kxj−1⃗x <j −1
+
+
+
+· · · Kxi⃗x <i (|ϕi⟩ ⊗ | η⟩)
+
+ 
+
+. (31) 
+
+If j = t, we take the forward operator to be 
+
+V⃗x i:t⃗x <i := pw(⃗x) |φ⃗ x ⟩ ⟨ φ⃗x | V⃗x i:t−1⃗x <i : M → H ⊗ M . (32) We think of V⃗x i:j⃗x <i as taking the memory at round i as well as j − i + 1 copies of an input ρ
+
+and mapping to the memory at state j after measuring the string of outcomes xixi+1 . . . x j . For example, V⃗x 1: j 
+
+> 0
+
+|ϕ⟩⊗j ⊗ | η0⟩ is the state of the memory at round i beginning from the start state for the memory |η0⟩. Note that the prior outcomes/round ⃗x <i may dictate the later maps, since the algorithm can be adaptive, but otherwise only appears in the state of the memory at stage i.However, the forward pass operators cannot depend on ⃗x >j since the past does not depend on the future. An important observation is that the forward operators compose. That is, V⃗x j:k⃗x <j V⃗x i:j⃗x <i = V⃗x i:k⃗x <i .This will be quite useful in our lower bound for testing. In particular, if we fix the first outcome 
+
+x1, then all subsequent outcomes can be represented by V⃗x 2: t⃗x <2 V x1 
+
+> 0
+
+. This allows us to construct a POVM with an iterative structure that represents the protocol. 
+
+Lemma 3.10. Let 
+
+n
+
+V⃗x i:j⃗x <i 
+
+o 
+
+> i,j
+
+be the forward operators for a protocol. Then, the probability of observing transcript ⃗x is given by Tr [E⃗ x ρ⊗t] where 
+
+E⃗x = ( I ⊗ ⟨ η0|)
+
+
+
+V⃗x
+
+> 0
+
+†
+
+V⃗x 
+
+> 0
+
+(I ⊗ | η0⟩) ∈ B  H⊗t . (33) 
+
+Proof. Say that the outcome ⃗x was observed upon measuring |ϕ⟩ ⊗t. By construction, V⃗x 1: t−1 
+
+> 0
+
+|ϕ⟩⊗t ⊗|η0⟩ is the state of the memory going into the final round. In the final round, the probability of observing xt is then given by 
+
+w(⃗x) ⟨φ⃗x |V⃗x 1: t−1 
+
+> 0
+
+(|ϕ⟩⊗t ⊗ | η0⟩) 2
+
+= Tr [E⃗x ϕ⊗t] . (34) 23 4 Testing upper bound 
+
+In this section we will prove the following theorem. 
+
+Theorem 4.1. Let k ≥ 0, ε > 0. There is an adaptive protocol that uses k qubits of memory and 
+
+O(( n − k)/ε ) copies of an unknown |ψ⟩ to distinguish between FStab (|ψ⟩) = 1 vs. FStab (|ψ⟩) ≤ 1 − ε.
+
+4.1 Partial Bell sampling 
+
+The first subroutine is a partial version of Bell difference sampling. It Bell-samples the first k
+
+qubits using the available memory, while measuring the remaining m = n − k qubits in the com-putational basis. 
+
+Algorithm 2: Partial Bell difference sampling using k qubits of memory 
+
+Input: Four copies of |ψ⟩.
+
+Output: (a, r ) with a ∈ F2k 
+
+> 2
+
+and r ∈ Fm 
+
+> 2
+
+. 
+
+> 1
+
+for i = 0 to 1 do  
+
+> 2
+
+Store the first k qubits of one copy of |ψ⟩; 
+
+> 3
+
+Measure the remaining m qubits in the computational basis, obtaining zi, 0 ∈ Fm 
+
+> 2
+
+; 
+
+> 4
+
+Load another copy of |ψ⟩; 
+
+> 5
+
+Bell-sample its first k qubits against the k qubits in memory, obtaining ai ∈ F2k 
+
+> 2
+
+; 
+
+> 6
+
+Measure the remaining m qubits in the computational basis, obtaining zi, 1 ∈ Fm 
+
+> 2
+
+; 
+
+> 7
+
+return (a0 + a1, z 0,0 + z0,1 + z1,0 + z1,1); The following Lemma was proved in the technical toolkit (Lemma 3.3), but we repeat it here for the reader. 
+
+Lemma 4.2. Let Qkψ be the output distribution of Algorithm 2. Then, for every (a, r ) ∈ F2k 
+
+> 2
+
+× Fm 
+
+> 2
+
+,
+
+Qkψ(a, r ) = X
+
+> t∈Fm
+> 2
+
+(pψ ⋆ p ψ) aXr, a Zt.
+
+When ψ is a stabilizer state, pψ ⋆ p ψ is again pψ. Let Mψ be the Lagrangian subspace corre-sponding to a stabilizer state ψ. Then, 
+
+Qkψ(a, r ) = |{ t ∈ Fn−k 
+
+> 2
+
+| (aXr, a Zt) ∈ Mψ}| 
+
+2n , (35) which is the fraction of stabilizers of ψ that have the prefixes ( a, r ). In particular, if we measure ( a, r )and ψ is a stabilizer state, this means that there must be some t ∈ Fn−k 
+
+> 2
+
+such that ( aXr, a Zt) ∈ Mψ.Hence, it remains to check that such a t does indeed exist. This is exactly the role of the next subroutine. 
+
+4.2 The hidden-shift subroutine 
+
+4.2.1 Hidden shift problem 
+
+Before presenting our algorithm, we will provide some background on the hidden shift problem. Let G be a group (usually taken to be Abelian) and let f and g be function on G to some finite 24 set S. Further, we assume that there exists some s ∈ G such that f (x) = g(x + s) for all x ∈ G.Given quantum query access to these functions, the goal is to find the shift s[CVD10, VDHI06, R¨ ot10, Kup05, EH00]. Note that this is an instance of the hidden subgroup problem on the group 
+
+G ⋊φ Z2 where φ : Z2 → Aut( G) is the homomorphism φ(b)( x) = ( −1) bx. For the special case of 
+
+G = ZN , this problem is actually equivalent to the hidden subgroup problem on DN [Kup05, EH00], a problem heavily studied for its connections to lattice cryptography [Reg04]. For our purposes, G = Zn 
+
+> 2
+
+(the additive group of bitstrings), in which case Zn 
+
+> 2
+
+⋊φ Z2 is simply 
+
+Zn+1 2 . Then, this can be solved as an instance of the Abelian hidden subgroup problem/Simon’s problem [Sim97, Lom04]. Let h : Zn+1 2 → S be defined by h(x, 0) = f (x) and h(x, 1) = g(x). From here, the standard approach of Fourier sampling resolves the hidden shift: 1. Initialize two registers |0⟩G and |0⟩f .2. Apply H⊗n+1 to |0⟩G.3. Conditioned on the state of the first register ( G), query the function h(x, b ), yielding the state 1
+
+√2n+1 
+
+X
+
+> x
+
+|x⟩ ⊗ (|0⟩ | f (x)⟩ + |1⟩ | g(x)⟩) . (36) 4. Apply H⊗n+1 to the first register. 5. Measure the first register in the computational basis to obtain y ∈ Fn+1 2 satisfying y · s = 0. By repeating this protocol O(n) times, enough information is learned to recover s with high prob-ability. 
+
+4.2.2 Stabilizer hidden shift 
+
+In this subsection we will provide an algorithm inspired by the hidden shift problem that takes a prefix ( a, r ) and checks for the existence of an postfix t∗ ∈ Fm 
+
+> 2
+
+such that P(aXr,a Zt∗) stabilizes the unknown state ψ. This algorithm could also be used to learn t∗ assuming it is unique (which occurs with at least constant probability when applying random Clifford to an input state) 3.The algorithm we present here makes use of n + 1 ancilla qubits and is a direct analogue of Fourier sampling. While it uses ancilla qubits, this protocol is still a single-copy measurement since the ancillas are not left coherent and are simply for implementing the POVM. However, it may still be undesirable to use ancillas, and we present an implementation that uses no ancillas and only Clifford gates in Section 4.2.3. To keep the connection to the hidden shift problem palpable, we continue with Algorithm 3. We will need a couple of definitions for this section. For a pair ( a, r ) ∈ F2k 
+
+> 2
+
+× Fm 
+
+> 2
+
+, define the two Pauli families 
+
+Fa,r (t) := PaXr,a Zt = Pa ⊗ Pr,t , and G(t) := P0,0t = Ik ⊗ Z(t),             
+
+> 3More explicitly, if MCψ ∩ Z ={(0 ,0) }, then t∗must be unique. This occurs with probability at least 0 .4 when applying a random Clifford to a stabilizer state ψ. Hence, the hidden shift protocol could be used to learn a stabilizer of ψwith at least constant probability and O(n) samples. Then, repeating yields an O(n2) single-copy learning algorithm.
+
+25 where Z(t) is an all-Z Pauli string. Now, say that we have obtained the bitstrings ( a, r ) via partial Bell difference sampling. For readability, we will write F (t) = Fa,r (t). Assuming that |ψ⟩ is indeed a stabilizer state, Lemma 4.2 implies that there exists some t∗ ∈ Fn−k 
+
+> 2
+
+such that PaXr,a Zt ∈ Mψ.With our Pauli convention, 
+
+F (t) = i(t−t∗)·rG(t + t∗)S(t∗) , (37) and therefore 
+
+F (t) |ψ⟩ = i(t−t∗)·rλG (t + t∗) |ψ⟩ . (38) That is, F (t) and G(t) have the same action on |ψ⟩ up to a shift t∗ and a sign i(t−t∗)·r. As we know the phase factor it·r, this can be undone to prepare the state 
+
+i−t·rF (t) |ψ⟩ = i−t∗·rλG (t + t∗) |ψ⟩ . (39) Now, the action of i−t·rF (t) is the same as G(t) up to a shift and a fixed phase factor i−t∗·r. While we do not know this phase factor, since we do not know t∗, we can guess t∗ · r = 0 or t∗ · r = 1. Hence, our stabilizer hidden shift protocol takes as input a guess of this phase, β.
+
+Algorithm 3: Stabilizer hidden-shift sample 
+
+Input: (a, r ) ∈ F2k 
+
+> 2
+
+× Fm 
+
+> 2
+
+, a phase bit β ∈ F, and one copy of |ψ⟩.
+
+Output: (s, b ) ∈ Fm 
+
+> 2
+
+× F2. 
+
+> 1
+
+Initialize an m-qubit register q, a control qubit c, and the input copy in |0⟩⊗mq |0⟩c |ψ⟩; 
+
+> 2
+
+Apply Hadamards to q and c; 
+
+> 3
+
+Apply the controlled Pauli operation 
+
+X
+
+> t∈Fm
+> 2
+
+|t⟩⟨ t|q ⊗
+
+
+
+|0⟩⟨ 0|c ⊗ Fa,r (t) + |1⟩⟨ 1|c ⊗ G(t)
+
+
+
+.
+
+Apply the phase operation 
+
+X
+
+> t∈Fm
+> 2
+
+|t⟩⟨ t|q ⊗
+
+
+
+iβ−t·r|0⟩⟨ 0|c + |1⟩⟨ 1|c
+
+
+
+⊗ I;Apply Hadamards to q and c; 
+
+> 4
+
+Measure q and c in the computational basis and output the result ( s, b ); Next we define the set of affine graphs, which will be related to the output of the hidden shift soubroutine. The hidden-shift subroutine outputs pairs ( s, b ) ∈ Fm 
+
+> 2
+
+× F2, For u ∈ Fm 
+
+> 2
+
+and c ∈ F2, let 
+
+χu,c (s) := u · s ⊕ c
+
+be an affine function from Fm 
+
+> 2
+
+to F2. Its graph is the subset Graph( χu,c ) := {(s, b ) ∈ Fm 
+
+> 2
+
+× F2 : b = χu,c (s)}. (40) Thus saying that a distribution P on Fm 
+
+> 2
+
+× F2 is supported on the graph of an affine function means that every outcome P (s, b ) > 0 only if b = u · s ⊕ c for the same fixed pair ( u, c ). 26 Lemma 4.3. Let |ψ⟩ be a stabilizer state, and let Mψ ≤ F2n 
+
+> 2
+
+be the subspace of Pauli labels that stabilize |ψ⟩ up to signs. Suppose partial Bell sampling outputs (a, r ) ∈ F2k 
+
+> 2
+
+× Fm 
+
+> 2
+
+. Then there is 
+
+t∗ ∈ Fm 
+
+> 2
+
+such that (aXr, a Zt) ∈ Mψ. Moreover, for the phase choice β = t∗ · r (mod 2) , the output distribution of Algorithm 3 is supported on Graph( χt∗,c ) for some c ∈ F2.Proof. For a stabilizer state, pψ is uniform on Mψ. By Lemma 4.2, if ( a, r ) is observed, then there must exist t∗ ∈ Fm 
+
+> 2
+
+such that ( aXr, a Z t∗) ∈ Mψ. Hence for some λ ∈ {± 1},
+
+Fa,r (t∗) |ψ⟩ = λ |ψ⟩ .
+
+For readability write F (t) = Fa,r (t). Recall that, with our Pauli convention, 
+
+F (t) |ψ⟩ = i(t−t∗)·rλG (t + t∗) |ψ⟩ .
+
+After the first Hadamards and the controlled Pauli operation in Algorithm 3, the joint state is 1
+
+√2m+1 
+
+X
+
+> t∈Fm
+> 2
+
+|t⟩q (|0⟩c F (t) |ψ⟩ + |1⟩c G(t) |ψ⟩) .
+
+Using the previous identity and then applying the phase operation gives 1
+
+√2m+1 
+
+X
+
+> t∈Fm
+> 2
+
+|t⟩q
+
+
+
+|0⟩c iβ−t∗·rλG (t + t∗) |ψ⟩ + |1⟩c G(t) |ψ⟩
+
+
+
+.
+
+After the final Hadamards, the unnormalized post-measurement vector corresponding to outcome (s, b ) is proportional to 
+
+X
+
+> t∈Fm
+> 2
+
+(−1) t·s 
+
+λi β−t∗·rG(t + t∗) + ( −1) bG(t)
+
+
+
+|ψ⟩ .
+
+Set η = λi β−t∗·r. Changing variables u = t + t∗ in the first sum, this becomes 
+
+
+
+η(−1) t∗·s + ( −1) b X 
+
+> u∈Fm
+> 2
+
+(−1) u·sG(u) |ψ⟩ .
+
+Now choose β = t∗ · r (mod 2). Then η = λ ∈ {± 1}. If λ = 1, the scalar prefactor vanishes unless 
+
+b = t∗ · s. If λ = −1, it vanishes unless b = t∗ · s ⊕ 1. Thus all possible outputs satisfy b = t∗ · s ⊕ c,where c = 0 if λ = 1 and c = 1 if λ = −1. Here “supported on the graph of an affine function” means that the only outcomes with nonzero probability lie in Graph( χ) (as defined in Eq. (40)) For χ(s) = t∗ · s ⊕ c, this is exactly the condition b = t∗ · s ⊕ c for every possible output ( s, b ). Note that if β̸ = t∗ · r then, for all ( s, b ) in the support of the sampling distribution, ( s, b ) and (s, b ⊕ 1) are equally likely. That is, the distribution is far from being supported on the graph of an affine function. 
+
+4.2.3 Ancilla-free stabilizer hidden shift 
+
+In this subsection we will show that the stabilizer hidden shift (Algorithm 3) can be implemented without ancillas and only Clifford gates. This implementation is exactly the same POVM. The reader that is not interested in removing the need for ancillas can safely skip to Section 4.3 where we present the complete testing algorithm. We separate the implementations into two cases: r̸ = 0 (Algorithm 4) and r = 0 (Algorithm 5). 27 Algorithm 4: Ancilla-free stabilizer hidden-shift sample ( r̸ = 0) 
+
+Input: (a, r ) ∈ F2k 
+
+> 2
+
+× Fm 
+
+> 2
+
+with r non-zero, a phase bit β ∈ F, and one copy of |ψ⟩.
+
+Output: (s, b ) ∈ Fm 
+
+> 2
+
+× F2. 
+
+> 1
+
+Measure Pa on the first k qubits, obtaining eigenvalue φ; 
+
+> 2
+
+Choose some i ∈ [m] with ri = 1, corresponding to physical qubit k + i; 
+
+> 3
+
+Using qubit k + i as the control, apply X(r′) to the remaining qubits, where r′ is the bitstring on all qubits in {k + 1 , . . . , n } other than k + i; 
+
+> 4
+
+If β = 0, apply H to qubit k + i. Otherwise, apply HS to qubit i, with S the phase gate;  
+
+> 5
+
+Measure qubit k + i and obtain a bit c; 
+
+> 6
+
+Measure the remaining n − k − 1 qubits to obtain a bitstring s′; 
+
+> 7
+
+Uniformly at random return either (0 is′, c ⊕ 1−φ 
+
+> 2
+
+) or (1 i(s′ + r′), c ⊕ 1−φ 
+
+> 2
+
+⊕ β) ; 
+
+Algorithm 5: Ancilla-free stabilizer hidden-shift sample ( r = 0) 
+
+Input: (a, 0) ∈ F2k 
+
+> 2
+
+× Fm 
+
+> 2
+
+, a phase bit β ∈ F, and one copy of |ψ⟩.
+
+Output: (s, b ) ∈ Fm 
+
+> 2
+
+× F2. 
+
+> 1
+
+Measure the last n − k qubits in the computational basis to obtain s; 
+
+> 2
+
+If β = 0, measure Pa on the first k qubits, obtaining eigenvalue φ and output ( s, (1 − φ)/2);  
+
+> 3
+
+Otherwise, output ( s, 0) or ( s, 1) with equal probability; 
+
+Lemma 4.4. Algorithm 3 and Algorithm 4/Algorithm 5 perform the same POVM on an input state |ψ⟩.Proof. First, assume that r̸ = 0. After fixing β, the Kraus operator corresponding to the measure-ment ( s, b ) is 
+
+Ks,b := 12n−k+1 
+
+X
+
+> t∈Fn−k
+> 2
+
+(−1) t·s 
+
+iβ−t·rF (t) + ( −1) bG(t)
+
+
+
+. (41) It is straightforward to verify that 12n−k
+
+X
+
+> t
+
+(−1) t·sG(t) = Ik ⊗ | s⟩ ⟨ s| . (42) Then, 
+
+iβ−t·rF (t) = iβ Pa ⊗ Z(t) ⊗ X(r) . (43) It follows that 12n−k
+
+X
+
+> t
+
+(−1) t·siβ−t·rF (t) = iβ Pa ⊗ | s⟩ ⟨ s + r| . (44) So, we can rewrite the Kraus operators as 
+
+Ks,b = 12
+
+
+
+iβ Pa ⊗ | s⟩ ⟨ s + r| + ( −1) bIk ⊗ | s⟩ ⟨ s|
+
+
+
+. (45) 28 In the two dimensional subspace spanned by {| s⟩ , |s + r⟩} , the POVM aspects Es,b := K†
+
+> s,b
+
+Ks,b 
+
+take the block form 
+
+Es,b = 14
+
+ Ik iβ (−1) bPa
+
+i−β (−1) bPa Ik
+
+
+
+. (46) One can verify that E2 
+
+> s,b
+
+= 12 Es,b . That is, 2 Es,b is a projector. Further, Es,b = Es+r,b ⊕β and pairing these together into Fs,b := Es,b + Es+r,b ⊕β yields orthogonal projectors such that measuring 
+
+{Fs,b }s,b simulates the original POVM. To concretely implement this measurement, consider the steps in Algorithm 4. Fix i such that 
+
+ri = 1. Then, Heisenberg evolve the dual vector ⟨b|i ⟨s′|, where s′ is the same as s but after omitting 
+
+si. The Hadamard and potential phase gate map this to 
+
+⟨b|i ⟨s′| 7 → 1
+
+√2 (⟨0|i + ( −1) biβ ⟨1|i) ⟨s′| . (47) Then, the controlled X takes this to 1
+
+√2 (⟨0|i ⟨s′| + ( −1) bi ⟨1| ⟨ s′ + r′|) . (48) Now, after measuring Pa on the first k qubits, they are in some eigenstate with eigenvalue φ. In this subspace, Es,b has off-diagonal terms iβ (−1) bφ |0is′⟩ ⟨ 1i(s′ + r′)| plus the Hermitian conjugate. Note that ( −1) bφ = ( −1) b+(1 −φ)/2. Hence, in this subspace I ⊗ | b⟩i |s′⟩ ⟨ b|i ⟨s′| Heisenberg evolves to E0is′,b ⊕(1 −φ)/2. Since E0is′b and E1( s′+r′),b ⊕β are the same, randomizing over 0 is′ and 1 i(s′ + r′)yields the exact same measurement statistics. When r = 0, the Kraus operators and POVM aspects simplify to 
+
+Ks,b = 12
+
+
+
+iβ Pa + ( −1) bIk
+
+
+
+⊗ | s⟩ ⟨ s| , (49) 
+
+Es,b = 12
+
+
+
+Ik + ( −1) b(1 − β)Pa
+
+
+
+⊗ | s⟩ ⟨ s| . (50) When β = 1, the algorithm measures the last m qubits in the computational basis and outputs a random b ∈ { 0, 1}. When β = 0, the algorithm measures Pa on the first k qubits and the last m
+
+qubits in the computational basis. The output is then the sign of the measurement of Pa.
+
+4.3 The final tester 
+
+The full tester repeats partial Bell sampling followed by the hidden-shift graph test. Given samples (sj , b j ), checking whether they lie in the graph of an affine function means checking whether there exist u ∈ Fm 
+
+> 2
+
+and c ∈ F2 such that bj = u · sj ⊕ c for every j.29 Algorithm 6: Stabilizer testing with k-qubit memory 
+
+Input: Copies of an unknown n-qubit pure state |ψ⟩; parameters Mout and N .
+
+Output: accept or reject.  
+
+> 1
+
+for i = 1 to Mout do  
+
+> 2
+
+Draw a random Clifford C and apply it to each copy used in this round;  
+
+> 3
+
+Run Algorithm 2 on C |ψ⟩ to obtain ( a, r );  
+
+> 4
+
+for j = 1 to N do  
+
+> 5
+
+Run Algorithm 3 on C |ψ⟩ with prefix ( a, r ) and β = 0, obtaining ( sj , b j );  
+
+> 6
+
+Run Algorithm 3 on C |ψ⟩ with prefix ( a, r ) and β = 1, obtaining ( s′ 
+
+> j
+
+, b ′ 
+
+> j
+
+);  
+
+> 7
+
+if neither {(sj , b j )}Nj=1 nor {(s′ 
+
+> j
+
+, b ′ 
+
+> j
+
+)}Nj=1 lies in an affine graph then  
+
+> 8
+
+reject ; 
+
+> 9
+
+accept ;
+
+Checking affine consistency. Given samples (s1, b 1), . . . , (sN , b N ) ∈ Fm 
+
+> 2
+
+× F2,
+
+checking whether they lie in the graph of an affine function is equivalent to checking whether there exist u ∈ Fm 
+
+> 2
+
+and c ∈ F2 such that 
+
+bj = u · sj ⊕ c for all j ∈ [N ].
+
+As the samples arrive, one may maintain a linear basis for the observed sj ’s. When a new sj
+
+is linearly independent of the previous ones, it imposes a new constraint on the unknown affine function. When sj lies in the span of previous samples, its value bj is forced by the previously observed constraints; if the forced value disagrees with bj , then the samples are not contained in any affine graph. Equivalently, the samples lie in the graph of an affine function if and only if there is a solution to the linear system 
+
+
+
+b1
+
+b2
+
+...
+
+bN
+
+ =
+
+
+
+s1 1
+
+s2 1... ...
+
+sN 1
+
+uc
+
+
+
+. (51) Hence, Gaussian elimination can be used to check for the existence of ( u, c ). 
+
+4.4 Conditional soundness of the graph test 
+
+In the case that |ψ⟩ is a stabilizer state, for exactly one setting of β, the output of Algorithm 3 is contained in the graph of some affine function. When |ψ⟩ is not a stabilizer state, we would like to know how likely it is that the samples still lie in such a graph. If there exists a t∗ ∈ Fn−k 
+
+> 2
+
+such that PaXr,a Zt stabilizes |ψ⟩, then the same analysis as for stabilizer states shows that one setting will always lie in an affine graph. Hence, we will instead consider the case where there is no such 
+
+t∗. It turns out that we will be able to control the probabilities by bounding 
+
+A(a, r ) := max 
+
+> t∈Fn−k
+> 2
+
+|⟨ ψ|PaXr,a Zt|ψ⟩| , (52) 30 which captures the closest that all completions of ( a, r ) into a full Pauli string can come to stabilizing 
+
+|ψ⟩ (ignoring phases). The following Lemma formalizes this. 
+
+Lemma 4.5. Fix (a, r ) ∈ F2k 
+
+> 2
+
+× Fm 
+
+> 2
+
+and β ∈ F. Let P βa,r be the output distribution of Algorithm 3 on one copy of |ψ⟩. Define 
+
+A(a, r ) := max 
+
+> t∈Fm
+> 2
+
+|⟨ ψ| PaXr,a Zt |ψ⟩| .
+
+Let (s1, b 1), . . . , (sN , b N ) be N independent samples from P βa,r . Then 
+
+Pr 
+
+h
+
+∃u ∈ Fm 
+
+> 2
+
+, c ∈ F2 such that bj = u · sj ⊕ c for all j ∈ [N ]
+
+i
+
+≤ 2m+1 
+
+ 1 + A(a, r )2
+
+N
+
+.
+
+Proof. We first record the following observation: let P be any distribution on Fm 
+
+> 2
+
+× F2, and define its bias function by dP (s) = P (s, 0) − P (s, 1). For u ∈ Fm 
+
+> 2
+
+, let 
+
+bdP (u) := X
+
+> s∈Fm
+> 2
+
+(−1) u·sdP (s) ,
+
+which is the Fourier transform of the bias function. For the affine function χu,c (s) = u · s ⊕ c,Pr  
+
+> (s,b )∼P
+
+[b = χu,c (s)] = E
+
+> (s,b )∼P
+
+"
+
+1 + ( −1) b+χu,c (s)
+
+2
+
+#
+
+= 12 + (−1) c
+
+2 bdP (u).
+
+Thus, if | bdP (u)| ≤ A for every u, every affine graph has P -mass at most (1 + A)/2. We apply this to P βa,r . The Kraus operator corresponding to outcome ( s, b ) from Algorithm 3 is 
+
+Kβs,b = 12m+1 
+
+X
+
+> t∈Fm
+> 2
+
+(−1) t·s 
+
+iβ−t·rF (t) + ( −1) bG(t)
+
+
+
+.
+
+Hence P βa,r (s, b ) = ∥Kβs,b |ψ⟩ ∥ 2. Let dβ (s) = P βa,r (s, 0) − P βa,r (s, 1). We use the following Pauli multiplication identities. 
+
+G(t)G(v) = G(t + v) , (53) (54) and, with our Hermitian Pauli convention, 
+
+i(t−v)·rF (t)F (v) = ( −1) (t+v)·rG(t + v),
+
+while 
+
+it·rF (t)G(v) = i(t+v)·rF (t + v).
+
+These identities are obtained by commuting the X(r) part past the corresponding Z-labels on the last m qubits. They are the only Pauli algebra needed in the bias calculation. Now, expanding the difference and using the Pauli multiplication relations for F (t) and G(t) gives 
+
+dβ (s) = 12m+1 
+
+X
+
+> t∈Fm
+> 2
+
+(−1) t·siβ+t·r 1 + ( −1) β+t·r ⟨ψ| F (t) |ψ⟩ .
+
+31 The factor 1 + ( −1) β+t·r vanishes unless t · r = β. Thus 
+
+dβ (s) = 12m
+
+X
+
+> t∈Fm
+> 2
+> t·r=β
+
+(−1) t·s+( β+t·r)/2 ⟨ψ| F (t) |ψ⟩ .
+
+Taking the Fourier transform and using orthogonality of characters gives 
+
+bdβ (s) = 
+
+(
+
+(−1) (β+t·r)/2⟨ψ|F (t)|ψ⟩ β ≡ t · r (mod 2) 0 otherwise . (55) Therefore | bdβ (u)| ≤ A(a, r ) for every u ∈ Fm 
+
+> 2
+
+. Every affine graph has mass at most (1 + 
+
+A(a, r )) /2, so the probability that N independent samples lie in any fixed affine graph is at most ((1+ A(a, r )) /2) N . There are 2 m+1 affine functions Fm 
+
+> 2
+
+→ F2. A union bound proves the lemma. 
+
+Corollary 4.6. Fix (a, r ) ∈ F2k 
+
+> 2
+
+× Fm 
+
+> 2
+
+. For each β ∈ F, draw N independent samples from Algorithm 3. The probability that at least one of the two phase choices produces samples lying in an affine graph is at most 
+
+2m+2 
+
+ 1 + A(a, r )2
+
+N
+
+.
+
+Proof. Apply Lemma 4.5 to β = 0 and β = 1, and union bound over the two choices of β.
+
+4.5 Global soundness: finding a bad prefix 
+
+We now show that if |ψ⟩ is far from every stabilizer state, then a random Clifford followed by one partial Bell difference sample often produces a prefix with no large Pauli completion. This is the step that turns the conditional graph-test soundness into soundness of Algorithm 6. Define the set of large Pauli coefficients 
+
+M0 := 
+
+
+
+u ∈ F2n 
+
+> 2
+
+: 2 npψ(u) > 12
+
+
+
+.
+
+Equivalently, M0 = {u : |⟨ ψ|Pu|ψ⟩| > 1/√2}. The set M0 is isotropic: if u, v ∈ M0 were noncom-muting, then the anticommuting observables Pu and Pv would satisfy 
+
+|⟨ ψ|Pu|ψ⟩| 2 + |⟨ ψ|Pv|ψ⟩| 2 ≤ 1 .
+
+Indeed, if a = Tr [Puψ] and b = Tr [Pvψ], then for a2 + b2 > 0, the observable 
+
+aP u + bP v
+
+√a2 + b2
+
+has square I and hence expectation value at most 1 in absolute value. This gives √a2 + b2 ≤ 1. But M0 is the set of Paulis with large overlap and hence this would contradict the definition of M0.
+
+Definition 4.7. Let M be a subset of F2n 
+
+> 2
+
+. We say that a prefix (a, r ) ∈ F2k 
+
+> 2
+
+× Fn−k 
+
+> 2
+
+is M -good if there exists t ∈ Fn−k 
+
+> 2
+
+such that (aXr, a Zt) ∈ M . Otherwise, (a, r ) is M -bad. 
+
+32 Now, consider any Lagrangian subspace M that contains M0. If we measure a prefix ( a, r ) that is M -bad, then no completion lies in M0 and thus A(a, r ) ≤ 1/√2. By Corollary 4.6, for an M -bad prefix the probability of passing the affine-graph test is at most 2m+2 1 + 2 −1/2
+
+2
+
+!N
+
+.
+
+Taking N = c1m for a sufficiently large universal constant c1 makes this probability at most 1 /10. Thus, conditioned on obtaining an M -bad prefix, the round rejects with probability at least 9 /10. It remains to upper bound the probability that partial Bell sampling lands in the set of M -good prefixes. Fix a subspace H of F2k 
+
+> 2
+
+× Fn−k 
+
+> 2
+
+. We will call such an H a prefix subspace. For such a subspace, we define its completion by 
+
+H × Z m := {(aXr, a Zt) | (a, r ) ∈ H, t ∈ Fm 
+
+> 2
+
+} ≤ F2n 
+
+> 2
+
+. (56) That is, H × Z m is all ways of completing a prefix in H to a complete label for a Pauli string. In the reverse direction, a subspace M ≤ F2n 
+
+> 2
+
+defines a prefix subspace via 
+
+HM = {(a, r ) ∈ F2k 
+
+> 2
+
+× Fm 
+
+> 2
+
+| ∃ t ∈ Fm 
+
+> 2
+
+: ( aXr, a Zt) ∈ M } . (57) The following lemma was proved in the Technical Toolkit, but we restate it here for complete-ness. 
+
+Lemma 4.8. Let H ≤ F2k 
+
+> 2
+
+× Fm 
+
+> 2
+
+be a prefix subspace and Qkψ the distribution for partial Bell difference sampling. Then, 
+
+Q(H) = |H|2m X
+
+> u∈(H×Z m)ω
+
+p2
+
+> ψ
+
+(u) . (58) 
+
+Corollary 4.9. Let M ≤ F2n 
+
+> 2
+
+be a Lagrangian subspace. Fixing a k, let HM be the corresponding prefix subspace. Then, 
+
+Qkψ(HM ) = |H|2m X 
+
+> u∈M∩Ek
+
+p2
+
+> ψ
+
+(u) , (59) 
+
+where 
+
+Ek := {(x, z ) ∈ F2n 
+
+> 2
+
+| x>k = 0 } . (60) 
+
+Proof. Since M ⊆ HM × Z m and M is self-dual, it follows that u ∈ (HM × Z m)ω implies that 
+
+u ∈ M as well. Now, say that u = ( aXr, a Zt). Then, ( aX r, a Z s) ∈ HM × Z m for any s ∈ Fm 
+
+> 2
+
+.By assumption, 0 = [ a, a ] + r · (t + s) , (61) for all s. Hence, it must be that r = 0 as well. The corollary then follows from Lemma 4.8. 33 Recall that the protocols works by first applying a uniformly random clifford C the |ψ⟩. This maps the Lagrangian subspace M to some other subspace C(M ). Hence, we would like to analyze 
+
+EC [QkCψC † [HC(M )]], the probability of drawing a prefix of M averaged over applying random Clifford unitaries to |ψ⟩. Equivalently, we can keep M and ψ fixed and repalce the coordinate subspace E
+
+with C−1E since pCψC † (u) = pψ(C−1u). That is, 
+
+X 
+
+> u∈C(M)∩E
+
+pCψ (u)2 = X 
+
+> u∈C(M)∩E
+
+pψ(C−1u)2 = X 
+
+> y∈M∩C−1E
+
+pψ(y)2.
+
+Thus, the relevant random subspace is WC := M ∩ C−1E.
+
+Claim 4.10. Let M ≤ F2n 
+
+> 2
+
+be a fixed Lagrangian subspace, C be a random Clifford, and let WC := 
+
+M ∩ C−1E. Conditioned on r = dim WC , the subspace WC is uniformly distributed among the 
+
+r-dimensional subspaces of M . Consequently, for every nonzero y ∈ M ,
+
+Pr y ∈ WC | dim WC = r = 2r − 12n − 1 .
+
+Proof. We only use the induced symplectic action of the Clifford group on F2n 
+
+> 2
+
+. Let Stab( M ) denote the subgroup of the symplectic group that preserves M . First, the distribution of WC is invariant under the action of Stab( M ). Indeed, for any g ∈ Stab( M ), the Clifford Cg is distributed exactly as C, and 
+
+WCg = M ∩ (Cg )−1E = M ∩ g−1C−1E. 
+
+Since gM = M , this equals 
+
+g−1(M ∩ C−1E) = g−1WC .
+
+Thus WC and g−1WC have the same distribution. Second, Stab( M ) acts as the full general linear group on M . To see this, choose a symplectic basis 
+
+e1, . . . , e n, f 1, . . . , f n
+
+with M = span {e1, . . . , e n}. Every A ∈ GL( M ) extends to a symplectic map by sending 
+
+e 7 → Ae, f 7 → (A−1)T f. 
+
+Hence the stabilizer of M acts transitively on the r-dimensional subspaces of M . Combining these two observations, conditioned on the event dim WC = r, the distribution of WC is invariant under a transitive action on the set of r-dimensional subspaces of M . Therefore it is uniform on that set. Finally, a r-dimensional subspace of M contains 2 r − 1 nonzero vectors, while M contains 2 n − 1nonzero vectors. By uniformity, any fixed nonzero y ∈ M is included with probability 2r −12n−1 .
+
+Proposition 4.11. Let M ≤ F2n 
+
+> 2
+
+be a Lagrangian subspace and HM be its prefix subspace. Let C
+
+be a random Clifford, and let QkCψ denote the partial Bell difference distribution for the state C |ψ⟩.Then 
+
+EC [QC (HC(M ))] ≤ (2 n+k − 2n) · F stab (ψ) + 2 n − 2k
+
+2k(2 n − 1) .
+
+Proof. Using Corollary 3.3 and that pCψ (u) = pψ(C−1u), we have that 
+
+QkCψ (HC(M )) = 22n
+
+|WC |
+
+X
+
+> y∈WC
+
+p2
+
+> ψ
+
+(y) , (62) 34 where WC := M ∩ C−1E. Now, if r := dim WC , we have |WC | = 2 r. By Claim 4.10, observe that 
+
+WC is uniformly distributed among the r-dimensional subspaces of M . Therefore 
+
+EC
+
+QC (HC(M )) | dim WC = r = 22n
+
+2r
+
+p2
+
+> ψ
+
+(0) + 2r − 12n − 1
+
+X 
+
+> y∈M\{ 0}
+
+p2
+
+> ψ
+
+(y)
+
+ (63) Note that pψ(0) = 2 −n always. Now, using Fact 2.6 and that for every Pauli label y, we have 
+
+pψ(y) ≤ 2−n
+
+X
+
+> y∈M
+
+pψ(y) ≤ F Stab =⇒ X 
+
+> y∈M\{ 0}
+
+pψ(y)2 ≤ 2−n  FStab − 2−n .
+
+Substituting this bound into Eq. (63) gives 
+
+EC
+
+QC (HC(M )) | dim WC = r ≤ 22n−r
+
+
+
+2−2n + 2r − 12n − 1 2−n(FStab − 2−n)
+
+
+
+= (2 n+r − 2n)FStab + 2 n − 2r
+
+2r(2 n − 1) .
+
+Now we make two observations: ( i) as r increases, the RHS decreases and ( ii ) since WC = M ∩C−1E
+
+and dim M = n, while dim E = n + k, we have dim WC ≥ dim M + dim E − 2n = k. 
+
+So the largest value is attained at r = k and we have that 
+
+EC [QC (HC(M ))] ≤ (2 n+k − 2n)FStab + 2 n − 2k
+
+2k(2 n − 1) ,
+
+proving the statement. 
+
+Corollary 4.12. Assume Fstab (ψ) ≤ 1 − ε and k ≥ 1. Then, in a random-Clifford round, the probability that partial Bell sampling outputs an M -bad prefix is at least ε/ 2.Proof. The M -good prefixes are exactly the prefix projection HM . Therefore the probability of an 
+
+M -good prefix in a random-Clifford round is EC [QC (HC(M ))]. Thus the probability of an M -bad prefix is 1 − EC [QC (HC(M ))]. By Proposition 4.11, 1 − EC [QC (HC(M ))] ≥ (1 − F stab (ψ)) 2n(2 k − 1) 2k(2 n − 1) .
+
+If Fstab (ψ) ≤ 1 − ε and k ≥ 1, then the RHS of the expression above is at least ε/ 2. In the case that k = 0, the bound from Proposition 4.11 is trivial. However, this is readily fixed by conditioning upon dim WC ≥ 1. 
+
+Corollary 4.13. Assume Fstab (ψ) ≤ 1 − ε and k = 0 . Then, in a random-Clifford round, the probability that partial Bell sampling outputs an M -bad prefix is at least ε/ 6.Proof. Condition upon dim WC ≥ 1. In this case, note that the probability that dim WC ≥ 1 is exactly the probability that a random Lagrangian subspace of F2n 
+
+> 2
+
+has an overlap with Z, the all Z’s Lagrangian, of dimension at least 1. From Fact 2.5, this occurs with probability at least 1 /3for a random Lagrangian subspace. Hence, the probability of observing a bad prefix is at least 1 /3times the probability of obtaining a bad prefix assuming that dim Wc ≥ 1. By the analysis above, this is at least ε/ 6. 35 Completing soundness. Choose N = c1m, where c1 is a sufficiently large constant so that 2m+2 1 + 2 −1/2
+
+2
+
+!N
+
+≤ 110 .
+
+If the prefix is M -bad, then A(a, r ) ≤ 2−1/2, and by Corollary 4.6, the two-phase hidden-shift graph test rejects with probability at least 9 /10. By Corollary 4.12, when Fstab (ψ) ≤ 1 − ε, a random-Clifford round produces an M -bad prefix with probability at least ε/ 2 ( ε/ 6 for k = 0). Therefore a single round rejects with probability Ω( ε). In particular, repeating O(1 /ε ) independent rounds is more than sufficient to obtain constant soundness error. Since each round uses 4 + 2 N = O(m) = 
+
+O(n − k) copies, the total sample complexity is 
+
+O
+
+ n − kε
+
+
+
+.
+
+This proves Theorem 4.1. 
+
+# 5 Testing lower bounds 
+
+The goal of this section is to prove the lower bound in our main testing theorem, which we restate here for convenience. 
+
+Theorem 1.1. (Optimal testing bounds) Let k ≥ 0, ε > 0. There is an adaptive protocol that uses 
+
+k qubits of memory and O(( n−k)/ε ) copies of an unknown |ψ⟩ to distinguish between FStab (|ψ⟩) = 1 
+
+vs. FStab (|ψ⟩) ≤ 1 − ε. Also every such tester needs Ω( n − k) copies. 
+
+5.1 Information Theoretic Lower Bounds 
+
+We will follow the standard approach of considering a one versus many hypothesis test. That is, given an unknown quantum state ρ, decide if ρ = σ for some fixed state σ or if ρ ∈ C for some set of states C. From here, we can apply a version of Le Cam’s lemma specialized to decision problems. 
+
+Lemma 5.1 (Le Cam’s Lemma for Decision Problems) . Let P1 and P2 be two families of probability distributions on some measure space. Say there exist distributions μ1 and μ2 in the convex hulls of 
+
+P1 and P2 respectively such that dTV (μ1, μ 2) < 1/3. Let P be a distribution promised to be either in P1 or P2. From a single sample, there is no algorithm which can correctly identify if P ∈ P 1 or 
+
+P ∈ P 2 with probability at least 2/3 for all possible distributions P .
+
+Now, let C1 and C2 be two sets of quantum states. Given access to an unknown state ρ,a testing algorithm A performs some series of measurements and then uses these outcomes to return a decision: ρ ∈ C 1 or ρ ∈ C 2. Thus, every possible state ρ induces some distribution P A
+
+> ρ
+
+over measurement transcripts ⃗x. It is to these collections of distributions, P A 
+
+> 1
+
+= {P A 
+
+> ρ
+
+}ρ∈C 1 and 
+
+PA 
+
+> 2
+
+= {P A 
+
+> ρ
+
+}ρ∈C 2 , that we apply Lemma 5.1. Here μ2 will be generated by taking some distribution 
+
+D over the set of states C2 and taking μ2 := P 
+
+> ρ∈C 2
+
+D(ρ)P A 
+
+> ρ
+
+.Let μ1 and μ2 be two distributions in the convex hulls of PA 
+
+> 1
+
+and PA 
+
+> 2
+
+, respectively. It turns out that it suffices to consider the likelihood ratios defined by L(⃗x) = μ2(⃗x) 
+
+> μ1(⃗x)
+
+. In particular, if L(⃗x) ≥ 1−δ
+
+for all ⃗x, then the total variational distance is at most δ. This was used, for example, to prove 36 exponential lower bounds on purity testing with single-copy measurements [CCHL22]. However, it may not be true that the likelihood ratios are always lower bounded by 1 − δ. Fortunately, this one-sided bound does not need to hold for all ⃗x, only most ⃗x.
+
+Lemma 5.2 ([CGY24, Lemma 6]) . Let μ1 and μ2 be two distributions. If 
+
+Pr ⃗x∼μ 1
+
+[L(⃗x) ≥ 1 − δ] ≥ 1 − β , (64) 
+
+then it holds that dTV (μ1, μ 2) ≤ δ + β.Proof. Let E denote the event that L(⃗x) = μ2(⃗x) 
+
+> μ1(⃗x)
+
+≥ 1 − δ.
+
+dTV (μ1, μ 2) = X⃗x:μ 1(⃗x)≥μ 2(⃗x)
+
+μ1(⃗x) − μ 2(⃗x) (65) = X⃗x∈E,μ 1(⃗x)≥μ 2(⃗x)
+
+μ1(⃗x) − μ 2(⃗x) + X⃗x̸∈ E,μ 1(⃗x)≥μ 2(⃗x)
+
+μ1(⃗x) − μ 2(⃗x) (66) 
+
+≤ X⃗x∈E,μ 1(⃗x)≥μ 2(⃗x)
+
+δμ 1(⃗x) + X⃗x̸∈ E,μ 1(⃗x)≥μ 2(⃗x)
+
+μ1(⃗x) (67) 
+
+≤ δ + β , (68) proving the lemma In particular, it suffices to bound the deviations of L(⃗x) around 1. Piecing everything together, we obtain the following lemma. 
+
+Lemma 5.3. Let P1 and P2 be two sets of distributions. Take distribution μ1 and μ2 in the convex hull of P1 and P2 respectively. If 
+
+E⃗x∼μ 1
+
+[|L(⃗x) − 1|] ≤ α , (69) 
+
+then dTV (μ1, μ 2) ≤ 2√α. If α ≤ 1/36 , then no algorithm can distinguish between distributions in 
+
+P1 and P2 with probability at least 2/3.Proof. By Le Cam’s method (Lemma 5.1), it suffices to prove that dTV (μ1, μ 2) < 1/3. Suppose we have that E⃗x∼μ 1 [|L(⃗x) − 1|] ≤ α, then by Markov’s inequality, Pr ⃗x∼μ 1
+
+[L(⃗x) ≥ 1 − t] ≥ 1 − α/t. (70) Using Lemma 5.2, this implies that dTV (μ1, μ 2) ≤ t + α/t . Fixing α, the smallest upper bound is given by taking t := √α, for which this bound becomes dTV (μ1, μ 2) ≤ 2√α ≤ 1/3 for α < 1/36. In our lower bounds, C1 will always be fixed to be the maximally mixed state I/2n. Then, 
+
+PA 
+
+> 1
+
+= {P A
+
+> mm
+
+}, where P A 
+
+> mm
+
+is the distribution induced by a POVM {E⃗x }⃗x and t copies of the maximally mixed state: 
+
+P A
+
+> mm
+
+(⃗x) = Tr [E⃗x ]2nt . (71) In this case, the likelihood ratios can always be written as 
+
+L(⃗x) = 2 nt μ2(⃗x)
+
+Tr [E⃗x ] . (72) The general proof outline from now onwards is as follows: 37 1. We construct our hard ensemble from random degree 2 phase states, which were introduced in Section 5.2. 2. We further show that one can simplify this hard ensemble to be proportional to a projector consisting of orthogonal matrices from Section 5.3. 3. Next we break this orthogonal set of matrices, denoted Ot into two sets Ot−1 and Mt =
+
+Ot\Ot−1 and using the likelihood ratio method, show that the value for the O ∈ Mt is at most 2 t−n+k (which is done in Section 5.5) and conclude the proof of our theorem in 5.4. 
+
+5.2 Construction of hard ensemble 
+
+We will consider uniformly random degree 2 phase states, which is a subset of stabilizer states (i.e., the subspace it is defined on is over Fn 
+
+> 2
+
+and there are not complex amplitudes). Recall that a phase state takes the form 
+
+|ψf ⟩ = 1
+
+√2n
+
+X
+
+> x
+
+(−1) f (x) |x⟩ . (73) When f (x) is a degree two polynomial, we can write it as f (x) = x⊤Ax , with A ∈ Fn×n 
+
+> 2
+
+an upper triangular matrix. Accordingly, we relabel the states as |ψA⟩.There are three ensembles we will consider in proving our bounds: 1. Uniformly random degree two phase states ρP := EA[ψ⊗tA ]. 2. Haar random pure states ρH := Eψ[ψ⊗t] = 1dim t
+
+> ∨C2n
+
+P 
+
+> π∈St
+
+π.3. The maximally mixed state ρmm = I⊗t/2nt .We will argue that distinguishing ρP from ρH is difficult under various settings. Further, we claim that this implies hardness of stabilizer testing. This follows from the fact that a Haar random state is far from any stabilizer state with high probability. 
+
+Fact 5.4. Let 0 < ε < 1 − n2/2n. Then, any algorithm for stabilizer testing to accuracy ε can distinguish ρP from ρH with probability greater than 2/3.Proof. This is a corollary of [HH25, Lemma 4.3,4.4] wherein the authors show that an algorithm for stabilizer testing would be able to distinguish a Haar random state from all stabilizer states (with high probability over the Haar random state). The fact then follows from phase states being a subset of stabilizer states. In order to prove our lower bound, instead of directly distinguishing between ρP and ρH , we will instead argue through the intermediate step of distinguishing ρP (or ρH ) from ρmm . To this end, suppose we fix an arbitrary protocol and then the states induce classical distributions PP , PH ,and Pmm . Using Lemma 5.1, our hardness would be implied by arguing dTV (PP , PH ) is small. To argue this, first observe by triangle inequality that 
+
+dTV (PP , PH ) ≤ dTV (PP , Pmm ) + dTV (PH , Pmm ) . (74) Hence, going forward we will exclusively consider distinguishing either ρP (or ρH ) from ρmm . We will show in Theorem 5.9 that dTV (Pmm , PP ) is small. In Therorem B.3 in Appendix B, we will 38 also show that dTV (Pmm , PH ) is small as well when t = o(2 n−k) 4. This then proves our lower bound. 
+
+5.3 Rewriting our phase state ensemble 
+
+In section 3.2, we showed the following: let |ψA⟩ be a quadratic phase state, then the ensemble corresponding to the t-fold tensor product of these states can be written as 
+
+ρ = EA[|ψA⟩⟨ ψA|⊗t] = 12nt 
+
+X⃗x,⃗ y∈(F n 
+
+> 2)t
+
+I
+
+h
+
+X⊤X = Y ⊤Y ]|⃗x⟩⟨ ⃗y|,
+
+where X, Y ∈ F t×n 
+
+> 2
+
+are obtained by stacking the vectors in ⃗x and ⃗y as rows. Our first observation below will be that one can replace the degree-2 ensemble state ρP with 
+
+σP := 12nt 
+
+X
+
+> O∈O t
+
+R(O), (75) with a small loss in trace distance. Observe that σP is unnormalized and, in particular, not equal to ρP , but is close in trace distance. Hence, by another triangle inequality, it suffices to argue that the distributions induced by measuring σP are close in total variational distance to those induced by ρmm . In this rest of this subsection, we will derive the following bound on the trace distance between ρP and σP :
+
+Theorem 5.5. Let ρP := EA[ψ⊗tA ] be the ensemble average of t copies of a uniformly random degree two phase state and σP = 12nt 
+
+P 
+
+> O∈O t
+
+R(O). Then, 
+
+∥ρP − σP ∥1 ≤ O(2 t−n) . (76) We now start to massage this into something that resembles σt. To do so, we first introduce the subspace of linearly independent sets of vectors. That is, 
+
+VLI = span {⃗x ∈ F nt  
+
+> 2
+
+|⃗x is a linearly independent set }, (77) where by linearly independent we mean x1, . . . , x t ∈ Fn 
+
+> 2
+
+is linearly independent. Equivalently, this means that X, defined by stacking the vectors in ⃗x as rows, is full rank. As an intermediate step, define ˜ σP := Π LI ρP ΠLI . It turns out that this is close in trace distance to ρP :
+
+Lemma 5.6. 
+
+∥ρP − ˜σP ∥1 ≤ 22+( t+1 −n)/2 . (78) 
+
+Proof. To each |ψA⟩⊗t define | bψA,t ⟩ = Π LI |ψA⟩⊗t. Now, observe that 
+
+ ⟨ψA|⊗t | bψA,t ⟩ = dim VLI 
+
+2nt (79)  
+
+> 4Prior work [CGY24] proved a lower bound of 2 O(n−k)for this task under a slightly weaker model where the distinguisher must measure the memory every other round. We allow for the memory to be left coherent throughout the entire protocol and need to prove hardness in this setting.
+
+39 Furthermore, we can lower bound dim VLI as follows dim VLI =
+
+> t−1
+
+Y
+
+> j=0
+
+(2 n − 2j ) = 2 nt t−1Y
+
+> j=0
+
+(1 − 2j−n) ≥ 2nt 
+
+1 − 2−nt−1X
+
+> j=0
+
+2−j
+
+ ≥ 2nt  1 − 2−n+t+1  (80) Hence, we have that 
+
+∥ψ⊗tA − bψA,t ∥1 ≤ 22+( t+1 −n)/2 . (81) Since ρP is a convex combination of the ψ⊗tA ’s, this concludes the proof. Now, we can expand ˜ σP .˜σP = Π V I ρP ΠV I (82) = 12nt 
+
+X⃗x,⃗ y∈V LI 
+
+I{X⊤X = Y ⊤Y } | ⃗x⟩ ⟨ ⃗y| . (83) Recall that Lemma 2.9 states that XT X = Y ⊤Y for full rank X, Y ∈ Ft×n 
+
+> 2
+
+if and only if there is an orthogonal matrix such that OY = X. Since ⃗x,⃗ y ∈ V LI , X and Y are full rank and this lemma applies. Further, notice that OY ̸ = Y for any O̸ = I. Indeed, assume that OY = Y , then multiplying with the right inverse of Y yields that O = I. So, fixing ⃗y, it suffices to sum over 
+
+O ∈ O t. Notice that the map Y 7 → OY is exactly the representation R(O) previously discussed in Section 2.3. That is, R(O) acts transversally on blocks of t qubits via R(O) |X⟩ = |OX ⟩. We can then recognize that ˜σP = Π LI 
+
+X
+
+> O∈O t
+
+R(O)Π LI . (84) Lastly, we will remove the projectors onto VLI . First, notice that VLI is an invariant subspace of 
+
+Ot since the rank of ⃗x does not change under invertible linear transformations. Second, P 
+
+> O∈O t
+
+R(O)is proportional to a projector. Then, Π LI 
+
+P 
+
+> O∈O t
+
+R(O)Π LI ⪯ P 
+
+> O∈O t
+
+R(O). Using this, 
+
+∥σP − σP ∥1 = 12nt Tr 
+
+" X
+
+> O∈O t
+
+R(O) − ΠLI 
+
+X
+
+> O∈O t
+
+R(O)Π LI 
+
+#
+
+. (85) Other than I, Tr [Π LI R(O)Π LI ] = 0 since OY ̸ = Y for all O̸ = I. Hence, Tr [Π LI 
+
+P 
+
+> O∈O t
+
+R(O)Π LI ] = dim VLI . The other trace we bound by first noting that 
+
+Tr [R(O)] = 2 n(dim ker( I+O)) = 2 n(t−rank( I+O)) . (86) Thus, 
+
+∥σP − σP ∥1 = X 
+
+> O∈O t
+> O̸=I
+
+2−n rank( I+O) + 1 − dim VLI 
+
+2nt ≤ 2t+1 −n + X 
+
+> O∈O t
+> O̸=I
+
+2−n rank( I+O) . (87) To finish our trace distance calculation, it suffices to count the number of O’s such that rank( I+O) = 
+
+r for 1 ≤ r ≤ t.
+
+Lemma 5.7. The number of O ∈ O t such that rank( I + O) = r is no more than 2rt .
+
+40 Proof. O is completely determined by A := I + O and vice versa. Let W := ker( A). Take any x
+
+such that Ox ̸ = x and hence Ax ̸ = 0. Let w ∈ W be some arbitrary element of the kernel. Then, 
+
+⟨Ax, w ⟩ = ⟨(I + O)x, w ⟩ (88) = ⟨x, w ⟩ + ⟨Ox, w ⟩ (89) = ⟨x, w ⟩ + ⟨x, O ⊤w⟩ (90) = 2 ⟨x, w ⟩ ≡ 0 , (91) where O⊤w = w because Ow = w implies that O⊤w = w as well. Hence, the image of A is contained in W ⊥. By counting dimensions, the image of A must be exactly W ⊥. Then, A is fully determined by two elements: 1. The kernel W , which is of dimension t − r.2. An invertible linear map A : Ft
+
+> 2
+
+/W → W ⊥.Hence, the number of such A’s is upper bounded by 
+
+ tt − r
+
+
+
+> 2
+
+|GL (r, 2) | =
+
+> r−1
+
+Y
+
+> j=0
+
+(2 t − 2j ) ≤ 2rt , (92) proving the desired bound. We can now finish the proof of Theorem 5.5 
+
+∥ρP − σP ∥1 ≤ ∥ ρP − ˜σP ∥1 + ∥˜σP − σP ∥1 (93) 
+
+≤ 22+( t+1 −n)/2 + 2 t+1 −n + X 
+
+> O∈O t
+> O̸=I
+
+2−n rank( I+O) (94) 
+
+≤ 2O(t−n) +
+
+> t
+
+X
+
+> r=1
+
+2−r(n−t) (95) 
+
+≤ 2O(t−n) (96) where the third inequality used Lemma 5.7. This concludes the proof of the theorem 
+
+5.4 Lower bound for testing 
+
+Our starting point is Theorem 5.5. In particular, we show that the (sub normalized) distribution induced by measuring σP is close in 1-norm to that obtained by measuring the maximally mixed state. That is, we apply triangle inequality as follows: 
+
+dTV (Pmm , PP ) ≤ dTV (Pmm , PσP ) + dTV (PσP , PP ) . (97) Theorem 5.5 implies that the second term on the right hand side is negligible as long as t ≪ n and we will focus on the first term. To bound this term, we consider the likelihood ratios 
+
+L(⃗x) = PσP (⃗x)
+
+Pmm (⃗x) = 1
+
+Tr [E⃗x ] Tr 
+
+" X
+
+> O∈O t
+
+R(O)E⃗x
+
+#
+
+. (98) 41 Ideally we we show that L(⃗x) ≥ 1 − δ for δ = O(1) when t ≪ n for every aspect ψ⃗ x . However, this cannot be possible. Indeed, Hinsche and Helsen showed that there exist product states which are orthogonal to σP (see [HH25, Lemma 4.14]), for which L(⃗x) = 0, which is of course as far from 1 as possible. To circumvent this, we will instead consider average-case bounds on likelihood ratios and use Lemma 5.3. A slight technicality is that PσP is a sub-normalized measure. We show that this is no issue in Appendix A. Hence, the rest of this section consists of arguing that 
+
+E⃗x∼P mm 
+
+[|L(⃗x) − 1|] = 12nt 
+
+X⃗x
+
+X 
+
+> O̸=I
+
+Tr [R(O)E⃗x ] , (99) is small when t ≪ n. At a high level, we will do so by splitting Ot into Ot−1 and Mt := Ot\O t−1,where we identify Ot−1 as all matrices of that fix e1 = (1 , 0, 0, . . . , 0). We will bound the expected value of P 
+
+> O∈Mt
+
+Tr [R(O)] E⃗x and then recursively apply the same argument to Ot−1 and so on. Our main technical lemma for making this argument is the following: 
+
+Lemma 5.8. Let t < n . For any protocol using single-copy measurement and k qubits of memory, it holds that 
+
+12nt 
+
+X⃗x
+
+X
+
+> O∈Mt
+
+Tr [R(O)E⃗x ] ≤ 21−(n−k−7t)/2 . (100) This lemma is proved in Section 5.5. Assuming Lemma 5.8, we can prove the desired bound on the total variational distance. 
+
+Theorem 5.9. Let t < n , then 
+
+E⃗x∼P mm 
+
+[|L(⃗x) − 1|] ≤ 2 2−(n−k−7t)/2 . (101) 
+
+Consequently, t = Ω( n − k) is required to distinguish between a random degree two phase state and the maximally mixed state. Proof. From Theorem 5.5, we have that 
+
+dTV (Pmm , PP ) ≤ 2O(t−n) + dTV (Pmm , PσP ) . (102) We use Lemma 5.3 to obtain the bound 
+
+dTV (Pmm , PσP ) ≤ 2
+
+
+
+E⃗x∼P mm 
+
+[|L(⃗x) − 1|]
+
+1/2
+
+≤ 22−(n−k−7t)/4 , (103) where we have assumed that E⃗x∼P mm [|L(⃗x) − 1|] ≤ 2 2−(n−k−7t)/2 as claimed. To prove this claim, we split the expectation value into Ot−1 and Mt.42 E⃗x∼P mm 
+
+[|L(⃗x) − 1|] = 12nt 
+
+X⃗x
+
+X 
+
+> O̸=I
+
+Tr [R(O)E⃗x ] (104) 
+
+≤ 12nt 
+
+X⃗x
+
+X 
+
+> O∈O t−1
+> O̸=I
+
+Tr [R(O)E⃗x ] + 12nt 
+
+X⃗x
+
+X
+
+> O∈Mt
+
+Tr [R(O)E⃗x ] (105) 
+
+≤ 12nt 
+
+X⃗x
+
+X 
+
+> O∈O t−1
+> O̸=I
+
+Tr [R(O)E⃗x ] + 2 1−(n−k−7t)/2 , (106) where we have used Lemma 5.8. Now, we will recursively apply the same bound to the sum over O ∈ O t−1. To do so, we note that each outcome x1 in the first round can be viewed as the start of a new protocol. Fixing x1,we define 
+
+Vx1 := V x1 
+
+> 0
+
+(I1 ⊗ | η0⟩) = Kx1 
+
+> 0
+
+(I1 ⊗ | η0⟩) : H → M , (107) where we are using the forward operator notation from Definition 3.9. For reference, recall that these are defined as 
+
+V⃗x i:j⃗x <i : Hi:j ⊗ M → M :: 
+
+> j
+
+O
+
+> ℓ=i
+
+|ϕℓ⟩ ⊗ | η⟩
+
+!
+
+7→ Kxj⃗x <j 
+
+
+
+|ϕj ⟩ ⊗ Kxj−1⃗x <j −1
+
+
+
+· · · Kxi⃗x <i (|ϕi⟩ ⊗ | η⟩)
+
+ 
+
+,
+
+(108) which represents the map from inputs i to j to the memory enacting by these rounds of the protocol (for a fixed transcript). Further, recall that the probability of a transcript ⃗x is given by Tr [E⃗ x ρ⊗t], where 
+
+E⃗x = ( I1 ⊗ ⟨ η0|)( V⃗x 
+
+> 0
+
+)†V⃗x 
+
+> 0
+
+(I1 ⊗ | η0⟩) (109) = ( Vx1 )†(V⃗x >1 
+
+> x1
+
+)†(V⃗x >1 
+
+> x1
+
+)Vx1 . (110) Now let At−1 := P  
+
+> O̸=I∈O t−1
+
+R(O), taken as an operator on H2: t. Then, 
+
+Tr [( I1 ⊗ At−1)E⃗x ] = Tr [( I1 ⊗ At−1)( Vx1 )†(V⃗x >1 
+
+> x1
+
+)†(V⃗x >1 
+
+> x1
+
+)Vx1 ] (111) = Tr [( Vx1 V † 
+
+> x1
+
+⊗ At−1)( V⃗x >1 
+
+> x1
+
+)†(V⃗x >1 
+
+> x1
+
+)] , (112) where the second equality follows from cyclicity of trace and that Vx1 acts trivially on H2: t. Define 
+
+ηx1 := Vx1 V †
+
+> x1
+
+Tr [Vx1 V † 
+
+> x1
+
+] ∈ B (M) , p(x1) = Tr [Vx1 V † 
+
+> x1
+
+]2n . (113) By completeness, P 
+
+> x1
+
+(V x1 
+
+> 0
+
+)†V x1 
+
+> 0
+
+= IH ⊗ IM and hence P 
+
+> x1
+
+p(x1) = 1. Hence, we can recognize Eq (112) as 
+
+Tr [( I1 ⊗ At−1)E⃗x ] = 2 np(x1)Tr [( ηx1 ⊗ At−1)( V⃗x >1 
+
+> x1
+
+)†(V⃗x >1 
+
+> x1
+
+)] . (114) 43 By taking a spectral decomposition of ηx1 and applying the triangle inequality, we can assume that each ηx1 is pure. That is, let ηx1 = P 
+
+> j
+
+λx1,j |ηx1,j ⟩ ⟨ ηx1,j | and 
+
+|Tr [( I1 ⊗ At−1)E⃗x ]| = 2 np(x1)|Tr [( ηx1 ⊗ At−1)( V⃗x >1 
+
+> x1
+
+)†(V⃗x 1 
+
+> x1
+
+)] | (115) 
+
+≤ 2np(x1) X
+
+> j
+
+λx1,j |Tr [( |ηx1,j ⟩ ⟨ ηx1,j | ⊗ At−1)( V⃗x >1 
+
+> x1
+
+)†(V⃗x 1 
+
+> x1
+
+)] . (116) Hence, we will assume that ηx1 is some pure state. Further, we will view ηx1 as the starting state of the memory of a new protocol using t − 1 copies of some input ρ. Varying ⃗x >1 for some fixed x1,the forward operators {V⃗x >1 
+
+> x1
+
+}⃗x >1|x1 form a complete POVM. To make this explicit, we can define the new set of POVM aspects 
+
+E⃗x >1|x1 := ( I2 ⊗ ⟨ ηx1 |)( V⃗x >1 
+
+> x1
+
+)†(V⃗x >1 
+
+> x1
+
+)( I2 ⊗ | ηx1 ⟩) . (117) Hence, 12nt 
+
+X⃗x
+
+|Tr [( I1 ⊗ At)E⃗x ]| = 12nt 
+
+X
+
+> x1
+
+X⃗x >1
+
+|Tr [( I1 ⊗ At)E⃗x ] (118) = X
+
+> x1
+
+p(x1) 12n(t−1) 
+
+X⃗x >1
+
+|Tr [At−1E⃗x >1|x1 ]| . (119) Thus, we have split the expectation value into a convex combination of protocols using t − 1 copies. We can now split Ot−1 into Ot−2 and Mt−1 and again apply Lemma 5.8. Then Ot−2 can be split into Ot−3 and Mt−2. Continuing this way, we obtain a bias of 2 1−(n−k−7t′)/2 for each t′ ∈ [2 , t ](since, in the case of t′ = 1 there is only the identity operator). Then, 
+
+E⃗x∼P mm 
+
+[|L(⃗x) − 1|] ≤ 2 1−(n−k)/2
+
+> t
+
+X
+
+> j=2
+
+27j/ 2 < 22−(n−k−7t)/2 . (120) 
+
+5.5 Proof of Lemma 5.8 
+
+We start with a simple fact that will be crucial in our lower bounds. 
+
+Fact 5.10. Let H be a Hermitian operator on some finite dimensional Hilbert space. Also let {E⃗x }⃗x
+
+be some collection of PSD operators such that P⃗x E⃗x ⪯ I, then 
+
+X⃗x
+
+|Tr [HE ⃗x ]| ≤ ∥ H∥1 . (121) 
+
+Proof. Split H = H+ − H− into its positive and negative parts. Then, 
+
+X⃗x
+
+|Tr [HE ⃗x ]| ≤ X⃗x
+
+(Tr [H+E⃗x ] + Tr [H−E⃗x ]) ≤ Tr [H+] + Tr [H−] = ∥H∥1 . (122) 44 To give some intuition for the lower bound proof, consider the case of k = 0, where the POVM consists entirely of product states. That is, Tr [ρ⊗t ⊗ti=1 φxi|⃗x <i ] for some collection of product states and inputs ρ⊗t. We can then fix x1 and sum over all competitions of the transcript ⃗x >1. Since P⃗x >1 φ⃗x 2: t|x1 = I2: t (by completeness of the POVM), we can use Fact 5.10 to bound the entire sum over this branch of the learning tree T with 
+
+X⃗x >1
+
+Tr 
+
+" X
+
+> O∈Mt
+
+R(O)φx1
+
+> t
+
+O
+
+> i=2
+
+φxi|⃗x <i 
+
+#
+
+≤ ∥ Tr 1
+
+" X
+
+> O∈Mt
+
+R(O)( φx1 ⊗ I2: t)
+
+#
+
+∥1 . (123) Take O = SWAP 1,2 ∈ Mt. Then, 
+
+Tr 1[(SWAP 1,2 ⊗I3: t)( φx1 ⊗ I2: t)] = φx1 ⊗ I3: t , (124) and ∥Tr 1[(SWAP 1,2 ⊗I3: t)( φx1 ⊗ I2: t)] ∥1 = Tr [φx1 ]2 n(t−2) . That is, this contraction has reduced SWAP 1,2 ⊗I3: t from a unitary with trace norm 2 nt to some operator with trace norm decreased by at least a factor of 2 2n. Lemma 5.8 is essentially a generalization of this reduction in trace norm to the entire collection of operators in Mt by noting that these matrices have some nontrivial linear action on the first tensor copy of H.To continue and make this argument when k ≥ 0, we first introduce a bit of notation. As in the prior section, we will adopt the notation 
+
+Vx1 := V x1 
+
+> 0
+
+(I1 ⊗ | η0⟩) : H → M , (125) which represents the operator passing from input in the first round to the memory when observing outcome x1. Also, we will use St := P 
+
+> O∈Mt
+
+R(O). Lastly, we will use the forward pass operators from Definition 3.9 to further refine St. For reference, recall that these are defined as 
+
+V⃗x i:j⃗x <i : Hi:j ⊗ M → M :: 
+
+> j
+
+O
+
+> ℓ=i
+
+|ϕℓ⟩ ⊗ | η⟩
+
+!
+
+7→ Kxj⃗x <j 
+
+
+
+|ϕj ⟩ ⊗ Kxj−1⃗x <j −1
+
+
+
+· · · Kxi⃗x <i (|ϕi⟩ ⊗ | η⟩)
+
+ 
+
+,
+
+(126) which represents the map from inputs i to j to the memory enacted by these rounds of the protocol (for a fixed transcript). For fixed x1, the probability of observing a transcript ⃗x is then given by 
+
+Tr [E⃗x ρ⊗t], where E⃗x = ( Vx1 )†(V⃗x >1 
+
+> x1
+
+)†(V⃗x >1 
+
+> x1
+
+Vx1 ). Using these, we refine St by applying Vx1 to map 
+
+H1 to the memory space M, essentially partially contracting S1.
+
+St,x 1 := ( Vx1 ⊗ I)St(Vx1 ⊗ I)† ∈ B (H2: t ⊗ M ) . (127) Then, using the construction of the pass operators, it follows that 12nt 
+
+X⃗x
+
+X
+
+> O∈Mt
+
+Tr [R(O)E⃗x ] = 12nt 
+
+X
+
+> x1
+
+X⃗x >1
+
+Tr [St,x 1 (V⃗x >1 
+
+> x1
+
+)†(V⃗x >1 
+
+> x1
+
+)] (128) 
+
+≤ 12nt 
+
+X
+
+> x1
+
+∥St,x 1 ∥1 , (129) where the final inequality used Fact 5.10 and the fact that P⃗x >1 (V⃗x >1 
+
+> x1
+
+)†(V⃗x >1 
+
+> x1
+
+) = I2: t ⊗ IM by the completeness of the protocol. Next, we will need a few simple facts about Mt.45 Lemma 5.11. Let Mt := Ot − O t−1 and St := P 
+
+> O∈Mt
+
+R(O). Then, 1. O ∈ Mt if and only if 
+
+O =
+
+O11 O1∗
+
+O∗1 O∗∗ 
+
+
+
+, (130) 
+
+where O1∗ ∈ F1×(t−1) 2 and O∗1 ∈ F(t−1) ×12 are non-zero row and column vectors. 2. S† 
+
+> t
+
+= St.3. |Mt| ≤ 2t−1|O t−1|.4. StO = OS t = St for any O ∈ O t−1.Proof. We prove these four items separately now. 1. Clearly O∗1 is non-zero if and only if O ∈ Mt. Note that Oe 1 = e1 if and only if e1 = O−1e1 =
+
+O⊤e1. Hence, O⊤ is in Mt if and only if O ∈ Mt and O⊤ ∈ Mt if and only if O1∗ is non-zero. 2. By the proof of (1) above, Mt is closed under inverses. 3. Mt consists of all but one coset of Ot−1 in Ot. The cosets are determined by the image of 
+
+e1 under O. That is, O and W are in the same coset if and only if Oe 1 = W e 1. Since O is orthogonal, Oe 1 · Oe 1 = e1 · e1. Hence, the cosets correspond to all odd-weight bitstring other than ⃗ 1 (because O⃗ 1 = ⃗ 1 for all O). Hence there are at most 2 t−1 cosets. 4. Take some W ∈ Mt. Since O must fix e1, W Oe 1 = W e 1̸ = e1. Similarly, if OW e 1 = e1, then 
+
+W e 1 = e1. Since group multiplication is invertible, left and right multiplication by O must simply permute Mt.This proves the lemma. We continue by bounding ∥St,x 1 ∥1. To do so, we will first bound ∥St,x 1 ∥2 and then use the general fact that ∥A∥1 ≤ √rank A∥A∥2 for any operator A. Notice that 
+
+∥St,x 1 ∥22 = Tr 
+
+"
+
+(Vx1 ⊗ I[2: t]) X
+
+> O∈Mt
+
+R(O)( Vx1 ⊗ I[2: t])†(Vx1 ⊗ I[2: t]) X 
+
+> W∈Mt
+
+R(W )( Vx1 ⊗ I[2: t])†
+
+#
+
+(131) = X 
+
+> O,W ∈Mt
+
+G(O, W ) , (132) where we define 
+
+G(O, W ) := Tr [( V † 
+
+> x1
+
+Vx1 ⊗ I)R(O)( V † 
+
+> x1
+
+Vx1 ⊗ I)R(W )] . (133) To bound G(O, W ), we introduce a combinatorial factor: define 
+
+χ(O, W ) := rank( I + OW ).
+
+This characterizes the number of fixed points of the orthogonal matrix OW and captures linear dependencies in applying these matrices. Further, Tr [R(O)] = 2 n(t−χ(O, I)) . When χ(O, W ) is not 46 very large (less than or equal to 5) Lemma 5.12 below will be used by applying Cauchy Schwarz to bound G(O, W ) as 
+
+|G(O, W )| ≤ ∥ (Vx1 ⊗ I2: t)R(O)( V † 
+
+> x1
+
+⊗ I2: t)∥2∥(Vx1 ⊗ I2: t)R(W )( V † 
+
+> x1
+
+⊗ I2: t)∥2 , (134) and then bounding each of these terms individually. When χ(O, W ) ≥ 5, we can use a generalization of the same argument as for Lemma 5.12 to prove a stronger bound. This is captured in Lemma 5.13. Combined, the following two lemmas will show that 
+
+|G(O, W )| ≤ Tr [V † 
+
+> x1
+
+Vx1 ]2 · min {2n(t−2) , 2n(t+3 −χ(O,W )) } . (135) 
+
+Lemma 5.12. Let V : H → M be an operator and let O ∈ Mt. Then, 
+
+∥(V ⊗ I[2: t])R(O)( V ⊗ I[2: t])†∥2 ≤ 2n(t−2) /2Tr [V †V ] (136) 
+
+Proof. Let V have singular value decomposition 
+
+V =
+
+> 2k
+
+X
+
+> a=1
+
+λa |μa⟩ ⟨ ζa| . (137) For convenience, we adopt the notation 
+
+H := ( V ⊗ I2: t)R(O)( V ⊗ I2: t)† = X
+
+> a,b
+
+λaλb |μa⟩ ⟨ μb| ⊗ (⟨ζa| ⊗ I)R(O)( |ζb⟩ ⊗ I)
+
+| {z }
+
+> := Ha,b
+
+(138) Using the orthonormality of the singular value decomposition, 
+
+∥H∥22 = X
+
+> a,b
+
+λ2
+
+> a
+
+λ2 
+
+> b
+
+∥Ha,b ∥22 . (139) We now bound each term ∥Ha,b ∥2. Since O ∈ Mt, by Lemma 5.11, we can express O as 
+
+O =
+
+O11 O1∗
+
+O∗1 O∗∗ 
+
+
+
+. (140) Furthermore, by Lemma 5.11, O1∗ and O∗1 must both be non-zero since O ∈ Mt. Let x ∈ F1×n
+
+> 2
+
+and y ∈ F(t−1) ×n 
+
+> 2
+
+represent the state of the first party as well as parties 2 to t respectively. Then, 
+
+R(O) has the action 
+
+R(O) |x, y ⟩ = |O1,1x + O1∗y, O ∗1x + O∗∗ y⟩ . (141) Then, it follows that [Ha,b ]y′,y = ⟨y′| (⟨ζa| ⊗ I2: t)R(O)( |ζb⟩ ⊗ I2: t) |y⟩ = X
+
+> x:O∗1x+O∗∗ y=y′
+
+ζa(O11 x + O1∗y)ζb(x) . (142) Further, 
+
+∥Ha,b ∥22 = X
+
+> y,y ′∈F(t−1) ×n
+> 2
+
+[Ha,b ]y′,y 2 (143) = X
+
+> y
+
+X
+
+> y′
+
+X
+
+> x:O∗1x+O∗∗ y=y′
+
+ζa(O11 x + O1∗y)ζb(x)
+
+> 2
+
+(144) 
+
+≤ X
+
+> y
+
+X
+
+> y′
+
+{x ∈ F1×n 
+
+> 2
+
+| O∗1x + O∗∗ y = y′} X
+
+> x:O∗1x+O∗∗ y=y′
+
+|ζa(O11 x + O1∗y)|2 |ζb(x)|2 .
+
+(145) 47 where the inequality is Cauchy-Schwarz. Now, O∗1 is some non zero element of F(t−1) ×12 and 
+
+O1∗x ∈ F(t−1) ×n 
+
+> 2
+
+is an outer product. Fixing y and y′, there is at most a single x such that 
+
+O∗1x + O∗∗ y = y′. To see this, let i∗ ∈ [t − 1] be such that [ O1∗x]t = 1. Row i∗ of the constraint then reads 
+
+x = [ O∗∗ y + y′]j, 1: t−1 , (146) which completely determines x. Hence, we can instead sum over y and x since y′ and x completely determine each for a fixed y.The linear map y 7 → O1∗y from F(t−1) ×n 
+
+> 2
+
+to F1×n 
+
+> 2
+
+is surjective since O1∗ is non-zero. Hence, the number of y ∈ F (t−1) ×n 
+
+> 2
+
+such that O1∗y = z must be the size of the kernel of this map which is 
+
+|F(t−1) ×n 
+
+> 2
+
+|/|F 1×n 
+
+> 2
+
+= 2 n(t−2) .
+
+∥Ha,b ∥22 ≤ X
+
+> x
+
+|ζb(x)|2 X
+
+> y
+
+|ζa(O11 x + O1∗y)|2 (147) = 2 n(t−2) X
+
+> x
+
+|ζb(x)|2 X
+
+> x′
+
+|ζa(x′)|2 = 2 n(t−2) . (148) Hence, 
+
+∥H∥22 = X
+
+> a,b
+
+λ2
+
+> a
+
+λ2 
+
+> b
+
+∥Ha,b ∥22 ≤ 2n(t−2) X
+
+> a
+
+λ2
+
+> a
+
+!2
+
+= 2 n(t−2) Tr [V †V ]2 . (149) 
+
+Lemma 5.13. Let O, W ∈ O t. Then, for all PSD matrices Q ∈ B (H), it holds that 
+
+Tr [( Q ⊗ I[2: t])] R(O)( Q ⊗ I[2: t])R(W )] ≤ Tr [Q]2 · 2n(t+3 −χ(O,W )) . (150) 
+
+Proof. First, we will reduce to the case of rank 1 operators. This follows by letting Q = P 
+
+> a
+
+λa |ζa⟩ ⟨ ζa|
+
+and applying triangle inequality: 
+
+Tr [( Q ⊗ I[2: t])] R(O)( Q ⊗ I[2: t])R(W )] = X
+
+> a,b
+
+λaλbTr [( |ζa⟩ ⟨ ζa| ⊗ I2t)R(O)( |ζb⟩ ⟨ ζb| ⊗ I2t)R(W )] 
+
+(151) 
+
+≤ X
+
+> a,b
+
+λaλb| Tr [( |ζa⟩ ⟨ ζa| ⊗ I[2: t])R(O) |ζb⟩ ⟨ ζb| ⊗ I[2: t])R(W )] 
+
+| {z }
+
+> := Ha,b
+
+|
+
+(152) Hence, it suffices to show that |Ha,b | ≤ 2n(t+3 −χ(O,W )) . Let us use the block decompositions 
+
+O =
+
+O11 O1∗
+
+O∗1 O∗∗ 
+
+
+
+, W =
+
+W11 W1∗
+
+W∗1 W∗∗ 
+
+
+
+. (153) We will represent the standard tensor product basis on H⊗t with matrices x ∈ Ft×n 
+
+> 2
+
+, where each row represents a bitstring for one of the tensor factors. Then, R(O) has the action Ox , which applies O
+
+48 transversely across the t copies. By xi we will denote the corresponding row. Let m ∈ Ft×n 
+
+> 2
+
+label a basis vector for H⊗t. Then, define the linear forms 
+
+t(m) := ( W m )1 = W11 m1 + W1∗m>1 ∈ F1×n 
+
+> 2
+
+, (154) 
+
+u(m) := ( W m )2: t = W∗1m1 + W∗∗ m>1 ∈ F(t−1) ×n 
+
+> 2
+
+, (155) 
+
+v(m) := ( Om )1 = O11 m1 + O1∗m>1 ∈ F1×n 
+
+> 2
+
+, (156) 
+
+w(m) := ( Om )w:t = O∗1m1 + O∗∗ m>1 ∈ F(t−1) ×n 
+
+> 2
+
+. (157) Hence, R(W ) |m⟩ = |u(m), v (m)⟩ and R(O) |m⟩ = |v(m), w (m)⟩. Then, direct evaluation yields 
+
+Ha,b = X
+
+> m
+
+⟨m| (|ζa⟩ ⟨ ζa| ⊗ I[2: t])R(O) |ζb⟩ ⟨ ζb| ⊗ I[2: t])R(W ) |m⟩ (158) = X
+
+> m
+
+ζa(m1)( ⟨ζa| ⊗ ⟨ m>1|)R(O) |ζb⟩ ⟨ ζb| ⊗ I[2: t]) |t(m), u (m)⟩ (159) = X
+
+> m
+
+ζa(m1)( ⟨ζa| ⊗ ⟨ m>1|)R(O)( |ζb⟩ ⊗ | u(m)⟩)ζb(t(m)) (160) = X
+
+> m
+
+ζa(m1)( ⟨ζa| ⊗ ⟨ m>1|)R(O) X
+
+> z∈F1×n
+> 2
+
+|z⟩ ⊗ | u(m)⟩ ζb(z)ζb(t(m)) (161) = X
+
+> m,z
+
+ζa(m1)ζb(z)ζb(u(m)( ⟨ζa| ⊗ ⟨ m>1|) |v(zu (m)) , w (zu (m)) ⟩ (162) = X
+
+> m∈Ft×n
+> 2
+
+X
+
+> z∈F1×n
+> 2
+
+ζb(t(m)) ζb(z)ζa(v(zu (m))) ζa(m1)δ{w(zu (m)) = m>1} , (163) where zu (m) ∈ Ft×n 
+
+> 2
+
+is to be understood as stacking z ∈ F1×n 
+
+> 2
+
+as a row on top of u(m) ∈ F(t−1) ×n 
+
+> 2
+
+.Similar to Lemma 5.12, we will consider the sizes of the preimages for various settings of the inputs and then apply Cauchy-Schwarz to remove the dependencies on ζa and ζb. The first step to doing this is to notice that the identity in the summation above is the same as (I + O∗∗ W∗∗ )m>1 = O∗1z + O∗∗ W∗1m1 . (164) Recall that m1, z ∈ F1×n 
+
+> 2
+
+and m>1 ∈ F (t−1) ×n 
+
+> 2
+
+. Then, this constraint must hold for each triple of columns (equivalently, for each transversal set of qubits) and each triple must lie in the solu-tion space 
+
+Si := {(s, s ′, s ′′ ) ∈ F2 × F2 × Ft−12 : ( I + O∗∗ W∗∗ )s′′ = O∗1s + O∗∗ W∗1s′} . (165) Because this is a linear constraint, Si is a subspace of Ft+1 2 . We let δ := dim S1. Then, the entire solution space has dimension nδ .Let S = S×n 
+
+> 1
+
+be the solution space, consisting of a copy of Si for each column. Notice that m1
+
+and a appear as arguments for ζa and ζb. Similarly, w and ( W m )1 appear as arguments for ζa and 
+
+ζb as well. The idea will be to apply Cauchy-Schwarz and sum over these arguments independently. Then, these factors sum to 1 because ζa and ζb are normalized states. The main difficulty in doing this will be to count the amount of redudency in these summation, as is quantified by the size of the preimages of the projection S 7 → (z, m 1). That is, by applying Cauchy-Schwarz to Eq (163), 49 we obtain 
+
+|Hc,c ′ | ≤ 
+
+ X
+
+> (z,m 1,m >1)∈S
+
+|ζb(z)|2|ζa(m1)|2
+
+ 
+
+> 1/2
+
+ X
+
+> (z,m 1,m >1)∈S
+
+|ζb(t(m)) |2|ζa(v(zu (m))) |2
+
+
+
+> 1/2
+
+.
+
+(166) Because ( z, m 1, m >1) 7 → (z, m 1) is a linear map, its fibers are of size 2 nκ for some κ. In particular, the fibers are determined by the cosets of {0} × { 0} × ker( It−1 + O∗∗ W∗∗ ). Thus, κ = dim ker( It−1 +
+
+O∗∗ W∗∗ ). Then, the first summation above can be upper bounded as 
+
+X
+
+> (z,m 1,m >1)∈S
+
+|ζb(z)|2|ζa(m1)|2 ≤ 2nκ X
+
+> z,m 1
+
+|ζb(z)|2|ζa(m1)|2 = 2 nκ , (167) where the final equality follows from ζa and ζb being normalized states. For the second, we are interested in the pre-images of the map ( z, m 1, m >1) 7 → (W11 m1 +
+
+W1∗m>1, O 11 z + O1∗(W∗1m1 + W∗∗ m>1)). On Si, this is the linear map Λi(s, s ′, s ′′ ) = ( W11 s′ + W1∗s′′ , O 11 s + O1∗(W1∗s′ + W∗∗ s′′ )) . (168) Then, the entire map is Λ := Λ ×n 
+
+> 1
+
+as each column is acted upon with the same map. As a linear map, the fibers are of size equal to the null space of Λ, which is the product of n copies of the null space of Λ i. By rank nullity, this is |S| /|imΛ | = 2 n(δ−dim imΛ 1). Now, the image of Λ i is only two bits so the rank is either 0, 1, or 2. For an upper bound, however, we can just assume the rank is 0 and obtain 
+
+X
+
+> (z,m 1,m >1)∈S
+
+|ζb(t(m)) |2|ζa(v(zu (m))) |2 ≤ 2nδ . (169) It is useful to note that δ ≤ κ + 2 (by simply adding in the two degrees of freedom for s and s′). Hence, 
+
+|Hc,c ′ | ≤ 2n(κ+1) . (170) The final step is to relate κ to χ := χ(O, W ). Note that 
+
+It−1 + O∗∗ W∗∗ = ( It + OW )∗∗ + O∗1W1∗ . (171) Since rank decreases by at most one by deleting a row or column from a matrix, rank( It + OW )∗∗ ≥
+
+χ − 2. Next, rank O∗1W∗1 ≤ 1 and adding a rank 1 matrix can only decrease the rank by at most 1. Hence, rank( It−1 + O∗∗ W∗∗ ) ≥ χ − 3 and κ ≤ t − 1 − (χ − 3) = t + 2 − χ.With these lemmas proven, we can now bound ∥St, 2∥2.
+
+Lemma 5.14. Let 1 < t < n , then 
+
+∥(V ⊗ I[2: t])St(V ⊗ I[2: t])†∥22 ≤ | Mt|26t+2 2n(t−2) Tr [V †V ]2 . (172) 
+
+Proof. Lemma 5.12 and Cauchy-Schwarz yields the bound 
+
+|G(O, W )| ≤ 2n(t−2) Tr [V †V ]2 (173) 50 for all pairs. We also have, from Lemma 5.13, 
+
+|G(O, W )| ≤ 2n(t+3 −χ(O,W )) Tr [V †V ]2 . (174) Fixing O ∈ Mt, W 7 → OW is a bijection and #{W ∈ O t : χ(O, W ) = r} ≤ 2rt , (175) which was proven in Lemma 5.7. When χ(O, W ) ≤ 5, the bound from Lemma 5.12 is smaller than or equal to that of Lemma 5.13. So, using the first when χ(O, W ) ≤ 5 and the second when χ(O, W ) > 5, we obtain, for fixed O,
+
+X 
+
+> W∈Mt
+
+|G(O, W )| ≤ Tr [V †V ]2 2n(t−2) 5X
+
+> r=0
+
+2rt + 2 n(t+3) 
+
+> t
+
+X
+
+> r=6
+
+2r(t−n)
+
+!
+
+. (176) Taking the geometric sums and noting that 2 −(n−t) ≤ 1/2, this can be bounded by 
+
+Tr [V †V ]2 
+
+2n(t−2)+5 t+1 + 2 n(t+3) −6( n−t)+1 
+
+≤ 26t+2 2n(t−2) Tr [V †V ]2 . (177) Summing over all O ∈ Mt completes the proof. Now that we have a bound on ∥St,x 1 ∥2, we would like to obtain a bound on ∥St,x 1 ∥1. To do so, we apply the general inequality ∥A∥1 ≤ √rank A∥A∥2. Let Πt−1 := 1
+
+|O t−1|
+
+X
+
+> O∈O t−1
+
+R(O) ∈ B (H2: t) , (178) which is a projector acting on all but the first round. Taking P := IM ⊗ Πt−1, Fact 5.11 (d) implies that P S tP = St. Hence, the rank of St is at most the dimension of the memory times the support of Π t−1. The latter is bounded in the following argument. 
+
+Lemma 5.15. Let 1 < t ≤ n and Πt−1 := 1/|O t−1| P 
+
+> O∈O t−1
+
+R(O) acting on H2: t. Then, 
+
+rank Π t−1 ≤ 2n(t−1)+1 /|O t−1|.Proof. Since Π t−1 is a projector, the rank is equal to the trace. The trace is exactly 
+
+Tr [Π t−1] = 1
+
+|O t−1|
+
+X
+
+> O∈O t−1
+
+Tr [R(O)] (179) = 1
+
+|O t−1|
+
+X
+
+> O∈O t−1
+
+2n(t−1−rank( I+O)) (180) = 2n(t−1) 
+
+|O t−1| 1 + 
+
+> t−1
+
+X
+
+> r=1
+
+#{O ∈ O t−1 : rank( I + O) = r}2−nr 
+
+!
+
+(181) 
+
+≤ 2n(t−1) 
+
+|O t−1|
+
+> t−1
+
+X
+
+> r=0
+
+2−r(n−t+1) 
+
+!
+
+(182) 
+
+≤ 2n(t−1)+1 
+
+|O t−1| , (183) where the first inequality is via Lemma 5.7 and the second uses the fact that t ≤ n to bound the summation by 1. 51 We can now complete the proof of Lemma 5.8. From Eq (129), it suffices to bound 12nt 
+
+X
+
+> x1
+
+∥St,x 1 ∥1 ≤ 23t+1 p|Mt|2−n(t/ 2+1) X
+
+> x1
+
+prank St,x 1 Tr [V † 
+
+> x1
+
+Vx1 ] (184) 
+
+≤ 21−(3 n−k−7t)/2Tr [V † 
+
+> x1
+
+Vx1 ] (185) = 2 1−(n−k−7t)/2 , (186) where the first inequality is Lemma 5.14, the second is Lemma 5.15 as well as Lemma 5.11(c), and the final equality is that P 
+
+> x1
+
+V † 
+
+> x1
+
+Vx1 = 2 n by completeness of the protocol. 
+
+# 6 Non-adaptive learning stabilizer states 
+
+6.1 Upper bounds 
+
+We prove the upper bound in Theorem 1.2. We emphasize that since we are working with non-adaptive algorithms, the measurement schedule is fixed before any outcome is observed, all choices unitaries, measurements are fixed in advance. All classical post-processing is performed only after all copies have been measured. The coherent quantum memory allows for correlations between rounds, but the way it is used is fixed ahead of time and independent of all prior outcomes. Our protocol has three ingredients. 1. We precommit to a small number of random Clifford branches. 5 With constant probability, at least one branch puts the unknown stabilizer state into full-support stabilizer form. 2. We run a procedure that breaks this state into blocks and runs Bell-sampling on these blocks to learn the graph matrix. On a branch where the state is in full-support stabilizer form, this recover the matrix with high probability. 3. Simultaneously (and independently), we perform random stabilizer-basis measurements; af-ter the label subspace has been learned, we use these classical outcomes recover the stabi-lizer signs. Throughout this section, Z ≤ F2n 
+
+> 2
+
+denotes the all-Z Lagrangian, i.e. Z := {0} × Fn 
+
+> 2
+
+. Let |ϕ⟩ be a state with full-support stabilizer form with unsigned stabilizer group Mϕ ≤ F2n 
+
+> 2
+
+. Observe that 
+
+|ϕ⟩ is full-support if and only if Mϕ ∩ Z = {0}. Equivalently, there is a unique symmetric matrix 
+
+A ∈ Fn×n 
+
+> 2
+
+such that Mϕ = {(u, Au ) : u ∈ Fn 
+
+> 2
+
+}. We now state a simple fact that a random Clifford transforms a stabilizer state to a stabilizer state with full-support . This is a folklore result, which we state and prove below for convenience. 
+
+Lemma 6.1. Fix an n-qubit stabilizer state |ψ⟩, and let C be a uniformly random Clifford. Then 
+
+Pr  
+
+> C
+
+[C |ψ⟩ has full-support stabilizer form ] = 
+
+> n
+
+Y
+
+> j=1
+
+(1 + 2 −j )−1 ≥ 0.4.
+
+Proof. Let Mψ ≤ F2n 
+
+> 2
+
+be the unsigned stabilizer group of |ψ⟩. As we observed above, C |ψ⟩ is full-support if and only if C(Mψ) ∩ Z = {0}. The result then follows from Fact 2.5.  
+
+> 5By branch here, we mean application of this Clifford to a fresh copy of the unknown state |ψ⟩.
+
+52 We precommit to R = O(log(1 /δ )) independent uniformly random Cliffords C1, . . . , C R. By Lemma 6.1, with probability at least 1 − δ, at least one branch Cj |ψ⟩ is full-support. The learner need not know during the measurement stage which branch succeeds: it runs the same precommitted schedule for every branch, and selects a successful branch later by classical postprocessing. 
+
+Graph learning on a Clifford branch Fix a branch j. Since Cj is part of the precommitted schedule, we treat |ψj ⟩ := Cj |ψ⟩ as the effective input state to the block measurements on branch j;its (unsigned) stabilizer group is Mj := Cj (Mψ). Since Clifford conjugation sends Pauli operators to Pauli operators, the induced symplectic action of Cj maps Mψ to Mj , i.e., 
+
+Mj = Mψj = Cj (Mψ).
+
+Theorem 6.2. Fix a Clifford branch j, and write |ψj ⟩ = Cj |ψ⟩ and Mj = Cj (Mψ). If |ψj ⟩ is full-support, then there is a fixed nonadaptive measurement schedule using O(n2/k ) copies and at most k qubits of coherent memory that recovers Mj with failure probability 2−Ω( n).Proof. Fix a partition [ n] = S1 ⊔ · · · ⊔ Sm, where m = ⌈n/k ⌉ and |Si| ≤ k for every i. Since |ψj ⟩ is full-support, there is a unique symmetric matrix Bj ∈ Fn×n 
+
+> 2
+
+such that Mj = {(u, B j u) : u ∈ Fn 
+
+> 2
+
+}.We describe the two-copy measurement for a block S ⊆ [n] with |S| ≤ k. On the first copy of |ψj ⟩,store the qubits in S and measure the complementary qubits in the computational basis, obtaining 
+
+z ¯S . On the second copy, again measure the qubits in S in the computational basis, obtaining 
+
+z′¯S . Bell-measure the remaining S register and the copy of the S register stored in the memory, obtaining ( aS , b S ). Define a ∈ Fn 
+
+> 2
+
+by a|S = aS and a| ¯S = z ¯S + z′¯S . The block measurement is exactly the marginal of full Bell sampling in which we keep the full X-label a and only the S-coordinates of the Z-label. Since full Bell sampling a stabilizer state outputs a uniformly random label ( a, b ) ∈ Mj , and since 
+
+Mj = {(u, B j u) : u ∈ Fn 
+
+> 2
+
+}, the recorded labels satisfy bS = Π S b = Π S Bj a. Here Π S indicates projecting onto the coordinates in S and discarding all others. Thus one block Bell sample gives the linear sample ( a, ΠS Bj a), with a uniform over Fn 
+
+> 2
+
+. Equivalently, each repetition gives one uniformly random linear equation for the unknown row block Π S Bj .These equations will determine Π S Bj if the sampled as span Fn 
+
+> 2
+
+, but since the as are uniformly random, with Ω( n) samples, they’ll span Fn 
+
+> 2
+
+with probability ≥ 1−2−Ω( n). Conditioned on this, the linear equations uniquely determine Π S Bj . We run this fixed procedure for every block Si. A union bound over m = ⌈n/k ⌉ ≤ n blocks shows that all row blocks Π Si Bj are recovered with probability 1 − 2−Ω( n). These row blocks assemble into Bj , and therefore into Mj = {(u, B j u) : u ∈ Fn 
+
+> 2
+
+}. The number of copies used is O(n) · m = O(n2/k ). The schedule is fixed in advance: for each repetition, the branch Cj and the block Si are already specified. Since each two-copy measurement stores at most |Si| ≤ k qubits coherently and the schedule is fixed ahead of the protocol, the above proves the theorem statement. At this point, the learner selects a branch j and accepts if, for every block Si, the sampled 
+
+a-labels span Fn 
+
+> 2
+
+and the recovered row blocks assemble into a symmetric matrix Bj . Full-support branches pass with probability 1 − 2−Ω( n). A non-full-support branch is rejected deterministically by the spanning check. 6 The learner then chooses any accepted branch j⋆ and uses the already               
+
+> 6Indeed, the observed a-labels are precisely the X-coordinates of labels in Mj. If the branch is not full-support, then the X-projection of Mjhas dimension strictly smaller than n, so all sampled a-labels lie in a fixed proper subspace of Fn
+> 2and can never span Fn
+> 2. Thus the only branch-selection failure is that a full-support branch exists but its random a-samples fail to span, which occurs with probability 2 −Ω( n).
+
+53 collected sign-recovery data for that same branch. 
+
+Sign recovery. The block Bell procedure recovers the unsigned stabilizer group Mj , but it does not recover the stabilizer signs. Indeed, Bell sampling depends on |⟨ ψj |Pu|ψj ⟩| 2, so it cannot distinguish the cases Pu |ψj ⟩ = + |ψj ⟩ and Pu |ψj ⟩ = − | ψj ⟩. We therefore recover signs using a separate precommitted layer of random stabilizer-basis measurements. That is, in each branch j,we choose in advance independent uniformly random Cliffords Dj, 1, . . . D j,T . For each s ∈ [T ], we take a fresh copy, and measure Dj,s Cj |ψ⟩ in the computational basis. All these choices are fixed before any outcomes are observed. This works because measuring in the computational basis is equivalent to jointly measuring the commuting observables {Z(c) | c ∈ Fn 
+
+> 2
+
+}. Then, by applying a random Clifford before a com-putational basis measurement, this is the same as measuring in a uniformly random Lagrangian subspace L ≤ F2n 
+
+> 2
+
+. This then reveals the correct sign for all u ∈ L ∩ Mψj . Explicitly, say that we apply Clifford D to |ψj ⟩. Then, there is a linear function g : F2n 
+
+> 2
+
+→ F2n 
+
+> 2
+
+and a known function 
+
+ω : Fn 
+
+> 2
+
+→ {± 1} such that 
+
+D−1Z(c)D = ω(c)Pg(c) . (187) Say we measure the bitstring y ∈ Fn 
+
+> 2
+
+. If g(c) ∈ Mψj , then the sign of this Pauli is exactly 
+
+ω(c)( −1) y·c , (188) since |y⟩ has eigenvalue ( −1) y·c with respect to the Pauli string Z(c). It remains to argue that signs for the entire Lagrangian subspace Mψj can be recovered with high probability. To do so, it suffices to find the signs for a generating set. 
+
+Lemma 6.3. Let M ≤ F2n 
+
+> 2
+
+be a fixed Lagrangian. Let T = O(n) and let L1, . . . , L T be independent uniformly random Lagrangians. Then, 
+
+Pr 
+
+"
+
+span 
+
+ T[
+
+> s=1
+
+M ∩ Ls
+
+̸
+
+= M
+
+#
+
+≤ 2−Ω( n).
+
+Proof. The span fails to equal M if and only if there is a hyperplane H < M such that M ∩ Ls ⊆ H
+
+for every s. There are at most 2 n − 1 hyperplanes in M , so by a union bound it suffices to prove that, for any fixed hyperplane H < M and a uniformly random Lagrangian L, Pr[ M ∩ L̸ ⊆ H] ≥ c1
+
+for an absolute constant c1 > 0. Let 
+
+N := |(M ∩ L) ∩ (M \ H)| .
+
+We bound Pr[ N ≥ 1] below by a positive constant using the second-moment method. For any fixed nonzero vector v ∈ M , the probability that v ∈ L is Pr[ v ∈ L] = 
+
+Qn−1 
+
+> j=1
+
+(2 j + 1) 
+
+Qnj=1 (2 j + 1) = 12n + 1 .
+
+Indeed, Lagrangians containing v correspond to Lagrangians in the symplectic quotient v⊥/⟨v⟩ ∼=
+
+F2( n−1) 2 . Since |M \ H| = 2 n−1, we get 
+
+E[N ] = 2n−1
+
+2n + 1 ≥ 1354 for all n ≥ 1. For the second moment, note that we are working over F2, so any two distinct nonzero vectors v̸ = w are automatically linearly independent. Moreover both vectors lie in the Lagrangian 
+
+M , so [ v, w ] = 0, and hence ⟨v, w ⟩ is a two-dimensional isotropic subspace. The probability that a uniformly random Lagrangian L contains both v and w is 
+
+Qn−2 
+
+> j=1
+
+(2 j + 1) 
+
+Qnj=1 (2 j + 1) = 1(2 n + 1)(2 n−1 + 1) ,
+
+by reducing modulo ⟨v, w ⟩⊥/⟨v, w ⟩ ∼= F2( n−2) 2 . Therefore, summing the diagonal w = v contribution and the w̸ = v contributions separately, 
+
+E[N 2] = 2n−1
+
+2n + 1 + 2n−1(2 n−1 − 1) (2 n + 1)(2 n−1 + 1) ≤ 12 + 2n−1 − 12(2 n−1 + 1) ≤ 12 + 12 = 1 .
+
+By Paley–Zygmund, Pr[ N ≥ 1] ≥ (E N )2
+
+E N 2 ≥ (1 /3) 2
+
+1 = 19 .
+
+Thus c1 = 1 /9 works. The union bound over hyperplanes gives Pr 
+
+"
+
+span 
+
+[ 
+
+> s
+
+M ∩ Ls
+
+̸
+
+= M
+
+#
+
+≤ (2 n − 1)(1 − c1)T ≤ 2n(1 − c1)T ,
+
+Setting T = O(n), for a suitably chosen constant in the O(·) gives the lemma statement. 
+
+Corollary 6.4. Fix a branch j for which Mj has been recovered. Using T = O(n) additional precommitted random stabilizer-basis measurements, one recovers the sign function χj on all of Mj
+
+with failure probability 2−Ω( n).Proof. Observe that for each u ∈ Mj ∩ Lj,s , the s-th computational-basis outcome determines the eigenvalue of Pu on |ψj ⟩, up to a known Clifford phase. Hence the data gives χj on a spanning set of Mj . By Fact 2.3, this determines χj on all of Mj .
+
+Putting the protocol together. Choose R independent random Clifford branches C1, . . . , C R.For each branch, run the nonadaptive label-recovery procedure of Theorem 6.2 and, independently, the sign-recovery procedure of Proposition 6.4. All Clifford choices and all measurements are fixed before any outcomes are observed. By Lemma 6.1, with probability at least 1 − (1 − c0)R,at least one branch j⋆ puts the state in full-support form. By the branch-selection step after Theorem 6.2, postprocessing identifies such a branch and recovers Mj⋆ with failure probability 2−Ω( n). By Proposition 6.4, the already collected random-basis data for the same branch recovers 
+
+χj⋆ with failure probability 2 −Ω( n).Thus the learner obtains the signed stabilizer data ( Mj⋆ , χ j⋆ ) for the rotated state |ψj⋆ ⟩ =
+
+Cj⋆ |ψ⟩. Since Cj⋆ is known, we classically pull this data back by C−1 
+
+> j⋆
+
+to recover ( Mψ, χ ψ), and hence |ψ⟩. Each branch uses O(n2/k ) copies: O(n2/k ) for label recovery and O(n) for sign recovery, with O(n) ≤ O(n2/k ) for k ≤ n. Thus R branches use O(( n2/k )R) copies. Taking R = O(1) gives constant success probability and sample complexity O(n2/k ). Taking R = O(log(1 /δ )) gives failure probability at most δ + 2 −Ω( n) and sample complexity 
+
+O n2/k · log 1 /δ  .
+
+The protocol is fully nonadaptive: the learned branch j⋆ is used only in classical postprocessing. The only cross-copy coherent memory used is the k-qubit memory in the block Bell samples. 55 6.2 Lower bound 
+
+We prove the lower bound already for the subclass of real degree-2 phase states. Consider a phase state |ψA⟩ = 1√2n
+
+P
+
+> x
+
+(−1) x⊤Ax |x⟩. Since the state is parameterized by A, we have that 
+
+H(A) = n(n + 1) /2 = Θ( n2). Thus any learner for this subclass must recover Θ( n2) bits of classical information. 
+
+Lemma 6.5. Let A be uniformly random over upper-triangular matrices in Fn×n 
+
+> 2
+
+, and let |ψA⟩ be as above. For any POVM on one copy of |ψA⟩, with outcome Y , we have I(A; Y ) = O(1) .
+
+Proof. Any POVM on a finite dimensional Hilbert space can be refined into rank-one effects 
+
+Ej = wj |φj ⟩ ⟨ φj | and classical post-processing (potentially randomized). Hence, by the data-processing inequality, the mutual information cannot decrease by considering the measurement to be {wj |φj ⟩ ⟨ φj |} j with corresponding measurement distributions 
+
+pA(j) = Tr [Ej ψA] , p(j) = E
+
+> A
+
+[pA(j)]] . (189) By Fact 3.6, p(j) = Tr [Ej EA[ψA]] = Tr [Ej ]/2n = wj /2n. Now, mutual information satisfies 
+
+I(A; Y ) = EA[D(pA|| p)], where D(·||· ) is the KL-divergence. Further, D(P || Q) ≤ χ2(P, Q ) for arbitrary probability distributions P and Q. Putting these together, 
+
+I(A; Y ) = E
+
+> A
+
+[D(pA|| p)] ≤ E
+
+> A
+
+χ2(pA, p ) (190) = X
+
+> j
+
+EA[pa(j)2] − p(j)2
+
+p(j) (191) = X
+
+> j
+
+2nwj (E
+
+> A
+
+[Tr [ψAφj ]2] − 1/22n) . (192) Recognize that the final line above is, up to a prefactor, the sum of the variances of Tr [ψAφj ]. We next bound the second moment. We claim that 
+
+E
+
+> A
+
+[Tr [ψAφ]2] ≤ 322n , (193) for all unit vectors |φ⟩ = P 
+
+> x
+
+αx |x⟩. To see this, write qA(x) = x⊤Ax . Then, 
+
+E
+
+> A
+
+[Tr [ψAφ]2] = X
+
+> x,y,z,w
+
+αxαyαz αw E
+
+> A
+
+h
+
+(−1) qA(x)+ qA(y)+ qA(z)+ qA(w)i
+
+. (194) The expectation over A is zero unless 
+
+q(x) + q(y) + q(z) + q(w) = 0 for every polynomial q spanned by the monomials xi and xixj for i < j . This condition forces the four points x, y, z, w to be paired: 
+
+x = y, z = w, x = z, y = w, x = w, y = z. 
+
+Indeed, the linear monomials first imply x + y + z + w = 0. Writing z = x + a and w = y + a,the quadratic monomials imply ai(xj + yj ) + aj (xi + yi) = 0 for every i < j , which forces either 56 a = 0 or x = y. These are exactly the three pairing patterns above. Therefore the fourth moment is bounded by the contribution of the three pairings: 
+
+E
+
+> A
+
+[|⟨ φ|ψA⟩| 4] ≤ 3
+
+d2
+
+X
+
+> x
+
+|φx|2
+
+!2
+
+= 3
+
+d2 .
+
+Consequently, 
+
+E
+
+> A
+
+[pA(j)2] = w2 
+
+> j
+
+E
+
+> A
+
+[|⟨ φj |ψA⟩| 4] ≤ 3w2
+
+> j
+
+d2 .
+
+Substituting into the information bound gives 
+
+I(A; Y ) ≤ X
+
+> j
+
+3w2 
+
+> j
+
+/d 2
+
+wj /d = 3
+
+d
+
+X
+
+> j
+
+wj .
+
+Since P 
+
+> j
+
+Ej = I, we have P 
+
+> j
+
+wj = Tr (I) = d. Hence I(A; Y ) ≤ 3, proving the lemma. 
+
+Theorem 6.6. A non-adaptive learner that identifies an unknown state from the ensemble {| ψA⟩} 
+
+with probability ≥ 2/3, using at most k qubits of coherent quantum memory, requires Ω n2/k  copies. Proof. Let ˆA be a final estimate of A from the learning protocol (which can be obtained from the estimate of |ψA⟩). If the learner succeeds with probability at least 2 /3, it also succeeds on identifying A with the same probability. Hence, Fano’s inequality implies that 
+
+I(A; ˆA) ≥ H(A) − 1 − 13 H(A) = Ω( n2) . (195) Suppose a learner uses t copies. Let ⃗x be the classical transcript of observations during the protocol and ηi the state of the k-qubit memory retained after the i-th round. Since the protocol is non-adaptive, outcomes in different rounds depend on each other only through the memory. That is, given ηi−1 and x<i , xi depends only upon ηi−1. Then, the POVM performed in round i is some measurement upon ψA ⊗ηi−1 and, by Lemma 6.5 reveals at most 3 bits of information. We have that 
+
+H(⃗x|A) = 
+
+> t
+
+X
+
+> i=1
+
+H(xi|x<i , A ) (196) =
+
+> t
+
+X
+
+> i=1
+
+H(xi|ηi−1, A ) − I(xi; ηi|A) ≥ − tk +
+
+> t
+
+X
+
+> i=1
+
+H(xi|A) , (197) where we have used that the mutual information between the classical and quantum random vari-ables xi and ηi is, conditioned upon A, at most the size of the system ηi, which is k-qubits. Finally, 
+
+I(A; ˆA) = H(⃗x) − H(⃗x|A) (198) 
+
+≤ H(⃗x) + tk −
+
+> t
+
+X
+
+> i=1
+
+H(xi|A) (199) = tk +
+
+> t
+
+X
+
+> i=1
+
+I(xi|A) (200) 
+
+≤ (k + 3) t , (201) where the final line follows from Lemma 6.5 and the protocol being non-adaptive. Combining the upper and lower bounds on I(A; ˆA) gives ( k + 3) t = Ω( n2), proving the theorem. 57 References 
+
+[ABDY23] Srinivasan Arunachalam, Sergey Bravyi, Arkopal Dutt, and Theodore J. Yoder. Opti-mal Algorithms for Learning Quantum Phase States. In 18th Conference on the Theory of Quantum Computation, Communication and Cryptography (TQC 2023) , volume 266 of Leibniz International Proceedings in Informatics (LIPIcs) , pages 3:1–3:24, 2023. 5 [ACQ22] Dorit Aharonov, Jordan Cotler, and Xiao-Liang Qi. Quantum algorithmic measure-ment. Nature communications , 13(1):887, 2022. 3 [AD25] Srinivasan Arunachalam and Arkopal Dutt. Polynomial-time tolerant testing stabilizer states. In Proceedings of the 57th Annual ACM Symposium on Theory of Computing ,STOC ’25, page 1234–1241. Association for Computing Machinery, 2025. 3, 11 [AG09] Scott Aaronson and Daniel Gottesman. Identifying stabilizer states, 2009. https: //pirsa.org/08080052 . 3, 5 [AHS23] Srinivasan Arunachalam, Vojtech Havlicek, and Louis Schatzki. On the role of entan-glement and statistics in learning. Advances in Neural Information Processing Systems ,36:55064–55076, 2023. 3 [AS25] Srinivasan Arunachalam and Louis Schatzki. Generalized inner product estimation with limited quantum communication. In 42nd International Symposium on Theoreti-cal Aspects of Computer Science (STACS 2025) , pages 11–1. Schloss Dagstuhl–Leibniz-Zentrum f¨ ur Informatik, 2025. 3 [BCL20] Sebastien Bubeck, Sitan Chen, and Jerry Li. Entanglement is necessary for optimal quantum property testing. In 2020 IEEE 61st Annual Symposium on Foundations of Computer Science (FOCS) , pages 692–703. IEEE, 2020. 3, 8 [BCS +25] Jacob Beckey, Luke Coffman, Ariel Shlosberg, Louis Schatzki, and Felix Leditzky. Product testing with single-copy measurements. arXiv preprint arXiv:2510.07820 ,2025. 3 [BEL +25] Lennart Bittel, Jens Eisert, Lorenzo Leone, Antonio A Mele, and Salvatore FE Oliviero. A complete theory of the clifford commutant. arXiv preprint arXiv:2504.12263 , 2025. 16 [BGTW25] Adam Bouland, Tudor Giurgic˘ a-Tiron, and John Wright. The state hidden subgroup problem and an efficient algorithm for locating unentanglement. In Proceedings of the 57th Annual ACM Symposium on Theory of Computing , pages 463–470, 2025. 6 [BMEL25] Lennart Bittel, Antonio Anna Mele, Jens Eisert, and Lorenzo Leone. Optimal trace-distance bounds for free-fermionic states: Testing and improved tomography. PRX Quantum , 6(3):030341, 2025. 12 [BvDH24] Zongbo Bao, Philippe van Dordrecht, and Jonas Helsen. Tolerant testing of stabilizer states with a polynomial gap via a generalized uncertainty relation. arXiv:2410.21811 ,2024. 11 [Car24] Matthias C Caro. Learning quantum processes and hamiltonians via the pauli transfer matrix. ACM Transactions on Quantum Computing , 5(2):1–53, 2024. 3 58 [CCHL22] Sitan Chen, Jordan Cotler, Hsin-Yuan Huang, and Jerry Li. Exponential separations between learning with and without quantum memory. In 2021 IEEE 62nd Annual Symposium on Foundations of Computer Science (FOCS) , pages 574–585. IEEE, 2022. 3, 6, 8, 21, 37 [CDP09] Giulio Chiribella, Giacomo Mauro D’Ariano, and Paolo Perinotti. Theoretical frame-work for quantum networks. Physical Review A—Atomic, Molecular, and Optical Physics , 80(2):022339, 2009. 22 [CG25] Sitan Chen and Weiyuan Gong. Efficient pauli channel estimation with logarithmic quantum memory. PRX Quantum , 6(2):020323, 2025. 3 [CGY24] Sitan Chen, Weiyuan Gong, and Qi Ye. Optimal tradeoffs for estimating Pauli observ-ables. In 2024 IEEE 65th Annual Symposium on Foundations of Computer Science (FOCS) , pages 1086–1105, 2024. 3, 6, 8, 37, 39 [CGYZ25] Sitan Chen, Weiyuan Gong, Qi Ye, and Zhihan Zhang. Stabilizer bootstrapping: A recipe for efficient agnostic tomography and magic estimation. In Proceedings of the 57th Annual ACM Symposium on Theory of Computing , STOC’25, page 429–438. Association for Computing Machinery, 2025. 3 [CLHL22] Sitan Chen, Jerry Li, Brice Huang, and Allen Liu. Tight bounds for quantum state certification with incoherent measurements. In 2022 IEEE 63rd Annual Symposium on Foundations of Computer Science (FOCS) , pages 1205–1213. IEEE, 2022. 3 [CLL24a] Sitan Chen, Jerry Li, and Allen Liu. An optimal tradeoff between entanglement and copy complexity for state tomography. In Proceedings of the 56th Annual ACM Sym-posium on Theory of Computing , pages 1331–1342, 2024. 3 [CLL24b] Nai-Hui Chia, Ching-Yi Lai, and Han-Hsuan Lin. Efficient learning of t-doped stabilizer states with single-copy measurements. Quantum , 8:1250, 2024. 5 [COZ +24] Senrui Chen, Changhun Oh, Sisi Zhou, Hsin-Yuan Huang, and Liang Jiang. Tight bounds on pauli channel learning without entanglement. Physical Review Letters ,132(18):180805, 2024. 3 [CVD10] Andrew M Childs and Wim Van Dam. Quantum algorithms for algebraic problems. 
+
+Reviews of Modern Physics , 82(1):1–52, 2010. 7, 25 [CZSJ22] Senrui Chen, Sisi Zhou, Alireza Seif, and Liang Jiang. Quantum advantages for pauli channel estimation. Physical Review A , 105(3):032435, 2022. 3 [EH00] Mark Ettinger and Peter Høyer. On quantum algorithms for noncommutative hidden subgroups. Advances in Applied Mathematics , 25(3):239–251, 2000. 25 [GHYZ24] Weiyuan Gong, Jonas Haferkamp, Qi Ye, and Zhihan Zhang. On the sample complexity of purity and inner product estimation. arXiv preprint arXiv:2410.12712 , 2024. 3, 6 [GIKL23] Sabee Grewal, Vishnu Iyer, William Kretschmer, and Daniel Liang. Low-Stabilizer-Complexity Quantum States Are Not Pseudorandom. In 14th Innovations in Theoret-ical Computer Science Conference (ITCS 2023) , Leibniz International Proceedings in Informatics (LIPIcs), pages 64:1–64:20. Schloss Dagstuhl – Leibniz-Zentrum f¨ ur Infor-matik, 2023. 3 59 [GIKL24] Sabee Grewal, Vishnu Iyer, William Kretschmer, and Daniel Liang. Improved Stabi-lizer Estimation via Bell Difference Sampling. In Proceedings of the 56th Annual ACM Symposium on Theory of Computing , STOC 2024, page 1352–1363. Association for Computing Machinery, 2024. 15 [GIKL25] Sabee Grewal, Vishnu Iyer, William Kretschmer, and Daniel Liang. Efficient learning of quantum states prepared with few non-clifford gates. Quantum , 9:1907, 2025. 5, 16 [GIKL26] Sabee Grewal, Vishnu Iyer, William Kretschmer, and Daniel Liang. Agnostic tomog-raphy of stabilizer product states. Quantum , 10:2027, 2026. 3 [GJMM26] Alexandru Gheorghiu, Dale Jacobs, Saeed Mehraban, and Arsalan Motamedi. Quan-tum state isomorphism problems for groups. arXiv preprint arXiv:2605.12615 , 2026. 6[GNW21] David Gross, Sepehr Nezami, and Michael Walter. Schur–Weyl duality for the Clifford group with applications: Property testing, a robust Hudson theorem, and de Finetti representations. Communications in Mathematical Physics , 385(3):1325–1393, 2021. 1, 3, 4, 8, 15, 16, 17 [GW07] Gus Gutoski and John Watrous. Toward a general theory of quantum games. In 
+
+Proceedings of the thirty-ninth annual ACM symposium on Theory of computing , pages 565–574, 2007. 22 [Har13] Aram W Harrow. The church of the symmetric subspace. arXiv preprint arXiv:1308.6595 , 2013. 10, 63, 65 [Har23] Aram W Harrow. Approximate orthogonality of permutation operators, with appli-cation to quantum information. Letters in Mathematical Physics , 114(1):1, 2023. 10, 63 [HBC +22] Hsin-Yuan Huang, Michael Broughton, Jordan Cotler, Sitan Chen, Jerry Li, Masoud Mohseni, Hartmut Neven, Ryan Babbush, Richard Kueng, John Preskill, et al. Quan-tum advantage in learning from experiments. Science , 376(6598):1182–1186, 2022. 3 [HBvD +26] Marcel Hinsche, Zongbo Bao, Philippe van Dordrecht, Jens Eisert, Jop Bri¨ et, and Jonas Helsen. Clifford testing: Algorithms and lower bounds. In Proceedings of the 58th Annual ACM Symposium on Theory of Computing , pages 869–873, 2026. 3 [HEC26] Marcel Hinsche, Jens Eisert, and Jose Carrasco. Abelian state hidden subgroup prob-lem: Learning stabilizer groups and beyond. PRX Quantum , 7(2):020337, 2026. 6 [HG24] Dominik Hangleiter and Michael J Gullans. Bell sampling from quantum circuits. 
+
+Physical Review Letters , 133(2):020601, 2024. 3 [HH25] Marcel Hinsche and Jonas Helsen. Single-copy stabilizer testing. In Proceedings of the 57th Annual ACM Symposium on Theory of Computing , pages 439–450, 2025. 3, 4, 5, 8, 38, 42 [HLK24] Tobias Haug, Soovin Lee, and Myung-Shik Kim. Efficient quantum algorithms for stabilizer entropies. Physical Review Letters , 132(24):240602, 2024. 3 60 [KG15] Richard Kueng and David Gross. Qubit stabilizer states are complex projective 3-designs. arXiv preprint arXiv:1510.02767 , 2015. 14 [KGKB25] Robbie King, David Gosset, Robin Kothari, and Ryan Babbush. Triply efficient shadow tomography. PRX Quantum , 6:010336, Feb 2025. 3 [Kup05] Greg Kuperberg. A subexponential-time quantum algorithm for the dihedral hidden subgroup problem. SIAM Journal on Computing , 35(1):170–188, 2005. 7, 25 [KW05] Dennis Kretschmann and Reinhard F Werner. Quantum channels with memory. Phys-ical Review A—Atomic, Molecular, and Optical Physics , 72(6):062323, 2005. 22 [LA24] Yuhan Liu and Jayadev Acharya. The role of randomness in quantum state certifica-tion with unentangled measurements. In The Thirty Seventh Annual Conference on Learning Theory , pages 3523–3555. PMLR, 2024. 3 [LN25] Angus Lowe and Ashwin Nayak. Lower bounds for learning quantum states with single-copy measurements. ACM Transactions on Computation Theory , 17(1):1–42, 2025. 3 [LOH22] Lorenzo Leone, Salvatore FE Oliviero, and Alioscia Hamma. Stabilizer r´ enyi entropy. 
+
+Physical Review Letters , 128(5):050402, 2022. 3 [LOH24] Lorenzo Leone, Salvatore FE Oliviero, and Alioscia Hamma. Learning t-doped stabi-lizer states. Quantum , 8:1361, 2024. 3 [LOLH24] Lorenzo Leone, Salvatore FE Oliviero, Seth Lloyd, and Alioscia Hamma. Learning effi-cient decoders for quasichaotic quantum scramblers. Physical Review A , 109(2):022429, 2024. 3 [Lom04] Chris Lomont. The hidden subgroup problem-review and open problems. arXiv preprint quant-ph/0411037 , 2004. 25 [LRZ23] Qipeng Liu, Ran Raz, and Wei Zhan. Memory-sample lower bounds for learning with classical-quantum hybrid memory. In Proceedings of the 55th Annual ACM Symposium on Theory of Computing , pages 1097–1110, 2023. 3 [Mel26] Antonio Anna Mele. Quantum learning in bosonic and fermionic systems. 2026. 12 [MH25] Antonio Anna Mele and Yaroslav Herasymenko. Efficient learning of quantum states prepared with few fermionic non-gaussian gates. PRX Quantum , 6(1):010319, 2025. 12 [Mon17] Ashley Montanaro. Learning stabilizer states by Bell sampling. arXiv:1707.04012 ,2017. 3, 5, 17 [MT25] Saeed Mehraban and Mehrdad Tahmasbi. Improved bounds for testing low stabilizer complexity states. In Proceedings of the 57th Annual ACM Symposium on Theory of Computing , pages 1222–1233, 2025. 11 [Ouf23] Aadil Oufkir. Sample-optimal quantum process tomography with non-adaptive inco-herent measurements. In 2023 IEEE International Symposium on Information Theory (ISIT) , pages 1919–1924. IEEE, 2023. 3 61 [Reg04] Oded Regev. Quantum computation and lattice problems. SIAM Journal on Comput-ing , 33(3):738–760, 2004. 7, 25 [R¨ ot10] Martin R¨ otteler. Quantum algorithms for highly non-linear boolean functions. In 
+
+Proceedings of the twenty-first annual ACM-SIAM symposium on Discrete algorithms ,pages 448–457. SIAM, 2010. 7, 25 [Sim97] Daniel R Simon. On the power of quantum computation. SIAM journal on computing ,26(5):1474–1483, 1997. 7, 25 [VDHI06] Wim Van Dam, Sean Hallgren, and Lawrence Ip. Quantum algorithms for some hidden shift problems. SIAM Journal on Computing , 36(3):763–778, 2006. 7, 25 
+
+# A Total variational distance for measures 
+
+In our lower bound proof in section 5.4 we work with a sub-normalized measure PσP . Here we show that it is no issue to consider likelihood ratios with respect to this measure. Let (Σ , F) be a 
+
+σ-algebra. For measures μ and ν (which we take to be bounded for simplicity) on this space, we can define the total variational distance to be 
+
+dTV (μ, ν ) := sup 
+
+> E∈F
+
+|μ(E) − ν(E)| = 12
+
+Z
+
+> Σ
+
+dμ dλ − dν dλ dλ , (202) where dλ is some measure that dominates both μ and η and the integrand is over the corresponding Radon derivatives. Our proofs in section 5.4 required usage of the triangle inequality, which clearly still holds here. Further, the proof of Lemma 5.2 expanded the total variational distance as the sum of outcomes where one probability distribution has no less weight than the other. Here we will quickly show that we can still work with likelihood ratios even when the measures and not normalized. Assume that μ ≪ ν. Then, there exists a Radon derivative f := dμ/dν such that μ(E) = R 
+
+> E
+
+f dν for any measurable set E ∈ F .Let Σ + = {ω ∈ Σ : f ≥ 1} and Σ − := {ω ∈ Σ : f < 1}. Since μ ≪ ν, the total variation distance is 
+
+dTV (μ, η ) = 12
+
+Z
+
+> Σ
+
+|f − 1|dν (203) = 12
+
+Z
+
+> Σ+
+
+(f − 1) dν + 12
+
+Z
+
+> Σ−
+
+(1 − f )dν (204) =
+
+Z
+
+> Σ−
+
+(1 − f )dν + μ(Σ) − ν(Σ) . (205) Now say that E = {ω : f (ω) ≥ 1 − δ} is such that ν(Ec) ≤ 1 − β. We then have that E =Σ+ ⊔ (Σ − ∩ E). This allows us to bound the total variational distance as 
+
+dTV (μ, ν ) = μ(Σ) − ν(Σ) + 
+
+Z
+
+> Σ−∩E
+
+(1 − f )dν +
+
+Z
+
+> Ec
+
+(1 − f )dν (206) 
+
+≤ μ(Σ) − ν(Σ) + δν (Σ − ∩ E) + ν(Ec) (207) 
+
+≤ μ(Σ) − ν(Σ) + δν (Σ) + β . (208) In the case where ν is a probability distribution and μ is sub-normalized, this recovers an upper bound of δ + β.62 This is indeed the case in Section 5.4 where we consider ν = Pmm and μ = PσP . Hence, we can still appeal to Lemma 5.3 to upper bound dTV (Pmm , PσP ). 
+
+# B Purity Testing Lower Bound 
+
+To complete a rigorous proof of the lower bound in Theorem 1.1 we require that dTV (Pmm , PH )must be small, where PH is the distribution induced by measuring t copies of a Haar random state. Here we will show that it is difficult to distinguish a Haar random state from the maximally mixed state using nearly identical steps to our stabilizer testing lower bound. The two key ingre-dients of the stabilizer testing bound are the following: 1. Eψ[ψ⊗t] ≈ 2−nt P 
+
+> O∈G≤O t
+
+R(O). 2. We can count the number of O ∈ G such that rank( I + O) = r.Given these ingredients, we can apply the approach of Theorem 5.9. That is, Lemma 5.12 and Lemma 5.13 still apply and can be used to obtain an analogue of Lemma 5.8. The dependence on 
+
+t in the exponent will come from counting O ∈ G such that rank( I + O) = r. Then, we can apply recursion as was done in Theorem 5.9 to complete the proof. The first ingredient does indeed hold for Haar random states: 
+
+Fact B.1 ([Har13, Proposition 6]) . The ensemble average of t copies of a Haar random state is given by 
+
+ρH =
+
+P 
+
+> π∈St
+
+R(π)
+
+Qt−1
+
+> j=0
+
+(2 n + j) . (209) Note that R(π) here is exactly the same representation that appears for Ot (and more generally elements of the Clifford commutant). For permutations, this simplifies to permutations of the copies. Further, St ≤ O t.The second ingredient holds as well: 
+
+Lemma B.2. To π ∈ St associate a permutation matrix π ∈ Ft×t 
+
+> 2
+
+. The number of π ∈ St such that 
+
+rank( I + π) = r is no more than t2r.Proof. For permutations, rank( I + π) is exactly |π|, the transposition length of the permutation (the minimum number of transpositions to produce π), which is exactly the Cayley distance on St
+
+generated by transpositions. Then, there are  t
+
+> 2
+
+ transpositions and hence #{π ∈ St : |π| = r} ≤ 
+
+t
+
+2
+
+
+
+#{π ∈ St : |π| = r − 1} . (210) For r = 0, there is only the identity, hence recursion yields the bound    t
+
+> 2
+
+ r ≤ t2r.It is interesting to note that this quantity has previously appeared in proving lower bounds via PPT methods [Har23]. Now, we can use these properties to prove hardness of purity testing. 63 Theorem B.3. There is an absolute constant c > 0 such that if t2 < c 2n, then, for any protocol using k-qubits of memory and single-copy measurements, 
+
+E⃗x∼P mm 
+
+[|L(⃗x) − 1|] ≤ t2
+
+2n + 2 3/2−(n−k−15 log t)/2 . (211) 
+
+Consequently, t = 2 Ω( n−k) samples are required to distinguish between a Haar random state and the maximally mixed state. Proof. We will consider the likelihood ratios 
+
+L(⃗x) = 2nt 
+
+Qt−1
+
+> j=0
+
+(2 n + j)1
+
+Tr [E⃗x ]
+
+X
+
+> π∈St
+
+Tr [R(π)E⃗x ] (212) 
+
+≥
+
+
+
+1 − t
+
+2n
+
+t 1
+
+Tr [E⃗x ]
+
+X
+
+> π∈St
+
+Tr [R(π)E⃗x ] . (213) Then, the expected likelihood ratios satisfy 
+
+E⃗x∼P mm 
+
+[|L(⃗x − 1) |] ≤ 1 −
+
+
+
+1 − t
+
+2n
+
+t
+
++ 12nt 
+
+X⃗x
+
+X 
+
+> π∈St
+> π̸=I
+
+Tr [R(π)E⃗x ] (214) 
+
+≤ t2
+
+2n + 12nt 
+
+X⃗x
+
+X 
+
+> π∈St
+> π̸=I
+
+Tr [R(π)E⃗x ] . (215) Similar to the case of Ot, we will split St into St−1, identified with all permutations π such that 
+
+π(1) = 1, and Nt := St\St−1. By the same argument as in Section 5.4, it suffices to bound the bias from Nt and then recursively apply the same bound to all remaining terms. This results in Lemma B.7, which we now apply to obtain: 
+
+L(⃗x) ≤ t2
+
+2n + 12nt 
+
+X⃗x
+
+X 
+
+> π∈St−1
+> σ̸=I
+
+Tr [R(π)E⃗x ] + 2 3/2−(n−k−13 log t)/2 (216) 
+
+≤ t2
+
+2n + 2 3/2−(n−k)/2
+
+> t
+
+X
+
+> j=2
+
+213 /2 log j (217) 
+
+≤ t2
+
+2 + 2 3/2−(n−k−15 t)/2 . (218) To obtain Lemma B.7 we note that Lemma 5.12 and Lemma 5.13 still apply and we can use them again here. Lemma B.2 improves the counting argument for χ(π, σ ) as well, which will result in the claimed exponential lower bound. Let Bt := P 
+
+> O∈Nt
+
+R(O). The following analogue of Lemma 5.11 holds: 
+
+Lemma B.4. 1. π ∈ Nt if and only if π1∗ and π∗1 are non-zero. 
+
+64 2. B† 
+
+> t
+
+= Bt.3. |Nt| = ( t − 1) |St−1| = ( t − 1) 2(t − 2)! 
+
+4. Btσ = σB t = Bt for any σ ∈ St−1.Proof. (1) , (2) , (4) are immediate from Lemma 5.11. (3)is readily computed as |St| − | St−1|.Fixing an outcome x1 in the first round, we will again define 
+
+Bt,x 1 := ( Vx1 ⊗ I)Bt(Vx1 ⊗ I)† . (219) As in the proof of Lemma 5.8, it suffices to bound ∥Bt,x 1 ∥1, which we do via the same steps as Lemma 5.14. 
+
+Lemma B.5. Let t ≤ 2n−1, then for any V : H → M ,
+
+∥(V ⊗ I2: t)Bt(V ⊗ I2: t)†|22 ≤ | Nt|212 log t+2 2n(t−2) Tr [V †V ]2 . (220) 
+
+Proof. We have that 
+
+∥(V ⊗ I2: t)Bt(V ⊗ I2: t)†|22 = X
+
+> π,σ ∈Nt
+
+G(π, σ ) , (221) where G(π, σ ) = Tr [( V †V ⊗ I)R(π)( V †V ⊗ I)R(σ)]. We use Lemma 5.12 and Lemma 5.13 to obtain the bound 
+
+|G(π, σ )| ≤ Tr [V †V ]22n(t−2) min 
+
+n
+
+2n(t−2) , 2n(t+3 −χ(π,σ )) o
+
+. (222) For fixed π, we use Lemma B.2 to obtain 
+
+X
+
+> σ∈Nt
+
+|G(π, σ )| ≤ Tr [V †V ]2 2n(t−2) 5X
+
+> r=0
+
+t2r + 2 n(t+3) 
+
+> t
+
+X
+
+> r=6
+
+2r(2 log t−n)
+
+!
+
+. (223) By the assumption that t ≤ 2n−1, the second term can be upper bounded by 2 n(t+3) −6( n−2 log t)+1 .The first can be upper bounded with 2 n(t−2)+10 t+1 .
+
+Corollary B.6. Let t ≤ 2n−1. Then, for any V : H → M , it holds that 
+
+∥(V ⊗ I2: t)Bt(V ⊗ I2: t)∥1 ≤ 2nt −3n/ 2+ k/ 2+13 /2 log t+3 /2Tr [V †V ] . (224) 
+
+Proof. Let Pt := I1 ⊗ 1
+
+> t!
+
+P 
+
+> σ∈St−1
+
+R(σ). Then, Lemma B.4 implies that PtBtPt = Bt and hence rank Bt,x 1 ≤ 2k P 
+
+> σ∈St−1
+
+Tr [R(σ)] /(t − 1)!. The trace here is the dimension of the symmetric subspace t−1
+
+∨ C2n
+
+, which is  2n+t−2
+
+> t−1
+
+ [Har13]. We then use Lemma B.5 combined with ∥A∥1 ≤
+
+prank( A)∥A∥2 for arbitrary operators A. Note that 
+
+|Nt|
+
+2n + t − 2
+
+t − 1
+
+
+
+= (2 n + t − 2)!( t − 1) (2 n − 1)! (225) = ( t − 1)2 n(t−1) 
+
+> t−2
+
+Y
+
+> j=0
+
+1 + j
+
+2n (226) 
+
+≤ 2n(t−1)+log t (227) 
+
+≤ 2n(t−1)+log t+1 , (228) 65 where the final inequality follows from the assumption that t2 ≤ 2n−1 (really t2 ≤ 2n would suffice) and the general inequality 1 + x ≤ ex. Lemma B.5 then completes the proof. Now we can prove an analogue of Lemma 5.8 for Nt.
+
+Lemma B.7. Let t2 < cn 2 for an absolute constant c. Then, for any protocol using single-copy measurements and k qubits of memory, it holds that 
+
+12nt 
+
+X⃗x
+
+X
+
+> σ∈Nt
+
+Tr [R(σ)E⃗x ] ≤ 23/2−(n−k−13 log t)/2 . (229) 
+
+Proof. Fix an outcome x1 in the first round. We have that 12nt 
+
+X⃗x
+
+X
+
+> σ∈Nt
+
+Tr [R(σ)E⃗x ] = 12nt 
+
+X
+
+> x1
+
+X⃗x >1
+
+X
+
+> σ∈Nt
+
+Tr [R(σ)E⃗x ] (230) = 12nt 
+
+X
+
+> x1
+
+X⃗x >1
+
+Tr [Bt,x 1
+
+
+
+V⃗x >1
+
+> x1
+
+† 
+
+V⃗x >1
+
+> x1
+
+
+
+] (231) 
+
+≤ 12nt 
+
+X
+
+> x1
+
+∥Bt,x 1 ∥1 (232) 
+
+≤ 2−3n/ 2+ k/ 2+13 /2 log t+3 /2 X
+
+> x1
+
+Tr [V † 
+
+> x1
+
+Vx1 ] (233) = 2 3/2−(n−k−13 log t)/2 , (234) where the first inequality is Fact 5.10, the second is Corollary B.6, and the final equality is com-pleteness of the Vx1 ’s. Piecing this together with the recursive technique in the proof of lower bound of Theorem 1.1 proves the claimed lower bound. 66

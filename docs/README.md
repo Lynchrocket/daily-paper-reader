@@ -6,43 +6,34 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-07-09
-- 运行时间：2026-07-09 22:09:18 UTC
+- 最新运行日期：2026-07-10
+- 运行时间：2026-07-10 21:45:48 UTC
 - 运行状态：成功
-- 本次总论文数：7
-- 精读区：6
-- 速读区：1
+- 本次总论文数：4
+- 精读区：1
+- 速读区：3
 
 ### 今日简报（AI）
-1) 今日精读6篇、速读1篇，聚焦量子纠错与表面码的硬件协同设计。  
-2) 最值得关注10分论文的延迟约束神经解码方法，以及7分论文中环面码的多熵研究。  
-3) 建议优先精读那篇10分论文，探索其协同设计对实际量子计算的启发。
-- 详情：[/202607/09/README](/202607/09/README)
+今日聚焦4篇量子计算研究，精读评分9.0的《Parallel QEC Decoding Applied to Distributed Quantum Computing》揭示分布式纠错关键进展。
+最值得关注的方向：并行量子纠错解码如何提升分布式计算容错性，以及有限量子存储下的最优稳定子测试。
+建议普通读者优先精读分布式QEC论文，再速览自正交码与纠缠楔重建研究，把握量子纠错与编码前沿。
+- 详情：[/202607/10/README](/202607/10/README)
 
 ### 精读区论文标签
-1. [Latency-Constrained Hardware-Aware Quantum Error Correction Co-Design with Adaptive Confidence-Gated Neural Decoding for the Rotated Surface Code](/202607/09/2607.05814v1-latency-constrained-hardware-aware-quantum-error-correction-co-design-with-adaptive-confidence-gated-neural-decoding-for-the-rotated-surface-code)  
-   标签：评分：10.0/10、query:qec-decoding
-   evidence：为旋转表面码提出自适应神经解码框架
-2. [Latency-Constrained Hardware-Aware Quantum Error Correction Co-Design with Adaptive Confidence-Gated Neural Decoding for the Rotated Surface Code](/202607/09/2607.05814v2-latency-constrained-hardware-aware-quantum-error-correction-co-design-with-adaptive-confidence-gated-neural-decoding-for-the-rotated-surface-code)  
-   标签：评分：10.0/10、query:qec-decoding
-   evidence：表面码解码，自适应置信门控神经解码
-3. [A Cross-Platform Analysis of High-Performance Quantum Error Correction Codes](/202607/09/2607.04082v1-a-cross-platform-analysis-of-high-performance-quantum-error-correction-codes)  
-   标签：评分：9.0/10、query:qec-code
-   evidence：提供先进量子纠错码跨平台的逻辑错误率解析估计
-4. [Towards Lattice Surgery Compilation for the Color Code Using Pipe Diagrams](/202607/09/2607.05501v1-towards-lattice-surgery-compilation-for-the-color-code-using-pipe-diagrams)  
-   标签：评分：9.0/10、query:qec-code
-   evidence：使用管道图进行颜色码的格子手术编译
-5. [Using Tanner Spectral Reduction to Improve Multi-Layer Optical Lattice Routing for Hypergraph-Product and Bivariate Bicycle qLDPC Codes](/202607/09/2607.06177v1-using-tanner-spectral-reduction-to-improve-multi-layer-optical-lattice-routing-for-hypergraph-product-and-bivariate-bicycle-qldpc-codes)  
-   标签：评分：9.0/10、query:qec-code
-   evidence：直接研究qLDPC码的Tanner图谱及其路由优化
-6. [Low-Overhead Error-Corrected QCNNs Using Bivariate Bicycle Codes](/202607/09/2607.05724v1-low-overhead-error-corrected-qcnns-using-bivariate-bicycle-codes)  
-   标签：评分：8.0/10、query:qec-code
-   evidence：双变量自行车码作为量子LDPC码用于QCNN纠错
+1. [Parallel QEC Decoding Applied to Distributed Quantum Computing](/202607/10/2607.08386v1-parallel-qec-decoding-applied-to-distributed-quantum-computing)  
+   标签：评分：9.0/10、query:qec-decoding
+   evidence：提出一种基于置信传播和有序统计解码的并行QEC解码方法，应用于分布式量子计算
 
 ### 速读区论文标签
-1. [Genuine Multi-Entropy in the Toric Code](/202607/09/2607.06050v1-genuine-multi-entropy-in-the-toric-code)  
+1. [Optimal Stabilizer Testing and Learning with Limited Quantum Memory](/202607/10/2607.02444v1-optimal-stabilizer-testing-and-learning-with-limited-quantum-memory)  
    标签：评分：7.0/10、query:qec-code
-   evidence：研究拓扑码——环面码中的真正多熵
+   evidence：有限量子记忆下的稳定子态测试与学习
+2. [Four classes of few-weight self-orthogonal codes and their applications for LCD codes and quantum codes](/202607/10/2607.07181v1-four-classes-of-few-weight-self-orthogonal-codes-and-their-applications-for-lcd-codes-and-quantum-codes)  
+   标签：评分：6.0/10、query:qec-code
+   evidence：自正交码用于量子码
+3. [Entanglement Wedge Reconstruction without Holographic Quantum Error Correction](/202607/10/2607.08684v1-entanglement-wedge-reconstruction-without-holographic-quantum-error-correction)  
+   标签：评分：6.0/10、query:qec-code
+   evidence：涉及全息量子纠错与HaPPY稳定子码
 
 
 <div class="dpr-home-promo-card">

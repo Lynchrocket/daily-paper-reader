@@ -1,6 +1,9 @@
 * <a class="dpr-sidebar-root-link" href="#/">首页</a>
 * <a class="dpr-sidebar-root-link dpr-sidebar-noactive-link" href="javascript:void(0)" data-dpr-hash="#/tutorial/README">使用教程</a>
 * Daily Papers
+  * 2026-07-13 <!--dpr-date:20260713-->
+    * 精读区
+      * <a class="dpr-sidebar-item-link dpr-sidebar-item-structured" href="#/202607/13/2607.08911v1-a-diagrammatic-field-theory-of-quantum-error-correction" data-sidebar-item="{&quot;title&quot;: &quot;A diagrammatic field theory of quantum error correction&quot;, &quot;link&quot;: &quot;https://arxiv.org/abs/2607.08911v1-a-diagrammatic-field-theory-of-quantum-error-correction&quot;, &quot;score&quot;: &quot;8.0&quot;, &quot;tags&quot;: [{&quot;kind&quot;: &quot;query&quot;, &quot;label&quot;: &quot;qec-code&quot;}], &quot;evidence&quot;: &quot;量子纠错的图解场论、融合空间码&quot;}">A diagrammatic field theory of quantum error correction</a>
   * 2026-07-10 <!--dpr-date:20260710-->
     * 精读区
       * <a class="dpr-sidebar-item-link dpr-sidebar-item-structured" href="#/202607/10/2607.08386v1-parallel-qec-decoding-applied-to-distributed-quantum-computing" data-sidebar-item="{&quot;title&quot;: &quot;Parallel QEC Decoding Applied to Distributed Quantum Computing&quot;, &quot;link&quot;: &quot;https://arxiv.org/abs/2607.08386v1-parallel-qec-decoding-applied-to-distributed-quantum-computing&quot;, &quot;score&quot;: &quot;9.0&quot;, &quot;tags&quot;: [{&quot;kind&quot;: &quot;query&quot;, &quot;label&quot;: &quot;qec-decoding&quot;}], &quot;evidence&quot;: &quot;提出一种基于置信传播和有序统计解码的并行QEC解码方法，应用于分布式量子计算&quot;}">Parallel QEC Decoding Applied to Distributed Quantum Computing</a>

@@ -1,0 +1,1743 @@
+Title: Spectral and Additive Combinatorial Methods for Cycles and Absorbing Sets in Lifted-Product Quantum LDPC Codes
+
+URL Source: https://arxiv.org/pdf/2607.13666v1
+
+Published Time: Thu, 16 Jul 2026 01:14:52 GMT
+
+Number of Pages: 32
+
+Markdown Content:
+# Spectral and Additive Combinatorial Methods for Cycles and Absorbing Sets in Lifted-Product Quantum LDPC Codes 
+
+## Aida Abiad ∗ Nichola Castriota †
+
+Abstract 
+
+The finite-length performance of quantum low-density parity-check (LDPC) codes under iterative decoding is governed by small substructures of the Tanner graph, principally short cycles and absorbing sets. While the classical theory of these sub-structures for quasi-cyclic codes is well developed through discrete Fourier transform (DFT) methods, these tools do not directly address the two-block tensor structure 
+
+HX = [ eH1 | I ⊗ eBT ] of the lifted-product (quasi-cyclic generalised hypergraph product, QC-GHP) codes that dominate current quantum LDPC constructions. In this paper we develop a quantum-specific spectral framework that exploits this structure. At its core is a DFT block-diagonalisation of HX HTX that reduces moment-trace and cycle computations from an ( r1ℓ) × (r1ℓ) matrix to a sum of ℓ
+
+small r1 × r1 Hermitian matrices, with the second block entering only as a scalar shift. From this result we derive a closed-form 4-cycle count for generalised bicycle codes via additive energies, a joint Sidon characterisation of girth 6 in the spirit of Fossorier’s classical criterion, a Fourier expression for the number of (3 , 3) elemen-tary absorbing sets in column-weight-3 codes via the Wang–Dolecek–Wesel triangle bijection, and a lower bound on stopping-set sizes using the expander mixing lemma. 
+
+Keywords: quantum LDPC codes, CSS codes, lifted product codes, generalised bi-cycle codes, Tanner graph, absorbing sets, stopping sets, discrete Fourier transform, additive energy, Sidon sets, expander mixing lemma 
+
+# 1 Introduction 
+
+Error-correcting codes underlie every modern communication and storage system, from cellular networks to deep-space links to the read channels in solid-state drives. In the 
+
+> ∗
+
+a.abiad.monge@tue.nl , Department of Mathematics and Computer Science, Eindhoven University of Technology, The Netherlands; Department of Mathematics and Data Science of Vrije Universiteit Brussel, Belgium 
+
+> †
+
+Nichola.Castriota@UGent.be , Department of Mathematics: Analysis, Logic and Discrete Mathe-matics, Ghent University, Belgium 
+
+1arXiv:2607.13666v1 [math.CO] 15 Jul 2026 quantum setting they play an even more fundamental role: physical qubits lose their state on microsecond timescales, so any scalable architecture must encode its information into a quantum error-correcting code able to detect and repair faults faster than they accumulate. Low-density parity-check (LDPC) codes , introduced by Gallager [20] for the classical setting and later studied in the quantum setting, beginning with the sparse-graph constructions of MacKay, Mitchison, and McFadden [32] and notably through the generalised-bicycle construction of Kovalev and Pryadko [29], are among the leading candi-date families for both regimes because they admit fast iterative decoders whose complexity grows only linearly with the block length. In practice, at the realistic block lengths used in hardware, the iterative decoder of an LDPC code does not meet the asymptotic guarantees promised by coding theory: its failure probability eventually flattens out as the noise decreases, and the configurations responsible for this error floor are small recurring patterns in the bipartite Tanner graph 
+
+associated to the code’s parity-check matrix [41, 15]. Two such patterns have repeatedly been singled out. Short cycles disrupt the independence assumptions on which iterative decoding rests and cause the decoder to oscillate, and absorbing sets are small vertex con-figurations where erroneous messages reinforce one another and become locally stable; the latter have been recognised as the dominant failure mechanism of iterative decoders across a wide range of channels [15, 33]. Morris, Pllaha, and Kelley [34] have recently shown that absorbing sets also drive decoder failure in Calderbank–Shor–Steane (CSS) quantum LDPC codes, so the same two graphical patterns govern the finite-length performance of classical and quantum LDPC codes alike. Controlling these patterns turns the engineering question of code design into a com-binatorial problem: how many few short cycles can a sparse Tanner graph have, and how small can its absorbing sets be? On the classical side, a considerable amount of work tackles this question through the spectrum of the parity-check matrix. For quasi-cyclic (QC) LDPC codes built from a cyclic lift, the discrete Fourier transform (DFT) block-diagonalises the relevant matrices and reduces cycle counts to small eigenvalue com-putations: this is the eigenvalue reduction of Smarandache and Flanagan [43] and the directed-edge-matrix recipe of Karimi and Banihashemi [27], while Fossorier [19] charac-terised the girth of QC codes built from circulant permutation matrices through exponent-difference conditions and Wang, Dolecek, and Wesel [48] gave a bijection between the smallest absorbing sets of column-weight-3 codes and triangles in an associated graph. On the quantum side, by contrast, cycle and absorbing-set counts of concrete code fam-ilies have so far been obtained largely by direct enumeration [38] rather than through structural spectral tools, and the absorbing-set theory of CSS codes is only beginning to be developed [34]. A main obstacle is that the leading quantum LDPC constructions, the lifted-product (and quasi-cyclic generalised hypergraph product, QC-GHP) codes of Panteleev and Kalachev [38], have an X-check matrix of the two-block tensor form 
+
+HX = [ eH1 | I ⊗ eBT ], which the single-block classical DFT machinery does not directly address. In this work we address this gap by developing a quantum-specific spectral framework that exploits the two-block tensor form rather than working around it (Theorem 4.1). The 2main tool is a DFT block-diagonalisation of HX HTX that captures the contribution of the second block as a scalar shift, reducing moment-trace and cycle computations on an ( r1ℓ)×
+
+(r1ℓ) ambient matrix to a sum of ℓ small r1 × r1 Hermitian matrices. As a consequence of the proposed spectral framework, we obtain, for generalised bicycle (GB) codes, a closed-form count of 4-cycles in terms of the additive energies of the support sets of the defining polynomials (Proposition 4.9) together with a joint Sidon-type characterisation of girth 6 (Corollary 4.11) that parallels, in the single-circulant setting, Fossorier’s classical exponent-difference criterion [19]; through the triangle bijection of Wang, Dolecek, and Wesel [48], we derive a Fourier expression for the number of (3 , 3) elementary absorbing sets in column-weight-3 QC-GHP codes (Proposition 4.17), addressing an enumeration question raised by the absorbing-set framework of Morris, Pllaha, and Kelley [34]; and, applying the bipartite expander mixing lemma through the second-largest singular value of HX obtained from the same Fourier matrices, we show a spectral lower bound on the stopping distance of a QC-GHP code (Proposition 5.1). All of these expressions are computable in closed form from the polynomial data of the lifted-product construction, and together they specialise and unify the classical single-block spectral methods of [43, 27, 19, 48] to the quantum two-block setting. 
+
+# 2 Preliminaries 
+
+This section the needed graph-theoretic, coding-theoretic, quantum, and spectral back-ground used throughout the paper. 
+
+## 2.1 Graph theory background 
+
+All graphs are finite and simple. For a graph G = ( V, E ) with vertex set V and edge set E, we write N (v) = {u : {u, v } ∈ E} for the neighbourhood of a vertex, deg( v) = 
+
+dv = |N (v)| for its degree, and N (S) = S 
+
+> v∈S
+
+N (v). For S ⊆ V , the induced subgraph on S is G[S] = GS ; when D is the vertex set of a substructure such as an absorbing set (Definition 2.8) we abbreviate G[D] by GD. The girth g(G) is the length of a shortest cycle (with g(G) = ∞ if G is acyclic). A graph is d-regular if every vertex has degree d; a bipartite graph G = ( VL, V R, E ), in which every edge joins VL to VR, is ( dL, d R)-biregular 
+
+if all left vertices have degree dL and all right vertices degree dR. A bipartite graph has no odd cycle, so its girth, if finite, is an even integer at least 4. We refer to [6] for standard graph-theoretic background. 
+
+Definition 2.1 (Adjacency and biadjacency matrices) . Let G be a graph with vertex set V = {v1, . . . , v n}. The adjacency matrix of G is the n × n symmetric 0-1 matrix 
+
+AG defined by ( AG)ij = 1 iff {vi, v j } ∈ E. For a bipartite graph G = ( VL, V R, E ) with 
+
+|VL| = m, |VR| = n, the biadjacency matrix H ∈ { 0, 1}m×n has Hij = 1 iff the i-th left vertex is adjacent to the j-th right vertex. The full adjacency matrix is then the block matrix 
+
+AG =
+
+ 0 HHT 0
+
+
+
+.
+
+3Theorem 2.1 (Walk counts via matrix powers, [6]) . For any graph G with adjacency matrix AG and any integer k ≥ 0, the entry (AkG)uv counts walks of length k from vertex 
+
+u to vertex v in G. Consequently, 
+
+tr( AkG) = # {closed walks of length k in G}.
+
+The bipartite specialisation of Theorem 2.1 through the biadjacency matrix is stated as Lemma 2.2. 
+
+## 2.2 Coding theory background 
+
+Let F2 = {0, 1}. For x ∈ Fn 
+
+> 2
+
+, the support is supp( x) = {i : xi = 1 } and the Hamming weight is wt( x) = |supp( x)|. A (binary) linear code C ⊆ Fn 
+
+> 2
+
+of dimension k (parameters [n, k ], rate k/n ) is the kernel {x ∈ Fn 
+
+> 2
+
+: Hx = 0 } of a parity-check matrix H ∈ Fm×n 
+
+> 2
+
+(with 
+
+m ≥ n − k); its minimum distance d = min {wt( x) : x ∈ C , x ̸ = 0 } equals the smallest size of a nonzero codeword support, and we write the parameters as [ n, k, d ]. The definition extends verbatim over any finite field Fq; all codes here are binary (in the quantum case via the symplectic representation of Pauli operators, see §2.3.1). 
+
+Definition 2.2 (LDPC code) . A low-density parity-check (LDPC) code is a linear code that admits a sparse parity-check matrix H, meaning each row and each column of H
+
+has a small (constant or slowly-growing) number of nonzero entries relative to the block length n.A parity-check matrix has column weight γ (resp. row weight k) if every column (resp. row) contains exactly γ (resp. k) ones; the code is then ( γ, k )-regular . Sparsity is asymptotic and has no sharp threshold at finite block length. 
+
+Definition 2.3 (Tanner graph, [46]) . Given a parity check matrix H of a linear code C,its bipartite Tanner graph representation is the graph G = ( V, W ; E) where the vertex sets V and W correspond to the codeword coordinates and the parity check equations, and are called variable and check nodes, respectively. E is the set of edges. For vi ∈ V
+
+and cj ∈ W , the edge ( vi, c j ) ∈ E if and only if hj,i = 1 in H.A code does not have a unique Tanner graph, as G depends on the choice of parity-check matrix. Being bipartite, G has even girth ( ≥ 4) whenever finite. A code’s parameters are reflected in G: n = |V |, m = |W | ≥ n − k (with equality when the rows of H are independent), and d equals the smallest size of a nonempty set S ⊆ V such that every check in N (S) has even degree in G[S ∪ N (S)]. 
+
+2.2.1 Critical substructures: stopping, trapping, and absorbing sets 
+
+Throughout this subsection, G = ( V, W ; E) is the Tanner graph of a binary linear code 
+
+C with parity-check matrix H, and degrees are taken in G. All definitions are purely graph-theoretic and extend verbatim to non-binary linear codes. 4Definition 2.4 (Stopping set, [12]) . A stopping set S in a Tanner graph G = ( V, W ; E)is a subset S ⊆ V of variable nodes such that every check node in the neighborhood N (S)is connected to S by at least two edges. Equivalently, the subgraph induced by S ∪ N (S)contains no check node of degree one. On the binary erasure channel, iterative decoding fails to recover the codeword iff the set of erased positions contains a stopping set [12, 42]; the stopping distance is the size of the smallest non-empty stopping set. See Figure 1(a). 
+
+Definition 2.5 (( a, b )-trapping set, [41]) . An ( a, b )-trapping set T in a Tanner graph G
+
+is a subset of a variable nodes whose induced subgraph GT contains exactly b odd-degree check nodes. Figure 1(b) shows a (2 , 2)-trapping set T = {v1, v 2} with its two odd-degree checks drawn in red. 
+
+Definition 2.6 (Elementary, leafless, and non-elementary trapping sets, [10]) . A trapping set is called elementary (ETS) if every check node in its induced subgraph has degree one or two. An elementary trapping set is leafless (LETS) if, additionally, every variable node is adjacent to at least two degree-two (satisfied) check nodes. An ETS that is not leafless is called an ETS with leaf (ETSL). A trapping set that is not elementary is called a non-elementary trapping set (NETS). A related global construction is the variable-node graph , attached to the Tanner graph itself rather than to one of its substructures. 
+
+Definition 2.7 (Variable-node graph) . The variable-node graph of a Tanner graph G =(V, W ; E), denoted GV N , is the simple graph on the variable set V in which u, v ∈ V are adjacent iff there exists a check c ∈ W with {u, c }, {v, c } ∈ E. When g(G) ≥ 6, any such pair {u, v } shares at most one common check, so GV N has no multi-edges. Absorbing sets refine trapping sets by adding a local stability condition: every variable node in the set has strictly more satisfied (even-degree) than unsatisfied (odd-degree) check neighbours in the induced subgraph [14, 16]. This local majority is what makes absorbing sets “absorb” the decoder [15]. 
+
+Definition 2.8 (( a, b )-absorbing set, [14, 16]) . Let G be a Tanner graph and A ⊆ V asubset of a variable nodes. For each variable v ∈ A , write ev (resp. ov) for the number of check neighbours of v in GA whose degree in GA is even (resp. odd). The set A is an ( a, b )-absorbing set if exactly b check nodes in GA have odd degree and ev > o v for every v ∈ A . An absorbing set is elementary if every check node in GA has degree 1 or 2 (equivalently, the underlying ( a, b )-trapping set is an ETS in the sense of Definition 2.6). 5v1
+
+> v2
+> v3
+> v4
+> c1
+> c2
+> c3
+> c4
+
+(a) Stopping set S =
+
+{v1, v 2, v 3}: every check in N (S) has ≥ 2 neighbours in S.
+
+> v1
+> v2
+> v3
+> v4
+> c1
+> c2
+> c3
+> c4
+
+(b) (2 , 2)-trapping and absorb-ing set T = {v1, v 2}: c3, c 4 are odd-degree in GT .
+
+> v1
+> v2
+> v3
+> v4
+> c1
+> c2
+> c3
+> c4
+
+(c) (4 , 4)-trapping set 
+
+{v1, . . . , v 4} that is not 
+
+absorbing: each vi has 
+
+evi = 0 < 3 = ovi .
+
+Figure 1: Three substructures on the same (3 , 3)-regular Tanner graph. Variables in the highlighted set are filled blue; check nodes with odd induced degree are drawn in red. Edges of the induced subgraph GS (resp. GT , GA) are coloured; edges incident to excluded variables are faded. The substructure classes form a strict hierarchy: ( a) is also a (3 , 1)-trapping and (3 , 1)-absorbing set; ( b) is trapping and absorbing but not stopping (because 
+
+c3, c 4 have induced degree 1); ( c) is trapping but neither stopping nor absorbing. 
+
+## 2.3 Quantum LDPC codes 
+
+Quantum error-correcting codes encode k logical qubits into n physical qubits, embedding the logical state into a structured subspace of ( C2)⊗n; see Breuckmann and Eberhardt [5] for a survey. We work with the stabilizer codes of Gottesman [22] and Calderbank-Rains-Shor-Sloane [7], and specifically with the Calderbank-Shor-Steane (CSS) subclass, whose stabilizer factors into pure-X and pure-Z generators. In the n-qubit Pauli group any two elements commute or anticommute, and commutation is governed by the symplectic inner product on Fn 
+
+> 2
+
+[7, 22]; this is the structural reason CSS codes admit a binary-matrix description. We focus on the QLDPC subclass (Definition 2.10), whose running example is the quasi-cyclic generalized hypergraph product (QC-GHP) family of [38]. 
+
+2.3.1 CSS codes 
+
+A stabilizer code is the joint +1 eigenspace of an abelian subgroup S ⊆ P n of the Pauli group [22, 7]; we work directly with the matrix description of the stabilizer. 
+
+Definition 2.9 (CSS code, [7, 22]) . A Calderbank-Shor-Steane (CSS) code is a stabilizer code whose stabilizer admits a set of generators that are either pure-X (tensor products of I and X only) or pure-Z. When the pure-X generators are specified by a matrix 
+
+HX ∈ FmX ×n 
+
+> 2
+
+(each row encodes the support of one generator) and the pure-Z generators by a matrix HZ ∈ FmZ ×n 
+
+> 2
+
+, the commutation requirement on the stabilizer translates to the orthogonality condition 
+
+HX H TZ = 0 (over F2). (1) 6The number of logical qubits encoded by the CSS code is 
+
+k = n − rank F2 (HX ) − rank F2 (HZ ),
+
+and the minimum distance d is the smallest weight of a Pauli operator that commutes with every stabilizer generator but does not lie in S. The code is then said to have parameters [[ n, k, d ]], where the double brackets distinguish quantum from classical parameters. Equivalently, the row spaces of HX and HZ are mutually orthogonal, so the classi-cal codes CX = ker HX and CZ = ker HZ form a nested pair C⊥ 
+
+> X
+
+⊆ C Z , and the CSS construction recovers a quantum code from any such pair. 
+
+2.3.2 QLDPC codes Definition 2.10 (QLDPC code) . A quantum low-density parity-check (QLDPC) code is a CSS code in which both parity-check matrices HX and HZ are sparse in the sense of Definition 2.2. QLDPC codes [32, 29] have become a central object in fault-tolerant quantum comput-ing, with asymptotically good constructions due to Panteleev-Kalachev [37] and Leverrier-Z´ emor [30]. As classically, sparsity is asymptotic; in structured families the column and row weights of HX , H Z are fixed constants. Each CSS code carries two Tanner graphs, 
+
+GX from HX and GZ from HZ (Definition 2.3); these are the principal objects on which the decoding analyses in this work take place. 
+
+2.3.3 Syndrome-based decoding 
+
+When a Pauli error E = XeX ZeZ corrupts the encoded state, measuring the X-type generators yields the X-syndrome HX eZ ∈ FmX 
+
+> 2
+
+and measuring the Z-type generators yields the Z-syndrome HZ eX . Syndrome-based decoding produces low-weight estimates ˆeX , ˆeZ consistent with the observed syndromes [39], run block-by-block with one iterative message-passing decoder per Tanner graph [39, 40]. Decoding succeeds when ˆ eX − eX ∈
+
+rowspace( HX ) (a degenerate error acting trivially on the codespace) and produces a logical error otherwise. The graph-theoretic substructures responsible for these failures are the quantum ana-logues of the stopping, trapping and absorbing sets of §2.2.1, taken up in Section 3. The verbatim graph-theoretic definitions (Definitions 2.4, 2.5, 2.8) carry over unchanged, since 
+
+GX and GZ are themselves classical bipartite graphs; what differs is that the decoder in-put is a measured syndrome rather than a corrupted codeword, so the substructures are characterised through the syndrome-matching analysis of Morris-Pllaha-Kelley [34]. In particular the b = 0 case acquires a genuinely quantum interpretation as a symmetric-stabilizer configuration on which iterative decoding oscillates rather than diverges [40, 34]. 72.4 Spectral and Fourier background 
+
+We provide the discrete Fourier and circulant-matrix tools that will be used in the pro-posed spectral cycle-counting framework. Throughout, ℓ ≥ 1 is a positive integer and 
+
+ω = e2πi/ℓ is a primitive ℓ-th root of unity. 
+
+2.4.1 Discrete Fourier transform on Zℓ
+
+The characters of Zℓ are χj (k) = ωjk , and the discrete Fourier transform (DFT) of 
+
+f : Zℓ → C is ˆf (j) = Pℓ−1 
+
+> k=0
+
+f (k) ω−jk , with inverse f (k) = 1
+
+> ℓ
+
+P 
+
+> j
+
+ˆf (j) ωjk [9, Ch. 1]. The 
+
+Parseval (energy) identity [9, §3.2] reads 
+
+> ℓ−1
+
+X
+
+> k=0
+
+|f (k)|2 = 1
+
+ℓ
+
+> ℓ−1
+
+X
+
+> j=0
+
+| ˆf (j)|2. (2) We apply (2) to the symbol polynomials of circulant generator matrices, converting a time-domain sum into a sum over frequency-domain eigenvalues. 
+
+2.4.2 Circulant matrices and block-diagonalization 
+
+A matrix C ∈ Cℓ×ℓ is circulant if Cij = c(i−j) mod ℓ for some symbol c ∈ Cℓ; equivalently 
+
+C = Pℓ−1 
+
+> k=0
+
+ck Sk where S is the cyclic shift matrix [9, §2.1]. The Fourier matrix F
+
+with entries Fjk = ωjk /√ℓ is unitary and simultaneously diagonalises every circulant [9, Thm. 3.2.1]: 
+
+F C F ∗ = diag  ˆc(0) , ˆc(1) , . . . , ˆc(ℓ − 1) , (3) where ˆ c(j) = P 
+
+> k
+
+ckωjk ; the same conjugation blockwise-diagonalises any block matrix of 
+
+ℓ × ℓ circulants (replace F by F ⊗ Ir for blocks of size r). Quasi-cyclic Tanner graphs, including the QC-GHP family of Example 3.2, have circulant-block biadjacency matrices, and (3) reduces their global cycle-counting problems to a sum over ℓ smaller matrices 
+
+{Mj }ℓ−1
+
+> j=0
+
+, the Fourier matrices of the protograph: this is the structural basis of Theo-rem 4.1. 
+
+2.4.3 Cycle counts from spectral traces 
+
+Theorem 2.1 specialises to bipartite graphs through the biadjacency matrix: the powers of HH T count closed walks that begin and end on the same side. 
+
+Lemma 2.2 (Side-restricted trace identity; bipartite specialisation of Theorem 2.1, [6]) .
+
+Let G = ( VL, V R, E ) be a bipartite graph with biadjacency matrix H ∈ { 0, 1}|VL|×| VR|. For every integer k ≥ 1 and every u ∈ VL, the diagonal entry  (HH T )k 
+
+> uu
+
+equals the number of closed walks of length 2k in G that begin and end at u. Summing over u ∈ VL,
+
+tr  (HH T )k = # {closed walks of length 2k in G starting in VL}.
+
+The analogous identity holds for (HT H)k and walks starting in VR; by the cyclic invariance of trace the two counts are equal. 
+
+8Proof. From Definition 2.1 we have 
+
+A2 
+
+> G
+
+=
+
+HH T 00 HT H
+
+
+
+,
+
+so A2kG is block-diagonal with blocks ( HH T )k and ( HT H)k. Therefore  (HH T )k 
+
+> uu
+
+=
+
+ A2kG
+
+ 
+
+> uu
+
+for u ∈ VL, and Theorem 2.1 identifies the right-hand side as the number of closed walks of length 2 k at u. The remaining claims follow by summation and from tr  (HH T )k = tr  (HT H)k.Closed-walk counts overcount cycles because they include back-tracking steps and tree-shaped excursions; subtracting these via M¨ obius-type corrections converts tr  (HH T )k
+
+into a closed-form count of cycles of length 2 k. The precise 4-cycle formula for quasi-cyclic Tanner graphs, expressed as a sum Pℓ−1 
+
+> j=0
+
+tr  (Mj M ∗ 
+
+> j
+
+)2 over the Fourier matrices of (3), is derived in Theorem 4.1; classical cycle-counting precursors appear in [27, 43]. 
+
+# 3 Lifted-product QLDPC codes and the absorbing-set framework 
+
+Quantum LDPC (QLDPC) codes are among the leading current candidates for scalable fault-tolerant quantum computation [21, 37, 30]. As in the classical case, their finite-length performance is determined not by asymptotics but by a small number of stable graphical configurations in the Tanner graph that cause persistent decoder failure [41, 16], and these critical substructures are far less understood in the quantum setting [8, 45, 34, 2] than in the classical one [10, 33, 3, 35, 36]. A systematic spectral graph-theoretic ap-proach to QLDPC Tanner graphs, parallel to the adjacency-spectrum cycle counts used extensively for classical LDPC codes [11, 27, 4], has not yet appeared: the CSS com-mutation constraint and the lifted-product block structure pose additional obstructions. This work takes a first step via a discrete Fourier transform (DFT)-based cycle-counting framework for lifted-product Tanner graphs. 
+
+## 3.1 QLDPC codes and the absorbing-set framework 
+
+Both structural threads to date concern syndrome-based iterative decoding (§2.3.3), the natural decoding model for stabilizer codes [39]. Raveendran and Vasi´ c [40] identify 
+
+symmetric stabilizers , a genuinely quantum failure mode in which decoder degeneracy lets belief propagation oscillate between equivalent error estimates rather than converge. Morris, Pllaha, and Kelley [34] show that absorbing sets (Definition 2.8) are the dominant failure mechanism for syndrome-based iterative decoders: any ( a, b )-absorbing set with 
+
+b ≥ 1 is failure-inducing (its syndrome estimate stays 0, permanently mismatching the input syndrome at the b odd-degree checks), while the b = 0 case subsumes the symmetric-stabilizer phenomenon and governs the degenerate-versus-logical-error dichotomy [34]. For CSS hypergraph-product codes [47] the absorbing sets are completely characterised by the 9base matrices H1, H2 and their transposes, so small base-code absorbing sets propagate to low-weight failure-inducing sets [34]. Absorbing sets thus give a single combinatorial object subsuming the symmetric-stabilizer formalism of [40], which is why subsequent QLDPC structural analyses [45, 8, 34] have converged on them. Moreover, the classical Hoory-type cage and girth lower bounds on absorbing-set sizes [25, 33] do not transfer to the QLDPC two-block form 
+
+HX = [ eH1 | Ir1 ⊗ eBT ], because the CSS commutation constraint HX HTZ = 0 forces girth at most 6 in any fully connected quasi-cyclic construction with column weight at least 3 [1], foreclosing the high-girth regime in which Hoory-type counting gives strong bounds. 
+
+## 3.2 Lifted-product QLDPC codes 
+
+We review the lifted-product construction of Panteleev and Kalachev [38] that produces the running QC-GHP example and the two-block form HX = [ eH1 | Ir1 ⊗ eBT ] above. 
+
+Definition 3.1. [38] Consider H1 ∈ Fr1×n1 
+
+> 2
+
+, H2 ∈ Fr2×n2 
+
+> 2
+
+, and G a finite abelian group of size L. Each g ∈ G is associated with an L × L permutation matrix Pg over F2 using the regular representation, defined by ( Pg)h,k = 1 if h = gk ; then PgPg′ = Pgg ′ and Pg−1 = P Tg .Given a labeling of the nonzero entries of H1 and H2 by elements of G, we regard H1
+
+and H2 as matrices over the group algebra R = F2[G]. For a matrix M over R, write 
+
+fM for its binary lift , obtained by replacing each entry P 
+
+> g
+
+ag g with the L × L matrix 
+
+P 
+
+> g
+
+agPg (so ˜H1 ∈ F(r1L)×(n1L)2 ), and M ∗ for its conjugate transpose, ( M ∗)ij = ( Mji )∗ with 
+
+ P  
+
+> g
+
+ag g∗ = P 
+
+> g
+
+ag g−1; on lifts, gM ∗ = fM T . The lifted product quantum CSS code is defined by its parity check matrices 
+
+HX =  ^H1 ⊗ In2 ^Ir1 ⊗ H∗
+
+> 2
+
+ and HZ =  ^In1 ⊗ H2 ^H∗ 
+
+> 1
+
+⊗ Ir2
+
+,
+
+where the Kronecker products are taken over R; the commutation condition (1) holds because HX HTZ is the lift of H1 ⊗ H∗ 
+
+> 2
+
++ H1 ⊗ H∗ 
+
+> 2
+
+= 0 over R. (For nonabelian G the second factor must instead act through the right regular representation, see [37]; we do not need that generality here.) In the case r2 = n2 = 1 with H2 = ( b), used throughout this paper, this reduces to HX = [ ˜H1 | Ir1 ⊗ ˜HT 
+
+> 2
+
+] and HZ = [ In1 ⊗ ˜H2 | ˜HT 
+
+> 1
+
+]. 
+
+Example 3.1 (Generalized bicycle codes as lifted products) . Take r1 = n1 = r2 = n2 = 1 ,so H1 = (1) and H2 = (1) are 1 × 1 matrices over F2. Let G = Zℓ = ⟨x | xℓ = 1 ⟩ be the cyclic group of order ℓ. Label the single nonzero entry of H1 by the group-algebra element 
+
+a(x) ∈ F2[x]/(xℓ − 1) , and the single nonzero entry of H2 by the reversed polynomial 
+
+b(x−1), so that H∗ 
+
+> 2
+
+= ( b(x)) . Writing A and B for the ℓ × ℓ circulant matrices of a(x)
+
+and b(x), the parity check matrices of the lifted product code become 
+
+HX = [ A | B], HZ = [ B⊤ | A⊤].
+
+This is precisely the generalized bicycle (GB) ansatz of Kovalev and Pryadko [29]. For instance, taking ℓ = 24 , a(x) = 1 + x2 + x8 + x15 , and b(x) = 1 + x2 + x12 + x17 yields the 
+
+[[48 , 6, 8]] code (code A3 in [38]). 
+
+10 Example 3.2 (A quasi-cyclic GHP code as a lifted product) . Now take r1 = n1 = 7 ,
+
+r2 = n2 = 1 , G = Z63 , H2 = (1) with label b(x) = 1 + x + x6, and H1 a 7 × 7 matrix over 
+
+F2 whose nonzero entries are labeled by monomials xi ∈ Z63 :
+
+H1 =
+
+
+
+x27 0 0 0 0 x54 11 x27 0 0 0 0 x54 
+
+x54 1 x27 0 0 0 00 x54 1 x27 0 0 00 0 x54 1 x27 0 00 0 0 x54 1 x27 00 0 0 0 x54 1 x27 
+
+
+
+.
+
+Lifting replaces each monomial xi with the corresponding 63 ×63 cyclic permutation matrix and each 0 with the zero matrix; the single entry b(x) = 1+ x+x6 of H2 lifts to the 63 ×63 
+
+circulant ˜H2 = B. The result is a CSS code with 
+
+HX = [ ˜H1 | I7 ⊗ B⊤], HZ = [ I7 ⊗ B | ˜H⊤ 
+
+> 1
+
+],
+
+which is the [[882 , 24 , d ]] generalized hypergraph product code (code B1 in [38]) with 18 ≤
+
+d ≤ 24 . (In [38] code B1 is presented with the labels 1 and x54 interchanged and with 
+
+HX = [ ˜H1 | I7 ⊗ B], HZ = [ I7 ⊗ B⊤ | ˜H⊤ 
+
+> 1
+
+]; the substitution x 7 → x−1 combined with monomial rescalings identifies that presentation with the one used here, so both define the same code.) Its Tanner graph is (3 , 6) -regular and has girth 6; the protograph of H1 is depicted in Figure 2. 
+
+## 3.3 Tanner graph properties of quasi-cyclic GHP codes 
+
+Regularity. The Tanner graph of HX (and symmetrically of HZ ) for the [[882 , 24 , d ]] code is (3 , 6)-regular. More generally, when H1 has constant column weight w1 and constant row weight w′ 
+
+> 1
+
+and H2 is 1 × 1 with label b(x) of Hamming weight w2, each variable node of HX = [ ˜H1 | Ir1 ⊗ ˜HT 
+
+> 2
+
+] has degree w1 or w2 according to its column block, while each check node has degree w′ 
+
+> 1
+
++ w2; in Example 3.2, w1 = w2 = 3 and w′ 
+
+> 1
+
++ w2 = 6, recovering the (3 , 6)-biregular graph. The biregular pair ( γ, k ) is exploited spectrally throughout: the DFT block-diagonalisation HX HTX ∼= L 
+
+> j
+
+Mj of Section 4 is a biregular-specific simplification, and the closed-form biregular cycle counts of Smarandache and Mitchell [44] lift to the QC-GHP setting (Remark 4.19). 
+
+Protograph and girth. Lifting over G = Zℓ preserves vertex degree, so biregularity of the protograph implies biregularity of the Tanner graph with the same degree pair [13, 28]. A protograph closed walk with Zℓ-labels g1, . . . , g 2k lifts to ℓ Tanner-graph cycles if and only if the alternating sum g1 −g2 +· · ·− g2k ≡ 0 (mod ℓ), and to none otherwise [27]; this obstruction is the source of the Sidon-type arithmetic conditions on a(x), b (x) in Section 4. The Tanner graph of the [[882 , 24 , d ]] code has girth 6 [38], which is optimal within the QC framework: any fully connected quasi-cyclic construction with column weight at least 3 11 ℓ1
+
+ℓ2
+
+ℓ3
+
+ℓ4
+
+ℓ5
+
+ℓ6
+
+ℓ7
+
+r1
+
+r2
+
+r3
+
+r4
+
+r5
+
+r6
+
+r7
+
+x27 
+
+1
+
+x54 
+
+Figure 2: The protograph of H1 for the [[882 , 24]] GHP code of Example 3.2. Left vertices ℓi
+
+represent row nodes and right vertices rj represent column nodes. Each edge is labeled by its group element in Z63 ; in the lift, label xi is replaced by the cyclic permutation matrix 
+
+P i of size 63 × 63. The three edge types correspond to the three circulant diagonals of 
+
+H1.yielding a CSS code ( HX HTZ = 0) has girth at most 6 [1], so the classical strategy of raising girth to suppress short cycles is structurally unavailable; girth beyond 6 requires column weight 2 [1]. 
+
+Distance, trapping, and absorbing sets. Panteleev and Kalachev report 18 ≤ d ≤
+
+24 for the [[882 , 24]] code [38]; computing quantum minimum distance is hard in gen-eral [26], and sharp bounds are known only for generalized bicycle codes [49]. Raveendran and Vasi´ c [40] show that symmetric-stabilizer trapping sets occur already in generalized bicycle codes (the r1 = n1 = 1 case) and that a layered decoding schedule mitigates them. For hypergraph-product codes the absorbing sets are governed by the base matrices H1,
+
+H2 and their transposes [34]; how the group lift interacts with this structure for QC-GHP codes with circulant base matrices is identified as open in [34]. The chain-complex con-structions of [34] exploit the symmetric tensor form HX, HGP = [ H1 ⊗I | I ⊗HT 
+
+> 2
+
+] and do not transfer directly to the asymmetric lifted-product form HX = [ eH1 | Ir1 ⊗ eBT ]; the Sidon-type characterisation of Corollary 4.11 and the spectral 6-cycle count of Remark 4.13 give algebraic handles on this interaction in the girth-6 regime. 12 3.4 Trapping sets, absorbing sets, and stopping sets in QLDPC codes 
+
+Existing QLDPC trapping/absorbing-set work [45, 8] develops algorithmic methods (learning-aided trapping-set identification, decoder modifications, post-decoding correc-tion) but yields no closed-form lower bounds on absorbing-set sizes; transferring classical biregular bounds to the two-block setting HX = [ eH1 | Ir1 ⊗ eBT ] would require an ana-logue of the Zhao-Xiong-Ye-Yan [51] assumption that no two 8-cycles share a variable node, which for QC-GHP codes becomes a joint condition on the supports of eH1 and 
+
+b(x) strictly stronger than the girth-6 Sidon condition of Corollary 4.11. In the classi-cal setting, stopping sets (Definition 2.4) characterise the failure of iterative decoding on the binary erasure channel [12, 42] and the stopping distance lower-bounds the minimum distance; the QLDPC analogue carries the additional X/Z block structure, giving two coupled notions: X-stopping sets S ⊆ VL(GX ) and Z-stopping sets S ⊆ VL(GZ ), each governing iterative decoding of one block of syndromes. 
+
+# 4 A spectral framework for cycle counting for lifted-product Tanner graphs 
+
+In this section we adapt and extend the classical spectral cycle-counting framework of Smarandache and Flanagan [43] and Karimi and Banihashemi [27] to the Tanner graphs of lifted-product QLDPC codes [38]. For cyclic lifts over G = Zℓ, the biadjacency matrix of the Tanner graph block-diagonalises under the discrete Fourier transform, reducing cycle-counting traces to a sum over ℓ small matrices [43, Thm. 1, Cor. 2], [27, Theorem 2]; in our setting this enters through Theorem 4.1 below. For classical QC-LDPC codes the reduction is due to Smarandache and Flanagan [43], who showed that the eigenvalues of the rL × rL matrix HT H for an L-fold cyclic lift of a J × r protograph reduce to those of 
+
+L matrices of size r × r obtained by Fourier evaluation; Karimi and Banihashemi [27] give an alternative recipe via the directed edge matrix; and Smarandache and Mitchell [44] derive explicit closed forms for N2k in any biregular Tanner graph, valid for k ≤ 7. On the quantum side, Zhang [50] carries out a finite-length combinatorial cycle analy-sis of the lifted product construction of [38] (and its left-right generalisation), focusing on dominant 8-cycles and proving a girth upper bound showing that 8-cycles are unavoid-able regardless of the group-algebra elements, unlike the classical QC-LDPC case. Our framework is complementary: where Zhang enumerates 8-cycle topologies case by case, we develop a Fourier-spectral identity (Theorem 4.1) that translates short-cycle counts into traces of small matrices, applies uniformly to all even cycle lengths 2 k up to the girth bound, and yields the additive-energy/Sidon-type characterisations of §4 absent from [50]. This section specialises the classical single-block framework to the quantum two-block structure HX = [ eH1 | Ir1 ⊗ eBT ] (Theorem 4.1, where the second block con-tributes only a scalar shift |b(ωj )|2Ir1 to each block-diagonal matrix; see Remark 4.2), gives an additive-combinatorial reading of the GB-code 4-cycle formula via additive ener-13 gies (Lemma 4.6, Proposition 4.9), and a joint Sidon condition characterising girth-6 GB codes (Corollary 4.11). 
+
+## 4.1 DFT block-diagonalisation 
+
+Consider a lifted product code over Zℓ (Definition 3.1) with base matrices H1 ∈ F2[Zℓ]r1×n1
+
+and H2 ∈ F2[Zℓ]r2×n2 , whose entries lie in the group ring F2[Zℓ] ∼= F2[x]/(xℓ − 1). We specialise to the QC-GHP case r2 = n2 = 1, so H2 is the 1 × 1 matrix with entry 
+
+b(x) ∈ F2[x]/(xℓ − 1). This covers the generalised bicycle ansatz (Example 3.1) and the QC-GHP family (Example 3.2), including the running [[48 , 6, 8]] and [[882 , 24 , d ]] codes; in the higher-rank case r2, n 2 > 1 the matrix (5) becomes the commuting Kronecker sum 
+
+Mj = A(ωj )A(ωj )∗ ⊗In2 +Ir1 ⊗B(ωj )∗B(ωj ), where B(ωj ) is the r2 ×n2 Fourier evaluation of H2, so its eigenvalues are the pairwise sums of those of the two factors and the trace analysis of §4 carries over (see Remark 4.2). The X-parity check matrix is then 
+
+HX =  eH1 Ir1 ⊗ eBT ,
+
+where eH1 is the ( r1ℓ) × (n1ℓ) matrix obtained by replacing each group-ring entry of H1
+
+with the corresponding ℓ × ℓ circulant matrix (and each zero entry with 0 ℓ×ℓ), and eB is the ℓ × ℓ circulant associated with b(x). Let ω = e2πi/ℓ . Every ℓ × ℓ circulant C with first column ( c0, c 1, . . . , c ℓ−1)T is di-agonalised by the DFT matrix Fℓ: Fℓ C F ∗ 
+
+> ℓ
+
+= diag(ˆ c0, . . . , ˆcℓ−1), where ˆ cj = c(ωj ) = 
+
+Pℓ−1 
+
+> s=0
+
+cs ωjs . Since HX has block structure [ eH1 | Ir1 ⊗ eBT ] with ( r1ℓ) rows and ( n1 + r1)ℓ
+
+columns, conjugate on the left by UL = Ir1 ⊗ Fℓ and on the right by UR = diag( In1 ⊗
+
+F ∗ 
+
+> ℓ
+
+, I r1 ⊗ F ∗ 
+
+> ℓ
+
+). For the first block, UL eH1 (In1 ⊗ F ∗ 
+
+> ℓ
+
+) diagonalises each circulant sub-block independently. For the second block, since b(x) has real (binary) coefficients, eBT corre-sponds to b(x−1) and satisfies Fℓ eBT F ∗ 
+
+> ℓ
+
+= diag( b(ω0), . . . , b (ωℓ−1)), since b(ω−j ) = b(ωj )for real coefficients. Grouping indices by frequency j rather than block index p then gives the block-diagonal decomposition 
+
+bHX =
+
+> ℓ−1
+
+M
+
+> j=0
+
+bH(j) 
+
+> X
+
+, bH(j) 
+
+> X
+
+=  A(ωj ) b(ωj ) Ir1
+
+ ∈ Cr1×(n1+r1), (4) where A(ωj ) is the r1 × n1 matrix obtained by evaluating each group-ring entry of H1 at 
+
+ωj ; see Figure 3. 
+
+Theorem 4.1 (Spectral trace formula for lifted product codes) . Let HX be the parity check matrix of a lifted product code over Zℓ as above. For each j = 0 , . . . , ℓ − 1, define the r1 × r1 positive semidefinite Hermitian matrix 
+
+Mj = A(ωj ) A(ωj )∗ + |b(ωj )|2 Ir1 . (5) 
+
+Then, by Lemma 2.2, the number of closed walks of length 2k in the Tanner graph of HX
+
+starting from check nodes is 
+
+tr  (HX HTX )k =
+
+> ℓ−1
+
+X
+
+> j=0
+
+tr( M kj ) = 
+
+> ℓ−1
+
+X
+
+> j=0
+> r1
+
+X
+
+> i=1
+
+λi(Mj )k, (6) 14 eH1 I ⊗ eBT    
+
+> r1ℓ×(n1+r1)ℓ
+
+HX   
+
+> UL(·)UR
+> block-diag basis
+
+. . .    
+
+> bH(0)
+> X= [ A(1) |b(1) Ir1]
+> bH(1)
+> X
+> bH(2)
+> X
+> bH(ℓ−1)
+> X
+
+bHX = Lℓ−1 
+
+> j=0
+
+bH(j)     
+
+> X
+> each block: r1×(n1+r1)
+
+Figure 3: The discrete Fourier transform takes the large parity-check matrix HX = [ eH1 |
+
+Ir1 ⊗ eBT ] on the left (size r1ℓ×(n1 +r1)ℓ, with the first block in blue and the second in red) to a direct sum of ℓ much smaller blocks bH(j) 
+
+> X
+
+on the right (each of size r1×(n1+r1), indexed by the Fourier frequency j ∈ { 0, 1, . . . , ℓ − 1}). The first block of every bH(j) 
+
+> X
+
+is the Fourier evaluation A(ωj ) of the protograph data and the second block is the scalar b(ωj )Ir1 .Theorem 4.1 below uses this decomposition to reduce trace-of-power computations on 
+
+HX HTX to a sum of traces on the smaller matrices Mj = A(ωj )A(ωj )∗ + |b(ωj )|2Ir1 .
+
+where λ1(Mj ) ≤ · · · ≤ λr1 (Mj ) are the eigenvalues of Mj . Positive semidefiniteness of Mj
+
+ensures that all eigenvalues are non-negative real, so the right-hand side of (6) is a sum of non-negative real-valued powers and the cycle-count interpretation is consistent with the left-hand side being a real count. Proof. Treat HX as a real 0-1 matrix, so HTX = H∗ 
+
+> X
+
+. With UL, U R as above, the conju-gated matrix bHX = UL HX UR has the block-diagonal form (4) after the frequency-first permutation P . As UL, U R are unitary and P is a permutation matrix (hence unitary), these similarities preserve traces of matrix powers, so tr  (HX HTX )k = tr  (UL HX HTX U ∗
+
+> L
+
+)k = tr  ( bHX bH∗ 
+
+> X
+
+)k =
+
+> ℓ−1
+
+X
+
+> j=0
+
+tr 
+
+  bH(j) 
+
+> X
+
+( bH(j) 
+
+> X
+
+)∗k
+
+,
+
+the last equality using the block-diagonal structure (see the spectral background §2.4 for matrix powers as walk counts and the trace-of-powers and DFT identities). Finally, 
+
+bH(j) 
+
+> X
+
+( bH(j) 
+
+> X
+
+)∗ =  A(ωj ) b(ωj ) Ir1
+
+  A(ωj )∗
+
+b(ωj ) Ir1
+
+
+
+= A(ωj )A(ωj )∗ + |b(ωj )|2Ir1
+
+= Mj ,
+
+which completes the proof. 
+
+Remark 4.2. Theorem 4.1 reduces the computation of traces of (r1ℓ)×(r1ℓ) matrix powers to a sum of traces of r1 × r1 matrix powers. For the [[882 , 24 , d ]] code, this is a reduction from 441 × 441 matrices to 63 copies of 7 × 7 matrices. 
+
+15 For a single classical J × r protograph parity-check matrix lifted by a factor L, the eigenvalue reduction HT H → { H(ωj )H(ωj )T }L−1 
+
+> j=0
+
+that underlies Theorem 4.1 is due to Smarandache and Flanagan [43], and the explicit cycle-count formulas N2k = N2k({λi})
+
+for k ≤ 7 are derived in Smarandache and Mitchell [44] for any biregular Tanner graph. Karimi and Banihashemi [27] give a parallel DFT recipe via the directed edge matrix; the two approaches are equivalent up to a change of basis. What this section adds to that classical literature is the specialisation to the quantum two-block structure HX = [ eH1 |
+
+Ir1 ⊗ eBT ]: the second block Ir1 ⊗ eBT contributes only a scalar shift |b(ωj )|2Ir1 to each Mj ,so the spectrum of Mj is that of A(ωj )A(ωj )∗ from the first block, shifted uniformly by the second. This scalar-shift form would not hold for a general two-block concatenation with independent column structure. 
+
+## 4.2 Applications 
+
+In this section we provide some applications of the proposed spectral framework. In particular we illustrate how to use the spectral trace formula of Theorem 4.1 in two directions: the scalar reduction for generalised bicycle codes, and the genuinely matrix-valued QC-GHP case worked out on the running [[882 , 24 , d ]] code. 
+
+4.2.1 Specialisation to generalised bicycle codes Corollary 4.3 (Scalar trace formula for GB codes) . When r1 = n1 = 1 (generalised bicycle codes), A(ωj ) = a(ωj ) is a scalar, so Mj reduces to the scalar |a(ωj )|2 + |b(ωj )|2,and the expression (6) becomes 
+
+tr  (HX HTX )k =
+
+> ℓ−1
+
+X
+
+> j=0
+
+ |a(ωj )|2 + |b(ωj )|2k. (7) 
+
+Proof. Use Theorem 4.1 with r1 = n1 = 1, where A(ωj ) = a(ωj ) is a scalar. 
+
+4.2.2 Application to the [[882 , 24 , d ]] QC-GHP code 
+
+This subsubsection applies the spectral trace formula (Theorem 4.1) to the genuinely matrix-valued QC-GHP case, computing the 4-cycle count of the running [[882 , 24 , d ]] code. For QC-GHP codes A(ωj ) is genuinely r1 × r1, so (5) no longer collapses to a scalar shift. We illustrate on the [[882 , 24 , d ]] code of Example 3.2, where a second layer of cyclic symmetry inside H1 yields the eigenvalues of each Mj in closed form. 
+
+Example 4.1 (Spectral cycle counting for the [[882 , 24 , d ]] code) . With ℓ = 63 , r1 = n1 =7, and b(x) = 1 + x + x6 as in Example 3.2, the protograph matrix 
+
+H1 = x27 I7 + S + x54 S2,
+
+is itself a polynomial in the 7 × 7 cyclic shift S defined by (S)i,k = 1 iff k ≡ i − 1(mod 7) (the three diagonals of H1 in Example 3.2 correspond to the three terms of this 
+
+16 polynomial). Evaluating each group-ring entry at ωj , where ω = e2πi/ 63 , gives the 7 × 7
+
+matrix 
+
+A(ωj ) = ω27 j I7 + S + ω54 j S2,
+
+which is itself a polynomial in S, so it is simultaneously diagonalised with S in the basis of 
+
+Z7-Fourier vectors. The eigenvalues of S are η−m for m = 0 , . . . , 6 with η = e2πi/ 7 = ω9,so the eigenvalues of A(ωj ) are 
+
+μj,m = ω27 j + ω−9m + ω54 j−18 m, m = 0 , . . . , 6. (8) 
+
+Since A(ωj ) commutes with S and is normal, A(ωj )A(ωj )∗ has eigenvalues |μj,m |2, and so by Theorem 4.1 the matrix Mj has eigenvalues |μj,m |2 + |b(ωj )|2. The spectral trace formula (6) therefore reduces to the explicit double sum 
+
+tr  (HX HTX )k =
+
+> 62
+
+X
+
+> j=0 6
+
+X
+
+> m=0
+
+ |μj,m |2 + |b(ωj )|2k, (9) 
+
+turning a 441 × 441 trace computation into 441 scalar evaluations of (8) followed by a 
+
+k-th power. As a consistency check at k = 1 : each A(ωj ) has Frobenius norm squared ∥A(ωj )∥2 
+
+> F
+
+=21 (it has 21 unimodular entries), so P 
+
+> m
+
+|μj,m |2 = 21 for every j, giving P 
+
+> j,m
+
+|μj,m |2 =63 · 21 = 1323 . By Parseval, P 
+
+> j
+
+|b(ωj )|2 = ℓ · wt( b) = 189 , so P 
+
+> j,m
+
+|b(ωj )|2 = 7 · 189 = 1323 . The two contributions sum to tr( HX HTX ) = 2646 = 6 · 441 , as expected from the 
+
+(3 , 6) -regularity of the Tanner graph. At k = 2 , Lemma 4.8 below with P 
+
+> i
+
+d2 
+
+> c,i
+
+= 441 · 36 = 15876 and P 
+
+> v
+
+dv(dv − 1) = 882 · 6 = 5292 gives 
+
+C4 = 14
+
+ tr  (HX HTX )2 − 21168 .
+
+Corollary 4.4 (4-cycle count of the [[882 , 24 , d ]] code) . The Tanner graph of the [[882 , 24 , d ]] 
+
+code has girth 6 [38], equivalently C4 = 0 , so the protograph parameters (27 , 54) together with b(x) = 1 + x + x6 satisfy the closed-form identity 
+
+> 62
+
+X
+
+> j=0 6
+
+X
+
+> m=0
+
+ |μj,m |2 + |b(ωj )|22 = 21168 . (10) 
+
+Proof. Substitute the exponents (27 , 54), the modulus ℓ = 63, and b(x) = 1+ x+x6 into the double sum (9) at k = 2, whose value is tr  (HX HTX )2. Since the girth is 6 we have C4 = 0, so the k = 2 reduction C4 = 14
+
+ tr  (HX HTX )2−21168  forces tr  (HX HTX )2 = 21168, which is the left-hand side of (10). The identity (10) is a sharp 4-cycle test: any modification of the exponents (27 , 54) or of b(x) that violates it introduces 4-cycles into the Tanner graph, and every nonnegative deviation from 21168 equals 4 C4.17 4.3 Cycle counts via additive energy 
+
+Next we connect the formula (7) to additive combinatorics over Zℓ, so that C4 = 0 becomes an arithmetic condition on the supports Sa, S b ⊂ Zℓ rather than a closed-walk count. Write Sa = supp( a) ⊂ Zℓ and Sb = supp( b) for the supports of a(x) and b(x). 
+
+Definition 4.1 (Additive energy and cross-energy) . The additive energy of a set S ⊂ Zℓ
+
+is 
+
+E(S) = (i, k, p, q ) ∈ S4 : i + p ≡ k + q (mod ℓ) = X
+
+> d∈Zℓ
+
+rd(S)2,
+
+where rd(S) = |{ (x, y ) ∈ S2 : x − y ≡ d}| . The cross-energy of the sets Sa and Sb ⊂ Zℓ is 
+
+E(Sa, S b) = X
+
+> d∈Zℓ
+
+rd(Sa) · rd(Sb).
+
+Example 4.2. For S = {0, 1, 3} ⊂ Z7, the difference counts are r0(S) = 3 and r±1(S) = 
+
+r±2(S) = r±3(S) = 1 , giving E(S) = 9 + 6 = 15 (Figure 4). Proposition 4.9 below expresses the 4-cycle count of a generalised bicycle code through these quantities. 
+
+> 0
+> 1
+> 2
+> 34
+> 5
+> 6
+
+(a) S = {0, 1, 3} ⊂ Z7 (blue).     
+
+> d∈Z7
+> rd(S)
+> 0
+> 3
+> 1
+> 1
+> 2
+> 1
+> 3
+> 1
+> 4
+> 1
+> 5
+> 1
+> 6
+> 1
+> E(S) = P
+> dr2
+> d
+> = 9 + 6 = 15
+
+(b) Difference-multiplicity profile rd(S). 
+
+Figure 4: Additive energy for the small example S = {0, 1, 3} ⊂ Z7. (a) The set S is shown as the three blue points on the cyclic group Z7 (white points are non-members). 
+
+(b) The histogram rd(S) = |{ (x, y ) ∈ S2 : x − y ≡ d}| takes value 3 at d = 0 (every pair ( s, s ) contributes) and value 1 at each d ∈ { 1, 2, 3, 4, 5, 6} (the six non-zero pairwise differences of S are pairwise distinct in Z7, which makes S a Sidon set ). Summing rd(S)2
+
+gives E(S) = 3 2 + 6 · 12 = 15 quadruples ( i, k, p, q ) ∈ S4 with i + p ≡ k + q (mod 7). 
+
+Remark 4.5. Since r−d(S) = rd(S) for any S ⊂ Zℓ (by the substitution (x, y ) 7 → (y, x )), the definition E(Sa, S b) = P 
+
+> d
+
+rd(Sa) rd(Sb), which naturally counts quadruples with i−k ≡
+
+p − q (i.e. i − k − p + q ≡ 0), also equals the count of quadruples with i − k + p − q ≡ 0.This is the form that arises from the Fourier expansion in Lemma 4.6(ii). 
+
+Lemma 4.6. Let S ⊂ Zℓ and a(x) = P 
+
+> s∈S
+
+xs. Then: 
+
+(i) 
+
+> ℓ−1
+
+X
+
+> j=0
+
+|a(ωj )|4 = ℓ · E(S).
+
+18 (ii) For T ⊂ Zℓ with b(x) = P 
+
+> t∈T
+
+xt,
+
+> ℓ−1
+
+X
+
+> j=0
+
+|a(ωj )|2 |b(ωj )|2 = ℓ · E(S, T ).Proof. For (i), write |a(ωj )|2 = P 
+
+> i,k ∈S
+
+ωj(i−k), so that 
+
+|a(ωj )|4 =
+
+ X 
+
+> i,k ∈S
+
+ωj(i−k)
+
+ X 
+
+> p,q ∈S
+
+ωj(p−q)
+
+
+
+= X
+
+> i,k,p,q ∈S
+
+ωj(i−k+p−q).
+
+Summing over j and using the orthogonality relation Pℓ−1 
+
+> j=0
+
+ωjm = ℓ 1m≡0 gives 
+
+> ℓ−1
+
+X
+
+> j=0
+
+|a(ωj )|4 = ℓ · {(i, k, p, q ) ∈ S4 : i − k + p − q ≡ 0} = ℓ · E(S).
+
+For (ii), the same argument gives 
+
+X
+
+> j
+
+|a(ωj )|2|b(ωj )|2 = ℓ · |{ (i, k, p, q ) : i, k ∈ S, p, q ∈ T, i − k + p − q ≡ 0}| ,
+
+which equals ℓ · E(S, T ) by Remark 4.5. 
+
+Remark 4.7. Lemma 4.6 gives two interchangeable ways to compute E(S) in practice: combinatorially as P 
+
+> d
+
+rd(S)2 by enumerating differences (cost O(|S|2 +ℓ)), or analytically as 1
+
+> ℓ
+
+P 
+
+> j
+
+|a(ωj )|4 via an FFT (cost O(ℓ log ℓ)). The same alternative applies to E(Sa, S b)
+
+via part (ii). 
+
+We also use the standard 4-cycle count in a bipartite graph via the trace of the squared adjacency matrix. 
+
+Lemma 4.8 (see e.g. [24]) . In a bipartite graph with biadjacency matrix H (check nodes as rows, variable nodes as columns), the number of 4-cycles is 
+
+C4 = 14
+
+
+
+tr  (HH T )2 − X
+
+> i
+
+d2 
+
+> c,i
+
+− X
+
+> v
+
+dv(dv − 1) 
+
+
+
+,
+
+where dc,i is the degree of check node i and dv is the degree of variable node v.Proof. Write A = HH T . The diagonal entry Aii = dc,i and the off-diagonal entry Aij for 
+
+i̸ = j counts the number of common variable-node neighbours of check nodes i and j; call this λij . A 4-cycle is determined by a pair of check nodes {i, j } and a pair of their common variable neighbours, so C4 = P
+
+> i<j
+
+ λij 
+
+> 2
+
+. Now tr( A2) = P 
+
+> i,j
+
+A2 
+
+> ij
+
+= P 
+
+> i
+
+d2 
+
+> c,i
+
++ P 
+
+> i̸=j
+
+λ2 
+
+> ij
+
+, so 
+
+P 
+
+> i̸=j
+
+λ2 
+
+> ij
+
+= tr( A2) − P 
+
+> i
+
+d2
+
+> c,i
+
+. Similarly, P 
+
+> i̸=j
+
+λij = P 
+
+> i,j
+
+Aij − P 
+
+> i
+
+Aii = P 
+
+> v
+
+d2 
+
+> v
+
+− P 
+
+> v
+
+dv =
+
+P 
+
+> v
+
+dv(dv − 1), where the identity P 
+
+> i,j
+
+Aij = P 
+
+> v
+
+d2 
+
+> v
+
+holds because each variable node v
+
+contributes 1 to Aij for each of the  dv
+
+> 1
+
+2 = d2 
+
+> v
+
+pairs ( i, j ) of check nodes it is adjacent to. Therefore 
+
+C4 = X 
+
+> i<j
+> 12
+
+(λ2 
+
+> ij
+
+− λij ) = 14
+
+ tr( A2) − P 
+
+> i
+
+d2
+
+> c,i
+
+ − 14
+
+P 
+
+> v
+
+dv(dv − 1) ,
+
+using P 
+
+> i<j
+
+= 12
+
+P 
+
+> i̸=j
+
+.19 Proposition 4.9 (4-cycle formula for GB codes) . Let HX = [ eA | eB] be the parity check matrix of a generalised bicycle code over Zℓ with wt( a) = wa and wt( b) = wb. The Tanner graph of HX has ℓ check nodes, each of degree dc = wa + wb, and 2ℓ variable nodes: ℓ
+
+of degree wa (from the eA block) and ℓ of degree wb (from the eB block). The number of 4-cycles is 
+
+C4 = ℓ
+
+4
+
+ E(Sa) + 2 E(Sa, S b) + E(Sb) − ℓ (wa + wb)2 + wa(wa − 1) + wb(wb − 1) 
+
+4 . (11) 
+
+Proof. We use (7) with k = 2: tr  (HX HTX )2 =
+
+> ℓ−1
+
+X
+
+> j=0
+
+ |a(ωj )|2 + |b(ωj )|22.
+
+Expanding the square and applying Lemma 4.6: tr  (HX HTX )2 = X
+
+> j
+
+|a(ωj )|4 + 2 X
+
+> j
+
+|a(ωj )|2|b(ωj )|2 + X
+
+> j
+
+|b(ωj )|4
+
+= ℓ E (Sa) + 2 ℓ E (Sa, S b) + ℓ E (Sb).
+
+Substituting into Lemma 4.8 with m = ℓ, P 
+
+> i
+
+d2 
+
+> c,i
+
+= ℓ(wa + wb)2, and P 
+
+> v
+
+dv(dv − 1) = 
+
+ℓ w a(wa − 1) + ℓ w b(wb − 1) gives the desired result (11). 
+
+Remark 4.10. Proposition 4.9 shows that the girth of a GB code Tanner graph is at least 6 if and only if 
+
+E(Sa) + 2 E(Sa, S b) + E(Sb) = ( wa + wb)2 + wa(wa − 1) + wb(wb − 1) .
+
+The right-hand side is the contribution from “trivial” 4-tuples (those where the two pairs of indices coincide). The following corollary reformulates this as a condition from additive combinatorics. 
+
+Corollary 4.11 (Joint Sidon condition for girth-6 GB codes) . A generalised bicycle code over Zℓ with polynomials a(x), b (x) has girth at least 6 if and only if 
+
+rd(Sa) + rd(Sb) ≤ 1 for all d̸ ≡ 0 (mod ℓ), (12) 
+
+where rd(S) = |{ (x, y ) ∈ S2 : x − y ≡ d (mod ℓ)}| . In other words, the difference multisets of Sa and Sb, restricted to nonzero differences, must be disjoint and repeat-free when combined. Proof. By Proposition 4.9, C4 = 0 if and only if E(Sa) + 2 E(Sa, S b) + E(Sb) = ( wa +
+
+wb)2 + wa(wa − 1) + wb(wb − 1). Since E(Sa) + 2 E(Sa, S b) + E(Sb) = P
+
+> d
+
+(rd(Sa) + rd(Sb)) 2,the left-hand side decomposes as (r0(Sa) + r0(Sb)) 2 + X
+
+> d̸=0
+
+(rd(Sa) + rd(Sb)) 2 = ( wa + wb)2 + X
+
+> d̸=0
+
+(rd(Sa) + rd(Sb)) 2,
+
+20 using r0(S) = |S|. The right-hand side equals ( wa + wb)2 + wa(wa − 1) + wb(wb − 1). Since P 
+
+> d̸=0
+
+rd(Sa) = w2 
+
+> a
+
+− wa = wa(wa − 1) and likewise for Sb, the condition C4 = 0 reduces to 
+
+X
+
+> d̸=0
+
+(rd(Sa) + rd(Sb)) 2 = X
+
+> d̸=0
+
+(rd(Sa) + rd(Sb)) .
+
+For non-negative integers x, x2 ≥ x with equality iff x ∈ { 0, 1}, so 
+
+X
+
+> d̸=0
+
+ (rd(Sa) + rd(Sb)) 2 − (rd(Sa) + rd(Sb))  = 0 with each summand non-negative forces every summand to vanish, giving (12). 
+
+Remark 4.12. When Sb = ∅ (i.e. a single circulant block), condition (12) reduces to 
+
+rd(Sa) ≤ 1 for all d̸ = 0 , which is the classical definition of a Sidon set (or B2 set) in 
+
+Zℓ. For a Sidon set S ⊂ Zℓ, counting nonzero differences gives |S|(|S| − 1) ≤ ℓ − 1, so 
+
+|S| ≤ √ℓ + O(1) (cf. the Erd˝ os–Tur´ an bound for Sidon sets of integers [17]). For the joint condition (12) , the combined difference set {x − y : ( x, y ) ∈ S2 
+
+> a
+
+∪ S2 
+
+> b
+
+, x ̸ = y} must have no repeated elements, so 
+
+wa(wa − 1) + wb(wb − 1) ≤ ℓ − 1,
+
+giving an upper bound on the total weight wa + wb achievable at girth 6 for a given ℓ.
+
+Remark 4.13 (Towards 6-cycle counts via additive 3-energies) . The same DFT identity extends to closed walks of length 6: by Theorem 4.1 with k = 3 ,
+
+tr  (HX HTX )3 =
+
+> ℓ−1
+
+X
+
+> j=0
+
+ |a(ωj )|2 + |b(ωj )|23.
+
+Expanding the cube and applying the same Parseval calculation as in Lemma 4.6 (using the Parseval identity (2) of the spectral background §2.4) expresses each term via the 
+
+additive 3-energy 
+
+T3(S) = (i1, k 1, i 2, k 2, i 3, k 3) ∈ S6 : ( i1 − k1) + ( i2 − k2) + ( i3 − k3) ≡ 0 (mod ℓ) ,
+
+together with mixed cross-versions for Sa and Sb, via the identity P 
+
+> j
+
+|a(ωj )|6 = ℓ T 3(Sa)
+
+(and analogously for higher mixed terms). Note that T3(S)̸ = P 
+
+> d
+
+rd(S)3 in general: writ-ing rd(S) for the number of representations d = i − k with i, k ∈ S, one has T3(S) = P  
+
+> d1+d2+d3≡0 (mod ℓ)
+
+rd1 (S) rd2 (S) rd3 (S), which counts all difference-triples summing to 0
+
+modulo ℓ, whereas P 
+
+> d
+
+rd(S)3 counts only those with d1 = d2 = d3; neither sum is con-tained in the other. Translating tr  (HX HTX )3 into a 6-cycle count requires subtracting closed length-6 walks that are not simple cycles; under girth ≥ 6 (i.e. assuming the Sidon condition (12) ) these reduce to backtracking walks whose count is fixed by the local degree statistics of the Tanner graph. The resulting girth-8 criterion is then a higher-order arith-metic condition on the supports, analogous to Corollary 4.11 but strictly stronger; we do not work out the full bookkeeping here. 
+
+21 4.4 Spectral interpretation of the Wang-Dolecek-Wesel reduc-tion in the QC-GHP setting 
+
+The cycle-counting formulas of Section 4 connect to absorbing sets, the dominant graphical cause of decoder failure, through a classical bijection of Wang, Dolecek and Wesel [48]. Recast in graph-theoretic language and combined with Theorem 4.1, it yields a closed-form spectral expression for the number of (3 , 3) elementary absorbing sets in a QC-GHP code, addressing in the column-weight-3 case an enumeration question raised by Morris, Pllaha and Kelley [34] for QLDPC codes with circulant base matrices. Throughout, assume the Tanner graph G has constant variable-node degree γ = 3 and girth at least 6, which covers the QC-GHP family above when H1 has column weight three and wt( b) = 3. Recall the variable-node graph GV N from Definition 2.7; under girth 
+
+≥ 6 it is simple. 
+
+Lemma 4.14 (Wang-Dolecek-Wesel [48], in GV N language) . For a Tanner graph G with 
+
+γ = 3 and g(G) ≥ 6, the assignment A 7 → A is a bijection between 
+
+(a) elementary (3 , 3) -absorbing sets of G, and 
+
+(b) simple 6-cycles of G, equivalently the triangles K3 in GV N realised by three pairwise distinct checks. A triangle of GV N realised by a single check of degree ≥ 3 is not absorbing: that check has odd degree in GA, so each of its three variables would have three odd and no even checks, violating the strong-majority condition. Proof. The correspondence is established in [48] via the cycle-consistency-matrix formal-ism for separable circulant-based codes; we give a graph-theoretic restatement valid for any Tanner graph satisfying the hypotheses. (⇒) Let A = {u1, u 2, u 3} be an elementary (3 , 3)-absorbing set. The total incidence count from A is P 
+
+> i
+
+γ = 9. By elementarity each check in N (A) has degree 1 or 2 in GA;the b = 3 degree-1 checks contribute 3 incidences, leaving 6 incidences from 3 degree-2 checks, so |N (A)| = 6. The strong-majority condition forces each ui to have at least 2 even-degree-check neighbours in GA, so (with γ = 3) exactly 2 degree-2 and 1 degree-1 check neighbour. Thus the 3 degree-2 checks form a triangle on {u1, u 2, u 3} in GV N ,realised by three pairwise distinct checks. (⇐) Conversely, given a triangle {u1, u 2, u 3} in GV N realised by three pairwise distinct checks c12 , c 13 , c 23 (equivalently, a simple 6-cycle of G), each ui has its three checks split as the two pair-checks cij , c ik (j, k ̸ = i) and one extra check c′′  
+
+> i
+
+. The check c′′  
+
+> i
+
+cannot also be incident to uj for any j̸ = i, else ui and uj would share two distinct checks ( cij and c′′  
+
+> i
+
+), giving a 4-cycle and contradicting g(G) ≥ 6. Thus c′′  
+
+> i
+
+has degree exactly 1 in GA. The same argument shows c′′ 
+
+> i
+
+̸ = c′′  
+
+> j
+
+for i̸ = j. So |N (A)| = 6, with 3 degree-2 and 3 degree-1 checks; each ui has 2 even-degree and 1 odd-degree check neighbour in GA, satisfying strong majority. So A is an elementary (3 , 3)-absorbing set. 22 u1 u2 
+
+> u3
+> c12
+> c13 c23
+
+(a) Elementary (3 , 3)-absorbing set in the Tanner graph.   
+
+> u1u2
+> u3
+> c12
+> c13 c23
+
+(b) Triangle K3 on {u1, u 2, u 3} in 
+
+GV N .
+
+Figure 5: The Wang-Dolecek-Wesel correspondence of Lemma 4.14, illustrated. (a) An elementary (3 , 3)-absorbing set in a column-weight-3 girth-≥ 6 Tanner graph: three vari-ables u1, u 2, u 3 (blue), three degree-2 even checks c12 , c 13 , c 23 (white squares) each shared by exactly two variables, and three degree-1 odd checks (red squares) each attached to exactly one variable. (b) The corresponding triangle in the variable-node graph GV N :each pair-check cij becomes the edge ui −uj , and the absorbing structure is reduced to a single triangle. The bijection runs both ways (Lemma 4.14), translating (3 , 3)-absorbing-set enumeration into the counting of triangles realised by three distinct checks. The variable-node graph admits a clean spectral description. 
+
+Lemma 4.15. Let G be a Tanner graph with biadjacency matrix H, constant variable-node degree γ, and g(G) ≥ 6. Then 
+
+AV N = HT H − γ I, 
+
+and consequently for every k ≥ 0tr( AkV N ) = 
+
+> k
+
+X
+
+> l=0
+
+kl
+
+
+
+(−γ)k−l tr  (HT H)l. (13) 
+
+Proof. The off-diagonal entry ( HT H)u,u ′ counts the common check-neighbours of u, u ′,which is 0 or 1 under g(G) ≥ 6 (else a 4-cycle); the diagonal entry equals the variable-node degree γ. So HT H = AV N + γI . Identity (13) follows by binomial expansion of 
+
+AkV N = ( HT H − γI )k and linearity of trace. For QC-GHP codes the right-hand side of (13) is fully spectral: tr(( HTX HX )l) = tr(( HX HTX )l) = 
+
+> ℓ−1
+
+X
+
+> j=0
+
+tr( M lj )for l ≥ 1 by Theorem 4.1, while tr(( HTX HX )0) = tr( I(n1+r1)ℓ) = ( n1 + r1)ℓ. 
+
+Triangles in GV N recover the 6-cycle count of G:23 Lemma 4.16. For G as above, the triangles of GV N are of two kinds: those realised by three distinct checks, which are in bijection with the simple 6-cycles of G, and those realised by a single check of degree at least 3. Consequently 
+
+#K3(GV N ) = N6(G) + X
+
+> c∈W
+
+deg( c)3
+
+
+
+,
+
+or equivalently 
+
+N6(G) = 16 tr( A3 
+
+> V N
+
+) − X
+
+> c∈W
+
+deg( c)3
+
+
+
+.
+
+Proof. Each edge of a triangle {u, v, w } in GV N is realised by a check: u, v share cuv ,and likewise cvw , c uw , each pair sharing exactly one check since g(G) ≥ 6. If two of these coincide, say cuv = cvw = c, then c is adjacent to all of u, v, w , so c = cuw as well; hence the three checks are either pairwise distinct or all equal. If they are pairwise distinct, the closed walk u c uv v c vw w c uw u is a simple 6-cycle (a repeated vertex would force a cycle shorter than 6); conversely every simple 6-cycle of the bipartite graph G
+
+alternates variable/check and projects to such a triangle, so this is a bijection. If the three checks are all equal to one check c, then deg( c) ≥ 3 and {u, v, w } is one of its  deg( c)3
+
+
+
+neighbour-triples; no such triangle is a 6-cycle, and none is counted for two different checks (two checks adjacent to the same three variables would create a 4-cycle, impossible at g(G) ≥ 6), giving P
+
+> c
+
+ deg( c)3
+
+ single-check triangles. Since AV N is the adjacency matrix of the simple graph GV N , 16 tr( A3 
+
+> V N
+
+) = # K3(GV N ), and the two displayed identities follow. Combining Lemmas 4.14, 4.15 and 4.16 with Theorem 4.1 gives the main result of this subsection: in the QC-GHP setting, the count of (3 , 3) elementary absorbing sets, equivalently the 6-cycle count N6, admits an explicit closed-form Fourier expression. 
+
+Proposition 4.17 ((3 , 3)-absorbing-set spectral count for QC-GHP codes) . Let GX be the X-Tanner graph of a QC-GHP code over Zℓ with γ = 3 and g(GX ) ≥ 6. Then 
+
+# ( elementary (3 , 3) -absorbing sets ) = N6(GX ),
+
+and                  
+
+> N6(GX) = 16
+> 
+> ℓ−1X
+> j=0
+> tr( M3
+> j)−3γ
+> ℓ−1X
+> j=0
+> tr( M2
+> j) + 3 γ2
+> ℓ−1X
+> j=0
+> tr( Mj)−γ3(n1+r1)ℓ
+> −X
+> c∈W
+> deg( c)3
+> 
+> .
+> (14)
+
+The bracket in Proposition 4.17 equals tr( A3 
+
+> V N
+
+), so the first term equals 16 tr( A3 
+
+> V N
+
+) = #K3(GV N X ); the correction P
+
+> c
+
+ deg( c)3
+
+ removes the triangles of GV N X induced by a single check of degree ≥ 3 (Lemma 4.16). For a ( γ, k )-biregular QC-GHP code with m = r1ℓ
+
+checks of degree k it equals r1ℓ k
+
+> 3
+
+; for the [[882 , 24]] code this is 441  63
+
+ = 8820. For generalised bicycle codes ( r1 = n1 = 1), each Mj collapses to the scalar |a(ωj )|2 + |b(ωj )|2,24 and (14) reduces to a polynomial in those scalars together with the constant P
+
+> c
+
+ deg( c)3
+
+ =
+
+ℓ wa+wb
+
+> 3
+
+, computable in O(ℓ log ℓ) time via FFT. The combinatorial half, #(elementary (3, 3)-absorbing sets) = N6(GX ),
+
+is the Wang-Dolecek-Wesel observation [48] in GV N language. The spectral half, the closed-form expression (14) for N6(GX ) in terms of the QC-GHP Fourier evaluations 
+
+A(ωj ) and b(ωj ), is the contribution of Section 4; the directed-edge-matrix DFT method of Karimi and Banihashemi [27] gives an equivalent count for classical QC-LDPC codes, but the explicit two-block QC-GHP form via the r1 × r1 matrices Mj does not appear there. 
+
+Remark 4.18 (Other absorbing-set sizes) . For column-weight-3 girth-6 codes the smallest elementary absorbing-set types are (3 , 3) and (4 , 2) , see [48]. The GV N dictionary handles 
+
+(4 , 2) in principle: an elementary (4 , 2) -absorbing set corresponds to an induced “ K4 mi-nus an edge” on four variables in GV N , with a degree-1 check attached to each of the two vertices of GV N -degree 2 within the configuration. Counting induced “ K4 minus an edge” subgraphs requires tr( A4 
+
+> V N
+
+) together with subgraph-elimination corrections, themselves ex-pressible via the spectral data but tied to the additive T3 machinery of Remark 4.13; we defer this computation to future work. The case (4 , 0) corresponds to induced K4 in GV N 
+
+but is generally rare or absent in the regime relevant to QC-GHP codes (where girth at most 6 is forced by the CSS commutation constraint [1]), so we do not develop it further. 
+
+Remark 4.19 (Comparison with adjacent classical QC-LDPC machinery) . This remark compares the spectral-trace identity of Theorem 4.1 with two adjacent classical pieces of QC-LDPC machinery, both of which yield cycle counts in the QC-GHP setting via slightly different routes: the directed-edge-matrix framework of Karimi-Banihashemi [27], and the moment-recursion of Smarandache-Mitchell [44]. The two approaches give equivalent answers up to a change of basis, but differ in what they require as input and what their output looks like. The directed-edge-matrix framework of Karimi and Banihashemi [27] gives, for any graph of girth g, the clean cycle count Nk = tr( Ake )/(2 k) for k < 2g,where Ae is the Hashimoto 2|E| × 2|E| directed-edge matrix; no trace-correction terms (cf. Lemma 4.15) are needed. For a QC protograph code over Zℓ, the matrix A2 
+
+> e
+
+has block-circulant structure with blocks of size |Eb| × | Eb| (|Eb| = number of edges of the base graph), and the same DFT block-diagonalisation as Theorem 4.1 reduces Nk to a sum of traces of ℓ small matrices. The construction applies verbatim to the X-Tanner graph GX
+
+of any QC-GHP or generalised bicycle code over Zℓ, yielding closed-form expressions for 
+
+N4, N 6, . . . , N 2g−2 via Fourier evaluations of base-graph data, on a larger ambient matrix (2|E| vs. r1ℓ) but without the lower-cycle correction terms that appear in our adjacency-based identity. We do not develop this route further. Complementarily, the Smarandache-Mitchell recursion [44, Cor. 4] expresses N2j for 
+
+2 ≤ j ≤ 7 in any (γ, k )-biregular Tanner graph as a polynomial in the moments μj := Tr(( HH T )j ) and the lower cycle counts N4, N 6, . . . , N 2j−2, under a girth hypothesis that grows with j: girth ≥ 4 for N4, N 6, girth ≥ 6 for N8, N 10 , and girth ≥ 8 for N12 , N 14 . By 
+
+25 Theorem 4.1, μj = Pℓ−1 
+
+> j′=0
+
+tr( M jj′ ) in the QC-GHP setting; combined with the recursion this gives a Fourier expression for N2j in terms of the same Fourier matrices. In partic-ular, the girth-6 hypothesis under which the rest of this section operates already suffices for N8 and N10 , so these cycle counts of the running [[882 , 24]] QC-GHP code (girth 6)are computable in closed form from its Fourier matrices; we do not work out the expres-sions here. Translating N2j (GX ) into an absorbing-set count beyond the (3 , 3) bijection of Proposition 4.17 would require an analogue of Lemma 4.14 for length-2j cycles in GX
+
+(equivalently, j-cycles in GV N on j distinct variables under a suitable girth hypothesis); we do not pursue this here. 
+
+# 5 Spectral lower bound on the QC-GHP stopping distance 
+
+Combining the bipartite version of the expander Mixing Lemma (Haemers [23]; see also [6, §4.3, 4.8]) with the Fourier matrices of Theorem 4.1 yields a spectral lower bound on the QC-GHP stopping distance. 
+
+Proposition 5.1 (Spectral gap bound on stopping-set size in QC-GHP codes) . Let GX
+
+be the X-Tanner graph of a (γ, k )-biregular QC-GHP code over Zℓ, with m = r1ℓ check nodes and Fourier matrices {Mj }ℓ−1 
+
+> j=0
+
+from Theorem 4.1. The second-largest singular value 
+
+σ2(HX ) of HX satisfies 
+
+σ2(HX )2 = max  λ2(M0), max   
+
+> j̸=0
+
+λmax (Mj ), (15) 
+
+where λ2(M0) is the second-largest eigenvalue of M0. Every non-empty stopping set S ⊆
+
+VL of size a (Definition 2.4) satisfies 
+
+a
+
+
+
+m − aγ 
+
+2
+
+
+
+≤
+
+σ2(HX ) mγ
+
+2
+
+. (16) 
+
+Writing C = ( σ2(HX ) m/γ )2 and setting a± =  m ± pm2 − 2γC /γ , inequality (16) 
+
+is informative precisely when σ2(HX )2 < γ/ 2; in this regime every non-empty stopping set S satisfies |S| ≤ a− or |S| ≥ a+, so the stopping distance is bounded below by a+
+
+whenever the small-size range (0 , a −] is excluded by separate (e.g. girth- or degree-based) considerations. Proof. See Figure 6. By Definition 2.4, a stopping set S satisfies |N (S)| ≤ aγ/ 2, since every check in N (S) has at least two neighbours in S. For a ( γ, k )-biregular code with m
+
+checks and n variables (so |E| = γn = km ), the expander mixing lemma applied to the bipartite Tanner graph gives, for any S ⊆ VL and T ⊆ VR,
+
+|E(S, T )| − |E| 
+
+> mn
+
+|S|| T | ≤ σ2(HX )p|S|| T |.
+
+26 Taking T = VR \ N (S) makes E(S, T ) = ∅, so the EMI reduces to γa |T | 
+
+> m
+
+≤ σ2(HX )pa|T |.Squaring and dividing by a|T | > 0 yields 
+
+a |T | ≤ 
+
+σ2(HX ) mγ
+
+2
+
+.
+
+Substituting |T | = m − | N (S)| ≥ m − aγ/ 2 gives (16). For (15), the DFT block-diagonalisation of Theorem 4.1 identifies spec( HX HTX ) with the disjoint union of spec( Mj )over j = 0 , . . . , ℓ − 1. The Perron eigenvalue σ1(HX )2 = γk = λmax (M0), and the next-largest eigenvalue in this union is the larger of λ2(M0) and max j̸ =0 λmax (Mj ). 
+
+Remark 5.2 (Regime of applicability of Proposition 5.1) . The non-vacuity condition 
+
+σ2(HX )2 < γ/ 2 is restrictive. For (γ, k )-biregular bipartite graphs the Alon-Boppana-type lower bound [18, 31] forces σ2(HX ) ≥ √γ − 1 + √k − 1 − o(1) as ℓ → ∞ , so for the column-weight-3 family of interest (including the [[882 , 24]] code of Example 3.2, with 
+
+γ = 3 , k = 6 ) the inequality is structurally vacuous: σ22 ≳ (√2 + √5) 2 ≈ 13 while 
+
+γ/ 2 = 1 .5. Proposition 5.1 therefore reads as a framework-level statement: it shows how the QC-GHP Fourier matrices control the stopping distance whenever the second singular value can be driven below pγ/ 2, a regime accessible to designs with substantially larger column weight or to Ramanujan-type lifted-product constructions, rather than to the small-γ examples of Section 3. Closing this gap, either by a Tanner-style multi-eigenvalue tightening or by replacing the EMI step with a more parameter-aware spectral inequality, remains an open direction.                 
+
+> S
+> VL\S
+> N(S)
+> T=VR\N(S)
+> no edges between Sand T
+> |N(S)| ≤ aγ/ 2(each red check sees ≥2 neighbours in S)
+
+Figure 6: The expander mixing lemma proof of Proposition 5.1. A stopping set S ⊆ VL
+
+(blue, size a) has |N (S)| ≤ aγ/ 2 because every check in N (S) (red squares) sees at least two neighbours in S, and the total aγ incidences from S are spread over the checks of N (S). The expander mixing lemma is then applied to the empty edge set between S and the test set T = VR \ N (S) of non-neighbour checks: the deviation |E(S, T )| − | E|| S|| T |/(mn )from the expected count is bounded by σ2(HX )p|S|| T |, and since the actual count is 0 this forces a to satisfy (16). 27 6 Concluding remarks 
+
+We have developed a quantum-specific spectral framework for the lifted-product (QC-GHP) and generalised bicycle Tanner graphs of the leading quantum LDPC construc-tions. The central tool is the DFT block-diagonalisation of HX HTX (Theorem 4.1), which exploits the two-block tensor form HX = [ eH1 | Ir1 ⊗ eBT ] by absorbing the second block into a scalar shift |b(ωj )|2Ir1 and reduces an ( r1ℓ) × (r1ℓ) moment-trace computation to 
+
+ℓ traces of r1 × r1 Hermitian matrices, extending the classical single-block reductions of Smarandache–Flanagan [43] and Karimi–Banihashemi [27] to the quantum setting. To illustrate applications of the proposed spectral method, we obtain, for generalised bicy-cle codes, a 4-cycle count through additive energies (Proposition 4.9) and a joint Sidon characterisation of girth 6 echoing Fossorier’s criterion [19] (Corollary 4.11); via the Wang– Dolecek–Wesel triangle bijection [48], a closed-form Fourier count of the (3 , 3) elementary absorbing sets of column-weight-3 QC-GHP codes (Proposition 4.17), addressing a ques-tion raised by the framework of Morris, Pllaha, and Kelley [34]; and, through the bipartite expander mixing lemma applied to the second-largest singular value computed from the same Fourier matrices, a spectral-gap lower bound on stopping-set sizes (Proposition 5.1). We conclude with a few open problems. 
+
+• Higher even-cycle and absorbing-set counts. Extending the closed-form counts be-yond 4- and 6-cycles requires the additive 3-energy ( T3) computations and the girth-8 criterion noted in Remark 4.13, together with a length-2 j analogue of the (3 , 3)-to-triangle bijection in order to translate higher cycle counts into absorbing-set counts. 
+
+• Non-vacuous stopping-set bounds. For the column-weight-3 examples studied here the spectral-gap bound is vacuous, since the second singular value exceeds pγ/ 2. Identifying QC-GHP design parameters, for instance larger column weight or Ramanujan-type lifted-product constructions, under which the bound becomes in-formative is left for future work, as is a Tanner-style multi-eigenvalue tightening of the expander mixing step. 
+
+• Other elementary absorbing-set types. The (4 , 2) and (4 , 0) absorbing-set cases are accessible in principle through the same spectral data, via induced “ K4 minus an edge” and induced K4 counts in the variable-node graph, but they require the ad-ditional subgraph-elimination corrections sketched in Remark 4.13. 
+
+Acknowledgements. Aida Abiad is supported by NWO (Dutch Research Council) through the grant VI.Vidi.213.085. We thank Kirsten Morris for bringing the quantum LDPC construction of Panteleev-Kalachev to our attention. 28 References 
+
+[1] F. Amirzade, D. Panario, and M.-R. Sadeghi. “Girth Analysis of Quantum Quasi-Cyclic LDPC Codes”. In: Problems of Information Transmission 60.2 (2024), pp. 71– 89. [2] Z. Babar, P. Botsinis, D. Alanis, S. X. Ng, and L. Hanzo. “Construction of Quantum LDPC Codes From Classical Row-Circulant QC-LDPCs”. In: IEEE Communica-tions Letters 20.1 (2016), pp. 9–12. [3] A. Beemer, K. Haymaker, and C. A. Kelley. “Absorbing sets of codes from finite geometries”. In: Cryptography and Communications 11 (2019), pp. 1115–1131. [4] I. F. Blake and S. Lin. “On Short Cycle Enumeration in Biregular Bipartite Graphs”. In: IEEE Transactions on Information Theory 64.10 (2018), pp. 6526–6535. [5] N. P. Breuckmann and J. N. Eberhardt. “Quantum low-density parity-check codes”. In: PRX Quantum 2.4 (2021), p. 040101. [6] A. E. Brouwer and W. H. Haemers. Spectra of graphs . Universitext. New York: Springer, 2012, pp. xiv+250. [7] A. R. Calderbank, E. M. Rains, P. W. Shor, and N. J. A. Sloane. “Quantum er-ror correction via codes over GF (4)”. In: Proceedings of the IEEE International Symposium on Information Theory . 1997, p. 292. [8] D. Chytas, N. Raveendran, and B. Vasi´ c. “Collective bit flipping-based decoding of quantum LDPC codes”. In: IEEE Transactions on Communications (2025). [9] P. J. Davis. Circulant Matrices . John Wiley & Sons, 1979. [10] A. Dehghan and A. H. Banihashemi. “From cages to trapping sets and codewords: a technique to derive tight upper bounds on the minimum size of trapping sets and minimum distance of LDPC codes”. In: IEEE Transactions on Information Theory 
+
+65.4 (2019), pp. 2062–2074. [11] A. Dehghan and A. H. Banihashemi. “On the Tanner Graph Cycle Distribution of Random LDPC, Random Protograph-Based LDPC, and Random Quasi-Cyclic LDPC Code Ensembles”. In: IEEE Transactions on Information Theory 64.6 (2018), pp. 4438–4451. [12] C. Di, D. Proietti, I. E. Telatar, T. J. Richardson, and R. L. Urbanke. “Finite-length analysis of low-density parity-check codes on the binary erasure channel”. In: IEEE Transactions on Information Theory 48.6 (2002), pp. 1570–1579. [13] D. Divsalar, C. Jones, S. Dolinar, and J. Thorpe. “Protograph based LDPC codes with minimum distance linearly growing with block size”. In: GLOBECOM ’05: IEEE Global Telecommunications Conference . Vol. 3. 2005. [14] L. Dolecek, P. Lee, Z. Zhang, V. Anantharam, B. Nikolic, and M. Wainwright. “Pre-dicting error floors of structured LDPC codes: deterministic bounds and estimates”. In: IEEE Journal on Selected Areas in Communications 27.6 (2009), pp. 908–917. 29 [15] L. Dolecek. “On absorbing sets of structured sparse graph codes”. In: Proceedings of the 2010 IEEE Information Theory and Applications Workshop (ITA) . 2010, pp. 1– 5. [16] L. Dolecek, Z. Zhang, V. Anantharam, M. J. Wainwright, and B. Nikolic. “Analysis of Absorbing Sets and Fully Absorbing Sets of Array-Based LDPC Codes”. In: IEEE Transactions on Information Theory 56.1 (2010), pp. 181–201. [17] P. Erd˝ os and P. Tur´ an. “On a problem of Sidon in additive number theory, and on some related problems”. In: Journal of the London Mathematical Society s1-16.4 (1941), pp. 212–215. [18] K. Feng and W.-C. W. Li. “Spectra of hypergraphs and applications”. In: Journal of Number Theory 60.1 (1996), pp. 1–22. [19] M. P. C. Fossorier. “Quasicyclic Low-Density Parity-Check Codes from Circulant Permutation Matrices”. In: IEEE Transactions on Information Theory 50.8 (2004), pp. 1788–1793. [20] R. Gallager. “Low-density parity-check codes”. In: IRE Transactions on Information Theory 8.1 (1962), pp. 21–28. [21] D. Gottesman. “Fault-tolerant quantum computation with constant overhead”. In: 
+
+Quantum Information and Computation 14 (2014), pp. 1338–1372. [22] D. Gottesman. “Stabilizer Codes and Quantum Error Correction”. arXiv:quant-ph/9705052. PhD thesis. California Institute of Technology, 1997. [23] W. H. Haemers. “Interlacing eigenvalues and graphs”. In: Linear Algebra and its Applications 226/228 (1995), pp. 593–616. [24] T. R. Halford and K. M. Chugg. “An algorithm for counting short cycles in bipartite graphs”. In: IEEE Transactions on Information Theory 52.1 (2006), pp. 287–292. [25] S. Hoory. “The size of bipartite graphs with a given girth”. In: Journal of Combi-natorial Theory, Series B 86.2 (2002), pp. 215–220. [26] U. Kapshikar and S. Kundu. “On the Hardness of the Minimum Distance Problem of Quantum Codes”. In: IEEE Transactions on Information Theory 69.10 (2023), pp. 6293–6302. [27] M. Karimi and A. H. Banihashemi. “Counting Short Cycles of Quasi Cyclic Pro-tograph LDPC Codes”. In: IEEE Communications Letters 16.3 (2012), pp. 400– 403. [28] R. Koetter and P. O. Vontobel. “Graph-covers and iterative decoding of finite length codes”. In: Proceedings of the 3rd International Symposium on Turbo Codes and Related Topics . 2003, pp. 1–5. [29] A. A. Kovalev and L. P. Pryadko. “Quantum Kronecker sum-product low-density parity-check codes with finite rate”. In: Physical Review A 88.1 (2013), p. 012311. [30] A. Leverrier and G. Z´ emor. “Quantum Tanner codes”. In: 2022 IEEE 63rd Annual Symposium on Foundations of Computer Science (FOCS) . IEEE. 2022, pp. 872–883. 30 [31] W.-C. W. Li and P. Sol´ e. “Spectra of regular graphs and hypergraphs and orthogonal polynomials”. In: European Journal of Combinatorics 17.5 (1996), pp. 461–477. [32] D. J. C. MacKay, G. Mitchison, and P. L. McFadden. “Sparse-Graph Codes for Quantum Error Correction”. In: IEEE Transactions on Information Theory 50.10 (2004), pp. 2315–2330. [33] E. McMillon, A. Beemer, and C. A. Kelley. “Extremal absorbing sets in low-density parity-check codes”. In: Advances in Mathematics of Communications 17.2 (2023), pp. 465–483. [34] K. D. Morris, T. Pllaha, and C. A. Kelley. “Absorbing sets in quantum LDPC codes”. In: Advances in Mathematics of Communications (2026). [35] A. Orlitsky, R. Urbanke, K. Viswanathan, and J. Zhang. “Stopping sets and the girth of Tanner graphs”. In: Proceedings of the IEEE International Symposium on Information Theory . 2002, p. 2. [36] A. Orlitsky, K. Viswanathan, and J. Zhang. “Stopping set distribution of LDPC code ensembles”. In: IEEE Transactions on Information Theory 51.3 (2005), pp. 929–953. [37] P. Panteleev and G. Kalachev. “Asymptotically good quantum and locally testable classical LDPC codes”. In: Proceedings of the 54th Annual ACM SIGACT Sympo-sium on Theory of Computing . 2022, pp. 375–388. [38] P. Panteleev and G. Kalachev. “Degenerate quantum LDPC codes with good finite length performance”. In: Quantum 5 (2021), p. 585. [39] N. Raveendran, M. Bahrami, and B. Vasi´ c. “Syndrome-generalized belief propaga-tion decoding for quantum memories”. In: ICC 2019 – IEEE International Confer-ence on Communications . 2019, pp. 1–6. [40] N. Raveendran and B. Vasi´ c. “Trapping sets of quantum LDPC codes”. In: Quantum 
+
+5 (2021), p. 562. [41] T. Richardson. “Error floors of LDPC codes”. In: Proceedings of the Annual Allerton Conference on Communication, Control, and Computing . Vol. 41. 2003, pp. 1426– 1435. [42] M. Schwartz and A. Vardy. “On the stopping distance and the stopping redundancy of codes”. In: IEEE Transactions on Information Theory 52.3 (2006), pp. 922–932. [43] R. Smarandache and M. F. Flanagan. “Spectral Graph Analysis of Quasi-Cyclic Codes”. In: Proceedings of the IEEE Global Telecommunications Conference (GLOBE-COM) . Honolulu, HI, USA, 2009. [44] R. Smarandache and D. G. M. Mitchell. The Number of Cycles of Bi-regular Tanner Graphs in Terms of the Eigenvalues of the Adjacency Matrix . arXiv:2601.05340, submitted to IEEE Transactions on Information Theory. 2026. [45] L. Stambler, A. Krishna, and M. E. Beverland. Addressing stopping failures for small set flip decoding of hypergraph product codes . arXiv:2311.00877. 2023. 31 [46] R. Tanner. “A recursive approach to low complexity codes”. In: IEEE Transactions on Information Theory 27.5 (1981), pp. 533–547. [47] J.-P. Tillich and G. Z´ emor. “Quantum LDPC codes with positive rate and minimum distance proportional to the square root of the blocklength”. In: IEEE Transactions on Information Theory 60.2 (2014), pp. 1193–1202. [48] J. Wang, L. Dolecek, and R. D. Wesel. “The Cycle Consistency Matrix Approach to Absorbing Sets in Separable Circulant-Based LDPC Codes”. In: IEEE Transactions on Information Theory 59.4 (2013), pp. 2293–2314. [49] R. Wang and L. P. Pryadko. “Distance Bounds for Generalized Bicycle Codes”. In: 
+
+Symmetry 14.7 (2022), p. 1348. [50] B. Zhang. “On the Left-Right Lifted Product Quantum LDPC Code”. Master’s thesis. Duke University, 2024. url : https://hdl.handle.net/10161/31036 .[51] Z. Zhao, H. Xiong, Z. Ye, and G. Yan. Tur´ an-Theoretic Bounds on Several Elemen-tary Trapping Sets in LDPC Codes . arXiv:2604.12332. 2026. 32

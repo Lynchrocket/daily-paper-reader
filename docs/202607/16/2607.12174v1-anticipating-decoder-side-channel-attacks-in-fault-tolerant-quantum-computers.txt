@@ -1,0 +1,351 @@
+Title: Anticipating Decoder Side-channel Attacks in Fault-tolerant Quantum Computers
+
+URL Source: https://arxiv.org/pdf/2607.12174v1
+
+Published Time: Wed, 15 Jul 2026 11:55:42 GMT
+
+Number of Pages: 10
+
+Markdown Content:
+# Anticipating decoder side-channel attacks in fault-tolerant quantum computers 
+
+Shashvat Shukla 
+
+Department of Physics & Astronomy University College London 
+
+London, United Kingdom 
+
+Dan E. Browne 
+
+Department of Physics & Astronomy University College London 
+
+London, United Kingdom 
+
+Shin Nishio 
+
+Department of Physics & Astronomy University College London 
+
+London, United Kingdom and 
+
+Graduate School of Science and Technology Keio University 
+
+Yokohama, Japan 
+
+Abstract —As quantum computing emerges as an applied tech-nology, there is a growing need to protect quantum computers against information security attacks. This work identifies anew class of side-channel attacks against fault-tolerant quantum computers, in which the syndrome data that is sent to the decoder system is used to infer which computation (logical circuit) is taking place on the quantum computer. Our work introduces the concept of gate fingerprints , which describes those patterns present in syndrome data that indicate which logical operation took place on the quantum computer. We show different effects by which logical operations produce gate fingerprints by focusing on Clifford+T computation in the surface code. We then explore how gate fingerprint information can be used to make inferences about the circuits or algorithms run on a quantum computer. Our findings indicate that decoder systems can be a vector for side-channel attacks and thus to prevent this, decoder systems should either be secured or built by a trusted party. 
+
+Index Terms —Fault-tolerant Quantum Computing, Side-channel Attack, Quantum Computing Security, Untrusted De-coder, Syndrome Information 
+
+I. I NTRODUCTION 
+
+Quantum computing is an emerging computing platform that can run new kinds of efficient algorithms and lower the memory usage and running time for solving various problems [1], [2]. Many proposed quantum algorithms will require quantum computers with large numbers of qubits running many gate operations [3], [4]. These requirements are beyond the capability of existing quantum computers, particularly because quantum computers are vulnerable to the effects of noise and errors. Extra qubits need to be introduced to provide redundancy against errors. Fault-tolerant quantum computing (FTQC) [5], [6] studies such techniques for per-forming large-scale computations on noisy quantum systems. This involves realizing the quantum computation on logical 
+
+qubits implemented using many physical qubits according to a quantum error correcting code (QECC) [7]. Errors that occur during the computation can then be identified and corrected in real time. 
+
+SS is supported by the UK Engineering and Physical Sciences Research Council [Grant Number EP/S021582/1] and the National Research Founda-tion, Singapore through the National Quantum Office, hosted in A*STAR, under its Centre for Quantum Technologies Funding Initiative (S24Q2d0009). SN acknowledges support from the JST Moonshot R&D Program Grant No. JPMJMS256G and a JSPS Overseas Research Fellowship. 
+
+The real-time detection and correction of errors in a fault-tolerant quantum computer is a computationally intensive process in itself [8], [9]. To identify where errors occur, sets of multi-qubit measurements, called stabilizer measurements, are performed periodically during a computation. These mea-surements produce many bits of data, collectively called the syndrome data. The syndrome data is then processed by means of a decoding algorithm that seeks to identify the errors most likely to have produced the observed syndrome. Appropriate corrections are then applied to negate the effect of the error. While small-scale demonstrations of FTQC can be done using CPUs to perform decoding [10], in larger systems, the larger amount of data and the low-latency required of decoders necessitate the use of GPUs [11], FPGAs [12], ASICs [13], or a combination of them [9] to perform the decoding procedure. As such, decoding syndrome data in fault-tolerant quantum computing is emerging as an engineering challenge of its own, for which a purpose-built system needs to be designed. More broadly, emerging FTQC and quantum-HPC archi-tectures increasingly treat decoding as part of a specialized classical control stack, alongside compilation, orchestration, and hardware-aware runtime services, rather than as a mono-lithic component of the quantum processor itself [14]–[16]. Therefore, quantum computers may be assembled by buying a decoder system from a vendor and connecting the quantum computer control hardware to the decoder system. This sep-aration of concerns will allow the control hardware experts and the FTQC experts to focus on what they do best, while remaining interoperable through an abstraction layer [17]. Prior work in FTQC has assumed that the decoder is a trusted and reliable component. For example, techniques to im-prove the decoding success rate by giving the decoder informa-tion about the quantum computation have been studied [18]– [21]. While it is likely that optimal decoder performance will require that a decoder be given full information about the quantum circuit being executed, one can imagine scenarios where passing this information to the decoder represents a se-curity risk. It is natural, therefore, to consider the performance and security properties of circuit-agnostic decoding , where as little information as possible about a circuit is provided to the decoder. arXiv:2607.12174v1 [quant-ph] 13 Jul 2026 In such a setting, the decoupling of the decoder system from the rest of the quantum computing stack raises the question of new information security vulnerabilities that may arise if the decoder system is malicious, faulty or compromised. In this work, we consider a confidentiality threat model in which the decoder is assumed to perform its decoding task correctly, but is not trusted with respect to the confidentiality of the computation. We call this the circuit-agnostic decoding model. Concretely, the decoder is allowed to observe the spacetime syndrome presented at the decoder interface and attempt to infer properties of the hidden logical computation from it, but it does not actively tamper with the decoding output, inject faults, or deliberately return incorrect corrections. This models both an honest-but-curious [22] decoder vendor and a passively compromised decoder system. To explore this risk, our work investigates how information about the logical circuit running on the quantum computer leaks to the decoder. Of course this will happen if information about the circuit is explicitly given to the decoder to improve its performance, so we focus on scenarios where one is trying to give the decoder as little information as possible to perform its function. We show in two natural settings that the decoder system can infer details about what computation is taking place in the quantum computer from just the syndrome information that it receives, even if it is not given explicit details of the computation. Our main finding is that although one may be inclined to think of syndrome data as data about background noise that needs to be corrected away, there are in fact gate fingerprints 1
+
+that logical gates leave in the syndrome data from which an untrusted decoder system is able to gain information about the computation occurring in the quantum computer that it supports. The information security of quantum computers is an emerging topic of research [25]. While quantum computing as an applied technology is still in an early stage of development, there are a number of reasons to start thinking about quantum computer security early. Firstly, quantum computers are pow-erful, expensive and strategic technologies which means adver-saries will have stronger incentives to attack them for example to get free time on a quantum computer, to steal intellectual property on quantum computer designs, or to damage the quantum computer. Secondly, the quantum computing stack is complex and different from the classical computing stack, making the attack possibilities entirely new and uncharted. Our project is also motivated by the hope that lessons from the history of classical computer security will be learned and applied in quantum computing so that mistakes of the past will not be repeated. Until recently, the focus in the field of quantum computer security has been on NISQ computers, however it is shifting   
+
+> 1The term fingerprint has also been used in prior quantum-computing security work, but with different referents and objectives. Mutolo et al. use error-syndrome statistics as a fingerprint of hardware/backend identity for authentication [23], whereas MacNeil et al. use localized noise profiles as a fingerprint for circuit-tampering detection [24]. By contrast, in this paper, a gate fingerprint refers specifically to gate-dependent information that leaks to the decoder via syndrome data. Decoder Pauli Frame Syndrome Extraction SE
+
+...   
+
+> Syndrome Spacetime Syndrome Gate Inference SE tSE
+
+... 
+
+Fig. 1: Threat model for decoder-side confidentiality leakage. The decoder is honest-but-curious, which is assumed to per-form its task of estimating the Pauli frame from the spacetime syndrome, but is not trusted with respect to confidentiality. Even without being given an explicit circuit description, the information available at the decoder interface may be exploited to infer properties of the hidden logical computation, such as the logical gate applied in a given decoding window. towards FTQC [26]. Topics in FTQC security have included information leakage attacks against control hardware to obtain logical qubit access patterns [27], and physical attacks to disrupt the integrity of decoding and quantum error correcting codes [28]. A taxonomy of FTQC security vulnerabilities has been proposed [26] to categorise these and other previously discovered attack types. In this work, we identify a new type of side-channel attack in fault-tolerant quantum computers, where an untrusted decoder can exploit syndrome data to infer which logical operations are being executed. Fig. 1 shows the threat model for the decoding system in a fault-tolerant quantum computer. The remainder of this paper is organized as follows. In Section II we present the formal model of syndrome data used in this work. In Section III, we formalize the information leakage vulnerability through the notion of gate fingerprints ,which are gate-implementation-dependent statistical patterns in spacetime syndrome data. We then analyze how such fin-gerprints arise in surface-code implementations of Clifford+ T
+
+computation, and show that they can reveal not only the type of logical gate, but in some cases also details of its physical realization. We also formulate the gate inference problem that an adversary performing this attack would have to solve, which is the task of estimating the logical gate from observed syndrome data. Section IV describes techniques that allow the curious decoder to combine fingerprint information across the execution of a computation to determine the circuit or algorithm being run on the quantum computer. Section V ends with security recommendations and ideas for future work. II. P RELIMINARIES 
+
+In this section, we formalize the decoder-side leakage set-ting considered in this work. We assume that a logical quantum circuit is executed on a fault-tolerant quantum computer and that the decoder receives the spacetime syndrome required for real-time decoding. The decoder is assumed to perform its decoding task correctly, but it is not trusted with respect to confidentiality. It may attempt to infer properties of the hidden logical computation from the information available at the decoder interface. This captures both an honest-but-curious decoder supplied by an external vendor and a decoder system that has been passively compromised or is subject to information leakage. Our primary threat model is passive. The decoder observes the spacetime syndrome and may additionally have access to decoder-side configuration information necessary for normal operation, but it does not inject faults, alter the reported decoding result, or deliberately return incorrect corrections. Thus, the attack surface studied here is a confidentiality side channel, not an integrity or availability attack on the decoding process. We assume that the decoder is not given an explicit de-scription of the logical circuit, the algorithm identity, or the intended gate sequence. However, this does not imply that the decoder interface is free of structural information. Even when explicit circuit metadata is withheld, the spacetime syndrome itself may implicitly reveal features such as patch extent, detector layout, or transient geometry changes arising from code deformation or lattice surgery. In a stronger variant of the model, the decoder may also be able to associate syndrome streams with logical qubit or code-block identities. The adversary’s primary goals are to infer properties of the logical gate sequence and to distinguish between candidate circuit families or algorithm classes. More detailed inferences, such as interaction structure or qubit mappings, are treated as downstream possibilities rather than primary claims of this paper. We further assume that the adversary may obtain reference fingerprints in advance, for example by profiling the same or a similar hardware stack, and may use these to aid gate inference. 
+
+A. Syndrome extraction 
+
+Definition 1 (Syndrome) . For each logical qubit i, let 
+
+{si,p,k } denote the set of p-type stabilizer generators with 
+
+p ∈ { X, Z } and index of stabilizers k = 0 , 1, . . . , |Gp|− 1
+
+where |Gp| stands for the number of p-type stabilizers. In the t-th round of syndrome extraction, the projective measurement of si,p,k yields an eigenvalue mti,p,k ∈{+1 , −1}.We define the corresponding binary syndrome bit 
+
+sti,p,k ∈ { 0, 1}, sti,p,k = 1 − mti,p,k 
+
+2 ,
+
+so that sti,p,k = 0 (resp. 1) indicates a +1 (resp. -1) measurement outcome. The associated X-type syndrome vector at round t for logical qubit i is then 
+
+sti,X =  sti,X, 0, s ti,X, 1, . . . , s ti,X, |GX |− 1
+
+,
+
+which is a binary vector whose length equals the number of X-type stabilizer generators. A Z-type syndrome vector sti,Z is defined analogously. In the case where noise-free ideal syndrome measurements are possible, errors on qubits can be estimated and corrected based solely on the syndrome at each point in time. However, more realistically, measurements contain errors, so multiple rounds of syndrome measurements can be performed to esti-mate errors on the qubits and measurement errors [29]. Such syndromes involving multiple rounds are called spacetime syndromes. 
+
+Definition 2 (Spacetime syndrome) . Fix a total number of syndrome-extraction rounds T ≥ 1. For spacetime de-coding, we define detection events, i.e., temporal changes in syndrome values. We define the spacetime syndrome bits (detection events) as 
+
+dt+ 12 i, p, k := st+1  
+
+> i,p,k
+
+⊕ sti,p,k 
+
+for t = 0 , 1, . . . , T −1, where ⊕ denotes addition modulo 2. The associated p-type spacetime syndrome vector is 
+
+di,p =  dt+ 12
+
+> i,p,k
+
+   
+
+> t=0 ,...,T −1k=0 ,..., |Gp|− 1
+
+∈ 0, 1T |Gp|.
+
+The set of all such vectors {di,p }i,p is called the spacetime syndrome. Here dt+ 12 
+
+> i,p,k
+
+= 1 if and only if the outcome of stabilizer 
+
+si,p,k flips between round t and t + 1 .
+
+Definition 3 (Detector check matrix [30]) . Consider a fault-tolerant syndrome-extraction circuit with N possi-ble elementary error locations, indexed by ℓ = 1 , . . . , N ,and let D be the total number of detector outcomes in the spacetime syndrome. The detector check matrix is the binary matrix 
+
+H ∈ { 0, 1}D×N ,
+
+whose (j, ℓ )-entry is defined by 
+
+Hjℓ = 1 ⇐⇒ an error at location ℓ flips detector j, 
+
+and Hjℓ = 0 otherwise. Equivalently, if 
+
+e = ( e1, . . . , e N ) ∈ { 0, 1}Ndenotes the binary error pattern, where eℓ = 1 indicates that the elementary error at location ℓ occurred, then the resulting detector outcome vector 
+
+d ∈ { 0, 1}D
+
+satisfies 
+
+d = He (mod 2) .
+
+Thus, each column of H specifies the set of detectors triggered by a single elementary fault, and the full detector outcome is obtained by summing these columns modulo 2.The detector check matrix provides a compact description of how physical faults are mapped to detector outcomes in a given fault-tolerant implementation. In particular, it depends not only on the underlying code but also on the syndrome-extraction circuit and gate implementation used during the decoding window. Therefore, if different logical operations are realized through different fault-tolerant circuits, the cor-responding detector mappings can differ, which in turn can induce gate-dependent statistical structure in the observed spacetime syndrome. This observation motivates the notion of gate fingerprints introduced in the next section. III. G ATE FINGERPRINTS AND GATE INFERENCE 
+
+A. Gate Fingerprint Definition 
+
+In our setting, the decoder does not observe an abstract logical circuit directly; it observes the spacetime syndrome, i.e., the pattern of detector events generated across repeated syndrome-extraction rounds. Because these detector events are induced through a gate-dependent fault-tolerant imple-mentation and its associated detector mapping H(G), their distribution can depend on the executed logical gate. We refer to this gate-dependent statistical structure in spacetime syndrome data as a gate fingerprint .
+
+Definition 4 (Gate Fingerprint in Spacetime Syndrome) .
+
+Let D ∈ { 0, 1}m denote the spacetime syndrome (detec-tor outcomes) observed over a fixed decoding window, and let G ∈ G denote the hidden logical gate or short logical schedule executed in that window. We say that the decoder interface exhibits a gate fingerprint if the conditional distribution P (D | G) depends on G.The notion of a gate fingerprint is useful for separating a physical phenomenon from a specific attack algorithm. At this stage, we only claim that detector outcomes can depend on the executed logical operation through the underlying fault-tolerant implementation. In other words, the decoder receives information that may carry a computation-dependent fingerprint. 
+
+B. Gate Fingerprint on surface codes 
+
+In this subsection, we instantiate Definition 4 on fault-tolerant logical operations implemented on surface codes. The detector observes a spacetime pattern of detector events generated by a gate-dependent syndrome-extraction schedule and its associated detector check matrix. This can be used to infer the logical gate information. Therefore, even when the logical circuit is specified at a high level, the conditional distribution of detector outcomes can depend on the particular fault-tolerant realization of the gate. More concretely, a gate fingerprint may arise from several distinct sources: 1) which stabilizer family is initially “flagged” by state preparation, i.e. either all X or all Z stabilizers will be fixed deterministically at the beginning or end of the decoding window, while the other will be uniformly random. (e.g. Sec. III-B1), 2) which data and ancilla qubits participate in the imple-mentation (e.g. Sec. III-B3), 3) how faults propagate through the syndrome-extraction circuit (e.g. Sec.III-B5), and 4) whether the logical operation changes the geometry or boundary conditions of the code, as in code deformation or lattice surgery [31] (e.g. Sec.III-B5). These mechanisms induce gate-dependent statistical structure in the spacetime syndrome, which can leak information about the logical circuit to the decoder. In the remainder of this subsection, we illustrate these categories using representative logical operations from the instruction set {Initialization of |0⟩ and |+⟩,
+
+Id, X, Y, Z, H, S, Transversal CX, Lattice Surgery, T }, and discuss which aspects of the spacetime syndrome make them distinguishable to the decoder. 
+
+1) State preparation: First, we consider cases in which the gate fingerprint is easily identifiable. |0⟩L state and |+⟩L state are fundamental resources for quantum computing. For logical state preparation in a rotated surface code, the difference between |0⟩L and |+⟩L initialization comes from which type of stabilizer is fixed by the initial product state. For the initialization of |0⟩L state, we first initialize all the physical qubits as |0⟩⊗N . For any Z-type stabilizer SZ =Q 
+
+> i∈p
+
+Zi, we have 
+
+SZ |0⟩⊗N = |0⟩⊗N ,
+
+because Zi |0⟩ = |0⟩. Therefore, all Z-stabilizers yield the default outcome +1 , without considering the effects of noise. By contrast, for any X-type stabilizer SX = Q 
+
+> i∈p
+
+Xi,SX |0⟩⊗N̸ = ± | 0⟩⊗N ,
+
+so |0⟩⊗N is not an eigenstate of SX . One can check that the first X-stabilizer measurements can return ±1 uniformly at random. Similarly, for the initialization of |+⟩L state, all data qubits are initialized in |+⟩⊗N , then 
+
+SX |+⟩⊗N = |+⟩⊗N ,because Xi |+⟩ = |+⟩. Thus all X-stabilizers yield +1 . On the other hand, 
+
+SZ |+⟩⊗N̸ = ± | +⟩⊗N ,
+
+since Zi |+⟩ = |−⟩ . Like before, the first Z-stabilizer mea-surements return ±1 uniformly at random. In summary, On |0⟩⊗N , Z -stabilizers give + 1 , X-stabilizers give ± 1,
+
+On |+⟩⊗N , X -stabilizers give + 1 , Z-stabilizers give ± 1.
+
+Therefore, the initialization fingerprint is not merely achange in average detector rate, but a structural asymmetry in which stabilizer family is flagged at the boundary of the decoding window , hence it is easy to distinguish between the two. 
+
+2) Identity gate: For the identity gate, the fingerprint is equivalent to the system’s background noise. If the background noise has distinctive characteristics, it can sometimes make the differences clearer to work with by subtracting the fingerprint of the identity gate from any chunk of syndrome data before looking for gate fingerprints. 
+
+3) Pauli X, Y, Z gates: The logical Pauli X, Y , and Z
+
+gates will produce fingerprints with more triggered detectors at the time when the gate is applied because of the physical gate errors from applying a physics X, Y , or Z gate to each physical qubit. Note that the application of physical gates typically introduces more errors than doing nothing (i.e. identity gate). Since all the Pauli gates are applied to the same qubits, under the non-biased channel where X errors occur with the same probability as Z errors, it is impossible to distinguish these three gates. 
+
+4) Hadamard and Phase gate: The Hadamard and Phase gates have fingerprints arising from how they propagate X and 
+
+Z errors in time. The logical Hadamard exchanges X-type and Z-type logical operators [32]. In the syndrome data, this can be seen as a conversion of past X (Z) errors to Z (X) errors. Consequently, a decoder may infer the presence of a Hadamard gate from an exchange in the syndrome statistics between the two detector families. The phase gate S transforms X errors into Y errors while leaving Z errors unchanged. Therefore, one can find a time correlation between those checks as Z check after the gate is now a combination of X and Z errors before the gate, while X
+
+checks are preserved during the gate up to background noise. Therefore, S may remain distinguishable from both identity-like behavior and Hadamard-like behavior. 
+
+5) CX gates: Two-qubit logical gates can produce stronger fingerprints than single-qubit gates, because they create cor-relations across multiple logical patches. Here we compare two representative implementations of logical CX , a transversal implementation and a lattice-surgery-based implementation. In a transversal logical CX , corresponding physical qubits in the control and target code blocks interact pairwise, as 
+
+Fig. 2: Transversal logical CX gate from foreground codeblock as a control qubit to background codeword as a target qubit. Each white vertex is a data qubit, and each red (blue) face is an 
+
+X stabilizer check ( Z stabilizer check). Each arrow illustrates the physical CX gate. X errors propagate in the direction of the arrow, while Z errors propagate in the opposite direction. 0 2 4 6 8 10                
+
+> x0246810
+> y
+> 0
+> 1
+> 2
+> 3
+> 4
+> round
+> Control patch
+> 0246810
+> x0246810
+> y
+> 0
+> 1
+> 2
+> 3
+> 4
+> round
+> Target patch
+> 0.0
+> 0.1
+> 0.2
+> 0.3
+> 0.4
+> 0.5
+> P(detector=1)
+
+Fig. 3: Gate fingerprint of transversal CX gate on a pair of 
+
+d = 5 rotated surface code patch. Detector-event probabilities are shown over space and time for the control and target patches. The resulting signature is localized in time but spread over both patches, consistent with the coordinated two-block interaction of the transversal implementation. We set the phys-ical error rates to pidle = 10 −3, p1q = 5 × 10 −3, p2q = 10 −2,
+
+preset = 10 −3, and pmeas = 10 −3.illustrated in Fig. 2. This produces a characteristic pattern of cross-block participation during a localized time window. Although the overall code geometry is unchanged, the syn-drome statistics can still reflect the presence of a coordinated two-block interaction. In particular, faults occurring during the transversal interaction can propagate along these pairwise couplings and induce correlated detector events across the two logical patches. The resulting fingerprint is therefore temporally localized, but spatially distributed over both code blocks. Fig. 3 shows the gate fingerprint of the transversal 
+
+CX gate. Which of the X and Z stabilizers gets excited is not symmetric with respect to the direction of the CX gate; the direction of the CX gate can also be inferred from the fingerprint. By contrast, in a lattice-surgery-based logical CX , the gate is implemented through logical two-qubit Pauli measurement. In this case, the fingerprint does not arise merely from pairwise interactions between corresponding qubits. Instead, it arises 0 2 4 6 8 10                
+
+> x
+> 0246810
+> y
+> 0
+> 2
+> 4
+> 6
+> 8
+> round
+> Control patch
+> 0246810
+> x
+> 0246810
+> y
+> 0
+> 2
+> 4
+> 6
+> 8
+> round
+> Target patch
+> 0.0
+> 0.1
+> 0.2
+> 0.3
+> 0.4
+> 0.5
+> P(detector=1)
+
+Fig. 4: Gate fingerprint of lattice surgery-based CX gate. The boundary associated with the XX (ZZ ) measurement is high-lighted by a localized increase in detector-event probability. from a temporary change in patch connectivity, boundary conditions, or effective code geometry. As a result, the decoder may observe detector patterns concentrated near the surgery region as shown in Fig. 4, together with transient events associated with the merge and split stages. These features can be qualitatively different from those of the transversal implementation. This comparison highlights an important point that the decoder may be able to distinguish not only between different logical gate labels, but also between different fault-tolerant realizations of the same logical gate. In other words, the object inferred by the decoder is not purely the logical semantics of CX , but the logical operation together with how it is physically implemented. 
+
+6) T gate: The logical T gate is a non-Clifford operation and, in surface-code-based FTQC, is typically implemented by magic-state injection [33]–[36], with magic states obtained from magic state distillation [33], [37] or cultivation [38] factories. Magic state injection can be realized by one and two-qubit Pauli measurements and classical controlled single-qubit gates. Therefore, for our purposes, we regard the T gate as a subroutine rather than a primitive operation. 
+
+C. Gate Inference 
+
+Decoding is the problem of inferring the appropriate cor-rection operations from syndrome data. On the other hand, an untrusted decoder trying to exploit the information leakage vulnerability to learn about the computation is also trying to solve the problem of inferring which logical gate operations were applied on the logical qubits from syndrome data. This is possible because different logical operations have different implementations, affecting how errors arise and propagate on physical qubits, which means that the logical operation leaves a signature in the syndrome data. We first present this problem in a Maximum Likelihood formulation. 
+
+Definition 5 (Maximum-Likelihood Gate Inference) . Let 
+
+d = {di,p }i,p denote the observed spacetime syndrome obtained from T rounds of stabilizer measurements. Let 
+
+G be the set of supported logical gates, and let G =
+
+{Gi,u }i,u be a candidate logical-gate schedule, where each gate Gi,u ∈ G has a fixed duration in syndrome-extraction cycles (also known as code cycles). Each schedule G determines a physical syndrome-extraction circuit, including its set of physical error locations, the corresponding noise probabilities, and the decoding matrix H(G) relating physical errors to the spacetime syndrome. The marginal posterior probability of a schedule G
+
+given the observed syndrome d is 
+
+P (G | d) ∝ P (G) X 
+
+> e∈{ 0,1}N(G)
+> H(G)e=d
+
+P (e | G),
+
+where N (G) is the number of error locations for G, P (G)
+
+is a prior over gate schedules, and P (e | G) is the product of location-wise noise probabilities. The maximum-likelihood estimate of the logical gate schedule is 
+
+ˆG = arg max  
+
+> G
+
+P (G | d)= arg max 
+
+> G
+
+P (G) X
+
+> e:
+> H(G)e=d
+
+P (e | G)
+
+ . (1) Definition 5 gives the most general form of the adversary’s task: inferring a hidden logical-gate schedule from the ob-served spacetime syndrome. In practice, however, solving Eq. (1) exactly is generally intractable for long schedules, since both the latent gate sequence and the associated physical fault configurations must be marginalized over. We therefore begin with a restricted setting that captures the essential leakage phenomenon while being easy to simulate. Specifically, we consider a single decoding window containing one logical operation drawn from a finite gate set. In this case, gate inference reduces to a multiclass classification problem: given the observed spacetime syndrome d, estimate which logical gate most likely generated it. Fig. 5 shows a representative confusion matrix for gate in-ference over the logical gate set. For this simulation, we do not implement the exact maximum-likelihood inference of Eq. (1). Instead, we use a naive-Bayes classifier on detector outcomes as a tractable approximation. The classification task takes the gate fingerprints of two qubits as input. The results suggest that 
+
+H, S, and CX induce more distinctive fingerprints, whereas 
+
+X, Y , and Z are much harder to separate from one another under the unbiased Pauli noise model. Therefore the gate fingerprints are not uniformly distinguishable, but some logical operations can nevertheless be identified from syndrome data reliably. This is already sufficient to establish decoder-side information leakage. Moreover, an attacker does not need perfect single-gate recovery. Partial gate-level evidence can still be exploited when combined across time or matched against a restricted set of candidate circuits. Having established this point at the single-gate level, we H S CX X Y Z                              
+
+> Predicted
+> HSCX XYZ
+> True
+> 867 83 32 459
+> 65 758 70 43 36 28
+> 16 50 919 384
+> 43 26 15 275 318 323
+> 41 44 18 273 327 297
+> 43 40 27 276 305 309
+> 200
+> 400
+> 600
+> 800
+> Count
+
+Fig. 5: Classification metrics for logical gates. H, S , and lattice surgery exhibit distinctive fingerprints and are therefore generally classified correctly, whereas the Pauli gates X, Y ,and Z share the same fingerprint under the unbiased Pauli channel, rendering them indistinguishable. 1000 shots per logical gate and 10000 shots for training. now turn to how an adversary can aggregate such evidence across time to infer larger circuit structure in the next section. IV. C IRCUIT IDENTIFICATION TECHNIQUES 
+
+The previous section showed how syndrome information contains fingerprints of individual logical gate operations. This section explores the techniques that can be used to process the individual gate fingerprints to make inferences about the circuit or algorithm that is running in the quantum computer. As we have seen in the last section, gate inference is not deterministic and so we will not always be able to perfectly reconstruct the circuit that was run. However given that the set of known practical quantum algorithms is currently small [4], and that many quantum circuits have repeating structure, this gives us strong priors together with which information from gate fingerprints can be very revealing. We now consider two variants of the decoder-side threat model introduced above, corresponding to different amounts of identifying information exposed at the decoder interface. In the weaker variant, which we call qubit-unaware decoding, the decoder receives syndrome instances without persistent logical-qubit or code-block identities. In the stronger variant, qubit-aware decoding, the decoder can associate syndrome streams with particular logical qubits or patches. The latter more closely reflects a straightforward implementation of decoder bookkeeping, while the former models an interface that attempts to reduce explicit metadata exposure. In both cases, however, the decoder may still exploit gate fingerprints present in the spacetime syndrome itself. 
+
+A. Qubit-unaware decoding 
+
+In this scenario, the quantum computer sends syndrome data to the decoder without associating the data to particular logical qubits. The decoder can still solve the decoding problems it is given and return the result to the quantum computer, however the problems are jumbled so that the decoder does not know which code block or qubits the data is associated with. This is a model of the minimal set of information that is given to a decoder without using sophisticated techniques to deliberately prevent decoder side-channel attacks. In this scenario, the decoder will still be able to observe gate fingerprints in the syndrome data it processes and estimate the count of each logical gate type. Certain subroutines such as adders [39], [40] can have fixed ratios of gates across different problem sizes because they use a standard theoretical construc-tion. Therefore, it is possible that for some circuits, a simple inference technique would be to match the ratios of gate counts observed in a circuit run to the gate statistics of a small set of candidate algorithms. However, this technique is likely to be of limited applicability as differences in compilation techniques can greatly change the ratio of gates. Many algorithms also do not preserve their gate ratios linearly in problem size. In particular, the fidelity of discretizations of rotation gates, by algorithms such as the Solovay-Kitaev algorithm [41], can totally change the ratio of gates. More powerful inferences can be made by considering that decoders operate in real-time and thus the gate fingerprints in the syndrome data arrive in the same order as the circuit being run. Analysing gate statistics as they change can reveal algorithmic structure. We performed a model simulation for three quantum circuits (Amplitude Amplification, HHL [42] and Quantum Fourier Transform). We implemented Amplitude Amplification, but the other circuits were obtained from FTCircuitBench [43]. These circuits were then compiled to a Clifford+ T gate set [44]. We make the assumption that all T -states are teleported into the circuit. This means that the decoder only needs to detect fingerprints of Clifford gates in the syndrome data. We also assume that the syndrome from the magic factories is not being used by the decoder system in its attack. The Clifford gates were counted in each layer of the circuit and the confusion matrix from Figure 5 was applied to the data to simulate the statistics as observed by the untrusted decoder after gate inference. Figures 6, 7 and 8 show rolling average gate counts for just the CX and Hadamard gates with simulated classification failures for Amplitude Amplification, HHL and the quantum Fourier transform, respectively. The two notable features of the plots are the changes in ratios of gates and the changes in the number of gates over time. The gate counts in Ampli-tude Amplification have a periodicity as it is an alternating operator algorithm. Such a structure would also be present in similar plots of Grover’s algorithm and QAOA, as long as the two alternating operators have different gate ratios. In HHL, the plot captures the symmetry that arises from applying a unitary and its inverse, with gate-intensive arcsin arithmetic and controlled rotations in between. A notable feature of the quantum Fourier transform circuit is that the gate density starts low and ends low, but has higher gate density in the middle part of the circuit. This is explained by the order of gates in the QFT circuit. In the earlier part of the circuit, some qubits are waiting for operations on other qubits to complete before they are activated. Once all qubits are active, the circuit achieves maximal parallelisation and thus the rolling mean reaches a maximum. Then towards the end, the work on those qubits that started early is complete, and the parallelisation decreases as more qubits finish their work. Algorithms can be distinguished by inspection of the rolling mean gate counts across layers. To automate this inference a classifier could be built by handcrafted features such as periodicity and peaks, or sequence models could be explored. There is even more information available to the decoder in the shape of the decoding problems. For example, performing lattice surgery between two patches further away creates a bigger surface code patch to be decoded. Further work can investigate attacks that use this information. 
+
+Fig. 6: Rolling mean gate counts of the amplitude amplifica-tion circuit as seen by the decoder. 
+
+Fig. 7: Rolling mean gate counts of the HHL algorithm as seen by the decoder. 
+
+Fig. 8: Rolling mean gate counts of the quantum Fourier transform circuit as seen by the decoder. 
+
+B. Qubit-aware decoding 
+
+In this scenario, the decoder can associate syndrome data with specific logical qubits or code blocks. This is the default scenario that would arise in a straightforward implementation, where the decoder receives syndrome data labeled by logical qubit identity to facilitate bookkeeping of the Pauli frame. It may also have advantages such as tailoring the decoding to the precise noise models of the physical qubits involved in that logical qubit. While this simplifies implementation, it grants the adversarial decoder more information than in the qubit-unaware setting, enabling more precise circuit-level inference. 
+
+1) Circuit interaction graph: With access to most of the 
+
+CX gates that occurred in the circuit, and only a small number of false-positive CX gates, an approximate structural analysis of the circuit will be possible to extract information such as the interaction graph of the circuit. The interaction graph is a weighted graph with qubits as vertices and higher-weight edges between qubits that have more two-qubit gates between them. This information can help classify the algorithm being used. For example, circuits corresponding to time evolutions of Hamiltonians have interaction graphs that reflect the local interactions within the Hamiltonian. Different algorithms and circuits are known to have different structures which have been studied for various reasons such as reconstructing circuit infor-mation from partial information obtained from side channels [27], visualisation [43] and investigating efficient circuit to device mappings [45]. 
+
+2) Circuits with repeating structure: Quantum Algorithms like Amplitude Amplification and Grover’s algorithm with a repeating circuit structure are particularly easy to recon-struct from gate fingerprint information, because the repeating structure allows for the correction of any incorrectly inferred gates. Figure 9 illustrates this principle using a majority-voting approach for a simple circuit with a three-fold repeating structure. This approach is more successful when the circuit consists of a larger number of repetitions. Figure 10 shows the performance of majority voting reconstruction as it depends on the number of repetitions in the circuit and the gate inference error. This technique can be particularly useful for identifying the oracle used in Grover’s algorithm or Amplitude estimation, which reveals all the information about the problem being solved. V. C ONCLUSION 
+
+In this work, we defined the circuit-agnostic model of quantum error correction decoding and studied its security properties. We identified a new class of side-channel attacks in fault-tolerant quantum computers, in which an untrusted decoder can exploit spacetime syndrome data to infer proper-ties of the logical computation being executed. We formalized this leakage through the notion of gate fingerprints which are gate-dependent patterns that appear in the syndrome data as a result of distinctive noise processes of the underlying physical circuit implementation of the logical gate. Focusing on Clifford +T computation in the surface code, we showed that different logical operations can leave dis-Fig. 9: Imperfect gate inferences on a circuit with repeating structure can be reconstructed by majority voting. Note that due to the uniform confusion between X, Y and Z gates as in Fig. 5, the inferred circuit has all three replaced with the X gate. 
+
+Fig. 10: Performance of majority-voting technique for recon-structing repeating circuits after gate-wise fingerprint infer-ence. tinguishable signatures in the syndrome history. In particu-lar, initialization procedures, Hadamard and phase gates, and multi-qubit operations such as transversal and lattice-surgery-based CX gates can produce characteristic patterns that may be exploited by a curious decoder to breach the confidentiality of the computation. Our analysis further suggests that the decoder may infer not only the logical gate label itself, but in some cases also features of its physical realization. These observations establish decoder-side inference as a concrete information-leakage threat in FTQC. More broadly, our results show that syndrome data should not be treated as auxiliary information about environmental noise. Instead, it should be regarded as security-sensitive data which is circuit-dependent and whose exposure may reveal algorithmic or structural information about the user’s computation. This finding also reveals a tradeoff between information security and decoding performance. For the same reason that different logical operations leave fingerprints in their syndrome data, knowledge of the logical operation and how it is implemented allows the decoder to anticipate which patterns of errors are correlated, and how to interpret them. A number of works have thus explored how best to incorporate this knowledge into the decoder [18]–[21]. Designing the stack to prevent information leakage to the decoder thus means passing up on the advantages of circuit-aware decoding. Important directions for future work include quantifying the information content of gate fingerprints under realistic noise models and on other state-of-the-art FTQC architectures and compilation strategies such as generalized Pauli-based computing [36] and high-rate Quantum LDPC code-based computing [46], [47]. To check the details of the attack, a real-time demonstration should be implemented using real decoder systems and quantum computer hardware. Secure decoding architectures that balance fault-tolerance performance with confidentiality of computation also need to be explored and developed. In particular, this will require more techniques that can erase fingerprints from syndrome data. For further mitigation of the effect of the attack, verifi-cation methods in blind quantum computation [48] can be useful. Also, it might be possible to hide the gate fingerprint by obfuscating the syndrome information for example using code automorphisms [49] or adding virtual errors. However, whether these strategies would be effective requires further research. From a systems perspective, our findings imply that decoder systems should either be secured as trusted components or the interface to the decoder must be designed with explicit leakage-mitigation mechanisms. This is particularly important in cases where decoder systems are large high-performance computers themselves, which may mean they are vendor-supplied, shared, or connected to networks increasing the vulnerability to side-channel attacks. As it is early to know the precise details of such attacks, our only security recommen-dation at this stage is for users who do not want information about the quantum circuit they are running to be revealed to ensure that they trust the decoder system. ACKNOWLEDGEMENT 
+
+SN thanks Yosuke Ueno for the useful discussion and for sharing references on fingerprint. SS thanks SN and DB for teaching him fault-tolerant quantum computing. SS and SN thank George Umbrarescu for helpful discussions. REFERENCES [1] P. W. Shor, “Algorithms for quantum computation: discrete logarithms and factoring,” in Proceedings 35th annual symposium on foundations of computer science . Ieee, 1994, pp. 124–134. [2] L. K. Grover, “A fast quantum mechanical algorithm for database search,” in Proceedings of the twenty-eighth annual ACM symposium on Theory of computing , 1996, pp. 212–219. [3] C. Gidney, “How to factor 2048 bit rsa integers with less than a million noisy qubits,” arXiv preprint arXiv:2505.15917 , 2025. [4] A. M. Dalzell, S. McArdle, M. Berta, P. Bienias, C.-F. Chen, A. Gily´ en, C. T. Hann, M. J. Kastoryano, E. T. Khabiboulline, A. Kubica et al. ,“Quantum algorithms: A survey of applications and end-to-end com-plexities,” arXiv preprint arXiv:2310.03011 , 2023. [5] P. W. Shor, “Fault-tolerant quantum computation,” in Proceedings of 37th conference on foundations of computer science . IEEE, 1996, pp. 56–65. [6] D. Gottesman, “Theory of fault-tolerant quantum computation,” Physical Review A , vol. 57, no. 1, p. 127, 1998. [7] P. W. Shor, “Scheme for reducing decoherence in quantum computer memory,” Physical review A , vol. 52, no. 4, p. R2493, 1995. [8] F. Battistel, C. Chamberland, K. Johar, R. W. J. Overwater, F. Sebastiano, L. Skoric, Y. Ueno, and M. Usman, “Real-time decoding for fault-tolerant quantum computing: progress, challenges and outlook,” Nano Futures , vol. 7, no. 3, p. 032003, Aug. 2023. [9] B. Barber, K. M. Barnes, T. Bialas, O. Bu˘ gdaycı, E. T. Campbell, N. I. Gillespie, K. Johar, R. Rajan, A. W. Richardson, L. Skoric et al. , “A real-time, scalable, fast and resource-efficient decoder for a quantum computer,” Nature Electronics , vol. 8, no. 1, pp. 84–91, 2025. [10] S. A. Moses, C. H. Baldwin, M. S. Allman, R. Ancona, L. Ascarrunz, C. Barnes, J. Bartolotta, B. Bjork, P. Blanchard, M. Bohn et al. , “A race-track trapped-ion quantum processor,” Physical Review X , vol. 13, no. 4, p. 041052, 2023. [11] O. Ferraz, B. Coutinho, G. Falcao, M. Gomes, F. A. Monteiro, and V. Silva, “Gpu-accelerated syndrome decoding for quantum ldpc codes below the 63 μs latency threshold,” arXiv preprint arXiv:2508.07879 ,2025. [12] P. Das, A. Locharla, and C. Jones, “Lilliput: a lightweight low-latency lookup-table decoder for near-term quantum error correction,” in Pro-ceedings of the 27th ACM International Conference on Architectural Support for Programming Languages and Operating Systems , 2022, pp. 541–553. [13] P. Das, C. A. Pattison, S. Manne, D. M. Carmean, K. M. Svore, M. Qureshi, and N. Delfosse, “Afs: Accurate, fast, and scalable error-decoding for fault-tolerant quantum computers,” in 2022 IEEE Interna-tional Symposium on High-Performance Computer Architecture (HPCA) .IEEE, 2022, pp. 259–273. [14] M. Mohseni, A. Scherer, K. G. Johnson, O. Wertheim, M. Otten, N. A. Aadit, Y. Alexeev, K. M. Bresniker, K. Y. Camsari, B. Chapman et al. ,“How to build a quantum supercomputer: Scaling from hundreds to millions of qubits,” arXiv preprint arXiv:2411.10406 , 2024. [15] N. Johnson, A. Asfaw, G. Prawiroatmodjo, T. Hartley, S. Protasov, C. Nnadi, A. Safehian, J. Lal, C. Sangvirojkul, G. Aiello, M. Ruszala, and L. Durst, “A real-time low-latency quantum error correction stack: Deltaflow and deltakit,” in 2025 IEEE International Conference on Quantum Computing and Engineering (QCE) , vol. 02, 2025, pp. 578– 579. [16] S. Seelam, J. M. Chow, A. C´ orcoles, S. Sheldon, T. Mittal, A. Kandala, S. Dague, I. Hincks, H. Horii, B. Johnson et al. , “Reference architecture of a quantum-centric supercomputer,” arXiv preprint arXiv:2603.10970 ,2026. [17] A. Husseini and A. Datta, “QEC interface for real-time quantum error correction,” in APS Global Physics Summit 2025 , Mar. 2025. [18] M. Cain, C. Zhao, H. Zhou, N. Meister, J. P. B. Ataides, A. Jaffe, D. Bluvstein, and M. D. Lukin, “Correlated decoding of logical algo-rithms with transversal gates,” Physical Review Letters , vol. 133, no. 24, p. 240602, 2024. [19] Y. Wu, N. Liyanage, and L. Zhong, “Lego: Qec decoding system architecture for dynamic circuits,” arXiv preprint arXiv:2410.03073 ,2024. [20] Y. Zhou, C. Wan, Y. Xu, J. P. Zhou, K. Q. Weinberger, and E.-A. Kim, “Learning to decode logical circuits,” Nature Computational Science ,pp. 1–10, 2025. [21] M. Serra-Peralta, M. H. Shaw, and B. M. Terhal, “Decoding across transversal clifford gates in the surface code,” PRX Quantum , vol. 7, p. 010335, Feb 2026. [22] A. Paverd, A. Martin, and I. Brown, “Modelling and automatically analysing privacy properties for honest-but-curious adversaries,” Tech. rep, Tech. Rep., 2014. [23] V. Mutolo, D. Campbell, Q. Manning, H. W. Dubourg, R. Lyu, S. Sethumadhavan, D. Rubenstein, and S. Stolfo, “Quantum computer fingerprinting using error syndromes,” arXiv preprint arXiv:2506.16614 ,2025. [24] G. MacNeil, S. Sunkavilli, and Q. Yu, “Authenticating quantum circuits through localized noise fingerprints,” in Proceedings of the 2025 Quan-tum Security and Privacy Workshop , 2025, pp. 7–9. [25] J. Szefer, “Research directions in quantum computer cybersecurity,” 2025. [26] T. Trochatos, C. Kang, F. T. Chong, and J. Szefer, “Exploration of vulnerabilities of fault-tolerant quantum computing,” in 2025 26th International Symposium on Quality Electronic Design (ISQED) . IEEE, 2025, pp. 1–6. [27] T. Trochatos, C. Kang, A. Wang, F. T. Chong, and J. Szefer, “Trace-based reconstruction of quantum circuit dataflow in surface codes,” arXiv preprint arXiv:2508.14533 , 2025. [28] J. Lenssen and A. Paler, “Fooling the decoder: An adversarial attack on quantum error correction,” 2025. [29] E. Dennis, A. Kitaev, A. Landahl, and J. Preskill, “Topological quantum memory,” Journal of Mathematical Physics , vol. 43, no. 9, pp. 4452– 4505, 2002. [30] O. Higgott and C. Gidney, “Sparse blossom: correcting a million errors per core second with minimum-weight matching,” Quantum , vol. 9, p. 1600, 2025. [31] D. Horsman, A. G. Fowler, S. Devitt, and R. V. Meter, “Surface code quantum computing by lattice surgery,” New Journal of Physics , vol. 14, no. 12, p. 123011, 2012. [32] Z.-H. Chen, M.-C. Chen, C.-Y. Lu, and J.-W. Pan, “Transversal logical clifford gates on the rotated surface code with reconfigurable neutral atom arrays,” Physical Review Letters , vol. 136, no. 13, p. 130601, 2026. [33] S. Bravyi and A. Kitaev, “Universal quantum computation with ideal clifford gates and noisy ancillas,” Physical Review A—Atomic, Molecu-lar, and Optical Physics , vol. 71, no. 2, p. 022316, 2005. [34] D. Gottesman and I. L. Chuang, “Demonstrating the viability of universal quantum computation using teleportation and single-qubit operations,” Nature , vol. 402, no. 6760, pp. 390–393, 1999. [35] X. Zhou, D. W. Leung, and I. L. Chuang, “Methodology for quantum logic gate construction,” Physical Review A , vol. 62, no. 5, p. 052316, 2000. [36] D. Litinski, “A game of surface codes: Large-scale quantum computing with lattice surgery,” Quantum , vol. 3, p. 128, 2019. [37] E. Knill, “Fault-tolerant postselected quantum computation: Schemes,” 
+
+arXiv preprint quant-ph/0402171 , 2004. [38] C. Gidney, N. Shutty, and C. Jones, “Magic state cultivation: growing t states as cheap as cnot gates,” arXiv preprint arXiv:2409.17595 , 2024. [39] S. A. Cuccaro, T. G. Draper, S. A. Kutin, and D. P. Moulton, “A new quantum ripple-carry addition circuit,” 2004. [40] Y. Takahashi, S. Tani, and N. Kunihiro, “Quantum addition circuits and unbounded fan-out,” arXiv preprint arXiv:0910.2530 , 2009. [41] C. M. Dawson and M. A. Nielsen, “The solovay-kitaev algorithm,” 2005. [42] A. W. Harrow, A. Hassidim, and S. Lloyd, “Quantum algorithm for linear systems of equations,” Physical review letters , vol. 103, no. 15, p. 150502, 2009. [43] A. Harkness, S. Kan, C. Liu, M. Wang, J. M. Martyn, S. Xu, D. Chamaki, E. Decker, Y. Mao, L. F. Zuluaga et al. , “Ftcircuitbench: A benchmark suite for fault-tolerant quantum compilation and architec-ture,” arXiv preprint arXiv:2601.03185 , 2026. [44] N. J. Ross and P. Selinger, “Optimal ancilla-free clifford+t approxima-tion of z-rotations,” 2016. [45] M. Bandic, P. le Henaff, A. Ovide, P. Escofet, S. Ben Rached, S. Ro-drigo, H. van Someren, S. Abadal, E. Alarc´ on, C. G. Almudever et al. ,“Profiling quantum circuits for their efficient execution on single-and multi-core architectures,” Quantum Science and Technology , vol. 10, no. 1, p. 015060, 2025. [46] T. J. Yoder, E. Schoute, P. Rall, E. Pritchett, J. M. Gambetta, A. W. Cross, M. Carroll, and M. E. Beverland, “Tour de gross: A modular quantum computer based on bivariate bicycle codes,” arXiv preprint arXiv:2506.03094 , 2025. [47] N. Baspin, L. Berent, and L. Z. Cohen, “Fast surgery for quantum ldpc codes,” arXiv preprint arXiv:2510.04521 , 2025. [48] A. Broadbent, J. Fitzsimons, and E. Kashefi, “Universal blind quantum computation,” in 2009 50th annual IEEE symposium on foundations of computer science . IEEE, 2009, pp. 517–526. [49] S. Koutsioumpas, H. Sayginel, M. Webster, and D. E. Browne, “Auto-morphism ensemble decoding of quantum ldpc codes,” arXiv preprint arXiv:2503.01738 , 2025.

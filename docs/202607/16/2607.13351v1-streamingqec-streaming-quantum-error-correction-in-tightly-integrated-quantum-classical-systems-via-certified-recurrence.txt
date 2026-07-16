@@ -1,0 +1,1704 @@
+Title: StreamingQEC: Streaming Quantum Error Correction in Tightly Integrated Quantum-Classical Systems via Certified Recurrence
+
+URL Source: https://arxiv.org/pdf/2607.13351v1
+
+Published Time: Thu, 16 Jul 2026 00:19:59 GMT
+
+Number of Pages: 49
+
+Markdown Content:
+# StreamingQEC: Streaming Quantum Error Correction in Tightly Integrated Quantum-Classical Systems via Certified Recurrence 
+
+PANAYIOTIS CHRISTOU, Fordham University, USA 
+
+SHUWEN KAN, Fordham University, USA 
+
+HAO WANG, Stevens Institute of Technology, USA 
+
+YING MAO, Fordham University, USA Fault-tolerant quantum computing requires a continuous hybrid quantum error correction (QEC) pipeline com-prising measurement readout, syndrome transport,decoding, feedback, and control. Existing QEC simulators primarily evaluate circuits, noise models, decoders, and protocol-level outcomes. System architects, however, must also understand how these workloads contend for and queue across controller, compute, accelerator, and communication resources during protected logical execution. We introduce StreamingQEC, a system-level simulator that translates fault-tolerant logical workloads into resource-constrained streaming-QEC pipelines. An explicit discrete-event simulation provides the reference execution semantics.An automatic staged-fluid mode enables faster approximate design-space exploration, while a certified recurrence mechanism compresses repeated transitions only when their scheduling state and metric contributions match those of the explicit execution trace. We assemble a decoder-runtime dataset containing 9,998 measurements, of which 8,174 are used to fit performance profiles. Recurrence reproduces the reported explicit-simulation metrics across 35 calibrated-profile configurations, as well as additional workload and cadence validation cases.For a 16-job anchor workload, it preserves 59,743,936 decoding events while achieving a 24.0 × host-side speedup, and recurrent simulations scale beyond 1.22 billion events. Across 17 reference configurations, the automatics taged-fluid mode yields a mean makespan error of 2.60% and a worst-case error of 6.45%. Design-space studies reveal transfer-limited resource matching,decoder-driven pipeline stalls, and saturation of dedicated resources under microsecond-scale QEC cycles. 
+
+1 Introduction 
+
+Fault-tolerant quantum workloads require repeated quantum error correction (QEC) control loops. While a logical operation is active, the machine extracts syndromes, moves measurement data, decodes errors, returns feedback, and applies a correction or updates a Pauli frame. The latency, bandwidth, backlog, and failure behavior of this classical work determine whether a tightly coupled quantum-classical system can keep pace with physical QEC cycles. Existing QEC simulators target a different layer. Stim [ 29 ] efficiently simulates stabilizer circuits and detector samples, qecsim evaluates code–error–decode experiments [ 69 ], qsample [ 33 ] simulates noisy adaptive QEC protocols to estimate logical failure, and qec_code_sim [ 42 ] studies small codes under device-noise models. Their quantum- and process-level targets are circuits, faults, syndromes, decoder outputs, and logical outcomes. Contention among controller, CPU, GPU, dedicated-decoder, and link resources lies outside that scope. The system-level question arises before the target machine exists. An architect may know the protected logical gadget, code, decoder, placement, and links, yet not know whether syndrome movement limits a fast decoder, when a heavier decoder saturates a shared resource, whether dedicated capacity relieves contention, or how much margin survives jitter and recoverable faults. Answering these questions requires a simulator that connects workload-derived protected duration  
+
+> Authors’ Contact Information: Panayiotis Christou, pc33@fordham.edu, Fordham University, New York City, New York, USA; Shuwen Kan, sk107@fordham.edu, Fordham University, New York City, New York, USA; Hao Wang, hwang9@stevens.edu, Stevens Institute of Technology, Hoboken, New Jersey, USA; Ying Mao, ymao41@fordham.edu, Fordham University, New York City, New York, USA. , Vol. 1, No. 1, Article . Publication date: July 2026. arXiv:2607.13351v1 [quant-ph] 15 Jul 2026 2Christou et al.
+
+and QEC cadence to resource placement, queueing, backlog, and end-to-end completion time. Isolated decoder and logical-failure results leave these interactions unresolved. Explicit Discrete-Event Simulation (DES) can preserve this ordering and contention, but streaming QEC emits millions of events per protected logical operation. Aggregate models are faster but can hide whether the load lands on the controller, host, accelerator, dedicated decoder, or links. StreamingQEC targets architects and runtime designers who need these bottleneck answers before investing in a complete, tightly integrated system. This paper presents StreamingQEC, a system-level simulator for streaming QEC in a tightly-integrated quantum-classical system: the stream of readout, transfer, decode, feedback, and controller-update work induced while repeated syndrome extraction protects a logical computation interval. Such intervals arise from logical gadgets such as state preparation, lattice-surgery or code-deformation operations, and feedforward-controlled non-Clifford steps. StreamingQEC begins at the gadget’s protected duration and simulates the resulting real-time classical workload. Quantum-state evolution inside the gadget remains outside its system-level scope. The detailed stage-level model is StreamingQEC’s semantic foundation. Its explicit DES path schedules every QEC stage and serves as the reference. On top of that model, StreamingQEC con-tributes two acceleration paths. Auto staged-fluid preserves the dominant pipeline, resource, and queueing effects for fast approximate screening. Certified recurrence skips repeated transitions only when resource frontiers, pending-QEC and backlog state, decoder cold/warm state, deterministic grounding state, continuation release, and metric effects prove equivalence to explicit execution. Here compression means a metric-preserving contraction of simulator transitions under the cer-tification preconditions. The QEC code, physical-noise model, and simulated machine semantics remain unchanged. 
+
+Contributions. The paper makes the following contributions: 
+
+• A system-level model for streaming QEC. We model each protected logical computation interval as readout, syndrome-transfer, decode, feedback-transfer, and controller-apply stages over controller, CPU, GPU, dedicated decoder hardware, link, and dedicated-QEC resources. The model reports simulated completion time, stage service, wait, busy time, queue pressure, payload movement, and backlog metrics. 
+
+• A fast QEC-specific approximation. Auto staged-fluid derives a pipeline- and queue-aware aggregate model from the same stage semantics. It has 2.60% mean and 6.45% worst makespan error on 17 exact references. 
+
+• Metric-preserving certified recurrence. We introduce a recurrence certificate that compresses repeated QEC transitions only when resource frontiers, pending/backlog state, decoder cold/warm state, deterministic profile state, continuation release, and metric deltas prove equivalence to explicit execution. A certified row therefore preserves the reported explicit-DES metrics under the stated preconditions through deterministic transition equivalence. 
+
+• Grounded timing inputs for QEC design. We construct fitted decoder service-time profiles from an author-generated corpus of 9,998 normalized runtime rows covering surface, toric, qLDPC, color-code, Fusion Blossom, LDPC, and neural decoder paths, and combine them with deterministic source-backed profiles for link jitter, slowdown/decay, and recoverable fault delay. 
+
+• Performance evidence and design insights. We validate both acceleration paths against exact references and use StreamingQEC to show how decoder choice, resource placement, QEC cycle rate, and future hardware improvements change modeled hybrid-system load. Section 2 gives the QEC background and simulation gap, and Section 3 defines the shared system model. Sections 4–6 present the two accelerators and implementation. Sections 7 and 8 validate  
+
+> , Vol. 1, No. 1, Article . Publication date: July 2026. StreamingQEC: Streaming Quantum Error Correction in Tightly Integrated Quantum-Classical Systems via Certified Recurrence 3
+
+them and apply StreamingQEC to design studies. The appendix provides the detailed evidence ledger. 
+
+2 Background and Related Work 2.1 QEC as a Real-Time Systems Workload 
+
+Quantum error correction has a long foundation, from Shor and CSS-style codes to stabilizer codes, topological memories, surface codes, and color codes [ 3, 8 , 22 , 27 , 31 , 52 , 62 , 64 , 67 ]. The systems problem starts when fault-tolerant execution turns those codes into repeated real-time work: stabilizer information must be measured, transported, decoded, and returned as a correction, Pauli-frame update, or control decision before logical progress can safely continue [30]. Fault-tolerant programs execute logical gadgets on encoded qubits rather than bare physical gates. Examples include logical state preparation, Pauli- or Clifford-frame updates, lattice-surgery merge/split operations, code deformations, magic-state injection and consumption, and feedforward-controlled non-Clifford steps [ 14 , 22 , 27 ]. The Eastin–Knill theorem rules out a universal set of transversal logical gates for a QEC code [ 25 ]. Magic-state injection is a common route to the required non-Clifford operations [ 4]. Its measurement-dependent conditional operations can extend beyond a Pauli-frame update and create control-pipeline barriers. This paper uses that QEC terminology to define the systems input. A logical gadget creates a protected logical computation interval. StreamingQEC abstracts the gadget’s quantum semantics into duration, code family, distance, QEC cycle, decoder profile, and resource placement, then simu-lates the induced readout, syndrome-transfer, decode, feedback, and controller-update workload. Quantum-state evolution and logical-error-rate validation remain outside this systems abstraction. 
+
+2.2 Codes, Decoders, and Control Placement 
+
+Different QEC families induce different systems footprints. Surface-code paths stress local syn-drome cadence and matching decoders. Toric paths ground both idealized matrix-decoder timing with perfect-measurement qecsim inputs and circuit-level detector-model timing with noisy Stim measurement rounds. We retain them as separate service-time profiles. qLDPC paths stress sparse matrix decoders, and color-code paths provide a contrasting CSS topological family. Appendix Table 3 gives the detailed taxonomy. Empirical QEC studies such as ECCentric show why this diversity matters: code family, hardware topology, noise model, and compilation strategy can change the practical tradeoff surface [ 65 ]. StreamingQEC applies that lesson at the systems layer by measuring how each code/decoder choice loads controller, link, CPU, GPU, dedicated decoder, and dedicated-QEC resources. Threshold and logical-error-rate rankings remain the domain of QEC code studies. Decoder frameworks provide the measured service-time inputs consumed by StreamingQEC. Section 8.1 identifies the public implementations, and Appendix G records their evidence scope. A decoder benchmark measures isolated service. StreamingQEC places that service in the complete readout, movement, feedback, and control loop. Fault-tolerant operation also depends on classical control infrastructure: near-device controllers, host interfaces, accelerator controllers, and hybrid quantum-HPC integration [ 1, 5 , 16 , 24 , 39 , 61 , 70 ]. StreamingQEC therefore treats decode placement as a systems choice: CPU, GPU, dedicated decoder hardware, controller, or dedicated QEC resource. The same measured decoder equation can be charged to different resource frontiers to study whether backlog lands on the host, a GPU path, a near-controller resource, or an isolated QEC resource.  
+
+> , Vol. 1, No. 1, Article . Publication date: July 2026. 4Christou et al.
+
+2.3 Prior Simulation Tools and the Remaining Gap 
+
+Event-driven simulation has proved successful for understanding and designing large-scale network and cloud systems. NS-2 and NS-3 support controlled evaluation of network protocols and cross-layer behavior, while CloudSim supports repeatable studies of cloud resource provisioning [ 6, 11 , 40 ]. These domains also have deployed systems and testbeds against which simulator assumptions can be checked. Comparable tightly integrated fault-tolerant QEC stacks remain scarce, which makes system-level simulations important before large-scale fault-tolerant quantum computing hardware and software are physically available and accessible. The same event-driven principle is a natural fit for hybrid quantum-classical systems because state changes occur at event boundaries rather than every physical timestep [ 2, 54 ]. Event-driven execution still incurs the cost of tracing every physical QEC cycle. Generic aggregate simula-tion reduces event count while leaving QEC-specific fill and drain, endpoint coupling, resource conservation, backpressure, and logical-work continuation to the model designer. The closest systems address different questions. NetSquid, SeQUeNCe, QuISP, and SimulaQron model quantum-network protocols, entanglement distribution, and network timing [ 17 , 19 , 57 , 72 ]. iQuantum, QSimPy, and hybrid quantum-HPC frameworks model admission, scheduling, and resource management around quantum jobs [ 43 , 45 , 46 ]. HyperQ models multiplexing and isolation at the quantum-computer level [ 66 ]. In contrast, StreamingQEC models the repeated control loop inside protected logical computation: readout, syndrome movement, decode, feedback, apply, backpressure, and the release of subsequent logical work. These tools are therefore complementary. None supplies a QEC-specific certificate that contracts repeated syndrome rounds while preserving stage wait, busy time, queue area, decoder warm state, and continuation release. Classic event-driven and parallel simulation techniques reduce scheduling overhead or distribute event execution. A QEC-specific argument is still needed to replace a repeated region with a grouped transition while preserving wait, busy time, queue area, service counts, and release semantics [7, 28, 36]. StreamingQEC builds that certification layer on top of explicit event semantics. StreamingQEC fills three related gaps: detailed stage-level semantics for the classical workload induced by streaming QEC, a QEC-specific staged-fluid approximation for fast screening, and fail-closed certified recurrence for exact compression. Measured decoder and deterministic hardware-effect profiles supply timing to all three execution modes. 
+
+3 StreamingQEC System Model 
+
+StreamingQEC models candidate tightly integrated QEC systems before their complete hardware and software stacks exist. A designer supplies protected logical computation, QEC and decoder choices, resource capacities, communication links, and placement policies. StreamingQEC converts that description into repeated, resource-bound QEC work and reports where service, waiting, backlog, and utilization accumulate. This section defines the common semantics used by all three execution modes. Figure 1 summarizes the shared system model. Workloads define protected logical computation intervals, QEC profiles determine payloads and runtime, resource bindings place staged work, and the execution mode determines whether that work is traced explicitly, approximated, or contracted under a certificate. 
+
+3.1 Scope and Candidate QEC Topology 
+
+A candidate topology is the modeled resource graph connecting protected quantum execution, QEC controllers, CPUs, GPUs, dedicated decoder hardware, and directed transfer links. Its configuration  
+
+> , Vol. 1, No. 1, Article . Publication date: July 2026. StreamingQEC: Streaming Quantum Error Correction in Tightly Integrated Quantum-Classical Systems via Certified Recurrence 5
+
+Fig. 1. StreamingQEC maps protected logical computation to grounded, resource-bound QEC stages evaluated by explicit DES, auto staged-fluid, or certified recurrence. 
+
+fixes resource capacities, link properties, stage bindings, code and decoder profiles, and hardware-effect profiles. The topology is a systems abstraction of the classical execution induced by QEC, including repeated rounds, data movement, decoding, feedback, backpressure, and logical-work release. Quantum-state evolution and logical-error-rate validation remain outside this abstraction. The intended workflow is progressive. Designers use auto staged-fluid to screen many candidate topologies, inspect their bottlenecks, and eliminate clearly dominated configurations. They then use certified recurrence for detailed exact studies of promising, saturated, or decision-boundary designs. Explicit DES remains the reference for validation and for regions outside the current certificate. 
+
+3.2 Protected Logical Computation and Streaming QEC 
+
+A fault-tolerant workload supplies protected logical computation intervals : quantum execution windows during which repeated syndrome extraction protects a logical operation or workload stage. For a logical gadget 𝑔 , StreamingQEC consumes 
+
+𝑔 ↦ → 𝐼 𝑔 =  𝑡 0, 𝑇 𝑔 , Δ𝑔 , 𝑐 𝑔 , 𝑑 𝑔 , 𝜋 𝑔 , 𝜌 𝑔 
+
+ , (1) where 𝑡 0 is its ready time, 𝑇 𝑔 its protected duration, Δ𝑔 its QEC cycle, 𝑐 𝑔 and 𝑑 𝑔 its code family and distance, 𝜋 𝑔 its runtime profile, and 𝜌 𝑔 its resource-binding policy. Unless a fixed round count is explicitly configured for a controlled experiment, the interval produces 
+
+𝑅 𝑔 = 𝑇 𝑔 /Δ𝑔 
+
+ (2) QEC rounds. Round count therefore follows from workload duration and physical QEC cadence. Longer protected execution or a shorter cycle produces more classical QEC work.  
+
+> , Vol. 1, No. 1, Article . Publication date: July 2026. 6Christou et al.
+
+Logical state preparation, lattice-surgery or code-deformation operations, and feedforward-controlled non-Clifford steps can have different interval descriptors. Once mapped to 𝐼 𝑔 , each induces the same class of system-level work. Any application or compiled primitive can supply the protected intervals and QEC parameters required from the compiler, runtime, or workload model. 
+
+3.3 Stage and Resource Graph 
+
+Each QEC round follows the typed stage chain 
+
+readout → syndrome transfer → decode → feedback transfer → control apply . (3) Readout and apply occupy the controller. Syndrome and feedback use directed links when decode is not colocated with the controller. Decode occupies the configured CPU, GPU, controller, or dedicated decoder resource. Final apply is a systems barrier representing a correction, frame update, or feedforward decision. The protected workload continuation is released only after that boundary. The simulator represents each resource lane by its earliest free-time frontier. For operation 𝑒 on resource 𝑟 (𝑒 ),
+
+𝑡 start (𝑒 ) = max {𝑡 ready (𝑒 ), 𝑡 free (𝑟 (𝑒 ))} , (4) 
+
+𝑡 done (𝑒 ) = 𝑡 start (𝑒 ) + 𝑇 (𝑒 ), (5) 
+
+𝑡 free (𝑟 (𝑒 )) ← 𝑡 done (𝑒 ). (6) Explicit execution reserves each stage individually. Both acceleration methods derive from these same stage and frontier semantics. A frontier represents a modeled allocation. A lane can represent a CPU slice or preloaded GPU path when its measured service profile already includes batching and internal parallelism. Independent service channels require multiple lanes or resources. Fine-grained concurrent GPU kernels remain outside the current evidence scope. Appendix Figure 9 gives the supplementary resource-frontier view. 
+
+3.4 Resource Binding, Queueing, and Backpressure 
+
+The same fitted runtime can be charged to different frontiers. A CPU decoder placed on the normal host frontier competes with application work. Charging the same service to a dedicated QEC frontier models isolated capacity until a device-specific profile is available. Dedicated placement changes isolation while retaining the calibrated service time. Wait is the gap between stage readiness and frontier availability. Pending QEC work forms the interval backlog. When pending work exceeds the configured limit, the next protected quantum round waits. Final apply decrements the pending count and may release one waiting round. These transitions encode contention and backpressure directly in the system state. 
+
+3.5 Runtime and Hardware-Effect Profiles 
+
+The code family determines syndrome and feedback payloads when explicit byte counts are unavailable. Let 𝐶 be checks, 𝐷 data qubits, and 𝑏 𝑠 and 𝑏 𝑓 the corresponding bit densities: 
+
+𝑃 syn = ⌈𝐶𝑏 𝑠 /8⌉ , (7) 
+
+𝑃 fb = 𝐷𝑏 𝑓 /8 . (8) The code layer supplies 𝐶 and 𝐷 for surface, toric, qLDPC, and color-code families. These payloads determine transfer service before deterministic hardware effects are applied. Generic runtime profiles support exploratory systems. Calibrated profiles are fitted from mea-sured decoder rows and keyed by provider, allocation, code, decoder, backend, device, and calibration  
+
+> , Vol. 1, No. 1, Article . Publication date: July 2026. StreamingQEC: Streaming Quantum Error Correction in Tightly Integrated Quantum-Classical Systems via Certified Recurrence 7
+
+version. For profile 𝜋 , the stage duration is 
+
+𝑇 decode = 𝑇 setup (𝜋 ) + 𝑈 (𝜋, 𝑑, 𝑟, 𝑏 )b𝑡 𝜋 (𝑑, 𝑟, 𝑏, 𝑝 ) + 𝑇 fixed (𝜋 ), (9) where 𝑈 maps a stage to the measured unit count and b𝑡 𝜋 is the fitted unit-service surface. Setup can include a one-time neural model load. Their scope is empirical service-time interpolation within the measured decoder regime. Appendix C.3 gives the complete fit. Hardware-effect profiles modify transfer or stage timing with deterministic link jitter, tail, slowdown, or fault-delay terms. Their structure is motivated by NVQLink, GPU interconnect, Slingshot, tail-at-scale, datacenter drift, DVFS, GPU/DRAM, and storage-fault studies [ 9 , 10 , 18 ,21 , 23 , 26 , 37 , 38 , 41 , 47 , 59 , 63 , 74 ]. Literature-prior profiles define source-backed stress scenarios. Provider- specific calibration would require direct measurements. Stable event keys ensure that explicit and recurrent execution assign the same perturbation to the same logical event. 
+
+3.6 Cost Metrics and Design Outputs 
+
+StreamingQEC reports simulated completion time, QEC stage counts and service, stage wait, resource busy time, utilization-compatible quantities, queue/backlog pressure, payload movement, and deterministic perturbation contributions. Together these outputs answer where QEC load lands, whether transfer or decode dominates, which resource saturates, and how much headroom remains under timing stress. Host simulator wall time is reported separately and measures the cost of obtaining those system-level results. Appendix Table 4 maps every metric to its design use. 
+
+3.7 Execution Modes and Fidelity Contract 
+
+All execution modes consume the same topology, interval, stage, runtime, and resource definitions. 
+
+Explicit DES.. The reference schedules every typed stage and records every metric effect. It preserves event order but becomes expensive across millions of rounds. 
+
+Auto staged-fluid. The approximate accelerator replaces repeated rounds with a QEC-specific stage queue. It preserves dominant pipeline, endpoint, resource-conservation, and queue-interaction effects while aggregating event identity. Section 4.1 defines this mode. 
+
+Certified recurrence. The exact accelerator contracts a region only when signed scheduling state and metric deltas are stable. Unsupported regions execute exactly or fail closed in certified-required mode. Section 5 gives the certificate. Auto staged-fluid enables broad screening with measured approximation error. Certified recur-rence enables detailed exact studies where the certificate holds. Explicit DES remains the validation oracle that separates those two claims. 
+
+4 Fast Approximate Simulation 
+
+Auto staged-fluid is StreamingQEC’s accelerator for broad design-space exploration. It approximates the same detailed QEC system model used by explicit DES, but replaces repeated event identities with aggregate stage-queue state. It trades exact trace reproduction for rapid ranking of candidate topologies and identification of configurations that require a detailed recurrence study. 
+
+4.1 Five-Stage Queue Abstraction 
+
+For a protected interval that emits many similar rounds, the approximation estimates the drain time of the readout, syndrome-transfer, decode, feedback-transfer, and apply pipeline. It starts from a deterministic five-stage tandem queue with capacity-adjusted service times. Unlike a single mean  
+
+> , Vol. 1, No. 1, Article . Publication date: July 2026. 8Christou et al.
+
+delay, the model retains pipeline fill, bottleneck drain rate, and the physical QEC cycle that drives round arrivals. Syndrome transfer, decode, and feedback can share endpoint constraints. The model therefore adds a bounded coupling term between perfect overlap and full serialization. It also enforces an interval-extension guard when the pipeline cannot drain within the nominal protected duration. Appendix D.1 gives the tandem, coupling, and extension equations. 
+
+4.2 Queue Interaction and Conservation 
+
+Aggregate stages lose interleaving with the surrounding workload. Auto staged-fluid restores the dominant effect with telemetry-gated corrections. It distinguishes light shared-resource decode, where host and transfer interaction dominate, from heavy qLDPC, color-code, or neural decode, where decoder service dominates. Its interval estimate is 
+
+𝑇 auto = 𝑇 base + Δchunk + Δℓ + Δℎ . (10) 
+
+𝑇 base is the coupled pipeline drain. Δchunk approximates collapsed queue interaction, Δℓ handles light shared decode, and Δℎ handles replicated heavy shared-resource rows. Measured decoder service remains fixed while these terms estimate the interleaving removed by aggregation. For an aggregated dedicated-QEC lane, the reported makespan also enforces its service-conservation floor. Shared CPU/GPU effects remain in the event-loop schedule and queue corrections. The full bounded equations and parameter values appear in Appendix D.1. 
+
+4.3 Fidelity and Intended Use 
+
+Auto staged-fluid is deterministic but approximate. Section 8.3 measures its error against exact references and identifies its weakest current regime. A designer should use it to screen many topologies and discard clearly dominated candidates. Designs near saturation, near a decision boundary, or outside the measured reference regime should be promoted to certified recurrence or explicit execution. This role is complementary to recurrence. Fluid approximation gains speed by discarding event identity. Certified recurrence preserves event frontiers and metric deltas and therefore supports exactness claims where certified. 
+
+5 Fast Exact Simulation with Certified Recurrence 
+
+The resource-frontier representation in Section 3.3 gives the engine a compact way to describe QEC state. Figure 2 shows the correctness mechanism. Contraction requires matching typed certification signatures and a repeatable transition and metric delta between the current and prior states. Timestamp or round similarity alone is insufficient. Rejected regions continue through the exact typed path. Certified recurrence is the detailed-study path in the StreamingQEC workflow. It retains the explicit stage and metric semantics needed to compare candidate topologies near saturation or a design boundary, while avoiding repeated host work where the current certificate applies. 
+
+5.1 Compression Contract 
+
+Let 𝑆 𝑘 be the complete scheduling state and 𝑚 𝑘 the accumulated metric vector at event boundary 𝑘 .Let F be the deterministic typed transition induced by the workload, resource frontiers, queues, QEC state, policies, runtime profiles, and hardware-effect profiles: 
+
+(𝑆 𝑘 +1, 𝑚 𝑘 +1) = F ( 𝑆 𝑘 , 𝑚 𝑘 ). (11)  
+
+> , Vol. 1, No. 1, Article . Publication date: July 2026. StreamingQEC: Streaming Quantum Error Correction in Tightly Integrated Quantum-Classical Systems via Certified Recurrence 9
+> Fig. 2. Certified recurrence contracts a repeated QEC region only when its signed scheduling state and transition/metric deltas are stable.
+
+A contracted region is valid only if it produces the same transition and metric effects as the corre-sponding explicit trace. The certificate therefore includes every represented input that can affect future scheduling: frontier state, stage sequence, resource bindings, backlog, decoder cold/warm state, runtime and grounding identifiers, external reservations, and continuation release. Resource frontiers make this contract auditable. If an external reservation, backlog transition, placement, deterministic timing term, or neural state changes frontier evolution, the candidate is rejected. Hybrid execution then continues through the exact typed path. Certified-required execution fails closed instead. Rejection can reduce simulator speed while leaving represented system semantics unchanged. 
+
+5.2 Transition Signatures 
+
+A recurrence candidate maps the state at event boundary 𝑘 to the certification signature 
+
+𝜎 (𝑆 𝑘 ) = (𝐹 𝑘 , 𝑄 𝑘 , 𝐵 𝑘 ,𝑊 𝑘 , 𝐺 𝑘 , 𝐸 𝑘 , 𝑀 𝑘 ) , (12) where 𝐹 𝑘 is the vector of resource frontiers, 𝑄 𝑘 is the relevant queue/order state, 𝐵 𝑘 is QEC pending and backlog state, 𝑊 𝑘 is decoder warm/cold state, 𝐺 𝑘 is the deterministic grounding-profile state, 
+
+𝐸 𝑘 is the external reservation cursor, and 𝑀 𝑘 is metric-delta state. The signature contains the state that can affect future scheduling decisions: stage template, resource bindings, runtime-profile key, deterministic grounding-profile identifiers, backlog limit, pending apply completions, decoder warm/cold state, and continuation-release state. Matching resource occupancy alone is insufficient. Continuation-release state is included because future scheduling depends on whether QEC has released the protected workload continuation. A recur-rence summary may skip many repeated syndrome rounds, but continuation release must occur at the same final feedback or frame-update boundary produced by explicit execution.  
+
+> , Vol. 1, No. 1, Article . Publication date: July 2026. 10 Christou et al.
+
+Appendix C.4 maps this mathematical signature to the native support classifier, certification ledger, and debug counters. 
+
+5.3 Scoped Correctness 
+
+The proof idea is induction over certified periods. If two period starts have identical signatures and the transition function observes only fields included in the signature, then the same QEC stages become ready, the same resources are selected, the same deterministic grounding values are applied, and the same metric deltas are produced. Applying the stable delta returns StreamingQEC to the same signature class for the next period. If any required field is absent or unstable, certification fails and no contraction is accepted. More precisely, the induction requires four preconditions. (C1) The candidate uses the canonical stage dependencies represented by the executor. (C2) Stage durations and hardware-effect values are deterministic functions of signed state and event identity. (C3) Every scheduling input that can affect the next transition appears in the signature, including external reservations and continuation state. (C4) An explicitly observed period has stable frontier, queue, and metric deltas, and the contraction stays within both its external- reservation scope and protected interval. Under C1–C4, one grouped period applies the same transition and metric delta as the observed explicit period. Induction gives the result for any number of whole contracted periods. 
+
+Proposition (scoped metric preservation). Let an explicitly observed period of length 𝑝 produce typed state delta 𝛿 𝑝 and metric delta Δ𝑚 𝑝 . Under C1–C4, for every 𝑞 whose 𝑞 whole periods remain inside the certified boundary, 
+
+F 𝑞𝑝 (𝑆 𝑘 , 𝑚 𝑘 ) =  𝑆 𝑘 ⊕ 𝑞𝛿 𝑝 , 𝑚 𝑘 + 𝑞 Δ𝑚 𝑝 
+
+ , (13) where ⊕ applies the typed frontier, queue, backlog, and continuation updates represented by the observed period. Appendix C.1 gives the base and induction steps. This proposition establishes equivalence to StreamingQEC’s explicit DES semantics. Its scope excludes physical QEC correctness and the accuracy of empirical timing inputs. For the recurrence algorithm, let 𝐷 𝑗 :𝑘 = (𝛿 𝑗 :𝑘 , Δ𝑚 𝑗 :𝑘 ) denote the typed state and metric delta observed over [ 𝑗, 𝑘 ), and let Cert denote the C1–C4 predicate plus the stable-delta check. This argument covers the protected logical-interval and stage-window recurrence forms imple-mented by the native QEC engine. Arbitrary global scheduler-graph compression lies beyond the current certificate. True streaming-overlap topology, full-interval retry with altered dependencies, and arbitrary backlog-policy changes require additional graph-level certification and are treated as future extensions unless separately validated. Table 1 makes the boundary operational. A user configuration is inside the certified recurrence claim only if all required fields are represented in the signature and the induced transition repeats with stable frontier and metric deltas. If the configuration is unsupported, the engine either executes the typed path exactly or fails closed when certification is required, preventing silent certification. Thus, scalar timing and placement changes are supported by the current certificate when stable, while topology-changing QEC policies require future graph-level certification or exact execution. 
+
+5.4 Recurrence Algorithm 
+
+Algorithm 1 alternates between exact typed execution and certified contraction. 𝐻 maps a signature to its most recent observed boundary, and 𝐿 records accepted contractions. 𝐷 𝑗 :𝑘 is the observed typed-state and metric delta, while 𝑞 counts additional whole periods that fit without crossing a certified boundary.  
+
+> , Vol. 1, No. 1, Article . Publication date: July 2026. StreamingQEC: Streaming Quantum Error Correction in Tightly Integrated Quantum-Classical Systems via Certified Recurrence 11
+
+Configuration property Certified behavior Reason Canonical readout–transfer–decode– feedback–apply stage chain with fixed resource bindings during the candidate period Eligible Stage order and resource fron-tiers are part of the signature. CPU/GPU/controller/dedicated-QEC de-code placement, calibrated service profiles, neural warm/preloaded state, and determin-istic jitter/slowdown/ fault-delay terms Eligible when stable They change durations or re-source lanes while preserving de-pendency topology. External arrivals or continuation release points that repeat with the same cursor and metric delta Eligible when stable The external-reservation cursor and release state are signed. Unsupported interval scopes, nonrepeating backlog state, or unstable external reserva-tions Exact fallback or certified-mode rejection The induction precondition fails. True streaming overlap, topology-changing window commits, full-interval retry, or ar-bitrary backlog-policy changes Future graph-level certifi-cation These introduce dependency edges not represented by the cur-rent canonical period signature. 
+
+Table 1. Certification boundary and decision procedure. The certified path is used only for configurations whose dependency structure and metric deltas are represented in the recurrence signature. Unsupported configurations fall back or fail closed. 
+
+Algorithm 1 Metric-preserving certified recurrence for streaming-QEC regions 
+
+Require: Initial state and metrics (𝑆 0, 𝑚 0), transition F
+
+Require: Signature 𝜎 and certificate predicate Cert 
+
+Ensure: Final state and metrics, with certification ledger 𝐿  
+
+> 1:
+
+𝑘 ← 0, 𝐻 ← ∅ , 𝐿 ← ∅ {𝐻 stores observed signatures}  
+
+> 2:
+
+while ¬Done (𝑆 𝑘 ) do  
+
+> 3:
+
+ℎ ← 𝜎 (𝑆 𝑘 ) 
+
+> 4:
+
+if 𝐻 [ℎ] = ( 𝑗, 𝑆 𝑗 , 𝑚 𝑗 ) then  
+
+> 5:
+
+𝑝 ← 𝑘 − 𝑗 , 𝐷 𝑗 :𝑘 ← ( 𝛿 𝑗 :𝑘 , 𝑚 𝑘 − 𝑚 𝑗 ) {Observed candidate period}  
+
+> 6:
+
+𝑞 ← MaxWholePeriods (𝑆 𝑘 , 𝑝, 𝐷 𝑗 :𝑘 ) {Respect certified boundaries}  
+
+> 7:
+
+if 𝑞 > 0 ∧ Cert (𝑆 𝑗 , 𝑆 𝑘 , 𝑝, 𝐷 𝑗 :𝑘 ) then  
+
+> 8:
+
+{C1–C4 and stable deltas hold}  
+
+> 9:
+
+𝑆 𝑘 +𝑞𝑝 ← 𝑆 𝑘 ⊕ 𝑞𝛿 𝑗 :𝑘  
+
+> 10:
+
+𝑚 𝑘 +𝑞𝑝 ← 𝑚 𝑘 + 𝑞 Δ𝑚 𝑗 :𝑘 {Reuse explicit-equivalent deltas}  
+
+> 11:
+
+𝐿 ← 𝐿 ∪ {( 𝑗, 𝑘 + 𝑞𝑝, 𝑝, 𝑞, 𝐷 𝑗 :𝑘 )}  
+
+> 12:
+
+𝑘 ← 𝑘 + 𝑞𝑝  
+
+> 13:
+
+continue  
+
+> 14:
+
+end if  
+
+> 15:
+
+end if  
+
+> 16:
+
+𝐻 [ℎ] ← ( 𝑘, 𝑆 𝑘 , 𝑚 𝑘 ) 
+
+> 17:
+
+(𝑆 𝑘 +1, 𝑚 𝑘 +1) ← F ( 𝑆 𝑘 , 𝑚 𝑘 ) {Execute one exact typed transition}  
+
+> 18:
+
+𝑘 ← 𝑘 + 1 
+
+> 19:
+
+end while  
+
+> 20:
+
+return (𝑆 𝑘 , 𝑚 𝑘 , 𝐿 ) 
+
+> , Vol. 1, No. 1, Article . Publication date: July 2026. 12 Christou et al.
+
+The grouped branch reuses an observed typed-state and metric delta only under the same certified signature. Otherwise, F executes one exact transition and extends the evidence map. Appendix C.4 records the corresponding ledger flow. 
+
+5.5 Work Reduction 
+
+Let 𝐽 be the number of protected jobs, 𝑁 𝑗 the number of QEC rounds in job 𝑗 , and 𝑆 the number of stages per round. Explicit streaming-QEC execution performs work proportional to 
+
+Θ 𝑆 
+
+> 𝐽
+
+∑︁ 
+
+> 𝑗 =1
+
+𝑁 𝑗 
+
+!
+
+, (14) before accounting for scheduler and metric-bookkeeping costs. Certified recurrence keeps the same explicit prefix and noncompressible regions, but replaces each certified repeated region by constant-time frontier and metric updates per contracted period. Appendix F.1 gives the prefix, residual-trace, and ledger cost terms. This reduction changes host work, not the modeled QEC schedule. 
+
+6 Implementation and Artifact 
+
+The artifact separates Python experiment construction from native execution. Python builds work-loads, QEC profiles, resource bindings, and execution modes. The native layer schedules typed QEC stages, reserves frontiers, accumulates metrics, and evaluates recurrence certificates. PyO3 connects the layers, and Serde/ serde_json carries typed configuration and summaries [53, 60]. Decoder libraries run only in offline grounding campaigns. The event loop consumes fitted coef-ficients and evidence metadata, which keeps decoder-timing uncertainty separate from recurrence correctness. Explicit DES, auto staged-fluid, and recurrence all derive from the same typed stage and placement representation. Unsupported regions execute through the exact typed path or fail closed when certification is required. The artifact records explicit, recurrent, rejected, and approximate regions separately. Appendix F.2 details profile matching, cold/warm state, stable timing keys, and ledger handling. 
+
+7 Evaluation Methodology 
+
+The evaluation follows the StreamingQEC workflow. We first establish the timing inputs and evidence scope. We then validate certified recurrence against explicit DES and measure auto staged-fluid against exact references. Only after those checks do we use the accelerated modes to answer design questions about candidate QEC topologies. 
+
+7.1 Evidence Classes and Questions 
+
+Four evidence classes remain distinct. Exact parity compares explicit DES with certified recur-rence and requires zero deltas in simulated completion time, stage counts, service, wait, busy time, queue/backlog-compatible metrics, utilization-compatible metrics, and continuation release. 
+
+Approximation compares auto staged-fluid with saved exact references. Design sweeps use validated execution paths and grounded timing profiles to compare system choices. Recurrent-only scaling 
+
+reports detailed metrics after explicit tracing becomes impractical. Its evidence class is tractability, with parity established by explicit pairs. Host speedup always means simulator wall-clock speedup. Simulated time is completion time in the modeled QEC system. The results answer eight questions, one per subsection: 
+
+• E1: grounding. How are decoder profiles constructed and scoped? Section 8.1. 
+
+• E2: exact acceleration. What exactness, speedup, and scale does recurrence achieve? Section 8.2.  
+
+> , Vol. 1, No. 1, Article . Publication date: July 2026. StreamingQEC: Streaming Quantum Error Correction in Tightly Integrated Quantum-Classical Systems via Certified Recurrence 13
+
+• E3: approximation. How accurate is auto staged-fluid, and where is it weakest? Section 8.3. 
+
+• E4: demand and placement. How do code, decoder, and placement move service and contention? Section 8.4. 
+
+• E5: timing margin. How does deterministic timing stress alter headroom? Section 8.5. 
+
+• E6: cadence. How does QEC cycle rate alter saturation and decoder pressure? Section 8.6. 
+
+• E7: transitions. Which decoder and link choices move the bottleneck? Section 8.7. 
+
+• E8: leverage. Which hardware improvement most reduces completion time? Section 8.8. 
+
+7.2 Workloads and Validation Coverage 
+
+Exactness evidence spans four axes. Large pipelined anchors test millions of repeated QEC events. Single-class sentinels cover pipeline, job-shop, unit-commitment, and VQE workload traces [ 13 ,15 , 51 , 56 , 58 ]; Appendix B.3 records their provenance, stages, and protected intervals. Calibrated gates vary code, decoder service, placement, deterministic timing, and scale. Cadence sentinels vary the QEC cycle from 1 𝜇 s to 70 ms, while backpressure and scheduler regressions exercise outstanding-round limits, external arrivals, and continuation release. Together they broaden the tested contract without turning design sweeps or recurrent-only rows into correctness claims. The validation sets use two counting conventions. The headline heterogeneous anchor reports 4, 8, and 16 total jobs sampled from the workload catalog, with stage-level protected intervals and rounds derived from a 1.1 𝜇 s cycle. All exact anchors use pipelined streaming QEC in which at most two QEC rounds may be outstanding. Backpressure prevents the protected computation from issuing a third round until an earlier QEC apply completes. The calibrated-profile gate uses pipeline, job-shop, unit-commitment, and VQE classes. There, 𝑛 is replicas per class, so 𝑛 = 1, 2, 4, 8, 16 
+
+contains 4, 8, 16, 32, and 64 total jobs, respectively. Only surface MWPM has an exact 𝑛 = 16 
+
+row. The single-class sentinels use one job from each class under the same duration-derived QEC semantics. Each protected quantum job retains 5–10 materialized circuit units. These bundle counts control experiment cost rather than define the system model. 
+
+7.3 Host and Grounding Setup 
+
+Host experiments run on a MacBook Pro (Mac17,6) with an Apple M5 Max, 18-core CPU, 40-core integrated GPU, and 128 GB unified memory. Decoder-runtime profiles are fitted from author-generated NERSC Perlmutter A100 shared-GPU benchmark campaigns [ 44 ] unless a row is marked as literature-prior or simulator-only evidence. Section 8.1 reports the corpus, fit uncertainty, and use of those artifacts before the method and design results. Appendix Table 5 gives the complete matrix and evidence class. 
+
+8 Results and Analysis 8.1 E1: Measured Decoder Profiles Ground QEC Service Time 
+
+Deterministic benchmark manifests generate the author-collected decoder/runtime corpus: 7,574 de-duplicated campaign rows, 2,304 nested Stim/PyMatching rows, and 120 synchronized NVIDIA Ising forward-pass rows on NERSC Perlmutter. Evidence filters retain 8,174 of 9,998 normalized rows for 48 fitted profiles. They cover surface PyMatching/MWPM, Fusion Blossom serial/window/partition, toric matrix and Stim-detector paths, qLDPC and color-code LDPC matrices, and NVIDIA Ising inference [12, 29, 34, 35, 55, 69, 73]. Each measured row executes public software: Stim generates surface circuits and detector data; PyMatching/Sparse Blossom and Fusion Blossom decode matching instances; qecsim supplies toric and Color666 objects and reference decoders; and ldpc supplies union-find, BP, BP+OSD, BP+LSD, and belief-find. NumPy and SciPy manipulate sparse parity-check matrices [ 32 , 71 ]. Neural timing                           
+
+> , Vol. 1, No. 1, Article . Publication date: July 2026. 14 Christou et al.
+> Total jobs Explicit wall (s) Recurrent wall (s) Speedup Total diff (s) Decode count Decode diff Decode wait (s) 4188.0 4.16 45.2 ×017.44M 08544.4 24.02 22.7 ×041.83M 016 823.1 34.23 24.0 ×059.74M 0
+> Table 2. Exact pipelined streaming-QEC anchors with explicit reference traces. All reported simulator-output deltas are zero.
+
+uses the public NVIDIA Ising-Decoding model and checkpoint through PyTorch on CUDA [ 48 –50 ]. These campaigns measure host decoder runtime. QPU execution time is a separate system parameter. The main qLDPC profile is BP+LSD on a CSS hypergraph-product code built from two repetition-code check matrices [ 68 ]; its CSS sectors are passed separately to ldpc.BpLsdDecoder . Generic sparse-matrix stress rows remain separate. Representative anchors range from 8.19–12.9 𝜇 s/decode for surface PyMatching to 0.506 ms/batch for preloaded Ising inference, with its 0.741 s model load represented as a separate cold-start term. These measurements supply DES service times rather than logical-error-rate evidence. The grounding pipeline reports log-space 𝑅 2 and median/p95 multiplicative error per fitted profile. CPU matrix-decoder and Fusion Blossom fits are typically near 1.05–1.15 × median error, surface PyMatching near 1.4–1.6 ×, and NVIDIA Ising reaches 1.73 × median and 3.35 × p95. These values quantify timing-input uncertainty, independently of recurrence correctness. Rows inside the sampled distance, batch, round, and error grid are grounded interpolation; larger-distance rows are extrapolative sensitivity studies rather than provider forecasts. StreamingQEC evaluates the selected profile, applies deterministic timing modifiers, and reserves its resource frontier. Appendix G gives the matrices, manifest grid, filters, row accounting, and regression procedure. Appendix Table 24 summarizes the retained evidence. 
+
+8.2 E2: Certified Recurrence Is Exact and Scales Beyond Explicit Feasibility 
+
+Table 2 summarizes the latest streaming-QEC ablation. The strongest exact evidence is the pipelined path through 16 total jobs: it matches explicit total time, decode count, decode service, and decode wait while accelerating the host simulation by 24.0 ×. The correctness claim applies only to rows that certify the full metric state. Figure 3 reports host runtime; simulated system time is separate. The pipelined anchors reach 45.2 ×, 22.7 ×, and 24.0 × speedup at 4, 8, and 16 jobs. The 35 calibrated-profile checks span 𝑛 = 1, 2, 4,dedicated CPU decoding, shared/dedicated preloaded NVIDIA Ising inference, and deterministic stress. No-stress rows extend four profiles through 𝑛 = 8 (32 jobs): each executes 31,238,974 decode stages with zero service, wait, busy-time, and utilization deltas and 22.9–39.6 × speedup. Surface MWPM also matches at 𝑛 = 16 (64 jobs), covering 68,932,161 decode stages at 53.3 × speedup (Appendix Table 6). Four single-class sentinels isolate pipeline, job-shop, unit-commitment, and VQE at one job, distance 3, and a 1.1 𝜇 s cycle. Across 751,721–1,961,296 duration-derived rounds and one to sixteen certified regions, every row has zero reported metric delta and fallback. Host speedup ranges from 23.2 × for VQE to 222.3 × for pipeline, showing that contraction depends on protected-interval structure as well as event count (Appendix Table 8). Three surface-MWPM cadence sentinels add exact pairs at 1 𝜇 s, 1 ms, and 70 ms. All preserve the reported metrics, with speedup from 1.24 × when few rounds repeat to 17.1 × at 1 𝜇 s (Appendix Table 7). Tests also exercise backlog limits, external arrivals, route conflicts, and continuation          
+
+> , Vol. 1, No. 1, Article . Publication date: July 2026. StreamingQEC: Streaming Quantum Error Correction in Tightly Integrated Quantum-Classical Systems via Certified Recurrence 15 4816 32 64 128 256 512 1024
+> Total jobs
+> 10 2
+> 10 3
+> 10 4
+> Host wall time (s, log scale)
+> 53.3x
+> Surface MWPM
+> qLDPC BP+LSD
+> Color BP+LSD
+> Neural Ising
+> Explicit reference
+> Certified, paired
+> Recurrent-only
+
+Fig. 3. Host runtime for calibrated code/decoder profiles. Squares are explicit references, filled circles are paired certified runs, and hollow circles are recurrent-only scaling. Paired points have zero reported simulator-output delta. 
+
+chains. Thus the evidence varies load, fitted duration, placement, cadence, and scheduler state, while exactness remains scoped by Table 1. Hollow markers in Figure 3 are recurrent-only tractability results, with parity supplied by paired rows. The 128-job row finishes in 452.7 s of host time and records 55,668 s of simulated decode wait; the saved 256-job inventory exceeds 1.22 billion decode events. Appendix E.2 records the claim/evidence/implication table. 
+
+8.3 E3: Auto Staged-Fluid Enables Fast Design Screening 
+
+We compare auto staged-fluid against saved exact references from the same detailed system model. Absolute makespan error is the magnitude of the fluid–exact completion-time difference divided by exact completion time. The model retains pipeline fill and drain, endpoint coupling, service conservation, and telemetry-gated queue terms while aggregating event identity. Mean-field base-lines exceed 4× error on some decoder-heavy rows. By separating light shared-resource decode from heavy decoder-service regimes, auto staged-fluid reduces mean absolute makespan error to 2.60%, median error to 2.03%, and worst error to 6.45% across 17 references. These span dedicated CPU decode at 𝑛 = 1, 2, 4 and shared CPU/GPU decode at 𝑛 = 1, 2. Figure 4 shows every reference, grouped by decoder and colored by placement. Appendix D.2 reports the underlying values and simpler baselines. The worst current row is qLDPC HGP BP+LSD on the shared CPU at one job: the fluid estimate is 55.86 s versus a 52.48 s exact reference. This is the regime where the model is weakest: small repli-cated workloads where shared-resource queue interaction matters but the aggregate model has few repetitions to average over. The model remains below the 10% operational screening threshold on the current reference set. Its intended use is screening within the covered code/decoder/placement regimes. A new reference check is required for correctness claims or use outside those regimes. Staged-fluid screens broad design spaces and discards clearly dominated candidates. Designs near saturation or a decision boundary, or outside the measured telemetry regime, are promoted to certified recurrence or explicit execution.        
+
+> , Vol. 1, No. 1, Article . Publication date: July 2026. 16 Christou et al. 0246810
+> Absolute makespan error (%)
+> Surface MWPM, n=4
+> Surface MWPM, n=2
+> Surface MWPM, n=2
+> Surface MWPM, n=1
+> Surface MWPM, n=1
+> qLDPC BP+LSD, n=4
+> qLDPC BP+LSD, n=2
+> qLDPC BP+LSD, n=2
+> qLDPC BP+LSD, n=1
+> qLDPC BP+LSD, n=1
+> Color BP+LSD, n=4
+> Color BP+LSD, n=2
+> Color BP+LSD, n=2
+> Color BP+LSD, n=1
+> Color BP+LSD, n=1
+> Neural Ising, n=2
+> Neural Ising, n=1 10% target
+> 5.3%
+> 5.5%
+> 0.6%
+> 0.5%
+> 1.6%
+> 2.9%
+> 2.9%
+> 0.1%
+> 0.3%
+> 6.4%
+> 2.0%
+> 2.0%
+> 3.7%
+> 2.9%
+> 2.0%
+> 5.5%
+> 0.1%
+> Dedicated QEC
+> Shared CPU
+> Shared GPU
+
+Fig. 4. Auto staged-fluid makespan error over 17 exact references. All rows remain below the 10% screening target. Appendix D.2 reports the full data. 
+
+Appendix D.1 gives the equations, and Appendix C.5 gives the metric-mode recurrence ablation. 
+
+8.4 E4: Code, Decoder, and Placement Choices Change Hybrid-System Load 
+
+The completed code/decoder sweep uses the same mixed workload and streaming-QEC semantics while varying code family, decoder, and placement. Figure 5 gives a representative stage-service decomposition. At distance 13, local Fusion Blossom window timing is the heaviest surface path in this sweep, qLDPC BP+LSD induces more decode service than surface MWPM, and toric/color LDPC-style rows occupy a middle range. Figure 7 tests whether these bottleneck assignments persist across broader decoder and link choices. Explicit shared-resource rows can be transfer- or decode-bound. Surface MWPM is lightest but transfer-heavy: decode versus syndrome/feedback service is 3.65 s versus 31.63 s at 𝑛 = 1, and 6.54 s versus 56.72 s at 𝑛 = 2. At 𝑛 = 2, qLDPC BP+LSD, color BP+LSD, and preloaded neural Ising instead shift pressure toward decode and complete 2.30 ×, 3.01 ×, and 8.72 × slower than surface MWPM. Appendix Table 13 gives the full rows. Dedicated-QEC rows isolate placement effects. At 16 jobs, qLDPC and color BP+LSD take 8.1 ×
+
+and 12.0 × the surface-MWPM total (Appendix Table 14). Appendix Table 18 gives the common 8-job view. A dedicated QEC GPU reduces preloaded neural completion time by about 15% at 8 and 16 jobs, yet remains about 99% utilized. 
+
+Design implication. Co-design decoder placement with syndrome and feedback transport: fast matching can expose link cost, while heavier decoders benefit from isolated capacity.      
+
+> , Vol. 1, No. 1, Article . Publication date: July 2026. StreamingQEC: Streaming Quantum Error Correction in Tightly Integrated Quantum-Classical Systems via Certified Recurrence 17 050 100 150 200
+> Accumulated QEC stage service (s)
+> Surface MWPM
+> qLDPC BP+LSD
+> Color BP+LSD
+> Ising GPU
+> 36.3s
+> 94.8s
+> 126.4s
+> 193.8s
+> Readout
+> Syndrome transfer
+> Decode
+> Feedback transfer
+> Apply
+
+Fig. 5. Representative accumulated QEC stage service on the mixed workload. Fast matching exposes transfer/control cost, while heavier profiles shift service toward decode. Appendix Table 12 reports the corresponding values. 
+
+8.5 E5: Deterministic Timing Stress Quantifies Capacity Margin 
+
+Link jitter, slowdown/decay, and fault-delay terms are deterministic functions of event identity, seed, profile, and salt, so explicit and recurrent execution assign the same perturbation to the same logical event. In the completed stress sweep, the combined profile increases representative stage service by 1.09 × for surface MWPM, 1.06 × for qLDPC, 1.07 × for color code, and 1.11 × for neural Ising (Appendix Table 19). The design question is headroom: a 6–11% service increase is small with millisecond-cycle slack but important near QEC-resource saturation. 
+
+Design implication. Reserve 6–11% timing headroom when a candidate QEC resource already operates near saturation. 
+
+8.6 E6: QEC-Cycle Pressure Reveals Modality-Scale Decoder Bottlenecks 
+
+This cadence-pressure experiment holds workload, distance, and placement fixed while varying the QEC cycle time that determines round count (Section 3). It does not substitute for full trapped-ion, neutral-atom, or superconducting platform models. At distance 21, shortening the cycle from 1000 to 5 𝜇 s raises simulated total time from 7.35 to 349.7 s for qLDPC BP+LSD, 7.34 to 43.11 s for color BP+LSD, and 7.34 to 102.50 s for surface MWPM. The workload duration remains fixed; extra measurement rounds and syndrome updates create the growth. Appendix E.1 gives the full table. At a 70 ms trapped-ion-style cycle, all rows remain near the 7.34 s base and below 0.5% QEC utilization. At a 1 ms neutral-atom-style cycle, utilization ranges from 2.1% for surface MWPM to 22.4% for preloaded neural inference. At a 1 𝜇 s superconducting-style cycle, all four profiles saturate the dedicated resource; qLDPC and neural inference are 5.0 × and 10.5 × slower than surface MWPM (Appendix Table 17). Figure 6 shows overlapping profiles while QEC fits within millisecond-scale slack and sharp separation once the dedicated frontier saturates at 1 𝜇 s. This is a system-capacity comparison under fixed workload assumptions, rather than a logical-error-rate comparison. 
+
+Design implication. Provision decoder and transport capacity against physical QEC cycle rate as well as logical workload size.     
+
+> , Vol. 1, No. 1, Article . Publication date: July 2026. 18 Christou et al. 70 ms
+> ion scale
+> 1 ms
+> atom scale
+> 1 us
+> SC scale
+> 10
+> 100
+> 1000
+> Simulated total time (s, log)
+> base workload
+> A
+> 70 ms
+> ion scale
+> 1 ms
+> atom scale
+> 1 us
+> SC scale
+> 0
+> 20
+> 40
+> 60
+> 80
+> 100
+> Dedicated-QEC utilization (%)
+> saturation
+> B
+> Surface MWPM Color BP+LSD qLDPC BP+LSD Neural Ising
+
+Fig. 6. QEC-cycle pressure under fixed workload and dedicated placement. Millisecond cycles retain headroom, while a microsecond cycle saturates the QEC frontier. 
+
+8.7 E7: Grounded Profiles Reveal Bottleneck Transitions 
+
+Figure 7 summarizes 219 certified-recurrence rows on the same 16-job mixed workload: 75 decoder, 96 link, and 48 controller variants across four code families at distances 5, 7, and 9. All rows complete with zero explicit fallback. We classify pressure as stage service plus wait and mark a row 
+
+mixed when its two largest shares differ by at most 10 percentage points. The matrix contains 114 decoder-dominated, 44 link-dominated, and 61 mixed rows. Appendix Table 25 gives the latency and bandwidth of the eight link variants. The matrix provides design-sweep evidence, while the paired experiments in Section 8.2 provide explicit parity evidence. Panel (a) sweeps eight links across 12 code/distance combinations with fixed decoder and controller defaults. Surface MWPM moves from link-dominated at distances 5 and 7 to mixed at 9. Ethernet is link-dominated in 11 of 12 combinations, whereas InfiniBand NDR exposes decode in 10 of 12. Transport can therefore change the active regime with code and decoder fixed. Panel (b) fixes link and controller choices. Every qLDPC and color variant is decoder-dominated, while surface and toric shares change regime; Fusion Blossom and neural Ising remain decoder-heavy. Four controller variants alter completion time by at most 51.5 𝜇 s, and none dominates under the fixed control-stage assumptions. Figure 5 gives service decompositions behind the classifications. Together they show why decoder and transport must be evaluated jointly: improving one can expose the other. 
+
+8.8 E8: Future-Hardware Sweeps Identify Decoder and Link Leverage 
+
+Figure 8 evaluates independent hardware counterfactuals for surface MWPM and qLDPC BP+LSD at distances 5, 15, 21, and 25 on the 4-job mixed workload. Each row changes only the named service axis relative to the same baseline: decode is divided by 10, 20, or 30, while transfer, controller, non-decoder, and all-QEC variants use a factor of 10. Each row starts from the baseline independently. Distances above the measured grid rank modeled hardware leverage. Their decoder latency is extrapolative. For surface MWPM at distance 5, decoder acceleration improves the reduction from 61.7% at 10 ×
+
+to 62.3% at 20 ×, with no further gain at 30 ×. Across the other seven rows, reduction grows from 87.4–89.8% at 10 × to 92.3–94.8% at 20 × and 93.9–96.5% at 30 ×. The increments shrink from 4.9–5.0 to 1.6–1.7 percentage points as the bottleneck moves to other stages. Transfer-only improvement 
+
+> , Vol. 1, No. 1, Article . Publication date: July 2026.
+
+StreamingQEC: Streaming Quantum Error Correction in Tightly Integrated Quantum-Classical Systems via Certified Recurrence 19 Surface 
+
+d=5 
+
+Toric 
+
+d=5 
+
+qLDPC 
+
+d=5 
+
+Color 
+
+d=5 
+
+Surface 
+
+d=7 
+
+Toric 
+
+d=7 
+
+qLDPC 
+
+d=7 
+
+Color 
+
+d=7 
+
+Surface 
+
+d=9 
+
+Toric 
+
+d=9 
+
+qLDPC 
+
+d=9 
+
+Color 
+
+d=9 
+
+NVQLink callback 
+
+Ctrl-QPU coax 
+
+Cryo-CMOS link 
+
+Photonic control 
+
+PCIe Gen4 
+
+PCIe Gen5 
+
+InfiniBand NDR 
+
+Ethernet 100G 
+
+> Link profile
+
+Link 
+
+66% Link 
+
+63% Dec 
+
+65% Dec 
+
+62% Link 
+
+55% Mix 
+
+50% Dec 
+
+69% Dec 
+
+63% Mix 
+
+54% Dec 
+
+58% Dec 
+
+71% Dec 
+
+64% 
+
+Dec 
+
+55% Dec 
+
+54% Mix 
+
+50% Mix 
+
+51% Mix 
+
+52% Mix 
+
+52% Mix 
+
+50% Mix 
+
+51% Mix 
+
+51% Mix 
+
+51% Mix 
+
+50% Mix 
+
+50% 
+
+Dec 
+
+59% Dec 
+
+57% Mix 
+
+51% Mix 
+
+51% Mix 
+
+54% Mix 
+
+53% Mix 
+
+50% Mix 
+
+51% Mix 
+
+52% Mix 
+
+51% Mix 
+
+50% Mix 
+
+51% 
+
+Dec 
+
+60% Dec 
+
+57% Mix 
+
+51% Mix 
+
+51% Mix 
+
+54% Mix 
+
+53% Mix 
+
+50% Mix 
+
+51% Mix 
+
+52% Mix 
+
+51% Mix 
+
+50% Mix 
+
+51% 
+
+Link 
+
+73% Link 
+
+70% Dec 
+
+60% Dec 
+
+57% Link 
+
+62% Link 
+
+58% Dec 
+
+65% Dec 
+
+58% Mix 
+
+53% Mix 
+
+52% Dec 
+
+68% Dec 
+
+59% 
+
+Link 
+
+73% Link 
+
+70% Dec 
+
+60% Dec 
+
+57% Link 
+
+62% Link 
+
+58% Dec 
+
+65% Dec 
+
+58% Mix 
+
+53% Mix 
+
+52% Dec 
+
+68% Dec 
+
+59% 
+
+Link 
+
+55% Mix 
+
+51% Dec 
+
+70% Dec 
+
+68% Dec 
+
+55% Dec 
+
+59% Dec 
+
+72% Dec 
+
+69% Dec 
+
+63% Dec 
+
+66% Dec 
+
+73% Dec 
+
+69% 
+
+Link 
+
+84% Link 
+
+83% Link 
+
+64% Link 
+
+68% Link 
+
+80% Link 
+
+78% Link 
+
+55% Link 
+
+66% Link 
+
+76% Link 
+
+72% Mix 
+
+51% Link 
+
+65% 
+
+(a) Link choices move the active QEC bottleneck 
+
+Surface 
+
+d=5 
+
+Toric 
+
+d=5 
+
+qLDPC 
+
+d=5 
+
+Color 
+
+d=5 
+
+Surface 
+
+d=7 
+
+Toric 
+
+d=7 
+
+qLDPC 
+
+d=7 
+
+Color 
+
+d=7 
+
+Surface 
+
+d=9 
+
+Toric 
+
+d=9 
+
+qLDPC 
+
+d=9 
+
+Color 
+
+d=9 
+
+0
+
+25 
+
+50 
+
+75 
+
+100 
+
+> Decoder profiles (%)
+
+(b) Bottleneck regimes across decoder-profile choices 
+
+Decoder Link Mixed 
+
+Fig. 7. Bottleneck transitions in the 219-row profile matrix. Panel (a) shows dominant pressure by link, code, and distance, while panel (b) aggregates decoder-profile regimes. No controller profile dominates under the fixed control-stage assumptions. Surface 
+
+MWPM 
+
+d = 5 
+
+qLDPC 
+
+BP+LSD 
+
+d = 5 
+
+Surface 
+
+MWPM 
+
+d = 15 
+
+qLDPC 
+
+BP+LSD 
+
+d = 15 
+
+Surface 
+
+MWPM 
+
+d = 21 
+
+qLDPC 
+
+BP+LSD 
+
+d = 21 
+
+Surface 
+
+MWPM 
+
+d = 25 
+
+qLDPC 
+
+BP+LSD 
+
+d = 25 
+
+Code/decoder profile and distance 
+
+30x decoder 
+
+20x decoder 
+
+10x decoder 
+
+10x transfer 
+
+10x controller 
+
+10x transfer + controller 
+
+10x all QEC stages 
+
+> Hardware improvement
+
+62.3% 93.9% 94.6% 96.2% 95.8% 96.4% 96.1% 96.5% 
+
+62.3% 92.3% 93.0% 94.6% 94.1% 94.7% 94.4% 94.8% 
+
+61.7% 87.4% 88.1% 89.6% 89.2% 89.8% 89.5% 89.8% 
+
+12.1% 1.4% 1.0% 0.2% 0.5% 0.1% 0.3% 0.1% 
+
+0.0% 0.0% 0.0% 0.0% 0.0% 0.0% 0.0% 0.0% 
+
+12.1% 1.4% 1.0% 0.2% 0.5% 0.1% 0.3% 0.1% 
+
+62.3% 88.8% 89.1% 89.8% 89.6% 89.9% 89.7% 89.9% 
+
+0% 
+
+20% 
+
+40% 
+
+60% 
+
+80% 
+
+100% 
+
+> Simulated-time reduction vs baseline
+
+Fig. 8. Simulated completion-time reduction from independent hardware-axis counterfactuals on the 4-job mixed workload. Decoder-only rows use 10 ×, 20 ×, and 30 × speedups. Other rows use 10 ×. Rows beyond the measured grounding grid are extrapolative sensitivity results. 
+
+, Vol. 1, No. 1, Article . Publication date: July 2026. 20 Christou et al. 
+
+reaches 12.1% for the smallest surface row but only 0–1.4% elsewhere; controller-only improvement does not move these rows. 
+
+Design implication. Redirect investment to transfer or other stages once decoder-only acceler-ation reaches the non-decoder floor. 
+
+9 Discussion and Limitations 
+
+Certification boundary. Certified recurrence contracts a region only when resource frontiers, queue/backlog state, deterministic profile state, continuation state, and metric deltas repeat. The ev-idence covers heterogeneous 4/8/16-job anchors, four single-class workload sentinels, 35 calibrated-profile rows, three cadence sentinels, and regression cases for backlog, external arrivals, and continuation release. Equality is claimed only for those configurations. Design-sweep rows without an explicit pair and arbitrary scheduler graphs lie outside that claim. Scalar timing and placement changes remain eligible when canonical dependencies hold. Table 1 gives the decision procedure. Unsupported regions execute exactly or fail closed in certified-required mode. 
+
+Timing and resource abstraction. The recurrence proof is a statement about simulator semantics for deterministic stage durations. The fitted decoder profiles are separate empirical timing inputs. Their log-space diagnostics measure residual error. They provide no confidence intervals for future systems. Higher-error neural timing is used for sensitivity analysis within its measured grid. Each resource frontier is a modeled lane. Profiles can include measured batching and internal parallelism, but unmeasured concurrent CPU or GPU execution requires additional lanes or a detailed scheduler. Conclusions therefore apply at the modeled allocation level. 
+
+Placement, approximation, and future scope. Shared and dedicated placement charge different frontiers, while shorter QEC cycles generate more rounds from the same protected interval. These results characterize system load. Logical-error-rate comparisons lie outside their scope. Auto staged-fluid discards event identity, and its 6.45% maximum is empirical over 17 references. New placement, scale, or queue regimes require an exact check. True streaming overlap, topology-changing commits, full-interval retry, and arbitrary backlog policies require a scheduler-graph certificate. Grounding extensions include maintained GPU MWPM and larger-allocation color-code MPS timing. 
+
+10 Conclusion 
+
+Quantum error correction is a systems workload. Protecting logical computation repeatedly gener-ates readout, syndrome transfer, decoding, feedback, and correction work. Whether that work keeps pace depends on QEC cycle time, code and decoder choice, resource placement, and contention with the surrounding application. StreamingQEC is a system-level simulator for studying these interactions before committing to a tightly coupled full-stack design. It attaches streaming QEC to workload-derived protected logical computation intervals and reports simulated completion time, stage service and wait, resource utilization, queue pressure, and continuation timing. StreamingQEC provides three complementary execution paths over the same staged semantics. Explicit DES is the reference trace for detailed validation. Auto staged-fluid retains pipeline, end-point, service-conservation, and aggregate queue effects for fast approximate screening. Certified recurrence contracts repeated regions only when the resource-frontier, backlog, deterministic timing, continuation, and metric state satisfy the certification contract. This separation lets users choose screening speed or exact detailed metrics without conflating approximation error with recurrence correctness. The timing layer uses 8,174 measured decoder-runtime rows and deterministic literature-prior hardware-effect profiles. Across the reported mixed anchors, single-class sentinels, cadence checks, and 35 calibrated-profile rows, certified recurrence preserves simulated time, counts, service, wait, 
+
+> , Vol. 1, No. 1, Article . Publication date: July 2026.
+
+StreamingQEC: Streaming Quantum Error Correction in Tightly Integrated Quantum-Classical Systems via Certified Recurrence 21 
+
+busy time, and utilization. The 16-job anchor preserves 59,743,936 decode events with 24.0 × host speedup. A calibrated surface-MWPM anchor reaches 53.3 × at 64 total jobs, while recurrent-only scaling exceeds 1.22 billion events. Auto staged-fluid provides faster screening with 2.60% mean and 6.45% worst absolute makespan error over 17 references. The resulting studies show why full-stack evaluation must follow the active bottleneck. Fast matching can expose syndrome and feedback movement. Heavier decoders can stall application progress. Microsecond QEC cycles can saturate a dedicated decoder resource, and the 219-row profile matrix shows that the limiting stage changes with code, decoder, distance, and transport. StreamingQEC makes these architecture questions tractable while keeping recurrence exactness, fluid approximation error, and timing-fit uncertainty as separate, auditable claims. FPGA is modeled as an extensible device but remains unevaluated without a hardware-grounded profile. 
+
+References 
+
+[1] Thomas Beck, Alessandro Baroni, Ryan Bennink, Gilles Buchs, Eduardo Antonio Coello Pérez, Markus Eisenbach, Rafael Ferreira da Silva, Muralikrishnan Gopalakrishnan Meena, Kalyan Gottiparthi, Peter Groszkowski, Travis S. Humble, Ryan Landfield, Ketan Maheshwari, Sarp Oral, Michael A. Sandoval, Amir Shehata, In-Saeng Suh, and Christopher Zimmer. 2024. Integrating quantum computing resources into scientific HPC ecosystems. Future Generation Computer Systems 161 (Dec. 2024), 11–25. doi:10.1016/j.future.2024.06.058 [2] Nathan Binkert, Bradford Beckmann, Gabriel Black, Steven K. Reinhardt, Ali Saidi, Arkaprava Basu, Joel Hestness, Derek R. Hower, Tushar Krishna, Somayeh Sardashti, Rathijit Sen, Korey Sewell, Muhammad Shoaib, Nilay Vaish, Mark D. Hill, and David A. Wood. 2011. The gem5 Simulator. ACM SIGARCH Computer Architecture News 39, 2 (2011), 1–7. doi:10.1145/2024716.2024718 [3] H. Bombin and M. A. Martin-Delgado. 2006. Topological Quantum Distillation. Physical Review Letters 97, 18 (2006), 180501. doi:10.1103/PhysRevLett.97.180501 [4] Sergey Bravyi and Alexei Kitaev. 2005. Universal Quantum Computation with Ideal Clifford Gates and Noisy Ancillas. 
+
+Physical Review A 71, 2 (2005), 022316. doi:10.1103/PhysRevA.71.022316 [5] Jack C. Brennan, João Barbosa, Chong Li, Meraj Ahmad, Fiheon Imroze, Calum Rose, Wridhdhisom Karar, Manoj Stanley, Hadi Heidari, Nick M. Ridler, and Martin Weides. 2025. Classical interfaces for controlling cryogenic quantum computing technologies. APL Quantum 2, 4 (12 2025), 041501. doi:10.1063/5.0273490 [6] Lee Breslau, Deborah Estrin, Kevin R. Fall, Sally Floyd, John S. Heidemann, Ahmed Helmy, Polly Huang, Steven McCanne, Kannan Varadhan, Ya Xu, and Haobo Yu. 2000. Advances in Network Simulation. Computer 33, 5 (2000), 59–67. doi:10.1109/2.841785 [7] Randy Brown. 1988. Calendar queues: A fast O(1) priority queue implementation for the simulation event set problem. 
+
+Commun. ACM 31, 10 (1988), 1220–1227. doi:10.1145/63039.63045 [8] A. Robert Calderbank and Peter W. Shor. 1996. Good quantum error-correcting codes exist. Physical Review A 54, 2 (1996), 1098–1105. doi:10.1103/PhysRevA.54.1098 [9] Shane Caldwell, Moein Khazraee, Ben Howe, Muyuan Li, Justin Lietz, Tom Lubowe, and Alex McCaskey. 2025. NVIDIA NVQLink Architecture Integrates Accelerated Computing with Quantum Processors. https://developer.nvidia.com/blo g/nvidia-nvqlink-architecture-integrates-accelerated-computing-with-quantum-processors/. Accessed 2026. [10] Shane A. Caldwell, Moein Khazraee, Elena Agostini, Tom Lassiter, Corey Simpson, Omri Kahalon, Mrudula Kanuri, Jin-Sung Kim, Sam Stanwyck, Muyuan Li, Jan Olle, Christopher Chamberland, Ben Howe, Bruno Schmitt, Justin G. Lietz, Alex McCaskey, Jun Ye, Ang Li, Alicia B. Magann, Corey I. Ostrove, Kenneth Rudinger, Robin Blume-Kohout, Kevin Young, Nathan E. Miller, Yilun Xu, Gang Huang, Irfan Siddiqi, John Lange, Christopher Zimmer, and Travis Humble. 2025. Platform Architecture for Tight Coupling of High-Performance Computing with Quantum Processors. arXiv:2510.25213 [cs.DC] https://arxiv.org/abs/2510.25213 [11] Rodrigo N. Calheiros, Rajiv Ranjan, Anton Beloglazov, Cesar A. F. De Rose, and Rajkumar Buyya. 2011. CloudSim: A Toolkit for Modeling and Simulation of Cloud Computing Environments and Evaluation of Resource Provisioning Algorithms. Software: Practice and Experience 41, 1 (2011), 23–50. doi:10.1002/spe.995 [12] Christopher Chamberland, Jan Olle, Muyuan Li, Scott Thornton, and Igor Baratta. 2026. Fast and accurate AI-based pre-decoders for surface codes. arXiv:2604.12841 [quant-ph] https://arxiv.org/abs/2604.12841 [13] Pranav Chandarana, Sebastián V. Romero, Alejandro Gomez Cadavid, Anton Simen, Enrique Solano, and Narendra N. Hegade. 2025. Hybrid Sequential Quantum Computing. arXiv:2510.05851 [quant-ph] https://arxiv.org/abs/2510.05851 [14] Yaojian Chen, Chun-Yang Luan, Peilin Zheng, Xianghong Zeng, Jia-Yi Hou, Zhuo Fu, Yirong Jin, Fei Wang, Guangwen Yang, and Dingshun Lv. 2026. Real-Time Quantum Error Correction System Stack: Architecture, Algorithms, and Engineering Practice. arXiv:2605.30765 [quant-ph] https://arxiv.org/abs/2605.30765 , Vol. 1, No. 1, Article . Publication date: July 2026. 22 Christou et al. 
+
+[15] Tyler Christeson, Md Habib Ullah, Ali Arabnya, Amin Khodaei, and Rui Fan. 2025. Hybrid Quantum-Classical Optimization of the Resource Scheduling Problem. arXiv:2511.00733 [eess.SY] https://arxiv.org/abs/2511.00733 [16] Srikar Chundury, Amir Shehata, Seongmin Kim, Muralikrishnan Gopalakrishnan Meena, Chao Lu, Kalyana Gottiparthi, Eduardo Antonio Coello Perez, Frank Mueller, and In-Saeng Suh. 2025. Scaling Hybrid Quantum–HPC Applications with the Quantum Framework. In Proceedings of the SC ’25 Workshops of The International Conference on High Performance Computing, Network, Storage, and Analysis . Association for Computing Machinery, New York, NY, USA, 1888–1897. doi:10.1145/3731599.3767553 [17] Tim Coopmans, Robert Knegjens, Axel Dahlberg, David Maier, Loek Nijsten, Julio de Oliveira Filho, Martijn Papendrecht, Julian Rabbie, Filip Rozpędek, Matthew Skrzypczyk, Leon Wubben, Walter de Jong, Damian Podareanu, Ariana Torres-Knoop, David Elkouss, and Stephanie Wehner. 2021. NetSquid, a NETwork Simulator for QUantum Information using Discrete Events. Communications Physics 4 (2021), 164. doi:10.1038/s42005-021-00647-8 [18] Shengkun Cui, Archit Patke, Hung Nguyen, Aditya Ranjan, Ziheng Chen, Phuong Cao, Gregory Bauer, Brett Bode, Catello Di Martino, Saurabh Jha, Chandra Narayanaswami, Daby Sow, Zbigniew T. Kalbarczyk, and Ravishankar K. Iyer. 2025. Story of Two GPUs: Characterizing the Resilience of Hopper H100 and Ampere A100 GPUs. In Proceedings of the International Conference for High Performance Computing, Networking, Storage and Analysis (SC) . Association for Computing Machinery, New York, NY, USA, 1145–1164. doi:10.1145/3712285.3759821 [19] Axel Dahlberg and Stephanie Wehner. 2018. SimulaQron: A simulator for developing quantum internet software. 
+
+Quantum Science and Technology 4, 1 (2018), 015001. doi:10.1088/2058-9565/aad56e [20] David Tolnay. 2026. thiserror: derive macros for the standard Rust error trait. https://crates.io/crates/thiserror. Software documentation. Accessed 2026-07-10. [21] Daniele De Sensi, Salvatore Di Girolamo, Kim H. McMahon, Duncan Roweth, and Torsten Hoefler. 2020. An In-Depth Analysis of the Slingshot Interconnect. In Proceedings of the International Conference for High Performance Computing, Networking, Storage and Analysis (SC) . IEEE, Piscataway, NJ, USA, 1–14. doi:10.1109/SC41405.2020.00039 [22] Eric Dennis, Alexei Kitaev, Andrew Landahl, and John Preskill. 2002. Topological quantum memory. J. Math. Phys. 43, 9 (2002), 4452–4505. doi:10.1063/1.1499754 [23] Dmitry Duplyakin, Alexandru Uta, Aleksander Maricq, and Robert Ricci. 2020. In Datacenter Performance, The Only Constant Is Change. In IEEE/ACM International Symposium on Cluster, Cloud and Internet Computing (CCGrid) . IEEE, Piscataway, NJ, USA, 370–379. doi:10.1109/CCGrid49817.2020.00-56 [24] Philip Döbler and Manpreet Singh Jattana. 2025. A Survey on Integrating Quantum Computers into High Performance Computing Systems. arXiv:2507.03540 [cs.ET] https://arxiv.org/abs/2507.03540 [25] Bryan Eastin and Emanuel Knill. 2009. Restrictions on Transversal Encoded Quantum Gate Sets. Physical Review Letters 102, 11 (2009), 110502. doi:10.1103/PhysRevLett.102.110502 [26] Bo Fang, Daoce Wang, Sian Jin, Quincey Koziol, Zhao Zhang, Qiang Guan, Suren Byna, Sriram Krishnamoorthy, and Dingwen Tao. 2021. Characterizing Impacts of Storage Faults on HPC Applications: A Methodology and Insights. In 
+
+IEEE International Conference on Cluster Computing (CLUSTER) . IEEE, Piscataway, NJ, USA, 409–420. doi:10.1109/Clus ter48925.2021.00048 [27] Austin G. Fowler, Matteo Mariantoni, John M. Martinis, and Andrew N. Cleland. 2012. Surface codes: Towards practical large-scale quantum computation. Physical Review A 86, 3 (2012), 032324. doi:10.1103/PhysRevA.86.032324 [28] Richard M. Fujimoto. 2000. Parallel and Distributed Simulation Systems . Wiley, New York, NY, USA. [29] Craig Gidney. 2021. Stim: a fast stabilizer circuit simulator. Quantum 5 (2021), 497. doi:10.22331/q-2021-07-06-497 [30] Google Quantum AI. 2023. Suppressing quantum errors by scaling a surface code logical qubit. Nature 614 (2023), 676–681. doi:10.1038/s41586-022-05434-1 [31] Daniel Gottesman. 1997. Stabilizer codes and quantum error correction . Ph. D. Dissertation. California Institute of Technology. doi:10.7907/97V4-YE48 [32] Charles R. Harris, K. Jarrod Millman, Stéfan J. van der Walt, Ralf Gommers, Pauli Virtanen, David Cournapeau, Eric Wieser, Julian Taylor, Sebastian Berg, Nathaniel J. Smith, Robert Kern, Matti Picus, Stephan Hoyer, Marten H. van Kerkwijk, Matthew Brett, Allan Haldane, Jaime Fernández del Río, Mark Wiebe, Pearu Peterson, Pierre Gérard-Marchant, Kevin Sheppard, Tyler Reddy, Warren Weckesser, Hameer Abbasi, Christoph Gohlke, and Travis E. Oliphant. 2020. Array programming with NumPy. Nature 585 (2020), 357–362. doi:10.1038/s41586-020-2649-2 [33] Sascha Heußen, Don Winter, Manuel Rispler, and Markus Müller. 2024. Dynamical subset sampling of quantum error-correcting protocols. Physical Review Research 6, 1 (2024), 013177. doi:10.1103/PhysRevResearch.6.013177 [34] Oscar Higgott. 2022. PyMatching: A Python package for decoding quantum codes with minimum-weight perfect matching. ACM Transactions on Quantum Computing 3, 3 (2022), 16:1–16:16. doi:10.1145/3505637 [35] Oscar Higgott and Craig Gidney. 2025. Sparse Blossom: Correcting a Million Errors per Core Second with Minimum-Weight Matching. Quantum 9 (2025), 1600. doi:10.22331/q-2025-01-20-1600 [36] David R. Jefferson. 1985. Virtual time. ACM Transactions on Programming Languages and Systems 7, 3 (1985), 404–425. doi:10.1145/3916.3988 , Vol. 1, No. 1, Article . Publication date: July 2026. StreamingQEC: Streaming Quantum Error Correction in Tightly Integrated Quantum-Classical Systems via Certified Recurrence 23 
+
+[37] Jaehoon Kang. 2026. Edge-Inference Governors Need Memory-Clock State. arXiv:2606.16106 [cs.DC] https://arxiv.or g/abs/2606.16106 [38] Apostolos Kokolis, Michael Kuchnik, John Hoffman, Adithya Kumar, Parth Malani, Faye Ma, Zachary DeVito, Shubho Sengupta, Kalyan Saladi, and Carole-Jean Wu. 2025. Revisiting Reliability in Large-Scale Machine Learning Research Clusters. In 2025 IEEE International Symposium on High Performance Computer Architecture (HPCA) . IEEE, Piscataway, NJ, USA, 1259–1274. doi:10.1109/HPCA61900.2025.00096 [39] Yaniv Kurman, Lior Ella, Ramon Szmuk, Oded Wertheim, Benedikt Dorschner, Sam Stanwyck, and Yonatan Cohen. 2025. Benchmarking the Ability of a Controller to Execute Quantum Error Corrected Non-Clifford Circuits. IEEE Transactions on Quantum Engineering 6 (2025), 1–14. doi:10.1109/TQE.2025.3608053 [40] Mathieu Lacage and Thomas R. Henderson. 2006. Yet Another Network Simulator. In Proceedings of the 2006 Workshop on ns-2: The IP Network Simulator . Association for Computing Machinery, New York, NY, USA, 12–es. doi:10.1145/1190 455.1190467 [41] Ang Li, Shuaiwen Leon Song, Jieyang Chen, Jiajia Li, Xu Liu, Nathan R. Tallent, and Kevin J. Barker. 2020. Evaluating Modern GPU Interconnect: PCIe, NVLink, NV-SLI, NVSwitch and GPUDirect. IEEE Transactions on Parallel and Distributed Systems 31, 1 (2020), 94–110. doi:10.1109/TPDS.2019.2928289 [42] Santiago Lopez, Jonathan Andrade Plascencia, and Gabriel N. Perdue. 2024. qec_code_sim: An open-source Python framework for estimating the effectiveness of quantum-error correcting codes on superconducting qubits. arXiv:2402.06745 [quant-ph] https://arxiv.org/abs/2402.06745 [43] Waylon Luo, Cheng-Chang Lu, Tong Zhan, and Qiang Guan. 2025. A Simulation Framework for Workload Management in Hybrid Quantum-HPC Cloud System. In Proceedings of the SC ’25 Workshops . Association for Computing Machinery, New York, NY, USA, 1851–1859. doi:10.1145/3731599.3767548 [44] National Energy Research Scientific Computing Center (NERSC). 2026. Perlmutter Architecture. https://docs.nersc.g ov/systems/perlmutter/architecture/. Official system documentation. Accessed 2026-07-11. [45] Hoa T. Nguyen, Muhammad Usman, and Rajkumar Buyya. 2024. iQuantum: A toolkit for modeling and simulation of quantum computing environments. Software: Practice and Experience 54 (2024), 1141–1171. doi:10.1002/spe.3331 [46] Hoa T. Nguyen, Muhammad Usman, and Rajkumar Buyya. 2025. QSimPy: A learning-centric simulation framework for quantum cloud resource management. In Quantum Computing , Rajkumar Buyya and Sukhpal Singh Gill (Eds.). Elsevier, Amsterdam, The Netherlands, 165–183. doi:10.1016/B978-0-443-29096-1.00012-X [47] NVIDIA. 2025. NVIDIA NVQLink. https://www.nvidia.com/en-us/solutions/quantum-computing/nvqlink/. Accessed 2026. [48] NVIDIA Corporation. 2026. CUDA Programming Guide. https://docs.nvidia.com/cuda/cuda-programming-guide/. Accessed 2026-07-10. [49] NVIDIA Corporation. 2026. NVIDIA Ising-Decoding. https://github.com/NVIDIA/Ising-Decoding. Public inference software and checkpoints. Accessed 2026-07-10. [50] Adam Paszke, Sam Gross, Francisco Massa, Adam Lerer, James Bradbury, Gregory Chanan, Trevor Killeen, Zeming Lin, Natalia Gimelshein, Luca Antiga, Alban Desmaison, Andreas Kopf, Edward Yang, Zachary DeVito, Martin Raison, Alykhan Tejani, Sasank Chilamkurthy, Benoit Steiner, Lu Fang, Junjie Bai, and Soumith Chintala. 2019. PyTorch: An Imperative Style, High-Performance Deep Learning Library. In Advances in Neural Information Processing Systems ,Vol. 32. Curran Associates, Inc., Red Hook, NY, USA, 8024–8035. https://proceedings.neurips.cc/paper/2019/hash/bdb ca288fee7f92f2bfa9f7012727740-Abstract.html [51] Alberto Peruzzo, Jarrod McClean, Peter Shadbolt, Man-Hong Yung, Xiao-Qi Zhou, Peter J Love, Alán Aspuru-Guzik, and Jeremy L O’Brien. 2014. A variational eigenvalue solver on a photonic quantum processor. Nature Communications 
+
+5, 1 (2014), 4213. doi:10.1038/ncomms5213 [52] John Preskill. 1998. Reliable quantum computers. Proceedings of the Royal Society of London. Series A 454, 1969 (1998), 385–410. doi:10.1098/rspa.1998.0167 [53] PyO3 Project. 2026. PyO3: Rust bindings for Python. https://pyo3.rs/. Software documentation. Accessed 2026-07-10. [54] Arun F. Rodrigues, K. Scott Hemmert, Brian W. Barrett, Chad D. Kersey, Ron A. Oldfield, Marlo Weston, Rolf Riesen, Jeanine Cook, Paul Rosenfeld, Elliott Cooper-Balis, and Bruce L. Jacob. 2011. The Structural Simulation Toolkit. ACM SIGMETRICS Performance Evaluation Review 38, 4 (2011), 37–42. doi:10.1145/1964218.1964225 [55] Joschka Roffe. 2022. LDPC: Python tools for low density parity check codes. https://pypi.org/project/ldpc/. Software package. Accessed 2026. [56] Sebastián V. Romero, Alejandro Gomez Cadavid, Enrique Solano, and Narendra N. Hegade. 2025. Sequential Quantum Computing. arXiv:2506.20655 [quant-ph] https://arxiv.org/abs/2506.20655 [57] Ryosuke Satoh, Michal Hajdušek, Naphan Benchasattabuse, Shota Nagayama, Kentaro Teramoto, Takaaki Matsuo, Sara Ayman Metwalli, Poramet Pathumsoot, Takahiko Satoh, Shigeya Suzuki, and Rodney Van Meter. 2022. QuISP: A Quantum Internet Simulation Package. In 2022 IEEE International Conference on Quantum Computing and Engineering (QCE) . IEEE, Piscataway, NJ, USA, 353–364. doi:10.1109/QCE53715.2022.00056 , Vol. 1, No. 1, Article . Publication date: July 2026. 24 Christou et al. 
+
+[58] Kenta Sawamura, Kensuke Araki, Naoki Maruyama, Renichiro Haba, and Masayuki Ohzeki. 2025. Quantum-classical hybrid algorithm using quantum annealing for multi-objective job shop scheduling. arXiv:2511.03257 [quant-ph] https://arxiv.org/abs/2511.03257 [59] Bianca Schroeder, Eduardo Pinheiro, and Wolf-Dietrich Weber. 2009. DRAM Errors in the Wild: A Large-Scale Field Study. In Proceedings of the ACM SIGMETRICS International Conference on Measurement and Modeling of Computer Systems . Association for Computing Machinery, New York, NY, USA, 193–204. doi:10.1145/1555349.1555372 [60] Serde Project. 2026. Serde: a serialization framework for Rust. https://serde.rs/. Software documentation. Accessed 2026-07-10. [61] Amir Shehata, Peter Groszkowski, Thomas Naughton, Muralikrishnan Gopalakrishnan Meena, Elaine Wong, Daniel Claudino, Rafael Ferreira da Silva, and Thomas Beck. 2026. Bridging paradigms: Designing for HPC-Quantum convergence. Future Generation Computer Systems 174 (Jan. 2026), 107980. doi:10.1016/j.future.2025.107980 [62] Peter W. Shor. 1995. Scheme for reducing decoherence in quantum computer memory. Physical Review A 52, 4 (1995), R2493–R2496. doi:10.1103/PhysRevA.52.R2493 [63] Akshitha Sriraman, Sihang Liu, Sinan Gunbay, Shan Su, and Thomas F. Wenisch. 2016. Deconstructing the Tail at Scale Effect Across Network Protocols. Workshop on Duplicating, Deconstructing and Debunking (WDDD). https://arxiv.org/abs/1701.03100 [64] Andrew M. Steane. 1996. Error correcting codes in quantum theory. Physical Review Letters 77, 5 (1996), 793–797. doi:10.1103/PhysRevLett.77.793 [65] Aleksandra Świerkowska, Jannik Pflieger, Emmanouil Giortamis, and Pramod Bhatotia. 2026. ECCentric: An Empirical Analysis of Quantum Error Correction Codes. Proceedings of the ACM on Measurement and Analysis of Computing Systems 10, 2 (2026), 37:1–37:33. doi:10.1145/3805635 [66] Runzhou Tao, Hongzheng Zhu, Jason Nieh, Jianan Yao, and Ronghui Gu. 2025. Quantum Virtual Machines. In 
+
+Proceedings of the 19th USENIX Symposium on Operating Systems Design and Implementation (OSDI ’25) . USENIX Association, Berkeley, CA, USA, 411–428. https://www.usenix.org/conference/osdi25/presentation/tao [67] Barbara M. Terhal. 2015. Quantum error correction for quantum memories. Reviews of Modern Physics 87, 2 (2015), 307–346. doi:10.1103/RevModPhys.87.307 [68] Jean-Pierre Tillich and Gilles Zémor. 2014. Quantum LDPC codes with positive rate and minimum distance proportional to the square root of the blocklength. IEEE Transactions on Information Theory 60, 2 (2014), 1193–1202. doi:10.1109/TIT. 2013.2292061 [69] David K. Tuckett. 2021. qecsim: A Python quantum error correction simulator. https://pypi.org/project/qecsim/. Software package. Accessed 2026. [70] J.P.G. van Dijk, E. Kawakami, R.N. Schouten, M. Veldhorst, L.M.K. Vandersypen, M. Babaie, E. Charbon, and F. Sebastiano. 2019. Impact of Classical Control Electronics on Qubit Fidelity. Phys. Rev. Appl. 12, 4 (Oct. 2019), 044054. doi:10.1103/PhysRevApplied.12.044054 [71] Pauli Virtanen, Ralf Gommers, Travis E. Oliphant, et al . 2020. SciPy 1.0: fundamental algorithms for scientific computing in Python. Nature Methods 17 (2020), 261–272. doi:10.1038/s41592-019-0686-2 [72] Xiaoliang Wu, Alexander Kolar, Joaquin Chung, Dong Jin, Tian Zhong, Rajkumar Kettimuthu, and Martin Suchara. 2021. SeQUeNCe: A Customizable Discrete-Event Simulator of Quantum Networks. Quantum Science and Technology 
+
+6, 4 (2021), 045027. doi:10.1088/2058-9565/ac22f6 [73] Yue Wu and Lin Zhong. 2023. Fusion Blossom: Fast MWPM Decoders for QEC. In 2023 IEEE International Conference on Quantum Computing and Engineering (QCE) . IEEE, Piscataway, NJ, USA, 928–938. doi:10.1109/QCE57702.2023.00107 [74] Zhu Zhu, Yu Sun, Dhatri Parakal, Bo Fang, Steven Farrell, Gregory H. Bauer, Brett Bode, Ian T. Foster, Michael E. Papka, William Gropp, Zhao Zhang, and Lishan Yang. 2025. Understanding the Landscape of Ampere GPU Memory Errors. arXiv:2508.03513 [cs.DC] https://arxiv.org/abs/2508.03513 , Vol. 1, No. 1, Article . Publication date: July 2026. StreamingQEC: Streaming Quantum Error Correction in Tightly Integrated Quantum-Classical Systems via Certified Recurrence 25 
+
+A Supplemental System Model and Taxonomy 
+
+This appendix is the audit trail for the main StreamingQEC claims. Its organization mirrors the paper: supplemental model definitions and evaluation setup come first, followed by recurrence vali-dation, fluid-model evidence, design-study results, implementation details, and runtime grounding. Framework and artifact names appear here only when they improve reproducibility. 
+
+A.1 Supplementary System Figures 
+
+This section keeps additional system diagrams out of the main text while preserving the visual audit trail for the staged resource-frontier model and the certified recurrence mechanism. The first diagram explains the state that must be preserved. The second explains how that state evolves within a round and across a certified repeated period. 
+
+From an explicit trace to a compact state transition. Figure 9 reads from left to right. The left panel shows the explicit staged trace. Readout and control apply occupy the controller, syndrome and feedback movement occupy their links, and decode occupies the selected decoder resource. Hatched gaps represent work waiting behind an occupied resource. The center panel replaces the stage history with the state needed to schedule future work: each resource’s next-free frontier, QEC backlog, pending applies, decoder warm/cold state, deterministic profile state, and metric accumulators. The right panel shows the recurrent update. Once a protected segment is certified to repeat, StreamingQEC advances every frontier and accumulates the corresponding metric deltas for all repeated instances, including the resource waits and service accounting represented by the explicit trace. 
+
+> Fig. 9. Resource-frontier representation of streaming QEC. An explicit staged trace is summarized by the scheduling and metric state required for an exact grouped update.
+
+From one staged round to a certified repeated period. Figure 10 expands the transition summarized above. The upper-left panel maps one QEC round to five ordered stages and their resource lanes: readout, syndrome transfer, decode, feedback transfer, and control apply. The upper-right panel  
+
+> , Vol. 1, No. 1, Article . Publication date: July 2026. 26 Christou et al.
+
+applies the reservation rule at each stage. A stage begins at the later of its dependency-ready time and its resource’s next-free frontier, completes after its profile-derived duration, and advances that frontier to its completion time. The lower panel separates an explicitly executed prefix, a certified repeated period, and an explicitly executed suffix. Recurrence groups only the middle region. It advances the frontiers and accumulates busy time, wait time, queue area, and service counts for all repetitions before explicit execution resumes at the suffix. 
+
+Fig. 10. Resource-frontier recurrence for staged QEC rounds. The same per-stage reservation rule governs explicit execution and the certified repeated-period update. 
+
+A.2 Code-Family Systems Taxonomy 
+
+Table 3 summarizes why the supported code families induce different systems workloads. Its scope is the simulator’s systems workload, while threshold and logical-error performance are properties of the underlying codes. 
+
+Table 3. QEC code families in StreamingQEC and why they create different systems workloads. The taxonomy focuses on system load. Code-performance evaluation lies outside its scope. 
+
+Code family Why it matters Hardware implication Current grounding role Rotated and unro-tated surface codes Local topological checks and nearest-neighbor lay-outs make them the base-line for many superconduct-ing and neutral-atom fault-tolerance studies. Frequent local syndrome rounds stress controller latency, syndrome transfer, matching decoders, and feedback timing. Main parity and decoder-runtime path with Stim/PyMatching, Fusion Blossom, and neural pre-decoder evidence.  
+
+> , Vol. 1, No. 1, Article . Publication date: July 2026. StreamingQEC: Streaming Quantum Error Correction in Tightly Integrated Quantum-Classical Systems via Certified Recurrence 27
+
+Code family Why it matters Hardware implication Current grounding role Toric surface codes Periodic-boundary topolog-ical code used to exercise detector models and toric-code decoder behavior. Useful for separating ideal matrix-code timing from circuit-level noisy measurement-round timing. Grounded with PyMatch-ing/LDPC matrix rows, qecsim ideal paths, and Stim circuit-detector paths. qLDPC HGP and generic sparse-matrix rows The HGP construction rep-resents a named sparse-check code family. Generic matrices provide separate decoder stress evidence be-yond planar codes. Larger sparse parity-check matrices stress CPU memory behavior, iterative decoders, batch size, and check/variable degree parameters. Grounded with belief propagation, BP+OSD, BP+LSD, union-find, and belief-find decoder rows. Color codes CSS structure and differ-ent check geometry provide a contrasting topological-code family. Matrix-decoder paths are scal-able. Tensor-network/MPS reference decoders can become memory-limited at larger distance. Grounded with LDPC ma-trix decoders and low-distance qecsim MPS evi-dence. 
+
+A.3 Detailed Cost Metrics 
+
+Table 4 expands the cost metrics used in the main evaluation. The distinction between simulated time and host simulator wall time is central to interpreting the results. 
+
+Table 4. Cost metrics reported by StreamingQEC. Simulated metrics describe the modeled tightly coupled system. Host wall time is the cost of running the simulator. 
+
+Metric Meaning Design use Simulated comple-tion time End-to-end time of the modeled tightly coupled hybrid-system workload. Determines whether QEC feedback, decode, and control can keep up with the protected workload. Stage service count and service time Number of readout, transfer, de-code, feedback, and apply stages and their accumulated service. Quantifies the amount of classical work in-duced by a code/decoder choice. Stage wait time Time stages spend waiting for their bound resource frontier. Identifies whether controller, CPU, GPU, dedicated QEC resource, or link contention is delaying QEC. Resource busy time and utilization Time each modeled hybrid-system resource is occupied by QEC or other work. Shows whether a resource is underused, sat-urated, or relieved by moving decode to an-other placement. Queue/backlog pressure Pending QEC work and resource-frontier delay caused by repeated rounds. Detects whether the decoder or transfer path falls behind the QEC cycle. Transfer payload and perturbation contribution Syndrome/feedback bytes plus deterministic jitter, tail, slow-down, and fault-delay terms. Separates bandwidth-limited, latency-limited, and fault/retry-limited behavior. Host simulator wall time Time required to run the simula-tor itself. Measures the computational benefit of recur-rence after semantic parity is established.  
+
+> , Vol. 1, No. 1, Article . Publication date: July 2026. 28 Christou et al.
+
+B Evaluation Organization B.1 Detailed Evaluation Matrix 
+
+Table 5 maps each evaluation block to the question it answers and the evidence it produces. 
+
+Table 5. Evaluation matrix matching the E1–E8 questions in the main text. 
+
+Question Experiment block Scale/reference Primary output E1 grounding Decoder-runtime ground-ing campaign 9,998 normalized rows across public surface, toric, qLDPC, color, Fusion Blossom, LDPC, and NVIDIA Ising paths Retained rows, fitted profiles, service-time anchors, and fit error. E2 exact accel-eration Explicit/certified validation and scaling Mixed anchors, four single-class sentinels, 35 calibrated-profile rows, three cadence sentinels, and recurrent-only scaling Metric deltas, host speedup, and tractable scale. E3 approxima-tion Auto staged-fluid compari-son Seventeen exact references across shared and dedicated placement Mean, median, worst, and row-level makespan error. E4 demand and placement Code/decoder load and placement sweeps Shared CPU/GPU and dedicated-QEC rows across surface, toric, qLDPC, color, Fusion Blossom, and neural paths Stage demand, waiting, uti-lization, and placement ef-fects. E5 timing mar-gin Deterministic hardware-effect sweep Link jitter, slowdown/decay, and recoverable fault-delay profiles Service penalty and remain-ing capacity margin. E6 cadence QEC-cycle pressure sweep Microsecond-, millisecond-, and 70-ms cycle assumptions Round pressure, utilization, saturation, and completion time. E7 transitions Grounded profile matrix 219 decoder, link, and con-troller variants across four code families Decoder-, link-, mixed-, and controller-pressure regimes. E8 leverage Independent future-hardware counterfactuals Decoder, transfer, controller, non-decoder, and all-QEC ac-celeration Completion-time reduction and bottleneck migration. 
+
+B.2 Workload Coverage Figure 
+
+Figure 11 compares host runtime across the workload families used in the coverage study.  
+
+> , Vol. 1, No. 1, Article . Publication date: July 2026. StreamingQEC: Streaming Quantum Error Correction in Tightly Integrated Quantum-Classical Systems via Certified Recurrence 29
+> Fig. 11. Streaming-QEC workload coverage across four workload families. Recurrence-scaling evidence is reported separately.
+
+B.3 Workload Stage Skeletons 
+
+The validation workloads are system-level stage skeletons motivated by sequential quantum pipelines, job-shop scheduling, unit commitment, and VQE [ 13 , 15 , 51 , 56 , 58 ]. The pipeline and unit-commitment traces contain classical preprocessing, QA submission and execution, intermediate processing, transformation, DQC submission and execution, result return, and postprocessing. The job-shop trace contains preprocessing, intermediate processing, transformation, DQC execution, result return, and postprocessing. The evaluated VQE trace begins with preprocessing and a QA warm start, followed by repeated classical-optimizer, parameter-transformation, and DQC-evaluation cycles before final postprocessing. QEC protects the DQC execution intervals in these traces. The surrounding classical, controller, and transfer stages determine when protected work becomes ready and which resources it contends for. The cited applications motivate the workload families and stage ordering. The evaluation measures system timing over these skeletons; application solution quality and algorithm-specific convergence are outside its scope. 
+
+C Recurrence Contract and Validation C.1 Streaming-QEC Correctness Contract 
+
+The production engine evaluates streaming QEC as canonical protected logical computation in-tervals with typed stages and resource frontiers. Explicit expansion remains the validation oracle. Certified recurrence computes the same local reservation semantics, commits grouped metric effects, and releases the protected workload continuation only after the required final-apply boundary.  
+
+> , Vol. 1, No. 1, Article . Publication date: July 2026. 30 Christou et al.
+
+Typed transition state. For each protected logical computation interval, the QEC state contains the protected-work frontier, controller frontier, decode-resource frontier, transfer frontiers, pend-ing QEC backlog, pending apply completions, decoder warm/cold state, final-apply boundary, deterministic grounding profile state, and metric accumulators. Each local QEC stage uses: 
+
+𝑡 start (𝑒 ) = max {𝑡 ready (𝑒 ), 𝑡 free (𝑟 (𝑒 ))} , (15) 
+
+𝑡 done (𝑒 ) = 𝑡 start (𝑒 ) + 𝑇 (𝑒 ). (16) The resource frontier and public metrics then update: 
+
+𝑡 free (𝑟 (𝑒 )) ← 𝑡 done (𝑒 ), (17) 
+
+𝑊 𝑠 ← 𝑊 𝑠 + 𝑡 start (𝑒 ) − 𝑡 ready (𝑒 ), (18) 
+
+𝐵 𝑟 ← 𝐵 𝑟 + 𝑇 (𝑒 ), (19) 
+
+𝑄 𝑟 ← 𝑄 𝑟 + 𝑡 start (𝑒 ) − 𝑡 ready (𝑒 ), (20) 
+
+𝐶 𝑠 ← 𝐶 𝑠 + 1. (21) 
+
+Backpressure invariant. Finite QEC backlog is part of the state. A protected quantum round increments pending QEC when it produces a syndrome round, and final apply decrements that count. If the pending count exceeds the backlog limit, the next protected round waits. After a final apply, exactly one waiting protected round can be released when pending work is within the limit. Backpressure is therefore encoded as a resource-frontier state transition. 
+
+Continuation release. Each protected logical computation interval has one final-apply boundary. A continuation-release event is idempotent: early events reschedule, duplicate events return without changing state, and exactly one event releases the next workload stage or completes the job. This prevents duplicate continuation release when recurrent QEC summaries overlap in simulated time. 
+
+Induction detail. The base case is the explicit period used to construct the typed state and metric delta. If the metric-preservation equality holds for 𝑞 periods, C1–C4 select the same ready stages and resources and produce the same deterministic durations and metric increments for period 𝑞 + 1.The stable delta therefore returns the executor to the same signature class. Induction proves the equality for every whole period accepted within the certified boundary. If a required field is absent or unstable, certification rejects the contraction. 
+
+C.2 Detailed Parity Anchor 
+
+The 16-job real streaming-QEC anchor is the strongest current validation row because it combines a real workload, duration-derived QEC rounds, tens of millions of decode events, and exact agreement between explicit and recurrent outputs. It reports: 
+
+• explicit total time: 14,664.33 s. 
+
+• recurrent total time: 14,664.33 s. 
+
+• total absolute difference: 0.0 s. 
+
+• explicit and recurrent decode count: 59,743,936. 
+
+• decode-count difference: 0. 
+
+• explicit and recurrent decode wait: 2,065.85 s. These are simulated outputs. The speedup in the main text is host wall-clock simulator speedup, which is a separate quantity. Figure 12 visualizes the paired base-gate speedups summarized in Table 6. 
+
+> , Vol. 1, No. 1, Article . Publication date: July 2026.
+
+StreamingQEC: Streaming Quantum Error Correction in Tightly Integrated Quantum-Classical Systems via Certified Recurrence 31 
+
+Calibrated profile group Placement Coverage Rows passed Speedup range Max delta Surface MWPM dedicated QEC CPU 𝑛 = 1, 2, 4, no-profile and stress, plus 𝑛 = 8, 16 , no-profile 8/8 25.1–53.3 × 0qLDPC HGP BP+LSD dedicated QEC CPU 𝑛 = 1, 2, 4, no-profile and stress, plus 𝑛 = 8, no-profile 7/7 12.3–22.9 × 0Color-code BP+LSD dedicated QEC CPU 𝑛 = 1, 2, 4, no-profile and stress, plus 𝑛 = 8, no-profile 7/7 13.9–22.9 × 0Surface neural Ising for-ward shared GPU, preloaded 
+
+𝑛 = 1, 2, 4, no-profile and deter-ministic stress 6/6 22.8–35.4 × 0Surface neural Ising for-ward dedicated QEC GPU, preloaded 
+
+𝑛 = 1, 2, 4, no-profile and stress, plus 𝑛 = 8, no-profile 7/7 13.8–24.2 × 0
+
+Table 6. Completed exact explicit-versus-certified validation for grounded calibrated runtime profiles on the reduced four-class workload. Here 𝑛 is replicas per class. The base gate uses 𝑛 = 1, 2, 4, all four dedicated paths extend to 𝑛 = 8, and surface MWPM extends to 𝑛 = 16 . Max delta is the maximum service-time, wait-time, device-busy, and utilization delta across each group. The neural Ising rows use preloaded forward-inference timing. Public workflow overhead is modeled separately. 1 2 4
+
+> Jobs in validation gate
+> 15x
+> 20x
+> 25x
+> 30x
+> 35x
+> Host simulator speedup (x)
+> Surface MWPM
+> qLDPC BP+LSD
+> Color BP+LSD
+> Ising GPU
+> Ising dedicated GPU
+
+Fig. 12. Base calibrated-profile validation speedup on the real mixed workload at 𝑛 = 1, 2, 4. Each plotted row matches explicit execution with zero simulated service, wait, busy-time, and utilization deltas. 
+
+, Vol. 1, No. 1, Article . Publication date: July 2026. 32 Christou et al. 
+
+QEC cycle Explicit host (s) Certified host (s) Speedup Max delta 1 𝜇 s 721.82 42.15 17.13 × 01 ms 0.766 0.264 2.90 × 070 ms 0.0359 0.0288 1.24 × 0
+
+Table 7. Exact cadence sentinels for surface MWPM at distance 3 on the four-job mixed workload. Max delta covers simulated service, wait, device-busy, utilization, and completion-time outputs. Long cycles contain fewer repeated rounds, so recurrence has less work to contract. 
+
+Workload Certified regions QEC rounds Explicit host (s) Certified host (s) Speedup Pipeline 1 1,190,829 182.32 0.820 222.3 ×
+
+Job shop 1 755,169 114.37 0.809 141.4 ×
+
+Unit commitment 1 751,721 113.88 0.810 140.7 ×
+
+VQE 16 1,961,296 297.71 12.854 23.2 ×
+
+Table 8. Exact single-class workload sentinels at one job, distance 3, a 1.1 𝜇 s QEC cycle, dedicated surface-MWPM decode, and at most two outstanding rounds. Each job retains 5–10 materialized circuit units. All four rows have zero completion-time, service, wait, device-busy, and utilization delta and zero explicit fallback. 
+
+C.3 Equation and Evidence Ledger 
+
+Streaming-QEC rounds. Streaming QEC derives rounds from protected logical execution time: 
+
+𝑅 =
+
+𝑇 protected 
+
+𝑇 cycle 
+
+
+
+. (22) Fixed-round experiments can set 𝑅 directly, but the streaming-QEC rows use duration and cycle time. 
+
+Payloads. In the absence of explicit payloads, syndrome and feedback transfer sizes are derived from code statistics: 
+
+𝑃 syn = ⌈𝐶𝑏 𝑠 /8⌉ , (23) 
+
+𝑃 fb = 𝐷𝑏 𝑓 /8 . (24) 
+
+Calibrated decoder runtime. When a fitted runtime profile is available, the native engine evaluates an empirical unit-service surface: 
+
+b𝑡 𝜋 (𝑑, 𝑟, 𝑏, 𝑝 ) = 𝛼 𝜋 𝑑 𝛽 𝑑,𝜋 𝑟 𝛽 𝑟,𝜋 𝑏 𝛽 𝑏,𝜋 𝑝 𝛽 𝑝,𝜋 , (25) where 𝜋 = ⟨𝑚, 𝑎, 𝑐, 𝛿, 𝜂, 𝑔, 𝑣 ⟩ is the profile key: machine or provider class, allocation profile, code family, decoder family, measured backend, execution device or resource class, and calibration version. The surface is fitted independently for each profile. The exponents describe measured sensitivities within the sampled artifact range. Each fit remains specific to its code family, decoder implementation, backend framework, device, and allocation. Dimensions absent from a grounding campaign are held fixed or assigned a zero exponent. The fitting pipeline applies linear least squares after the log transform 
+
+log 𝑡 = log 𝛼 𝜋 + 𝛽 𝑑,𝜋 log 𝑑 + 𝛽 𝑟,𝜋 log 𝑟 + 𝛽 𝑏,𝜋 log 𝑏 + 𝛽 𝑝,𝜋 log 𝑝. (26) Only positive timing rows and dimensions that vary within a profile group are included. The fitting pipeline reports log-space 𝑅 2, median multiplicative error, and p95 multiplicative error. Their scope  
+
+> , Vol. 1, No. 1, Article . Publication date: July 2026. StreamingQEC: Streaming Quantum Error Correction in Tightly Integrated Quantum-Classical Systems via Certified Recurrence 33
+
+is descriptive goodness of fit over the sampled grid. They provide no confidence intervals for unseen systems. The decode-stage service used by StreamingQEC is 
+
+𝑇 decode = 𝑇 setup (𝜋 ) + 𝑈 (𝜋, 𝑑, 𝑟, 𝑏 ) b𝑡 𝜋 (𝑑, 𝑟, 𝑏, 𝑝 ) + 𝑇 fixed (𝜋 ). (27) Here 𝑈 maps the StreamingQEC stage to the measured unit: decodes, shots, window decodes, or neural batches depending on the profile. Neural profiles may add a one-time cold-load term: 
+
+𝑡 decode ,first = 𝑡 load + 𝑛 units b𝑡 𝜋 , 𝑡 decode ,warm = 𝑛 units b𝑡 𝜋 . (28) These equations are empirical interpolation models for measured decoder artifacts. Logical-error-rate behavior and asymptotic decoder scaling outside the sampled regime lie outside their scope. 
+
+Certified contraction. If a period 𝑝 repeats with the same signature and stable transition deltas, then 𝑚 periods can be contracted: 
+
+𝑆 𝑖 +𝑚𝑝 = 𝑆 𝑖 + 𝑚 Δ𝑆 𝑝 , M𝑖 +𝑚𝑝 = M𝑖 + 𝑚 ΔM𝑝 . (29) The metric component expands to: 
+
+𝑇 ← 𝑇 + 𝑚 Δ𝑇 𝑝 , (30) 
+
+𝐵 𝑟 ← 𝐵 𝑟 + 𝑚 Δ𝐵 𝑟,𝑝 , (31) 
+
+𝑊 𝑠 ← 𝑊 𝑠 + 𝑚 Δ𝑊 𝑠,𝑝 , (32) 
+
+𝑄 𝑟 ← 𝑄 𝑟 + 𝑚 Δ𝑄 𝑟,𝑝 , (33) 
+
+𝐶 𝑠 ← 𝐶 𝑠 + 𝑚 Δ𝐶 𝑠,𝑝 . (34) 
+
+C.4 Certification Details 
+
+For a certified period 𝑝 repeated 𝑚 times, the native engine groups the same metric updates explicit execution would have produced: 
+
+𝑇 ← 𝑇 + 𝑚 Δ𝑇 𝑝 , (35) 
+
+𝐵 𝑟 ← 𝐵 𝑟 + 𝑚 Δ𝐵 𝑟,𝑝 , (36) 
+
+𝑊 𝑠 ← 𝑊 𝑠 + 𝑚 Δ𝑊 𝑠,𝑝 , (37) 
+
+𝑄 𝑟 ← 𝑄 𝑟 + 𝑚 Δ𝑄 𝑟,𝑝 , (38) 
+
+𝐶 𝑠 ← 𝐶 𝑠 + 𝑚 Δ𝐶 𝑠,𝑝 . (39) The certified path first translates the QEC configuration into code statistics, payloads, runtime pro-files, resource bindings, and deterministic grounding profiles. It then classifies whether recurrence supports the protected logical computation interval. Unsupported intervals fall back or fail closed, depending on executor mode. Supported intervals apply certified frontier and metric deltas and release the continuation only at the final-apply boundary. The mathematical signature is represented internally by the native engine’s typed certification state. The support classifier checks the signed fields, the recurrent executor records accepted and rejected regions in the certification ledger, and debug counters identify use of the exact typed path, fallback path, or certified recurrent path. 
+
+C.5 Metric Details 
+
+Figure 13 isolates the host cost of preserving the complete metric ledger. Metric preservation is stricter than makespan preservation. For a recurrent interval, the engine must update the same architecture quantities that explicit tracing would accumulate: 
+
+• service counts : how many readout, transfer, decode, feedback, and apply stages executed.                           
+
+> , Vol. 1, No. 1, Article . Publication date: July 2026. 34 Christou et al.
+> Jobs Recurrent wall (s) Simulated total time (s) Decode count Decode wait (s) Evidence type 32 49.53 25,104.21 100,492,504 5,598.68 recurrent-only 64 229.22 58,459.19 263,454,879 25,372.02 recurrent-only 128 452.74 135,921.07 572,856,569 55,668.23 recurrent-only 256 1,093.48 292,328.77 1,222,642,063 131,621.91 historical recurrent-only
+
+Table 9. Saved recurrent-only streaming-QEC rows demonstrating tractability beyond explicit feasibility. Explicit parity anchors are reported separately. 
+
+Fig. 13. Metric-mode ablation. Makespan-only recurrence can be useful for very large sweeps, but full-metric recurrence is the correctness target for architecture studies. 
+
+• busy time : time each controller, CPU, GPU, dedicated QEC resource, or link is occupied. 
+
+• wait time : time a ready QEC stage waits for its target resource frontier. 
+
+• queue/backlog area : the sustained pressure induced by pending QEC work. 
+
+• utilization-compatible quantities : busy time divided by the relevant simulated interval. 
+
+• continuation release : exactly one release after the required final-apply boundary. 
+
+D Fluid Approximation and Error Evidence D.1 Fluid Model Equations 
+
+A fluid approximation replaces individual QEC events with continuous rates or aggregate queue frontiers. Section 4.1 gives the stage-queue model used in the main results. The two simpler fluid baselines are useful to explain why that model is needed. If 𝜆 𝑠 (𝑡 ) is the arrival rate of stage 𝑠 work, 
+
+𝑟 (𝑠 ) is its resource, ¯𝑇 𝑠 is its average service time, and 𝑐 𝑟 is resource capacity, then a mean-field load estimate is 
+
+𝜌 𝑟 (𝑡 ) = 1
+
+𝑐 𝑟 ∑︁ 𝑠 :𝑟 (𝑠 )=𝑟 
+
+𝜆 𝑠 (𝑡 ) ¯𝑇 𝑠 . (40)  
+
+> , Vol. 1, No. 1, Article . Publication date: July 2026. StreamingQEC: Streaming Quantum Error Correction in Tightly Integrated Quantum-Classical Systems via Certified Recurrence 35
+
+A simple continuous backlog model is 
+
+𝑑𝑞 𝑟 (𝑡 )
+
+𝑑𝑡 =
+
+∑︁ 𝑠 :𝑟 (𝑠 )=𝑟 
+
+𝜆 𝑠 (𝑡 ) − 𝜇 𝑟 (𝑡 )
+
+
+
+> +
+
+, 𝜇 𝑟 (𝑡 ) = 𝑐 𝑟 
+
+¯𝑇 𝑟 
+
+, (41) and a discrete-time engineering approximation is 
+
+𝑞 𝑟 [𝑘 + 1] = max {0, 𝑞 𝑟 [𝑘 ] + 𝑎 𝑟 [𝑘 ] − 𝑐 𝑟 Δ𝑡 }. (42) For streaming QEC, one may set 
+
+𝜆 round (𝑡 ) = 1{𝑡 inside protected logical computation }
+
+Δ (43) and distribute that rate across readout, transfer, decode, feedback, and apply. The dynamic fluid baseline recomputes ¯𝑇 𝑠 from the selected runtime profile. The precomputed baseline uses a static service estimate. Both discard pipeline fill time, endpoint coupling, and aggregate service bounds. The stage-queue model adds those effects explicitly. For a protected logical computation interval with 𝑅 rounds separated by cycle time 𝑐 , define capacity-adjusted stage times 
+
+𝑠 1 = 𝑇 readout 
+
+𝐶 ctrl 
+
+, 𝑠 2 = 𝑇 syn 
+
+𝐶 syn 
+
+, 𝑠 3 = 𝑇 decode 
+
+𝐶 dec 
+
+, 𝑠 4 = 𝑇 fb 
+
+𝐶 fb 
+
+, 𝑠 5 = 𝑇 apply 
+
+𝐶 ctrl 
+
+. (44) The first round waits for pipeline fill, 
+
+𝐿 pipe =
+
+> 5
+
+∑︁ 
+
+> 𝑗 =1
+
+𝑠 𝑗 , (45) and a pure tandem queue drains at spacing 
+
+𝐵 = max {𝑐, 𝑠 1, 𝑠 2, 𝑠 3, 𝑠 4, 𝑠 5 }, 𝑇 tandem = 𝑐 + 𝐿 pipe + ( 𝑅 − 1)𝐵. (46) To capture endpoint coupling between syndrome movement, decode, and feedback, the model replaces the three middle stages by 
+
+𝐸 = max {𝑠 2, 𝑠 3, 𝑠 4 } + 𝛾 (( 𝑠 2 + 𝑠 3 + 𝑠 4) − max {𝑠 2, 𝑠 3, 𝑠 4 }) , (47) where 𝛾 = 0 is perfect overlap and 𝛾 = 1 is endpoint serialization. The implemented drain spacing is 
+
+𝐵 𝛾 =
+
+(
+
+max {𝑐, 𝑠 1, 𝑠 2, 𝑠 3, 𝑠 4, 𝑠 5 }, 𝛾 = 0,
+
+max {𝑐, 𝑠 1 + 𝑠 5, 𝐸 }, 𝛾 > 0, (48) and 
+
+𝑇 coupled = 𝑐 + 𝐿 pipe + ( 𝑅 − 1)𝐵 𝛾 . (49) The stage-queue model then adds an interval-extension guard and endpoint backpressure: 
+
+𝐺 = 𝑇 nom + max {0,𝑇 coupled − 𝑇 nom }, (50) 
+
+𝜌 = 𝑅 Í5 
+
+> 𝑗 =1
+
+𝑠 𝑗 
+
+𝑇 nom 
+
+, 𝛼 = min 
+
+
+
+1, max 
+
+
+
+0, 𝜌 − 0.54
+
+ 
+
+, (51) 
+
+Δep = max {0,𝑇 coupled − 𝑇 uncoupled }, (52) 
+
+𝑇 fluid = 𝑇 coupled + 𝛼 (𝐺 − 𝑇 coupled ) + 𝑤 Δep . (53) The endpoint weight is 𝑤 = 0.5 for a GPU lane, 𝑤 = 0.25 𝛾 for a CPU or other shared lane, and zero when endpoint coupling is disabled. The current implementation then enforces a conservation floor for an aggregated dedicated-QEC lane 𝑞 :
+
+𝑇 reported = max 𝑇 event loop ,𝑊 𝑞 /𝐶 𝑞 . (54)  
+
+> , Vol. 1, No. 1, Article . Publication date: July 2026. 36 Christou et al.
+
+When no dedicated-QEC lane is present, 𝑇 reported is the event-loop completion time. Shared CPU/GPU effects remain in the event-loop schedule and the queue-interaction corrections below. The final auto staged-fluid model adds regime information learned from explicit/certified teleme-try. First, it distinguishes light shared-resource decode from heavy decode: 
+
+ℓ = 1 𝑔 dec ∈ { CPU , GPU } ∧ 𝑇 decode ≤ 0.5  𝑇 syn + 𝑇 fb 
+
+ . (55) When ℓ = 1, the middle QEC stages are treated as a shared host/endpoint drain and the endpoint-coupling term is disabled. When ℓ = 0, the regular endpoint-coupled stage queue is used. Second, the model adds a bounded interaction term for collapsed queueing. With 
+
+𝑆 QEC = 𝑅  𝑇 readout + 𝑇 syn + 𝑇 decode + 𝑇 fb + 𝑇 apply 
+
+ , (56) workload replication pressure 
+
+𝜈 = 𝑁 jobs 
+
+max {𝐶 q, 𝑁 workload classes } , (57) where 𝐶 q is protected quantum-execution capacity, together with normalized quantum-execution queue-density telemetry 
+
+¯𝑞 q (𝑡 ) = 1
+
+𝑡 𝐶 q
+
+∫ 𝑡 
+
+> 0
+
+𝑞 q (𝜏 ) 𝑑𝜏, (58) where 𝑄 q below is instantaneous quantum-execution demand. The chunk correction is 
+
+Δchunk = min 0.95 𝜒𝑆 QEC , 𝜅𝑆 QEC 𝜙 𝐴 𝜙 𝑄 𝜙 𝐷 𝜙 𝑁 𝜙 drain , (59) 
+
+𝜙 𝐴 = 𝐴 − 1
+
+𝐴 , (60) 
+
+𝜙 𝑄 = min 
+
+
+
+1, max {0, 𝑄 q/𝐶 q − 1}
+
+3
+
+
+
+, (61) 
+
+𝜙 𝐷 = min 
+
+
+
+1, max {0, ¯𝑞 q − 𝜃 }
+
+1.5
+
+
+
+, (62) 
+
+𝜙 𝑁 = min {1, max {0, 𝜈 − 1}} , (63) 
+
+𝜙 drain = 11 +  max {0,𝑇 coupled − 𝑇 nom }/ 𝑇 nom 
+
+2 , (64) 
+
+𝜒 = 1 + 𝜆 
+
+
+
+1 − 1
+
+𝜈 
+
+ 11 +  𝑆 QEC /( 2𝑇 nom )2 . (65) The current artifact uses 𝜃 = 1.5, 𝜅 = 6.4, and 𝜆 = 1.1. The remaining bounded tails are 
+
+Δℓ = 1{ℓ = 1 ∧ 𝜈 = 1} 0.10 𝑅 (𝑇 syn + 𝑇 fb ), (66) 
+
+𝑓 dec = 𝑅𝑇 decode 
+
+𝑅 (𝑇 decode + 𝑇 syn + 𝑇 fb ) , (67) 
+
+𝜅 ℎ = 0.08 + 𝜔 𝑓 dec , (68) 
+
+Δℎ = 1{ℓ = 0 ∧ 𝑔 dec ∈ { CPU , GPU } ∧ 𝜈 > 1} min 
+
+
+
+0.40 𝑆 QEC , 𝜅 ℎ𝑆 QEC 
+
+𝜈 − 1
+
+𝜈 
+
+
+
+. (69) Here 𝜔 = 0.10 for CPU decode and 𝜔 = 0.28 for GPU decode. The final auto staged-fluid duration is 
+
+𝑇 auto = 𝑇 fluid + Δchunk + Δℓ + Δℎ, (70) followed by the same dedicated-lane conservation floor. All fluid models remain approximations. Certified recurrence is the exact compression path. 
+
+> , Vol. 1, No. 1, Article . Publication date: July 2026.
+
+StreamingQEC: Streaming Quantum Error Correction in Tightly Integrated Quantum-Classical Systems via Certified Recurrence 37                                            
+
+> Calibrated profile Exact (s) Dynamic error Precomputed error Stage queue (s) Stage-queue error Interpretation Surface MWPM, dedicated QEC CPU 9.28 +112.2% +383.1% 9.32 +0.5% Fast matching is captured by the conservation floor. qLDPC HGP BP+LSD, dedicated QEC CPU 67.23 +475.7% +1620.3% 67.45 +0.3% Heavy decoder drain is nearly ex-act in makespan. Color-code BP+LSD, dedicated QEC CPU 98.87 +474.3% +1628.9% 96.05 -2.9% Dedicated color-code load is captured within 2.9%. Surface neural Ising, GPU preloaded 195.73 +472.5% +1637.1% 195.45 -0.1% Shared preloaded inference is nearly exact in makespan. Surface neural Ising, dedicated QEC GPU preloaded 166.30 +473.1% +1636.4% 163.48 -1.7% Isolated neural de-code is captured within 1.7%.
+
+Table 10. Fluid approximation error on the one-job calibrated-profile sweep. Dynamic and precomputed fluid are mean-service baselines. The stage-queue fluid model adds pipeline drain, endpoint coupling, queue corrections, and a dedicated-lane conservation floor where applicable. It reduces the calibrated-profile makespan error to 0.1–2.9% on this sweep. 
+
+Stage-queue proof sketch. For a deterministic five-stage tandem queue with constant inter-arrival time 𝑐 , the first completed round must wait for the sum of all stage services, which gives 𝐿 pipe .After the pipeline is filled, no completed round can emerge faster than the slowest occupied lane or faster than arrivals enter the pipeline, which gives the bottleneck spacing and completion time 𝑐 + 𝐿 pipe + ( 𝑅 − 1)𝐵 . The endpoint-coupling equation is bounded between perfect overlap of syndrome/decode/feedback work and full serialization on one endpoint lane. The dedicated-lane conservation floor follows from the workload lower bound: a lane with capacity 𝐶 𝑞 cannot complete service 𝑊 𝑞 in less than 𝑊 𝑞 /𝐶 𝑞 time. The auto corrections are telemetry-gated terms for collapsed queue interaction, bounded by counted QEC service and disabled outside their regime predicates. Consequently, this argument bounds tandem-queue drain and dedicated-lane service. Approximation error under arbitrary event interleavings remains empirical. 
+
+D.2 Fluid Approximation Error 
+
+Table 10 first compares the simple fluid baselines against exact explicit/certified references for the one-job calibrated-profile sweep. The reported relative error is 
+
+𝜖 rel = |𝑇 fluid − 𝑇 exact |
+
+𝑇 exact 
+
+. (71) The sign records whether the fluid model overestimates or underestimates simulated hybrid-system completion time. The mean-field modes are useful stress baselines, but they intentionally discard too much ordering information for calibrated streaming-QEC timing. The queue-aware stage-queue mode keeps a coarse readout-transfer-decode-feedback-apply drain model plus an aggregate dedicated-lane conservation floor where applicable. It is substantially more accurate and remains an approximation. Table 11 then reports the final auto staged-fluid model on all current saved references. The resulting 6.45% maximum is an empirical bound on this reference set. Distribution-free error bounds for unseen queue interleavings, placements, or job populations remain open. 
+
+, Vol. 1, No. 1, Article . Publication date: July 2026. 38 Christou et al. 
+
+Calibrated profile and placement Jobs Exact (s) Auto staged-fluid (s) Signed error (s) Relative error Color-code BP+LSD, dedicated QEC CPU 1 98.87 96.05 -2.82 2.85% qLDPC HGP BP+LSD, dedicated QEC CPU 1 67.23 67.45 0.23 0.34% Surface MWPM, dedicated QEC CPU 1 9.28 9.32 0.05 0.49% Color-code BP+LSD, dedicated QEC CPU 2 175.69 172.25 -3.44 1.96% qLDPC HGP BP+LSD, dedicated QEC CPU 2 118.94 115.50 -3.44 2.89% Surface MWPM, dedicated QEC CPU 2 15.02 14.20 -0.82 5.47% Color-code BP+LSD, dedicated QEC CPU 4 425.04 416.58 -8.46 1.99% qLDPC HGP BP+LSD, dedicated QEC CPU 4 287.79 279.34 -8.46 2.94% Surface MWPM, dedicated QEC CPU 4 36.46 34.53 -1.93 5.30% Color-code BP+LSD, shared CPU 1 68.31 69.69 1.38 2.03% qLDPC HGP BP+LSD, shared CPU 1 52.48 55.86 3.38 6.45% Surface MWPM, shared CPU 1 23.25 22.88 -0.37 1.60% Surface neural Ising, shared GPU preloaded 1 195.73 195.45 -0.28 0.14% Color-code BP+LSD, shared CPU 2 121.03 116.61 -4.42 3.65% qLDPC HGP BP+LSD, shared CPU 2 92.65 92.55 -0.11 0.12% Surface MWPM, shared CPU 2 40.21 40.45 0.23 0.58% Surface neural Ising, shared GPU preloaded 2 350.51 331.36 -19.15 5.47% 
+
+Table 11. Full auto staged-fluid error table for the current saved reference set. Across these 17 rows, mean absolute error is 2.60%, median absolute error is 2.03%, and worst absolute error is 6.45%. This empirical range supports screening within the tested regimes. Exact recurrence validation is reported separately. 
+
+E Detailed Design-Study Evidence E.1 Supplementary Hybrid-System Load Evidence 
+
+This section records numerical rows that support the main-body hybrid-system load claims without crowding the evaluation narrative. The quantities in these tables are simulated hybrid-system outputs unless explicitly marked as host runtime. Simulated total time, decode service, and wait describe the modeled machine. Host runtime describes how long the simulator took to compute the row. Figure 14 visualizes the distance-21 rows in Table 16.  
+
+> , Vol. 1, No. 1, Article . Publication date: July 2026. StreamingQEC: Streaming Quantum Error Correction in Tightly Integrated Quantum-Classical Systems via Certified Recurrence 39
+
+Code/decoder path Decode service (s) Stage service (s) Placement Surface Fusion Blossom windowed, 𝑑 = 13 0.245 0.252 shared CPU qLDPC HGP BP+LSD, 𝑑 = 13 0.077 0.084 shared CPU qLDPC HGP union-find, 𝑑 = 13 0.047 0.055 shared CPU Toric Stim gate MWPM, 𝑑 = 13 0.023 0.030 shared CPU Color-code BP+LSD, 𝑑 = 13 0.017 0.024 shared CPU Surface MWPM, 𝑑 = 13 0.015 0.023 shared CPU Surface neural Ising, 𝑑 = 3 0.048 0.050 GPU profile 
+
+Table 12. Numerical current hybrid-system QEC load snapshot behind Figure 5. Values are accumulated QEC stage service for the common mixed workload row. Logical-error-rate evaluation lies outside this service-time result.                                            
+
+> Shared placement profile Jobs Simulated total (s) Decode service (s) Transfer service (s) Host runtime (s) Surface MWPM, CPU 123.25 3.65 31.63 823.4 qLDPC HGP BP+LSD, CPU 152.48 62.11 31.63 780.4 Color-code BP+LSD, CPU 168.31 93.75 31.63 658.4 Surface neural Ising, preloaded GPU 1195.73 161.18 31.63 697.5 Surface MWPM, CPU 240.21 6.54 56.72 1,393.8 qLDPC HGP BP+LSD, CPU 292.65 111.38 56.72 1,391.9 Color-code BP+LSD, CPU 2121.03 168.13 56.72 1,396.1 Surface neural Ising, preloaded GPU 2350.51 289.05 56.72 1,487.3
+
+Table 13. Supplementary explicit shared-resource hybrid-system load rows. Transfer service is syndrome plus feedback service. Host runtime is the cost of computing the explicit reference on the local host, included to explain why broad shared-placement sweeps need recurrence or fluid approximation. 
+
+Dedicated-QEC profile Jobs Simulated total (s) Certified regions Host runtime (s) Surface MWPM 8 63.67 238 197.33 qLDPC HGP BP+LSD 8 504.73 238 219.46 Color-code BP+LSD 8 745.59 238 219.62 Surface MWPM 16 137.02 480 467.08 qLDPC HGP BP+LSD 16 1,110.28 480 567.80 Color-code BP+LSD 16 1,641.75 480 450.83 
+
+Table 14. Dedicated-QEC calibrated large-𝑛 rows used for design-sweep evidence. All rows complete with zero explicit fallback.  
+
+> , Vol. 1, No. 1, Article . Publication date: July 2026. 40 Christou et al.
+
+Dedicated-QEC profile Distance 13: simulated total (s) Distance 21: simulated total (s) 5 𝜇 s 10 𝜇 s 100 𝜇 s 1000 𝜇 s 5 𝜇 s 10 𝜇 s 100 𝜇 s 1000 𝜇 sSurface MWPM 33.58 18.20 7.34 7.34 102.50 52.66 7.81 7.34 qLDPC HGP BP+LSD 159.47 81.15 10.66 7.34 349.70 176.26 20.17 7.35 Color-code BP+LSD 37.16 19.99 7.34 7.34 43.11 22.96 7.34 7.34 
+
+Table 15. Corrected streaming-QEC cycle-pressure sweep on the real mixed workload. Smaller QEC cycles generate more rounds per protected logical computation interval. The table shows the resulting modeled hybrid-system total time. 
+
+Dedicated-QEC profile, 𝑑 = 21 5 𝜇 s 10 𝜇 s 100 𝜇 s 1000 𝜇 s Decode service at 5 𝜇 sSurface MWPM 102.50 52.66 7.81 7.34 99.18 qLDPC HGP BP+LSD 349.70 176.26 20.17 7.35 346.37 Color-code BP+LSD 43.11 22.96 7.34 7.34 39.78 
+
+Table 16. Numerical distance-21 cycle-pressure rows behind Figure 14. Entries are simulated total time in seconds except the final column, which is accumulated QEC decode service. 5 10 100 1000 
+
+Physical QEC cycle time (us, log scale) 
+
+> 0
+> 50
+> 100
+> 150
+> 200
+> 250
+> 300
+> 350
+> Simulated total time (s)
+> Color BP+LSD
+> Surface MWPM
+> qLDPC BP+LSD
+
+Fig. 14. Supplementary distance-21 streaming-QEC cycle-pressure sweep on the mixed workload with dedicated-QEC placement. Smaller physical QEC cycles create more rounds per protected logical computation interval and can shift the simulated hybrid-system bottleneck to decoding.  
+
+> , Vol. 1, No. 1, Article . Publication date: July 2026. StreamingQEC: Streaming Quantum Error Correction in Tightly Integrated Quantum-Classical Systems via Certified Recurrence 41
+
+Modality-scale cycle Surface MWPM qLDPC BP+LSD Color BP+LSD Neural Ising preloaded Trapped ion, 70 ms 7.34 s / 0.04% 7.34 s / 0.19% 7.34 s / 0.04% 7.35 s / 0.41% Neutral atom, 1 ms 7.34 s / 2.1% 7.34 s / 10.7% 7.34 s / 2.3% 7.35 s / 22.4% Superconducting, 1 𝜇 s 156.62 s / 98.2% 786.06 s / 99.6% 174.52 s / 98.4% 1,639.30 s / 99.8% 
+
+Table 17. Supplementary modality-pressure rows at 𝑛 = 1, distance 13, and dedicated-QEC placement. Each cell reports simulated total time followed by dedicated-QEC utilization. 
+
+Runtime profile, 𝑛 = 8 Decode place-ment Simulated total (s) Decode service (s) Host runtime (s) Surface MWPM dedicated QEC 63.67 27.75 268.64 qLDPC HGP BP+LSD dedicated QEC 504.73 472.72 276.44 Color-code BP+LSD dedicated QEC 745.59 713.57 222.09 Surface neural Ising forward GPU 1,661.09 1,403.13 511.19 
+
+Table 18. Fast-path rows for the eight-job mixed workload. These rows show how code/decoder choice and placement change modeled hybrid-system load while remaining practical to evaluate with certified recurrence. 
+
+Row Baseline stage (s) Combined stress Surface MWPM CPU, 𝑑 = 13 0.012 1.09 ×
+
+qLDPC HGP BP+LSD CPU, 𝑑 = 13 0.084 1.06 ×
+
+Color-code BP+LSD CPU, 𝑑 = 13 0.024 1.07 ×
+
+Neural Ising GPU profile, 𝑑 = 13 1.925 1.11 ×
+
+Table 19. Hardware-effect sensitivity from the completed deterministic perturbation sweep. The combined stress profile includes link tail terms, machine slowdown, and deterministic fault-delay terms.                                                                                                  
+
+> Row Baseline (s) Decoder only Other hardware axes, 10 ×
+> 30 ×20 ×10 ×Transfer Controller Transfer+controller All QEC Surface MWPM, 𝑑 =574.43 62.3% 62.3% 61.7% 12.1% 0.0% 12.1% 62.3% qLDPC BP+LSD, 𝑑 =5647.79 93.9% 92.3% 87.4% 1.4% 0.0% 1.4% 88.8% Surface MWPM, 𝑑 =15 868.41 94.6% 93.0% 88.1% 1.0% 0.0% 1.0% 89.1% qLDPC BP+LSD, 𝑑 =15 3,922.76 96.2% 94.6% 89.6% 0.2% 0.0% 0.2% 89.8% Surface MWPM, 𝑑 =21 1,973.56 95.8% 94.1% 89.2% 0.5% 0.0% 0.5% 89.6% qLDPC BP+LSD, 𝑑 =21 6,846.68 96.4% 94.7% 89.8% 0.1% 0.0% 0.1% 89.9% Surface MWPM, 𝑑 =25 3,028.91 96.1% 94.4% 89.5% 0.3% 0.0% 0.3% 89.7% qLDPC BP+LSD, 𝑑 =25 9,140.74 96.5% 94.8% 89.8% 0.1% 0.0% 0.1% 89.9%
+
+Table 20. Numerical design-sensitivity rows behind Figure 8. Entries after the baseline column are simulated completion-time reduction relative to the corresponding baseline row. Decoder-only columns report 30 ×, 20 ×,and 10 × acceleration. The remaining columns report 10 × acceleration of the named axes. Higher is better. All rows use the 4-job mixed workload with certified recurrence and zero explicit fallback.  
+
+> , Vol. 1, No. 1, Article . Publication date: July 2026. 42 Christou et al.
+
+E.2 Main Findings Table 
+
+Table 21. Main QEC evaluation findings and the architecture insight each supports. 
+
+Claim Evidence Systems implication Recurrence preserves explicit semantics where certified Pipelined 4-, 8-, and 16-job parity anchors have zero total-time and decode-count difference. Four single-class workload sentinels also have zero reported metric delta and zero explicit fallback. The 16-job anchor preserves about 2,066 s decode wait exactly. The recurrent path accelerates the de-tailed streaming-QEC trace through certi-fied transition contraction. Speedup is substan-tial but structure-dependent Latest pipelined parity anchors reach 45.2 × at 4 jobs and 24.0 × at 16 jobs. Recurrence should be certified opportunis-tically, with exact fallback for disrupted patterns. Full metrics are pre-served Full-metric recurrence matches ex-plicit wait/count outputs. Makespan-only mode is only an ablation. Architecture studies gain controller, de-coder, and link provisioning evidence alongside final completion time. QEC load is measur-able on current and future tightly coupled hybrid-system scenar-ios The 16-job anchor records 59,743,936 decode events and about 2,066 s de-code wait. The recurrent-only 128-job row records 572,856,569 events and about 55,668 s decode wait, while the 256-job row exceeds 1.22 billion events. Users can study whether CPU, GPU, con-troller, dedicated QEC resources, or trans-fer links become the bottleneck as ma-chines scale. Decoder profiles are grounded 8,174 rows are used in fitted runtime surfaces across surface, toric, qLDPC, color, Fusion Blossom, and NVIDIA Ising paths. QEC service times are now tied to mea-sured decoder campaigns with explicit caveats. Calibrated runtime profiles preserve recurrence semantics The completed calibrated-profile vali-dation set has 35/35 passing rows. All four dedicated paths reach 𝑛 = 8, and surface MWPM reaches 𝑛 = 16 , with zero service, wait, busy-time, and uti-lization deltas. Fitted service-time equations and deter-ministic hardware-effect modifiers can be used in certified recurrence when they pre-serve the same stage-ordering contract. Hardware stress changes capacity margin The combined deterministic stress profile increases representative QEC stage service by 1.06–1.11 × across sur-face, qLDPC, color, and neural rows. Link tails, slowdown/decay, and recover-able fault delays should be treated as head-room eroders, especially near saturated microsecond-cycle regimes. Light decoders can be transfer-bound In explicit shared-resource rows, sur-face MWPM has only 3.65 s decode service at one job but 31.63 s of syn-drome plus feedback movement. At two jobs the split is 6.54 s versus 56.72 s. Hybrid-system designs must account for syndrome and feedback movement, which can dominate fast matching-style de-coders. Heavy decoders create hybrid-system-wide stalls At two shared jobs, qLDPC BP+LSD, color-code BP+LSD, and preloaded neural Ising take 2.30 ×, 3.01 ×, and 8.72 × the surface-MWPM simulated completion time. Decoder choice changes both isolated QEC service and application-level hybrid-system completion time.  
+
+> , Vol. 1, No. 1, Article . Publication date: July 2026. StreamingQEC: Streaming Quantum Error Correction in Tightly Integrated Quantum-Classical Systems via Certified Recurrence 43
+
+Claim Evidence Systems implication Fluid approximation supports fast screen-ing in the tested regimes The final auto staged-fluid model has 2.60% mean absolute error, 2.03% me-dian error, and 6.45% worst error on 17 saved references. Fluid sweeps are useful for first-pass ca-pacity screening within the reference regimes. Recurrence remains the exact compressed trace for correctness-sensitive claims. Dedicated QEC placement makes calibrated design sweeps tractable At 16 jobs, dedicated-QEC surface, qLDPC, and color rows complete with zero fallback and produce 137.02 s, 1,110.28 s, and 1,641.75 s simulated completion time, respectively. Users can compare decoder/code load un-der the same isolated QEC resource policy before studying more contentious shared-resource placements. Dedicated neural placement reduces contention while saturation remains Preloaded neural inference improves by about 15% when moved from shared GPU placement to a dedicated QEC GPU at both 8 and 16 jobs, while the dedicated QEC resource remains about 99% utilized. Isolation is useful, but future neural QEC needs faster inference, batching, or addi-tional QEC parallelism. QEC cycle time drives systems load At distance 13 and 𝑛 = 1, a 1 𝜇 ssuperconducting-style cycle drives dedicated-QEC utilization to 98.2– 99.8% across surface, qLDPC, color, and neural rows. qLDPC is 5.0 × and preloaded neural inference is 10.5 ×
+
+slower than surface MWPM. Future tightly coupled hybrid systems need decoder and controller capacity that scales with physical QEC cycle rate as well as logical workload size. Scaling reaches explicit-infeasible regimes 128 recurrent jobs complete in 452.74 s in the newest ablation. Saved 256-job rows record over 1.22 billion QEC decode events in 1,093.5 s. Streaming-QEC sweeps become practical for architecture exploration. 
+
+F Implementation and Complexity F.1 Complexity 
+
+Explicit streaming-QEC tracing is 𝑂 (𝑅𝐽𝑆 ) in rounds 𝑅 , jobs 𝐽 , and QEC stages per round 𝑆 , with additional scheduler and metric-update overhead. Certified recurrence reduces the cost when repeated protected logical-interval or stage-window structure can be grouped. The recurrent cost is proportional to the prefix needed to establish the certified pattern, the number of grouped updates, and any suffix/fallback regions. More specifically, if 𝑃 is the number of explicitly simulated periods needed to establish a repeating signature and 𝐶 is the number of certified contractions, recurrent work is governed by the explicit prefix, unsupported residual trace, and 𝐶 ledger updates. Its cost is therefore decoupled from the number of rounds represented by each accepted contraction. Each accepted contraction applies constant-time frontier and metric updates per grouped period. The current implementation handles scalar/resource extensions naturally: CPU decode, GPU decode, controller decode, dedicated QEC decode, calibrated runtime coefficients, neural cold/warm timing, and deterministic additive jitter/slowdown/fault delays. The modes that change dependency topology–true streaming overlap, full-interval retry, arbitrary window commit graphs, and new backlog policies–require a future full scheduler-graph recurrence model.  
+
+> , Vol. 1, No. 1, Article . Publication date: July 2026. 44 Christou et al.
+
+F.2 Implementation Notes 
+
+The Python QEC configuration contains execution semantics, stage durations, payload derivation, resource binding, code-family fields, decoder/runtime profile selection, neural fields, and grounding-profile identifiers. The native translation step converts this into typed Rust fields and attaches fitted decoder coefficients when a calibrated profile matches. The native QEC modules derive job parameters, build protected logical computation intervals, construct typed QEC operation templates, reserve resource frontiers, accumulate metric effects, and evaluate recurrence support. The explicit engine and the recurrence engine use the same streaming-QEC stage semantics. The recurrent engine differs only in how much repeated structure it can group after certification. 
+
+Native profile and mode handling. The native engine evaluates a fitted service equation when code, decoder, backend, device, allocation, and calibration metadata match. Otherwise it records use of the generic preset. Neural profiles carry cold/warm state, and hardware-effect profiles derive deterministic modifiers from stable event keys. Unsupported regions use exact typed execution or fail closed in certified-required mode. The certification ledger distinguishes explicit, recurrent, rejected, and approximate regions. 
+
+Workload independence. StreamingQEC accepts any workload that supplies protected logical computation intervals. QEC is a protection layer attached to those intervals, so the same streaming-QEC semantics can therefore be applied to portfolio, VQE, pipeline, mixed workloads, or any future compiled workload that emits protected logical computation intervals. 
+
+How grounding artifacts are constructed and used. Grounding artifacts are produced outside the DES by decoder/runtime campaigns. Each campaign row records a code family, decoder, backend framework, distance, rounds, physical error, shots or batch size, device, allocation metadata, and measured service time. The analysis pipeline retains a normalized audit table, excludes delegated, failed, superseded, or out-of-scope adapter rows from fitting, records evidence scope, and emits calibrated runtime profiles. During evaluation, the DES reads the calibrated profile and evaluates its fitted service equation for each QEC decode stage, and schedules that duration on the selected modeled hybrid-system resource frontier. Hardware-effect profiles are then applied as deterministic timing modifiers. The grounding corpus therefore supplies simulation inputs, while the protected application supplies the simulated workload. 
+
+G Runtime Grounding and Hardware Profiles G.1 Decoder and Code Grounding Evidence 
+
+The current decoder grounding artifacts cover 9,998 normalized rows, with 8,174 rows used in fitted runtime surfaces. The completed and usable evidence includes: 
+
+• surface rotated/unrotated Stim/PyMatching MWPM and sparse-matching service-time rows. 
+
+• Fusion Blossom serial, windowed serial, local parallel-window, and partial official partitioned-solver rows. 
+
+• toric PyMatching, LDPC matrix-decoder, qecsim ideal, and Stim MPP/gate detector paths. 
+
+• qLDPC HGP and generic matrix-decoder rows, including repaired union-find and belief-find qLDPC generic rows. 
+
+• color-code LDPC matrix decoder rows and low-distance qecsim MPS rows. 
+
+• NVIDIA Ising public workflow rows and pure CUDA neural-forward rows. 
+
+Public software provenance. Table 22 lists the public packages that directly implement the simula-tor bridge or generate retained decoder timing evidence. Decoder packages execute outside the  
+
+> , Vol. 1, No. 1, Article . Publication date: July 2026. StreamingQEC: Streaming Quantum Error Correction in Tightly Integrated Quantum-Classical Systems via Certified Recurrence 45
+
+Artifact layer Public software Role in the reported artifact Simulator bridge PyO3, Serde/ serde_json , and 
+
+thiserror 
+
+Exposes the native Rust engine to Python and trans-ports typed configuration, ledger, and summary records. Decoder timings come from the measured packages below. Surface paths Stim, PyMatching/Sparse Blos-som, and Fusion Blossom Uses Stim to generate circuits and detector data for full, windowed, and partitioned decoder timing. QPU timing is configured separately. Toric paths qecsim, Stim, PyMatching, and 
+
+ldpc 
+
+Supplies toric stabilizers and reference MWPM, converts stabilizers to MPP or serial ancilla/CNOT Stim circuits, and generates detector data for matching or matrix-decoder timing. qLDPC paths NumPy, SciPy sparse, and ldpc Constructs the HGP and generic sparse matrices and measures union-find, BP, BP+OSD, BP+LSD, and belief-find implementations. Color-code paths qecsim and ldpc Uses Color666Code /MPS for low-distance refer-ence rows and its CSS stabilizers for scalable matrix-decoder rows. Neural surface path NVIDIA Ising-Decoding, Py-Torch, and NVIDIA CUDA Loads the public model/checkpoint and measures synchronized forward passes on the A100. Model load remains a separate cold-start term. 
+
+Table 22. Direct public software used by StreamingQEC and the decoder-grounding campaigns [ 12 , 20 , 29 ,32, 34, 35, 48–50, 53, 55, 60, 69, 71, 73]. 
+
+DES. Their measured outputs are normalized and fitted before StreamingQEC reads them. Auxiliary plotting and logging packages remain in the environment manifests solely for artifact support. 
+
+qLDPC construction used by the main profile. The main-text qLDPC profile is qldpc_hgp with BP+LSD. It uses the Tillich–Zémor CSS hypergraph product of two adjacent-pair repetition-code check matrices [ 68 ]. For configured sweep coordinate 𝑑 and no explicit HGP override, the campaign sets 
+
+𝑛 1 = 2𝑑 + 1, 𝑛 2 = 2𝑑, 𝑘 1 = 𝑘 2 = 1, 𝑚 𝑖 = 𝑛 𝑖 − 𝑘 𝑖 , (72) and constructs 𝐻 𝑖 ∈ F𝑚 𝑖 ×𝑛 𝑖  
+
+> 2
+
+with ones in adjacent columns of each row. The two CSS check matrices are 
+
+𝐻 𝑋 = 𝐻 1 ⊗ 𝐼 𝑛 2 𝐼 𝑚 1 ⊗ 𝐻 T
+
+> 2
+
+ , (73) 
+
+𝐻 𝑍 = 𝐼 𝑛 1 ⊗ 𝐻 2 𝐻 T 
+
+> 1
+
+⊗ 𝐼 𝑚 2
+
+ . (74) The campaign passes 𝐻 𝑋 and 𝐻 𝑍 separately to ldpc.BpLsdDecoder with minimum-sum BP, a parallel schedule, 20 BP iterations, and zero-order LSD_0 . Each configured QEC round is an indepen-dent final-syndrome decode under Bernoulli data errors. These rows measure decoder service and residual-syndrome failure. Circuit-level syndrome extraction, logical-error rate, and recomputation of each matrix’s exact minimum distance lie outside the campaign. The plotted 𝑑 is its configured HGP sweep coordinate. The separate qldpc_generic repair rows use deterministic sparse stress matrices with configured check weight and variable degree. They broaden the matrix-decoder runtime inventory and remain separate from the named HGP profile.  
+
+> , Vol. 1, No. 1, Article . Publication date: July 2026. 46 Christou et al.
+
+Corpus construction. The authors generated this benchmark corpus through deterministic man-ifests that shard decoder cases across NERSC Perlmutter A100 shared-GPU nodes and save the case specification, environment, raw result, and task-level CSV. CPU decoder cases execute on the allocated host cores. The NVIDIA forward microbenchmark executes the public model on the A100 with CUDA synchronization. The broad matrix varies code distance 𝑑 ∈ { 3, 5, 7, 9, 11 , 13 }, rounds 
+
+𝑟 ∈ { 𝑑, 2𝑑 }, physical error 𝑝 ∈ { 3 × 10 −4, 10 −3, 3 × 10 −3, 10 −2 }, and batch tags 1 and 128. Focused campaigns use documented subsets: official Fusion Blossom uses completed partitioned-solver shards, repaired qLDPC rows replace an invalid generator campaign, and NVIDIA inference uses batches 1, 8, 32 , 128 , 512 . Campaign manifests request ten timed repetitions per parameter point. The normalizer de-duplicates campaign cases, extracts nested decoder timings when a wrapper delegates the actual decode, and maps every usable result to a runtime source, unit count, and unit kind. Units are decodes, shots, window decodes, or neural batches. Service time is the measured runtime divided by that unit count. Table 23 gives the resulting audit and fit counts. The 1,824 audit-only rows comprise 1,536 delegated wrapper rows whose nested timings are used instead, 160 failed rows from the original qLDPC generic generator bug, 32 successful but superseded rows from that campaign, and 96 early non-focused NVIDIA adapter rows. The repair campaign contributes 192 replacement qLDPC rows. Fits are performed independently by code family, decoder, backend, device, and unit kind. Reported log-space 𝑅 2 and multiplicative errors are in-sample diagnostics. Confidence intervals and held-out accuracy guarantees would require additional sampling. The fitted surfaces are interpolation models inside the measured grid. Uses outside that grid are labeled extrapolative sensitivity studies. Framework provenance follows Stim, PyMatching, Sparse Blossom, Fusion Blossom, qecsim, LDPC, and the NVIDIA Ising artifact descriptions [12, 29, 34, 35, 55, 69, 73]. Figure 15 shows the measured service-time range represented by these retained row families. The NVIDIA Ising forward-pass fit is separated from the public workflow path: 
+
+𝑡 forward batch = 7.4372 × 10 −6𝑏 0.5119 𝑑 0.9781 𝑟 0.5365 . (75) Its median multiplicative error is 1.73 × and p95 multiplicative error is 3.35 × over the measured grid. The current grounding scope is: 
+
+• surface-code PyMatching rows provide the CPU matching service-time profile. True GPU MWPM grounding is future work. 
+
+• official Fusion Blossom partition rows are valid completed-shard evidence and should remain separate from local window wrappers. 
+
+• toric Stim gate rows are the preferred path for noisy measurement-round claims. 
+
+• color-code LDPC matrix rows provide the scalable color-code timing profile. Larger-allocation qecsim MPS grounding is future work. 
+
+• NVIDIA Ising forward timing should be used for pure neural inference, while the public-workflow rows measure workflow overhead. 
+
+G.2 Grounding Profiles 
+
+StreamingQEC stores compact profile catalogs for large runs. For an event key 
+
+𝑘 = (seed , job , round , stage , source , destination , profile ), (76) a stable hash produces deterministic uniforms 𝑈 𝑖 (𝑘 ). Those values drive jitter, tail, slowdown, or fault-delay equations. The same logical event gets the same perturbation in explicit and recurrent execution. 
+
+> , Vol. 1, No. 1, Article . Publication date: July 2026.
+
+StreamingQEC: Streaming Quantum Error Correction in Tightly Integrated Quantum-Classical Systems via Certified Recurrence 47 
+
+Normalized source layer Audit rows Fit rows Construction and role De-duplicated campaign results 7,574 5,750 Framework-level decoder and adapter runs with case manifests, environment records, measured runtime, and explicit unit counts. Nested Stim/PyMatching timing 2,304 2,304 Decoder timing extracted from delegated surface-code wrappers. These rows replace the wrapper elapsed time as the fitted service target. NVIDIA Ising CUDA for-ward 120 120 Synchronized public-model forward passes over the measured distance, rounds, and batch grid. Model load is recorded separately. Total 9,998 8,174 Normalized audit corpus and rows retained across 48 independently fitted code/decoder/backend/device profiles. 
+
+Table 23. Construction and filtering of the author-generated decoder-runtime corpus. Audit rows remain available even when they are excluded from fitted service-time profiles. 10 1 10 2 10 3 10 4 10 5 10 6 10 7
+
+> Measured service time per batch (us, log scale)
+> Toric paths
+> (n=960)
+> Color-code matrix
+> (n=512)
+> qLDPC matrix
+> (n=992)
+> Fusion Blossom
+> (n=126)
+> Neural Ising forward
+> (n=120)
+
+Fig. 15. Distribution of directly measured decoder service-time artifacts used by the grounding analysis. The log scale separates low-latency detector and matching paths from matrix-decoder, Fusion Blossom, and neural-forward rows. The plot reports service-time evidence. Logical-error-rate validation lies outside this systems paper. 
+
+Link profiles. The current literature-prior link families include PCIe H2D/D2H, NVLink P2P, NVSwitch P2P, GPUDirect/RDMA, Slingshot, InfiniBand/RDMA, Ethernet TCP/UDP tail profiles, and NVQLink-style callback profiles. A generic transfer model is 
+
+𝑡 final = 𝐿 + 𝑃 /𝐵 + 𝑗 normal + 𝑗 tail + 𝑡 retry . (77) 
+
+, Vol. 1, No. 1, Article . Publication date: July 2026. 48 Christou et al. 
+
+Family/path Grounded evidence Representative timing Interpretation Surface MWPM /sparse matching Stim/PyMatching nested rows for rotated/unrotated surface codes, distances 3– 13 Rotated MWPM me-dian 8.19 𝜇 s/decode. Unrotated median 12.9 𝜇 s/decode Real PyMatching CPU decode timing used for matching-service profiles. GPU match-ing is future grounding work. Fusion Blossom Serial full-window, serial windowed, local parallel-window, and partial official partitioned-solver rows Official partition me-dians: 98.9 𝜇 s/shot ro-tated, 115 𝜇 s/shot unro-tated Official partition data is valid for completed shards and kept separate from local window wrappers. Toric PyMatching and LDPC matrix rows plus qecsim ideal toric and Stim MPP/gate circuit-detector paths Stim MPP median 5.46 𝜇 s/decode. Stim gate median 13.6 𝜇 s/decode Use the Stim gate path for noisy measurement-round claims. The ideal qecsim path supplies matrix-level reference timing. qLDPC Repetition-seed HGP ma-trices plus generic sparse-matrix stress rows with BP, BP+OSD, BP+LSD, union-find, and belief-find qLDPC generic union-find median 26.6 𝜇 s/decode. Belief-find median 43.3 𝜇 s/decode The main profile uses HGP BP+LSD. Generic repair rows supersede an earlier failed stress-matrix generator and remain labeled as stress ma-trices. Color code LDPC matrix decoders over qecsim color-code CSS stabilizers. qecsim MPS at low distance LDPC median 25– 30 𝜇 s/decode. qecsim MPS d=3/5 median 58.2 ms/decode Use LDPC matrix path for scalable color-code ground-ing. Larger-allocation MPS timing is future grounding work. NVIDIA Ising Public workflow rows and separate CUDA neural-forward microbenchmark Forward median 0.506 ms/batch. Model load median 0.741 s Use forward model for pure neural inference service time. Adapter rows include orches-tration overhead. 
+
+Table 24. Grounded decoder/runtime evidence integrated into StreamingQEC. The reported timings charac-terize decoder service. 
+
+Here 𝐿 is the fixed latency of the selected transport path, 𝑃 is the payload in bytes, and 𝐵 is its bandwidth in bytes per second. For host-side transfers, 𝐿 is the host latency reported in Table 25. Controller–QPU transfers use the corresponding controller–QPU latency. The remaining terms are deterministic normal jitter, tail delay, and retry delay, respectively. Table 25 records the base transfer parameters used by the 219-row profile matrix in Figure 7. The first four variants hold the host callback path at the NVQLink baseline and vary the controller–QPU path. The remaining variants apply one transport class to both paths. These are modeled scenario parameters: PCIe, InfiniBand, and Ethernet bandwidths reflect nominal line-rate assumptions. Their latency values and the future control-link values are explicit simulation assumptions with no provider guarantee [9, 41, 47]. 
+
+Machine profiles. Machine-regime profiles model performance drift, thermal/power slowdown, OS/network noise, campaign-scale efficiency changes, and semiconductor exposure tracking. These profiles apply multiplicative slowdown and additive stage delay. 
+
+> , Vol. 1, No. 1, Article . Publication date: July 2026.
+
+StreamingQEC: Streaming Quantum Error Correction in Tightly Integrated Quantum-Classical Systems via Certified Recurrence 49 
+
+Matrix link profile Host latency ( 𝜇 s) Host BW (GB/s) Ctrl.–QPU latency ( 𝜇 s) Ctrl.–QPU BW (GB/s) Sweep role NVQLink callback 3.84 50.000 3.84 50.000 Baseline callback path on both sides. Ctrl.–QPU coax 3.84 50.000 0.20 8.000 Baseline host path with cryogenic-coax control. Cryo-CMOS link 3.84 50.000 0.05 20.000 Baseline host path with integrated cryogenic con-trol. Photonic control 3.84 50.000 0.02 50.000 Baseline host path with fu-ture photonic control. PCIe Gen4 ×16 6.00 31.508 6.00 31.508 On-node PCIe Gen4 trans-port on both paths. PCIe Gen5 ×16 6.00 63.040 6.00 63.040 On-node PCIe Gen5 trans-port on both paths. InfiniBand NDR 2.00 53.125 2.00 53.125 NDR-class fabric transport on both paths. Ethernet 100G 30.00 12.500 30.00 12.500 100-GbE-class fabric trans-port on both paths. 
+
+Table 25. Base latency and bandwidth assumptions for the link variants in Figure 7. Bandwidth uses decimal GB/s. For payload 𝑃 , each path contributes 𝐿 + 𝑃 /𝐵 before deterministic jitter, tail, and retry terms. 
+
+Fault profiles. Fault profiles model correctable memory-error state, uncorrectable GPU memory failure, XID/reset retry, NVLink errors, job-failure hazard, host DRAM error state, storage-artifact faults, and node drain/recovery. In the current QEC recurrence validation path, retryable fault profiles contribute deterministic delay. Topology-changing retry semantics are future work. 
+
+, Vol. 1, No. 1, Article . Publication date: July 2026.

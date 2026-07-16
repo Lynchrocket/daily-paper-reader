@@ -1,0 +1,412 @@
+Title: Clifford-Only Quantum Reed-Solomon Codes and a Tornado Concatenation for Biased-Noise Cat Qubits
+
+URL Source: https://arxiv.org/pdf/2607.13105v1
+
+Published Time: Thu, 16 Jul 2026 00:06:41 GMT
+
+Number of Pages: 12
+
+Markdown Content:
+# Clifford-Only Quantum Reed–Solomon Codes and a Tornado Concatenation for Biased-Noise Cat Qubits 
+
+Cheng-You Ho ∗, Justin Luo ∗, Henry Ng ∗, Simba Shi ∗, and Daniel Wang ∗
+
+> Yale University, New Haven, Connecticut 06520, USA
+
+Dissipative cat qubits exponentially suppress one Pauli error channel with the mean photon number, leaving the conjugate bit-flip error as the domi-nant failure mode. This strong noise bias makes the full machinery of general quantum error correction unnecessary: a code need only protect against a single error type, and any classical linear code can be promoted to a Clifford stabilizer code that does exactly this. We use this observation to build a Clifford-only 
+
+quantum Reed–Solomon (RS) code. Starting from the [7 , 3, 5] RS code over 
+
+GF(2 3), which is maximum distance separable, we expand each field symbol into three bits to obtain the [21 , 9, 6] linear code over GF(2) , realized as a 
+
+[[21 , 9, d X = 6 , d Z = 1]] bit-flip code whose stabilizers are products of Z opera-tors. Because no phase-flip correction is attempted, the construction avoids the non-Clifford quantum Fourier transform required by the Grassl–Beth quantum RS codes and is fully simulable in Stim. Errors are decoded by a lookup table of minimum-weight corrections. We then introduce a Tornado architecture: a two-layer concatenation that wraps every position of the outer RS code in an inner distance-three repetition code, yielding a [[63 , 9, 18]] code decoded in two stages, a majority vote within each repetition block followed by the outer lookup table. Monte Carlo simulations show that at a physical bit-flip rate 
+
+p = 0 .1 the Tornado code reaches a logical error rate pL ≈ 5.3 × 10 −3, below both parent codes, and that its logical error rate scales as pL ∝ p6 at low p, in contrast to p2 for the repetition code and p3 for the standalone RS code. We give the exact construction, the error and circuit model, an asymptotic scaling analysis, and an account of the overhead cost and of the assumptions behind the noise model. 
+
+# 1 Introduction 
+
+Fault-tolerant quantum computing is expensive largely because a generic qubit suffers two kinds of error, bit flips ( X) and phase flips ( Z), and a general-purpose code such as the surface code must spend qubits suppressing both. Dissipative cat qubits change this accounting. A cat qubit encodes information in the phase space of a driven-dissipative bosonic mode, and as the mean photon number grows one of its two error channels is suppressed exponentially while the other grows only polynomially [1, 2, 3]. The result is a qubit with a tunable, and in practice enormous, noise bias: error rates asymmetric by 
+
+> ∗These authors contributed equally to this work.
+
+1arXiv:2607.13105v1 [quant-ph] 14 Jul 2026 factors of 10 5 or more have been demonstrated [3, 4]. Exploiting such an asymmetry to lower the cost of fault tolerance is a well-established idea [5]. In this regime one error type is so rare that it can be neglected, and the code above the cat qubit needs to correct only the dominant one. 1
+
+This is a strong simplification, because a code that must correct only one Pauli error type is essentially a classical code. Any binary linear code with parity-check matrix H
+
+becomes a quantum code for the dominant error by promoting each row of H to a multi-qubit Z-type stabilizer, so that the classical syndrome and the quantum syndrome coincide. The encoded states are the classical codewords, the logical operators are inherited from the classical code, and, crucially, every gate involved (state preparation, the CNOT-based encoder, stabilizer measurement, and readout) is Clifford. Such circuits can be simulated exactly and at scale with the stabilizer simulator Stim [6]. This opens the door to high-rate classical codes that would be awkward or impossible to use as fully quantum ( X-and-Z) codes. Reed–Solomon (RS) codes [7] are the canonical example: they are maximum distance separable (MDS), meaning they achieve the largest possible minimum distance for their rate, and they are ubiquitous in classical storage and communication. A quantum version of the RS code already exists: the Grassl–Beth construction [8] encodes and decodes through a discrete cyclic Fourier transform over the finite field, a non-Clifford operation. It is therefore not simulable in Stim, and, more fundamentally, it spends its power correcting both X and Z errors, which is exactly the redundancy that cat qubits render unnecessary. In this work we take the opposite, deliberately minimal route. Our contributions are: 1. A Clifford-only quantum RS code. We construct the RS code [7 , 3, 5] over GF(2 3),binary-expand it to [21 , 9, 6] over GF(2) , put it in systematic form, and realize it as the bit-flip stabilizer code [[21 , 9, d X = 6 , d Z = 1]] with an explicit CNOT encoder and Z-type checks (Sec. 3). No quantum Fourier transform appears, and the whole circuit is Clifford. 2. An optimal lookup decoder. Because the code is small, we decode with a lookup table of minimum-weight corrections built from the systematic parity-check matrix 
+
+H = [ P T | I] (Sec. 3.5). 3. The Tornado concatenation. Inspired by classical Tornado codes [9], we wrap every position of the outer RS code in an inner distance-three repetition code, producing a 
+
+[[63 , 9, 18]] concatenated code decoded in two stages, an inner majority vote followed by the outer RS lookup (Sec. 4). 4. Benchmarks and scaling. We compare the repetition, RS, and Tornado codes over two orders of magnitude in physical error rate, show that the Tornado logical error rate scales as p6 at low error rates, and quantify the qubit overhead and the assumptions of the noise model (Secs. 5–7).                
+
+> 1In the standard cat-qubit convention the exponentially suppressed error is the bit flip and the dominant residual error is the phase flip [3, 2]; a repetition code that corrects phase flips is then concatenated on top [2, 4]. The two descriptions are related by a transversal Hadamard, which exchanges X↔Zand
+> XX ↔ZZ stabilizers. Throughout this paper we adopt the frame used by our simulation code, in which the single dominant error is labelled X(a “bit flip”) and is detected by Z-type stabilizers. Every statement below holds verbatim in the phase-flip frame after this relabelling.
+
+22 Biased noise and bit-flip codes 
+
+Noise bias. We work in the strong-bias limit: the suppressed error channel of the cat qubit is neglected entirely, and the only error is a bit flip X that strikes each physical qubit independently with probability p. The same idealization underlies analyses of repetition cat codes [2, 10]; it is accurate whenever the bias η = pdominant /p suppressed is large, and in that regime a code that corrects a single type of error is all that is needed. 
+
+Classical linear codes as quantum bit-flip codes. Let C ⊆ Fn 
+
+> 2
+
+be a binary linear code with generator matrix G (k × n) and parity-check matrix H ((n − k) × n), so that 
+
+HG T = 0 . We associate one physical qubit with each of the n bits and define, in the stabilizer formalism [11], the stabilizer group 
+
+S =
+
+> 〈
+
+Sr = ∏  
+
+> q:Hrq =1
+
+Zq : r = 1 , . . . , n − k
+
+> 〉
+
+. (1) 
+
+All generators are products of Z operators, hence mutually commuting and Clifford. The codespace is the +1 eigenspace of S; its logical computational states |c⟩ are labelled by the classical codewords c ∈ C, and a bit-flip pattern e ∈ Fn 
+
+> 2
+
+maps the state |c⟩ to |c ⊕ e⟩.Measuring the stabilizers (1) returns precisely the classical syndrome 
+
+σ = He T ∈ F n−k 
+
+> 2
+
+, (2) 
+
+so classical and quantum decoding are identical. This is a CSS code [12, 13] built from a single classical code: every stabilizer is of Z type, so the code corrects X errors and makes no attempt to correct Z errors. Its quantum parameters are 
+
+[[ n, k, d X = d(C), d Z = 1 ]] , (3) 
+
+where d(C) is the classical minimum distance: a weight-1 Z operator is already a logical operator ( dZ = 1 ), which is harmless precisely because the cat qubit suppresses that error exponentially. These parameters generalize the cat repetition code [[ n, 1, d X = n, d Z =1]] [2], which is recovered by taking C to be the length-n repetition code. 
+
+Circuit and error model. Every logical error rate reported here is obtained under the following single-shot memory model, which matches our Stim implementation: (i) all data qubits are reset and the CNOT encoder prepares the logical all-zero codeword |0L⟩;(ii) each data qubit independently undergoes X with probability p (a single X_ERROR (p)
+
+location); (iii) the Z-type stabilizers are measured once with a noiseless ancilla, yielding the syndrome (2) ; (iv) the data qubits are read out in the Z basis and the k message qubits are declared as logical observables. The decoder then applies the correction inferred from the syndrome and a logical failure is recorded whenever any logical observable is left flipped. This model isolates the code’s combinatorial error-correcting power; measurement and gate noise and repeated syndrome rounds are deliberately excluded and are discussed as limitations in Sec. 7. 
+
+# 3 Clifford quantum Reed–Solomon construction 
+
+3.1 The field GF(8) 
+
+We work over the field GF(2 3) = F2[x]/(x3 + x + 1) with primitive polynomial x3 + x +1 (0b1011 ). Field elements are 3-bit strings interpreted as polynomials of degree < 3;
+
+3addition is bitwise xor and multiplication is polynomial multiplication modulo x3 + x + 1 .The element α = 2 (i.e. x) is primitive: its powers enumerate all seven nonzero elements, 
+
+(α0, . . . , α 6) = (1 , 2, 4, 3, 6, 7, 5) , (4) 
+
+which we use as the evaluation points of the code. 
+
+3.2 Reed–Solomon over GF(8) 
+
+The RS code encodes a message of ks = 3 field symbols (m0, m 1, m 2) as the evaluations of the polynomial m(y) = m0 + m1y + m2y2 at the ns = 7 points (4) :
+
+cj =
+
+> 2∑
+> i=0
+
+mi α ij , j = 0 , . . . , 6. (5) 
+
+Equivalently c = m G sym with the 3 × 7 symbol generator 
+
+Gsym =
+
+> 
+
+1 1 1 1 1 1 11 2 4 3 6 7 51 4 6 5 2 3 7 
+
+> 
+
+, (6) 
+
+whose rows are the componentwise powers (αij )j . This is a [7 , 3, 5] code over GF(8) . As an evaluation code it is maximum distance separable: its symbol distance meets the Singleton bound, ds = ns − ks + 1 = 5 , so it corrects any t = ⌊(ds − 1) /2⌋ = 2 symbol errors. 
+
+3.3 Binary expansion and systematic form 
+
+Quantum hardware acts on bits, not field symbols, so we expand Gsym over GF(2) by replacing each symbol operation with its action on the underlying 3-bit strings. Encoding the 9 basis messages produces a 9 × 21 binary generator matrix Gbin . Gaussian elimina-tion over GF(2) , followed by a column permutation that collects the pivots, brings it to systematic form 
+
+Gs = [ I 9 | P ], P ∈ F 9×12 2 , (7) 
+
+from which the systematic parity-check matrix follows immediately, 
+
+H = [ P T | I12 ] ∈ F 12 ×21 2 , HG T 
+
+> s
+
+= 0 . (8) 
+
+A brute-force minimum-weight search over all 29 − 1 nonzero codewords gives a binary minimum distance of 6; the binary image of the RS code is therefore the linear code 
+
+[21 , 9, 6] , corrects t = 2 bit errors, and as a quantum bit-flip code has parameters 
+
+[[ 21 , 9, d X = 6 , d Z = 1 ]] . (9) 
+
+The 12 rows of H are the supports of the 12 Z-type stabilizers; its structure is shown in Fig. 1. The systematic layout separates the 21 physical qubits into 9 message qubits and 
+
+12 parity qubits and directly dictates the encoder. 
+
+4P T (9 columns) I12 (12 columns)  
+
+> physical qubit (21 columns)
+> Z-stabiliser
+> (12 rows)
+
+Figure 1: The systematic parity-check matrix H = [ P T | I12 ] of the binary-expanded quantum Reed– Solomon code [[21 , 9, 6]] . Each of the 12 rows is a Z-type stabilizer generator; each of the 21 columns is a physical qubit. Filled cells mark a 1. The left block P T (orange) couples parity checks to the 9
+
+message qubits; the right block is the 12 × 12 identity (green) acting on the parity qubits. H has 72 
+
+nonzero entries. 
+
+3.4 The encoder and stabilizer circuit 
+
+The systematic generator prepares the logical all-zero codeword from the physical all-zero state using only CNOTs: for every 1 in P we entangle the corresponding message and parity qubit, if Pij = 1 : CX( message i → parity 9 + j ). (10) 
+
+Syndrome extraction measures each stabilizer Sr of Eq. (1) by copying the parities of its support onto a fresh ancilla with CNOTs and measuring the ancilla in the Z basis, contributing one detector bit per row of H. Finally the 9 message qubits are read out and declared as logical observables. Every operation is Clifford; the circuit compiles and samples directly in Stim [6]. This should be contrasted with the Grassl–Beth quantum RS code [8], whose encoder and decoder are built from the discrete cyclic Fourier transform over GF(8) : that transform is non-Clifford, cannot be sampled by a stabilizer simulator, and buys Z-error correction that a cat qubit does not need. 
+
+3.5 Maximum-likelihood lookup decoder 
+
+For a code this small, optimal decoding is a table lookup. We precompute, for every attainable syndrome, the minimum-weight error consistent with it: we enumerate error patterns in order of increasing weight w = 0 , 1, 2, 3 and record the first pattern that produces each syndrome, which is by construction a minimum-weight coset leader, 
+
+ˆe(σ) = arg min  
+
+> e:He T=σ
+
+wt( e). (11) 
+
+The enumeration yields a table with 1359 distinct syndromes out of the 212 = 4096 possible. Every error of weight at most 2 is corrected exactly, as the distance guarantees, and the weight-3 leaders fill in additional syndromes so that some weight-3 errors are corrected as well. A logical failure is declared when the residual error e ⊕ ˆe is a nonzero codeword, i.e. 
+
+5Encoding         
+
+> 9 logical bits
+> j0®9
+> outer RS
+> (CX from P)21-bit RS
+> codeword
+> inner d= 3
+> repetition 63 physical
+> cat qubits
+> Xnoise, rate p
+> measure
+> Z-checks Decoding
+> 63 syndrome +
+> data bits
+> inner
+> majority vote
+> 21 effective
+> bits
+> outer RS
+> lookup
+> 9 corrected
+> logical bits
+
+Figure 2: The Tornado architecture. Encoding (top): nine logical bits are encoded by the outer Reed– Solomon code into a 21 -bit codeword using the CNOT encoder read off from P ; every one of those 
+
+21 positions is then wrapped in an inner distance-three repetition code, giving 63 physical cat qubits exposed to bit-flip noise at rate p. Decoding (bottom): the 63 measured qubits are first collapsed by an inner majority vote (one vote per repetition block) to 21 effective bits, which are then decoded by the outer Reed–Solomon syndrome lookup table to recover the nine logical bits. 
+
+when the decoder returns to a wrong codeword or the syndrome lies outside the table. We verified that this classical decoder, applied directly to random error patterns, agrees with the same decoder applied to the detector samples of the full Stim circuit to within Monte Carlo error (e.g. pL = 0 .182 vs. 0.181 at p = 0 .1, consistent with Fig. 3), as it must for a purely classical X-error channel. 
+
+# 4 The Tornado concatenation 
+
+4.1 Motivation 
+
+The RS code is high-rate but fragile: with dX = 6 it tolerates only two bit flips among 
+
+21 qubits, so at large p its logical error rate is actually worse than a simple repetition code (Fig. 3). A repetition code is the opposite: extremely robust but wasteful of qubits. Classical Tornado codes [9] resolve exactly this tension by layering sparse graph codes with an outer high-rate code so that each layer cleans up the errors that slip past the previous one. We adopt a deliberately simple, two-layer instance of this idea suited to biased-noise qubits. 
+
+4.2 Architecture 
+
+The Tornado code concatenates an inner distance-three repetition code inside the outer 
+
+RS code, as sketched in Fig. 2. Each of the n = 21 positions of an RS codeword is itself encoded into a block of din = 3 physical cat qubits by a repetition code. The composite code therefore uses 
+
+N = n · din = 21 × 3 = 63 (12) 
+
+physical qubits to protect k = 9 logical qubits. Concatenation multiplies distances, so the 
+
+X-distance of the composite code is 
+
+dX = din · d(C) = 3 × 6 = 18 , (13) 
+
+while dZ remains 1; the Tornado code is [[63 , 9, 18]] . Its rate is 9/63 = 1 /7.
+
+610 ¡3 10 ¡2 10 ¡1                
+
+> Physical bit-flip error rate p
+> 10 ¡7
+> 10 ¡6
+> 10 ¡5
+> 10 ¡4
+> 10 ¡3
+> 10 ¡2
+> 10 ¡1
+> 10 0
+> Logical error rate  pL
+> /p2
+> /p3
+> /p6
+> Tornado [[63 ;9;18]]
+> Reed--Solomon [[21 ;9;6]]
+> Repetition [[3 ;1;3]]
+> break-even pL=p
+
+Figure 3: Logical error rate pL versus physical bit-flip rate p for the three codes, on log–log axes. The Tornado code (green triangles) lies below both parent codes wherever it is resolvable and falls off far more steeply. Dashed guides show the asymptotic slopes pL ∝ p2 (repetition), p3 (Reed–Solomon), and p6 (Tornado); the dotted line is the uncoded break-even pL = p. Error bars are 1σ Poisson; where the Tornado rate falls below the sampling floor the markers are omitted. 
+
+4.3 Two-stage decoder 
+
+Decoding mirrors the encoding, from the inside out. For each of the 21 repetition blocks the inner decoder takes a hard majority vote over its din = 3 qubits, producing a single effective bit. A block is decoded incorrectly exactly when at least two of its three qubits flipped, which happens with the effective error probability 
+
+q(p) = 
+
+(32
+
+)
+
+p2(1 − p) + p3 = 3 p2 − 2p3 ≈ 3p2. (14) 
+
+The 21 effective bits are then handed to the outer decoder, which is exactly the RS syn-drome lookup table of Sec. 3.5 applied with error rate q(p) in place of p. Because the noise is a classical X channel and both layers are CSS, this two-stage hard-decision procedure is equivalent to a stabilizer simulation of the full 63 -qubit circuit, and we evaluate it directly by Monte Carlo sampling. 
+
+# 5 Numerical results 
+
+Figure 3 is the central result: the logical error rate pL of the repetition code [[3 , 1, 3]] ,the standalone RS code [[21 , 9, 6]] , and the Tornado code [[63 , 9, 18]] as a function of the physical bit-flip rate p, over p ∈ [10 −3, 10 −1]. The repetition curve is the exact majority-vote expression 3p2 − 2p3; the RS and Tornado curves are Monte Carlo simulations of the decoders of Secs. 3.5 and 4, with up to 8 × 10 6 shots per point and 1σ Poisson error bars. Representative values are collected in Table 1. Three features stand out. First, the RS and repetition curves cross near p ≈ 0.013 :below it the high-rate RS code wins, above it the robust repetition code wins, quantifying 
+
+7Table 1: Logical error rate pL at three physical error rates, and the factor by which the Tornado code improves on each parent. Monte Carlo estimates; the repetition entries are exact. 
+
+p = 0 .036 p = 0 .06 p = 0 .1
+
+Repetition [[3 , 1, 3]] 3.8 × 10 −3 1.0 × 10 −2 2.8 × 10 −2
+
+Reed–Solomon [[21 , 9, 6]] 1.1 × 10 −2 4.8 × 10 −2 1.8 × 10 −1
+
+Tornado [[63 , 9, 18]] 1.1 × 10 −5 2.7 × 10 −4 5.3 × 10 −3
+
+gain vs. repetition 340 × 38 × 5.3×
+
+gain vs. Reed–Solomon 990 × 180 × 34 ×
+
+the trade-off between density and robustness. Second, the Tornado code is below both parents throughout the resolvable range; at p = 0 .1 it reaches pL ≈ 5.3 × 10 −3, a factor of 5.3 below the repetition code and 34 below the standalone RS code. Third, and most importantly, the Tornado advantage grows as p decreases because its curve is steeper: by 
+
+p ≈ 0.036 the improvement is already 340 × over repetition and 990 × over RS (Table 1). The concatenation does not merely shift the curve down, it bends it. 
+
+# 6 Asymptotic scaling 
+
+The slopes in Fig. 3 follow from counting the minimum-weight error that defeats each decoder. A code that corrects t errors first fails at weight t + 1 , so its logical error rate scales as pL ∝ p t+1 at small p.
+
+Repetition ( d = 3 ). Majority vote fails at two flips out of three, so prep L ≈ 3p2: slope 2.
+
+Reed–Solomon [[21 , 9, 6]] . The bounded-distance decoder corrects t = 2 bit flips and first fails at weight 3, so pRS L ∼ A3 p3: slope 3. (The weight-3 coset leaders in the table lower the prefactor A3 but do not change the exponent.) 
+
+Tornado [[63 , 9, 18]] . A logical failure requires the outer RS decoder to fail, i.e. at least 
+
+t + 1 = 3 of the 21 effective bits to be wrong; each effective bit is wrong with probability 
+
+q(p) ≈ 3p2 from Eq. (14) . Hence 
+
+ptor L ∼
+
+> (
+
+21 3
+
+> )
+
+q(p)3 ≈
+
+> (
+
+21 3
+
+> )
+
+(3 p2)3 = 3 .6 × 10 4 p6, (15) 
+
+a slope of 6. A least-squares fit to the simulated Tornado data over p ∈ [0 .03 , 0.06] gives a local slope of 6.3, consistent with Eq. (15) ; the small excess over 6 and the smaller measured prefactor both reflect the weight-3 coset leaders, which correct a fraction of the three-block failures. More generally, concatenating an inner code whose failure probability scales as pa with an outer code that first fails at b block errors yields an exponent a b ; here 
+
+a = 2 (majority vote) and b = 3 (RS correcting two), giving 6.It is worth being precise about what this exponent is and is not. The code distance 
+
+dX = 18 would, under an optimal decoder, permit correcting up to ⌊(18 − 1) /2⌋ = 8 errors and yield a slope of ⌈18 /2⌉ = 9 . Our two-stage hard-decision decoder does not reach that: it fails already at 6 physical flips (two in each of three blocks), so its exponent is 6, not 9.The gap is the price of decoding the two layers independently and with hard decisions; a soft-decision decoder acting on the full 63 -qubit code could in principle recover the missing 
+
+8Table 2: Resource comparison. “Overhead” is physical qubits per logical qubit. The Tornado code trades the lowest rate for the largest distance and steepest error suppression. 
+
+Code [[ n, k, d X ]] rate k/n overhead pL ∝
+
+Repetition [[3 , 1, 3]] 0.33 3 p2
+
+Reed–Solomon [[21 , 9, 6]] 0.43 2.3 p3
+
+Tornado [[63 , 9, 18]] 0.14 7 p6
+
+suppression. The p6 scaling is what the simple decoder we implement actually achieves; closing the gap to p9 is left for future work. 
+
+# 7 Discussion and limitations 
+
+Overhead is the cost of the steep slope. The Tornado code’s low logical error rate is bought with qubits, and it is important to state this plainly. Table 2 lists the rates: the Tornado code has the lowest rate of the three, 1/7, below both the standalone RS code ( 3/7) and even the d = 3 repetition code ( 1/3). The Tornado code is not a free improvement over its parents at fixed qubit budget; it trades rate for a much steeper error suppression. The fair comparison is at fixed distance : a pure repetition code of distance 18 
+
+would need 18 physical qubits per logical qubit (rate 1/18 ≈ 0.056 ), whereas the Tornado code achieves the same distance-18 protection at rate 1/7 ≈ 0.143 , a 2.6× improvement in encoding rate. This is the concrete sense in which folding a high-rate algebraic outer code into the concatenation is worthwhile: for a target distance it uses far fewer qubits than repetition alone. The same lesson motivates the high-rate outer codes in the cat-qubit architectures of Refs. [10, 14, 4]. 
+
+Single-shot, code-capacity noise. Our results are code-capacity results: a single round of X noise followed by noiseless syndrome extraction and readout. Real devices have faulty gates and measurements and require repeated syndrome rounds, under which an outer code with only dZ = 1 and a static, single-shot decoder is not by itself fault-tolerant. Establishing a circuit-level threshold would require modelling CNOT and mea-surement noise, decoding over multiple rounds, and accounting for the residual phase-flip rate of the physical cat qubits (which sets the dZ = 1 vulnerability). We view the present construction as a proof of concept, at the code-capacity level, for using high-rate classical codes on biased-noise qubits, not as a claim of fault tolerance. 
+
+Decoder cost and code families. The lookup decoder is optimal but its table grows exponentially in the number of correctable errors, so it does not scale to large codes; a syndrome-based algebraic RS decoder or belief propagation would be needed there. Like-wise, the three codes benchmarked here are single instances, not a family, so Fig. 3 exhibits finite-size scaling rather than a threshold. The construction is nonetheless parametric: the RS code [15 , 9] over GF(2 4) (primitive polynomial x4 + x + 1 ) expands to a [60 , 36] bi-nary code with symbol distance 7 and binary distance at least 7, and the same Tornado wrapping applies to any member of the family. Mapping out a genuine threshold for a scal-able Tornado family, and comparing it against quantum LDPC codes tailored to biased noise [15, 16, 14], is the natural next step. 
+
+9Relation to prior and concurrent work. Our construction sits at the intersection of three lines of work. Compared with the Grassl–Beth quantum RS codes [8], we trade generality (correction of both X and Z) for a Clifford circuit, simulable in Stim, that is matched exactly to the biased channel of the cat qubit. From classical Tornado codes [9] we keep only the layered philosophy, replacing the cascade of sparse graph codes with a single repetition layer beneath an algebraic outer code. Within the cat-qubit literature, concate-nating biased qubits with a classical outer code is precisely the strategy behind repetition cat architectures [2, 10, 4], LDPC-cat codes [14], and bias-tailored LDPC codes [16]; the recent Elevator codes [17] likewise concatenate an inner repetition layer with a high-rate outer code under biased noise. Our contribution is a small, fully explicit, optimally de-coded instance built from an MDS Reed–Solomon outer code, together with an account of its scaling and overhead. 
+
+# 8 Conclusion 
+
+Exploiting the noise bias of cat qubits, we built a Clifford-only quantum Reed–Solomon code, the [[21 , 9, 6]] bit-flip code, that avoids the non-Clifford quantum Fourier transform of the standard quantum RS construction and is simulable end-to-end in Stim. Wrapping each of its positions in a distance-three repetition code yields a [[63 , 9, 18]] Tornado code that, with a simple two-stage decoder, reaches a logical error rate of 5.3 × 10 −3 at a physical error rate of 0.1 and suppresses errors as p6, far steeper than either parent code. The construction is a compact demonstration that the extreme noise asymmetry of bosonic qubits turns the rich toolbox of classical linear codes into directly usable Clifford quantum codes, and that concatenating a high-rate algebraic outer code with a simple inner code achieves steep error suppression at a modest cost in qubits. The clear next steps are to extend the analysis to circuit-level noise and to a scalable code family. 
+
+# References 
+
+[1] Mazyar Mirrahimi, Zaki Leghtas, Victor V. Albert, Steven Touzard, Robert J. Schoelkopf, Liang Jiang, and Michel H. Devoret. “Dynamically protected cat-qubits: A new paradigm for universal quantum computation”. New Journal of Physics 16 ,045014 (2014). [2] Jérémie Guillaud and Mazyar Mirrahimi. “Repetition cat qubits for fault-tolerant quantum computation”. Physical Review X 9, 041053 (2019). [3] Raphaël Lescanne, Marius Villiers, Théau Peronnin, Alain Sarlette, Matthieu Delbecq, Benjamin Huard, Takis Kontos, Mazyar Mirrahimi, and Zaki Leghtas. “Exponential suppression of bit-flips in a qubit encoded in an oscillator”. Nature Physics 16 , 509– 513 (2020). [4] Harald Putterman, Kyungjoo Noh, Connor T. Hann, Gregory S. MacCabe, et al. “Hardware-efficient quantum error correction via concatenated bosonic qubits”. Nature 
+
+638 , 927–934 (2025). [5] Panos Aliferis and John Preskill. “Fault-tolerant quantum computation against biased noise”. Physical Review A 78 , 052331 (2008). [6] Craig Gidney. “Stim: A fast stabilizer circuit simulator”. Quantum 5, 497 (2021). [7] Irving S. Reed and Gustave Solomon. “Polynomial codes over certain finite fields”. Journal of the Society for Industrial and Applied Mathematics 8, 300–304 (1960). [8] Markus Grassl, Willi Geiselmann, and Thomas Beth. “Quantum Reed–Solomon codes”. In Applied Algebra, Algebraic Algorithms and Error-Correcting Codes 
+
+10 (AAECC-13). Volume 1719 of Lecture Notes in Computer Science, pages 231–244. Springer (1999). [9] Michael G. Luby, Michael Mitzenmacher, M. Amin Shokrollahi, and Daniel A. Spiel-man. “Efficient erasure correcting codes”. IEEE Transactions on Information Theory 
+
+47 , 569–584 (2001). [10] Élie Gouzien, Diego Ruiz, François-Marie Le Régent, Jérémie Guillaud, and Nicolas Sangouard. “Performance analysis of a repetition cat code architecture: Computing 256-bit elliptic curve logarithm in 9 hours with 126133 cat qubits”. Physical Review Letters 131 , 040602 (2023). [11] Daniel Gottesman. “Stabilizer codes and quantum error correction”. PhD thesis. California Institute of Technology. (1997). [12] A. R. Calderbank and Peter W. Shor. “Good quantum error-correcting codes exist”. Physical Review A 54 , 1098–1105 (1996). [13] Andrew M. Steane. “Error correcting codes in quantum theory”. Physical Review Letters 77 , 793–797 (1996). [14] Diego Ruiz, Jérémie Guillaud, Anthony Leverrier, Mazyar Mirrahimi, and Christophe Vuillot. “LDPC-cat codes for low-overhead quantum computing in 2D”. Nature Com-munications 16 , 1040 (2025). [15] David K. Tuckett, Andrew S. Darmawan, Christopher T. Chubb, Sergey Bravyi, Stephen D. Bartlett, and Steven T. Flammia. “Tailoring surface codes for highly biased noise”. Physical Review X 9, 041031 (2019). [16] Joschka Roffe, Lawrence Z. Cohen, Armanda O. Quintavalle, Daryus Chandra, and Earl T. Campbell. “Bias-tailored quantum LDPC codes”. Quantum 7, 1005 (2023). [17] Peter Shanahan and Diego Ruiz. “Elevator codes: Concatenation for resource-efficient quantum memory under biased noise” (2026). arXiv:2601.10786. 
+
+# A Reproducibility 
+
+All code, data, and figure scripts are available in the project repository at https:// github.com/Coderrexe/MIT-iQuHACK-Winner-2026 . The numerical results in this pa-per were reproduced independently of the original notebook using Python 3, stim 1.16.0, 
+
+pymatching 2.4.0, numpy , and scipy ; the original notebook pins stim ∼ 1.15. Every con-struction constant was verified against a clean re-implementation: the primitive polyno-mial x3 + x + 1 , the primitive element α = 2 , the evaluation points (1 , 2, 4, 3, 6, 7, 5) , the generator Gsym of Eq. (6) , the binary distance 6, and the 1359 -entry lookup table. The self-contained module figures/rs_tornado_lib.py rebuilds the code, H, and the decoders; 
+
+figures/make_data.py regenerates the benchmark data of Fig. 3 and Table 1; and the 
+
+figures/fig_*.py scripts regenerate every figure. 
+
+# B Explicit code matrices 
+
+For completeness we give the code in fully explicit form, so that it can be reconstructed without running any code. The Gaussian elimination of Sec. 3 yields the systematic gen-
+
+11 erator Gs = [ I 9 | P ] with the 9 × 12 parity block 
+
+P =
+
+> 
+
+1 1 0 0 1 0 1 0 0 1 1 00 1 1 0 0 1 0 1 0 0 1 11 1 1 1 1 0 0 0 1 1 1 11 0 1 1 0 1 1 0 0 0 0 11 0 0 1 0 0 0 1 0 1 1 00 1 0 0 1 0 0 0 1 0 1 11 1 1 0 1 1 1 0 0 0 1 11 0 1 1 1 1 0 1 0 1 1 11 0 0 1 0 1 0 0 1 1 0 1
+
+> 
+
+. (16) 
+
+The parity-check matrix is H = [ P T | I12 ] (Eq. (8) ), the 12 rows of which are the Z-type stabilizer supports; one verifies H G T 
+
+> s
+
+= 0 over GF(2) . The encoder places a CNOT from message qubit i to parity qubit 9 + j for every nonzero entry Pij of Eq. (16) , sixty gates in total. A brute-force search over the 29 − 1 nonzero codewords of Gs confirms the minimum distance 6.
+
+# C Worked field arithmetic 
+
+In GF(8) = F2[x]/(x3 + x + 1) the relation x3 = x + 1 reduces higher powers. Writing elements as 3-bit strings (little-endian in the powers of x), the element 2 = 010 = x
+
+generates the multiplicative group: x1 = 2 , x2 = 4 , x3 = x + 1 = 3 , x4 = x2 + x = 6 ,
+
+x5 = x2 + x + 1 = 7 , x6 = x2 + 1 = 5 , x7 = 1 , reproducing the evaluation points of Eq. (4) . Addition is xor : e.g. 3 ⊕ 3 = ( x+1) ⊕ (x+1) = 0 . Multiplication follows the shift-and-reduce rule; e.g. 6 · 6 = ( x2+x)2 = x4 + x2 = x(x+1) + x2 = x = 2 .
+
+12

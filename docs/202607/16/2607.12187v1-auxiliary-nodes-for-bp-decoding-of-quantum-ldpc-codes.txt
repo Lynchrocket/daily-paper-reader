@@ -1,0 +1,679 @@
+Title: Auxiliary Nodes for BP Decoding of Quantum LDPC Codes
+
+URL Source: https://arxiv.org/pdf/2607.12187v1
+
+Published Time: Wed, 15 Jul 2026 11:55:44 GMT
+
+Number of Pages: 8
+
+Markdown Content:
+# Auxiliary Nodes for BP Decoding of Quantum LDPC Codes 
+
+Daniel Tandler, Paul Bezner, and Stephan ten Brink 
+
+Institute of Telecommunications, University of Stuttgart, Pfaffenwaldring 47, 70569 Stuttgart, Germany 
+
+{tandler, bezner, tenbrink }@inue.uni-stuttgart.de 
+
+Abstract —Many recently proposed Calderbank–Shor–Steane (CSS) quantum low-density parity-check (QLDPC) codes have sparse decoding graphs, enabling syndrome-based belief prop-agation (BP) decoding at low complexity. Their construction, however, often results in properties that impair BP performance, such as short cycles and degeneracy. In this work, we propose a general framework for introducing auxiliary variable nodes (AVNs) and auxiliary check nodes (ACNs) into the decoding graph of CSS codes, compatible with the standard stabilizer measurement framework. This provides an additional degree of freedom in the design of the decoding graph itself and can be used to tackle the aforementioned shortcomings. We show that recently proposed techniques, 4-cycle removal and subcode ensemble decoding, can be interpreted as instances of this framework. For 
+
+4-cycle removal, we find that the gains depend strongly on the BP iteration count and check-node message scaling. Building on this framework, we further propose a graph-derived subcode ensemble decoder and demonstrate under circuit-level noise that it substantially reduces the per-round logical error rate compared with BP on the corresponding 4-cycle-free decoding graph. 
+
+I. I NTRODUCTION 
+
+Belief propagation (BP) decoding is attractive for quan-tum low-density parity-check (QLDPC) codes due to its low complexity and direct compatibility with sparse parity-check representations. However, the performance of BP decoding is highly sensitive to the chosen Tanner-graph representation. In particular, trapping sets, often consisting of short cycles ,and degeneracy -induced symmetries can strongly degrade the decoding performance. Short cycles in the Tanner graph cause the messages in BP to become strongly correlated and thus oscillate and reinforce potential wrong beliefs. Degeneracy refers to the phenomenon that can occur in syndrome based decoding, where multiple error hypotheses can share the same syndrome. While in theory finding a single one of these hypotheses can be sufficient in the quantum setting, this ambiguity can strongly impair the BP decoder’s performance. This is especially strong in QLDPC codes as they tend to have low-weight stabilizers. One line of research aims to circumvent these issues by applying different decoding methods, usually after a first pass of BP decoding [1], [2], [3]. While improving performance, this can also increase the worst-case latency, which might be problematic for practical quantum error correction (QEC). Other approaches [4], [5], [6], [7], aim to introduce decoding diversity by changing the decoding trajectory that BP sees during different decoding runs. Yet other approaches try to address these issues more   
+
+> M
+> Syndrome extraction
+> BP decoder
+> ˆeDEM
+> Haug
+> saug =As DEM
+> Classical processing
+> sDEM
+> saug
+> ˆeDEM
+
+Fig. 1: Decoding architecture of the considered framework: r syndrome measurement rounds of an encoded quantum state yield the syndrome string 
+
+sDEM . Using the linear map A, this syndrome is mapped to saug , which is suitable for decoding on the augmented parity-check matrix Haug . After syndrome-based decoding, the proposed correction ˆeDEM is output. 
+
+directly by modifying the concrete decoding graph that BP uses: In [8], a neural decoder for quaternary BP together with 
+
+overcomplete parity check matrices has been investigated. [9] proposes a joint code and decoder scheme by concentrating all 4-cycles in the parity check matrix of the code on a single variable node (VN), effectively removing them from the graph when using a decoder ensemble on that VN. [10] proposes to break potentially problematic checks that cause degeneracy issues after a first BP decoding pass. Structural decoding graph modifications in the form of 4-cycle removal for the decoding graph of BP decoders using auxiliary check node (ACN) and auxiliary variable node (AVN) were first introduced for classical channel codes [11], [12]. Recently, [13] introduced a related graph augmentation (graph augmentation and rewiring for interference (GARI)) specifically targeting the 4-cycles induced by Y -type errors in the detector error model (DEM), while proving equivalence of the decoding problem for their construction. Affine subcode ensemble decoding (ASCED) was first introduced for classical codes in [14]. In [15], ASCED is adapted for the Quantum Decoding setting by intro-ducing additional linear independent parity check constraints acting as degeneracy splitters . In this work, we show that these two latter viewpoints, short cycle removal and subcode ensemble approaches, can be connected through a common framework. We make the following contributions:  
+
+> •
+
+We formalize a general framework for augmenting the decoding graph of Calderbank–Shor–Steane (CSS) codes with AVNs and ACNs, fully compatible with standard arXiv:2607.12187v1 [cs.IT] 13 Jul 2026 stabilizer measurements. 1 
+
+> •
+
+We show this construction has two distinct interpreta-tions: ACNs can be used for structural modifications of the decoding graph, e.g. for removing 4-cycles, while fixing an AVN imposes a potentially degeneracy-splitting affine subcode constraint.  
+
+> •
+
+We construct a graph-derived affine subcode ensemble by reusing the ACNs and AVNs from 4-cycle removal as candidate constraints, in both a fixed and an adaptive (BP-guided) variant. The complete decoding architecture for the proposed method is shown in Fig. 1. Notation : Scalars are denoted by lower-case, non-bold letters; vectors by lowercase, bold letters; and matrices by uppercase, bold letters. Unless stated otherwise, all vectors are column vectors. Furthermore, rank( H) denotes the rank of H over F2, row( H) its row space, supp( hT ) the support of row-vector hT and S denotes a linear space. If not mentioned otherwise, operations are assumed to be performed in the binary field GF (2) . For H ∈ Fm×n 
+
+> 2
+
+and s ∈ Fm 
+
+> 2
+
+we write E(H, s) := {x ∈ Fn 
+
+> 2
+
+: Hx = s}, and π for the projection of Fn′ 
+
+> 2
+
+,n′ > n onto its first n coordinates. We denote the ith row of a matrix H by hT 
+
+> i
+
+. For an index set S ⊆ 1, . . . , n ,
+
+1S ∈ Fn 
+
+> 2
+
+denotes its indicator vector, whose jth entry equals 
+
+1 if j ∈ S and 0 otherwise. The support of a binary vector x
+
+is denoted by supp( x).II. P RELIMINARIES 
+
+A. System Model 
+
+In this work, we consider QEC using CSS stabilizer codes. A CSS code can be described by a pair of binary matrices HX ,corresponding to X-type stabilizers, and HZ , corresponding to Z-type stabilizers. Error detection and correction can be performed by measuring the stabilizers and using the binary measurement results to infer the error location. In practice this syndrome extraction is realized using a sequence of quantum gates, resulting in a measurement circuit . As this process can be noisy itself, it can introduce additional errors. This work adopts the widely recognized circuit-level noise model 
+
+(together with the corresponding DEM) for Quantum Error Correction as described in e.g. [16], [17], [18], which can also model these errors. Here, it is assumed that independent errors can occur at any position in the syndrome extraction circuit (state preparation, measurement, single- and two-qubit gates). We assume an equal probability p for each error class. To account for these additional potential errors, r repeated syndrome measurement rounds are performed. 2 This measure-ment circuit produces a collection of binary measurement outcomes from which one can form binary parities whose values are deterministic in the absence of errors. These parities are usually referred to as detectors . Logical observables are similar to detectors with the difference that they only have   
+
+> 1No additional stabilizer or detector measurements are required.
+> 2Following conventions, we assume that the final measurement round is noiseless. We furthermore assume for simplicity and ease of exposition a Z-logical memory experiment where only the Z-type stabilizers are measured.
+
+a known value if the logical state is known. Altogether, the decoder-relevant quantities in this model can be arranged in the following way [16] [2]:  
+
+> •
+
+Detector matrix HDEM ∈ FM ×N 
+
+> 2
+
+: Each row corresponds to a detector and each column to an error location. Hij =1 if the j-th error flips the i-th detector  
+
+> •
+
+Logical matrix L ∈ FK×N 
+
+> 2
+
+: Each row corresponds to a logical observable and each column to an error location. 
+
+Lij = 1 if the j-th error flips the i-th logical observable.  
+
+> •
+
+Prior vector τ ∈ RN : Probability that each error occurs. As some errors can have an identical (no) effect on the measurements and logical observables (duplicated (all zero) columns in HDEM and L ), the duplicate (all zero) columns can be deleted and their probabilities combined (removed). Furthermore, for each instance of the noisy syndrome extrac-tion circuit, the following can be defined:  
+
+> •
+
+Error vector eDEM ∈ FN 
+
+> 2
+
+: Each entry corresponds to an individual error that occurred in the syndrome extraction circuit.  
+
+> •
+
+Measured syndrome sDEM ∈ FM 
+
+> 2
+
+: Each entry corresponds to the measurement outcome of the corresponding detec-tor.  
+
+> •
+
+Logical flips l ∈ FK 
+
+> 2
+
+: lk indicates if e flipped the k-th logical observable. Using this formalism, the decoding problem can be formulated as: 
+
+sDEM = HDEM eDEM (1) The task of the decoder is now to find an ˆe ∈ FN 
+
+> 2
+
+such that 
+
+sDEM = ˆs = HDEM ˆe and 
+
+L(eDEM + ˆe) = 0 (2) thus, no logical error remains after applying the correction ˆe.
+
+B. Syndrome-Based Belief Propagation (BP) Decoding 
+
+Similar to their classical counterparts, QLDPC codes can be decoded using a variant of the message passing BP decoder operating on the decoding graph of the code, derived from the DEM. The decoder iteratively exchanges scalar messages between the graph’s VNs and check nodes (CNs) and outputs an estimate of the marginal probability of error for each VN. Decoding is finished if a maximum number of iterations I is reached. The initial information for the decoder is given by the measured syndrome vector s and the initial channel statistics. The variable nodes are first initialized to the channel statistics 
+
+Lch ,j . The outgoing message Lci→vj from CN ci to connected VN vj is given by 
+
+Lci→vj = α(−1) si 2·tanh −1
+
+ Y 
+
+> j′∈N (ci)\{ j}
+
+tanh 
+
+ Lvj′ →ci
+
+2
+
+
+
+(3) where N (·) denotes the set of connected nodes, Lvj′ →ci the incoming message from the VN vj′ to CN ci, si the syndrome bit at position i and α a scalar scaling factor. The outgoing message Lvj →ci from variable node vj to CN ci is determined using 
+
+Lvj →ci = Lch ,j + X  
+
+> i′∈N (vj)\{ i}
+
+Lci′ →vj . (4) The a posteriori log-likelihood ratio (LLR) for vj is the sum of all incoming messages plus its initial value: 
+
+Lvj = Lch ,j + X  
+
+> i∈N (vj)
+
+Lci→vj . (5) Finally, the estimate ˆej for the j-th fault location is com-puted by taking a hard decision on Lvj . Syndrome-based BP decoders were shown to share failure modes with LLR-based BP decoders, denoted as classical-type trapping sets in [19]. Often, these trapping sets consist of cycles in the decoding graph, which cause the messages exchanged during decoding to become highly correlated and frequently result in decoding failure. In particular, 4-cycles (arising when two rows of the code’s parity-check matrix overlap in two or more posi-tions) are among the most harmful short cycles. Furthermore, syndrome-based decoders also suffer from degeneracy-induced symmetries (where e1̸ = e2 but He 1 = He 2 = s), which often lead to convergence failures ( quantum-type trapping sets). III. P ROPOSED METHOD 
+
+In this section, we propose a method to apply the technique of using AVN and ACN to the syndrome-based BP decoding problem. Consider a parity check matrix H ∈ Fm×n 
+
+> 2
+
+of a binary linear code with rank( H) = m3 together with a given syndrome vector s ∈ Fm 
+
+> 2
+
+. Let 
+
+E(H, s) := {e ∈ Fn 
+
+> 2
+
+: He = s} (6) be the solution space of all e ∈ Fn 
+
+> 2
+
+fulfilling He = s.Suppose we augment the binary linear system of equations in the following way: (1) AVN insertion: Append an all-zero column to the right of H.(2) ACN insertion: Append a new row cT 
+
+> aug
+
+= ( c′T, 1) ∈
+
+F1×(n+1) 2 after the last row of H. c′ can be chosen arbitrarily but is fixed thereafter. 4
+
+(3) Transform s to saug ∈ Fm+1 2 by appending an arbitrary but fixed bit s′.The results of this process are shown in Eq. 7 and Eq. 8. 
+
+Haug = m + 1 
+
+( n+1 
+
+z }| { H 0c′T 1
+
+
+
+saug =
+
+ s
+
+s′
+
+
+
+(7) 
+
+E(Haug , saug ) := {eaug ∈ Fn+1 2 : Haug eaug = saug } (8)      
+
+> 3In practice, the matrices of interest such as HDEM typically contain redundant rows, i.e., their rank is smaller than their number of rows. All statements and proofs in this section carry over with minor modifications; we assume full row rank only to simplify the exposition.
+> 4Note specifically that c′⊤ can be linearly independent of the rows of H.
+
+Here, eaug = ( e, e ′) denotes e extended by a new bit e′.
+
+Lemma 1 (Augmentation) . For Haug , saug as in Eq. 7, the projection π : E(Haug , saug ) → E (H, s), (e, e ′) 7 → e, is a bijection with inverse e 7 → (e, s ′ + c′⊤ e).Proof. The augmented system consists of He = s and e′ =
+
+s′ + c′⊤ e. The first equation is the original system; the second determines e′ uniquely from e and imposes no constraint on it. 
+
+Remark: Observe that merely appending a single row cT
+
+> aug
+
+together with an LLR-0 prior AVN has no influence on BP decoding using this augmented graph. As evident from Eq. 4 and Eq. 3, due to this degree-1 AVN, the corresponding ACN will always send L = 0 to all connected VNs. As we will show later, only by adding this ACN to other rows in Haug or setting a different prior LLR will this influence the decoding trajectory. Any finite sequence of augmentation steps (1)–(3) inter-leaved with elementary row additions, containing nAVN aug-mentations in total, transforms H ∈ Fm×n 
+
+> 2
+
+into a matrix of the general block structure 
+
+Haug =  Hsys M ∈ Fmaug ×(n+nAVN )2 , m aug = m + nAVN .
+
+(9) where Hsys ∈ Fmaug ×n 
+
+> 2
+
+acts on the original error coordinates and M ∈ Fmaug ×nAVN  
+
+> 2
+
+, the auxiliary block , contains the AVN columns. Note that in general row( Hsys )̸ = row( H), as the appended rows c′⊤ may be linearly independent of the rows of H; in particular, the augmented syndrome can no longer be obtained from s directly. The following lemma summarizes the structural properties of Eq. 9 that the later syndrome mapping relies on. 
+
+Lemma 2. For Haug = ( Hsys | M) as in Eq. 9, it holds that (i) rank( M) = nAVN , i.e., the auxiliary block has full column rank, (ii) rank( Haug ) = rank( H) + nAVN = maug ,(iii) The subspace of row( Haug ) consisting of all vectors with 
+
+0 in the last nAVN positions equals row( H) × { 0}.Proof. See Appendix A. With this and Alg. 1, a back transformation can be defined: 
+
+Proposition 1 (Back Transformation) . Let Haug be as in Eq. 9 and Hmap the output of Alg. 1. Then (i) row( Hmap ) = row( H), so Hmap = AH for some A ∈ Fmaug ×m 
+
+> 2
+
+with zero rows at the pivot positions, and (ii) for saug = As ,
+
+π : E(Haug , saug ) → E(H, s), (e, e′) 7 → e,
+
+is a bijection. Proof. See Appendix B. The conventional syndrome-based BP decoding framework can then be readily used in the following way:  
+
+> •
+
+Given the syndrome s, compute saug = As .Algorithm 1 Construction of Hmap 
+
+Input: Haug = ( Hsys | M) with rank( M) = nAVN as Eq. 9 
+
+Output: Hmap ∈ Fmaug ×n 
+
+> 2
+
+with row( Hmap ) = row( H) 
+
+> 1:
+
+By Gaussian elimination on M, find a pivot row set P
+
+with |P| = nAVN and an invertible E adding pivot rows to non-pivot rows such that (EM ) is zero on all rows outside P 
+
+> 2:
+
+Hmap ← EH sys with the rows in P set to 0 
+
+> 3:
+
+return Hmap  
+
+> •
+
+Perform BP-based decoding using Haug and saug , yield-ing ˆeaug . 
+
+> •
+
+Extract the estimate of the original error as ˆe = ˆ eaug [: n].In the remainder of this work, we apply this framework to the circuit-level decoding problem of Sec. II-A, i.e., with 
+
+H = HDEM and the measured syndrome s = sDEM ; the estimate ˆeDEM is obtained analogously. The complete decod-ing architecture for the proposed method is shown in Fig. 1. In the following sections, we first show how the removal of short cycles from a given parity check matrix can be formulated in the proposed framework. After that, we interpret the syndrome-splitting subcode approach in our framework. Finally, we propose an ensemble-split method that combines the advantages of both approaches. IV. S HORT -CYCLE REMOVAL 
+
+A. Direct graph modification 
+
+The GARI method proposed in [13] introduces auxiliary nodes to eliminate the 4-cycles that the Y -component of the decoding matrices induces in the DEM. Although the underly-ing graph transformation is stated for general decoding graphs, its application in [13] is restricted to the 4-cycles arising from Y -type error mechanisms. Each such augmentation is an instance of steps (1)–(3) of our framework: the vector c′ is supported on the columns of the targeted Y -induced biclique, and the corresponding row additions follow. The resulting augmentation thus takes the form of Eq. 9, and Proposition 1 recovers the decoding-problem equivalence established in [13]. Although [13] remarks that the transformation can be applied recursively to the remaining 4-cycles, this option is not ex-plored in its numerical evaluation. In contrast, we apply the optimized AVN/ACN-based 4-cycle-removal strategy of [12] to the X-type decoding matrix. The algorithm of [12] greedily selects all-ones blocks containing δ 4-cycles each and removes them either by a plain row addition, if this is possible without creating degree-1 or degree-2 check nodes (Cases 1 and 2 of [12]), or by an AVN/ACN insertion. 
+
+Corollary 1. Alg. 2 performs only elementary row additions (Cases 1 and 2, and adding the appended row to the rows in Sc) and augmentation steps with c′ supported on Sv . Its output is therefore of the form of Eq. 9, Lemma 2 applies, and the decoding pipeline via Proposition 1 can be used. 
+
+Algorithm 2 Optimized 4-cycle removal, adapted from [12] 
+
+Input: H ∈ Fm×n
+
+> 2
+
+Output: 4-cycle free H′ of the form of Eq. 9  
+
+> 1:
+
+while H contains an all-ones block (Sc, Sv ) with 
+
+|S c|, |S v | ≥ 2 do  
+
+> 2:
+
+Among all such blocks, select one maximizing δ = |S c|
+
+> 2
+
+  |S v |
+
+> 2
+
+ 
+
+> 3:
+
+if ∃ i0 ∈ S c : Sv ⊆ supp( hT 
+
+> i0
+
+) and |supp( hT 
+
+> i0
+
+)\S v | ≤ 1
+
+then  
+
+> 4:
+
+Add row i0 to all other rows in Sc (Cases 1 and 2)  
+
+> 5:
+
+else  
+
+> 6:
+
+Perform augmentation steps (1)–(2) with c′ = 1Sv ;add the new row to all rows in Sc 
+
+> 7:
+
+end if  
+
+> 8:
+
+end while  
+
+> 9:
+
+return H′ ← H
+
+The following example aims to illustrate the workings of Alg. 2 and Alg. 1. 
+
+Example : Consider the following 3 × 8 binary parity check matrix H:
+
+H = 0 0 0 1 1 0 0 11 0 1 0 0 1 1 00 1 1 0 1 1 0 0
+
+
+
+
+
+Observe that the matrix contains a single 4-cycle spanned by the row-column pairs (2 , 3) , (3 , 3) , (2 , 6) , (3 , 6) , for clarity also marked with a red rectangle. We now use Alg. 2 to remove this cycle. The column indices participating in this cycle are 
+
+Sv = {3, 6}, the row indices Sc = {2, 3} and the number of 
+
+4-cycles inside this block is δ =  22
+
+  22
+
+ = 1 . As ”Case 1” and ”Case 2” of Alg. 2 are not fulfilled, we proceed to remove this 
+
+4-cycle by introducing an AVN and ACN. First, we extend H
+
+with an all zero column to the right. Then, we append a new row cT 
+
+> aug
+
+to H which has a 1 in the columns participating in the 4−cycle and a 1 in the newly created all-zero column. Finally, we add the newly created row to the rows participating in the 4−cycle we want to remove; in our example these are rows 2 and 3. The result of this process is the 4 × 9 matrix 
+
+Haug :
+
+0 0 0 1 1 0 0 1 0
+
+1 0 0 0 0 0 1 0 1
+
+0 1 0 0 1 0 0 0 1
+
+0 0 1 0 0 1 0 0 1
+
+
+
+
+
+Haug =
+
+ACN 
+
+AVN 
+
+Hsys M
+
+Observe that indeed row( H)̸ = row( Haug ). We now want to use Alg. 1 to ”invert” this mapping: As we only have nAVN =1, M consists of single column. Say, we choose row 2 as pivot row for the Gaussian elimination. We now add row 2 onto rows 10 2
+
+10 3
+
+10 4
+
+> # 4-cycles
+
+8,000 
+
+8,500 
+
+9,000 
+
+> # edges
+
+10 −2
+
+10 −1
+
+> pL
+
+I = 5 
+
+10 −3
+
+10 −2
+
+> pL
+
+I = 20 
+
+0 200 400 600 800 1,000 
+
+10 −3
+
+10 −2
+
+# AVNs 
+
+> pL
+
+I = 100 
+
+α = 0 .8 α = 0 .9 α = 1 .0 α = 1 .1 α = 1 .2                 
+
+> Fig. 2: Effect of iterative 4-cycle removal on HDEM of the [[72 ,12 ,6]]
+> bivariate bicycle (BB) code for p= 0 .001 and r= 6 measurement rounds. The top two panels show structural quantities. The lower three panels show the logical error rate pLfor different BP iteration numbers Iand factor node scalings α.
+
+3 and 4 to make the last column all zero. Then we set row 2
+
+to zero and remove the last column, resulting in Hmap :
+
+0 0 0 1 1 0 0 1
+
+0 0 0 0 0 0 0 0
+
+1 1 0 0 1 0 1 0
+
+1 0 1 0 0 1 1 0
+
+
+
+
+
+Hmap =
+
+H̸ = Hmap but row( H) = row( Hmap ). Note that H = Hmap 
+
+if we had chosen row 4 as the pivot row. Finally, we determine 
+
+A such that Hmap = AH and saug = As :
+
+A =
+
+
+
+1 0 00 0 00 1 10 1 0
+
+ , saug = As 
+
+Note that, in accordance with Proposition 1, A has a zero row at the pivot position, so saug is computable from the measured syndrome alone. 
+
+B. Parity check matrix construction 
+
+The 4-cycle removal algorithm was recently used in the con-struction of parity check matrices optimized for BP decoding of short classical channel codes in [12], [20], demonstrating significant gains in performance for some codes. For the quantum setting, [8] observed that adding redundant checks to the parity check matrix of CSS codes in the code ca-pacity model can improve performance of some codes while worsening that of others. In preliminary experiments on the codes considered here, straightforward adaptations of these constructions to the DEM parity check matrix did not yield consistent improvements over the standard matrix within our BP configuration; a systematic study, including tuning of the construction parameters, is left for future work. V. A FFINE SUBCODE VIEW 
+
+Affine subcode ensemble decoding was introduced for short classical binary codes [14] and recently extended to the quan-tum setting [15]. The core idea is to append additional, linearly independent rows ( splitters ) to the parity check matrix of a CSS code in order to break degeneracy-induced symmetries that impair syndrome-based BP decoding. Since the syndrome bits of these added checks are not available before decoding, an ensemble of decoders is run, one for each hypothesized value. This can be viewed as the check-splitting postprocessing of [10] moved before BP, with the added benefit that it can also improve the structure of the decoding graph itself. This construction emerges naturally from our framework. By Lemma 1, fixing the AVN to a hypothesized value e′ = b′
+
+restricts the original solution space E(H, s) to the affine constraint c′⊤ e = s′ + b′. The two hypotheses b′ ∈ { 0, 1}
+
+partition the solution space, so exactly one branch of the resulting two-decoder ensemble contains the true error. Since elementary row additions leave the solution space unchanged, the same holds for the general construction of Eq. 9. The following lemma shows which choices of c′ provide new information for decoding: 
+
+Lemma 3 (DEM splitter) . Let e denote the true physical error and let S := ker HDEM ∩ ker L. We call the cosets e + S
+
+degeneracy sets , in analogy to [15]: adding an element of S
+
+to e does not change the syndrome or the logical observables. Fixing the AVN to its true value e′ 
+
+> true
+
+= s′ + c′⊤ e imposes the affine constraint c′⊤ ˆe = s′ + e′ 
+
+> true
+
+= c′⊤ e on the candidate errors ˆe ∈ E (HDEM , sDEM ). This constraint (i) provides information not contained in the measured syndrome iff c′⊤ /∈ Row( HDEM ), and (ii) splits every degeneracy set into two disjoint subsets iff c′⊤ /∈ Row( HDEM ) + Row( L).Proof. See Appendix C. As in [15], running an ensemble of two BP decoders with the AVN fixed to 0 and 1, respectively, recovers the subcode ensemble decoder. VI. A UGMENTED GRAPH BASED ENSEMBLE DECODER 
+
+Each step μ (0 ≤ μ < P ) of the 4-cycle removal process can be seen as appending a new row c⊤ 
+
+> aug ,μ
+
+to the matrix and then adding it onto existing rows. By Lemma 3, the appended row is a candidate splitter for subcode ensemble decoding [14] whenever its c′⊤ part lies outside Row( HDEM ) + Row( L).As simulations suggest, nearly all of these rows fulfill this criterion. We therefore propose to reuse the rows generated by 
+
+4-cycle removal as splitter candidates for a subcode ensemble decoder. Since this yields far more candidates than can be used (P ), a selection rule is required; following the observation in [15], we further restrict each ensemble member to two decoding paths ( ∆ = 2 ). We propose two greedy selection strategies:  
+
+> •
+
+Static : The ensemble is built iteratively. The first member is the candidate with the lowest empirical logical error rate pL. Each subsequent member is the candidate that corrects the largest number of sampled error events on which the current ensemble fails (the maximum-coverage heuristic of [21]).  
+
+> •
+
+Adaptive : Standard BP is run for T iterations on the 4-cycle-free matrix. If the decoder did not converge to a syndrome-valid solution, the AVNs are ranked by their LLR magnitudes, and the ensemble is formed from the ACNs associated with the L least reliable AVNs. If multiple ensemble members produce syndrome-valid esti-mates, the minimum-Hamming-weight estimate is selected as the final correction. In the following, E denotes the ensemble size, i.e. the number of two decoding path ensemble members. VII. N UMERICAL RESULTS 
+
+If not specified otherwise, we perform the experiments using 
+
+I = 20 iterations of syndrome-based BP (sum-product, α = 1 )decoding at an error rate p = 0 .001 on the [[72 , 12 , 6]] BB [17] code. For each data point, we collect at least 200 logical error events, defined as instances after which at least one logical observable is flipped after applying the decoded error. Dividing this by the total number of samples yields the logical error rate (LER). Using this, we calculate the logical error rate per syndrome measurement round [17] as, 
+
+pL = 1 − (1 − LER ) 1 
+
+> r
+
+(10) Following common convention [22], if not mentioned other-wise, we assume r = d rounds of measurements, where d
+
+is the code minimum distance. Our simulation framework is based on QUITS [18] for the circuit-level error model and the BP-decoder implementation of [3]. 
+
+A. 4−cycle removal 
+
+We first evaluate the effect of 4-cycle removal on the number of edges in the decoding graph, the 4-cycles and the error rate pL for various iteration counts I and check-node scaling factors α during fixed steps of the removal process. To this end, we first run a complete 4-cycle removal to determine the total number of removal steps. Then, we evenly divide this into 
+
+15 intermediate checkpoints where we evaluate the previously mentioned quantities on the partially 4-cycle reduced matrices. The results are shown in Fig. 2. As expected, the number of 4-cycles steadily decreases during the removal process, with the first removal step removing the largest number of cycles. This is also reflected in the edge count of the matrices: The minimum does not lie at zero 4-cycles but arises shortly after the start of the removal process. Note that removing single 4-cycles with the ACN and AVN construction can indeed increase the number of edges in the matrix as 4 edges are removed and 5 edges introduced. This reveals a tradeoff between decoding complexity (in terms of edge count) and decoding performance. Most interesting is the pL behaviour over the removal process. First, note that the performance of the 4-cycle reduced augmented matrices generally improves for a check-node scaling α = 1 and a reasonable number of BP iterations. Remarkably, the final 4-cycle free matrices exhibit a strong dependence on α in their performance. For a small number of BP iterations, the decoding performance of the augmented graph worsens as more AVNs are introduced. One possible explanation is that the zero-prior-LLR AVNs provide no intrinsic information while simultaneously enlarging the decoding graph. Consequently, additional BP iterations may be required for useful information to propagate through the augmented graph. Furthermore, for a large iteration count, the original HDEM without any removed 4-cycles shows a performance nearly as good as the final 4-cycle removed one. 5
+
+B. Ensemble Construction 
+
+Next, we investigate the performance of the proposed en-semble based decoding method. To this end, we first perform an ablation study where we construct static and adaptive ensembles for different parameters of E and T . The results are shown in Fig. 3. As expected, both ensemble approaches 
+
+1 2 4 6 8 10 12 
+
+1357911 
+
+10 −3
+
+> Hfree
+
+Ensemble size E # prior steps T            
+
+> pL
+> Fig. 3: Error rate pLcomparison between the adaptive and static ensemble decoders for p= 0 .001 ,r= 6 , and I= 20 . The shaded surface represents the adaptive decoder performance for various combinations of Eand T. The red curve shows the performance of the static ensemble decoder over varying
+> E.
+
+achieve lower pL as the ensemble size increases. Surprisingly, the static ensemble outperforms the adaptive variant over a broad range of parameter settings and performs comparably for 
+
+> 5We observed the same behaviour exaggerated in the code capacity model, where noise can only occur on the data qubits.
+
+123456
+
+·10 −3
+
+10 −4
+
+10 −3
+
+10 −2
+
+10 −1
+
+Physical error rate p    
+
+> pL
+> BP( HDEM )
+> BP( Hfree )
+> BP+OSD -0( Hfree )
+> Adaptive BP ensemble ( E= 24 ,T= 5 )
+> Static BP ensemble ( E= 12 )
+
+(a) [[72 , 12 , 6]] BB code 
+
+2.533.544.555.56
+
+·10 −3
+
+10 −3
+
+10 −2
+
+10 −1
+
+Physical error rate p   
+
+> pL
+> BP( HDEM )
+> BP( Hfree )
+> BP+OSD -0( Hfree )
+> Adaptive BP ensemble ( E= 128 ,T= 5 )
+
+(b) [[90 , 8, 10]] BB code Fig. 4: Logical error rate per round pL of the proposed ensembles together with different baselines over the physical error rate p. BP adaptive denotes the adaptive ensemble and BP static the static variant. All tested decoders use a total of I = 20 BP iterations. 
+
+the remaining settings. Note that the current LLR-magnitude-based AVN ranking might not always identify the most effective splitter candidates. A more refined AVN selection strategy may therefore further improve the performance of the adaptive decoder. In a next step, we evaluate the proposed ensemble decoders against plain BP and the BP+ordered statistics decoding (OSD) [23] decoder. The results for two different BB codes are shown in Fig. 4. Again, removing the 4-cycles increases the BP decoding performance for both codes. For the smaller [[72 , 12 , 6]] code, the adaptive ensemble with 24 ensemble members nearly reaches the performance of the BP+OSD-0 baseline while permitting latency comparable to plain BP through parallel execution. For the larger code, however, a substantial performance gap remains even with 128 
+
+ensemble members. This suggests that further gains may re-quire complementary techniques, such as layered or windowed decoding, which could reduce the effective decoding problem size and improve information propagation. VIII. C ONCLUSION 
+
+In this work, we introduced a general framework that incor-porates AVNs and ACNs into the decoding graph for binary syndrome-based decoding of QLDPC codes while preserving the original decoding problem. The framework provides a common algebraic interpretation of graph augmentation, 4-cycle removal and affine subcode constraints. We showed that while 4-cycle removal can improve the performance, its benefits strongly depend on the BP iteration count and check-node message scaling. By reusing the auxiliary nodes generated during 4-cycle removal as candidate degeneracy splitters, the proposed static and adaptive subcode ensembles substantially improve plain BP decoding. Improved decoding-matrix construction methods utilizing auxiliary nodes might further improve performance. Combining these methods with windowed decoding could be particularly effective for larger codes, as it could reduce the effective decoding problem size while retaining the benefits of graph-derived subcode ensembles. REFERENCES [1] K. R. Ott, B. Het´ enyi, and M. E. Beverland, “Decision-tree decoders for general quantum ldpc codes,” arXiv preprint arXiv:2502.16408 , 2025. [2] S. Wolanski and B. Barber, “Ambiguity clustering: an accurate and efficient decoder for qldpc codes,” arXiv preprint arXiv:2406.14527 ,2024. [3] J. Roffe, D. R. White, S. Burton, and E. Campbell, “Decoding across the quantum low-density parity-check code landscape,” Physical Review Research , vol. 2, no. 4, Dec 2020. [Online]. Available: http://dx.doi.org/10.1103/PhysRevResearch.2.043423 [4] T. M¨ uller, T. Alexander, M. E. Beverland, M. B¨ uhler, B. R. Johnson, T. Maurer, and D. Vandeth, “Improved belief propagation is sufficient for real-time decoding of quantum memory,” 2025. [Online]. Available: https://arxiv.org/abs/2506.01779 [5] S. Koutsioumpas, T. Noszko, H. Sayginel, M. Webster, and J. Roffe, “Colour codes reach surface code performance using vibe decoding,” 2025. [Online]. Available: https://arxiv.org/abs/2508.15743 [6] A. Gong, S. Cammerer, and J. M. Renes, “Graph neural networks for enhanced decoding of quantum ldpc codes,” in 2024 IEEE International Symposium on Information Theory (ISIT) , 2024, pp. 2700–2705. [7] M. Ye, D. Wecker, and N. Delfosse, “Beam search decoder for quantum ldpc codes,” 2025. [Online]. Available: https://arxiv.org/abs/2512.07057 [8] S. Miao, A. Schnerring, H. Li, and L. Schmalen, “Quaternary neural belief propagation decoding of quantum ldpc codes with overcomplete check matrices,” IEEE Access , vol. 13, pp. 25 637–25 649, 2025. [9] S. Miao, J. Mandelbaum, H. J¨ akel, and L. Schmalen, “A joint code and belief propagation decoder design for quantum ldpc codes,” in 2024 IEEE International Symposium on Information Theory (ISIT) , 2024, pp. 2263–2268. [10] K. Yin, X. Fang, J. Ruan, H. Zhang, D. Tullsen, A. Sornborger, C. Liu, A. Li, T. Humble, and Y. Ding, “Symbreak: mitigating quantum degeneracy issues in qldpc code decoders by breaking symmetry,” arXiv preprint arXiv:2412.02885 , 2024. [11] J. S. Yedidia, J. Chen, and M. P. Fossorier, “Generating code represen-tations suitable for belief propagation decoding,” in Proceedings of the annual Allerton Conference on Communication Control and Computing ,vol. 40, no. 1. The University; 1998, 2002, pp. 447–456. [12] Y. Shen, Z. Li, Y. Ren, E. Boutillon, A. Balatsoukas-Stimming, C. Zhang, X. You, and A. Burg, “Toward universal belief propagation decoding for short binary block codes,” IEEE Journal on Selected Areas in Communications , vol. 43, no. 4, pp. 1135–1152, 2025. [13] A. S. Maan, F. M. Garcia Herrero, A. Paler, and V. Savin, “Decoding correlated errors in quantum ldpc codes,” Nature Communications , 2026. [14] J. Mandelbaum, P. Bezner, H. J¨ akel, S. ten Brink, and L. Schmalen, “Affine subcode ensemble decoding of linear block codes,” 2026. [Online]. Available: https://arxiv.org/abs/2604.06889 [15] L. Wursthorn, J. Mandelbaum, S. Miao, H. Liu, H. J¨ akel, S. Kout-sioumpas, and L. Schmalen, “Affine subcode ensemble decod-ing for degeneracy-aware quantum error correction,” arXiv preprint arXiv:2605.06547 , 2026. [16] P.-J. H. Derks, A. Townsend-Teague, A. G. Burchards, and J. Eisert, “Designing fault-tolerant circuits using detector error models,” Quantum , vol. 9, p. 1905, Nov. 2025. [Online]. Available: http://dx.doi.org/10.22331/q-2025-11-06-1905 [17] S. Bravyi, A. W. Cross, J. M. Gambetta, D. Maslov, P. Rall, and T. J. Yoder, “High-threshold and low-overhead fault-tolerant quantum memory,” Nature , vol. 627, no. 8005, p. 778–782, March 2024. [Online]. Available: http://dx.doi.org/10.1038/s41586-024-07107-7 [18] M. Kang, Y. Lin, H. Yao, M. G¨ okduman, A. Meinking, and K. R. Brown, “QUITS: A modular Qldpc code circUIT Simulator,” Quantum , vol. 9, p. 1931, Dec. 2025. [Online]. Available: https://doi.org/10.22331/q-2025-12-05-1931 [19] N. Raveendran and B. Vasi´ c, “Trapping sets of quantum ldpc codes,” 
+
+Quantum , vol. 5, p. 562, 2021. [20] Y. Shen, Z. Li, E. Boutillon, W. Song, Y. Ren, C. Zhang, X. You, and A. Burg, “Belief propagation decoding for short codes on structured sparse parity-check matrices,” in 2025 IEEE International Symposium on Information Theory (ISIT) , 2025, pp. 1–6. [21] J. Mandelbaum, H. J¨ akel, and L. Schmalen, “Subcode ensemble decoding of linear block codes,” 2025. [Online]. Available: https://arxiv.org/abs/2501.11993 [22] L. A. Beni, O. Higgott, and N. Shutty, “Tesseract: A search-based decoder for quantum error correction,” 2025. [Online]. Available: https://arxiv.org/abs/2503.10988 [23] P. Panteleev and G. Kalachev, “Degenerate quantum ldpc codes with good finite length performance,” Quantum , vol. 5, p. 585, Nov. 2021. [Online]. Available: http://dx.doi.org/10.22331/q-2021-11-22-585 
+
+APPENDIX APROOF OF LEMMA 2
+
+Proof. By induction over the sequence of operations. (i) and (ii): A row addition is a left-multiplication by an invertible matrix and preserves the rank of any column subset, in particular of M and of Haug . An augmentation grows M to the block-triangular matrix  M 0 v⊤ 1
+
+; since the new column is supported only on the new row, both ranks grow by exactly one. (iii): Row additions leave the rowspace unchanged. After augmentation, the appended row is the only row with anonzero entry in the new column; hence any element of the row space equals zero in that column has zero coefficient on the appended row and thus lies in the previous row space extended by 0. Starting from H with no auxiliary columns, the claims follow. APPENDIX BPROOF OF PROPOSITION 1
+
+Proof. (i) Performing Gaussian elimination on M leaves 
+
+maug − nAVN = rank( H) rows in Haug with 0 in the last 
+
+nAVN positions, which by Lemma 2 (iii) span a subspace of row( H) × { 0}. So, row( Hmap ) ⊆ row( H). As the non-zero part of (EM ) has rank nAVN , the remaining rows with 
+
+0 in the last nAVN columns have to have rank rank( H), thus 
+
+row( Hmap ) = row( H). (ii) Since saug equals to 0 on the pivot positions, Es aug = saug (as E corresponds to adding pivot rows to other rows), so the augmented system is equivalent to the eliminated one. There, the non-pivot equations reproduce 
+
+Hˆe = s, while the pivot equations carry an invertible block on the auxiliary columns and, as in Lemma 1, merely determine 
+
+ˆe′ from ˆe.APPENDIX CPROOF OF LEMMA 3
+
+Proof. Both statements follow from the same observation. Consider a coset e0 + V for some subspace V. The value 
+
+c′⊤ ˆe is the same for all ˆe = e0 + δ in this coset iff c′⊤ δ = 0 
+
+for all δ ∈ V, i.e., iff c′⊤ ∈ V⊥; in this case the constraint cannot distinguish elements of the coset. Otherwise, there is a σ0 ∈ V with c′⊤ σ0 = 1 . Adding σ0 to any element stays within the coset but flips the value of c′⊤ ˆe, so both values occur and the constraint splits the coset into two nonempty parts. Statement (i) is this observation applied to the solution space 
+
+E(HDEM , sDEM ) = e + ker HDEM , using (ker HDEM )⊥ =Row( HDEM ). Statement (ii) is the same applied to the de-generacy sets e0 + S, where duality gives S⊥ = (ker HDEM ∩
+
+ker L)⊥ = Row( HDEM ) + Row( L).

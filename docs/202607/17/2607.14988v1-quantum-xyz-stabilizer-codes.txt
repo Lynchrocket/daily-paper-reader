@@ -1,0 +1,2320 @@
+Title: Quantum XYZ Stabilizer Codes
+
+URL Source: https://arxiv.org/pdf/2607.14988v1
+
+Published Time: Fri, 17 Jul 2026 01:38:29 GMT
+
+Number of Pages: 13
+
+Markdown Content:
+> 1
+
+# Quantum XYZ Stabilizer Codes 
+
+Alessio Baldelli :; , Davide Orsucci ;, Francisco Lázaro ;, Massimo Battaglioni :: Department of Information Engineering, Università Politecnica delle Marche, 60131 Ancona, Italy Email: a.baldelli@pm.univpm.it , m.battaglioni@univpm.it  
+
+> ;
+
+Institute of Communications and Navigation, German Aerospace Center (DLR), 82234 Weßling, Germany Email: {davide.orsucci, francisco.lazaroblasco}@dlr.de 
+
+Abstract —Stabilizer codes are often constructed within the Calderbank–Shor–Steane (CSS) framework, where two mutually orthogonal binary classical codes define X and Z-type stabilizer generators. While this structure is algebraically convenient, additional non-CSS constraints may help suppress low-weight logical operators and improve decoding performance in the finite-length regime. We thus introduce quantum XYZ stabilizer codes, whose parity-check matrix (PCM) is built from three pairwise orthogonal binary PCMs associated with X-, Y -, and 
+
+Z-type stabilizer generators. A nontrivial point is that an XYZ code instance is not automatically genuinely non-CSS: the same stabilizer group may admit a CSS generating set. We characterize this collapse, obtaining algebraic and rank conditions for deciding when the Y -type checks are redundant and when they define genuinely non-CSS stabilizer constraints. We also derive upper and lower bounds on the quantum minimum distance, including bounds for mixed Pauli logical operators. The novel framework includes a known non-CSS topological code, namely the XYZ 2
+
+hexagonal code, and yields also sparse finite-length quantum low-density parity-check (qLDPC) constructions from intersecting-subset and quasi-dyadic code families. Simulations under depo-larizing code-capacity noise and quaternary belief propagation decoding show that the proposed XYZ qLDPC instances can outperform representative CSS qLDPC instances with similar finite-length parameters. 
+
+Index Terms —Quantum error correction, CSS codes, stabilizer codes, belief propagation decoding. 
+
+I. I NTRODUCTION 
+
+Over the last thirty years, many quantum error correction (QEC) techniques have been developed, which use redundant physical qubits for the detection and correction of errors in such quantum systems. The framework almost universally em-ployed to construct a quantum error-correcting code (QECC) is that of stabilizer codes , which stands as the quantum equiv-alent of classical linear codes [1]. The best-known approach for obtaining stabilizer codes is the Calderbank-Shor-Steane (CSS) construction [2], [3]. In a CSS code, the stabilizer gener-ators can be divided into two sets: generators containing only 
+
+X-type operators, up to identities, and generators containing only Z-type operators, up to identities. These two sets are derived from two classical codes that are mutually orthogonal. Many widely used and extensively studied QECCs belong to CSS families. Notable examples include Shor’s 9-qubit code, 
+
+> The work of Alessio Baldelli was partially supported by Agenzia per la Cybersicurezza Nazionale (ACN) under the programme for promotion of XL cycle PhD research in cybersecurity (CUP I32B24001750005). The work of Davide Orsucci and Francisco Lázaro is part of the HESC lighthouse project within Munich Quantum Valley initiative and is supported by the Bavarian state government with funds from the Hightech Agenda Bavaria.
+
+the first proposed QECC [4], as well as several topological 
+
+codes [5], [6], such as the toric code [7] and surface codes [8]. Topological codes in two dimensions are fundamentally lim-ited in the achievable minimum distance d and coding rate 
+
+R “ k{n (where n is code length and k the number of encoded qubits), since the quantity d2k{n is at most constant [9]. Thus, motivated by the need to improve the rate–distance tradeoff, the efforts of the research community have shifted towards quantum low-density parity-check (qLDPC) codes, which are codes whose stabilizer generators are sparse , or equivalently have low weight, but for which geometric locality is not imposed. This flexibility has motivated a line of work on qLDPC code constructions with progressively improved tradeoffs between minimum distances and coding rates [10]– [12]. However, asymptotic scaling does not necessarily predict finite-length performance: at short code lengths, specific in-stances from asymptotically weaker families may outperform instances from asymptotically stronger ones. Most known qLDPC constructions live within the CSS framework. A question which arises naturally is what happens if this restriction is relaxed and Pauli-Y operators are also employed in the definition of the stabilizer generators. This idea is at the basis, for example, of XYZ product codes , first introduced in [13] as a generalization of hypergraph product (HP) codes [10], and further investigated in [14], [15], where the authors show that specific instances can achieve an almost-linear minimum distance and constant rate. A further example of a topological code involving Y -type stabilizers is the XYZ 2
+
+hexagonal stabilizer code [16]. In this work, we investigate a structured extension of the CSS framework that is related to, but structurally distinct from, the constructions discussed above. Unlike XYZ product codes, our framework does not impose a specific three-fold product structure; instead, we define the stabilizer parity-check matrix (PCM) directly from three binary classical PCMs associated with pure X-, Y -, and Z-type stabilizer generators and satisfying pairwise orthogonality conditions. In other words, the CSS code is enriched with an additional set of pure Y -type checks. We call the resulting codes quantum XYZ stabilizer codes . The proposed framework therefore occupies an intermediate position between CSS and stabilizer codes: it allows genuinely non-CSS stabilizer structures, while its description through three classical codes allows us to use classical coding-theoretic arguments for their construction and distance analysis. However, the presence of all three Pauli types alone does not guarantee that the XYZ code is gen-arXiv:2607.14988v1 [cs.IT] 16 Jul 2026 2
+
+uinely non-CSS. Characterizing the conditions under which this occurs is one of the main objectives of this work. 
+
+A. Main Motivation 
+
+The CSS framework offers a particularly convenient alge-braic structure, but it also restricts the stabilizer configura-tions available for constructing a code with given parame-ters. Relaxing this restriction enlarges the code-design space and may provide additional freedom to exclude low-weight logical operators when designing codes with a given block length and rate. This possibility is especially relevant at finite block lengths, where the detailed structure of individual code instances can be more important than the asymptotic scaling of the underlying family. Motivated by this observation, we investigate the following conjecture: quantum XYZ stabilizer code families can achieve larger minimum distance than comparable CSS code families at the same block length and rate. In this work, we investigate this conjecture in the finite-length regime. To formalize the comparison, let dS pn, k q and 
+
+dCSS pn, k q denote the largest minimum distance achievable by, respectively, stabilizer and CSS codes with parameters 
+
+Jn, k K. Since CSS codes form a subclass of stabilizer codes, it trivially holds that dCSS pn, k q ď dS pn, k q. Conversely, by the stabilizer-to-CSS mapping of [17, Theorem 1], any stabilizer code Jn, k, d K can be mapped to a CSS code J2n, 2k, d 1K with 
+
+d ď d1 ď 2d and stabilizer generator weights at most doubled 1.Hence, we get 
+
+dCSS pn, k q ď dS pn, k q ď dCSS p2n, 2kq. (1) Therefore, defining the asymptotic relative distances as afunction of the rate R “ k{n, we get 
+
+drel  
+
+> ˚
+
+pRq :“ lim sup 
+
+> nÑ8
+
+1
+
+n d˚pn, tRn uq, (2) with ˚ P t S, CSS u. As a consequence, we obtain 
+
+drel CSS pRq ď drel  
+
+> S
+
+pRq ď 2drel CSS pRq. (3) Eq. (3) shows that relaxing the CSS restriction cannot yield more than a constant-factor improvement in the asymptotic relative distance. It does not, however, preclude substantial improvements for specific finite-length parameters. Although this comparison concerns general stabilizer codes, quantum XYZ stabilizer codes provide a structured non-CSS setting in which such a finite-length advantage can be investigated using convenient analytical tools. Our objective is therefore to determine whether the additional design freedom offered by quantum XYZ stabilizer codes can produce better distance– rate tradeoffs in the short-block-length regime. Although a larger minimum distance does not necessarily imply better performance under every decoder and noise model, the nu-merical results presented later show that the proposed qLDPC XYZ instances can achieve lower logical error rate (LER) than representative CSS instances under low-complexity belief propagation (BP) decoding.    
+
+> 1A related construction gives a CSS code with parameters J4n, 2k, 2dK,again with at most doubled generator weights [18, Lemma 2].
+
+B. Our Contribution 
+
+As anticipated, our main contribution is the introduction of quantum XYZ stabilizer codes, a class of stabilizer codes whose PCM is specified by three binary classical codes satisfying pairwise orthogonality conditions. We first provide a structural characterization of this con-struction. We show how the row spans associated with the 
+
+X-, Y -, and Z-type stabilizers decompose into reducible and irreducible components, thereby separating the part that is already generated by an underlying CSS structure from the part that is genuinely XYZ. This leads to necessary and sufficient conditions for an XYZ code to be (or not to be) CSS, and to rank criteria for detecting when the Y -type checks do not introduce a genuinely new stabilizer structure. We also discuss the stronger notions of genuineness under uniform and local Pauli relabeling, clarifying that the presence of X-, Y -, and Z-type generators is not sufficient to obtain a genuinely quantum XYZ stabilizer code. Then, we perform a theoretical analysis of the distance prop-erties of XYZ codes. We derive upper bounds by restricting the logical-operator search to pure X-, Y -, and Z-type logical operators. We then derive lower bounds by associating to every XYZ code a collection of CSS codes obtained by removing one irreducible Pauli component at a time. Since these CSS codes contain the original XYZ codespace, their distances provide lower bounds on the XYZ minimum distance. Finally, we refine this analysis for mixed Pauli logical operators, obtaining a bound that explicitly uses the interaction between the three classical component codes. These results explain, at the level of logical operators, how additional Y -type stabilizer constraints can increase the minimum distance with respect to the CSS structures from which the construction is derived. We also provide a constructive contribution. We first show that a known topological non-CSS code, namely the XYZ 2
+
+hexagonal code [16], fits naturally within the proposed XYZ framework. Then, we use our framework to design two new sparse finite-length qLDPC XYZ code families, one based on intersecting subsets (IS) codes [19] and one on quasi-dyadic (QD) codes [20]. Finally, we evaluate the proposed qLDPC XYZ instances over the depolarizing code-capacity channel using quaternary belief propagation (BP 4) decoding. The simulations compare the new XYZ codes with representative CSS qLDPC codes of comparable block length, rate, and stabilizer generator weight. The results provide finite-length evidence that the additional 
+
+Y -type constraints can translate the distance improvements suggested by our analysis into improved LER performance under iterative decoding. 
+
+C. Paper Organization 
+
+The remainder of the paper is organized as follows. Sec-tion II introduces the notation and preliminary material used throughout the paper. Section III defines quantum XYZ sta-bilizer codes from three pairwise orthogonal classical codes and studies their relation with CSS codes. In particular, it introduces the reducible and irreducible components of the XYZ check spaces and derives algebraic and rank criteria for 3
+
+identifying genuinely non-CSS instances. Section IV investi-gates the minimum distance of XYZ codes by deriving upper bounds from pure logical operators and lower bounds from CSS codes imposed by the XYZ stabilizer structure, including bounds for mixed logical operators. Section V discusses fam-ilies of stabilizer codes that fit the XYZ framework, including a known topological code instance and novel finite-length qLDPC constructions based on IS and QD codes. Section VI presents numerical simulations over the code-capacity noise model using a BP 4 decoder and compares the proposed XYZ qLDPC instances with representative CSS qLDPC codes of comparable parameters. Finally, Section VII concludes the paper and outlines possible directions for future work. II. N OTATION AND PRELIMINARIES 
+
+For a P N, let ras :“ t 1, 2, . . . , a u Ă N. We use calligraphic uppercase letters to denote tuples, sets of subsets, and groups, e.g., S. Given a group G, the normalizer of a subgroup S Ď G
+
+is denoted by N pSq. Column vectors, e.g., a, b, and matrices, e.g., A, B, are denoted by bold lowercase and uppercase letters, respectively. Unless otherwise specified, the operations that involve binary vectors and matrices are performed over the binary field F2. We denote transposition by p¨q J. The 
+
+m ˆ m identity matrix is denoted as Im, and the subscript is omitted when it is clear from the context. Similarly, the the all-zero and all-one matrices (vectors) are denoted by 0
+
+and 1, respectively. Given a matrix A P Fmˆn 
+
+> 2
+
+, we denote by rk pAq its rank over F2, while using ker pAq :“ t v P
+
+Fn 
+
+> 2
+
+: Av “ 0u, span pAq :“ tAv P Fm 
+
+> 2
+
+| v P Fn 
+
+> 2
+
+u
+
+and row pAq “ span pAJq “ tp wJAqJ P Fn 
+
+> 2
+
+| w P Fm 
+
+> 2
+
+u
+
+to indicate the null space, (column) span, and row span of 
+
+A, respectively; with this convention, a vector in the row span of A, v P row pAq, is a column vector. Moreover, we write A row 
+
+„ B to indicate row pAq “ row pBq. We omit round parentheses for functions of block matrices, e.g., 
+
+span rA B s “ span pr A B sq . The Hamming weight (or simply weight) of the vector a, i.e., the number of its non-zero entries, is denoted by ∥a∥.
+
+A. Classical Linear Codes 
+
+A classical binary linear code C with code length n,encoding k bits, and having minimum (Hamming) distance d
+
+is a k-dimensional linear subspace of Fn 
+
+> 2
+
+, where the minimum distance d is equal to the weight of a minimum-weight non-zero codeword c P C. The coding rate of C is R :“ k{n. A linear code is defined as the null space of a PCM H P Fmˆn 
+
+> 2
+
+,with m ě n ´ k “ rk pHq (where the PCM may have linearly dependent rows), that is, C :“ ker pHq “ t c P Fn 
+
+> 2
+
+| Hc “ 0u,where c P C is a codeword. Alternatively, we can define 
+
+C :“ span pGq, where G P Fnˆk 
+
+> 2
+
+satisfying HG “ 0
+
+is a (full-rank) generator matrix of the code. We denote the dual code of C by CKrn, n ´ k, d Ks, that is, CK :“␣w P Fn 
+
+> 2
+
+| cJw “ 0, @ c P C(. With C1 ` C2 we denote the linear subspace obtained by vector spaces addition, namely 
+
+C1 ` C2 “ t c1 ` c2 | c1 P C1, c 2 P C2u and with C1 ‘ C2
+
+their direct sum , corresponding to the addition of linearly independent subspaces. 
+
+B. Quantum Information 
+
+We denote the single-qubit Pauli group as 
+
+P1 :“ t ϕ P | ϕ P Φ, P P t I, X, Y, Zuu , Φ : “ t˘ 1, ˘iu, (4) where Y “ iXZ .2 We define a Pauli operator on n qubits 
+
+as the n-fold tensor product of n elements of P1, which can be expressed as P “ ϕ P1 b . . . b Pn P p C2ˆ2qbn, where 
+
+ϕ P Φ is the global phase , and Pi P t I, X, Y, Zu. Then, the Pauli operators act on n qubits and form the so-called n-qubit Pauli group Pn. In Pauli tensor products, the symbol b and identities will be omitted, and we will just indicate the qubit on which each Pauli is acting (e.g., P “ X2Y5 acts with X
+
+on qubit 2 and Y on qubit 5). We also denote with wt pPq
+
+the weight of a Pauli operator P P Pn, which consists of the number of non-trivial, i.e., non-identity, elements in its associated tensor product decomposition. Next, we consider the quotient Pauli group Pn{Φ, where Pauli operators differing only by a global phase are regarded as equivalent, on which we define the bijective map: 
+
+I Þ Ñ r 0 | 0s, X Þ Ñ r 1 | 0s, Z Þ Ñ r 0 | 1s, Y Þ Ñ r 1 | 1s,
+
+P Þ Ñ “uJ | vJ‰ “ r u1 . . . u n | v1 . . . v ns, (5) where ui, v i P F2 and the index i represents the i-th qubit. This induces a group isomorphism between Pn{Φ, with the group operation inherited from multiplication in Pn, and the additive group F2n 
+
+> 2
+
+and a non-invertible (many-to-one) mapping from 
+
+Pn to F2n 
+
+> 2
+
+. Note that wt pPq “ ∥u _ v∥ “ 12 p∥u∥ ` ∥v∥ ` ∥w∥q, (6) where _ denotes the bit-wise OR and w “ u ` v. The last equality follows from ∥u _ v∥ “ ∥u∥ ` ∥v∥ ´ ∥u ^ v∥ and 
+
+∥u ` v∥ “ ∥u∥ ` ∥v∥ ´ 2 ∥u ^ v∥, where ^ denotes the bit-wise AND. We call pure X-, Y -, and Z-type Pauli operators the n-qubit Pauli operators whose non-identity tensor factors are, respectively, only X, only Y, or only Z, independently of the global phase, and mixed otherwise. Two n-qubit Pauli operators P1, P2 P Pn either commute ( P1P2 “ P2P1)or anti-commute ( P1P2 “ ´P2P1). Using the mappings 
+
+P1 Þ Ñ r uJ 
+
+> 1
+
+|vJ 
+
+> 1
+
+s and P2 Þ Ñ r uJ 
+
+> 2
+
+|vJ 
+
+> 2
+
+s, we say that P1 and 
+
+P2 commute iff u1 ¨ v2 ` v1 ¨ u2 “ 0.
+
+C. Stabilizer Codes 
+
+Qubit stabilizer codes are the quantum analogue of classical binary linear codes [1]. 
+
+Definition 1 (Stabilizer Codes) . A stabilizer group S “xS1, . . . , Smy is an abelian subgroup of Pn that does not con-tain ´I, generated by m ě n ´ k commuting Pauli operators 
+
+S1, . . . , Sm P Pn, whose binary images under (5) have rank 
+
+n ´ k. The associated stabilizer code with n physical qubits, 
+
+k logical qubits, and minimum quantum distance d, denoted by CJn, k, d K, is defined as the 2k-dimensional subspace 
+
+C :“ ␣|ψy P p C2qbn ˇˇ Si |ψy “ | ψy , @i P r ms( . (7)      
+
+> 2We will use the uppercase bold letters when we denote Pauli operators as matrices, e.g., X,Y, and uppercase italic letters when we want to specify the type of an operator, e.g., X-type, Y-type. 4
+
+Definition 2 (Degenerate Errors and Logical Operators) . For a stabilizer group S Ď Pn, the normalizer 3 N pSq contains all the degenerate errors and logical errors of the associated stabilizer code C. Let 
+
+ΦS :“ t ϕS | ϕ P Φ, S P Su. (8) 
+
+A Pauli operator P P S Ď N pSq, by definition, acts trivially on the code space, i.e., P |ψy “ | ψy for all |ψy P C. More generally, every element of ΦS acts on the code space as a global phase, namely, if P “ ϕS with ϕ P Φ and S P S,then P |ψy “ ϕ |ψy for all |ψy P C. The elements of ΦS are thus phase-equivalent to stabilizers and are known as degen-erate errors [21] or harmless errors [22]. Moreover, a Pauli operator P P N pSqz ΦS commutes with all stabilizers but is not equivalent to a stabilizer up to a global phase. Hence, it preserves the code space but acts nontrivially on it, i.e., there exists |ψy P C such that P |ψy ‰ ϕ |ψy , @ϕ P Φ. These operators are called logical operators or logical errors [1]. 
+
+Definition 3 (Minimum Distances of Stabilizer Codes) . The 
+
+quantum minimum distance d of a stabilizer code is defined 4
+
+as follows 
+
+d :“ min twt pPq | P P N pSqz ΦSu. (9) 
+
+The classical minimum distance [1], [21] δ of a stabilizer code is defined as the minimum weight of a non-scalar Pauli operator in the normalizer group: 
+
+δ :“ min twt pPq | P P N pSqz ΦtIuu . (10) 
+
+By construction, the quantum and classical minimum distances always satisfy d ě δ.
+
+By leveraging the isomorphism in (5) we can rewrite the stabilizer formalism in matrix form as follows. 
+
+Proposition 1 (Parity-Check Matrices for Stabilizer Codes) .
+
+Consider a code CJn, k, d K with stabilizer group S. Under (5) ,the binary images of a possibly redundant set of m ě n ´ k
+
+stabilizer generators are collected as the rows of HS :
+
+HS :“ “HX HZ
+
+‰ P Fmˆ2n 
+
+> 2
+
+, (11) 
+
+where HX, HZ P Fmˆn 
+
+> 2
+
+. We call HS a PCM associated to C. The commutativity property of stabilizers, under the isomorphism (5) , is equivalent to the symplectic product orthogonality condition , that is: 
+
+HXHJ 
+
+> Z
+
+` HZHJ 
+
+> X
+
+“ 0. (12) 
+
+The dimension of the stabilizer code can be computed as 
+
+k “ n ´ rk pHS q, while its rate is R “ k{n.
+
+Proposition 2 (Logical Operator Matrices for Stabilizer Codes) . The logical operators of a CJn, k, d K stabilizer code admit a binary representation: the 2k independent logical generators are collected into the rows of the logical matrix 
+
+LS :“ “LX LZ
+
+‰ P F2kˆ2n 
+
+> 2
+
+, (13)       
+
+> 3For a stabilizer subgroup, the centralizer and the normalizer coincide [1].
+> 4If k“0, the distance is the minimum over an empty set, in which case we set d“ 8 by convention.
+
+where LX, LZ P F2kˆn 
+
+> 2
+
+, and each row is the image under (5) 
+
+of a logical operator L P N pSqz ΦS. By definition, these rows 
+
+piq commute with all stabilizer generators, i.e., they satisfy the symplectic orthogonality condition 
+
+HXLJ 
+
+> Z
+
+` HZLJ 
+
+> X
+
+“ 0, (14) 
+
+pii q are not contained in row pHS q.The generators can be chosen as a symplectic (conjugate) basis t ¯Xi, ¯ZiuiPr ks, where ¯Xi and ¯Zj anti-commute iff i “ j,while all the remaining pairs commute. 
+
+Note that, in the binary representation, the set ΦS corre-sponds to row pHS q, while the scalar subgroup ΦtIu corre-sponds to the zero vector. 
+
+Proposition 3 (Minimum Distances of Stabilizer Codes) .
+
+Using the notation of Proposition 1, the quantum and the classical distances are given by: 
+
+d “ min 
+
+"
+
+∥u _ v∥
+
+ˇˇˇˇ HS
+
+„vu
+
+ȷ
+
+“ 0,
+
+„uv
+
+ȷ
+
+R row pHS q
+
+*
+
+, (15a) 
+
+δ “ min 
+
+"
+
+∥u _ v∥
+
+ˇˇˇˇ HS
+
+„vu
+
+ȷ
+
+“ 0,
+
+„uv
+
+ȷ
+
+‰ 0
+
+*
+
+. (15b) A special subclass of such stabilizer codes, in which the stabilizer generators consist exclusively of X-type or Z-type Pauli operators, is given by the so-called CSS codes [2], [3]. 
+
+Definition 4 (CSS Codes) . Consider two binary classical codes CXrn, k X, δ Xs and CZrn, k Z, δ Zs having associated PCMs HX P FmXˆn 
+
+> 2
+
+and HZ P FmZˆn 
+
+> 2
+
+, respectively, and such that CK 
+
+> Z
+
+Ď CX, equivalently CK 
+
+> X
+
+Ď CZ. This property can be expressed as 
+
+HZHJ 
+
+> X
+
+“ 0, equivalently HXHJ 
+
+> Z
+
+“ 0. (16) 
+
+A CSS code can be represented by the following PCM 
+
+HCSS :“
+
+„HX 00 HZ
+
+ȷ
+
+P FpmX`mZqˆ 2n 
+
+> 2
+
+(17) 
+
+and we denote it as CpCX, C ZqJn, k, d K, where k “ n ´
+
+rk pHXq ´ rk pHZq is the number of logical qubits, R “ k{n
+
+is the rate and d is the minimum distance. Furthermore, the logical matrix of (13) can be chosen to have the specific form: 
+
+LCSS :“
+
+„LX 00 LZ
+
+ȷ
+
+P F2kˆ2n 
+
+> 2
+
+(18) 
+
+where the X-type logical operators are associated to LX and 
+
+Z-type logical operators are associated to LZ (both consisting of k rows) and satisfy: 
+
+HZLJ 
+
+> X
+
+“ 0, HXLJ 
+
+> Z
+
+“ 0, and LZLJ 
+
+> X
+
+“ I. (19) As a consequence, CSS codes allow correcting X-type and 
+
+Z-type errors separately. In particular, the classical code CX
+
+with associated PCM HX is used to correct Z-type errors, and similarly for CZ and HZ with X-type errors. 
+
+Definition 5 (Coset Distance) . For subspaces D Ď C Ď Fn
+
+> 2
+
+we define the coset minimum distance dpCzDq and the mini-mum distance dpCq as 
+
+dpCzDq :“ min t∥x∥ | x P C, x R Du (20a) 
+
+dpCq :“ min t∥x∥ | x P C, x R t 0uu . (20b) 5
+
+By construction, the coset distance satisfies dpCzDq ě dpCq.
+
+Proposition 4 (Minimum Distance of a CSS Code) . Let 
+
+CpCX, C ZqJn, k, d K be a CSS code constructed from classical codes CXrn, k X, δ Xs and CZrn, k Z, δ Zs as in Definition 4. The lowest weights of Z-type and X-type logical operators are, respectively, given by the following coset distances 
+
+dXzZ :“ d` ker pHXqz row pHZq˘ “ dpCXzCK 
+
+> Z
+
+q, (21a) 
+
+dZzX :“ d` ker pHZqz row pHXq˘ “ dpCZzCK 
+
+> X
+
+q, (21b) 
+
+where ker pHXq “ row pLZq ` row pHZq and ker pHZq “
+
+row pLXq ` row pHXq. Furthermore, we have 
+
+δX “ dpCXq ď dXzZ, (22a) 
+
+δZ “ dpCZq ď dZzX. (22b) 
+
+Consequently, the quantum minimum distance d and the clas-sical distance δ satisfy: 
+
+d “ min ␣dZzX, d XzZ
+
+( ě δ “ min tδX, δ Zu . (23) See, e.g., [2] for a proof. 
+
+Definition 6 (Self-Dual CSS Code) . A CSS code CpCX, C Zq
+
+is called self-dual (SD) if CX “ CZ.D. Error Model and Syndromes 
+
+In this paper, we benchmark our codes using a code capacity noise model which is based, specifically, on the depolarizing channel . In this quantum channel, each qubit is affected by a 
+
+X, Z, or Y Pauli operator with probability p{3 each, and remains unaffected with probability 1 ´ p, where p is the 
+
+depolarizing probability . The syndromes associated to these errors are obtained as follows. 
+
+Definition 7 (Syndrome Extraction) . Consider a stabilizer code with associated PCM HS “ r HX | HZ s P Fmˆ2n 
+
+> 2
+
+and a Pauli error with binary representation eJ “ r eJ 
+
+> X
+
+| eJ 
+
+> Z
+
+s P F2n 
+
+> 2
+
+.The obtained syndrome vector s P Fm 
+
+> 2
+
+is 
+
+s “ HXeZ ` HZeX. (24) Note that with the block-diagonal structure of the PCM of CSS codes the syndrome outcome decouples as 
+
+sX “ HXeZ, sZ “ HZeX, (25) so that X- and Z-type errors can be corrected separately. This does not hold for the quantum XYZ stabilizer codes considered here, motivating the decoding strategy described in Section III-A. 
+
+E. Quantum LDPC Codes 
+
+A quantum stabilizer code is referred to as qLDPC when its PCM is sparse. Its Tanner graph [23] contains one variable node per qubit and one check node per stabilizer generator, with an edge whenever the generator acts nontrivially on the corresponding qubit. For non-CSS codes, each edge is additionally labeled by its Pauli type. We denote the uniform stabilizer weight by wr (which is the row weight of the corre-sponding PCM) and the girth of the Tanner graph associated with Hσ by gσ , with σ P t X, Y, Z u.III. Q UANTUM XYZ S TABILIZER CODES 
+
+In this Section, we introduce a novel framework for non-CSS stabilizer codes, which includes an additional PCM associated with stabilizers composed exclusively of I- and Y -type operators. 
+
+Definition 8 (Quantum XYZ Stabilizer Codes) . Let us consider three classical linear codes CXrn, k X, δ Xs,
+
+CYrn, k Y, δ Ys, and CZrn, k Z, δ Zs such that CK 
+
+> Y
+
+Ď CX, CK 
+
+> Z
+
+Ď
+
+CY, and CK 
+
+> X
+
+Ď CZ. These properties can be expressed in terms of PCMs representing such classical codes, using the following orthogonality conditions 
+
+HXHJ 
+
+> Y
+
+“ 0, HYHJ 
+
+> Z
+
+“ 0, HZHJ 
+
+> X
+
+“ 0, (26) 
+
+where Hσ P Fmσ ˆn 
+
+> 2
+
+, with σ P tX, Y, Z u. Under these conditions, we obtain a stabilizer code, described by the following PCM 
+
+HXYZ :“
+
+»–HX 00 HZ
+
+HY HY
+
+fi fl P FpmX`mY `mZqˆ 2n 
+
+> 2
+
+. (27) 
+
+We call it quantum XYZ stabilizer code or simply XYZ code , and we denote it by CXYZ pCX, C Y, C ZqJn, k, d K, or with the shorthand notations CXYZ pCX, C Y, C Zq or CXYZ Jn, k, d K,where the dimension is k “ n ´ rk pHXYZ q.A. Logical Operators and Syndromes of XYZ Codes 
+
+Observe that CSS codes can be chosen to have PCM consisting only of X- and Z-type operators as in (17) and 
+
+logical generators consisting only of X- and Z-type operators as in (18). For quantum XYZ stabilizer codes, the PCM is extended by adding Y -type stabilizers to (17). 5 For XYZ codes, unlike in the CSS case, representatives of the logical Pauli generators need not be X-type or Z-type up to identities; in general, they may mix X, Y , and Z components, as in (13). Furthermore, for XYZ codes the syndrome vector s is given by the horizontal stack of 
+
+sX “ HXeZ, sZ “ HZeX, and sY “ HYpeX ` eZq. (28) Unlike in CSS codes, X- and Z-type errors are mixed in sY
+
+and thus they must be decoded jointly. 
+
+B. Matrix Decomposition of XYZ Codes 
+
+Notice that a Y -type operator can be expressed as the sum of X- and Z-type operators. Therefore, the Y -type checks that can be obtained from X- and Z-type stabilizers are redundant. These operators produce what we call the reducible -XYZ com-ponent; the complementary part cannot be reduced to a CSS code and will be denoted as the irreducible -XYZ component. More precisely, for an XYZ code CXYZ pCX, C Y, C Zq having PCM as in (27) we give some definitions. In particular, the following decomposition isolates the part of the Y -type checks that is already generated by the X- and Z-type checks.     
+
+> 5In principle, one could also consider quantum XYZ generator codes, obtained by adding Y-type logical operators in (18), but these will not be considered in the present work. 6
+
+Definition 9 (Reducible and Irreducible XYZ Components) .
+
+Write CK 
+
+> σ
+
+:“ row pHσ q for σ P t X, Y, Z u, then let HXXY,
+
+HYXZ, and HXXZ be any choice of full-rank binary matrices such that 
+
+row pHXXYq “ CK 
+
+> X
+
+X CK 
+
+> Y
+
+, (29a) 
+
+row pHYXZq “ CK 
+
+> Y
+
+X CK 
+
+> Z
+
+, (29b) 
+
+row pHXXZq “ CK 
+
+> X
+
+X CK 
+
+> Z
+
+. (29c) 
+
+Next, define H1
+
+> X
+
+, H1
+
+> Y
+
+, and H1 
+
+> Z
+
+as any matrices such that 
+
+row pHXq “ row pH1
+
+> X
+
+q ‘ row 
+
+„HXXY
+
+HXXZ
+
+ȷ
+
+, (30a) 
+
+row pHYq “ row pH1
+
+> Y
+
+q ‘ row 
+
+„HXXY
+
+HYXZ
+
+ȷ
+
+, (30b) 
+
+row pHZq “ row pH1
+
+> Z
+
+q ‘ row 
+
+„HXXZ
+
+HYXZ
+
+ȷ
+
+, (30c) 
+
+which are direct sums of linearly independent subspaces. We then say that any matrix H1 
+
+> XYZ
+
+such that 
+
+row pH1
+
+> XYZ
+
+q “ row 
+
+»–H1 
+
+> X
+
+00 H1
+
+> Z
+
+H1 
+
+> Y
+
+H1
+
+> Y
+
+fi fl (31) 
+
+is a generator of the irreducible XYZ component of the code. Furthermore, we say that any matrix HX such that 
+
+row pHXq “ row 
+
+»–HXXY
+
+HYXZ
+
+HXXZ
+
+fi fl “: CKX (32) 
+
+is a generator of the reducible XYZ component of the code. 
+
+By exploiting the above definition, the PCM of an XYZ code can be rewritten as: 
+
+HXYZ row 
+
+„
+
+»————————————–
+
+H1 
+
+> X
+
+0HXXY 0HXXZ 00 H1
+
+> Z
+
+0 HYXZ
+
+0 HXXZ
+
+H1 
+
+> Y
+
+H1
+
+> Y
+
+HYXZ HYXZ
+
+HXXY HXXY
+
+fi ffi ffi ffi ffi ffi ffi ffi ffi ffi ffi ffi ffi fl 
+
+> row
+
+„
+
+»————–
+
+H1 
+
+> X
+
+00 H1
+
+> Z
+
+H1 
+
+> Y
+
+H1
+
+> Y
+
+HX 00 HX
+
+fi ffi ffi ffi ffi fl . (33) Notice that the two lowest blocks contain the same matrix 
+
+HX in both the X and the Z components, so these can be interpreted simultaneously as X-, Y -, and Z-type checks. In contrast, the row spans of the matrices H1 
+
+> σ
+
+are mutually linearly independent and each generates σ-type checks sepa-rately, meaning that, e.g., Y -type checks cannot be obtained by combining together X-type checks generated by H1 
+
+> X
+
+and 
+
+Z-type checks generated by H1
+
+> Z
+
+. This matrix decomposition will be useful to identify when an XYZ code is genuine 
+
+and to study the minimum distance bounds of XYZ codes, respectively in Section III-C and in Section IV. 
+
+C. Genuine XYZ Codes 
+
+In this section, we explore the connection between CSS and XYZ codes. Although the PCM of an XYZ code is built from three Pauli types, it may be a CSS code in disguise, since it is possible that its stabilizer group is generated using only two Pauli types. This could be done either directly or after the application of a local Clifford (LC) unitary, i.e., a Clifford gate that acts on each single-qubit as a relabeling of the Pauli operators. These notions are formalized as follows. 
+
+Definition 10 (Genuine XYZ Codes) . The code CXYZ is called 
+
+genuine if it is not a CSS code, and non-genuine otherwise. Equivalently, the code is non-genuine if it admits a set of stabilizer generators that consists exclusively of pure X- and 
+
+Z-type operators. 
+
+Definition 11 (Genuine XYZ Codes under Uniform Pauli Relabeling) . The code CXYZ is called genuine under uniform Pauli relabeling if, for every single-qubit Clifford unitary U
+
+(acting as a permutation of the tX, Y, Z u labels), U bnCXYZ 
+
+is not a CSS code, and is called non-genuine otherwise. Equivalently, a non-genuine XYZ code under uniform Pauli relabeling admits a set of stabilizer generators that consists exclusively of pure operators of X- and Y -type, or Y - and 
+
+Z-type, or X- and Z-type. 
+
+Definition 12 (Genuine XYZ Codes under Local Pauli Rela-beling) . The code CXYZ is called genuine under local Pauli relabeling if, for all single-qubit Clifford unitaries U1, . . . , U n,the code pU1 b¨ ¨ ¨b UnqCXYZ is not a CSS code, and is called 
+
+non-genuine otherwise. Equivalently, a non-genuine XYZ code under local Pauli relabeling is LC-equivalent to a CSS code, i.e., it can be transformed into it by a LC unitary. 
+
+With the next theorem, we show a necessary and sufficient condition for an XYZ code to be a CSS code. 
+
+Theorem 1. Let CXYZ pCX, C Y, C Zq be an XYZ code. The code is CSS (and thus non-genuine) iff 
+
+CK 
+
+> Y
+
+“ `CK 
+
+> X
+
+X CK
+
+> Y
+
+˘ ` `CK 
+
+> Y
+
+X CK
+
+> Z
+
+˘ . (34) 
+
+In this case CXYZ pCX, C Y, C Zq is a CSS code with X-type checks spanning CK 
+
+> X
+
+`p CK 
+
+> Y
+
+XCK 
+
+> Z
+
+q and Z-type checks spanning 
+
+CK 
+
+> Z
+
+` p CK 
+
+> X
+
+X CK 
+
+> Y
+
+q. Condition (34) is equivalent to 
+
+rk pHXYZ q “ rk 
+
+„HX
+
+HY
+
+ȷ
+
+` rk 
+
+„HY
+
+HZ
+
+ȷ
+
+, (35) 
+
+which can be numerically verified efficiently. 
+
+The rank condition (35) can also be obtained directly from [24, Lemma 7.4]. 
+
+Proof: By construction we have 
+
+CK 
+
+> Y
+
+“ row pH1
+
+> Y
+
+q ‘ r row pHXXYq ` row pHYXZqs “ row pH1
+
+> Y
+
+q ‘ rp CK 
+
+> X
+
+X CK 
+
+> Y
+
+q ` p CK 
+
+> Y
+
+X CK 
+
+> Z
+
+qs . (36) Hence, the condition CK 
+
+> Y
+
+“ p CK 
+
+> X
+
+X CK 
+
+> Y
+
+q ` p CK 
+
+> Y
+
+X CK 
+
+> Z
+
+q is equivalent to H1 
+
+> Y
+
+“ 0.If H1 
+
+> Y
+
+“ 0, Eq. (33) directly shows that the code is CSS. 7
+
+We now show, conversely, that if the code is CSS then 
+
+H1 
+
+> Y
+
+“ 0. We consider the spaces 
+
+NX :“ CK 
+
+> X
+
+` p CK 
+
+> Y
+
+X CK 
+
+> Z
+
+q “ row pH1
+
+> X
+
+q ` row pHXq, (37) 
+
+NZ :“ CK 
+
+> Z
+
+` p CK 
+
+> X
+
+X CK 
+
+> Y
+
+q “ row pH1
+
+> Z
+
+q ` row pHXq. (38) We then apply the modular law pD ` Eq X F “ D ` p E X F q,which holds for vector spaces D Ď F . Taking D “ CK 
+
+> Y
+
+X CK 
+
+> Z
+
+,
+
+E “ CK 
+
+> X
+
+, and F “ CK 
+
+> Y
+
+we get 
+
+NX X row pH1
+
+> Y
+
+q Ď NX X CK
+
+> Y
+
+“ p CK 
+
+> Y
+
+X CK 
+
+> Z
+
+q ` p CK 
+
+> X
+
+X CK 
+
+> Y
+
+q. (39) Since pCK 
+
+> Y
+
+X CK 
+
+> Z
+
+q ` p CK 
+
+> X
+
+X CK 
+
+> Y
+
+q intersects row pH1
+
+> Y
+
+q only in 0, we get NX X row pH1
+
+> Y
+
+q “ t 0u. Similarly we obtain 
+
+NZ X row pH1
+
+> Y
+
+q “ t 0u. The row span W :“ row pHXYZ q can then be written as 
+
+W “
+
+"„ x ` yz ` y
+
+ȷ ˇ ˇˇˇ x P NX, z P NZ, y P row pH1
+
+> Y
+
+q
+
+*
+
+, (40) 
+
+WX :“ W X p Fn 
+
+> 2
+
+ˆ t 0uq , W Z :“ W X pt 0u ˆ Fn 
+
+> 2
+
+q . (41) A vector belongs to WX (i.e., it is of X-type) iff y`z “ 0, that is, y “ z P NZ X row pH1
+
+> Y
+
+q “ t 0u, which implies y “ z “ 0.Similarly, a vector in W is of Z-type iff x “ y “ 0. Moreover, the X, Y , and Z components are independent, since 
+
+„x0
+
+ȷ
+
+`
+
+„0z
+
+ȷ
+
+`
+
+„yy
+
+ȷ
+
+“
+
+„00
+
+ȷ
+
+(42) implies y “ x P NX X row pH1
+
+> Y
+
+q “ t 0u, which forces x “
+
+y “ z “ 0. Consequently we have: 
+
+rk pHXYZ q “ dim pWXq ` dim pWZq ` rk pH1
+
+> Y
+
+q. (43) Since WX ‘ WZ Ď W always holds, the code is CSS iff W “
+
+WX ‘ WZ, i.e. iff rk pHXYZ q “ dim pWXq ` dim pWZq, which by (43) is equivalent to H1 
+
+> Y
+
+“ 0. This proves the converse implication. To prove the rank condition (35) we consider the projection 
+
+πX : W Ñ Fn 
+
+> 2
+
+onto the first n components of the vector space; it has image CK 
+
+> X
+
+` CK 
+
+> Y
+
+and kernel WZ, thus 
+
+dim pNZq “ dim pWZq “ rk pHXYZ q ´ rk 
+
+„HX
+
+HY
+
+ȷ
+
+(44) and a similar expression holds using the projection πZ on the last n components. Substituting into (43) yields 
+
+rk pH1
+
+> Y
+
+q “ rk 
+
+„HX
+
+HY
+
+ȷ
+
+` rk 
+
+„HY
+
+HZ
+
+ȷ
+
+´ rk pHXYZ q, (45) and thus rk pH1
+
+> Y
+
+q “ 0 is equivalent to condition (35). We now consider the notion of genuine and non-genuine XYZ codes under uniform Pauli relabeling. 
+
+Corollary 1 (Genuine XYZ Codes under Uniform Pauli Relabeling) . By the same arguments as in Theorem 1, the code 
+
+CXYZ pCX, C Y, C Zq is CSS up to uniform relabeling iff at least 
+
+one of the following conditions holds: 
+
+CK 
+
+> X
+
+“ `CK 
+
+> X
+
+X CK
+
+> Y
+
+˘ ` `CK 
+
+> X
+
+X CK
+
+> Z
+
+˘ (46a) 
+
+CK 
+
+> Y
+
+“ `CK 
+
+> X
+
+X CK
+
+> Y
+
+˘ ` `CK 
+
+> Y
+
+X CK
+
+> Z
+
+˘ (46b) 
+
+CK 
+
+> Z
+
+“ `CK 
+
+> X
+
+X CK
+
+> Z
+
+˘ ` `CK 
+
+> Y
+
+X CK
+
+> Z
+
+˘ . (46c) 
+
+These conditions can be efficiently evaluated using the rank condition in (35) and the ones obtained via label permutations of tX, Y, Z u.
+
+Example 1 (Non-genuine XYZ Codes from SD CSS Code) .
+
+Consider CXYZ pCX, C X, C Zq, obtained by setting CY “ CX,so that the construction is based only on two classical codes 
+
+CX and CZ. Its PCM is 
+
+HXYZ “
+
+»–HX 00 HZ
+
+HX HX
+
+fi fl P Fp2mX`mZqˆ 2n 
+
+> 2
+
+. (47) Conditions (46a) and (46b) hold, so the code is non-genuine: it collapses into the CSS code CpCX, C Z X CXq. More generally, whenever any two of CX, C Y, C Z coincide, the XYZ code is non-genuine under uniform Pauli relabeling. If the coinciding pair involves CY, then the code is already CSS in the original Pauli labeling. Hence, using three distinct classical codes is necessary, but not sufficient, for having a genuine XYZ code. 
+
+Example 2 (4-qubit XYZ Code equivalent to a CSS Code under Local Pauli Relabeling) . Consider these stabilizers for a XYZ code with n “ 4 qubits: 
+
+S1 “ X1X4, S2 “ Y1Y3Y4, S3 “ Z1Z2Z4. (48) Here the underlying classical codes CK 
+
+> X
+
+“ span r1 0 0 1 s,
+
+CK 
+
+> Y
+
+“ span r1 0 1 1 s, CK 
+
+> Z
+
+“ span r1 1 0 1 s are distinct one-dimensional spaces with trivial pairwise intersections, so this code is genuine under uniform Pauli relabeling. However, under local Pauli relabeling it becomes CSS: transposing the Y
+
+and Z labels on qubit 3 alone maps S2 Ñ rS2 “ Y1Z3Y4, and replacing it with the product S1 rS2 “ ´ Z1Z3Z4 (a row addi-tion in the binary representation) results in the stabilizer group generators tX1X4, Z1Z3Z4, ´Z1Z2Z4u, which are CSS. 
+
+Example 3 (A Small Genuine XYZ Code under Local Pauli Relabeling) . Consider an XYZ code with n “ 4 qubits: 
+
+S1 “ X1X3X4, S2 “ Y1Y2Y4, S3 “ Z1Z2Z3. (49) The three rows are linearly independent over F2, so none of the conditions (46) holds. Moreover, an exhaustive search over all 
+
+64 “ 1296 assignments of single-qubit Pauli relabelings shows that no local relabeling brings the code into a CSS form. 
+
+D. Complexity of LC-equivalence to CSS Codes 
+
+A natural question raised by the above examples is whether it is possible to efficiently determine if a given stabilizer code is LC-equivalent to a CSS code as per Definition 12. To the best of our knowledge, the computational complexity of this decision problem is open. It is known that deciding the pairwise LC-equivalence of stabilizer states (that is, stabilizer codes with null rate, k “ 0) can be done efficiently [25], [26], but we are not aware of either a polynomial-time algorithm or a hardness result for deciding whether a stabilizer code is LC-equivalent to some CSS code. Related hard problems on graph states (such as the vertex-minor problem [27]) do not seem to be directly applicable. In conclusion, the presence of X-, Y -, and Z-type gener-ators in the PCM is not sufficient to guarantee a genuinely 8
+
+non-CSS code. The rank criteria derived above identify when the additional Y -type constraints are essential. We next study how these additional constraints affect the minimum distance. IV. M INIMUM DISTANCE BOUNDS FOR XYZ CODES 
+
+In this section, we derive upper and lower bounds on the quantum minimum distance of XYZ codes. The upper bound follows by restricting the logical-operator search to pure Pauli types. Lower bounds are obtained from CSS codes whose stabilizer groups are contained in the XYZ stabilizer group, and are subsequently refined for mixed logical operators using the weight identity in (6). We begin by deriving an upper bound by studying dσ , the minimum-weight logical errors consisting solely of σ-type operators for σ P t X, Y, Z u.6 This yields the following result. 
+
+Proposition 5 (X-type Minimum-weight Logical Errors) . Let 
+
+CXYZ pCX, C Y, C Zq be an XYZ code. The minimum-weight X-type logical errors have weight 
+
+dX “ min ␣∥v∥ ˇˇ v P p CY X CZqzp CK 
+
+> X
+
+` CKX q(. (50) 
+
+Proof: Restricting (15) to X-type errors we have 
+
+dX “ min 
+
+"
+
+∥x∥
+
+ˇˇˇˇ HXYZ 
+
+„0x
+
+ȷ
+
+“ 0,
+
+„x0
+
+ȷ
+
+R row pHXYZ q
+
+*
+
+.
+
+(51) Using the definition (27), the syndrome condition 
+
+HXYZ 
+
+“ 0x
+
+‰ “ 0 is equivalent to HZx “ 0 and HYx “ 0,so that x P CY X CZ. Using the decomposition (33) the remaining condition “ x0
+
+‰ R row pHXYZ q is equivalent to 
+
+x R row pH1
+
+> X
+
+q ` row pHXq, since by construction H1
+
+> Y
+
+, H1
+
+> Z
+
+are irreducible components that cannot be turned into X-type checks. Using row pH1
+
+> X
+
+q ` row pHXq “ row pHXq ` row pHXq,the second condition is equivalent to x R CK 
+
+> X
+
+` CKX , which then gives (50). Analogous results hold for dY and dZ. Summarizing, 
+
+dX “ min ␣∥v∥ ˇˇ v P p CY X CZqzp CK 
+
+> X
+
+` CKX q(, (52a) 
+
+dY “ min ␣∥v∥ ˇˇ v P p CX X CZqzp CK 
+
+> Y
+
+` CKX q(, (52b) 
+
+dZ “ min ␣∥v∥ ˇˇ v P p CX X CYqzp CK 
+
+> Z
+
+` CKX q(, (52c) are the minimum-weights of logical errors consisting solely of 
+
+X-, Y - and Z-type operators, respectively. Since each dσ is the minimum weight of the set of logical operators restricted to a single Pauli type, the upper bound follows. 
+
+Corollary 2 (Distance Upper Bound) . Let CXYZ pCX, C Y, C Zq
+
+be an XYZ code. Then 
+
+d ď U :“ min ␣dX, d Y, d Z( . (53) We now derive a lower bound on the minimum distance by considering three CSS codes whose codespaces contain the XYZ codespace. These are obtained by removing some stabilizer generators and exploiting the decomposition (33) to obtain a CSS code.    
+
+> 6If the set of pure σ-type logical operators is empty, we set dσ“ 8 .
+
+Definition 13 (CSS Codes imposed by the XYZ Structure) .
+
+Let CXYZ pCX, C Y, C Zq be an XYZ code, and set 
+
+˜HX “
+
+„HX
+
+HX
+
+ȷ
+
+, ˜HZ “
+
+„HZ
+
+HX
+
+ȷ
+
+, (54) 
+
+defining the codes 
+
+˜CX “ ker p ˜HXq “ CX X CX, ˜CK 
+
+> X
+
+“ CK 
+
+> X
+
+` CKX , (55a) 
+
+˜CZ “ ker p ˜HZq “ CZ X CX, ˜CK 
+
+> Z
+
+“ CK 
+
+> Z
+
+` CKX , (55b) 
+
+whose orthogonality is a consequence of (26) and of (33) .The associated CSS code Cp ˜CX, ˜CZq has PCM 
+
+˜HCSS “
+
+„ ˜HX 00 ˜HZ
+
+ȷ
+
+, (56) 
+
+and row p ˜HCSS q generates exactly the X- and Z-type stabi-lizers of CXYZ pCX, C Y, C Zq. When HX is empty, this reduces to the PCM of CpCX, C Zq, as in (17) .We denote the associated classical and quantum minimum distances as: 
+
+˜δX :“ dp ˜CXq, ˜dXzZ :“ dp ˜CXz ˜CK 
+
+> Z
+
+q, (57a) 
+
+˜δZ :“ dp ˜CZq ˜dZzX :“ dp ˜CZz ˜CK 
+
+> X
+
+q (57b) 
+
+obtained using Definition 5. We also define: 
+
+˜δX,Z :“ min t˜δX, ˜δZu, ˜dX,Z :“ min t ˜dZzX, ˜dXzZu. (58) By applying the same construction after a uniform Pauli relabeling, we also use the analogous notation for the imposed CSS codes Cp ˜CX, ˜CYq and Cp ˜CY, ˜CZq. In particular, we set 
+
+˜δY :“ dp ˜CYq, and, for every ordered pair of distinct Pauli labels σ, σ 1 P t X, Y, Zu, we define ˜dσzσ1 :“ dp ˜Cσ z ˜CK 
+
+> σ1
+
+q and 
+
+˜dσ,σ 1 :“ min t ˜dσzσ1 , ˜dσ1zσ u.The specialization of Proposition 4 to the CSS code of Definition 13 directly results in the following propositions. 
+
+Proposition 6 (Coset Distances) . The distances of the CSS codes Cp ˜CX, ˜CZq and CpCX, C Zq satisfy 
+
+˜δZ ě δZ, ˜dZzX ě dZzX, (59a) 
+
+˜δX ě δX, ˜dXzZ ě dXzZ. (59b) 
+
+Proof: By construction ˜CZ “ CZ X CX Ď CZ, so ˜CZ is a subcode of CZ, which proves ˜δZ ě δZ, and similarly for 
+
+˜δX ě δX. Furthermore, ˜CK 
+
+> X
+
+“ CK 
+
+> X
+
+` CKX Ě CK 
+
+> X
+
+, and similarly for ˜CK 
+
+> Z
+
+, so the same arguments applied to the coset distances proves ˜dZzX ě dZzX and ˜dXzZ ě dXzZ.
+
+Proposition 7 (CSS Distance and XYZ Distance) . Let 
+
+CXYZ pCX, C Y, C Zq be an XYZ code and Cp ˜CX, ˜CZq the de-rived CSS code as per Definition 13. Then ˜dX,Z ď d.Proof: The minimum distance (15a) of Cp ˜CX, ˜CZq is 
+
+˜dX,Z “ min 
+
+"
+
+∥u _ v∥
+
+ˇˇˇˇ ˜HCSS 
+
+„vu
+
+ȷ
+
+“ 0,
+
+„uv
+
+ȷ
+
+R row p ˜HCSS q
+
+*
+
+.
+
+(60) Since row p ˜HCSS q Ď row pHXYZ q, HXYZ 
+
+“ vu
+
+‰ “ 0 implies 
+
+˜HCSS 
+
+“ vu
+
+‰ “ 0 and, similarly, “ uv
+
+‰ R row p ˜HXYZ q implies “ uv
+
+‰ R row p ˜HCSS q. Hence, every XYZ logical operator is also 9
+
+a logical operator of the CSS code that enters the minimization defining ˜dX,Z. Thus we conclude ˜dX,Z ď d.The same derivation applies to Cp ˜CX, ˜CYq and Cp ˜CY, ˜CZq,which are CSS codes (up to uniform Pauli relabeling) obtained from the XYZ code by removing the stabilizers associated to 
+
+H1 
+
+> Z
+
+and to H1
+
+> X
+
+, respectively. Thus we have ˜dX,Y ď d and 
+
+˜dY,Z ď d, that is, every non-trivial XYZ logical operator is also a non-trivial logical operator of each of these CSS codes. The lower bound below then follows. 
+
+Corollary 3 (Distance Lower Bound) . Let CXYZ pCX, C Y, C Zq
+
+be an XYZ code and Cp ˜CX, ˜CYq, Cp ˜CY, ˜CZq, and Cp ˜CX, ˜CZq
+
+the imposed CSS codes. Then: 
+
+d ě L :“ max 
+
+! ˜dX,Y, ˜dY,Z, ˜dX,Z
+
+)
+
+. (61) Next, we prove a second lower bound, based on the identity in (6) for mixed Pauli operators. 
+
+Lemma 1 (Conditions for Mixed Operators) . Let “ uv
+
+‰
+
+be associated to a nontrivial mixed logical operator of 
+
+CXYZ pCX, C Y, C Zq, i.e., it is in N pSq{ ΦS. Writing w “
+
+u ` v, these three conditions all hold: 
+
+piq u R ˜CK 
+
+> X
+
+or v R ˜CK 
+
+> Z
+
+,
+
+pii q u R ˜CK 
+
+> Y
+
+or w R ˜CK 
+
+> Z
+
+,
+
+piii q v R ˜CK 
+
+> Y
+
+or w R ˜CK 
+
+> X
+
+.Proof: Consider the CSS code Cp ˜CX, ˜CZq of Defi-nition 13. As in Proposition 7, all logical operators of 
+
+CXYZ pCX, C Y, C Zq are also logical operators of Cp ˜CX, ˜CZq.Since “ uv
+
+‰ is by assumption mixed, both u and v must be non-zero. Moreover, it is nontrivial for the XYZ code, hence it cannot be a stabilizer of the imposed CSS code. Therefore, we cannot have simultaneously u P ˜CK 
+
+> X
+
+and v P ˜CK 
+
+> Z
+
+, i.e., condition piq. The conditions pii q and piii q follow identically from Cp ˜CY, ˜CZq and Cp ˜CX, ˜CYq, which are CSS up to uniform Pauli relabeling. 
+
+Proposition 8 (Distance Lower Bound based on Mixed Op-erators) . Using the notation introduced in Definition 13, and their analogues for the remaining Pauli pairs, define: 
+
+BX “ 12 ˜δX ` 12 min 
+
+! ˜dZzY ` ˜δY, ˜dYzZ ` ˜δZ
+
+)
+
+, (62) 
+
+BY “ 12 ˜δY ` 12 min 
+
+! ˜dZzX ` ˜δX, ˜dXzZ ` ˜δZ
+
+)
+
+, (63) 
+
+BZ “ 12 ˜δZ ` 12 min 
+
+! ˜dXzY ` ˜δY, ˜dYzX ` ˜δX
+
+)
+
+. (64) 
+
+Then every mixed-type logical operator of CXYZ pCX, C Y, C Zq,has weight at least B :“ max tBX, B Y, B Zu.Proof: Let “ uv
+
+‰ be a vector associated with a mixed logical operator of the XYZ code; we want to show that its Pauli weight is greater than or equal to BY. Since the operator is mixed, u, v, and w “ u ` v are all nonzero. Moreover, by Proposition 7 it is a logical operator of each imposed CSS code, so u P ˜CZ, v P ˜CX and w “ u ` v P ˜CY,hence ∥w∥ ě ˜δY. We then use condition piq of Lemma 1: if 
+
+u R ˜CK 
+
+> X
+
+, then u P ˜CZz ˜CK 
+
+> X
+
+and v P ˜CX, giving ∥u∥ ě ˜dZzX
+
+and ∥v∥ ě ˜δX; if instead v R ˜CK 
+
+> Z
+
+, then v P ˜CXz ˜CK 
+
+> Z
+
+and 
+
+u P ˜CZ, giving ∥v∥ ě ˜dXzZ and ∥u∥ ě ˜δZ. Substituting into the weight identity (6), ∥u _ v∥ “ 12
+
+` ∥u∥ ` ∥v∥ ` ∥w∥ ˘ and retaining the smaller of the two cases yields 
+
+∥u _ v∥ ě 12 min 
+
+! ˜dZzX ` ˜δX ` ˜δY, ˜dXzZ ` ˜δZ ` ˜δY
+
+)
+
+“ BY.
+
+(65) The bounds BX and BZ follow identically from conditions 
+
+pii q and piii q of Lemma 1, using the CSS codes Cp ˜CX, ˜CYq
+
+and Cp ˜CY, ˜CZq. Since each Bσ , with σ P t X, Y, Z u, bounds every mixed-type logical operator, so does their maximum. Since each Pauli operator is either of pure type or mixed 
+
+type, the minimum distance is also attained by a logical operator that is either of pure or mixed, which leads to the following Corollary. 
+
+Corollary 4 (Combined Distance Lower Bound) . Let 
+
+CXYZ pCX, C Y, C Zq be an XYZ code, with U the minimum distance of pure operators, as in (53) , and B the minimum distance of mixed operators, as in Proposition 8. Then: 
+
+d ě min ␣U, B (, (66) 
+
+and we have exactly d “ U when U ď B.
+
+Eq. (61) shows that every XYZ logical operator must also be logical for each imposed CSS code, and hence cannot be lighter than the largest imposed CSS distance. Eq. (66), instead, captures genuinely mixed logical operators and can be stronger when the three component codes have large classical distances. Together, these bounds explain why adding Y -type stabilizers can increase the minimum distance relative to the underlying CSS constructions. The proposed bounds require computing minimum-weight vectors in a code while excluding a given subspace. We formulate each problem as a mixed-integer linear program (MILP) with a candidate vector x, linearized parity constraints enforcing x P C, and auxiliary syndrome variables enforcing 
+
+x R D, where D Ď C. The objective is to minimize }x}. When the solver certifies optimality, the resulting value is exactly 
+
+dpCzDq. These formulations involve one n-bit candidate vec-tor, whereas computing the exact quantum distance requires the two binary components of a Pauli operator. Therefore, the bounds are expected to be easier to compute. V. F AMILIES OF XYZ S TABILIZER CODES 
+
+In this section, we use the XYZ construction to identify three families of quantum stabilizer codes. More precisely, we show how a topological code family already known in the literature, the XYZ 2 code [16], is LC-equivalent to XYZ codes. Furthermore, we construct two novel families (and as many instances) of qLDPC XYZ codes: one based on IS codes [19], [28] and one based on QD codes [20], [29]–[31]. 
+
+A. Topological Construction based on the XYZ 2 Code 
+
+The XYZ 2 code introduced in [16] is a 2D topological code family with parameters J2d2, 1, d K, obtained by placing qubits in a rhombus-shaped patch of the hexagonal lattice. Its mixed stabilizer generators are weight-6 plaquette operators with type 
+
+XY ZXY Z , together with weight-2 links with type XX on 10                  
+
+> X
+> Z
+> Y
+> X
+> Z
+> Y
+> X
+> Z
+> Y
+> X
+> Z
+> Y
+> X
+> Z
+> Y
+> X
+> Z
+> Y
+> X
+> Z
+> Y
+> X
+> Z
+> Y
+> X
+> X
+> Z
+> Y
+> X
+> Y
+> X
+> Z
+> Y
+> Z
+> Y
+> X
+> Z
+> X
+> Z
+> Y
+> X
+> Y
+> X
+> Y
+> Z
+> Y
+> Z
+> X
+> Z
+> XX
+> X
+> X
+> X
+> X
+> X
+> X
+> X
+> ZYXZY
+> Fig. 1. Tanner graph of the CXYZ ´2D J50 ,1,5K. Circles represent qubits and squares represent stabilizers. The qubits joined by a dashed line form minimum-weight logical operators of pure type (in red, weight 2d´1“9)and mixed type (in blue, weight d“5).
+
+the vertical edges, and weight-3 half-plaquette operators on the boundary. Via local Pauli relabeling, every stabilizer generator can be homogenized to a pure one and the resulting family 
+
+CXYZ ´2D J2d2, 1, d K is XYZ, in the sense of Definition 8, where the code parameters are invariant under LC operations and thus inherited from the XYZ 2 code. In particular, each plaquette becomes a pure X-, Y -, or Z-type stabilizer, and so does each vertical link 7. The Tanner graph of the CXYZ ´2D 
+
+code for d “ 5 is shown in Fig. 1. It was proven that the XYZ 2 codes have dX “ d and 
+
+dY “ dZ “ 2d2, resulting in excellent resilience against 
+
+Z- and Y -biased noise; however, these properties are not 
+
+LC-invariant [16]. Preliminary investigations indicate that the minimum-weight pure-type logical operators of CXYZ ´2D are strings joining the two opposite corners of the rhombus (see Fig. 1), which would force dσ “ 2d ´ 1. This conjecture implies that minimum-weight logical operators must be mixed and would provide an explicit example of a family for which the pure-type upper bound U “ 2d ´ 1 ą d is asymptotically loose by a factor approaching two; finally, this would endow the code with resilience against any unknown biased noise. However, such an unknown bias is a rather contrived error model, and for conventional noise channels, this code is suboptimal with respect to the XYZ 2 code, whose pure Y -type and Z-type distances scale as n. We therefore do not analyze the CXYZ ´2D family further. 
+
+B. XYZ Codes based on Intersecting Subset Codes 
+
+IS codes [19] stand as a generalization of the classical product code construction for CSS codes [28] and of quantum Reed-Muller codes [32]. To generalize the definition IS codes        
+
+> 7We conjecture that all codes in this family are genuine under uniform relabeling, which we have numerically verified for dď99 , while we have not verified genuineness under arbitrary local relabeling as it requires 62d2
+> tests, which is computationally challenging already for d“3.
+
+to the XYZ framework, we need to add a further PCM, associated with Y -type stabilizer generators. 
+
+Definition 14 (XYZ Code based on IS Codes) . An IS XYZ code CXYZ ´IS pCX, C Y, C ZqJn, k, d K, with n “ 2ℓ, is designed starting from three tuples of subsets: 
+
+SX “
+
+¨˚˝
+
+SX1
+
+...
+
+SX
+
+> aX
+
+˛‹‚, SY “
+
+¨˚˝
+
+SY1
+
+...
+
+SY
+
+> aY
+
+˛‹‚, SZ “
+
+¨˚˝
+
+SZ1
+
+...
+
+SZ
+
+> aZ
+
+˛‹‚,
+
+@ σ P t X, Y, Z u, @ i : Sσi Ď r ℓs, (67) 
+
+where Sσi , for i “ 1, . . . , a σ with aσ ă 2ℓ, are distinct subsets of rℓs that satisfy the following intersection conditions: 
+
+@ σ ‰ σ1 : @ i P r aσ s, j P r aσ1 s : Sσi X Sσ1 
+
+> j
+
+‰ H . (68) 
+
+The PCMs of the XYZ code are given by: 
+
+HX “
+
+»—–
+
+HSX1
+
+...
+
+HSX
+
+> aX
+
+fi ffi fl , HY “
+
+»—–
+
+HSY1
+
+...
+
+HSY
+
+> aY
+
+fi ffi fl , HZ “
+
+»—–
+
+HSZ1
+
+...
+
+HSZ
+
+> aZ
+
+fi ffi fl , (69) 
+
+where we have 
+
+HS “
+
+> ℓ
+
+â
+
+> i“1
+
+#
+
+h if i P S
+
+I2 if i R S @S Ď r ℓs, (70) 
+
+with h “ r 1 1 s.
+
+In particular, the vector h satisfies hh J “ 0 which, together with the intersecting subset condition (68), guarantees that the three PCMs HX, HY, HZ are pairwise orthogonal 8.The original CSS version of the IS codes are shown to be quantum generalized Reed-Muller (GRM) codes, also known as decreasing monomial codes [33]; using this correspondence, it is possible to determine the quantum (coset) minimum distance in poly pnq time [19]. The identification with GRM codes does not hold for XYZ-IS codes, and we could not find other polynomial-time algorithms to compute the minimum distance. However, it is possible to efficiently evaluate the bounds of Section IV by exploiting the closure of CSS IS codes under sum, intersection, and orthogonal complements. These closures can be shown by representing the codes 
+
+CK 
+
+> σ
+
+“ row pHσ q with the tuple Sσ and through this with the sets Fσ :“ GpCK 
+
+> σ
+
+q “ FpSσ q, where 
+
+FpSq :“ t F Ď r ℓs | F X S “ ∅ for some S P Su. (71) The correspondence is given explicitly by: 
+
+CK 
+
+> σ
+
+“ row 
+
+˜
+
+ΠrFσ s
+
+„1 10 1
+
+ȷbℓ¸
+
+(72) where ΠrFσ s P F|Fσ |ˆ 2ℓ 
+
+> 2
+
+is a matrix with a one in each row, in the position indexed by the corresponding element of Fσ . Sums and intersections of the codes CK 
+
+> σ
+
+correspond, respectively, to unions and intersections of the associated Fσ ,while the dual code Cσ corresponds to GpCσ q “ t F c | F P               
+
+> 8Both XYZ and CSS codes based on IS codes can also be constructed from arbitrary tuples of matrices Hσisuch that HσipHσ1
+> iqJ“0for all iP r ℓs
+> and σ‰σ1, instead of using the fixed base matrix h“ r 1 1 s, see [19]. 11
+
+2rℓszGpCK 
+
+> σ
+
+qu , where p¨q c denotes set complement in rℓs. Since these families are downward closed with the partial order given by set inclusion, a generating tuple for a set F is recovered via SpFq “ t F c | F P max pFqu . Hence, each 
+
+CK 
+
+> σ
+
+, their duals Cσ , the pairwise intersections Cσ X Cσ1 , the reducible component CKX , and the imposed codes ˜CX, ˜CY, ˜CZ
+
+of Definition 13, are all IS codes whose F sets are computed explicitly from SX, SY, SZ. E.g., we have 
+
+GpCKX q “ p FX X FYq Y p FY X FZq Y p FX X FZq. (73) Therefore, since ˜CK 
+
+> X
+
+“ CK 
+
+> X
+
+` CKX , we obtain 
+
+Gp ˜CK 
+
+> X
+
+q “ FX Y `FY X FZ
+
+˘. (74) As an example, we construct an XYZ code 
+
+CXYZ ´IS J512 , 9, d K, with 12 ď d ď 16 , choosing ℓ “ 9
+
+and the following three tuples 
+
+SX “
+
+¨˝t1, 2, 3ut4, 5, 6ut7, 8, 9u
+
+˛‚, SY “
+
+¨˚˚˚˚˚˚˝
+
+t1, 5, 9ut2, 6, 7ut3, 4, 8ut3, 5, 7ut2, 4, 9ut1, 6, 8u
+
+˛‹‹‹‹‹‹‚
+
+, SZ “
+
+¨˝t1, 4, 7ut2, 5, 8ut3, 6, 9u
+
+˛‚,
+
+(75) satisfying the intersection condition given in (68). We have verified that this code is genuine, also under uniform re-labeling, while extending this verification to arbitrary local relabelings would require evaluating 6512 cases, which is computationally infeasible. We have bounded the quantum minimum distance using the closed-form distance equations of [19] for CSS IS codes to compute the bounds of Sec-tion IV. In particular, the distances with pure-type operators are dX “ dZ “ 32 and dY “ 16 , giving U “ 16 from Corollary 2. The three CSS codes of Definition 13 have ˜δσ “ 8
+
+and ˜dσzσ1 “ 8 for all σ ‰ σ1 with σ, σ 1 P tX, Y, Z u,hence L “ 8 from Corollary 3; finally, Proposition 8 yields 
+
+BX “ BY “ BZ “ 12 , so that Corollary 4 gives the final result 12 ď d ď 16 . This is a concrete instance in which the bound (66) is strictly stronger than the one in (61). 
+
+C. XYZ Codes based on Quasi-Dyadic Codes 
+
+We first recall the definitions of dyadic and QD matrices. 
+
+Definition 15 (Ring of Dyadic Matrices) . Consider ℓ P N. We define MℓpF2q as the set of 2ℓ ˆ 2ℓ matrices with entries over 
+
+F2 and structured as follows 
+
+M “
+
+„A BB A
+
+ȷ
+
+, A, B P Mℓ´1pF2q. (76) 
+
+For ℓ “ 0, M0pF2q :“ F2.
+
+Dyadic matrices are reproducible matrices [34], i.e., it is possible to determine the entire matrix only using its first row, called signature .
+
+Definition 16 (Dyadic Permutation Matrix, Quasi-Dyadic Matrix and Codes) . We call dyadic permutation matrix (DPM) 
+
+any dyadic matrix with a signature of weight 1. A matrix is called QD if it is a u ˆ w array of dyadic matrices; consequently, a classical linear code is called QD if it admits a generator matrix or a PCM that is QD. 
+
+We construct CSS qLDPC codes using the affine con-struction method of [20], that allows to have CSS codes suitable for the CAMEL framework [35]. Let us briefly recall how to build the binary PCM of the component QD codes. A classical QD code is described by an exponent matrix 
+
+E1 P Fuˆ2ℓ 
+
+> 2ℓ
+
+, with u ď 2ℓ. Each entry pi,j of the exponent matrix, where i, j P F2ℓ , is associated to a (not necessarily distinct) DPM. Each row of E1 is generated as an affine permutation pi,j “ aij ` bi, with distinct non-zero multipliers 
+
+ai P Fˆ 
+
+> 2ℓ
+
+and bi P F2ℓ with a multiplication over the field 
+
+F2ℓ . Then, we lift the exponent matrix, i.e., we replace each element pi,j P F2ℓ with the corresponding DPM. 
+
+Definition 17 (XYZ Code based on QD Codes) . An XYZ code 
+
+CXYZ ´QD pCX, C Y, C ZqJn, k, d K based on QD codes is defined by three exponent matrices E1 
+
+> X
+
+P FuXˆ2ℓ 
+
+> 2ℓ
+
+, E1 
+
+> Y
+
+P FuY ˆ2ℓ 
+
+> 2ℓ
+
+, E1 
+
+> Z
+
+P
+
+FuZˆ2ℓ 
+
+> 2ℓ
+
+with affine rows 
+
+ppσq 
+
+> i,j
+
+“ apσq 
+
+> i
+
+j ` bpσq 
+
+> i
+
+, σ P t X, Y, Z u, (77) 
+
+where uX ` uY ` uZ ă 2ℓ, and the multipliers ai are distinct within and across the three matrices. Lifting the exponent matrices yields H1 
+
+> X
+
+P FuX2ℓˆ22ℓ 
+
+> 2
+
+, H1 
+
+> Y
+
+P FuY 2ℓˆ22ℓ 
+
+> 2
+
+and 
+
+H1 
+
+> Z
+
+P FuZ2ℓˆ22ℓ 
+
+> 2
+
+, that satisfy 
+
+H1 
+
+> σ
+
+pH1 
+
+> σ1
+
+qJ “ 1uσ 2ℓˆuσ1 2ℓ , σ, σ 1 P t X, Y, Z u, σ ‰ σ1. (78) 
+
+Finally, by setting 
+
+HX “ “H1 
+
+> X
+
+1‰ , HY “ “H1 
+
+> Y
+
+1‰ , HZ “ “H1 
+
+> Z
+
+1‰ , (79) 
+
+we get the orthogonality condition 
+
+Hσ HJ 
+
+> σ1
+
+“ 0 σ, σ 1 P t X, Y, Z u, σ ‰ σ1. (80) As an example, the XYZ code CXYZ ´QD J257 , 116 , 16 K9 ℓ “
+
+4, 2ℓ “ 16 , uX “ uY “ uZ “ 5. We have verified that this code instance is genuine and remains genuine under uniform Pauli relabeling. As in Section V-B, we avoid the verification for the local Pauli relabeling due to complexity constraints. Regarding the minimum-distance bounds, we use the tool available in [36] to numerically estimate the distances ˜dX,Y,
+
+˜dY,Z, and ˜dX,Z, as well as the coset distances ˜dσzσ1 for all distinct σ, σ 1 P t X, Y, Z u. These computations yield the numerical estimate L “ 12 , according to Corollary 3. To evaluate the mixed-operator bound (Corollary 4), we addition-ally estimate the classical distances ˜δX, ˜δY, and ˜δZ using the tool available in [37], obtaining B “ 18 . Finally, the MILP formulation solved with the Gurobi optimizer finds a pure logical operator for each σ-type, with σ P t X, Y, Z u, with weight 16 . The numerical estimation of the upper bound is thus U “ 16 (Corollary 2). Together, these numerical results suggest that the minimum distance is d “ 16 (Corollary 4). VI. N UMERICAL RESULTS 
+
+In this section, we show the LER performance of the proposed XYZ qLDPC codes, one based on IS and the other on                
+
+> 9The minimum distance was numerically estimated by keeping track of the minimum weight logical errors during the Monte Carlo simulations for the LER under BP decoding. 12
+> 10 ´210 ´1
+> 10 ´7
+> 10 ´6
+> 10 ´5
+> 10 ´4
+> 10 ´3
+> 10 ´2
+> 10 ´1
+> 10 0
+> p
+> LER
+> CXYZ ´QD
+> CQD
+> CBic, 1
+> CGB, 1
+> (a)
+> 10 ´210 ´1
+> 10 ´7
+> 10 ´6
+> 10 ´5
+> 10 ´4
+> 10 ´3
+> 10 ´2
+> 10 ´1
+> 10 0
+> p
+> LER
+> CBic, 2CGB, 2
+> CHP, 1CHP, 2
+> CQM CBB
+> CXYZ ´IS CIS
+> (b) Fig. 2. Monte Carlo simulations of the LER under BP 4CN serial decoding over a code-capacity noise model, as a function of p. (a): comparison between the LER of CXYZ ´QD and some state-of-the-art CSS codes. With dashed lines and empty squares, we report the code CQD decoded using the CAMEL decoder of [20]. (b): comparison between the LER of CXYZ ´IS and several state-of-the-art CSS codes. With dashed lines and empty dots, we report the code CIS .
+
+QD codes, through finite-length Monte Carlo simulations, over a code-capacity noise model, with depolarizing probability 
+
+p. The two presented instances of XYZ codes are compared with representative state-of-the-art CSS qLDPC codes having comparable lengths, stabilizer generator weights, and rates. We employ a BP 4 decoder, relying on the sum-product algorithm (SPA). We used a CN serialized schedule for message passing. The decoder runs at most for 50 iterations, and the simulation continues with the same p until 100 logical errors are detected. We compare the proposed XYZ codes with several CSS codes, namely: a QD code ( CQD ) [20], an IS code ( CIS ) [28], bicycle codes ( CBic ) [38], generalized bicycle (GB) codes (CGB ) [17], HP codes ( CHP ) [10], a quantum Margulis (QM) code ( CQM ) [39], and a bivariate bicycle (BB) code ( CBB ) [40]. For each tested code instance (be it CSS or XYZ) the code parameters n, k, R, and d, the stabilizer generator weight wr
+
+(which is uniform for all the codes), and the girth gσ , of each classical code Cσ with σ P t X, Y, Z u, are reported in Table I. All tested CSS codes are directly available in the literature, with the exception of the bicycle codes CBic, 1 and CBic, 2,constructed with the same method of [38], and the GB codes 
+
+CGB, 1 and CGB, 2, designed as in [41] 10 . Since instances si-multaneously matched in length, dimension, stabilizer weight, are generally not available, we select the benchmark codes to match the parameters most relevant to each comparison. In Fig. 2a, we compare the performance of CXYZ ´QD ,defined in Section V-C, against some state-of-the-art CSS qLDPC codes instances with n « 257 , wr « 16 and R « 0.45 .We observe that the proposed CXYZ ´QD behaves better than 
+
+CBic, 1 and CGB, 1, consistently with their smaller minimum distance, namely dBic, 1 “ 5 and dGB, 1 “ 8, even though the latter exhibits a larger girth, equal to 6. As a benchmark, we report also the performance of CQD (dashed line with empty squares), which is the state-of-the-art code instance of QD codes, for these specific length and rate. Such a code has been devised for a joint code and BP 4 decoder framework, 
+
+> 10 In [11], the authors remark that such class of CSS codes can be considered as a specific case of GB codes.
+
+namely CAMEL [35], and therefore it has been decoded with the corresponding CAMEL decoder. The latter significantly improves the code LER with respect to a standard BP 4 [20]. Despite this, the performance of CXYZ ´QD , decoded with a conventional BP 4 decoder, is superior to that of CQD . This comparison is informative because both codes have the same length, stabilizer generator weight and nearly equal rates. It therefore isolates, to a substantial extent, the effect of replacing the CSS structure with the proposed XYZ construction. Moreover, in Fig. 2b, we report the behavior of CXYZ ´IS 
+
+against several state-of-the-art CSS qLDPC codes instances, with n « 512 , wr « 8, and R « 0.02 . We remark that the performance of CXYZ ´IS is better than CBic, 2, CHP, 1, and CHP, 2,which is consistent with their smaller minimum distances, namely, dBic, 2 “ dHP, 1 “ 6, dHP, 2 “ 8. We observe that, for p ą 0.09 , CGB, 2 exhibits poorer performance than the proposed XYZ code. Instead, we note that, for p ă 0.09 , the performance curve of CQM exhibits an error floor. Eventually, for p ą 0.05 , the XYZ code shows better performance than the latter code. Moreover, we also include the LER performance of 
+
+CBB , which is the instance with the biggest n and (estimated) d
+
+among the family of BB codes [40]. In particular, for p ą 0.07 ,the BB code achieves a lower LER than the XYZ code. Below this crossover point, however, the XYZ code performs better. Finally, Fig. 2b includes the performance of CIS , namely the CSS IS code constructed using only the tuples SX and SZ of Section V-B. This comparison is not rate matched, since CIS 
+
+has a substantially larger dimension than CXYZ ´IS . Rather, it illustrates the effect of adding the Y -type constraints within the same underlying IS construction. Over the simulated range, the resulting XYZ code achieves a lower LER, at the cost of a reduced coding rate. VII. C ONCLUSIONS 
+
+We introduced quantum XYZ stabilizer codes as a general-ization of the CSS framework obtained by including Y -type stabilizer generators. We characterized when these additional generators produce a genuinely non-CSS code and derived 13 
+
+TABLE I PARAMETERS OF TESTED STABILIZER CODES . W ITH “¨” IN THE “REF .”
+
+> COLUMN WE INDICATE THAT THE CORRESPONDING CODE INSTANCE HAS BEEN PRESENTED IN THIS WORK FOR THE FIRST TIME
+
+.
+
+Code Parameters Ref. 
+
+wr gX{gY{gZ R
+
+CXYZ ´QD J257 , 116 , 16 K 17 4{4{4 0.45 ¨
+
+CXYZ ´IS J512 , 9, ď 16 K 8 8{4{8 0.02 ¨
+
+CQD J257 , 121 , 10 K 17 4{ ¨ { 4 0.47 [20] 
+
+CIS J512 , 174 , 8K 8 8{ ¨ { 8 0.33 [28] 
+
+CBic, 1J256 , 116 , 5K 16 4{ ¨ { 4 0.45 ¨
+
+CBic, 2J512 , 10 , 6K 8 4{ ¨ { 4 0.02 ¨
+
+CGB, 1J272 , 142 , 8K 16 6{ ¨ { 6 0.52 ¨
+
+CGB, 2J488 , 6, ě 8K 8 6{ ¨ { 6 0.01 ¨
+
+CHP, 1J400 , 16 , 6K 7 6{ ¨ { 6 0.04 [42] 
+
+CHP, 2J625 , 25 , 8K 7 6{ ¨ { 6 0.04 [42] 
+
+CQM J672 , 4, ě 8K 8 6{ ¨ { 6 0.01 [39] 
+
+CBB J756 , 16 , ď 34 K 6 6{ ¨ { 6 0.02 [40] 
+
+bounds on the resulting minimum distance. Moreover, we show that the topological XYZ 2 code fits in the proposed XYZ framework. The constructions based on IS and QD codes show that this framework can yield sparse finite-length codes, while the numerical results confirm that the proposed instances can outperform comparable CSS codes under BP 4 decoding. Future work should focus on the joint design of the three component codes and on decoders tailored to the full XYZ structure. It would also be relevant to extend the analysis beyond the code-capacity setting and to clarify the complexity of recognizing LC equivalence to CSS codes. ACKNOWLEDGMENTS 
+
+Davide Orsucci acknowledges support in preliminary tech-nical and conceptual work from Dr. Francesco Gautieri. REFERENCES [1] D. Gottesman, “Stabilizer codes and quantum error correction,” Ph.D. dissertation, California Institute of Technology, 1997. [2] A. R. Calderbank and P. W. Shor, “Good quantum error-correcting codes exist,” Phys. Rev. A , vol. 54, no. 2, 1996. [3] A. M. Steane, “Error correcting codes in quantum theory,” Phys. Rev. Lett. , vol. 77, no. 5, 1996. [4] P. W. Shor, “Scheme for reducing decoherence in quantum computer memory,” Phys. Rev. A , vol. 52, no. 4, 1995. [5] S. B. Bravyi and A. Y. Kitaev. (1998) Quantum codes on a lattice with boundary. [Online]. Available: https://arxiv.org/abs/quant-ph/9811052 [6] E. Dennis, A. Kitaev, A. Landahl, and J. Preskill, “Topological quantum memory,” J. Math. Phys. , vol. 43, no. 9, 2002. [7] A. Y. Kitaev, Quantum Error Correction with Imperfect Gates . Springer US, 1997. [8] A. G. Fowler, M. Mariantoni, J. M. Martinis, and A. N. Cleland, “Surface codes: Towards practical large-scale quantum computation,” Phys. Rev. A, vol. 86, no. 3, 2012. [9] S. Bravyi, D. Poulin, and B. Terhal, “Tradeoffs for reliable quantum information storage in 2D systems,” Phys. Rev. Lett. , vol. 104, no. 5, 2010. [10] J.-P. Tillich and G. Zémor, “Quantum LDPC codes with positive rate and minimum distance proportional to the square root of the blocklength,” 
+
+IEEE Trans. Inf. Theory , vol. 60, no. 2, 2014. [11] P. Panteleev and G. Kalachev, “Quantum LDPC codes with almost linear minimum distance,” IEEE Trans. Inf. Theory , vol. 68, no. 1, 2022. [12] ——, “Asymptotically good quantum and locally testable classical LDPC codes,” in Proc. Annu. ACM SIGACT Symp. Theory Comput. (STOC) , 2022. [13] D. Maurice, “Codes correcteurs quantiques pouvant se décoder itérative-ment,” Theses, Université Pierre et Marie Curie - Paris VI, 2014. [14] A. Leverrier, S. Apers, and C. Vuillot, “Quantum XYZ product codes,” 
+
+Quantum , vol. 6, 2022. [15] Z. Liang, Z. Yi, F. Yang, J. Chen, Z. Wang, and X. Wang. (2025) High-dimensional quantum XYZ product codes for biased noise. [Online]. Available: https://arxiv.org/abs/2408.03123 [16] B. Srivastava, A. Frisk Kockum, and M. Granath, “The XYZ 2 hexagonal stabilizer code,” Quantum , vol. 6, Apr. 2022. [17] A. A. Kovalev and L. P. Pryadko, “Quantum Kronecker sum-product low-density parity-check codes with finite rate,” Phys. Rev. A , vol. 88, 2013. [18] S. Bravyi, B. M. Terhal, and B. Leemhuis, “Majorana Fermion codes,” 
+
+New J. Phys. , vol. 12, no. 8, 2010. [19] D. Ostrev, “Quantum LDPC codes from intersecting subsets,” IEEE Trans. Inf. Theory , vol. 70, no. 8, 2024. [20] A. Baldelli, M. Battaglioni, J. Mandelbaum, S. Miao, and L. Schmalen, “Quantum CSS LDPC codes based on dyadic matrices for belief propagation-based decoding,” in IEEE Int. Symp. Inf. Theory (ISIT) ,2026. [21] P. Panteleev and G. Kalachev, “Degenerate quantum LDPC codes with good finite length performance,” Quantum , vol. 5, 2021. [22] Z. Babar, P. Botsinis, D. Alanis, S. X. Ng, and L. Hanzo, “Fifteen years of quantum LDPC coding and improved decoding strategies,” IEEE Access , vol. 3, 2015. [23] M. R. Tanner, “A recursive approach to low complexity codes,” IEEE Trans. Inf. Theory , vol. 27, no. 5, 1981. [24] A. Cross and D. Vandeth, “Small binary stabilizer subsystem codes,” 
+
+ArXiv:2501.17447 , 2025. [25] A. Bouchet, “An efficient algorithm to recognize locally equivalent graphs,” Combinatorica , vol. 11, no. 4, 1991. [26] M. Van den Nest, J. Dehaene, and B. De Moor, “Efficient algorithm to recognize the local Clifford equivalence of graph states,” Phys. Rev. A ,vol. 70, no. 3, 2004. [27] A. Dahlberg, J. Helsen, and S. Wehner, “The complexity of the vertex-minor problem,” Information Processing Letters , vol. 175, 2022. [28] D. Ostrev, D. Orsucci, F. Lázaro, and B. Matuz, “Classical product code constructions for quantum Calderbank-Shor-Steane codes,” Quantum ,vol. 8, 2024. [29] A. Baldelli, M. Battaglioni, and P. Santini, “Quantum CSS LDPC codes with quasi-dyadic structure,” in Proc. Int. Symp. Topics Coding (ISTC) ,2025. [30] A. Baldelli, M. Baldi, M. Battaglioni, F. Chiaraluce, and P. Santini. (2026) Design and analysis of quantum dual-containing CSS LDPC codes based on quasi-dyadic matrices. [Online]. Available: https://arxiv.org/abs/2605.03631 [31] A. Gómez-Fonseca, G. L. Matthews, K. D. Morris, and T. Pllaha. (2026) Combinatorial analysis of dyadic and quasi-dyadic codes. [Online]. Available: https://arxiv.org/abs/2605.01942 [32] A. M. Steane, “Quantum Reed-Muller codes,” IEEE Trans. Inf. Theory ,vol. 45, no. 5, pp. 1701–1703, 1999. [33] M. Bardet, V. Dragoi, A. Otmani, and J.-P. Tillich, “Algebraic properties of polar codes from a new polynomial formalism,” in 2016 IEEE Int. Symp. Inf. Theory (ISIT) , 2016. [34] P. Santini, E. Persichetti, and M. Baldi. (2018) Reproducible families of codes and cryptographic applications. Cryptology ePrint Archive, Paper 2018/666. [Online]. Available: https://eprint.iacr.org/2018/666 [35] S. Miao, J. Mandelbaum, H. Jäkel, and L. Schmalen, “A joint code and belief propagation decoder design for quantum LDPC codes,” in Proc. IEEE Int. Symp. Inf. Theory (ISIT) , 2024. [36] L. P. Pryadko, V. A. Shabashov, and V. K. Kozin, “QDistRnd: A GAP package for computing the distance of quantum error-correcting codes,” 
+
+J. Open Source Softw. , vol. 7, no. 71, mar 2022. [37] D. J. C. MacKay. (2008) Source code for approximating the mindist problem of LDPC codes. [Online]. Available: http://www.inference.eng.cam.ac.uk/mackay/MINDIST_ECC.html [38] D. MacKay, G. Mitchison, and P. McFadden, “Sparse-graph codes for quantum error correction,” IEEE Trans. Inf. Theory , vol. 50, no. 10, 2004. [39] M. Pacenti and B. Vasi´ c, “Quantum Margulis codes,” in Proc. Annu. Allerton Conf. Commun., Control, Comput. , 2024. [40] S. Bravyi, A. W. Cross, J. M. Gambetta, D. Maslov, P. Rall, and T. J. Yoder. (2024) High-threshold and low-overhead fault-tolerant quantum memory. [Online]. Available: https://arxiv.org/abs/2308.07915 [41] M. Hagiwara and H. Imai, “Quantum quasi-cyclic LDPC codes,” in Proc. IEEE Int. Symp. Inf. Theory (ISIT) , 2007. [42] J. Roffe, D. R. White, S. Burton, and E. Campbell, “Decoding across the quantum low-density parity-check code landscape,” Phys. Rev. Res. ,vol. 2, no. 4, 2020.

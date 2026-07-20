@@ -6,24 +6,26 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-07-19
-- 运行时间：2026-07-19 20:27:39 UTC
+- 最新运行日期：2026-07-20
+- 运行时间：2026-07-20 21:16:51 UTC
 - 运行状态：成功
-- 本次总论文数：1
+- 本次总论文数：2
 - 精读区：1
-- 速读区：0
+- 速读区：1
 
 ### 今日简报（AI）
-今日精读1篇高分量子纠错论文（9.0/10）。核心方向：在紧耦合量子-经典系统中通过认证递归实现流式量子纠错。建议关注实时量子纠错与经典系统集成的最新进展。
-- 详情：[/202607/19/README](/202607/19/README)
+今日精读高分论文《Quantum error-correcting codes from aperiodic monotiles》，速读原子互连新进展。最值得关注的是精读论文：利用非周期单瓷砖构建量子纠错码，为拓扑容错提供全新思路。建议普通读者重点关注该方向，它可能简化未来量子计算机的纠错实现。
+- 详情：[/202607/20/README](/202607/20/README)
 
 ### 精读区论文标签
-1. [StreamingQEC: Streaming Quantum Error Correction in Tightly Integrated Quantum-Classical Systems via Certified Recurrence](/202607/19/2607.13351v1-streamingqec-streaming-quantum-error-correction-in-tightly-integrated-quantum-classical-systems-via-certified-recurrence)  
-   标签：评分：9.0/10、query:qec-decoding
-   evidence：StreamingQEC系统级模拟器，用于包含解码的量子纠错流水线
+1. [Quantum error-correcting codes from aperiodic monotiles: the Hat and the Spectre](/202607/20/2607.15326v1-quantum-error-correcting-codes-from-aperiodic-monotiles-the-hat-and-the-spectre)  
+   标签：评分：8.0/10、query:qec-code
+   evidence：从非周期单瓷砖构造量子纠错码，扩展拓扑码思想
 
 ### 速读区论文标签
-- 本次无速读推荐。
+1. [Deterministic atom-shuttle interconnects via ultrafast atom-ion entangling gate](/202607/20/2607.15597v1-deterministic-atom-shuttle-interconnects-via-ultrafast-atom-ion-entangling-gate)  
+   标签：评分：7.0/10、query:qec-code
+   evidence：提出混合qLDPC存储器
 
 
 <div class="dpr-home-promo-card">

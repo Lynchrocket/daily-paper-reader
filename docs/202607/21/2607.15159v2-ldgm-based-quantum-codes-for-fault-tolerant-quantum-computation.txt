@@ -1,0 +1,1394 @@
+Title: LDGM-Based Quantum Codes for Fault-Tolerant Quantum Computation
+
+URL Source: https://arxiv.org/pdf/2607.15159v2
+
+Published Time: Tue, 21 Jul 2026 02:04:07 GMT
+
+Number of Pages: 33
+
+Markdown Content:
+LDGM-Based Quantum Codes for Fault-Tolerant Quantum Computation 
+
+Yumin Li 1, Kejing Liu 2, Hanqing Lou 3, and Javier Garcia-Frias 1
+
+> 1
+
+Department of Electrical and Computer Engineering, University of Delaware; 2Verizon; 3InterDigital Email: {liyumin,jgf }@udel.edu 
+
+Abstract 
+
+We construct a new family of Calderbank-Shor-Steane (CSS) codes using the generator and parity-check matrices of Low-Density Generator Matrix (LDGM) codes, with row operations applied to both matrices in order to achieve the desired quantum rate. Decoding is performed in an iterative manner, by applying message passing over the associated graph, and discrete Density Evolution (DDE) is used to optimize performance in the depolarizing channel. The proposed construction offers high flexibility and easiness in the design, producing quantum codes that possess excellent error correction capabilities. By properly designing the structure of the code, we are able to control and bound the weight of the stabilizer generators to a small value, which results in codes particularly well suited for fault-tolerant quantum computation. At the same time, these codes achieve very good performance in terms of error correction capability. 
+
+Index Terms 
+
+Quantum error correction, CSS codes, LDGM codes, fault-tolerant quantum computation. 
+
+I. I NTRODUCTION 
+
+Quantum error-correcting codes and fault-tolerant quantum computation have drawn much interest during the last years. The first proposed schemes dealt with very short block lengths, and the error correction capabilities of these codes were far away from the achievable limits [1], [2]. An important class of quantum error-correcting codes, known as CSS codes, was proposed by Calderbank, Shor and Steane in [3], [4]. The CSS framework comprises a large number of particular quantum error-correcting codes and provides a unifying perspective. Even a more generalized class, the class of stabilizer codes, was proposed in [5]–[7], where it was shown that quantum error-correcting codes can be constructed based on classical block codes. 
+
+> This material is based upon work supported by the National Science Foundation under Grant CCF-2007689. The work was developed while all authors where at the University of Delaware. 2
+
+While these developments in quantum error correction were taking place, classical error-correcting codes were also developing at a very fast pace. The discovery of capacity approaching codes with reasonable encoder/decoder computational complexity, such as turbo codes [8] and low-density parity check (LDPC) codes [9], [10], was one of the most important developments in coding during the 1990’s. Turbo-like codes have been successfully applied in many different communications problems, and also to construct quantum error correcting codes. The first quantum codes based on LDPC codes appeared in [11]–[14]. Of special interest were the results in [12], where CSS sparse-graph codes making use of iterative decoding were introduced. The codes in [12] were based on classical LDPC codes with specific constraints required by the CSS construction, and easily outperformed existing quantum codes, since large block lengths could be constructed. Decoding was performed by using iterative techniques. The quantum rate could be easily adjusted, but the code structure utilized in [12] to satisfy the CSS constraints led to some performance degradation. Motivated by [12], in [14]–[16] we proposed novel quantum error-correcting codes based on the use of the generator and parity-check matrices of LDGM codes. Classical LDGM codes [17]– [19] are a special class of LDPC codes with a sparse generator matrix. Therefore, they can be decoded with the same complexity as standard LDPC codes, but the encoding complexity is much less. The rationale of the proposed quantum error-correcting codes is that in systematic LDGM codes the generator matrix and the parity check matrix are both low density and orthogonal to each other. This provides a high degree of flexibility in the construction of quantum codes, since the CSS constraints can be easily satisfied by using these matrices. Importantly for fault-tolerant quantum computation, the stabilizer generators of these codes have small (bounded) weight and so do the encoded ¯X and ¯Z operators. This is very relevant, since the number of physical gates required to realize encoded Clifford operators is highly dependent on the weight of ¯X and ¯Z
+
+[20], [21]. In particular, the number of physical CNOTs required to implement logical gates increases with the weight, which amplifies error propagation and raises the probability of gate failures during quantum computation. Recent work in quantum LDPC codes has studied constructions that are asymptotically optimal and achieve a minimum distance that increases linearly with the block length [22]–[24]. Thus, the choice of LDGM codes may at first appear questionable, as their minimum distance is, by definition, small and independent of the block length, which will lead to error floors. However, as explained by MacKay in [12], “Much of coding theory, including the founding papers of 
+
+> DRAFT 3
+
+quantum coding theory, emphasizes the number of errors that can be corrected by a code–an emphasis which leads to one trying to make codes that have large minimum distance. However, distance is not everything”, and the minimum distance does not need to increase with the block length for a code to correct (asymptotically) almost all of the errors up to the theoretical limit: quoting [12] again “if our goal is simply to make a code whose error probability is smaller than some figure such as 10 −6 or 10 −20 then there is no reason why the distance has to grow at all with blocklength”. Indeed, as in classical LDGM codes [17]–[19], [25]–[27], we will see in the sequel that the trade-off between convergence threshold and error floor appearing in our proposed quantum LDGM codes can be kept under control to obtain excellent performance in terms of error rate, even when they are designed for fault-tolerant computation. The objective of this paper is to construct simple random-like LDGM-based quantum codes with excellent error correction capabilities, and which can be successfully used for fault-tolerant quantum computation. In order to achieve this goal, we expand the work in [14]–[16] in several directions: i) we show how exploiting the correlation between the binary representation of the Pauli errors introduced by a depolarizing channel leads to substantial improvements in performance, ii) we introduce an optimization technique based on the use of Discrete Density Evolution (DDE) [28], which facilitates the design of better codes, and iii) more importantly, we design codes that not only show excellent error correction capabilities but are also perfectly suited for fault-tolerant computation. The remainder of this paper is as follows. Section II provides a brief overview of stabilizer and CSS codes, and presents the key idea that allows the use of classical LDGM codes to generate CSS codes, discussing also how decoding is performed. Section III describes the proposed structure in detail and Section IV proposes a novel design to utilize LDGM quantum codes for fault-tolerant computation. Section V studies the decoding modifications required to deal with the depolarizing channel, while Discrete Density Evolution (DDE) is developed in Section VI. Simulation results illustrating the excellent performance of the proposed codes are provided in Section VII. Finally, Section VIII concludes the paper. II. Q UANTUM ERROR -C ORRECTING CODES BASED ON LDGM C ODES 
+
+A. Classical Low-Density Generator Matrix Codes 
+
+Systematic LDGM codes are linear codes with a sparse generator matrix ˜G = [ I P ], so that the output bits o = [ o1 . . . o L]T are obtained from the input bits, u = [ u1 . . . u K ]T as oT = uT ˜G =
+
+> DRAFT 4
+
+[uT uT P ]. Since LDGM codes are a specific class of LDPC codes—their parity-check matrix 
+
+˜H = [ P T I] is also sparse—they can be decoded in exactly the same manner, using message passing algorithms such as belief propagation [29] or the sum-product algorithm [30]. These algorithms operate on graphs representing the parity-check matrix or the equation c = P T u,where c is the vector of parity bits generated at the encoder, P is the non-systematic part of the generator matrix, and u is the information message. This framework also accounts for non-systematic LDGM codes, where the input bits are not part of the output bits, i.e., ˜G = P . During decoding, message passing utilizes prior knowledge of u, noisy observations of c (c′), and—for systematic codes—noisy observations of u (u′). Depending on the ratio between K and L and the presence of input bits in the output, an LDGM code can function as either a channel code or a source code. We define (x, y ) regular LDGM codes as those where the degrees of the input and parity bit nodes are x and y, respectively. It is well known that systematic regular LDGM codes are asymptotically bad [10]. This was corroborated in [17], [18], where it was shown that the use of single regular LDGM codes always leads to error floors which do not improve with block length. However, the trade-off between convergence threshold and error floor can be managed by properly selecting the node degrees. Moreover, a significant reduction in the error floor can be achieved by serially concatenating two regular LDGM codes [17], [18] or by using a parallel concatenation scheme [26], [27]. The resulting performance for concatenated LDGM codes over classical BSC and AWGN channels is, as shown in [17], [18], [26], comparable to that of irregular LDPC and turbo codes, but with a very low encoding/decoding complexity. 
+
+B. Stabilizer Codes 
+
+Stabilizer codes [5] are defined by a set of N −K “stabilizer generators” S = {Si}, which is a set of independent 1 Pauli operators on N qubits such that any two operators in the set commute and −I⊗N /∈ S. A quantum codeword is defined as a state |ψ⟩ that is a +1 eigenstate of all the stabilizer generators (i.e., Si|ψ⟩ = |ψ⟩ for all i.) The set of all codewords, or codespace, is a subspace of dimension 2K . Due to the properties of the Pauli operators, a given Pauli error operator Eα on N qubits either commutes or anticommutes with each stabilizer generator 
+
+Si. Then, the syndrome of Eα is defined as the “commutation status” (either commute or 
+
+> 1Independent in the sense that none of them can be expressed as a product of other generators (up to a global phase).
+> DRAFT 5
+
+anticommute) of Eα with respect to all the generators, and is completely independent of the quantum state |ψ⟩.A Pauli operator on N qubits can be written uniquely as a product of an X-containing operator (i.e., using only Pauli matrices X and I), a Z-containing operator, and a phase factor (+1 , −1, i 
+
+or −i). Then, discarding the phase, the X- ( Z-) containing operator can be expressed as a binary string of length N , with ‘1’ standing for X (Z) and ‘0’ for I. For instance, XIY ZY I =
+
+−(XIXIXI ) × (IIZZZI ) = (101010 |001110) . In this way, we can represent each generator stabilizer as a binary vector, and write the set of generators as a binary matrix A = ( A1|A2),where row j of A1 (A2) corresponds to the X- ( Z-) containing operator of stabilizer generator 
+
+j. With this binary representation, the commutativity between stabilizers can be expressed as 
+
+A1AT 
+
+> 2
+
++ A2AT 
+
+> 1
+
+= 0 (mod 2) . (1) Similarly, a Pauli error operator E′ 
+
+> α
+
+can be interpreted as a binary string e′ 
+
+> α
+
+=
+
+⎛⎝ ex
+
+ez
+
+⎞⎠ of length 2N . By exchanging the X and Z operators in E′
+
+> α
+
+, the ordinary dot product (mod 2) of 
+
+eα =
+
+⎛⎝ ez
+
+ex
+
+⎞⎠ with a row of the matrix A is 0 if E′ 
+
+> α
+
+and the stabilizer represented by that row commute, and 1 otherwise. Thus, the quantum syndrome for the error operator E′ 
+
+> α
+
+is exactly the classical syndrome Ae α, where matrix A = ( A1|A2), called quantum parity check matrix, acts as the classical parity check matrix and eα as the binary error pattern. Therefore, we can conclude that from any binary matrix (A1|A2) of size MQ × 2N satisfying (1), it is possible to construct a quantum code that encodes K = N − MQ qubits in N physical qubits. 
+
+C. CSS Codes 
+
+Calderbank-Shor-Steane (CSS) codes [3], [4] are an important subfamily of stabilizer codes. Their quantum parity-check matrix has the form 
+
+A = ( A1|A2) = 
+
+⎛⎝ H 00 G
+
+⎞⎠ , (2) with GH T = 0 , which implies HG T = 0 . Notice that this assumption guarantees that condition (1) is always satisfied in CSS codes, and thus CSS codes are a special class of stabilizer codes. CSS constructions based on the use of appropriate classical codes can be found in [31]–[37]. 
+
+> DRAFT 6
+
+D. Construction of LDGM-Based CSS Codes 
+
+From the previous development, it is clear that in order to build “good” quantum codes we just need to design “good” classical binary codes with parity-check matrix A = ( A1|A2) satisfying (1). Notice that this is different from the design of classical LDPC-like codes, since (1) imposes important constraints in the code design. The first quantum codes based on LDPC codes appeared in [11]–[14]. Of special interest are the results in [12], where classical LDPC codes were used to construct matrix A, and the proposed codes easily outperformed previous quantum codes. Specifically, the quantum parity check matrix of these codes, named Dual-Containing Low-Density Parity-Check codes (DC-LDPC), satisfies G = H in (2), with the constraints that i) every row in H has weight k and every column has weight j; ii) every pair of rows in H has an even overlap, and every row has even weight. These constraints guarantee that (1) is satisfied. The quantum rate of DC-LDPC codes can be easily adjusted, but the restrictions introduced by their special (dual-containing) matrix structure lead to significant performance degradation with respect to classical LDPC codes with optimized parity-check matrices. The idea we proposed in [14], [15] is to allow more degrees of freedom for the quantum parity check matrix A by using the generator and the parity-check matrix of classical systematic LDGM codes in CSS codes. As explained before, the rationale for utilizing LDGM codes is that both the parity check matrix ˜H
+
+and the generator matrix ˜G of an LDGM code are sparse and easy to build. More importantly, 
+
+˜H and ˜G are orthogonal by definition (i.e., ˜G ˜HT = 0 ), which forces the compliance of ( 1). The first intuitive idea would be to directly use ˜H and ˜G in (2). However, the resulting matrix 
+
+˜A would have size N × 2N , and, therefore, it could not be used for encoding purposes, since the resulting quantum rate would be 0. In order to get a valid quantum code, we need to reduce the number of rows, while keeping the constraint (1). The simplest way to do this is to puncture several rows of matrix ˜G. However, the systematic structure of ˜G makes it impossible to decode successfully in this case, since puncturing ˜G = [ I P ] leads to a new matrix where some columns have degree 0. The technique we proposed in [14], [15] to construct quantum codes from matrix 
+
+˜A is to perform linear row operations on both ˜G and ˜H to reduce the number of rows. The following theorem details the process. 
+
+Theorem Let ˜H = [ P T I] of size n1 × N and ˜G = [ I P ] of size n2 × N be the parity-check matrix and the generator matrix for a given classical linear block code C, respectively (i.e., n1 + n2 = N ). Define H = M1 ˜H and G = M2 ˜G, where M1 has size m1 × n1 such that 
+
+> DRAFT 7
+
+m1 < n 1, and the size of M2 is m2 × n2 such that m2 < n 2. The matrix 
+
+A =
+
+⎛⎝ H 00 G
+
+⎞⎠
+
+of size (m1 + m2) × 2N is the parity-check matrix of a quantum CSS code with quantum rate 
+
+RQ = KN , where K = N − m1 − m2.
+
+Proof: Since ˜G ˜HT = 0 , GH T = ( M2 ˜G)( M1 ˜H)T = M2( ˜G ˜HT )M T 
+
+> 1
+
+= 0 . Therefore, the CSS constraint is preserved, and the quantum rate can be adjusted by appropriately selecting matrices 
+
+M1 and M2.
+
+E. Decoding of LDGM-Based CSS Codes 
+
+Decoding is performed by applying the belief propagation/sum-product algorithm [29], [30] on the graph defined by matrix A
+
+⎛⎝ sx
+
+sz
+
+⎞⎠ =
+
+⎛⎝ H 00 G
+
+⎞⎠⎛⎝ ez
+
+ex
+
+⎞⎠ , (3) where sx is the vector of syndromes measured using the X-containing stabilizer generators defined in matrix H and sz is the vector of syndromes measured using the Z-containing stabilizer generators defined in matrix G. Notice that if errors ex and ez are independent, decoding for the H and G matrices can be performed independently on the graphs defined by sx = He z (Z-decoder) and sz = Ge x (X-decoder), respectively. Fig. 1 represents the decoding graph for matrix 
+
+H, consisting of the X-containing stabilizer generators, utilized to decode ez , i.e., the Z-decoder. A similar process is performed for matrix G, consisting of the Z-containing stabilizer generators, to decode ex (X-decoder). Focusing on matrix H, to simplify notation in Fig. 1 we denote the syndrome by s and the error pattern by e. They are related by s = He = M1 ˜He = M1[P T I]e.In order to construct the graph in Fig. 1, we split the error pattern e into two parts e1 and e2,and relate it to the syndrome in a two-step process 
+
+d = [ P T I]e = [ P T I]
+
+⎛⎝ e1
+
+e2
+
+⎞⎠ = P T e1 + e2 (4) 
+
+s = M1d. (5) The section in the lower part of the graph (lower layer) in Fig. 1, where information is exchanged between nodes e1 and c, and between nodes e2/c and d, is defined by (4) and can be               
+
+> DRAFT 8
+> Fig. 1: Decoding graph for matrix H, consisting of the X-containing stabilizer generators, utilized to decode ez
+> (Z-decoder) if errors exand ezare independent. To simplify notation, we denote the syndrome sxby sand the error pattern ezby e.
+
+seen as a classical non-systematic LDGM code performing source coding to generate parity bits 
+
+d from input e when the non-systematic part of the generator matrix (as defined in Section II.A) is [P T I]T . On the other hand, the upper part of the graph (upper layer) in Fig. 1, specified in detail the sequel (Section III.A, Fig. 2), is defined by (5) and can be seen as a classical LDPC code with syndromes s and parity bits d.For decoding, we apply belief propagation over the graph defined in Fig. 1. Notice that the syndrome s is known exactly from the quantum decoding circuit, and the a priori probability of the error pattern e can be calculated according to the quantum channel. However, there is no information about the middle layer of the graph. In other words, we do not have any a priori 
+
+information about variables c or d, which introduces difficulties in the first decoding iterations. In order to overcome this problem, we utilize the doping [38] technique in matrix M1. That is, we introduce some degree-1 syndrome nodes, which propagate correct information to some nodes of d, and push the iterative decoding in the right direction. It is important to mention that decoding based on the graph presented in Fig. 1 is different from decoding based on the final matrix H. The reason is that the product of M1 and ˜H eliminates some edges and introduces more cycles 2, thus degrading the performance of iterative decoding methods. 
+
+> 2Notice that the decoding structure based on Fig. 1 is similar to a serial concatenated LDGM scheme in classical error correction, where decoding of the overall code also results in worse performance [19].
+> DRAFT 9
+
+III. P ROPOSED STRUCTURE 
+
+In order to simplify the code design, we force matrix P T to have the same degree distribution for nodes c and e1 (obviously, this implies n1 = n2 = N/ 2, see Fig. 1), so that the degree distribution of P is the same as that of P T . In this way, the results for the decoding of ez errors using matrix H (Z-decoder) are statistically the same as the results obtained for the decoding of 
+
+ex errors using matrix G (X-decoder), and, if errors ex and ez are independent (something that does not occur for a depolarizing channel), we just need to simulate either the X-decoder or the 
+
+Z-decoder. For matrices M1 and M2, we fix M1 = M2 = M so that m = m1 = m2 = N −K 
+
+> 2
+
+. As mentioned above and described in detail next, we apply doping. 
+
+A. Proposed Upper Layer Structure: Doping 
+
+Fig. 2 shows the proposed upper layer structure (matrix M ). As mentioned above, we utilize 
+
+doping [38], introducing Na degree-1 syndrome nodes in the associated graph, referred to as doping syndrome nodes or sA syndrome nodes. These nodes propagate “correct” messages to the 
+
+d nodes they are connected to ( dA nodes), pushing the iterative decoding in the right direction during the first decoding iterations. Notice that for a given dA node connected to a specific sA
+
+node, the messages propagated downwards to the c and e2 nodes are independent of the messages that node dA receives from other non-doping syndrome nodes. Moreover, messages passed from a dA node to non-doping syndrome nodes will never lead to an improved performance for the iterative decoder. Therefore, as shown in Fig. 2 a dA node should only be connected to an sA
+
+node. Notice that there is an important design trade-off in the number of doping/ sA syndrome nodes: If there are too few sA nodes, the iterative decoding process lacks sufficient “correct” information to be pushed in the right direction during the first decoding iterations, and in that sense it is desirable for the number of doping syndrome nodes to be high. However, if too many sA nodes are introduced, the degree of the remaining non-doping syndrome nodes has to increase significantly if the density of 1’s in matrix M (number of edges in the graph associated with matrix M ) is fixed. This makes the messages coming from these high-degree non-doping syndrome nodes less reliable, which negatively affects the performance of the iterative decoder. The choice of the number of doping/ sA syndrome nodes is, therefore, a trade-off between these two effects.                                            
+
+> DRAFT 10
+> Fig. 2: Graph associated with proposed matrix M. Each doping/ sAsyndrome node is connected to one dnode (dAnode). sBsyndrome nodes have degree two, while all sCsyndrome nodes have degree ws. Each dBnode is connected to only one sBnode, while dCnodes are connected only to nodes sC. All dBand dCnodes have degree
+> wd. For a fixed value of Kand N, the parameters to optimize are wdand the number of sAand sBnodes ( Na
+> and Nb, respectively). wsand the number of sC,dA,dBand dCnodes are fixed given the parameters above.
+
+To address this trade-off, as shown in Fig. 2, our proposed structure utilizes Nb non-doping syndrome nodes of degree 2, sB nodes. Notice that the degree of sB nodes is higher than that of 
+
+sA nodes, but lower than that of the Nc remaining syndrome nodes ( sC nodes, all with degree 
+
+ws). Therefore, sB nodes do not convey messages as correctly as degree-1 sA doping nodes, but their messages are more accurate than those of sC nodes. Utilizing a combination of sA, sB ,and sC syndrome nodes provides more flexibility in code design and softens the aforementioned trade-off. For instance, if Na + Nb is fixed, and the overall number of connections between s
+
+and d nodes is also fixed, increasing the value of Nb results in a smaller value for ws, increasing the accuracy of the messages proceeding from the sC nodes. To ensure that the more reliable messages proceeding from sB nodes propagate to the highest possible number of d nodes, we do not allow any node d to be connected to more than one sB
+
+node. Thus, each one of the 2Nb dB nodes connected to sB nodes will receive one relatively reliable message from a sB node among its wd incoming messages. As we will see in the sequel, this structure of matrix M will have to be modified in order to design codes well suited for fault-tolerant quantum computation. 
+
+B. Proposed Lower Layer Structure: Regular LDGM Codes 
+
+As explained before, ˜G and ˜H are, respectively, the generator and parity-check matrices of a regular LDGM code. For simplicity, we just consider regular matrices P in Fig. 1 with size  
+
+> DRAFT 11
+> N
+> 2
+
+× N 
+
+> 2
+
+(n1 = N 
+
+> 2
+
+) and degrees (y, y ). An important characteristic of the proposed structure is the presence of error floors that do not decrease with the block length. These error floors were analytically studied for very simple quantum channels in [39]. IV. D ESIGN OF CODES WELL -S UITED FOR FAULT -T OLERANT QUANTUM COMPUTATION 
+
+In order to develop good fault-tolerant schemes, it is important to be able to implement logical gates with few physical gates. In particular, it is desirable to design codes so that the K
+
+encoded/logical ¯Z operators and the K encoded/logical ¯X operators have few positions different from I. Equivalently, the binary representation of these operators, ¯Z and ¯X, both of dimension 
+
+K × 2N , should have low weight for all their rows. It is well known that the parity-check matrix of any [N, K ] CSS code can be expressed, through Gaussian elimination and simultaneous column permutation in the X and Z sections, as  
+
+> N−K
+> 2
+
+⏟⏞⏞⏟ N −K
+
+> 2
+
+⏟⏞⏞⏟ K
+
+⏟⏞⏞⏟ N −K
+
+> 2
+
+⏟⏞⏞⏟ N −K
+
+> 2
+
+⏟⏞⏞⏟ K
+
+⏟⏞⏞⏟[︄]︄   
+
+> N−K
+> 2
+
+{ I A1 A2 0 0 0  
+
+> N−K
+> 2
+
+{ 0 0 0 D I E, (6) so that the encoded/logical ¯X operators and the encoded/logical ¯Z operators are obtained as 
+
+¯X =[︂ 0 ET I 0 0 0]︂ 
+
+¯Z =[︂ 0 0 0 AT 
+
+> 2
+
+0 I]︂ .
+
+(7) For the CSS codes proposed in the previous section with M1 = M2 = M , the parity-check matrix is given as 
+
+A =
+
+⎡⎣ M 00 M
+
+⎤⎦⎡⎣ P T I 0 00 0 I P
+
+⎤⎦ =
+
+⎡⎣ M P T M 0 00 0 M M P 
+
+⎤⎦ , (8) where the matrix P can be defined as 
+
+P = 
+
+> N−K
+> 2
+
+⏟⏞⏞⏟ K
+
+> 2
+
+⏟⏞⏞⏟[︄]︄   
+
+> N−K
+> 2
+
+{ P11 P12  
+
+> K
+> 2
+
+{ P21 P22 
+
+.      
+
+> DRAFT 12
+> Fig. 3: Graph associated with the matrix Mutilized in the upper layer for the design of codes well suited for fault-tolerant quantum computation. In the lower layer, matrix Pis modified by forcing P22 = 0 .
+
+Different from the previous section, for reasons that will be clear shortly we modify the structure of matrix M , which is now defined as 
+
+M =[︂ I M ′]︂ , M ′ = Na{  
+
+> N−K
+> 2
+
+− Na{
+
+⎡⎣ 0
+
+M ′′ 
+
+⎤⎦ ,
+
+so that 
+
+M =
+
+⎡⎣ I 0 00 I M ′′ 
+
+⎤⎦ , (9) where the column weight of matrix M ′ is wd, and M ′ has additional constraints as defined in its corresponding graph shown in Fig. 3. Substituting (9) into (8), the parity-check matrix of the proposed fault-tolerant CSS codes takes the following form  
+
+> N−K
+> 2
+
+⏟ ⏞⏞ ⏟ K
+
+> 2
+
+⏟ ⏞⏞ ⏟ N −K
+
+> 2
+
+⏟⏞⏞⏟ K
+
+> 2
+
+⏟⏞⏞⏟ N −K
+
+> 2
+
+⏟⏞⏞⏟ K
+
+> 2
+
+⏟⏞⏞⏟ N −K
+
+> 2
+
+⏟ ⏞⏞ ⏟ K
+
+> 2
+
+⏟ ⏞⏞ ⏟[︄]︄   
+
+> N−K
+> 2
+
+{ P T 
+
+> 11
+
++ M ′P T 
+
+> 12
+
+P T 
+
+> 21
+
++ M ′P T 
+
+> 22
+
+I M ′ 0 0 0 0  
+
+> N−K
+> 2
+
+{ 0 0 0 0 I M ′ P11 + M ′P21 P12 + M ′P22 
+
+.
+
+We now aim to transform this parity-check matrix into the standard form given in (6). To achieve this, it suffices to permute certain columns of the matrix. However, to preserve the symplectic structure of the CSS code, any column permutation applied to the X part must also be applied to the corresponding columns of the Z part. Therefore, we move the third column blocks of both parts to the first column position to obtain the standard form of the proposed code as  
+
+> DRAFT 13
+> N−K
+> 2
+
+⏟⏞⏞⏟ N −K
+
+> 2
+
+⏟ ⏞⏞ ⏟ K
+
+> 2
+
+⏟ ⏞⏞ ⏟ K
+
+> 2
+
+⏟⏞⏞⏟ N −K
+
+> 2
+
+⏟ ⏞⏞ ⏟ N −K
+
+> 2
+
+⏟⏞⏞⏟ K
+
+> 2
+
+⏟⏞⏞⏟ K
+
+> 2
+
+⏟ ⏞⏞ ⏟[︄]︄ 
+
+(N − K)/2{ I P T 
+
+> 11
+
++ M ′P T 
+
+> 12
+
+P T 
+
+> 21
+
++ M ′P T 
+
+> 22
+
+M ′ 0 0 0 0(N − K)/2{ 0 0 0 0 P11 + M ′P21 I M ′ P12 + M ′P22 
+
+.
+
+(10) By comparing (10) with (6), we identify the corresponding submatrices in (6) as 
+
+A1 = P T 
+
+> 11
+
++ M ′P T
+
+> 12
+
+A2 =[︁ P T 
+
+> 21
+
++ M ′P T 
+
+> 22
+
+M ′]︁ 
+
+D = P11 + M ′P21 
+
+E = [ M ′ P12 + M ′P22 ] .
+
+The parity-check matrix of the proposed fault-tolerant CSS codes is obtained by substituting these submatrices into (6), and making P22 = 0 , which introduces additional constraints in the general structure discussed in the previous section. From (7), the encoded/logical ¯X and ¯Z
+
+operators are then 
+
+¯X =
+
+⎡⎣ 0 M ′T I 0 0 0 0 00 P T 
+
+> 12
+
+0 I 0 0 0 0
+
+⎤⎦
+
+¯Z =
+
+⎡⎣ 0 0 0 0 P21 0 I 00 0 0 0 M ′T 0 0 I
+
+⎤⎦ .
+
+Notice that the weight of half of the encoded/logical ¯X operators is determined by the row weight of submatrix P T 
+
+> 12
+
+or, equivalently, by the column weight of submatrix P12 which is y
+
+when we consider a regular LDGM code of degrees (y, y ) (recall that P22 = 0 ). Thus, the weight of this half of the ¯X operators will always be y + 1 . The weight of the other half of the encoded/logical ¯X operators is determined by the row weight of matrix M ′T or, equivalently, by the column weight of matrix M ′, which as explained before is wd, the degree of the nodes d
+
+that are connected to more than one syndrome node (see Fig. 3). Thus, the weight of this other half of the ¯X operators will be wd + 1 . Notice that the reason M was defined as specified in Fig. 3 was to fix the weight of half of the ¯X operators to wd + 1 , where wd can be seen as a design parameter that has to be chosen properly. For instance, if wd = y, the weight of all 
+
+> DRAFT 14
+
+the encoded/logical ¯X operators is y + 1 . A similar argument holds for the encoded/logical ¯Z
+
+operators. V. M ODIFIED DECODER FOR THE DEPOLARIZING CHANNEL 
+
+Our focus in this paper is on the depolarizing channel, where Pauli errors X, Y and Z each occur with probability p/ 3, and p is the depolarizing parameter. Thus, the errors ex and ez are correlated. Therefore, in order to optimize performance 3 this correlation has to be exploited in the decoding process. The key is to iteratively exchange information between the X-decoder and the Z-decoder based on the graph depicted in Fig. 4, in a manner very similar to the case of distributed turbo-like coding of correlated sources in classical coding, an area pioneered by one of the authors [17], [40]–[43]. Specifically, the message passed from the kth node of the X-decoder, exi,k , to the kth node of the Z-decoder, ez
+
+> ˆi,k
+
+, where i, ˆi ∈ { 1, 2},ˆi = 3 − i, is given by 
+
+pez 
+
+> ˆi
+> k
+
+∝ pexi 
+
+> k
+
+P (ez = 1 , e x = 1) + (1 − pexi 
+
+> k
+
+)P (ez = 1 , e x = 0) = p
+
+3pexi 
+
+> k
+
++ p
+
+3(1 − pexi 
+
+> k
+
+)1 − pez 
+
+> ˆi
+> k
+
+∝ pexi 
+
+> k
+
+P (ez = 0 , e x = 1) + (1 − pexi 
+
+> k
+
+)P (ez = 0 , e x = 0) = p
+
+3pexi 
+
+> k
+
++ (1 − p)(1 − pexi 
+
+> k
+
+),
+
+(11) where we have used the fact that in a depolarizing channel P (ez = 0 , e x = 0) = 1 − p and 
+
+P (ez = 1 , e x = 0) = P (ez = 0 , e x = 1) = P (ez = 1 , e x = 1) = p 
+
+> 3
+
+. pexi 
+
+> k
+
+= P (exi,k = 1) is calculated in the X-decoder including all the messages proceeding from the nodes below the corresponding node exi,k but excluding the prior probability, P (ex = 1) = 2 p/ 3. Then, the value of pez 
+
+> ˆi
+> k
+
+obtained in (11) is used in the Z-decoder as a priori probability of a Y - or Z-error in the corresponding qubit in lieu of the prior P (ezk = 1) = 2 p/ 3, which is no longer utilized. Denoting by Lexi 
+
+> k
+
+= log 1−pexik
+
+> pexik
+
+, we can easily obtain Lez 
+
+> ˆi
+> k
+
+= log 1−pez
+
+> ˆik
+> pez
+> ˆik
+
+as a function of Lexi
+
+> k
+
+Lez 
+
+> ˆi
+> k
+
+= log 1 + 3 eLexik +Lp
+
+1 + eLexik
+
+, with Lp = log 1 − pp . (12) The message passed from the Z-decoder to the X-decoder is obtained by substituting x by z (and vice versa) in (12).   
+
+> 3If the correlation is ignored, decoding can be performed independently in the X- and the Z-decoders as defined in Fig. 1. The price to pay will be performance degradation, which we will assess in the sequel.
+> DRAFT 15 Correlation
+
+Fig. 4: Decoding graph for a CSS code with matrices H = M1[P T I] and G = M2[I P ] utilized in the depolarizing channel. The upper part of the graph ( Z-decoder) and the lower part of the graph ( X-decoder) exchange information to exploit the correlation existing between errors ez and ex. In our development, M1 = M2 = M .
+
+VI. D ISCRETE DENSITY EVOLUTION 
+
+We now implement Discrete Density Evolution, DDE, originally proposed in [28] for classical codes, to predict the performance of the proposed LDGM-based quantum codes. Although DDE is a standard tool commonly used in classical coding, to our knowledge it has never been discussed in the quantum coding literature. 
+
+A. DDE in Classical vs Quantum LDPC/LDGM Codes 
+
+Let us first consider a classical regular LDGM code, with its associated graph representing equation c = GTc u, where Gc is the non-systematic section of the generator matrix. Input bit nodes u = ( u1, u 2, . . . , u K )T have degree dv and parity bit nodes c = ( c1, c 2, . . . , c M )T have degree dc. In addition to prior knowledge about u, the noisy observations of c (denoted as c′), and—for systematic codes—also the noisy observations of u (denoted as u′), are available for decoding 4.    
+
+> 4The LDGM code may be used as either a channel or a source code, depending on whether the output bits contain the input bits in addition to the parity bits, as well as on the ratio between Kand M.
+> DRAFT 16
+
+Let v = log P (u=0)   
+
+> P(u=1)
+
+be the LLR message transferred from a generic input bit node to an associated parity bit node, and w the LLR message from a generic parity bit node to an associated input bit node. DDE follows the evolution of the discretized version of the probability density functions (referred to as probability mass functions in the sequel) of u and v as the messages are exchanged in the associated graph. Notice that for a classical LDPC code, which can be represented by a graph associated with equation 0 = Hpc, where Hp is now the parity-check matrix and c is a codeword, DDE can be seen as a particular case of DDE for LDGM codes, since the equation for LDPC codes is a particular case of that of LDGM codes when the left-hand side of c = GTc u is 0, and in the right-hand side u = c and GTc = Hp. Thus, next section presents DDE for the most general case of classical LDGM codes, and in the sequel the DDE equations will be particularized for the specific graph section under consideration. It is important to remark that, for classical LDPC codes, the graph mentioned in the previous paragraph (associated with equation 0 = Hpc, where c is a codeword and c′ = c ⊕ e), is different from the one usually used in message passing, which corresponds to equation s = Hpe, where s
+
+is the syndrome vector and e is the error pattern vector. However, both equations are equivalent. In the quantum case, the latter equation has perfect physical meaning and is associated with (4,5) and the graph depicted in Fig. 1 by considering e =
+
+⎛⎝ e1
+
+e2
+
+⎞⎠ and Hp = M1[P T I]. The syndrome s is obtained through quantum measurements and e =
+
+⎛⎝ e1
+
+e2
+
+⎞⎠ corresponds to the binary representation of the quantum error operators. Because of the aforementioned equivalence between the two equations in the classical domain, even though 0 = Hpc, with c′ = c ⊕ e, has no physical meaning in the quantum domain, the error predictions obtained by applying DDE on its corresponding graph will also predict the error probability when message passing is performed on the graph associated with s = Hpe,which is the one we utilize to decode our proposed quantum codes (see Fig. 1). The reason to perform DDE on the graph corresponding to 0 = Hpc, where as indicated before Hp = M1[P T I]
+
+(i.e., the same graph as in Fig. 1 but with all syndrome nodes equal to 0 and the bottom nodes being the transmitted classical codeword rather than the error pattern), is that, assuming that the all-zero sequence is transmitted, we can easily predict the node error probability from the probability mass functions of the exchanged messages. 
+
+> DRAFT 17
+
+B. DDE for Classical LDGM Codes 
+
+Coming back to message passing for classical LDGM codes, the LLR message v departing from an input bit node in the graph defined by equation c = GTc u is updated as [28] 
+
+v = 
+
+> dv−1
+
+∑︂ 
+
+> i=0
+
+wi, (13) where w0 is the prior LLR message associated with the corresponding input bit node, and wi,
+
+i = 1 , 2, . . . , d v −1 are the LLR messages proceeding from the associated parity bit nodes except for the one to which v is sent. The probability mass function of v is given as 
+
+P (v) = P (w0)⨂︂(︄  
+
+> dv−1
+
+⨂︂ 
+
+> i=1
+
+P (wi))︄ , (14) where ⨂︁ denotes the convolution operation. The LLR message exchanged from a parity bit node to an input bit node, w, is updated by the “tanh rule” in [44] and obtained as 
+
+tanh( w
+
+2 ) = 
+
+> dc−1
+
+∏︂ 
+
+> j=0
+
+tanh( vj
+
+2 ), (15) where vj , j = 1 , 2, . . . , d c − 1 are the LLR messages proceeding from the incident input bit nodes except for the message from the bit node where w is sent to, and v0 is the prior LLR message corresponding to the parity bit node. Expression (15) can be calculated iteratively as 
+
+w = R( v0, R( v1, R( v2, . . . , R( vdc−2, v dc−1)))) , (16) where the function R is defined as 
+
+R( a, b ) = Q(2 tanh −1(tanh a
+
+2 tanh b
+
+2)) , (17) and Q is a quantization function. The probability mass function of R( a, b ) is denoted as R(Pa, P b)
+
+and obtained as 
+
+R(Pa, P b) = Pc[k] = ∑︂ 
+
+> (i,j ): kδ =R( iδ,jδ )
+
+Pa[i]Pb[j], (18) where δ is the quantization step. Based on (16), (17) and (18), the probability mass function of the LLR message w, P (w) can be calculated in an iterative way. The a posteriori LLR message of an input bit node u, used to make a decision, is calculated as 
+
+LLR( u) = 
+
+> dv
+
+∑︂ 
+
+> i=0
+
+wi, (19) 
+
+> DRAFT 18
+
+and the probability mass function of LLR( u) is given by 
+
+P (LLR( u)) = P (w0)⨂︂(︄ 
+
+> dv
+
+⨂︂ 
+
+> i=1
+
+P (wi))︄ . (20) Assuming that the all zero sequence is transmitted, the probability of error for an input bit node is obtained as 
+
+Pe =∫︂ 
+
+> 0
+> −∞
+
+P(︁ LLR( u))︁ du. (21) 
+
+C. DDE for the Proposed CSS Codes 
+
+We now discuss DDE for the proposed CSS codes described in Figs. 1 and 2 5. We denote by 
+
+mch the prior LLR message (depending on the channel), with probability mass function pmch .
+
+m(r, t ) denotes the random variable representing the quantized LLR message exchanged from a node of class r to a node of class t (r, t ∈ { e1, e 2, c, d, s }). The probability mass function of 
+
+m(r, t ) is denoted as pm(r,t ). Extending the DDE technique in [28] to the graphs presented in Figs. 1 and 2, we can obtain the equations for the updating of the probability mass functions of the quantized LLR messages. As described in Section II.E, the lower part of the graph in Fig. 1, where information is exchanged between nodes e1 and c, and between nodes e2/c and d
+
+can be seen as a classical non-systematic LDGM code, while the upper layer in Fig. 1 can be seen as a classical LDPC code. The proper equations to be used in each section are specified in the sequel. From the final probability mass functions of the LLRs of e1 and e2, we can easily predict the probability of error. Recall that in the proposed codes matrix P is regular with size 
+
+n1 × n1, n1 = N/ 2, and degrees (y, y ).
+
+1) Lower Layer: Information Passing between Nodes e1 and c: The quantized LLR message exchanged from nodes e1 to nodes c, denoted as m(e1, c ), is the sum of the quantized LLR messages m(c, e 1) exchanged from nodes c to node e1 (except for node c where m(e1, c ) is sent to), and the prior LLR message (depending on the channel), denoted as mch . The probability mass function of m(e1, c ) is calculated as the discrete convolution of the probability mass functions of m(c, e 1) and the probability mass function of mch as 
+
+pm(e1,c ) = pmch ⨂︂(︄ 
+
+> y−1
+
+⨂︂ 
+
+pm(c,e 1))︄ , (22) 
+
+> 5A very similar development can be performed for the fault-tolerant quantum codes proposed in Section IV.
+> DRAFT 19
+
+where pmch denotes the probability mass function of the prior LLR message and is calculated as indicated in (43). The quantized LLR message exchanged from a node c to a node e1, m(c, e 1), is obtained by utilizing the “tanh rule” in [44], and the corresponding probability mass function is 
+
+pm(c,e 1) = R(︁ pm(d,c ), R y−1pm(e1,c ))︁ , (23) where pm(d,c ) is the probability mass function of the quantized LLR messages exchanged from nodes d to nodes c, calculated in (26), and Ry−1pm(e1,c ) is the probability mass function of the LLR message Ry−1(m(e1, c )) , calculated by applying (16) to v1 = v2 = · · · = vy−1 = m(e1, c ).
+
+Ry−1pm(e1,c ) is calculated by iteratively applying (17) and (18). 
+
+2) Lower Layer: Information Passing between Nodes e2/c and d: As shown in Fig. 1, there is only one connection between nodes e2 and nodes d. Thus, the quantized LLR message exchanged from a node e2 to a node d, denoted as m(e2, d ), is just the prior LLR message, mch . Then, the probability mass function of m(e2, d ) is the same as the probability mass function of mch 
+
+pm(e2,d ) = pmch , (24) where pmch is calculated as indicated in (43). The quantized LLR message exchanged from a node c to a node d is denoted as m(c, d ). We obtain it by utilizing the “tanh rule”, and calculate its probability mass function as 
+
+pm(c,d ) = Rypm(e1,c ), (25) where Rypm(e1,c ) is the probability mass function of the LLR message Ry(m(e1, c )) , calculated by applying (16) to v1 = v2 = · · · = vy = m(e1, c ). Rypm(e1,c ) is obtained by iteratively applying (17) and (18). In the middle layer shown in Fig. 1, the quantized LLR message exchanged from a node d
+
+to a node c is denoted as m(d, c ), and the quantized LLR message exchanged from a node d to a node e2 is denoted as m(d, e 2). The quantized LLR message m(d, c ) is obtained by utilizing the “tanh rule”, and contains the information of the quantized LLR message m(e2, d ) and the quantized LLR message m(d), which as explained in the sequel is the sum of all the incoming quantized LLR messages to a randomly chosen node d proceeding from nodes s. Specifically, 
+
+pm(d,c ) = R(︁ pm(d), p m(e2,d ))︁ , (26) where pm(d) is calculated as indicated in (38). 
+
+> DRAFT 20
+
+Similarly, the probability mass function of the LLR messages exchanged from nodes d to nodes e2, m(d, e 2), can be calculated as 
+
+pm(d,e 2) = R(︁ pm(d), p m(c,d ))︁ . (27) 
+
+3) Upper Layer: Information Passing between Nodes d and s, and calculation of pm(d): In matrix M , nodes d are considered as parity bit nodes and nodes s are syndrome nodes. From Fig. 2, we observe that each node sA is connected to a single node dA, and vice versa. Each node sB has degree two, with both edges connected exclusively to nodes dB , while for each node dB one edge connects to a node sB and the remaining wd − 1 edges connect to nodes sC .Nodes dC are connected exclusively to nodes sC , while nodes sC may be connected to nodes 
+
+dB and dC .The probability mass function of m(sA, d A), the LLR message exchanged from a syndrome node sA to a node dA, is 
+
+pm(sA,d A) = pm(sA) = pm(s0), (28) where pm(sA) denotes the probability mass function of the LLR of a syndrome node sA. Since the syndromes are all zero (a codeword is to be recovered), pm(sA) = pm(s0), where pm(s0) is a delta at infinity. Syndrome nodes sB connect with two nodes dB , and also satisfy pm(sB ) = pm(s0). Therefore, the probability mass function of m(sB , d B ), the quantized LLR messages exchanged from nodes 
+
+sB to nodes dB , is 
+
+pm(sB ,d B ) = pm(dB ,s B ), (29) where pm(dB ,s B ) is calculated in (32). Syndrome nodes sC connect with nodes dB and dC . Assuming that the connections between the nodes are randomly set, and that the probability mass functions of the LLR messages m(sC , d B )
+
+and m(sC , d C ) are the same ( m(sC , d B ) = m(sC , d C ) = m(sC , d )), which are reasonable assumptions for the set of parameters under consideration, the probability mass function of the LLR messages departing from a node sC , m(sC , d ), can be calculated by applying the “tanh rule” as 
+
+pm(sC ,d ) = Rws−1pm(d,s C ), (30) 
+
+> DRAFT 21
+
+where ws is the degree of the nodes sC 6 and pm(d,s C ) is the probability mass function of an LLR message (chosen at random) arriving at a node sC from a node d. It can be calculated as 
+
+pm(d,s C ) = αdB pm(dB ,s C ) + αdC pm(dC ,s C ), (31) where pm(dB ,s C ) and pm(dC ,s C ) are calculated in (33) and (34), respectively, and αdB and αdC
+
+represent the fraction of edges arriving at a node sC from nodes dB and dC , respectively. Specifically 
+
+αdB = 2Nb(wd − 1) 2Nb(wd − 1) + ( N 
+
+> 2
+
+− Na − 2Nb)wd
+
+, αdC = 1 − αdB .
+
+There are two types of LLR messages departing from a node dB towards a syndrome node: i) the messages to nodes sB , m(dB , s B ), which combine wd − 1 incoming messages from nodes sC
+
+and the messages received in node dB from nodes c and e2, and ii) the messages to nodes sC ,which combine one incoming message from a node sB , wd − 2 incoming messages from nodes 
+
+sC , and the messages received in node dB from nodes c and e2. The probability mass functions of these messages are 
+
+pm(dB ,s B ) = R(︁ pm(c,d ), p m(e2,d ))︁ 
+
+> wd−1
+
+⨂︂ 
+
+pm(sC ,d ), (32) 
+
+pm(dB ,s C ) = R(︁ pm(c,d ), p m(e2,d ))︁⨂︂ pm(sB ,d B )
+
+> wd−2
+
+⨂︂ 
+
+pm(sC ,d ), (33) where pm(e2,d ), pm(c,d ), pm(sB ,d B ) and pm(sC ,d ) are calculated in (24), (25), (29) and (30), respec-tively. The quantized LLR messages exchanged from nodes dC to nodes sC , denoted as m(dC , s C ),consist of all the quantized LLR messages proceeding from connected nodes sC except from the one where m(dC , s C ) is sent to, and the LLR messages received in node dC from nodes c and 
+
+e2. Thus, the probability mass function of m(dC , s C ) is obtained as 
+
+pm(dC ,s C ) = R(︁ pm(c,d ), p m(e2,d ))︁ 
+
+> wd−1
+
+⨂︂ 
+
+pm(sC ,d ), (34) where pm(e2,d ), pm(c,d ), and pm(sC ,d ) are calculated in (24), (25), and (30), respectively.                          
+
+> 6In general, wsis not an integer: some nodes sCwill have degree ⌊ws⌋, while the degree for the other nodes sCwill be ⌈ws⌉. In such cases, pm(sC,d )=α⌊R⌊ws⌋− 1pm(d,s C)+α⌈R⌈ws⌉− 1pm(d,s C), where α⌊and α⌈are the fraction of edges departing nodes sCwith degrees ⌊ws⌋and ⌈ws⌉, respectively.
+> DRAFT 22
+
+As described when discussing the DDE in the lower layer, the quantized LLR message m(d),consisting of the sum of all the incoming quantized LLR messages arriving at a randomly chosen node d from connected nodes s, is required to obtain the probability mass functions of m(d, c )
+
+and m(d, e 2) in (26) and (27), respectively. Since nodes d are partitioned into the three categories 
+
+dA, dB , and dC , the probability mass function of m(d) is calculated as the weighted sum of the respective probability mass functions, pm(dA), pm(dB ), and pm(dC ).Taking into account that a node dA only receives an incoming message from a node sA, a node dB receives one message from a node sB and wd − 1 messages from nodes sC , and a node 
+
+dC receives all its wd messages from nodes sC , the corresponding probability mass functions are 
+
+pm(dA) = pm(sA,d A) = pm(s0), (35) where pm(s0) is a delta at infinity, independent of the iteration number. 
+
+pm(dB ) =
+
+> wd−1
+
+⨂︂ 
+
+pm(sC ,d )⨂︂ pm(sB ,d B ), (36) where pm(sB ,d B ) and pm(sC ,d ) are calculated in (29) and (30), respectively. 
+
+pm(dC ) =
+
+> wd
+
+⨂︂ 
+
+pm(sC ,d ). (37) Finally, for a randomly chosen node d, we obtain the probability mass function of m(d), to be used in (26) and (27), as 
+
+pm(d) = Na
+
+N/ 2 pm(dA) + 2Nb
+
+N/ 2 pm(dB ) + N/ 2 − Na − 2Nb
+
+N/ 2 pm(dC ). (38) 
+
+4) Predicted Error: Based on the final probability mass functions of the quantized LLR messages, after a sufficient number of iterations have been performed, we calculate the sum of all the quantized LLR messages into a given node e1 and e2, which are denoted as m(e1) for 
+
+e1, and m(e2) for e2. Since we are transmitting the all-zero sequence, the probability of error for a given node e1, Pe(e1), or e2, Pe(e2), can be calculated by integrating the discretized probability density function of m(e1) or m(e2), the final LLRs of e1 and e2, from negative infinity to zero 
+
+pm(e1) = pmch ⨂︂ pext m(e1), where pext m(e1) =(︄ 
+
+> y
+
+⨂︂ 
+
+pm(c,e 1))︄ (39) 
+
+Pe(e1) = ∫︂ 
+
+> 0
+> −∞
+
+pm(e1)(x)dx (40) 
+
+> DRAFT 23
+
+pm(e2) = pmch ⨂︂ pext m(e2), where pext m(e2) = pm(d,e 2) (41) 
+
+Pe(e2) = ∫︂ 
+
+> 0
+> −∞
+
+pm(e2)(x)dx. (42) 
+
+5) Exploiting the Correlation between ex and ez Errors: The development above does not exploit the correlation between the ex and ez errors introduced by the depolarizing channel. Indeed, up to now DDE has been performed independently for the X- and the Z-decoders, and in both decoders the probability mass function for the prior LLR message mch that depends on the depolarizing channel, pmch , used in (22, 24, 39, 41), has been calculated based on the marginals of the depolarizing channel. Specifically, recall from Section VI.A that in DDE we are using the notation e =
+
+⎛⎝ e1
+
+e2
+
+⎞⎠ to represent a codeword rather than an error vector, so that for the X-decoder 7 ei(x)′ = ei(x) ⊕ exi , i ∈ { 1, 2}, where ei(x) is a bit of the codeword, 
+
+ei(x)′ is the corrupted version, and exi = 1 represents an X or a Y error. Then, since we are transmitting the all-zero sequence ( ei(x) = 0 ), the probability mass of the observed, noisy, bit 
+
+ei(x)′ is P (ei(x)′ = 1) = 1 − P (ei(x)′ = 0) = p′, where p′ = 2p 
+
+> 3
+
+and p is the depolarizing parameter. Thus, random variable mch (x), where (x) indicates that we are using the X-decoder, is 
+
+mch (x) = log P (ei(x) = 0) 
+
+P (ei(x) = 1) =
+
+⎧⎨⎩
+
+log P (exi =0)    
+
+> P(exi=1)
+
+= log 1−p′ 
+
+> p′
+
+with prob. 1 − p′ (when ei(x)′ = 0) log P (exi =1)    
+
+> P(exi=0)
+
+= log p′ 
+
+> 1−p′
+
+with prob. p′ (when ei(x)′ = 1) .
+
+(43) In order to exploit the correlation between the ex and ez errors in DDE, we need to consider the relationship between Lez 
+
+> ˆi
+> k
+
+and Lexi 
+
+> k
+
+as defined in (12), so that rather than having independent decoders for the graphs associated with the H and G matrices, information from the X-decoder will be transferred to the Z-decoder and vice versa. Denoting by m(e1(x)) ext and m(e2(x)) ext the random variables of the extrinsic LLRs of e1
+
+and e2, defined in the X-decoder by probability masses pext m(e1(x)) and pext m(e2(x)) , calculated using (39) and (41), respectively, and taking into account that ei(x)′ = ei(x) ⊕ exi , we obtain random variable Lexi as  
+
+> 7The same development holds for the Z-encoder by exchanging x and z.
+> DRAFT 24
+
+Lexi = log P (exi = 0) 
+
+P (exi = 1) =
+
+⎧⎨⎩
+
+log P (ei(x)=0)   
+
+> P(ei(x)=1)
+
+= m(ei(x)) ext if ei(x)′ = 0 log P (ei(x)=1)   
+
+> P(ei(x)=0)
+
+= −m(ei(x)) ext if ei(x)′ = 1 . (44) Using (12), we obtain 
+
+Lez 
+
+> ˆi
+
+= f (Lexi , L p) = log 1 + 3 eLexi +Lp
+
+1 + eLexi
+
+, where Lp = log 1 − pp . (45) Recall from (12) that in the Z-decoder Lez 
+
+> ˆi
+> k
+
+was used as prior knowledge in lieu of the marginal obtained from the depolarizing channel. However, in DDE we are considering the evolution of the probability mass of the LLRs of the bits eˆi(z), which are related to the error 
+
+ez 
+
+> ˆi
+
+by eˆi(z)′ = eˆi(z) ⊕ ez 
+
+> ˆi
+
+. The “prior” to use in the Z-decoder, proceeding from the X-decoder and the depolarizing channel, is obtained as 
+
+mˆich (z) = Leˆi(z) = log P (eˆi(z) = 0) 
+
+P (eˆi(z) = 1) =
+
+⎧⎨⎩
+
+log P (ez    
+
+> ˆi=0)
+> P(ez
+> ˆi=1)
+
+= Lez 
+
+> ˆi
+
+if eˆi(z)′ = 0 log P (ez    
+
+> ˆi=1)
+> P(ez
+> ˆi=0)
+
+= −Lez 
+
+> ˆi
+
+if eˆi(z)′ = 1 (46) Combining (44,45,46), and since we are transmitting the all zero sequence, ei(x) = eˆi(z) = 0 ,we obtain 
+
+mˆich (z) = 
+
+⎧⎪⎪⎪⎪⎪⎨⎪⎪⎪⎪⎪⎩
+
+f (m(ei(x)) ext , L p) with prob. 1 − p (when ei(x)′ = 0 , e ˆi(z)′ = 0) 
+
+f (−m(ei(x)) ext , L p) with prob. p/ 3 (when ei(x)′ = 1 , e ˆi(z)′ = 0) 
+
+−f (m(ei(x)) ext , L p) with prob. p/ 3 (when ei(x)′ = 0 , e ˆi(z)′ = 1) 
+
+−f (−m(ei(x)) ext , L p) with prob. p/ 3 (when ei(x)′ = 1 , e ˆi(z)′ = 1) ,
+
+(47) where function f is defined in (45). Notice that we have defined random variable mˆich (z) as a function of random variable m(ei(x)) ext , for which we know its probability mass function, 
+
+pext m(ei(x)) , from (39) and (41). In order to obtain the probability mass function of mˆich (z), which will be used in (22) and (24) to continue with the DDE process in the Z-decoder, we can simply generate Monte Carlo samples of m(ei(x)) ext using pext m(ei(x)) and obtain the corresponding samples of mˆich (z) by applying (47). Then, we can approximate the probability mass of mˆich (z) by its histogram. Information passing from the Z-decoder to the X-decoder is performed similarly substituting x by z (and vice versa). 
+
+> DRAFT
+
+25 0.06 0.07 0.08 0.09 0.1 0.11 0.12       
+
+> Depolarizing parameter, p
+> 10 -6
+> 10 -5
+> 10 -4
+> 10 -3
+> 10 -2
+> 10 -1
+> BER 1
+> Error Rate for nodes e 1, BER 1
+> CSS(8,8);N a=4000,N b=0 CSS(8,8);N a=4500,N b=0 CSS(8,8);N a=5000,N b=0 CSS(8,8);N a=5250,N b=0 CSS(8,8);N a=5500,N b=0 0.06 0.07 0.08 0.09 0.1 0.11 0.12
+> Depolarizing parameter, p
+> 10 -5
+> 10 -4
+> 10 -3
+> 10 -2
+> 10 -1
+> BER 2
+> Error Rate for nodes e 2, BER 2
+> CSS(8,8);N a=4000,N b=0 CSS(8,8);N a=4500,N b=0 CSS(8,8);N a=5000,N b=0 CSS(8,8);N a=5250,N b=0 CSS(8,8);N a=5500,N b=0
+
+Fig. 5: DDE predictions and simulated residual error rate in both e1 and e2 for a family of quantum codes designed using the original structure proposed in Fig. 2 with an LDGM code of degrees (8 , 8) in the bottom layer, Nb = 0 
+
+and different values of Na. A depolarizing channel is considered. The rightmost curves correspond to the case where the correlation between the ex and ez errors is exploited in the decoder via information exchange between the X and Z sections of the graph (continuous lines for simulation results and dotted lines for DDE predictions). The leftmost curves (dashed lines) correspond to the simulation results when this exchange does not occur. 
+
+VII. S IMULATION RESULTS 
+
+In all results in this section, a depolarizing channel of parameter p is considered. For compar-ison purposes, we consider quantum codes with the same rate, RQ, and block length, N , as in [12] ( RQ ∼= 1 /4 and N = 19014 ), encoding K = 4752 qubits into N = 19014 qubits. Matrix P
+
+corresponds to a 1/2 LDGM code and has size 9507 ×9507 , so that both ˜G and ˜H, the generator and parity-check matrices of a regular LDGM code of degrees (y, y ), have size 9507 × 19014 .Matrix M , with size 7131 × 9507 , is used to transform ˜H and ˜G into H and G. The specific form of matrix M will depend on the utilized structure. Both the original structure proposed in Fig. 2 and the fault-tolerant codes described in Fig. 3 will be investigated. 
+
+A. Original Structure 
+
+We first consider the original structure proposed in Fig. 2. In all cases, the degree of the nodes 
+
+d not connected to nodes sA is fixed to wd = 3 , as this value resulted in the best performance (results not shown due to space constraints). Fig. 5 compares the DDE predictions with the simulation results for LDGM codes with degree (8 , 8) when Nb = 0 and different values of Na
+
+are considered. Specifically, we plot the residual error rate (BER) in both e1 and e2 versus the depolarizing parameter, p. The rightmost curves correspond to the case where the correlation 
+
+DRAFT 26 
+
+between the ex and ez errors is exploited in the decoder via information exchange between the X and Z sections of the graph (continuous lines for simulation results and dotted lines for DDE predictions), while the leftmost curves correspond to the case in which this exchange does not occur (dashed lines). It is remarkable that exploiting the correlation between the ex and ez errors (rightmost curves in the figure) leads to significant improvements in performance, both in terms of convergence thresholds and error floors. This occurs for all the range of Na, but in terms of threshold the effect is more pronounced for high values of Na. Indeed, for both e1 and e2
+
+the threshold when Na = 5250 is clearly better than for Na = 5500 if the correlation is not exploited, while Na = 5500 mostly outperforms Na = 5250 when the correlation is exploited. Fig. 5 also shows the excellent match between simulation results and DDE predictions in the error floor region when correlation is exchanged between the X and Z sections of the graph. As expected, due to the finite block length, the convergence thresholds obtained through simulation are worse than the DDE predictions. However, DDE predictions convey the same trend as simulation results (better convergence thresholds as Na initially increases). The match between DDE and simulation results is also excellent when correlation is not exchanged between the X and Z sections of the graph, but the DDE curves for this case are not shown to avoid overcrowding the figure. Fig. 6 explores the effect of varying the degree of the LDGM code used in the bottom layer. 
+
+Nb is again fixed to 0, and Na = 5250 , which resulted in the best performance in Fig. 5. As in Fig. 5, the rightmost curves correspond to the case where the correlation between the ex and 
+
+ez errors is exploited in the decoder via information exchange between the X and Z sections of the graph (continuous lines for simulation results and dotted lines for DDE predictions), while the leftmost curves correspond to the case in which this exchange does not occur (dashed lines). Similar to Fig. 5, exploiting the correlation between the ex and ez errors (rightmost curves in the figure) leads to improvements in performance, both in terms of convergence thresholds and error floors, but the threshold improvement is more pronounced when the degree of the LDGM code is lower. As expected, in all cases (with and without correlation exploitation) the error floor decreases when the degree increases, while the convergence threshold experiences significant degradation. Notice also the excellent match between simulation results and DDE predictions in the error floor region when correlation is exchanged between the X and Z sections of the graph, and how DDE predictions convey the same trend as simulation results. The match between DDE and simulation results is also excellent when correlation is not exchanged between the X and Z 
+
+> DRAFT
+
+27 0.065 0.07 0.075 0.08 0.085 0.09 0.095 0.1 0.105 0.11 0.115 
+
+> Depolarizing parameter, p
+> 10 -8
+> 10 -7
+> 10 -6
+> 10 -5
+> 10 -4
+> 10 -3
+> 10 -2
+> 10 -1
+> BER 1
+
+Error Rate for nodes e 1, BER 1          
+
+> CSS(8,8);N a=5250,N b=0 CSS(9,9);N a=5250,N b=0 CSS(10,10);N a=5250,N b=0 CSS(11,11);N a=5250,N b=0 CSS(12,12);N a=5250,N b=0 0.065 0.07 0.075 0.08 0.085 0.09 0.095 0.1 0.105 0.11 0.115
+> Depolarizing parameter, p
+> 10 -7
+> 10 -6
+> 10 -5
+> 10 -4
+> 10 -3
+> 10 -2
+> 10 -1
+> BER 2
+
+Error Rate for nodes e 2, BER 2
+
+> CSS(8,8);N a=5250,N b=0 CSS(9,9);N a=5250,N b=0 CSS(10,10);N a=5250,N b=0 CSS(11,11);N a=5250,N b=0 CSS(12,12);N a=5250,N b=0
+
+Fig. 6: DDE predictions and simulated residual error rate in both e1 and e2 for a family of quantum codes designed using the original structure proposed in Fig. 2 with an LDGM code of degrees varying from (8 , 8) to (12 , 12) in the bottom layer, Na = 5250 and Nb = 0 . A depolarizing channel is considered. The rightmost curves correspond to the case where the correlation between the ex and ez errors is exploited in the decoder via information exchange between the X and Z sections of the graph (continuous lines for simulation results and dotted lines for DDE predictions). The leftmost curves (dashed lines) correspond to the simulation results when this exchange does not occur. 
+
+sections of the graph (results not shown). Fig. 7 and Fig. 8 focus on designs using the original structure proposed in Fig. 2 when the LDGM code in the bottom layer has degrees (8 , 8) and (12 , 12) , respectively, and illustrate the effect of Nb on the resulting performance. All curves are obtained exploiting the correlation between the ex and ez errors in the decoder via information exchange between the X and Z sections of the graph. The continuous lines correspond to the case where Na = 5000 , while for the dashed lines Na = 4000 . For both values of Na and in both figures ( (8 , 8) and (12 , 12) 
+
+codes), the convergence threshold improves when Nb increases away from 0. When Na = 4000 ,the best performance in both figures is obtained when Nb = 2500 , while for Na = 5000 the best results are achieved when Nb = 750 . In all cases, further increases of Nb results in degradation of the convergence threshold. On the other hand, the error floor is independent of the value of Nb
+
+(and Na) and only depends on the degree of the LDGM codes. It is interesting to remark that for both the (8 , 8) and the (12 , 12) code, the scheme with Na = 4000 is much more sensitive to the value of Nb, as in this case the improvement in convergence threshold when Nb increases away from 0 is much more substantial than when Na = 5000 , while for a fixed value of Na the (8 , 8) 
+
+code is more sensitive to changes in Nb. Notice that according to Fig. 8 it is possible to obtain 
+
+DRAFT 28 0.07 0.075 0.08 0.085 0.09 0.095 0.1 0.105 0.11 0.115 0.12 
+
+Depolarizing parameter, p 
+
+10 -6 
+
+10 -5 
+
+10 -4 
+
+10 -3 
+
+10 -2 
+
+10 -1 
+
+> BER 1
+
+Error Rate for nodes e 1, BER 1
+
+CSS(8,8);N a=4000,N b=0 CSS(8,8);N a=4000,N b=1000 CSS(8,8);N a=4000,N b=2000 CSS(8,8);N a=4000,N b=2500 CSS(8,8);N a=4000,N b=2750 CSS(8,8);N a=5000,N b=0 CSS(8,8);N a=5000,N b=250 CSS(8,8);N a=5000,N b=500 CSS(8,8);N a=5000,N b=750 CSS(8,8);N a=5000,N b=1000 0.07 0.075 0.08 0.085 0.09 0.095 0.1 0.105 0.11 0.115 0.12 
+
+Depolarizing parameter, p 
+
+10 -5 
+
+10 -4 
+
+10 -3 
+
+10 -2 
+
+10 -1 
+
+> BER 2
+
+Error Rate for nodes e 2, BER 2
+
+CSS(8,8);N a=4000,N b=0 CSS(8,8);N a=4000,N b=1000 CSS(8,8);N a=4000,N b=2000 CSS(8,8);N a=4000,N b=2500 CSS(8,8);N a=4000,N b=2750 CSS(8,8);N a=5000,N b=0 CSS(8,8);N a=5000,N b=250 CSS(8,8);N a=5000,N b=500 CSS(8,8);N a=5000,N b=750 CSS(8,8);N a=5000,N b=1000 
+
+Fig. 7: For CSS codes designed using the original structure proposed in Fig. 2, with an LDGM code of degrees 
+
+(8 , 8) in the bottom layer, simulated residual error rate in both e1 and e2 when Na = 4000 (dashed lines) and 
+
+Na = 5000 (continuous lines) for different values of Nb. A depolarizing channel is considered, and in all cases the correlation between the ex and ez errors is exploited in the decoder via information exchange between the X and Z sections of the graph. 0.06 0.065 0.07 0.075 0.08 0.085 0.09 0.095 0.1 
+
+Depolarizing parameter, p 
+
+10 -8 
+
+10 -7 
+
+10 -6 
+
+10 -5 
+
+10 -4 
+
+10 -3 
+
+10 -2 
+
+10 -1 
+
+> BER 1
+
+Error Rate for nodes e 1, BER 1
+
+CSS(12,12);N a=4000,N b=0 CSS(12,12);N a=4000,N b=1000 CSS(12,12);N a=4000,N b=2000 CSS(12,12);N a=4000,N b=2500 CSS(12,12);N a=5000,N b=0 CSS(12,12);N a=5000,N b=250 CSS(12,12);N a=5000,N b=500 CSS(12,12);N a=5000,N b=750 0.06 0.065 0.07 0.075 0.08 0.085 0.09 0.095 0.1 
+
+Depolarizing parameter, p 
+
+10 -7 
+
+10 -6 
+
+10 -5 
+
+10 -4 
+
+10 -3 
+
+10 -2 
+
+10 -1 
+
+> BER 2
+
+Error Rate for nodes e 2, BER 2
+
+CSS(12,12);N a=4000,N b=0 CSS(12,12);N a=4000,N b=1000 CSS(12,12);N a=4000,N b=2000 CSS(12,12);N a=4000,N b=2500 CSS(12,12);N a=5000,N b=0 CSS(12,12);N a=5000,N b=250 CSS(12,12);N a=5000,N b=500 CSS(12,12);N a=5000,N b=750 
+
+Fig. 8: For CSS codes designed using the original structure proposed in Fig. 2, with an LDGM code of degrees 
+
+(12 , 12) in the bottom layer, simulated residual error rate in both e1 and e2 when Na = 4000 (dashed lines) and 
+
+Na = 5000 (continuous lines) for different values of Nb. A depolarizing channel is considered, and in all cases the correlation between the ex and ez errors is exploited in the decoder via information exchange between the X and Z sections of the graph. 
+
+codes with error floors around 10 −6 and convergence thresholds at values of p slightly above .08, while Fig. 7 indicates that codes with error floors around 10 −4 and convergence thresholds at values of p a little bit above .1 are possible. 
+
+DRAFT 29 0.06 0.07 0.08 0.09 0.1 0.11 0.12 
+
+> Depolarizing parameter, p
+> 10 -6
+> 10 -5
+> 10 -4
+> 10 -3
+> 10 -2
+> 10 -1
+> BER 1
+
+Error Rate for nodes e 1, BER 1          
+
+> CSS(8,8);N a=3500,N b=2750,w d=8 CSS(8,8);N a=4000,N b=2250s,w d=8 CSS(8,8);N a=4250,N b=1750,w d=8 CSS(8,8);N a=4500,N b=1500s,w d=8 CSS(8,8);N a=5000,N b=750,w d=8 0.06 0.07 0.08 0.09 0.1 0.11 0.12
+> Depolarizing parameter, p
+> 10 -5
+> 10 -4
+> 10 -3
+> 10 -2
+> 10 -1
+> BER 2
+
+Error Rate for nodes e 2, BER 2    
+
+> CSS(8,8);N a=3500,N b=2750,w d=8 CSS(8,8);N a=4000,N b=2250s,w d=8 CSS(8,8);N a=4250,N b=1750,w d=8 CSS(8,8);N a=4500,N b=1500s,w d=8 CSS(8,8);N a=5000,N b=750,w d=8
+
+Fig. 9: For CSS codes designed using the fault-tolerant structure proposed in Fig. 3, with an LDGM code of degrees 
+
+(8 , 8) in the bottom layer and wd = 8 , simulated residual error rate in both e1 and e2 for different values of Na
+
+when i) Nb is optimized for each value of Na (continuous lines; optimal value of Nb provided in the label) and ii) 
+
+Nb = 0 (dashed lines). A depolarizing channel is considered, and in all cases the correlation between the ex and 
+
+ez errors is exploited in the decoder via information exchange between the X and Z sections of the graph. 
+
+B. Fault-Tolerant Structure 
+
+We now consider the design of codes well suited for fault-tolerant computation using the structure proposed in Section IV (see Fig. 3). Fig. 9 considers a family of CSS codes with an LDGM code of degrees (8 , 8) in the bottom layer when the degree of each node d of degree different from 1 in the upper layer is wd = 8 . All curves are obtained exploiting the correlation between the ex and ez errors in the decoder via information exchange between the X and Z sections of the graph. For a given value of Na, the continuous (rightmost) curves indicate the performance for the optimal value of Nb, which is identified in the label. The dashed (leftmost) lines represent the performance for each value of Na when Nb = 0 . It is important to remark that, similar to the (8 , 8) code designed in Fig. 7 using the original structure, optimizing Nb leads to substantial improvements in the convergence threshold while the error floor is not affected. This improvement is particularly relevant for smaller values of Na. Notice that these codes achieve error floors a little bit higher than 10 −4 and convergence thresholds at values of p around .1, very similar to those presented in Fig. 7 using the original structure with an (8 , 8) code in the bottom layer. Fig. 10 explores the effect of varying the degree of the LDGM code used in the bottom layer, 
+
+(y, y ), y ∈ { 8, 9, 10 , 11 , 12 } when Na = 4250 and wd = y in the upper layer. All curves are obtained exploiting the correlation between the ex and ez errors in the decoder via information 
+
+DRAFT 30 0.05 0.06 0.07 0.08 0.09 0.1 0.11 0.12 
+
+> Depolarizing parameter, p
+> 10 -8
+> 10 -7
+> 10 -6
+> 10 -5
+> 10 -4
+> 10 -3
+> 10 -2
+> 10 -1
+> BER 1
+
+Error Rate for nodes e 1, BER 1            
+
+> CSS(8,8);N a=4250,N b=1750,w d=8 CSS(9,9);N a=4250,N b=1750,w d=9 CSS(10,10);N a=4250,N b=1750,w d=10 CSS(11,11);N a=4250,N b=1750,w d=11 CSS(12,12);N a=4250,N b=1750,w d=12 0.05 0.06 0.07 0.08 0.09 0.1 0.11 0.12
+> Depolarizing parameter, p
+> 10 -7
+> 10 -6
+> 10 -5
+> 10 -4
+> 10 -3
+> 10 -2
+> 10 -1
+> BER 2
+
+Error Rate for nodes e 2, BER 2     
+
+> CSS(8,8);N a=4250,N b=1750,w d=8 CSS(9,9);N a=4250,N b=1750,w d=9 CSS(10,10);N a=4250,N b=1750,w d=10 CSS(11,11);N a=4250,N b=1750,w d=11 CSS(12,12);N a=4250,N b=1750,w d=12
+
+Fig. 10: Simulated residual error rate in both e1 and e2 for a family of quantum codes designed using the fault-tolerant structure proposed in Fig. 3, with an LDGM code of degrees (y, y ), y ∈ { 8, 9, 10 , 11 , 12 } in the bottom layer and Na = 4250 , wd = y in the upper layer. Two cases are studied: i) Nb is optimized for each value of 
+
+Na (continuous lines; optimal value of Nb, always 1750 , provided in the label) and ii) Nb = 0 (dashed lines). A depolarizing channel is considered, and in all cases the correlation between the ex and ez errors is exploited in the decoder via information exchange between the X and Z sections of the graph. 
+
+exchange between the X and Z sections of the graph. The continuous (rightmost) curves indicate the performance of each code for the optimal value of Nb, which is identified in the label (always 1750). The dashed (leftmost) lines represent the performance for each one of the codes when Nb = 0 . In all cases, optimizing Nb leads to substantial improvements in the convergence threshold while the error floor is not affected. This improvement is more relevant for lower values of wd. Notice the trade-off between the error floor, which decreases as the degree increases, and the convergence threshold, which degrades as the degree increases. This makes it possible to obtain codes with error floors around 10 −6 and convergence thresholds at values of p slightly below .08 for LDGM codes with degrees (12 , 12) , but also error floors a little bit higher than 
+
+10 −4 and convergence thresholds at values of p around .1 when the degree is (8 , 8) .VIII. C ONCLUSION 
+
+We have constructed a new family of Calderbank-Shor-Steane (CSS) codes using the generator and parity-check matrices of Low-Density Generator Matrix (LDGM) codes concatenated with “compression” matrices that perform row operations to achieve the desired quantum rate. For the depolarizing channel, decoding is performed in an iterative manner, by applying message passing and properly exploiting the correlations existing in the associated decoding graph. 
+
+DRAFT 31 
+
+We have also developed discrete Density Evolution (DDE) to predict the performance of the proposed codes in the depolarizing channel. Remarkably, DDE predictions match very well with simulation results, and both show that exploiting the correlations existing in the decoding graph leads to significant improvements in the error-correction capability, both in terms of convergence threshold and error floors. Although density evolution is well known in classical coding, to our knowledge this is the first time it has been applied in quantum codes over the depolarizing channel. The challenge is that the classical graph utilized in density evolution to study the performance of quantum codes does not have a direct physical meaning in the quantum domain. However, in terms of predictive performance this graph is equivalent to the one utilized for the iterative decoding of the quantum code, and therefore the resulting predictions apply to the proposed quantum codes. The proposed construction offers high flexibility and easiness in the design, producing quantum codes with excellent error correction capabilities. By properly constructing the parity-check matrix of the code, we are able to control and bound the weight of the encoded/logical ¯X
+
+and ¯Z operators to a small value. This allows the design of codes particularly well suited for fault-tolerant quantum computation, which, at the same time, possess excellent error correction capabilities, with a performance only slightly worse than that of the best codes obtained when the only focus is on minimizing the residual errors. IX. C ONTRIBUTION 
+
+HL and JGF conceived and developed the original structure (Section II). YL developed the doping scheme (Section III) and conceived and designed the fault-tolerant codes (Section IV). KL, YL, and JGF developed the discrete density evolution framework (Section VI); the latter two also adapted the density evolution and decoding algorithms (Section V) for the depolarizing channel. Finally, YL ran the simulations (Section VII). All authors contributed to writing the manuscript, and JGF supervised the project. REFERENCES        
+
+> [1] P. Shor, “Scheme for Reducing Decoherence in Quantum Computer Memory,” Physical Review A , vol. 52 (R), no. 4, pp. 2493-2496, October 1995. [2] M. A. Nielsen and I. L. Chuang, “Quantum Computation and Quantum Information,” Cambridge University Press, 2000. [3] R. Calderbank and P. W. Shor, “Good Quantum Error-Correcting Codes Exist,” Physical Review A , vol. 54, no. 2, pp. 1098-1105, August 1996.
+> DRAFT 32
+
+[4] A. Steane, “Multiple Particle Interference and Quantum Error Correction,” Proc. of the Royal Society A , vol. 452, no. 1954, pp. 2551-2577, November 1996. [5] D. Gottesman, Stabilizer Codes and Quantum Error Correction , Ph.D. thesis, California Institute of Technology, 1997. Available at https://arxiv.org/abs/quant-ph/9705052. [6] A. R. Calderbank, E. M. Rains, P. W. Shor, and N. J. A. Sloane, Quantum error correction and orthogonal geometry, Phys. Rev. Lett. 78 (3), 405–408 (1997). [7] A. R. Calderbank, E. M. Rains, P. W. Shor, and N. J. A. Sloane, “Quantum Error Correction via Codes over GF(4),” IEEE Trans. on Information Theory , vol. 44, no. 4, pp. 1369-1387, July 1998. M. M. Wilde, Quantum Information Theory , 2nd ed. Cambridge University Press, 2017. [8] C. Berrou, A. Glavieux, and P. Thitimajshima, “Near Shannon Limit Error-Correcting Coding and Decoding: Turbo-Codes,” 
+
+Proc. ICC’93 , May 1993. [9] R. G. Gallager, “Low-Density Parity-Check Codes,” IEEE Trans. on Information Theory , vol. 8, no. 1, pp. 21-28, January 1962. [10] D. J. C. MacKay, “Good Error-Correcting Codes Based on Very Sparse Matrices,” IEEE Trans. on Information Theory ,vol. 45, no. 2, pp. 399-431, March 1999. [11] M. S. Postol, “A Proposed Quantum Low Density Parity Check Code,” arXiv:quant-ph/0108131v1 , August 2001. [12] D. J. C. MacKay, G. Mitchison, and P. L. McFadden, “Sparse-Graph Codes for Quantum Error-Correction,” IEEE Trans. on Information Theory , vol. 50, no. 10, pp. 2315-2330, October 2004. [13] T. Camara, H. Ollivier and J.-P. Tillich, “Constructions and Performance of Classes of Quantum LDPC Codes,” arXiv:quant-ph/0502086v2 , April 2005. [14] H. Lou and J. Garcia-Frias, “Quantum Error-Correction Using Codes with Low-Density Generator Matrix,” Proc. SPAWC’05 , June 2005. [15] H. Lou and J. Garcia-Frias, “On the Application of Error-Correcting Codes with Low-Density Generator Matrix over Different Quantum Channels,” Proc. International Symposium on Turbo Codes , April 2006. [16] J. Garcia-Frias and K. Liu, “Design of Near-Optimum Quantum Error-Correcting Codes Based on Generator and Parity-Check Matrices of LDGM Codes,” Proc. CISS’08 , March 2008. [17] J. Garcia-Frias and W. Zhong, “Approaching Near Shannon Performance by Iterative Decoding of Linear Codes with Low-Density Generator Matrix,” IEEE Communications Letters, vol. 7, no. 6, pp. 266-268, June 2003. [18] J. Garcia-Frias, W. Zhong, and Y. Zhao, “Iterative Decoding Schemes for Source and Channel Coding of Correlated Sources,” Proc. Asilomar’02 , November 2002. [19] W. Zhong and J. Garcia-Frias, “LDGM Codes for Channel Coding and Joint Source-Channel Coding of Correlated Sources,” 
+
+EURASIP Journal on Applied Signal Processing , vol. 2005, no. 6, pp. 942-953, May 2005. [20] N. Rengaswamy, R. Calderbank, S. Kadhe, and H. D. Pfister, “Synthesis of Logical Clifford Operators via Symplectic Geometry,” in Proc. IEEE Int. Symp. Inf. Theory (ISIT) , 2018, pp. 791–795. doi: 10.1109/ISIT.2018.8437652. [21] N. Rengaswamy, R. Calderbank, S. Kadhe, and H. D. Pfister, “Synthesis of Logical Clifford Operators via Symplectic Geometry,” http://arxiv.org/abs/1803.06987 , 2018. [22] P. Pantellev and G Kalachev, “Asymptotically Good Quantum and Locally Testable Classical LDPC Codes,” in Proc. ACM SIGACT Symposium on Theory of Computing , 2022, pp. 375–388. doi: 10.1145/3519935.3520017. [23] P. Pantellev and G Kalachev, “Quantum LDPC Codes With Almost Linear Minimum Distance,” IEEE Trans. on Information Theory , vol.68, no. 1, pp. 213–229, January 2022. doi: 10.1109/TIT.2021.3119384. [24] L. Golowich and V. Guruswami, “Quantum LDPC Codes of Almost Linear Distance via Homological Products,” 
+
+arXiv:quant-ph/2411.03646 , November 2024. 
+
+> DRAFT 33
+
+[25] K. Liu, J. Garcia-Frias, “Error Floor Analysis in LDGM Codes”, Proc. ISIT’10 , June 2010. [26] H. Chai, W. Zhong, and J. Garcia-Frias, “Parallel Concatenation of LDGM Codes to Approach Capacity Limits,” Proc. CISS’05 , March 2005. [27] W. Zhong, H. Chai, and J. Garcia-Frias, “Approaching the Shannon Limit through Parallel Concatenation of Regular LDGM Codes,” Proc. ISIT’05 , September 2005. [28] S.-Y. Chung, G. D. Forney, T. J. Richardson, and R. Urbanke, “On the Design of Low-Density Parity-Check Codes within 0.0045 dB of the Shannon Limit,” IEEE Communications Letters , vol. 5, no. 2, pp. 58-60, February 2001. [29] J. Pearl, “Probabilistic Reasoning in Intelligent Systems: Networks of Plausible Inference,” Morgan Kaufmann , 1988. [30] F. R. Kschischang, B. J. Frey, and H.-A. Loeliger, “Factor Graphs and the Sum-Product Algorithm,” IEEE Trans. on Information Theory , vol. 47, no. 2, pp. 498-519, February 2001. [31] A. C. A. de Almeida and R. Palazzo Jr., “A Concatenated [(4,1,3)] Quantum Convolutional Code,” Proc. ITW’04 , October 2004. [32] G. D. Forney, Jr., M. Grassl and S.Guha, “Convolutional and Tail-Biting Quantum Error-Correcting Codes,” arXiv:quant-ph/0511016v2 , November 2006. [33] M. Grassl and T. Beth, “Quantum BCH Codes,” arXiv:quant-ph/9910060v1 , October 1999. [34] M. Grassl and T. Beth, “Quantum Reed-Solomon Codes,” arXiv:quant-ph/9910059v1 , October 1999. [35] M. Grassl and M. Roetteler, “Constructions of Quantum Convolutional Codes,” Proc. ISIT’07 , June 2007. [36] M. Hagiwara, and H. Imai, “Quantum Quasi-Cyclic LDPC Codes,” Proc. ISIT’07 , June 2007. [37] H. Ollivier and J.-P. Tillich, “Description of a Quantum Convolutional Code,” Phys. Rev. Lett. , vol. 91, no. 17, pp. 177902-1-4, October 2003. [38] S. ten Brink, “Code Doping for Triggering Iterative Decoding Convergence,” Proc. ISIT’01 , June 2001. [39] K. Liu and J. Garcia-Frias, “Asymptotic Analysis of LDGM-Based Quantum Codes,” Proc. CISS’09 , March 2009. [40] J. Garcia-Frias, “Joint Source-Channel Decoding of Correlated Sources over Noisy Channels,” Proc. DCC’01 , March 2001. [41] J. Garcia-Frias and Y. Zhao, “Near Shannon/Slepian-Wolf Performance for Unknown Correlated Sources over AWGN Channels,” IEEE Trans. on Communications , vol. 53, no. 4, pp. 555-559, April 2005. [42] J. Garcia-Frias and Y. Zhao, “Compression of Correlated Binary Sources Using Turbo Codes,” IEEE Communications Letters , vol. 5, no. 10, pp. 417-419, October 2001. [43] J. Garcia-Frias, Y. Zhao, and W. Zhong, “Turbo-Like Codes for Transmission of Correlated Sources over Noisy Channels,” 
+
+IEEE Signal Processing Magazine , vol. 24, no. 5, pp. 58-66, September 2007. [44] J. Hagenauer, E. Offer and L. Papke “Iterative decoding of binary block and convolutional codes,” IEEE Trans. Inform. Theory , vol. 42, pp. 429-445, March 1996.

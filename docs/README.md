@@ -6,29 +6,24 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-07-21
-- 运行时间：2026-07-21 21:55:15 UTC
+- 最新运行日期：2026-07-22
+- 运行时间：2026-07-22 21:38:29 UTC
 - 运行状态：成功
-- 本次总论文数：3
+- 本次总论文数：1
 - 精读区：1
-- 速读区：2
+- 速读区：0
 
 ### 今日简报（AI）
-今日聚焦量子纠错前沿，精读1篇LDGM量子码论文并速读2篇偏噪声量子RS码与表面码限制研究。最值得关注的是LDGM码在容错量子计算中的架构优势，以及针对Cat量子比特的龙卷风级联纠错方案。建议优先理解LDGM码的设计逻辑，并留意偏噪声环境下的编码优化方向。
-- 详情：[/202607/21/README](/202607/21/README)
+今日精读一篇高分论文，聚焦Nishimori阈值估计在贝叶斯推断与Z_q表面码解码中的应用。最值得关注的是该研究将统计物理的相变精确分析与量子纠错解码性能建立联系，为表面码阈值优化提供了新视角。建议读者后续关注该阈值估计方法在容错量子计算中的实际效果验证。
+- 详情：[/202607/22/README](/202607/22/README)
 
 ### 精读区论文标签
-1. [LDGM-Based Quantum Codes for Fault-Tolerant Quantum Computation](/202607/21/2607.15159v2-ldgm-based-quantum-codes-for-fault-tolerant-quantum-computation)  
-   标签：评分：8.0/10、query:qec-decoding
-   evidence：基于LDGM的CSS码上的消息传递量子纠错解码器
+1. [Nishimori Threshold Estimation for Bayesian Inference and $\mathbb{Z}_q$ Surface Code Decoding](/202607/22/2607.18374v1-nishimori-threshold-estimation-for-bayesian-inference-and-mathbbzq-surface-code-decoding)  
+   标签：评分：9.0/10、query:qec-decoding
+   evidence：表面码解码与阈值估计
 
 ### 速读区论文标签
-1. [Biased-Noise Quantum Reed--Solomon Codes and a Tornado Concatenation for Cat Qubits](/202607/21/2607.13105v2-biased-noise-quantum-reed--solomon-codes-and-a-tornado-concatenation-for-cat-qubits)  
-   标签：评分：7.0/10、query:qec-code
-   evidence：针对偏置噪声猫量子比特的级联量子纠错码
-2. [A conditional no-go for resource-free magic-axis measurement on a static surface code](/202607/21/2607.16968v1-a-conditional-no-go-for-resource-free-magic-axis-measurement-on-a-static-surface-code)  
-   标签：评分：7.0/10、query:qec-decoding
-   evidence：静态表面码上魔法轴测量的条件性不可能定理
+- 本次无速读推荐。
 
 
 <div class="dpr-home-promo-card">

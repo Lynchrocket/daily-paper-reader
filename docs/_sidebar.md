@@ -1,6 +1,9 @@
 * <a class="dpr-sidebar-root-link" href="#/">首页</a>
 * <a class="dpr-sidebar-root-link dpr-sidebar-noactive-link" href="javascript:void(0)" data-dpr-hash="#/tutorial/README">使用教程</a>
 * Daily Papers
+  * 2026-07-22 <!--dpr-date:20260722-->
+    * 精读区
+      * <a class="dpr-sidebar-item-link dpr-sidebar-item-structured" href="#/202607/22/2607.18374v1-nishimori-threshold-estimation-for-bayesian-inference-and-mathbbzq-surface-code-decoding" data-sidebar-item="{&quot;title&quot;: &quot;Nishimori Threshold Estimation for Bayesian Inference and $\\mathbb{Z}_q$ Surface Code Decoding&quot;, &quot;link&quot;: &quot;https://arxiv.org/abs/2607.18374v1-nishimori-threshold-estimation-for-bayesian-inference-and-mathbbzq-surface-code-decoding&quot;, &quot;score&quot;: &quot;9.0&quot;, &quot;tags&quot;: [{&quot;kind&quot;: &quot;query&quot;, &quot;label&quot;: &quot;qec-decoding&quot;}], &quot;evidence&quot;: &quot;表面码解码与阈值估计&quot;}">Nishimori Threshold Estimation for Bayesian Inference and $\mathbb{Z}_q$ Surface Code Decoding</a>
   * 2026-07-21 <!--dpr-date:20260721-->
     * 精读区
       * <a class="dpr-sidebar-item-link dpr-sidebar-item-structured" href="#/202607/21/2607.15159v2-ldgm-based-quantum-codes-for-fault-tolerant-quantum-computation" data-sidebar-item="{&quot;title&quot;: &quot;LDGM-Based Quantum Codes for Fault-Tolerant Quantum Computation&quot;, &quot;link&quot;: &quot;https://arxiv.org/abs/2607.15159v2-ldgm-based-quantum-codes-for-fault-tolerant-quantum-computation&quot;, &quot;score&quot;: &quot;8.0&quot;, &quot;tags&quot;: [{&quot;kind&quot;: &quot;query&quot;, &quot;label&quot;: &quot;qec-decoding&quot;}], &quot;evidence&quot;: &quot;基于LDGM的CSS码上的消息传递量子纠错解码器&quot;}">LDGM-Based Quantum Codes for Fault-Tolerant Quantum Computation</a>

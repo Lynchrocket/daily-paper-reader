@@ -1,0 +1,417 @@
+Title: Latency-Constrained Encoded Quantum Teleportation with Punctured Codes
+
+URL Source: https://arxiv.org/pdf/2607.19770v1
+
+Published Time: Thu, 23 Jul 2026 00:26:53 GMT
+
+Number of Pages: 10
+
+Markdown Content:
+# Latency-Constrained Encoded Quantum Teleportation with Punctured Codes 
+
+Mahmoud Saad Abouamer †, Jakob Kaltoft Søndergaard †, Petar Popovski 
+
+Department of Electronic Systems, Aalborg University, 9220 Aalborg, Denmark Email: {mahmoudabo, jakobks, petarp}@es.aau.dk 
+
+Abstract —Quantum teleportation is a key protocol for trans-mitting quantum information using entanglement and classi-cal communication. Its reliability is constrained by both the availability and fidelity of shared entangled pairs, which are affected by stochastic generation and memory decoherence. In this work, we focus on encoded teleportation , in which quantum information is encoded using a quantum error-correcting code and transmitted as a codeword. We evaluate reliability in terms of logical error probability, considering latency-constrained settings where entanglement is accumulated over time and degrades while in memory. We develop a unified framework that captures the interaction between entanglement availability, decoherence, and coding decisions. Our results show that the benefits of longer codes depend on the availability and fidelity of entangled pairs, as acquiring additional resources introduces delays that can reduce their quality. To address this latency-reliability tradeoff, we leverage code puncturing to enable flexible encoded teleportation, allowing the effective code length to adapt across different latency regimes while preserving a common stabilizer structure. Numerical results show that encoded teleportation can provide substantial reliability gains over uncoded transmission under a common entanglement-acquisition latency constraint, and that selecting appropriate punctured codes improves performance across varying latency budgets. Overall, our results highlight the importance of resource-aware adaptation for reliable quantum networking. 
+
+Index Terms —Quantum networks, entanglement distribution, quantum error correction, encoded teleportation, code punctur-ing. 
+
+I. I NTRODUCTION 
+
+Quantum networks enable the distribution of quantum in-formation across different quantum processors, supporting applications such as distributed quantum computation [1], [2]. 
+
+Quantum teleportation serves as a fundamental primitive for such networks, enabling the transfer of quantum states through shared entanglement and classical communication [2]. The reliability of teleportation is therefore fundamentally tied to the quality of the shared entanglement. To improve teleportation reliability, one direct approach is to improve the fidelity of the shared entangled pairs before they are used for teleportation. This is commonly achieved through entanglement purification, where multiple imperfect entangled pairs are processed to obtain fewer pairs with 
+
+This work was supported, in part, by the Danish National Research Foundation (DNRF), through the Center CLASSIQUE, grant nr. 187.  
+
+> †
+
+Equal contribution. 
+
+improved fidelity using local operations and classical com-munication [3]. However, purification introduces additional processing, coordination, and storage overhead, during which stored entanglement decoheres [4], [5]. Consequently, practical latency and storage constraints can limit the fidelity that can be achieved through resource-level optimization alone. This motivates encoded teleportation , where reliability is improved beyond individual EPR pair fidelity by encoding quantum information using a quantum error-correcting code prior to teleportation [6], [7]. A logical qubit is encoded across multiple physical qubits, each teleported using an independent entangled pair, followed by decoding to detect and correct errors introduced by imperfect entanglement. While logical-level protection can improve reliability beyond individual EPR pair fidelity, it also increases the number of entangled resources required for communication. In particular, an [[ n, k ]] 
+
+code requires n entangled pairs to transmit k logical qubits. While longer codes improve error-correction capability, they also increase resource consumption and latency. However, these works treat entanglement quality as independent of code length and do not account for how acquiring larger entanglement resources can alter their fidelity through waiting-time variability and memory decoherence. As illustrated in Fig. 1, the impact of longer codes in quantum networks extends beyond the local encoding and decoding operations and includes the time required to acquire entanglement resources. Since encoded teleportation requires multiple entangled pairs to transmit a logical state, the network must first accumulate these resources before the encoded teleportation can be completed. Such collections of entangled pairs, referred to as entanglement packets [8], are generated probabilistically, making the acquisition time variable. Under latency constraints, the network may need to operate at higher entanglement generation probabilities to meet the required timing, which can result in lower-fidelity entangled pairs [8]. In addition, pairs generated earlier must be stored while the remaining pairs are acquired, during which they decohere and degrade in fidelity. Consequently, increasing the packet size to support a longer code reduces the quality of the entanglement used for tele-portation. In some regimes, this reduction in pair quality can outweigh the error-correction gain of a longer code, so longer codes do not necessarily improve reliability. This effect is driven by probabilistic acquisition delays and sub-arXiv:2607.19770v1 [quant-ph] 22 Jul 2026 ENCODED TELEPORTATION 
+
+Generate & store EPR pairs Encode Teleport Decode    
+
+> treq tenc ttel tdec
+> time
+
+Case 1: Shorter Code ( [[ n1, k ]] )  
+
+> Quantum Memory (Storing n1entanglement resources)
+
+Entanglement generation 
+
+Encode/ Teleport/ Decode   
+
+> decoherence due to wait times
+> treq (n1)
+> time
+> • Request completes sooner • Less time in memory ⇒higher fidelity • Lower coding gain, better entanglement
+
+Case 2: Longer Code ( [[ n2, k ]] )  
+
+> Quantum Memory (Storing n2entanglement resources)
+
+Entanglement generation 
+
+Encode/ Teleport / Decode   
+
+> longer wait times
+> treq (n2)
+> time
+> • Request completes later • More time in memory ⇒more decoherence • Higher coding gain, lower entanglement
+
+Implication: [[ n1, k ]] is preferable in some regimes, while [[ n2, k ]] is preferable in others. Support both using punctured variants of a common base code [[ nbase , k ]] .
+
+Figure 1: Latency–reliability tradeoff in encoded quantum teleportation. The dominant latency arises from entanglement acquisition. With n1 < n 2, shorter effective code lengths require smaller entanglement packets, reducing acquisition burden and memory decoherence, but provide lower coding gain. Longer codes can provide stronger error protection, but require larger entanglement packets and may increase waiting times and storage-induced decoherence. Different latency–reliability regimes can therefore favor different code lengths, motivating adaptive puncturing from a common base code. sequent memory decoherence, which has no direct analogue in conventional classical communication resources. The result-ing latency-reliability tradeoff, illustrated in the contrasting regimes of Fig. 1, depends on both the number and quality of available entangled pairs. This work focuses on network-related imperfections arising from stochastic entanglement generation, storage-induced decoherence, and noisy shared entangled pairs. The latency-reliability tradeoff affects the optimized choice of code length depending on the network conditions. As illustrated conceptually in Fig. 2, evaluating the logical er-ror probability under different latency constraints can reveal distinct decision regions separated by crossover boundaries. Although a given code length can, in principle, be operated under different latency targets by adjusting the entanglement generation probability, doing so changes the quality of the generated entangled pairs and therefore the resulting reliability. Thus, different effective code lengths can minimize the logical error probability in different operating regimes, leading to thresholds where the preferred code size changes. Since entan-glement generation, link quality, and latency requirements can vary across operating conditions, a fixed code choice may be suboptimal. We investigate these tradeoffs to identify decision regions and motivate a latency-aware code-selection strategy. To support this, we adopt puncturing of quantum error-correcting codes [9] as a mechanism for modifying code length and distance by selectively removing physical qubits. This makes puncturing a practical mechanism for adaptive encoded teleportation driven by resource availability. In particular, nodes can operate within a common base-code architecture and dynamically use only the number of entangled pairs required by the chosen punctured code, enabling adaptation to resource availability while reducing the need to switch between unre-lated encoding and decoding implementations. Since shared entangled pairs are consumed as network communication re-sources, whereas encoding and decoding are performed locally, puncturing can reduce the number of entangled pairs required for a teleportation request while maintaining a common base-code structure. Moreover, coding gains are obtained only at certain punctured code lengths rather than continuously with packet size. We refer to these discrete operating points as 
+
+puncturing tiers , which create non-trivial trade-offs between the latency required to acquire larger entanglement packets and the reliability gains provided by stronger error correction. While [7] considered punctured encoded teleportation un-der fixed entanglement availability and quality, independent of code length, this work incorporates the entanglement-acquisition process into the code-selection problem. Since an 
+
+[[ n, k ]] code requires n entangled pairs, increasing the code length can improve error protection but can also increase ac-quisition time, memory decoherence, and fidelity heterogeneity across the packet. As a result, the best puncturing tier depends on the latency and link-quality regime, providing a network-aware rationale for when different punctured codes should be used. More broadly, this work bridges entanglement generation and its use in scalable quantum network architectures. Here, entanglement generation refers to the successful establishment of shared entanglement between communicating nodes. In the entanglement generation literature (e.g., [8]), the focus is on generating and maintaining entanglement, often without considering how it is ultimately used in applications such as teleportation. Conversely, encoded-teleportation studies often abstract away the stochastic acquisition and storage of entan-glement resources. We investigate this interface by evaluating how stochastic entanglement availability affects logical tele-portation reliability and how punctured codes can adapt to resource constraints. Such adaptiveness is particularly relevant for early-generation quantum access networks, where users exhibit diverse quality-of-service requirements and hardware capabilities vary significantly. In these settings, a common base encoding, shared across a network domain such as a wireless quantum cell [10], can be adaptively punctured to accommodate individual users. This provides a potential architectural approach for balancing performance, complexity, and resource efficiency. The main contributions of this work are as follows:  
+
+> •
+
+We develop a unified framework for latency-constrained encoded teleportation that jointly models stochastic entan-glement generation, memory decoherence, and punctured quantum error-correcting codes.  
+
+> •
+
+We investigate the latency-reliability tradeoff by compar-ing uncoded teleportation and multiple encoded telepor-tation schemes under a common average entanglement-acquisition latency constraint, highlighting how latency, entanglement fidelity, and logical error probability are coupled under resource constraints.  
+
+> •
+
+Through numerical simulations, we investigate latency-and link-dependent decision regions in which different puncturing tiers minimize the logical error probability, demonstrating the potential of adaptive puncturing-based code selection to outperform fixed code-selection strate-gies. 
+
+L
+
+PL
+
+n1
+
+n2
+
+n3         
+
+> P(1)
+> L
+> P(2)
+> L
+> P(3)
+> L
+> n⋆(L) = n1n⋆(L) = n2n⋆(L) = n3
+> L12 L23
+
+Figure 2: Decision regions induced by crossover behavior of the logical error probability PL under latency constraint L.Each curve corresponds to a code length n, and the preferred length n⋆(L) minimizes PL at that latency. Larger n re-quires a larger entanglement packet, changing the acquisition-time/fidelity tradeoff. The crossover points partition the latency axis into regions where different code lengths are preferred. II. S YSTEM MODEL 
+
+In this section, we introduce a unified model for latency-constrained encoded teleportation based on stochastic entangle-ment generation. The model captures the interaction between entanglement generation, storage-induced decoherence, and quantum error correction, enabling a cross-layer analysis of latency-reliability trade-offs in quantum networks. Throughout this work, entanglement generation refers to the successful generation and distribution of an EPR pair shared between the communicating nodes. As illustrated in Fig. 1, encoded teleportation proceeds through a sequence of stages including entanglement gener-ation, encoding, teleportation, and decoding. Since encoding and decoding are local operations and classical communication during teleportation can be performed in parallel, we focus on the latency associated with entanglement generation, which is typically the dominant contribution in many physical im-plementations. In particular, the time required to generate an entanglement packet of n pairs determines the overall latency. Since the packet size n governs both the acquisition time and the strength of error correction, this induces a trade-off between resource availability, fidelity, and logical reliability. In particular, increasing n improves error-correction capability but requires longer waiting times to accumulate entanglement, leading to additional decoherence and reduced fidelity. The goal is to select the code length n that minimizes the logical error probability under a latency constraint. To accom-modate varying operating conditions, we consider puncturing of a base code, allowing the effective code length to be adapted while preserving a common stabilizer structure. This provides a structured way to realize different latency-reliability tradeoffs without switching among unrelated code families, as detailed in the following subsections. 
+
+A. Encoded Teleportation 1) Imperfect Teleportation: Teleportation using ideal Bell pairs and perfect local operations faithfully transmits an arbitrary quantum state. In realistic settings, however, the shared entangled resource is imperfect, and the protocol can be interpreted as a Pauli channel whose error probabilities 
+
+{pI , p Z , p X , p Y } are determined by the Bell-state decomposi-tion of the resource [6]: 
+
+ρ = pI
+
+∣∣Φ+〉 〈 Φ+∣∣ + pZ
+
+∣∣Φ−〉 〈 Φ−∣∣
+
++ pX
+
+∣∣Ψ+〉 〈 Ψ+∣∣ + pY
+
+∣∣Ψ−〉 〈 Ψ−∣∣ , (1) where pI + pZ + pX + pY = 1 .
+
+2) Logical Reliability under CSS Codes: To mitigate these errors, we employ encoded teleportation using CSS codes. Instead of transmitting a single qubit, the state is encoded into an [[ n, k, d Z , d X ]] CSS code, requiring an entanglement packet of n EPR pairs, one for each physical qubit. Due to the stochastic generation process (see Sec. II-B) and storage-induced decoherence (see Sec. II-C), these pairs generally have non-identical fidelities, resulting in heterogeneous Pauli error probabilities (pI,i ,p Z,i , p X,i , p Y,i ) across qubits. CSS codes are well-suited to Pauli noise as they decouple 
+
+X and Z error correction. Each branch can therefore be treated as a binary symmetric channel with effective error probabilities [11] 
+
+qX,i = pX,i + pY,i , qZ,i = pZ,i + pY,i , (2) corresponding to bit-flip and phase-flip errors, respectively. This model is adopted from [11] to evaluate logical reliability across different puncturing tiers. Furthermore, to capture realistic noise processes, we con-sider both symmetric and asymmetric Pauli channels. The latter is defined by the ratio 
+
+η = pZ,i 
+
+pX,i 
+
+, (3) allowing phase-flip errors to occur more frequently than bit-flip errors [12]. Let tZ = ⌊(dZ − 1) /2⌋ and tX = ⌊(dX − 1) /2⌋ denote the correction radii of the code. Due to heterogeneous error probabilities across qubits, errors are independent but not identically distributed, and the number of errors in each branch therefore follows a Poisson-binomial distribution. The probabilities of successful decoding of X and Z errors are given by 
+
+Psucc ,X =
+
+> tX
+
+∑
+
+> j=0
+
+∑
+
+> S⊆{ 1,...,n }|S|=j
+
+∏
+
+> i∈S
+
+qX,i 
+
+∏
+
+> i / ∈S
+
+(1 − qX,i 
+
+), (4) 
+
+Psucc ,Z =
+
+> tZ
+
+∑
+
+> j=0
+
+∑
+
+> S⊆{ 1,...,n }|S|=j
+
+∏
+
+> i∈S
+
+qZ,i 
+
+∏
+
+> i / ∈S
+
+(1 − qZ,i 
+
+). (5) The resulting logical error probability is 
+
+PL = 1 − Psucc ,X Psucc ,Z . (6) The logical reliability above depends on the error probabilities induced by the shared entangled pairs. In practice, these prob-abilities are determined by how entanglement is generated and stored over time. As entanglement generation is stochastic and dominates the overall latency, the time required to accumulate an entanglement packet directly impacts both the availability and quality of the pairs used for teleportation. This establishes a trade-off between latency and entangle-ment fidelity. As illustrated in Fig. 2, this trade-off gives rise to distinct operating regimes in which different coding strategies are optimal, depending on the latency constraint. We analyze this behavior by modeling entanglement generation and mem-ory decoherence in the following subsections. Furthermore, as the required packet size n directly affects this trade-off, adaptive code selection via puncturing tiers (see Sec. III-B) becomes essential. 
+
+B. Entanglement Generation Rate and Fidelity 
+
+Entanglement generation is modelled as a discrete-time stochastic process, where in each time slot an attempt is made to generate and distribute an EPR pair between the communicating nodes. The duration of a slot depends on the implementation, with experimental demonstrations typically reporting entanglement-generation rates on the order of 1020 kHz [13], [14]. The entanglement generation and storage process is illus-trated in Fig. 3, where successful generation attempts occur over time and are stored until a complete entanglement packet has been successfully distributed. We model entanglement generation as a sequence of inde-pendent Bernoulli trials, where each attempt succeeds with probability p. When the success probability of a single attempt is very small, the sender may perform a batch of M attempts within a single time slot, in which case p corresponds to the probability that at least one of the attempts succeeds. The success probability is inherently related to the fidelity of the generated pair; protocols that aim for higher fidelity typically achieve lower generation rate. Following [8], we model this trade-off by relating the initial fidelity F0 of a successfully generated pair to the generation probability as 
+
+F0(p) = 1 − 1 − (1 − p)1/M 
+
+3pd
+
+, (7) where M denotes the batch size and pd is the photon detection probability, which captures physical link characteristics such as photon collection efficiency and detector geometry that can vary with the spatial configuration of the link and across users [15]. The fidelity F0(p) characterizes the fidelity of entangled pairs at the time of generation. However, these pairs are stored in quantum memory while additional entanglement is accu-mulated. During this time, qubits are subject to decoherence, causing their fidelities to degrade as illustrated in Fig. 3. In the Time step                    
+
+> Generation attempt
+> t= 0 t= 1 t= 2 t= 3 t= 4
+> Attempt 1
+> Attempt 2
+> Attempt 3
+> Attempt 4
+> Attempt 5
+> Age 0 Age 1 Age 2 Age 3 Age 4
+> Failure Failure Failure Failure
+> Age 0 Age 1 Age 2
+> Failure Failure
+> Age 0
+> Fidelity
+> Fidelity
+> Fidelity
+
+Figure 3: Example of the generation process with entangle-ment packet size n = 3 . Generated EPR pairs are stored until a complete packet is formed. Their fidelity degrades over time due to decoherence, resulting in heterogeneous fidelities across the packet. example shown in Fig. 3, a packet of three entangled pairs is requested, but completing the packet requires five generation attempts. Since successful pairs must be stored while waiting for the remaining pairs, earlier successes accumulate age and gradually decohere. Consequently, when the final pair is generated (Age 0), previously generated pairs may have aged (e.g., Ages 2 and 4), leading to heterogeneous fidelities within the completed packet. 
+
+C. Memory Decoherence 
+
+We model the degradation as exponential decay such that a qubit stored for t time slots has fidelity 
+
+Ft = 12 +
+
+(
+
+F0 − 12
+
+)
+
+e−t/T , (8) where T is the coherence time of the quantum memory. To mitigate excessive degradation caused by long storage times, we impose a finite storage window of size w, such that entangled pairs are discarded if not used within w time slots similarly to [8]. On one hand, this prevents severely decohered pairs from being used in teleportation to reduce the impact of excessively aged pairs on the logical error probability. On the other hand, it constrains the time available to accumulate an entanglement packet. Consequently, the finite window size introduces an inherent trade-off between resource availability and fidelity. The trade-off is further enhanced by latency requirements, which determine how long the communicating nodes can wait to form an entanglement packet. Together, the entanglement generation model, memory de-coherence, and encoded teleportation framework define the error characteristics and reliability of the transmitted quantum information under realistic network conditions. III. L ATENCY -C ONSTRAINED ENCODED TELEPORTATION AND ADAPTIVE CODING 
+
+In this section, we investigate how latency constraints shape entanglement availability and fidelity, and how these in turn impact the performance of encoded teleportation. In particular, the time required to generate an entanglement packet couples resource availability with decoherence, creating a trade-off between latency and logical reliability. This trade-off directly influences the choice of code length n, motivating adaptive coding strategies such as puncturing, which are presented in this section. 
+
+A. Latency Requirement and Waiting Time 
+
+We impose a latency requirement L, specifying that an entanglement packet must be successfully generated within an average of L time slots, reflecting application-level quality of service constraints. For a given packet size n and storage window w, this latency constraint determines the required entanglement generation probability p.Let E[L(w, n )] denote the expected waiting time until an entanglement packet of size n is successfully generated within a window of size w. In the special case where n = 1 , the waiting time follows a geometric distribution with success probability p, thus E[L(w, 1)] = 1 /p . However, for larger n,obtaining the exact expected waiting time requires solving a linear system of dimension (w−1
+
+> n−1
+
+), which quickly becomes computationally intractable [8]. Instead, for n > 1, we approximate the expected waiting time as 
+
+E[L(w, n )] ≈
+
+( 1
+
+Pe
+
+− 1
+
+) ( 
+
+w + n
+
+2p
+
+)
+
++ np , (9) where 
+
+Pe =
+
+> w
+
+∑
+
+> ℓ=n−1
+
+(wℓ
+
+)
+
+pℓ(1 − p)w−ℓ (10) is the probability that at least n − 1 additional successes occur within a window of w attempts following the first success. Using this approximation, we determine the generation prob-ability p required to satisfy the latency constraint by solving 
+
+E[L(w, n )] = L numerically. Comparison with exact evalua-tions shows that (9) conservatively overestimates the expected waiting time, and the approximation becomes increasingly accurate as p → 1. Consequently, satisfying a given latency constraint requires a slightly higher generation probability p
+
+than under the exact model, introducing a conservative bias: latency requirements are more likely to be met, but at the cost of reduced initial entanglement fidelity due to the coupling between generation rate and fidelity in (7). Since the generation probability is physically coupled to the quality of the generated entanglement, this in turn determines the initial fidelity through F0 = F0(p), establishing a direct trade-off between latency constraint and entanglement quality. To illustrate this latency-fidelity coupling, we evaluate the minimum fidelity of the entangled pairs, corresponding to the oldest stored pair in a packet, used for encoded teleportation as a function of the latency constraint L, as shown in Fig. 4. 10 15 20 25 30 35 40 45 50 
+
+> Allowed latency L (time slots)
+> 0.800
+> 0.825
+> 0.850
+> 0.875
+> 0.900
+> 0.925
+> 0.950
+> 0.975
+> 1.000
+> Minimum fidelity
+> n=1
+> n=3
+> n=8
+
+Figure 4: Minimum fidelity of the entangled pairs as a function of the latency constraint L. The minimum corresponds to the oldest stored pair at the time the packet is completed. Allowing larger latency enables higher-quality entanglement as pairs can be generated with lower success probability and thus higher initial fidelity F0.This trade-off plays a central role in determining which coding strategy is preferred under different latency regimes. As shown in Fig. 4, longer codes require more aggressive entan-glement generation rates to satisfy a given latency constraint, which reduces the fidelity of the generated pairs. Consequently, the system must balance using a small number of high-fidelity qubits, corresponding to uncoded or short-code teleportation, against using a larger number of lower-fidelity qubits that provide redundancy through error correction. Determining where the reliability gain from coding outweighs the loss in en-tanglement quality depends jointly on latency constraints and link conditions. This motivates adaptive coding strategies that select the appropriate coding policy for the current operating regime. 
+
+B. Puncturing Tiers 
+
+To adapt to latency-constrained entanglement generation, we consider puncturing of quantum error-correcting codes, which allow the code length to be reduced by selectively removing qubits while retaining a common encoding structure at the cost of lowering code distance [9]. In the context of encoded teleportation, this enables different entanglement packet sizes to be considered under latency constraints, at the cost of reduced error-correction capability. Puncturing a base code can produce many candidate code lengths. However, multiple punctured variants may provide the same error-correction capability, characterized by identical 
+
+(dZ , d X ) values. Since larger n requires more entangled pairs and incurs higher latency, we retain only the smallest-n code for each distinct (dZ , d X ) pair. This results in a discrete set of operating points, referred to as puncturing tiers . In this work, we consider four tiers derived from the same length-17 CSS base code following [7]: 
+
+[[17 , 1, 5, 5]] , [[13 , 1, 5, 3]] , [[8 , 1, 3, 3]] , uncoded .
+
+These tiers preserve a single logical qubit ( k = 1) while offering different packet sizes and error-correction capabilities. In particular, the [[13 , 1, 5, 3]] tier provides stronger protection against phase errors than bit-flip errors, making it well suited for asymmetric noise regimes where phase errors dominate [12]. The final tier corresponds to uncoded teleportation using a single entangled pair. Each tier therefore represents a different trade-off be-tween entanglement packet size, acquisition latency, and error-correction capability. While larger codes generally provide stronger error correction for equal fidelities, they require larger entanglement packets and longer acquisition times, which reduce the fidelity of stored pairs due to decoherence. This interplay between stochastic entanglement generation, storage-induced decoherence, and coding choices defines the trade-off studied in this work and motivates the need for adaptive encoded teleportation strategies. 
+
+C. Offline Optimization and Online Deployment 
+
+In this section, we present an operational use of the pro-posed framework, illustrated in Fig. 5. The framework consists of two phases for adaptive encoded teleportation. In the first phase, system parameters, including generation statistics, link quality, and memory coherence times, are evaluated offline across candidate puncturing tiers to analyze the trade-offs between logical error probability, latency, and link quality. For each relevant operating point, such as latency requirement or target reliability, the logical error probability is computed for all candidate codes, from which an optimized coding policy can be extracted. In particular, for a given operating point defined by the latency constraint L, detection probability pd,and noise asymmetry η, the selected puncturing tier is 
+
+n⋆(L, p d, η ) = arg min  
+
+> n∈N
+
+PL(n; L, p d, η ), (11) where N = {1, 8, 13 , 17 } denotes the set of candidate punctur-ing tiers. The resulting policy can be stored as a precomputed policy map. In the second phase, the framework is deployed during network operation. When a teleportation request arrives, the associated quality-of-service requirements and operating con-ditions are used to determine the appropriate puncturing tier from the precomputed policy map. The required entanglement packet is then requested. After successful generation, the data qubit is encoded using the selected punctured code, and the resulting physical qubits are teleported using the entanglement packet and decoded at the receiver. The numerical results in Sec. IV focus on the first phase to investigate these trade-offs and motivate the resulting policy map. IV. N UMERICAL RESULTS 
+
+In this section, we evaluate the performance of latency-constrained encoded teleportation, with the goal of quanti-fying the trade-off between latency and logical reliability, and comparing different coding strategies under a common latency constraint. To enable this comparison, we follow the Phase 1: Tradeoff Analysis & Design              
+
+> Model Entanglement Generation vs. Latency L
+> Analyze Stochastic Memory Decoherence & Pauli Noise
+> Evaluate PLvs. L
+> and PLvs. pd
+> Tradeoffs across Puncturing Tiers n
+> Latency-Aware Decision Rule
+> n⋆(L, P L)
+> Phase 2: Deployment Pipeline
+> Incoming Request: Latency Lreq &Target Rel. Preq
+> L
+> Determine n⋆,Puncture Base Code, & Encode
+> Teleport over Entangled Channel
+> Decode & Correct Errors
+> Inform Adaptive Code Selection
+
+Figure 5: System framework for adaptive latency-constrained encoded teleportation. Phase 1 represents the tradeoff analysis stage: we model entanglement generation under latency constraints, analyze the resulting stochastic memory decoherence, and evaluate the PL vs. L and PL vs. pd tradeoffs to establish decision regions. Phase 2 represents the physical deployment pipeline: incoming user requests specify constraints (Lreq , P req  
+
+> L
+
+), which inform the code selection. The base code is punctured to the optimized length n⋆, after which the data qubit is encoded, followed by quantum teleportation, decoding, and error correction. In this work, we focus on phase 1 to motivate the need for adaptive coding strategies in the system. modeling framework developed in Sec. II-B–Sec. II-C and Sec. III-A. For a given latency constraint L and code length 
+
+n, we determine the entanglement generation probability p by solving E[L(w, n )] = L using the approximation in (9). This ensures that all schemes satisfy the same latency constraint on average. The resulting value of p determines the initial fidelity of generated entangled pairs through F0(p) in (7). We then simulate the stochastic entanglement generation and storage process described in Sec. II-B and Sec. II-C until a successful entanglement packet of the corresponding size is obtained. Because successful pairs are generated at different time instants, the qubits in a packet experience different storage durations prior to teleportation. This results in hetero-geneous fidelities across the n qubits, which are computed using (8). The resulting fidelities are then mapped to qubit-wise Pauli error probabilities (pI,i ,p Z,i , p X,i , p Y,i ) according to the teleportation channel model in (1). Specifically, for a qubit with fidelity Fi, we set pI,i = Fi and distribute the remaining probability mass 1 − Fi across Pauli errors according to the underlying noise model: under symmetric noise pX,i = pY,i = pZ,i = (1 − Fi)/3, while under asymmetric noise pX,i = pY,i and η = pZ,i /p X,i , with all probabilities satisfying pI,i + pZ,i + pX,i + pY,i = 1 .Using these heterogeneous error probabilities, we evaluate encoded teleportation under CSS codes corresponding to the puncturing tiers described in Sec. III-B. For each Monte Carlo realization, we simulate the stochastic entanglement-generation and storage process to obtain the waiting times and storage ages of the qubits in the entanglement packet, which determine their heterogeneous fidelities. These fidelities are then mapped to qubit-wise Pauli error probabilities, and the corresponding logical error probability PL is computed using (6). The reported results are obtained by averaging PL over 
+
+10 5 independent realizations. For our numerical results, we use a coherence time of T =10000 time slots. Since the proposed framework is independent of the physical duration of a time slot, the coherence time should be interpreted relative to the underlying implementation. Relative to the representative time-slot durations discussed in Sec. II-B, this corresponds to a coherence time on the order of one second, consistent with reported coherence times of long-lived quantum memories [16]. This procedure enables a comparison across coding schemes, as each operates under the same average latency constraint while capturing the coupling between entanglement generation rate, fidelity, and logical reliability. In particular, longer codes require higher generation probabilities to satisfy the latency constraint, which reduces the fidelity of the gen-erated entanglement and can offset the benefits of increased error-correction capability. 
+
+A. Impact of Average Latency Constraint L
+
+We evaluate the logical error probability PL as a function of the latency constraint L for different puncturing tiers, corresponding to different code lengths n. This allows us to demonstrate how an optimized coding strategy depends on the available latency budget, and to identify regimes in which encoded teleportation outperforms uncoded transmission, as well as regimes where adaptive coding across puncturing tiers provides significant performance gains over fixed coding strategies. In Fig. 6, we show the logical error probability PL as a function of the latency constraint L for different coding tiers 
+
+n, with n = 1 corresponding to the uncoded case. Increasing the allowed latency budget improves entanglement quality, reducing logical error probabilities across all transmission strategies. Under tight latency constraints, encoded teleporta-tion outperforms uncoded transmission, with distinct decision regions in which the n = 8 punctured code (briefly) and the 5  5  5  5  !'% ( %$!%$   
+
+>   
+>   
+> !## !#"# !%(
+> &$'"  %
+> 
+> 
+> 
+> 
+
+Figure 6: Logical error probability PL as a function of allowed latency L for different puncturing tiers n under symmetric errors. 5  5  5  5  !'% ( %$!%$   
+
+>   
+> !## !#"# !%(
+> &$'"  %
+> 
+> 
+> 
+> 
+
+Figure 7: Logical error probability PL as a function of latency constraint L for different puncturing tiers n under asymmetric errors ( η = 10 ). 
+
+n = 17 code respectively achieve the lowest logical error probability. In this regime, the fidelity of a single entangled pair is too low for reliable uncoded transmission, and error correction through encoding reduces logical error probability despite requiring teleportation across multiple physical qubits. However, beyond approximately L = 200 , uncoded transmis-sion becomes favorable, as the fidelity of individual entangled pairs becomes sufficiently high that physical error probabilities are already very small. In this regime, encoded teleportation requires transmitting multiple physical qubits through inde-pendent teleportation channels, and the additional exposure to physical errors can outweigh the coding gains of larger codes. These decision regions demonstrate that puncturing enables adaptive selection across coding tiers under varying latency constraints. In Fig. 7, we show that under asymmetric errors with 
+
+η = 10 , the role of the asymmetrically punctured n = 13 
+
+code becomes pronounced, achieving the lowest logical error probability over most of the latency range. In contrast to the 0 0 0 0 ! #&##    
+
+> 0  
+> 0  
+> 0  
+> 0  
+> !! !  !#&
+> $"  0000%0000#
+> 
+> 
+> 
+> 
+
+Figure 8: Logical error probability PL as a function of detection probability pd for different puncturing tiers n under symmetric errors. symmetric case, encoded teleportation remains favorable for nearly all values of L, with uncoded transmission and the 
+
+n = 17 code only catching up briefly at the largest allowed latencies. These results show that asymmetry can significantly shift the best-performing coding tier and further enhance the benefits of adaptive puncturing. Moreover, under resource con-straints, encoded teleportation provides a significant reduction in logical error probability (corresponding to improved logical reliability) across nearly the entire latency regime considered. Taken together, the symmetric and asymmetric results demonstrate that adaptive puncturing can accommodate dis-tinct error environments while maintaining a common stabi-lizer structure and flexibly selecting coding tiers matched to the operating regime. 
+
+B. Impact of Detection Probability pd
+
+In addition to latency-constrained evaluations, we next examine how physical link quality affects logical reliability by studying the logical error probability PL as a function of the detection probability pd, which enters the initial fidelity model in (7). By evaluating PL as a function of pd, we assess how different coding strategies perform under heterogeneous link conditions while maintaining the same underlying coding framework. In Fig. 8, we show the logical error probability PL as a function of detection probability pd for symmetric errors under a fixed latency constraint L = 20 . At very low detection probabilities, corresponding to poor link quality or longer link distances, uncoded transmission achieves the lowest logical error probability, as coding provides limited error-correction benefit while increasing transmission error accumulation across multiple physical qubits. For moderate detection probabilities, approximately 0.2 ≤ pd ≤ 0.4, the 
+
+n = 8 punctured code achieves the lowest logical error probability, balancing error correction capability with reduced multi-qubit error accumulation relative to larger codes. Beyond approximately pd = 0.5, corresponding to improved link 0 0 0 0 ! #&##    
+
+> 0  
+> 0  
+> 0  
+> 0  
+> !! !  !#&
+> $"  0000%0000#0
+> 
+> 
+> 
+> 
+
+Figure 9: Logical error probability PL as a function of detection probability pd for different puncturing tiers n under asymmetric errors ( η = 10 ). quality or shorter link distances, the n = 17 code becomes fa-vorable and achieves the lowest logical error probability. These decision regions show that different link conditions require different coding tiers, further motivating adaptive puncturing to accommodate heterogeneous network conditions. In Fig. 9, we show that under asymmetric errors, the asymmetrically punctured n = 13 code again plays a dominant role, achieving the lowest logical error probability over most of the detection probability range. While uncoded transmission performs best briefly at very low detection probabilities, the 
+
+n = 13 code becomes favorable once link quality improves, providing a significant reduction in logical error probability across most operating regimes. As in the latency-constrained results, these findings show that adaptive puncturing provides a flexible mechanism for selecting coding tiers under both symmetric and asymmetric error environments based on link conditions. V. C ONCLUSIONS AND FUTURE WORK 
+
+In this work, we investigated the reliability of quantum teleportation under realistic network conditions where en-tanglement must be generated stochastically and degrades over time due to memory decoherence. Focusing on encoded teleportation, we developed a unified framework that captures the interaction between entanglement availability, decoherence, and coding decisions, enabling the evaluation of reliability in terms of logical error probability under latency constraints. Our results demonstrate that encoded teleportation can pro-vide substantial reliability gains over uncoded transmission under entanglement resource constraints. However, these gains depend critically on both the availability and fidelity of entan-gled pairs, as acquiring additional resources introduces delays that can reduce their effective quality. This interplay gives rise to non-uniform coding gains across operating regimes and highlights an interesting latency-reliability tradeoff. Through numerical investigations, we illustrated decision regions that determine optimized effective code length under varying latency constraints and link conditions, and showed that code puncturing provides a practical mechanism for adapt-ing the coding rate to resource availability without requiring changes to the underlying stabilizer structure. These findings underscore the importance of resource-aware adaptation in quantum networking, where both the quantity and quality of entanglement must be considered jointly in communication design. Several directions for future work remain. First, while this work focuses on encoded teleportation, entanglement purifi-cation provides a complementary mechanism for improving resource quality; jointly optimizing purification and encoding strategies is a promising direction for further improving reli-ability. Second, extending the framework to dynamic settings where coding decisions are made online, based on the instan-taneous availability of entangled pairs, would enable adaptive protocols that respond to time-varying resource conditions. Such extensions would further bridge the gap between theoret-ical models and practical quantum network implementations. REFERENCES [1] M. Caleffi, M. Amoretti, D. Ferrari, J. Illiano, A. Manzalini, and A. S. Cacciapuoti, “Distributed quantum computing: A survey,” 
+
+Computer Networks , vol. 254, p. 110672, 2024. [Online]. Available: https://www.sciencedirect.com/science/article/pii/S1389128624005048 [2] A. S. Cacciapuoti, M. Caleffi, F. Tafuri, F. S. Cataliotti, S. Gherardini, and G. Bianchi, “Quantum internet: Networking challenges in distributed quantum computing,” IEEE Network , vol. 34, no. 1, pp. 137–143, 2020. [3] D. Deutsch, A. Ekert, R. Jozsa, C. Macchiavello, S. Popescu, and A. Sanpera, “Quantum privacy amplification and the security of quantum cryptography over noisy channels,” Phys. Rev. Lett. , vol. 77, pp. 2818– 2821, 1996. [4] V. Vasan, A. Nico-Katz, B. A. Bash, D. C. Kilper, and M. Ruffini, “Entanglement purification with finite latency classical communication in quantum networks,” arXiv preprint arXiv:2509.03667 , 2025. [5] V. Vasan, A. Agrawal, A. Nico-Katz, J. Horgan, B. A. Bash, D. C. Kilper, and M. Ruffini, “Control protocol for entangled pair verification in quantum optical networks,” in IEEE Int. Conf. on Commun. , 2025, pp. 4609–4614. [6] L. Valentini, R. B. Christensen, P. Popovski, and M. Chiani, “Reliable quantum communications based on asymmetry in distillation and cod-ing,” IEEE Trans. on Quantum Eng. , vol. 5, pp. 1–13, 2024. [7] M. S. Abouamer, J. Skovsted Gundersen, S. P. Rasmussen, and P. Popovski, “Resource-adaptive teleportation under imperfect entangle-ment: A code-puncturing framework,” in IEEE INFOCOM 2026 - IEEE Conference on Computer Communications , 2026, pp. 1–6. [8] B. Davies, T. Beauchamp, G. Vardoyan, and S. Wehner, “Tools for the analysis of quantum protocols requiring state generation within a time window,” IEEE Transactions on Quantum Engineering , vol. 5, pp. 1–20, 2024. [9] J. S. Gundersen, R. B. Christensen, M. Grassl, P. Popovski, and R. Wisniewski, “Puncturing quantum stabilizer codes,” IEEE Journal on Selected Areas in Information Theory , 2025. [10] P. Popovski, ˇ C. Stefanovi´ c, B. Soret, I. Leyva-Mayorga, S. R. Pandey, R. B. Christensen, J. K. Søndergaard, K. S. Jensen, T. G. Pedersen, A. S. Cacciapuoti et al. , “1q: First-generation wireless systems integrating classical and quantum communication,” IEEE Vehicular Technology Magazine , 2025. [11] P. K. Sarvepalli, A. Klappenecker, and M. Rötteler, “Asymmetric quan-tum codes: constructions, bounds and performance,” Proc. R. Soc. A: Mathematical, Physical and Engineering Sciences , vol. 465, no. 2105, pp. 1645–1672, 03 2009. [12] L. Ioffe and M. Mézard, “Asymmetric quantum error-correcting codes,” 
+
+Physical Review AAtomic, Molecular, and Optical Physics , vol. 75, no. 3, p. 032345, 2007. [13] S. Zhang, J. Shi, Y. Liang, Y. Sun, Y. Wu, L. Duan, and Y. Pu, “Fast delivery of heralded atom-photon quantum correlation over 12 km fiber through multiplexing enhancement,” Nature Communications , vol. 15, no. 1, p. 10306, 2024. [14] A. N. Craddock, A. Lazenby, G. B. Portmann, R. Sekelsky, M. Flament, and M. Namazi, “Automated distribution of polarization-entangled pho-tons using deployed new york city fibers,” PRX Quantum , vol. 5, no. 3, p. 030330, 2024. [15] C. Cabrillo, J. I. Cirac, P. Garcia-Fernandez, and P. Zoller, “Creation of entangled states of distant atoms by interference,” Physical Review A ,vol. 59, no. 2, p. 1025, 1999. [16] C. Simon, M. Afzelius, J. Appel, A. Boyer De La Giroday, S. Dewhurst, N. Gisin, C. Hu, F. Jelezko, S. Kröll, J. Müller et al. , “Quantum memories: a review based on the european integrated project qubit applications (qap),” The European Physical Journal D , vol. 58, no. 1, pp. 1–22, 2010.

@@ -6,24 +6,29 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-07-22
-- 运行时间：2026-07-22 21:38:29 UTC
+- 最新运行日期：2026-07-23
+- 运行时间：2026-07-23 20:30:36 UTC
 - 运行状态：成功
-- 本次总论文数：1
+- 本次总论文数：3
 - 精读区：1
-- 速读区：0
+- 速读区：2
 
 ### 今日简报（AI）
-今日精读一篇高分论文，聚焦Nishimori阈值估计在贝叶斯推断与Z_q表面码解码中的应用。最值得关注的是该研究将统计物理的相变精确分析与量子纠错解码性能建立联系，为表面码阈值优化提供了新视角。建议读者后续关注该阈值估计方法在容错量子计算中的实际效果验证。
-- 详情：[/202607/22/README](/202607/22/README)
+今日共阅读3篇量子纠错前沿论文，其中《Learning to Decode Quantum LDPC Codes via Cluster-Based Sequential Belief Propagation》以9.0/10高分揭示机器学习驱动的解码新路径。最值得关注的是集群顺序置信传播解码器与机器学习后选择（7.0/10）分别显著提升量子LDPC码纠错效率及可靠性。建议未来实践中优先探索ML与传统解码的融合方案，并注意纠错中间过程对规模化量子计算的延迟约束（6.0/10）。
+- 详情：[/202607/23/README](/202607/23/README)
 
 ### 精读区论文标签
-1. [Nishimori Threshold Estimation for Bayesian Inference and $\mathbb{Z}_q$ Surface Code Decoding](/202607/22/2607.18374v1-nishimori-threshold-estimation-for-bayesian-inference-and-mathbbzq-surface-code-decoding)  
+1. [Learning to Decode Quantum LDPC Codes via Cluster-Based Sequential Belief Propagation](/202607/23/2607.20130v1-learning-to-decode-quantum-ldpc-codes-via-cluster-based-sequential-belief-propagation)  
    标签：评分：9.0/10、query:qec-decoding
-   evidence：表面码解码与阈值估计
+   evidence：提出基于聚类的顺序置信传播解码量子LDPC码
 
 ### 速读区论文标签
-- 本次无速读推荐。
+1. [Machine-learned syndrome post-selection for reliable quantum error correction](/202607/23/2607.19563v1-machine-learned-syndrome-post-selection-for-reliable-quantum-error-correction)  
+   标签：评分：7.0/10、query:qec-decoding
+   evidence：机器学习综合征后选择用于可靠量子纠错，提升解码器性能
+2. [Latency-Constrained Encoded Quantum Teleportation with Punctured Codes](/202607/23/2607.19770v1-latency-constrained-encoded-quantum-teleportation-with-punctured-codes)  
+   标签：评分：6.0/10、query:qec-code
+   evidence：使用凿孔量子纠错码的编码隐形传态
 
 
 <div class="dpr-home-promo-card">

@@ -1,0 +1,1087 @@
+Title: Learning to Decode Quantum LDPC Codes via Cluster-Based Sequential Belief Propagation
+
+URL Source: https://arxiv.org/pdf/2607.20130v1
+
+Published Time: Thu, 23 Jul 2026 00:55:20 GMT
+
+Number of Pages: 11
+
+Markdown Content:
+> 1
+
+# Learning to Decode Quantum LDPC Codes via Cluster-Based Sequential Belief Propagation 
+
+Mohsen Moradi , Taejoon Kim , Rémi A. Chou , and David G. M. Mitchell 
+
+Abstract —Belief-propagation (BP) decoding for quantum low-density parity-check (QLDPC) codes is attractive due to its low complexity, but its performance is often limited by short cycles, degeneracy, and convergence failures. Recently, reinforcement-learning-based sequential variable-node (VN) scheduling (RL-S) was shown to improve BP decoding by learning state-dependent update orders. However, the VN-by-VN nature of that approach offers limited within-iteration parallelism, since only one VN is updated at a time. In this paper, we propose a cluster-based extension of RL-S for QLDPC codes. The VNs are partitioned into fixed clusters, and at each scheduling step the RL agent selects one cluster to update, after which all VNs in that cluster are updated in parallel using the same pre-update incoming messages. To keep the tabular state space practical for large cluster sizes, we introduce a permutation-invariant cluster state based on a normalized histogram of local mismatch weights, followed by quantization. This representation makes the number of cluster states depend on the quantization resolution rather than the cluster size. We also develop the corresponding cluster-level Markov decision process, reward function, and Q-learning update. Numerical results on representative QLDPC codes show that the proposed clustered learned scheduling preserves most of the error-rate benefit of VN-level learned sequential scheduling while substantially reducing the number of scheduling decisions per BP iteration, thereby providing an attractive latency-parallelism tradeoff. 
+
+Index Terms —Quantum error correction, quantum LDPC codes, CSS codes, belief propagation, reinforcement learning, se-quential scheduling, cluster-based scheduling, syndrome decoding. 
+
+I. I NTRODUCTION 
+
+Quantum error correction is indispensable for large-scale quantum information processing because physical qubits are inherently noisy and unprotected computations accumulate errors rapidly [1]–[3]. Among the many code families pro-posed for fault tolerance, quantum low-density parity-check (QLDPC) codes have emerged as a particularly promising direction. Their sparse stabilizer structure supports low-weight syndrome extraction, while recent code constructions have significantly improved the achievable rate-distance tradeoff, in-cluding hypergraph-product codes [4], balanced-product codes 
+
+Mohsen Moradi and Taejoon Kim are with the School of Electrical, Com-puter and Energy Engineering, Arizona State University, Tempe, AZ 85287, USA (e-mail: mmorad11@asu.edu, taejoonkim@asu.edu). Rémi Chou is with the Department of Computer Science and Engineering, The University of Texas at Arlington, Arlington, TX 76019, USA (e-mail: remi.chou@uta.edu). David G. M. Mitchell is with the Klipsch School of Electrical and Computer Engineering, New Mexico State University, Las Cruces, NM 88003, USA (e-mail: dgmm@nmsu.edu). This work is in part supported by the National Science Foundation (NSF) under grants CNS2451268, CNS2514415, ITE2515378, and CCF-2145917, and the Office of Naval Research (ONR) under Grant N000142112472. 
+
+[5], lifted-product / almost-linearly distanced constructions [6], quantum Tanner codes [7], and finite-length families such as bivariate bicycle (BB) codes [8]. As a result, QLDPC codes are now widely viewed as a serious candidate for low-overhead fault-tolerant quantum architectures. These advances make the decoder design problem increasingly important: good codes are now available, but practical performance depends critically on whether one can decode them both accurately and quickly. While recent code constructions have greatly strengthened the case for QLDPC codes, their practical performance is still tightly linked to the design of efficient and reliable decoders. Belief propagation (BP) is an attractive starting point because it has low complexity, relies only on local message passing on a sparse Tanner graph, and is highly successful for clas-sical LDPC codes. For QLDPC codes, however, plain BP is well known to perform poorly [9], [10]. Two difficulties are especially important. First, the commutativity constraints of stabilizer codes induce many short cycles in the decoding graph, violating the independence assumptions of BP. Second, quan-tum degeneracy means that many distinct physical error patterns can produce the same syndrome and may even correspond to equivalent recovery operations on the codespace. In prac-tice, these effects create symmetric pseudo-codewords, trapping structures, and oscillatory decoder dynamics, so conventional BP often fails to converge or converges to a logically incorrect solution [11], [12]. A substantial literature has therefore developed around im-proving BP-based decoding for QLDPC codes. One major line of work augments BP with a post-processing stage. BP with ordered-statistics decoding (BP–OSD) [10], [13] improves BP by converting BP reliabilities into a syndrome-consistent solution through ordered-statistics post-processing. BP with stabilizer inactivation (BP–SI) reduces the cost of this post-processing step by restricting the linear solve to a smaller set of carefully selected variables [14]. More recent variants such as check-agnosia, localized statistics decoding (LSD), and low-complexity syndrome-based linear-programming post-processing seek to retain strong performance while improving parallelizability or lowering latency [15]–[17]. These methods can be very effective, but they introduce an auxiliary stage beyond plain BP whose latency, control complexity, or hard-ware footprint can become significant. A second line of work aims to improve the message-passing process itself rather than appending a heavy post-processor. Examples include memory-enhanced BP that explicitly exploits degeneracy [12], guided decimation [18], [19], layered and random-order schedules [20], arXiv:2607.20130v1 [cs.IT] 22 Jul 2026 2
+
+graph-neural or hybrid learned decoders [21], and recent relay-style BP refinements for real-time decoding under circuit-level noise [22]. The common theme is that the poor performance of plain BP is not simply a matter of insufficient iterations; rather, one must break the harmful symmetries created by short cycles and degeneracy, while preserving as much of BP’s locality and low complexity as possible. Among the many proposed improvements to BP-based QLDPC decoding, scheduling is particularly attractive. Chang-ing the order of message updates does not alter the code itself, does not require a separate post-processing stage, and can often be implemented with relatively low overhead. In classical coding, serial and shuffled BP schedules are known to improve convergence, and reinforcement learning (RL) has also been used to learn effective update orders [23], [24]. For QLDPC codes, sequential check-node (CN) and variable-node (VN) schedules have likewise been shown to outperform conventional flooding BP [25]. More recently, reinforcement-learning-based sequential VN scheduling (RL-S) was intro-duced, where the next VN is selected from a local syndrome-driven state, yielding substantial gains over both flooding and random sequential schedules while preserving the underlying BP message-update rule [26]. In particular, RL-S can achieve significantly better error-correction performance than conven-tional BP and, for a fixed iteration cap, often succeeds in much fewer average iterations. Subsequent extensions further addressed the latency–performance tradeoff of learned sequen-tial BP under depolarizing noise. A list-based extension showed that the learned sequential decoder can achieve significantly better error-correction performance while maintaining the same decoding latency [27]. A complementary learned bit-flipping extension improved performance by selecting promising flip candidates after an initial learned sequential decoding stage and processing the resulting continuation branches in parallel, thereby improving the latency–performance tradeoff without adding a heavy post-processing step [28]. Taken together, these results show that, for QLDPC decoding, the scheduling policy is an important part of the decoder design itself. In this paper, we address a central limitation of the sequential decoding approach. In RL-S, the decoder updates one VN at a time. This VN-level control is beneficial because it injects state-dependent asymmetry into BP and improves convergence, but it also creates a long serial decision chain: one BP iteration requires up to n scheduling decisions for a length n code. As a result, although RL-S often converges in fewer average iterations and attains substantially better decoding performance than conventional BP, its VN-by-VN schedule can still lead to a less favorable latency profile from an implementation perspective. In particular, the fully serial scheduling process limits within iteration parallelism and can increase the latency, even when the underlying local message updates are themselves simple. Put differently, RL-S offers an attractive convergence-performance tradeoff, but at a scheduling granularity that may be too fine for latency-sensitive implementations. Our goal is to preserve the main advantage of learned sequential scheduling while reducing its serial depth. To this end, we propose a cluster-based extension of RL-S for QLDPC codes. The VNs are partitioned into fixed clusters. At each scheduling step, the RL agent selects one cluster, and all VNs in that cluster are then updated in parallel using the same pre-update incoming messages. The resulting hard-decision changes are applied simultaneously. This produces a decoder that is still sequential at the cluster level, but parallel inside each selected cluster. The key design challenge is then no longer the BP update itself, but how to represent the state of a cluster compactly enough for tabular RL to remain practical. A technical idea of this paper is to represent each cluster in a permutation-invariant manner through the distribution of local mismatch weights across its VNs. Rather than storing the ordered states of all VNs in a cluster, which would cause the state space to grow rapidly with cluster size, our proposed approach summarizes each cluster by a normalized histogram of local mismatch weights and then quantizes that histogram. In this way, the number of admissible cluster states depends mainly on the quantization resolution rather than on the cluster size itself. The resulting representation is compact, invariant to arbitrary reorderings of VNs within the cluster, and well matched to the syndrome-driven nature of sequential BP decoding. Our proposed clustered RL-S decoder retains state-dependent scheduling at a coarser level while enabling parallel pro-cessing inside each chosen cluster. In that sense, it pro-vides a direct latency–parallelism tradeoff inside the learned-scheduling framework. We formulate the corresponding cluster-level Markov decision process (MDP), derive the reward and Q-learning update, and characterize how a parallel cluster update changes the residual mismatch pattern. Through numerical results on representative QLDPC codes, we show that our proposed clustered decoder preserves much of the error-rate improvement of VN-level learned sequential scheduling while requiring substantially fewer scheduling decisions per BP iter-ation. For the [[288 , 12 , 18]] BB code [8] over the depolarizing channel, our results show that clustered RL-S with cluster size 
+
+B = 10 , corresponding to a cluster-level scheduling depth of 29 per iteration, can achieve error-correction performance close to that of VN-level RL-S, which requires 288 scheduling decisions per iteration. Thus, under an ideal parallel cluster-update model and with sufficient quantization resolution, our proposed decoder can reduce the serial scheduling latency by approximately one order of magnitude. The remainder of the paper is organized as follows. Section II reviews the stabilizer and CSS framework, syndrome-based decoding under the independent Pauli-X channel, and the role of message-passing schedules in BP decoding. Section III develops the proposed clustered RL-S formulation. Section IV discusses the complexity and latency of BP, RL-S, and clustered RL-S. Section V presents numerical results, and Section VI concludes the paper. 3
+
+II. B ACKGROUND 
+
+A. Stabilizer and CSS quantum LDPC codes 
+
+Quantum stabilizer codes are the quantum counterpart of classical linear block codes [2], [3]. Let Pn denote the n-qubit Pauli group, consisting of n-fold tensor products of the single-qubit Pauli operators I, X, Y , and Z, with phases in {± 1, ±i}.An [[ n, k, d ]] stabilizer code is defined by an abelian subgroup 
+
+S ⊂ P n generated by n − k independent commuting Hermitian Pauli operators and satisfying −I2n /∈ S . The codespace is the joint +1 eigenspace of the elements of S and has dimension 
+
+2k.A particularly important subclass is the Calderbank–Shor– Steane (CSS) family [2], [3], for which the stabilizer generators can be separated into X-type and Z-type checks. A CSS code is specified by two binary parity-check matrices 
+
+HX ∈ FmX ×n 
+
+> 2
+
+, HZ ∈ FmZ ×n 
+
+> 2
+
+,
+
+satisfying the orthogonality condition 
+
+HX H⊤ 
+
+> Z
+
+= 0 over F2,
+
+which is the binary representation of stabilizer commutativity. A CSS code is called a QLDPC code when these matrices are sparse, i.e., when every row and every column has relatively small Hamming weight compared with the blocklength. 
+
+B. Syndrome decoding and degeneracy under the independent Pauli-X channel 
+
+In this paper we first focus on the independent Pauli-X
+
+channel for conceptual clarity. In this model, each physical qubit is flipped independently with probability px, and only bit-flip errors are present. The physical error can therefore be represented by a binary vector 
+
+e ∈ Fn 
+
+> 2
+
+,
+
+where ei = 1 indicates an X error on qubit i.For this X-only setting, only the relevant Z-type parity checks matter. We denote by 
+
+H1 ∈ Fm×n
+
+> 2
+
+the binary parity-check matrix used for this component of decoding, and the measured syndrome is 
+
+s = H1e ∈ Fm 
+
+> 2
+
+.
+
+A decoder outputs an estimate ˆe based on s and the channel parameter px.Unlike in ordinary classical syndrome decoding, recovering the exact physical error is not the real objective. In a quantum code, different physical errors may induce the same syndrome and may even act identically on the codespace up to multipli-cation by stabilizers. This is the phenomenon of degeneracy 
+
+[9], [12]. Consequently, successful decoding only requires that the residual operator between the true error and the chosen correction be logically trivial; exact physical identification is unnecessary. This feature is fundamentally beneficial from the viewpoint of quantum information, but it complicates BP decoding because the syndrome alone does not isolate a unique most-likely binary error pattern. At the level of binary syndrome equations, all vectors in the affine set 
+
+{x ∈ Fn 
+
+> 2
+
+| H1x = s}
+
+are syndrome-consistent. However, these candidates need not be equally useful from the viewpoint of logical recovery. In simulations, one therefore typically checks not only syndrome consistency but also whether the residual error induces anontrivial logical action. For BP-based decoders, degeneracy manifests itself as ambiguity in the soft information: multiple nearby candidates may explain the same syndrome, leading to weak or oscillatory beliefs rather than a clean separation between correct and incorrect local decisions [9], [11]. 
+
+C. Tanner graph and belief-propagation decoding 
+
+The binary matrix H1 defines a Tanner graph with VNs 
+
+v1, . . . , v n and check nodes c1, . . . , c m. For i ∈ { 1, . . . , n }
+
+and j ∈ { 1, . . . , m }, VN vi is adjacent to check node cj if and only if H1(j, i ) = 1 . For each VN vi, define 
+
+N (vi) = {cj | H1(j, i ) = 1 } ,
+
+and for each check node cj , define 
+
+N (cj ) = {vi | H1(j, i ) = 1 } .
+
+For the independent Pauli-X channel, the a priori log-likelihood ratio (LLR) at each VN is 
+
+λi ≜ log 1 − px
+
+px
+
+.
+
+In standard sum-product BP, variable-to-check and check-to-variable messages are iteratively updated according to local rules on the Tanner graph. Denoting by m(ℓ) 
+
+> vi→cj
+
+and m(ℓ) 
+
+> cj→vi
+
+the VN-to-CN and CN-to-VN messages associated with edge 
+
+(vi, c j ) at iteration ℓ, the CN update takes the form         
+
+> m(ℓ)
+> cj→vi= 2 tanh −1
+> (−1) sj
+> ∏
+> vi′∈N (cj)\{ vi}
+> tanh
+> (m(ℓ−1)
+> vi′→cj
+> 2
+> ),
+> (1)
+
+while the VN update is 
+
+m(ℓ) 
+
+> vi→cj
+
+= λi + ∑   
+
+> cj′∈N (vi)\{ cj}
+
+m(ℓ)  
+
+> cj′→vi
+
+. (2) The posterior LLR at VN vi is then 
+
+L(ℓ) 
+
+> i
+
+= λi + ∑  
+
+> cj∈N (vi)
+
+m(ℓ)  
+
+> cj→vi
+
+, (3) and the hard decision is 
+
+ˆe(ℓ) 
+
+> i
+
+=
+
+{0, L(ℓ) 
+
+> i
+
+> 0,
+
+1, L(ℓ) 
+
+> i
+
+≤ 0. (4) The resulting estimated syndrome is H1 ˆe(ℓ).For QLDPC codes, the issue is that the Tanner graph contains many short cycles; information can therefore return quickly to 4
+
+its origin and be repeatedly overcounted. In addition, degener-acy implies that local reliabilities need not concentrate cleanly on a single candidate error pattern. This is why plain flooding BP often stalls or oscillates on QLDPC instances even when its classical counterpart is effective [9], [10], [12]. For later use, it is convenient to define the residual mismatch vector associated with a current hard estimate ˆe as 
+
+δ ≜ s ⊕ (H1 ˆe), (5) where ⊕ denotes componentwise addition modulo 2. Thus, 
+
+δj = 1 indicates that check node cj is currently unsatisfied. 
+
+D. Sequential scheduling, learned scheduling, and the motiva-tion for clustering 
+
+The conventional BP decoder uses a flooding schedule: all CN messages are updated in parallel from the previous VN messages, and then all VN messages are updated in parallel from the new CN messages. A sequential or serial schedule updates nodes one at a time and can immediately reuse fresher messages. Such schedules are well known to help classical BP decoding, and related schedule-optimization ideas have also been explored with RL [23], [24]. For QLDPC decoding, scheduling is especially relevant be-cause the decoding graph has many short cycles. In [25] it is shown that sequential VN scheduling (SVNS) and sequential CN scheduling (SCNS) can already improve performance over flooding BP. Building on that observation, [26] introduced a learned SVNS (RL-S) decoder in which, within each BP iteration, an RL agent chooses the next VN to update based on a local syndrome-driven state. After a VN is selected, its incident messages and local hard decision are updated, the residual mismatch is refreshed locally, and the VN is removed from the remaining set for that BP iteration. This can substantially reduce non-convergence. The advantage of this VN-level learned schedule is also its main drawback: one VN is processed at a time. Hence, for a length n code, a single BP iteration may require up to n separate scheduling decisions. From a hardware perspective, this creates a long serial control path and limits within-iteration parallelism. The clustered decoder proposed in this paper is designed precisely to alleviate that limitation. Instead of selecting a single VN, the RL agent selects a cluster of VNs, after which all VNs in the chosen cluster are updated in parallel from the same pre-update information. The challenge is then to preserve the essential syndrome-driven information needed for learned scheduling while moving from a node-level to a cluster-level action space. The next section develops that formulation. III. C LUSTERED RL S CHEDULING 
+
+The VN-by-VN learned schedule in RL-S improves con-vergence by injecting controlled asymmetry into BP, but it offers limited within-iteration parallelism because only one VN is updated at a time. To reduce the scheduling depth while retaining a learned, state-dependent update order, we group VNs into clusters and let the RL agent choose which cluster to process next. Once a cluster is selected, all VNs in that cluster are updated in parallel using the same pre-update incoming messages, and the resulting hard-decision changes are then applied simultaneously. In this way, the decoder preserves the main idea of learned scheduling, but operates at a coarser and more hardware-friendly granularity. Fix an integer cluster size B and partition the VN set 
+
+{v1, . . . , v n} into 
+
+Ncl ≜
+
+⌈ nB
+
+⌉
+
+disjoint clusters 
+
+C1, . . . , CNcl , Ca ⊆ { v1, . . . , v n},
+
+such that 
+
+Ca ∩ C a′ = ∅ (a̸ = a′),
+
+> Ncl
+
+⋃
+
+> a=1
+
+Ca = {v1, . . . , v n}.
+
+For each cluster Ca, define its associated index set as 
+
+Ia = {i | vi ∈ C a}.
+
+In our numerical results, this partition is drawn once at initial-ization and then kept fixed throughout both training and testing. Specifically, for each of the first Ncl − 1 clusters, we assign B
+
+VNs uniformly at random without replacement, and the final cluster contains the remaining VNs. The random VN partitions used in this work are not designed to guarantee conflict-free hardware implementations. Accordingly, the latency analysis assumes ideal parallel cluster updates. Related work on classical LDPC decoding constructs conflict-free CN clusters [29]; ex-tending such graph-aware partitioning methods to VN clusters for QLDPC decoding is left for future work. 
+
+A. Cluster-level MDP formulation 
+
+The cluster-level Markov decision process (MDP) follows the VN-based RL-S decoder, except that the actions now correspond to clusters rather than individual VNs. An episode samples a crossover probability px from the training set, generates an error pattern and its syndrome, initializes the BP beliefs and messages, and then runs clustered RL-S decoding for at most Imax BP iterations. The environment state is the full decoder configuration, 
+
+{mvi→cj , m cj →vi : ( vi, c j ) ∈ E}, {Li}, ˆe, δ,
+
+where E denotes the edge set of the Tanner graph. Inside each BP iteration, the agent maintains a remaining set 
+
+Rt ⊆ { 1, . . . , N cl }
+
+of clusters that have not yet been visited in that iteration. Choosing action at ∈ R t means that cluster Cat is selected and all VNs in that cluster are updated in parallel. After the update, the selected cluster is removed from the remaining set. Thus, as in the VN-based decoder, the schedule is applied without replacement within each BP iteration. 5
+
+B. Cluster state 
+
+A direct state description that stores the ordered collection of all VN-level states inside a cluster is unnecessarily large and depends on the arbitrary ordering of the VNs within that cluster. To obtain a compact and permutation-invariant representation, we summarize the local mismatch weights inside each cluster. For each VN vi, let 
+
+Ai ≜ |N (vi)|, Amax ≜ max  
+
+> i
+
+Ai.
+
+Using a fixed deterministic ordering of the neighboring checks of VN vi, write 
+
+N (vi) = ( cj1 , c j2 , . . . , c jAi ).
+
+We define the local binary mismatch vector [26] 
+
+bi ≜ [δj1 , δ j2 , . . . , δ jAi , 0, . . . , 0] ∈ { 0, 1}Amax ,
+
+where the vector is zero-padded to length Amax when Ai <Amax .From this local pattern, we define the local mismatch weight 
+
+ωi ≜ ∥bi∥1,
+
+which is simply the number of unsatisfied neighboring checks seen by VN vi.For a cluster Ca, we aggregate these local mismatch weights into the histogram 
+
+cr (a) ≜ ∣∣{vi ∈ C a | ωi = r}∣∣, r ∈ { 0, 1, . . . , A max }.
+
+These counts satisfy 
+
+> Amax
+
+∑
+
+> r=0
+
+cr (a) = |C a|.
+
+The corresponding unquantized cluster state is 
+
+ca ≜ (c0(a), c 1(a), . . . , c Amax (a)). (6) Note that the size of ca still grows with the cluster size. To make the state representation comparable across different cluster sizes and to control the state-space growth, we instead normalize the histogram by the cluster size as 
+
+ρr (a) ≜ cr (a)
+
+|C a| , r = 0 , 1, . . . , A max ,
+
+so that Amax ∑
+
+> r=0
+
+ρr (a) = 1 .
+
+To control the state-space size, we choose a quantization resolution L. We quantize ρ(a) onto the integer simplex using a largest-remainder rule. First, define 
+
+˜qr (a) = Lρ r (a), br (a) = ⌊˜qr (a)⌋, fr (a) = ˜ qr (a) − br (a).
+
+Let 
+
+D = L −
+
+> Amax
+
+∑
+
+> r=0
+
+br (a).
+
+Cluster Ca = {vi1 , v i2 , v i3 , v i4 , v i5 }
+
+> ωi1
+> = 1
+> ωi2
+> = 2
+> ωi3
+> = 0
+> ωi4
+> = 3
+> ωi5
+> = 1
+
+vi1 vi2 vi3 vi4 vi5
+
+c1 c2 c3 c4 c5 c6
+
+1 0 1 0 1 0 δj            
+
+> Fig. 1. Tanner subgraph used in Example 1. The highlighted cluster Ca=
+> {vi1, . . . , v i5}is connected to checks c1, . . . , c 6according to the listed neighbor sets. The values below the check nodes are the current residual mismatches δj, and the circles above the variable nodes show the induced local mismatch weights ωik.
+
+Then qr (a) is obtained by setting qr (a) = br (a) and adding one to the D indices with the largest fractional parts fr (a),with ties broken by increasing r. Thus, 
+
+qr (a) ∈ Z≥0,
+
+> Amax
+
+∑
+
+> r=0
+
+qr (a) = L. (7) The resulting quantized cluster state is 
+
+σa ≜ (q0(a), q 1(a), . . . , q Amax (a)). (8) This representation is permutation-invariant within the clus-ter, captures the distribution of local mismatch weights, and, crucially, makes the number of possible states depend on the quantization resolution L rather than the cluster size. 
+
+Example 1. Suppose Amax = 3 and a cluster Ca of size B = 5 
+
+contains 
+
+Ca = {vi1 , v i2 , v i3 , v i4 , v i5 }.
+
+Assume that the current residual mismatch vector is 
+
+δ = ( δ1, δ 2, δ 3, δ 4, δ 5, δ 6) = (1 , 0, 1, 0, 1, 0) ,
+
+so that checks c1, c 3, c 5 are currently unsatisfied and checks 
+
+c2, c 4, c 6 are satisfied. Assume further that the neighboring checks of the VNs in Ca
+
+are, in the fixed deterministic order used by the decoder, 
+
+N (vi1 ) = ( c1, c 2, c 4), N (vi2 ) = ( c1, c 3, c 6),
+
+N (vi3 ) = ( c2, c 4, c 6), N (vi4 ) = ( c1, c 3, c 5),
+
+N (vi5 ) = ( c2, c 3, c 4).
+
+The Tanner subgraph corresponding to this setup is illustrated in Fig. 1. The circles below the check nodes show the current residual mismatch values δj , while the circles above the VNs show the resulting local mismatch weights ωik computed below. 6
+
+The corresponding local mismatch vectors are obtained by restricting δ to the neighboring checks of each VN as 
+
+bi1 = [ δ1, δ 2, δ 4] = [1 , 0, 0] , bi2 = [ δ1, δ 3, δ 6] = [1 , 1, 0] ,
+
+bi3 = [ δ2, δ 4, δ 6] = [0 , 0, 0] , bi4 = [ δ1, δ 3, δ 5] = [1 , 1, 1] ,
+
+bi5 = [ δ2, δ 3, δ 4] = [0 , 1, 0] .
+
+Their local mismatch weights are therefore 
+
+ωi1 = 1 , ωi2 = 2 , ωi3 = 0 , ωi4 = 3 , ωi5 = 1 .
+
+Hence the histogram counts are 
+
+c0(a) = 1 , c1(a) = 2 , c2(a) = 1 , c3(a) = 1 .
+
+If we use the raw histogram representation, the resulting cluster state is 
+
+σa = (c0(a), c 1(a), c 2(a), c 3(a)) = (1 , 2, 1, 1) .
+
+In words, the cluster contains one VN with no unsatisfied neighboring checks, two VNs with one unsatisfied neighboring check, one VN with two unsatisfied neighboring checks, and one VN with three unsatisfied neighboring checks. If instead we use the normalized representation, then 
+
+(ρ0(a), ρ 1(a), ρ 2(a), ρ 3(a)) = 
+
+( 15 , 25 , 15 , 15
+
+)
+
+.
+
+For example, if the quantization resolution is L = 8 , then 
+
+Lρ (a) = (1 .6, 3.2, 1.6, 1.6) .
+
+The integer floor vector is therefore 
+
+(b0(a), b 1(a), b 2(a), b 3(a)) = (1 , 3, 1, 1) ,
+
+and the corresponding fractional remainders are 
+
+(f0(a), f 1(a), f 2(a), f 3(a)) = (0 .6, 0.2, 0.6, 0.6) .
+
+Since 
+
+D = L −
+
+> 3
+
+∑
+
+> r=0
+
+br (a) = 2 ,
+
+we must add one unit to the two largest fractional remainders. The largest remainders are tied at r = 0 , 2, 3; with ties broken by increasing r, the two selected positions are r = 0 and r = 2 .Hence, 
+
+(q0(a), q 1(a), q 2(a), q 3(a)) = (2 , 3, 2, 1) ,
+
+which satisfies 
+
+q0(a) + q1(a) + q2(a) + q3(a) = 8 .
+
+C. State-space size under quantization 
+
+For a fixed Amax and quantization resolution L, the number of possible quantized cluster states is the number of nonnegative integer solutions of 
+
+q0 + q1 + · · · + qAmax = L, 
+
+namely 
+
+N (L)states =
+
+(L + Amax 
+
+Amax 
+
+)
+
+. (9) Hence the tabular state space no longer scales with the cluster size B. Note that without quantization, the number of possible cluster states is 
+
+N (B)states =
+
+(B + Amax 
+
+Amax 
+
+)
+
+. (10) For the [[882 , 24 , 18 ≤ d ≤ 24]] code B1 [13], we have 
+
+Amax = 3 , so 
+
+N (L)states =
+
+(L + 3 3
+
+)
+
+.
+
+As a concrete example, when L = 8 ,
+
+N (8) states =
+
+(11 3
+
+)
+
+= 165 .
+
+Therefore, if n = 882 and B = 20 , then Ncl = 45 and the Q-table contains 
+
+165 × 45 = 7425 
+
+entries. If instead B = 60 , then Ncl = 15 and the Q-table contains 
+
+165 × 15 = 2475 
+
+entries. In both cases, the cluster-state resolution is controlled by L, not by B.
+
+D. Parallel cluster update 
+
+When a cluster Ca is selected, all VNs in that cluster are updated in parallel. More precisely, each VN vi ∈ C a first computes its updated belief and tentative hard decision using the pre-update incoming messages. After all tentative decisions in the cluster have been formed, the induced hard-decision flips are applied simultaneously. This makes the within-cluster update independent of any arbitrary ordering of the VNs inside the cluster. Using the residual mismatch δ, suppose that the selected cluster update changes the hard decisions on the index set F ⊆ Ia. If ui denotes the ith standard basis vector, then the updated hard estimate is 
+
+ˆe′ = ˆ e ⊕
+
+(⊕
+
+> i∈F
+
+ui
+
+)
+
+.
+
+The following lemma describes how this simultaneous set of flips changes the residual mismatch. 
+
+Lemma 1. The updated residual mismatch 
+
+δ′ = s ⊕ (H1 ˆe′)7
+
+satisfies, for each check index j,
+
+δ′ 
+
+> j
+
+= δj ⊕
+
+(∑
+
+> i∈F
+
+H1(j, i )
+
+)
+
+(mod 2) .
+
+Equivalently, check node cj changes its residual status if and only if it is adjacent to an odd number of flipped VNs in F.Proof. By linearity over F2,
+
+H1 ˆe′ = H1 ˆe ⊕ ⊕
+
+> i∈F
+
+H1ui.
+
+Therefore, 
+
+δ′ = s ⊕ H1 ˆe′ = s ⊕ H1 ˆe ⊕ ⊕
+
+> i∈F
+
+H1ui = δ ⊕ ⊕
+
+> i∈F
+
+H1ui.
+
+Taking the jth component gives 
+
+δ′ 
+
+> j
+
+= δj ⊕ ⊕
+
+> i∈F
+
+H1(j, i ) = δj ⊕
+
+(∑
+
+> i∈F
+
+H1(j, i )
+
+)
+
+(mod 2) .
+
+Hence, check node cj changes its residual status exactly when it is connected to an odd number of flipped VNs. Lemma 1 shows that the effect of a parallel cluster update on the residual mismatch is completely local: only checks adjacent to at least one flipped VN in the selected cluster can change, and each such check changes according to an odd-parity rule. 
+
+E. Reward and Q-learning update for cluster actions 
+
+For the the current mismatch weight w = ∥δ∥1, suppose that at step t the agent selects cluster at ∈ R t, where Rt is the set of clusters that remain available in the current BP iteration. Let 
+
+wbefore and wafter denote the mismatch weights immediately before and after applying the corresponding parallel cluster update. We define the one-step reward as the normalized mismatch reduction 
+
+rt ≜ wbefore − wafter 
+
+∑
+
+> i∈I at
+
+Ai
+
+, Ai ≜ |N (vi)|. (11) We add a terminal bonus of +1 when the current estimate becomes syndrome-consistent, i.e., 
+
+rt ← rt + 1 if wafter = 0 .
+
+After selecting at, we remove that action from the remaining set, i.e., 
+
+Rt+1 ≜ Rt \ { at}.
+
+Let σa denote the current quantized cluster state associated with action a. The one-step lookahead value is 
+
+Vt+1 ≜ max 
+
+> a′∈R t+1
+
+Q(σa′ , a ′), (12) with the convention that Vt+1 = 0 when Rt+1 = ∅.The tabular Q-learning update is then 
+
+Q(σat , a t) ← Q(σat , a t)+ α
+
+(
+
+rt +γV t+1 −Q(σat , a t)
+
+)
+
+, (13) where α ∈ (0 , 1] is the learning rate and γ ∈ [0 , 1) is the discount factor. 
+
+F. Extension to the depolarizing channel 
+
+The clustered RL-S framework can also be applied to the depolarizing channel by using the same quaternary BP repre-sentation as in the VN-level RL-S decoder [26]. In this setting, each qubit error is a Pauli symbol 
+
+qi ∈ { I, X, Y, Z },
+
+with 
+
+Pr( qi = I) = 1 − p, 
+
+Pr( qi = X) = Pr( qi = Y ) = Pr( qi = Z) = p
+
+3 ,
+
+where p denotes the physical depolarizing error probability per qubit. For a Pauli symbol q, define its binary components as 
+
+eX (q) ≜ 1[q ∈ { X, Y }], eZ (q) ≜ 1[q ∈ { Y, Z }].
+
+Thus, the X-component is detected by the Z-type checks, while the Z-component is detected by the X-type checks. For a CSS code, the residual mismatch vectors are 
+
+δX ≜ sX ⊕ HX ˆeZ , δZ ≜ sZ ⊕ HZ ˆeX ,
+
+where the superscripts on δX and δZ label the X- and Z-type check syndromes, respectively. Thus, δX is associated with the X-type checks and the estimated Z-component, while 
+
+δZ is associated with the Z-type checks and the estimated X-component. The total mismatch weight is 
+
+w ≜ ∥δX ∥1 + ∥δZ ∥1.
+
+The cluster state is formed in the same way as in the independent Pauli-X case, except that each VN now observes unsatisfied checks from both Tanner graphs. To distinguish the two CSS Tanner graphs, let cXa denote the ath X-type check node, corresponding to row a of HX , and let cZb denote the bth 
+
+Z-type check node, corresponding to row b of HZ . For qubit 
+
+i, define 
+
+NX (vi) ≜ {cXa | HX (a, i ) = 1 },
+
+NZ (vi) ≜ {cZb | HZ (b, i ) = 1 }.
+
+The depolarizing-channel local mismatch weight is then 
+
+ωi ≜ ∑  
+
+> cXa∈N X(vi)
+
+δXa + ∑  
+
+> cZb∈N Z(vi)
+
+δZb .
+
+Thus, ωi counts the number of currently unsatisfied X- and 
+
+Z-type checks adjacent to qubit i, using the residual mismatch vectors δX and δZ . The cluster histogram is then constructed from the values of ωi inside each cluster and quantized exactly as in Section III-B. Hence, the same permutation-invariant cluster-state representation applies. When a cluster is selected, all qubits in that cluster are updated in parallel using the quaternary BP update rule. If the Pauli decision at qubit i changes from ˆqi to ˆq′
+
+> i
+
+, define 
+
+∆eXi ≜ eX (ˆ qi) ⊕ eX (ˆ q′
+
+> i
+
+), ∆eZi ≜ eZ (ˆ qi) ⊕ eZ (ˆ q′
+
+> i
+
+).
+
+Then the residual mismatches are updated as 
+
+δX′ = δX ⊕ HX ∆eZ , δZ′ = δZ ⊕ HZ ∆eX .8
+
+Thus, the depolarizing-channel version uses the same cluster-selection, reward, and Q-learning structure, with the binary residual mismatch replaced by the pair (δX , δZ ). The full quaternary BP message-update details generalize the RL-S decoder in [26]; here, the learned component only changes the scheduling action from a single VN to a cluster of VNs. 
+
+G. Training and greedy inference 
+
+During training, the action is selected using an ϵ-greedy policy over the current remaining set Rt. At training episode 
+
+ν, the decoder selects an action uniformly at random from 
+
+Rt with probability ϵν . Otherwise, with probability 1 − ϵν ,it selects an action that maximizes Q(σa, a ) over all a ∈ R t.Ties between maximizing actions are broken deterministically. In our implementation, the exploration probability decreases linearly according to 
+
+ϵν = max 
+
+{
+
+ϵmin , ϵ 0
+
+(
+
+1 − ν − 1
+
+Emax − 1
+
+)} 
+
+, ν ∈ { 1, . . . , E max }.
+
+After training, the learned policy is used greedily by setting 
+
+ϵ = 0 . Thus, at scheduling step t, the selected action satisfies 
+
+at ∈ arg max 
+
+> a∈R t
+
+Q(σa, a ).
+
+Thus, one BP iteration requires only Ncl scheduling decisions rather than n, while each decision activates a full cluster of VNs in parallel. This is precisely the latency–parallelism tradeoff introduced by clustered RL-S: as B increases, the number of scheduling decisions per iteration decreases, but each action becomes coarser. The training and inference procedures for the independent Pauli-X setting are summarized in Algorithms 1 and 2, respec-tively. Algorithm 1 describes the offline Q-learning procedure used to learn the cluster-selection table, while Algorithm 2 describes the greedy decoding procedure used after training. In both algorithms, the main difference from VN-level RL-S is that the action is a cluster index rather than a single VN index. The depolarizing-channel implementation follows the same structure, with the binary hard decision and residual mismatch replaced by the quaternary decision and the pair 
+
+(δX , δZ ).Algorithm 1 gives the offline training procedure for the clustered RL-S decoder. Line 1 initializes the Q-table. Lines 2– 6 generate one training episode by sampling the channel parameter, generating an error and its syndrome, initializing the BP messages and beliefs, and forming the initial hard decision and residual mismatch. Lines 7–8 start the BP iterations and initialize the set of available clusters for the current iteration. Lines 9–12 perform the cluster-selection steps within one BP iteration and stop early if the residual mismatch has already become zero. Line 13 computes the current quantized state of each remaining cluster. Line 14 selects a cluster using the ϵ-greedy rule. Lines 15–17 apply the parallel cluster update and measure the change in the residual mismatch weight. Lines 18– 21 compute the one-step reward, including the terminal bonus upon syndrome convergence. Line 22 removes the selected cluster from the remaining set so that each cluster is visited at 
+
+Algorithm 1 Offline training of the clustered RL-S decoder for the independent Pauli-X channel  
+
+> 1:
+
+Initialize Q-table Q ← 0 
+
+> 2:
+
+for episode = 1 to Emax do  
+
+> 3:
+
+Sample px uniformly from Ptrain  
+
+> 4:
+
+Sample e ∼ Bernoulli( px) and compute s = H1e 
+
+> 5:
+
+Set μx = log 
+
+( 1−px
+
+> px
+
+)
+
+and initialize beliefs/messages  
+
+> 6:
+
+Initialize ˆe and residual mismatch δ = s ⊕ (H1 ˆe) 
+
+> 7:
+
+for BP-iteration = 1 to Imax do  
+
+> 8:
+
+R ← { 1, 2, . . . , N cl } 
+
+> 9:
+
+for step = 1 to Ncl do  
+
+> 10:
+
+if δ = 0 then  
+
+> 11:
+
+break  
+
+> 12:
+
+end if  
+
+> 13:
+
+Compute quantized cluster states σa ∀ a ∈ R  
+
+> 14:
+
+Choose at ∈ R by ϵ-greedy on Q(σa, a ) 
+
+> 15:
+
+wbefore ← ∥ δ∥1 
+
+> 16:
+
+Apply one parallel cluster update on Cat 
+
+> 17:
+
+wafter ← ∥ δ∥1 
+
+> 18:
+
+rt ← wbefore − wafter 
+
+∑
+
+> i∈I at
+
+Ai 
+
+> 19:
+
+if wafter = 0 then  
+
+> 20:
+
+rt ← rt + 1  
+
+> 21:
+
+end if  
+
+> 22:
+
+R ← R \ { at} 
+
+> 23:
+
+if R = ∅ then  
+
+> 24:
+
+Vt+1 ← 0 
+
+> 25:
+
+else  
+
+> 26:
+
+Recompute σa′ for all a′ ∈ R  
+
+> 27:
+
+Vt+1 ← max a′∈R Q(σa′ , a ′) 
+
+> 28:
+
+end if  
+
+> 29:
+
+Q(σat , a t) ← Q(σat , a t) +
+
+α(rt + γV t+1 − Q(σat , a t))  
+
+> 30:
+
+end for  
+
+> 31:
+
+end for  
+
+> 32:
+
+end for 
+
+most once per BP iteration. Lines 23–28 compute the one-step lookahead value over the remaining clusters. Finally, line 29 updates the Q-table entry associated with the selected cluster and its current quantized state. Algorithm 2 gives the greedy decoding procedure used after training. Line 1 takes the measured syndrome and the learned Q-table as inputs. Line 2 initializes the BP messages, beliefs, hard decision, and residual mismatch. Lines 3–4 start the BP iterations and reset the remaining cluster set at the beginning of each iteration. Lines 5–8 process the clusters within the current iteration and return the current estimate as soon as the residual mismatch becomes zero. Line 9 computes the quantized states of the remaining clusters. Line 10 selects the cluster with the largest learned Q-value. Line 11 updates all VNs in the selected cluster in parallel, and line 12 removes that cluster from the remaining set. If no zero residual mismatch is found within the iteration budget, line 15 returns the final hard decision. 9
+
+Algorithm 2 Greedy inference of the clustered RL-S decoder for the independent Pauli-X channel  
+
+> 1:
+
+Input: measured syndrome s, learned table Q 
+
+> 2:
+
+Initialize BP messages, beliefs, hard decision ˆe, and resid-ual mismatch δ = s ⊕ (H1 ˆe) 
+
+> 3:
+
+for BP-iteration = 1 to T do  
+
+> 4:
+
+R ← { 1, 2, . . . , N cl } 
+
+> 5:
+
+for step = 1 to Ncl do  
+
+> 6:
+
+if δ = 0 then  
+
+> 7:
+
+return ˆe 
+
+> 8:
+
+end if  
+
+> 9:
+
+Compute quantized cluster states σa for all a ∈ R  
+
+> 10:
+
+Select 
+
+at ∈ arg max  
+
+> a∈R
+
+Q(σa, a ) 
+
+> 11:
+
+Apply one parallel cluster update on Cat 
+
+> 12:
+
+R ← R \ { at} 
+
+> 13:
+
+end for  
+
+> 14:
+
+end for  
+
+> 15:
+
+Return final hard decision ˆe
+
+IV. C OMPLEXITY AND LATENCY 
+
+In this section, we compare BP, RL-S, and clustered RL-S algorithms in terms of the number of local VN updates and the serial decoding depth. We assume a sparse QLDPC Tanner graph with bounded node degrees and a fixed maximum number of iterations Imax . Then:  
+
+> •
+
+For conventional flooding BP, all VN updates within one iteration can be performed in parallel. Therefore, under ideal parallel hardware, the latency scales as O(Imax ).
+
+Since each iteration updates all VNs and their incident messages, the total computational complexity scales as 
+
+O(Imax n); 
+
+> •
+
+For RL-S, the decoder updates one VN at a time. Hence, one BP iteration requires up to n sequential VN updates. The total number of local updates is still O(Imax n), so the computational complexity remains comparable to BP. However, the serial decoding depth scales as O(Imax n),
+
+because the VN updates are performed one by one;  
+
+> •
+
+Finally, for clustered RL-S, the VNs are partitioned into 
+
+Ncl =
+
+⌈ nB
+
+⌉
+
+clusters. During one BP iteration, the decoder selects clusters sequentially, but all VNs inside the selected cluster are updated in parallel. Therefore, the total number of local VN updates per iteration remains O(n), and the overall computational complexity is still O(Imax n). The main difference is in latency: the serial decoding depth now depends on the number of clusters rather than the blocklength. Thus, under the parallel cluster-update model, the latency scales as O(Imax Ncl ), instead of O(Imax n) for VN-level RL-S. The quantized cluster-state representation also keeps the Q-table size practical. The Q-table contains Ncl N (L)states entries, where N (L)states is given in (9) for the independent Pauli-X0.04 0.05 0.06 0.07 0.08 0.09 0.1                            
+
+> X-error probability ( px)
+> 10 -6
+> 10 -5
+> 10 -4
+> 10 -3
+> 10 -2
+> 10 -1
+> 10 0
+> Block Error Rate
+> RL-S, B= 1 RL-S, B= 20 RL-S, B= 40 RL-S, B= 50 RL-S, B= 60 RL-S, B= 80 RL-S, B= 100
+> Fig. 2. Block error rate of clustered RL-S decoding for the [[882 ,24 ,18 ≤
+> d≤24]] code B1 over the independent Pauli-Xchannel. Different cluster sizes Bare compared under the same maximum iteration budget T= 100 .
+
+decoder. Thus, the allocated Q-table size is controlled by the quantization resolution and the number of clusters, rather than directly by the number of VNs in each cluster. V. N UMERICAL RESULTS 
+
+In this section, we evaluate the error-correction performance of our proposed clustered RL-S decoder. The main goal of these experiments is to study how much of the performance gain of VN-level learned sequential scheduling can be preserved when the scheduling action is moved from individual VNs to clusters of VNs. We report the block error rate as a function of the physical error probability. A block is counted as erroneous if the decoder either fails to reach syndrome consistency or returns a syndrome-consistent correction whose residual action is logically nontrivial. Throughout this section, B denotes the cluster size and 
+
+L denotes the quantization resolution used in the normalized cluster-state representation introduced in Section III. For a code of blocklength n, the number of clusters is 
+
+Ncl =
+
+⌈ nB
+
+⌉
+
+.
+
+Thus, larger B reduces the number of scheduling decisions per BP iteration, while each scheduling action updates a larger group of VNs. The parameter L controls the resolution of the quantized histogram state. The learned policies are trained offline by sampling the physical error probability uniformly from 
+
+Ptrain = {0.03 , 0.04 , 0.05 , 0.06 , 0.07 },
+
+and are then used greedily during inference. In the depolarizing-channel comparisons, QBP denotes quaternary BP, and QBPGD denotes quaternary BP with guided decimation. Fig. 2 shows the block error rate performance of clustered RL-S on the [[882 , 24 , 18 ≤ d ≤ 24]] code B1 [13] over the independent Pauli-X channel. In this experiment, the maximum number of BP iterations is fixed to T = 100 , and we compare several cluster sizes where we use the unquantized histogram 10 0.04 0.05 0.06 0.07 0.08 0.09 0.1                                      
+
+> X-error probability ( px)
+> 10 -7
+> 10 -6
+> 10 -5
+> 10 -4
+> 10 -3
+> 10 -2
+> 10 -1
+> 10 0
+> Block Error Rate
+> RL-S, T= 10 RL-S, T= 100 RL-S, T= 1000 RL-S, T= 10000 RL-S, B= 60, T= 10 RL-S, B= 60, T= 100 RL-S, B= 60, T= 1000 RL-S, B= 60, T= 10000
+> Fig. 3. Block error rate for the [[882 ,24 ,18 ≤d≤24]] code B1 over the independent Pauli-Xchannel. The unclustered RL-S decoder is compared with clustered RL-S using cluster size B= 60 for several iteration budgets.
+
+state ca in (6). This figure studies the effect of replacing VN-by-VN scheduling with cluster-based scheduling. The results show that moderate clustering does not significantly degrade the decoding performance. In particular, increasing the cluster size up to about B = 60 preserves the error rate behavior of the VN-level learned sequential schedule. This is important from a latency perspective. For B = 60 , the n = 882 VNs are partitioned into 
+
+Ncl =
+
+⌈ 882 60 
+
+⌉
+
+= 15 
+
+clusters, where the last cluster contains 42 VNs. Hence, one BP iteration requires only 15 scheduling decisions instead of 
+
+882 VN-level decisions. Therefore, the serial scheduling depth per iteration is reduced substantially, while the error-correction performance remains close to that of the VN-level learned schedule for the moderate cluster sizes shown in the figure. Fig. 3 compares the unclustered RL-S decoder with the clustered decoder using B = 60 for different maximum iteration budgets with the code B1. For small iteration budgets, the clustered decoder can be more sensitive to the cluster update structure (assuming sufficiently large clusters), since each selected cluster applies several VN updates in parallel and therefore provides fewer opportunities to adapt the update order within one sweep. However, for iteration budgets of T = 100 
+
+and above, the clustered decoder closely follows the block error rate of the unclustered RL-S decoder. This indicates that our proposed cluster-level schedule preserves the main convergence benefit of learned sequential scheduling when the iteration budget is large enough. Fig. 4 evaluates our proposed quantized cluster-state repre-sentation on the code B1. Here, the cluster state is formed by the normalized histogram of local mismatch weights inside the cluster, followed by quantization with resolution L. Fig. 3 uses the unquantized cluster state ca in (6), which retains the exact number of VNs having each local mismatch weight. In contrast, Fig. 4 uses the quantized state σa in (8), ob-tained by normalizing the histogram and applying the simplex 0.04 0.05 0.06 0.07 0.08 0.09 0.1 
+
+X-error probability px
+
+10 -6 
+
+10 -5 
+
+10 -4 
+
+10 -3 
+
+10 -2 
+
+10 -1 
+
+> Block Error Rate
+
+RL-S RL-S, B = 10 , L = 8 RL-S, B = 20 , L = 16 RL-S, B = 40 , L = 32 RL-S, B = 60 , L = 42                         
+
+> Fig. 4. Effect of the quantization resolution on clustered RL-S decoding for the [[882 ,24 ,18 ≤d≤24]] code B1 over the independent Pauli-Xchannel. The iteration budget is fixed at T= 100 , while Band Lare varied. The RL-S baseline ( B= 1 ) uses the original exact VN-level state, whereas all B > 1
+> curves use the quantized histogram state. 0.05 0.06 0.07 0.08 0.09 0.1
+
+p                                
+
+> 10 -6
+> 10 -5
+> 10 -4
+> 10 -3
+> 10 -2
+> 10 -1
+> FER
+> QBP, T= 100 QBPGD, GT = 2880 RL-S, T= 100 RL-S, T= 100 , B = 10 , L = 2 RL-S, T= 100 , B = 10 , L = 5 RL-S, T= 100 , B = 10 , L = 10
+> Fig. 5. Block error rate comparison for the [[288 ,12 ,18]] BB code over the depolarizing channel. The proposed quantized clustered RL-S decoder is compared with QBP, QBPGD, and the unclustered RL-S decoder. The RL-S and clustered RL-S decoders use maximum iteration budget T= 100 , while QBPGD uses 288 guided-decimation rounds with T= 10 BP iterations per round, i.e., total budget GT = 2880 .
+
+quantization in (7); increasing L preserves finer distinctions between normalized cluster histograms. The results show that across the tested pairs of B and L, the clustered decoders remain close to the unclustered RL-S baseline while using far fewer scheduling decisions per BP iteration. This suggests that the distribution of local mismatch weights provides a useful summary of how strongly the cluster is connected to the current residual syndrome. Fig. 5 considers the [[288 , 12 , 18]] BB code [8] over the de-polarizing channel. In this experiment, our proposed quantized clustered RL-S decoder is compared with QBP, QBPGD, and the unclustered RL-S decoder. The QBPGD decoder uses 288 
+
+rounds of guided decimation with T = 10 BP iterations per round, corresponding to a total BP-iteration budget of 2880 .11 
+
+The clustered learned schedules continue to provide a clear improvement over conventional QBP. The clustered decoder also remains competitive with the unclustered RL-S decoder. In particular, for L = 10 , the error-correction performance is very close to the RL-S performance. VI. C ONCLUSIONS 
+
+In this paper, we proposed a cluster-based extension of reinforcement-learning-based sequential BP decoding for QLDPC codes. Our proposed decoder reduces the serial scheduling depth of RL-S by selecting clusters of VNs rather than individual VNs. Once a cluster is selected, all VNs in that cluster are updated in parallel using the same pre-update information. We also introduced a compact permutation-invariant cluster state based on the normalized histogram of local mismatch weights. After quantization with resolution 
+
+L, this representation keeps the tabular state space practical. We formulated the corresponding cluster-level MDP, reward function, Q-learning update, and parallel cluster-update rule. Numerical results indicate that cluster-level learned scheduling is a promising approach for improving the latency–parallelism tradeoff of BP-based QLDPC decoders. Future work includes studying graph-aware cluster partitions, optimizing B and L for different QLDPC codes, and extending the numerical evaluation to additional channel models. REFERENCES [1] P. W. Shor, “Scheme for reducing decoherence in quantum computer memory,” Physical Review A , vol. 52, no. 4, pp. R2493–R2496, 1995. [2] A. R. Calderbank and P. W. Shor, “Good quantum error-correcting codes exist,” Physical Review A , vol. 54, no. 2, pp. 1098–1105, 1996. [3] A. M. Steane, “Error correcting codes in quantum theory,” Physical Review Letters , vol. 77, no. 5, pp. 793–797, 1996. [4] J.-P. Tillich and G. Zémor, “Quantum LDPC codes with positive rate and minimum distance proportional to the square root of the blocklength,” 
+
+IEEE Transactions on Information Theory , vol. 60, no. 2, pp. 1193–1202, 2014. [5] N. P. Breuckmann and J. N. Eberhardt, “Balanced product quantum codes,” IEEE Transactions on Information Theory , vol. 67, no. 10, pp. 6653–6674, 2021. [6] P. Panteleev and G. Kalachev, “Quantum LDPC codes with almost linear minimum distance,” IEEE Transactions on Information Theory , vol. 68, no. 1, pp. 213–229, 2022. [7] A. Leverrier and G. Zémor, “Quantum Tanner codes,” in 2022 IEEE 63rd Annual Symposium on Foundations of Computer Science (FOCS) , 2022, pp. 872–883. [8] S. Bravyi, A. W. Cross, J. M. Gambetta, D. Maslov, P. Rall, and T. J. Yoder, “High-threshold and low-overhead fault-tolerant quantum memory,” Nature , vol. 627, no. 8005, pp. 778–782, 2024. [9] D. Poulin and Y. Chung, “On the iterative decoding of sparse quantum codes,” Quantum Information and Computation , vol. 8, no. 10, pp. 987– 1000, 2008. [10] J. Roffe, D. R. White, S. Burton, and E. Campbell, “Decoding across the quantum low-density parity-check code landscape,” Physical Review Research , vol. 2, no. 4, p. 043423, 2020. [11] N. Raveendran and B. Vasi´ c, “Trapping sets of quantum LDPC codes,” 
+
+Quantum , vol. 5, p. 562, 2021. [12] K.-Y. Kuo and C.-Y. Lai, “Exploiting degeneracy in belief propagation decoding of quantum codes,” npj Quantum Information , vol. 8, no. 1, p. 111, 2022. [13] P. Panteleev and G. Kalachev, “Degenerate quantum LDPC codes with good finite length performance,” Quantum , vol. 5, p. 585, 2021. [14] J. du Crest, M. Mhalla, and V. Savin, “Stabilizer inactivation for message-passing decoding of quantum LDPC codes,” in 2022 IEEE Information Theory Workshop (ITW) , 2022, pp. 488–493. [15] J. du Crest, F. Garcia-Herrero, M. Mhalla, V. Savin, and J. Valls, “Check-agnosia based post-processor for message-passing decoding of quantum LDPC codes,” Quantum , vol. 8, p. 1334, 2024. [16] T. Hillmann, L. Berent, A. O. Quintavalle, J. Eisert, R. Wille, and J. Roffe, “Localized statistics decoding for quantum low-density parity-check codes,” Nature Communications , vol. 16, no. 1, p. 8214, 2025. [17] S. Javed, S. Colet, F. Garcia-Herrero, Ó. Ruano, J. A. Maestro, B. Vasi´ c, and M. F. Flanagan, “Low-complexity syndrome-based linear program-ming decoding of quantum LDPC codes,” IEEE Transactions on Quantum Engineering , vol. 7, p. 2100319, 2026. [18] H. Yao, W. A. Laban, C. Häger, A. G. i Amat, and H. D. Pfister, “Belief propagation decoding of quantum LDPC codes with guided decimation,” in 2024 IEEE International Symposium on Information Theory (ISIT) ,2024, pp. 2478–2483. [19] M. Alinia, D. G. M. Mitchell, H. Yao, and H. D. Pfister, “Decimation strategies for belief propagation decoding of quantum LDPC codes,” in 
+
+2025 13th International Symposium on Topics in Coding (ISTC) , 2025, pp. 1–5. [20] J. du Crest, F. Garcia-Herrero, M. Mhalla, V. Savin, and J. Valls, “Layered decoding of quantum LDPC codes,” in 2023 12th International Symposium on Topics in Coding (ISTC) , 2023, pp. 1–5. [21] A. S. Maan, M. Paler, T. Pathak, K. Yousaf, E. Peltonen, R. V. Vintan, T. Krajník, D. E. Browne, E. Andersson, and A. Fedorov, “Machine learning message-passing for the scalable decoding of quantum LDPC codes,” npj Quantum Information , vol. 11, no. 1, p. 80, 2025. [22] T. Müller, T. Alexander, M. E. Beverland, M. Bühler, B. R. Johnson, T. Maurer, and D. Vandeth, “Improved belief propagation is sufficient for real-time decoding of quantum memory,” 2025. [23] S. Habib and D. G. M. Mitchell, “Reinforcement learning for sequen-tial decoding of generalized LDPC codes,” in 2023 12th International Symposium on Topics in Coding (ISTC) , 2023, pp. 1–5. [24] M. Moradi, S. Habib, and D. G. M. Mitchell, “Enhancing belief propaga-tion decoding of polar codes: A reinforcement learning approach,” IEEE Communications Letters , vol. 29, no. 6, pp. 1285–1289, 2025. [25] M. Moradi, S. Habib, V. Nourozi, and D. G. M. Mitchell, “Sequential BP-based decoding of QLDPC codes,” 2026. [26] M. Moradi, V. Nourozi, S. Habib, and D. G. M. Mitchell, “Learning to decode quantum LDPC codes via belief propagation,” 2026. [27] M. Moradi, T. Kim, and R. Chou, “Learning-based list sequential belief propagation decoding of quantum LDPC codes,” manuscript, 2026. [28] M. Moradi, T. Kim, R. Chou, and D. G. M. Mitchell, “Learned parallel bit-flipping sequential belief propagation decoding of quantum LDPC codes,” 2026, manuscript. [29] Y. Ozkan, Y. Yakimenka, and J. Kliewer, “Rl-based parallel ldpc decoding with clustered scheduling,” Entropy , vol. 28, no. 2, p. 215, 2026.

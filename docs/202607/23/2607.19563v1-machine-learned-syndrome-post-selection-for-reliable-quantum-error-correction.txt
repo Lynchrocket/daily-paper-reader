@@ -1,0 +1,435 @@
+Title: Machine-learned syndrome post-selection for reliable quantum error correction
+
+URL Source: https://arxiv.org/pdf/2607.19563v1
+
+Published Time: Thu, 23 Jul 2026 00:11:41 GMT
+
+Number of Pages: 12
+
+Markdown Content:
+# Machine-learned syndrome post-selection for reliable quantum error correction 
+
+Tobias Haug, 1, ∗ Askery Canabarro, 1, 2 and Leandro Aolita 1
+
+> 1
+
+Quantum Research Center, Technology Innovation Institute, Abu Dhabi, UAE 
+
+> 2
+
+Campus Arapiraca, Federal University of Alagoas, Arapiraca-AL, Brazil 
+
+(Dated: July 23, 2026) Quantum error correction can be enhanced by post-selecting out runs that are likely to produce a logical failure, but the most accurate measures for that require costly decoder-level information. We introduce a practical, decoder-agnostic post-selection method that learns directly from syndrome data. The method trains a supervised classifier to distinguish between syndromes from low- and high-noise regimes, and then uses the classifier’s output as an abort score for new runs, without requiring logical-error labels, correction operators, or code-specific likelihood calculations. We validate the approach in three complementary settings: circuit-level simulations of the Gross bivariate-bicycle code, code-capacity simulations of the surface code, and experimental logical magic-state distillation data from the QuEra neutral-atom processor. In the Gross and surface codes, learned syndrome post-selection reduces the conditional logical error rate at a fixed acceptance rate, with performance comparable to syndrome-weight filtering. For the surface code, the learned classifier reveals a post-selection transition distinct from the conventional decoding threshold. In the experimental data, the machine-learning score outperforms syndrome-weight post-selection and, when combined with logical-gap filtering, improves the output fidelity beyond using the logical gap alone. These results show that syndrome-only learning provides a scalable and hardware-compatible route to improving the reliability of quantum error correction. 
+
+Quantum error correction (QEC) protects fragile quan-tum information by encoding logical information into a large number of physical qubits [1]. Stabilizer measure-ments diagnose physical noise through syndrome data, which are then processed by a classical decoder to choose a correction while preserving the encoded logical state. In practice, however, some error patterns remain ambigu-ous and can evade the decoder, producing logical failures that spoil the computation. This limitation is particu-larly relevant for near-term and early fault-tolerant de-vices, where the achievable logical performance is con-strained by the number of available qubits, the physi-cal error rate, the fidelity of syndrome extraction, and the speed and accuracy of classical decoding. Methods that improve the conditional reliability of QEC without changing the quantum hardware are therefore valuable. Post-selection provides one such method. Rather than using every experimental shot, a post-selection rule aborts runs whose syndrome history suggests a high prob-ability of logical failure [2]. If the abort rule is sufficiently predictive, the conditional logical error rate of the ac-cepted ensemble can be much lower than the uncondi-tional logical error rate [3, 4]. This trade-off is especially useful when high-fidelity outputs are more valuable than deterministic throughput, as in logical magic-state prepa-ration, magic-state distillation, magic-state cultivation, and repeat-until-success gadgets [5–10]. A powerful route to post-selection is to augment de-coding with soft information: instead of outputting only a correction, the decoder also estimates the reliability of that correction. A prominent example is the logical gap [7, 11–16], defined as the difference between the score  
+
+> ∗tobias.haug@tii.ae
+
+of the most likely logical class and that of the second most likely logical class after decoding. Intuitively, a small gap means that the decoder is uncertain, and such shots are promising candidates for rejection. However, logical-gap post-selection requires decoder-level likelihood informa-tion. For structured decoders and codes, efficient ap-proximations to such soft information are available [11]; for general qLDPC codes, experimental decoding graphs, or maximum-likelihood logical-class comparisons, obtain-ing reliable likelihood information can remain computa-tionally demanding [17, 18]. Thus, the most informative confidence metric may be precisely the one that is least convenient to obtain. Alternatively, one can use decoder-free metrics such as aborting when the number of flipped syndrome bits exceeds a cutoff [7, 19–21], but such scores discard geometric, temporal, and correlation information contained in the full syndrome record. Machine learning has also become a powerful tool for QEC, primarily through learned decoders that map syn-drome histories to correction operators, logical classes, or decoder confidence estimates [22–31]. Such methods can improve decoding accuracy on realistic noise and experimental data, but they typically require training data labeled by corrections, logical outcomes, or decoder-derived targets, and their architecture is often tied to a particular code family or noise model. Here we take a different route: rather than learning to decode, we learn when not to decode. We introduce a machine-learning method that learns directly from syndrome distributions to post-select. The training data are simple to acquire (see Fig. 1): one gen-erates two syndrome ensembles, one in a low-noise regime and one in a high-noise regime. A supervised classifier is trained only to distinguish these two ensembles. For a new syndrome s, the classifier output is interpreted as a arXiv:2607.19563v1 [quant-ph] 21 Jul 2026 2Test syndromes   
+
+> Training Application
+> Low-error syndromes
+> High-error syndromes
+> FIG. 1. Machine-learning post-selection via syndrome data . The supervised machine-learning model learns from an ensemble of syndromes with high- and low-error events. After training, the model is applied on new syndromes to decide which runs to actively correct errors on and which ones to discard.
+
+high-noise score, and the post-selection rule aborts when this score exceeds a cutoff. Crucially, the labels used for training are not logical-success or logical-failure labels, nor correction operators or logical-gap values, as in many machine-learning approaches [22–32]. Instead, our labels only specify from which noise ensemble the syndrome was sampled. The method is therefore decoder-agnostic and can be trained from simulation, from calibration data at deliberately varied noise rates, or from a mixture of both. We benchmark this syndrome-only post-selection strategy in three settings. First, we train on simulated syndrome data for a neutral-atom logical magic-state dis-tillation experiment [15] and apply the resulting classifier to actual experimental data. In this case, our machine-learning post-selection method outperforms syndrome-weight filtering. Further, by combining our method with logical-gap post-selection, we achieve higher output fi-delity than the original logical-gap filtering method of Ref. [15]. Second, we apply it to circuit-level simula-tions of the [[144 , 12 , 12]] Gross bivariate-bicycle code, demonstrating that the method applies beyond standard surface-code decoding graphs. As a third application, we study the surface code under a code-capacity noise model and find that the learned score exhibits a cross-ing at a post-selection threshold pML distinct from the usual logical-error threshold pth [21]. Our results identify syndrome-distribution learning as a practical and modu-lar pre-decoding filter for improving the conditional reli-ability of QEC.   
+
+> I. PRELIMINARIES A. Syndromes and decoding
+
+QEC codes are characterized by parity check matrix 
+
+H ∈ Fm×n 
+
+> 2
+
+, in which syndrome measurements produce the m-bit syndrome s ∈ { 0, 1}m given by 
+
+s = He (1) which is the result of n possible errors in error config-uration e ∈ { 0, 1}n that affected the code [33]. Then, a most-likely-error decoder tries to find the most proba-ble physical error e∗ that matches the syndrome. From this, the correction operator is determined and applied, where the decoder succeeds when the correction returns the state to its original form without inducing a logical error. For example, a CSS stabilizer code [[ n, k, d ]] with code distance d can protect k logical qubits against up to ⌊d − 1⌋/2 errors. However, the decoding problem is notoriously hard [17, 18]. Further, the most probable error may not be the ac-tual error that has occurred. This can lead to a corrup-tion of the logical state, i.e. a logical error. The logical error probability (after decoding) at physical error rate 
+
+p is denoted by pL.Undetected logical errors can corrupt the underlying computation. As such, when one has strong indication that decoding is unlikely to succeed, it is often better to simply discard the computation, and restart with a fresh run. Such post-selection strategies are also essential in magic state distillation protocols, where one distills resource states from noisy states [5, 6], or repeat-until-success schemes [9]. In such post-selection schemes, only a subset ˜Nshots of the total number of shots Nshots is used, while the rest is discarded even before decoding. We denote by 
+
+R = ˜Nshots 
+
+Nshots 
+
+(2) the post-selection acceptance rate, i.e. the probability that our post-selection rule accepts shots, and by ˜pL the logical error rate after post-selection and decoding.  
+
+> B. Post-selection and the logical gap
+
+A post-selection rule is a scalar score g(s) together with a cutoff τ that is used to discard QEC runs that are deemed unreliable. The rule accepts a shot when 
+
+g(s) < τ and aborts otherwise. Several schemes have been proposed so far. A simple decoder-free score is the syndrome-weight [21] 
+
+w(s) = 
+
+> m
+
+X
+
+> i=1
+
+si, (3) which counts the number of nontrivial detection events, i.e. of flipped syndrome bits. Syndrome-weight post-selection is computationally cheap and can be surpris-ingly effective, but it discards detailed information about the geometry, correlations, and temporal structure of the syndrome record. 3A more informed score is the logical gap [7, 11–16]. Let L1(s) and L2(s) be the largest and second-largest probability of physical errors that match syndrome s and belong to different logical cosets.Then, the logical gap is 
+
+∆( s) = log L1(s) − log L2(s). (4) where larger ∆ indicates a more confident decoding de-cision. Logical-gap post-selection is attractive because it directly measures the ambiguity relevant to logical fail-ure. Its drawback is that estimating L1 and L2 can be a hard decoding problem.  
+
+> II. MACHINE-LEARNING POST-SELECTION
+
+We now introduce our machine-learning approach to syndrome-based post-selection. The central idea is to train a binary classifier to distinguish syndromes gen-erated in low- and high-error-rate regimes. The result-ing classifier score is then used as a decoder-independent measure of whether a given syndrome resembles the high-noise ensemble and should therefore be rejected.  
+
+> A. Supervised learning from syndrome ensembles
+
+Let s ∈ { 0, 1}m denote a syndrome record, or a vector-ized syndrome history when several rounds of syndrome extraction are considered. We formulate syndrome post-selection as a supervised binary-classification problem in which the target label identifies the noise ensemble from which each syndrome was sampled: 
+
+y =
+
+(
+
+0, low-error-rate ensemble ,
+
+1, high-error-rate ensemble . (5) Importantly, these labels do not indicate whether decod-ing succeeds or whether a logical error occurs. They only specify the physical-error-rate regime used to generate each syndrome. A classifier C(s) is trained to distinguish the two syn-drome ensembles. The classifier predicts the probability Pr (y = 1 | s) that a given syndrome s belongs to class 
+
+y = 1 , which corresponds to the high-error-rate dataset 
+
+C(s) = Pr (y = 1 | s) ∈ [0 , 1] , (6) which we define following Refs. [34, 35]. Larger values of 
+
+C(s) indicate that the syndrome is judged by the trained classifier to be more consistent with the class-1 ensem-ble. Conversely, smaller C(s) imply a higher probability Pr (y = 0 | s) = 1 − C(s) to belong to the low-error dataset y = 0 .The model parameters are learned by minimizing the empirical binary cross-entropy, 
+
+L(θ) = − 1
+
+N
+
+> N
+
+X
+
+> j=1
+
+[yj log C(sj ) + (1 − yj ) log (1 − C(sj ))] ,
+
+(7) where N is the number of training samples. Eq. (7) repre-sents the standard probabilistic binary-classification for-mulation underlying the proposed approach. Further de-tails on the classifier, the class definitions, and the train-ing and calibration procedures are provided in the Sup-plementary Information, Sec. B. Although C(s) is obtained as a class probability, the post-selection procedure primarily relies on the ordering of the syndromes induced by this score. Therefore, per-fect probability calibration is not required, provided that syndromes associated with higher-error regimes tend to receive larger values of C(s). 
+
+> B. Training data
+
+The training data consist of two syndrome data sets, 
+
+Dlow = {slow  
+
+> j
+
+}Nlow  
+
+> j=1
+
+, Dhigh = {shigh  
+
+> j
+
+}Nhigh  
+
+> j=1
+
+, (8) obtained at physical error rates plow and phigh , respec-tively. The values are chosen so that plow is representative of an easy regime and phigh is a noisier regime in which logical failure is more common. The choice of plow and 
+
+phigh is flexible: For example, for codes with threshold, 
+
+plow is chosen below and phigh above the error correction threshold pth . For experiments, one can choose it to be below and above the operating error regime of the device. Our method can be applied to both simulations and ex-periments of quantum error correction. Simulated train-ing data for realistic noise models can be efficiently gener-ated: For stabilizer codes with Pauli noise, the quantum evolution is Clifford and thus can be efficiently simulated due to the Gottesman-Knill theorem [36]. In fact, one can efficiently sample syndrome data from the full error correction circuit with noisy gates via the tableau for-malism. This can be done in time complexity O(mn )
+
+where m is the number of gates and n the number of qubits of the code [37]. By varying the error probabil-ities of the gates, one can generate both the low and high-error-rate dataset efficiently. For experiments, the low- and high-noise ensembles can be generated by cal-ibrated noise amplification, by using simulations fitted to calibration data, or by combining experimental and synthetic data. We highlight that in contrast to other machine learning approaches [26–30], our method does not require information about what logical errors have occurred, thus simulated data can be acquired cheaply, and experimental data can be directly used for training without the need for a reference decoder.  
+
+> C. Model architecture
+
+To construct the supervised learning model to repre-sent C(s), we employ an automated machine-learning strategy based on Tree-based Pipeline Optimization Tool (TPOT) (see Fig. 2) [38, 39]. TPOT formulates model 4               
+
+> FIG. 2. Sketch of the automated machine-learning pipeline . Syndrome records sampled from low- and high-error-rate regimes are assigned class labels 0and 1, respectively, and used to train a binary classifier through the TPOT automated model-selection procedure. Candidate pipelines are evaluated by cross-validation, and the best-performing pipeline is refitted on the training data. For each new syndrome s, the selected classifier returns the class-1probability C(s) = Pr (y= 1 |s),which quantifies its similarity to the high-error-rate ensemble. This score is compared with a cutoff C0, where for C(s)< C 0
+> we accept the run, and else reject.
+
+selection as a genetic programming problem, in which candidate machine-learning pipelines are evolved and evaluated according to a predefined performance metric. Each pipeline includes preprocessing operations, feature transformations, and a classification algorithm to explore different hyperparameter configurations, distinct model families and data-processing strategies. We use TPOT to identify an effective binary classi-fier capable of discriminating between samples associ-ated with low- and high-error-rate regimes. The input features are constructed from the syndrome information, while the target labels are assigned according to the se-lected low- and high-error-rate training instances. Can-didate pipelines are compared using cross-validation on the training set, and the best-performing pipeline is sub-sequently used to assign probabilistic predictions to the remaining data. This approach provides a systematic and reproducible framework to find the best model for the machine learn-ing problem. Importantly, the TPOT search is not restricted to a single model architecture: in general, the optimization procedure can distinguish among sev-eral classes of models, including linear classifiers, tree-based ensembles, nearest-neighbor methods, and prob-abilistic classifiers, depending on the specified search space. Therefore, the final selected pipeline should be interpreted as the result of an automated comparison among competing hypotheses for the structure of the classifier. Detailed information about the TPOT con-figuration, search space, optimization parameters, and selected pipeline is provided in the SM.  
+
+> D. Abort rule
+
+After training, the best classifier is chosen and applied to new syndrome records. We define a cutoff C0 ∈ [0 , 1] ,where we accept a run with syndrome s when 
+
+C(s) < C 0. (9) Thus, syndromes that look too similar to the high-noise class are rejected. By varying C0, we can map out the performance curve as function of the post-selection rate 
+
+R, defined in (2), and the conditional logical error rate ˜pL
+
+after the usual decoder is applied to the accepted shots. For memory experiments we report the improvement factor 
+
+I = pL
+
+˜pL
+
+. (10) At fixed R, larger I means better conditional logical per-formance. For magic-state data we report the conditional output fidelity F as a function of R.50.00 0.02 0.04 0.06 0.08 
+
+> R
+> 0.8
+> 0.9
+> 1.0
+> F
+> ML +LG
+> LG
+> ML
+> SW
+> SI
+
+# a0.005 0.010 0.015 0.020  
+
+> R
+> 0.90
+> 0.92
+> 0.94
+> 0.96
+> 0.98
+> 1.00
+> F
+> ML +LG
+> LG
+> ML
+> SW
+> SI
+
+# b0.005 0.010 0.015 0.020  
+
+> R
+> 0.90
+> 0.92
+> 0.94
+> 0.96
+> 0.98
+> 1.00
+> F
+> ML +LG
+> LG
+> SI
+
+# c
+
+FIG. 3. Post-selection enhancement for QuEra’s magic-state distillation experiment . Experimental implementation of 5-1 magic state distillation protocol by Ref. [5] where 5 noisy single-qubit magic states are encoded into distance −5 color code blocks and then distilled into a less noisy magic state. The experimental protocol is described in Ref. [15] and the data from Ref. [40]. We show logical-error reduction by different post-selection strategies: based on the logical gap (LG), on machine-learning (ML), syndrome-weight (SW), and on machine-learning combined with logical gap (ML+LG). As a reference, the black dashed line is direct state-injection (SI) into the QEC code without distillation and post-selection as reported in Ref. [15]. a) Fidelity F of distilled magic state against post-selection rate R for different post-selection methods. ML achieves higher fidelity than SW for all R. Compared to LG, ML performs better for larger R, while being slightly worse for smaller R.We highlight that combined ML+LG performs better than LG (as well as SW and ML). b) Close-up of panel a for R ≤ 0.02 .
+
+c) ML+LG and LG including 68% confidence intervals as shaded areas. The fidelity and the confidence interval are computed following the Bures prior as described in Ref. [15]. For ML, we train on simulated syndrome data which are generated via Stim, where the error rates of each gate, which were previously calibrated for the experiment, are rescaled by a factor E, with 
+
+E = {0.01 , 0.05 , 0.10 , 0.15 } for low-error and E = {1.75 , 2.00 , 2.25 , 2.50 } for high-error ensemble, and then apply the trained model to the experimental data. After balancing the two classes, the simulated dataset contains 809 ,064 syndromes in total, with 404 ,532 samples in each class; we use a stratified 10% /90% split for training and validation, respectively. For ML+LG, we use ML to discard 80% of the data, and then the remaining data is post-selected via the logical gap. 
+
+III. APPLICATION I: EXPERIMENTAL LOGICAL MAGIC-STATE DISTILLATION DATA 
+
+First, we apply our method to the recent QuEra ex-periment for logical magic-state distillation [15]. Here, we directly enhance the actual experiment by applying our scheme to experimental data which can be found at Ref. [40]. In this experiment, the goal is not merely to preserve a memory, but to prepare a high-fidelity logi-cal magic state via magic-state distillation. The exper-iment uses the 5-to-1 magic state distillation protocol by Ref. [5]: 5 noisy single-qubit magic states are dis-tilled into a less noisy magic state. The scheme starts by encoding noisy magic states into d = 5 color codes, then the distillation protocol is applied, which includes post-selection on certain logical measurement outcomes. On successful distillation, logical tomography is used to measure the fidelity of the distilled magic state. As dis-tillation requires post-selection by default, our own post-selection method can be naturally integrated to further enhance the fidelity of the produced magic states. The training data is generated using the Stim circuit that is calibrated on the actual experiment, where the Stim circuit can be found at Ref. [40]. Two simulated data sets are produced at physical error rates below and above the error rates calibrated to the experiment. The machine-learning classifier is trained on these simulated syndromes and then applied to actual experimental syn-drome data. As baseline, we consider the syndrome-weight strategy, as well as computing the logical gap of most likely and second-most likely error by solving the corresponding mixed-integer problem over the decod-ing graph. We note that the original paper considered the logical gap for its fidelities [15], where it was noted that the logical gap is quite computationally expensive to compute and scales badly with d.Fig. 3 compares four post-selection scores: logical gap (LG), machine-learning (ML), syndrome-weight (SW), and machine-learning post-selection followed by logical gap (ML+LG). We also show the fidelity FSI ≈ 0.951 
+
+for direct state-injection (SI) into the QEC code without distillation and post-selection as reported in Ref. [15]. We show fidelity F against post-selection rate R in Fig. 3. We find that for R > 0.025 , ML and ML+LG have the highest fidelities, even superior to LG alone. In Fig. 3b, we show the close-up for low R. We find that for small R, ML+LG and LG perform similarly well. Inter-estingly, even ML alone is superior to SW, thus showing that our machine learning model learns information be-yond syndrome-weight from the data. This allows ML to perform quite well, while having much lower complex-ity than LG. In particular, ML alone already exceeds the fidelities achieved by direct injection of the magic state without magic-state distillation, thus demonstrat-ing that sufficient performance can be achieved without high-cost logical-gap calculation. Finally, Fig. 3c shows ML+LG and LG with 68% confidence intervals, showing that our results are robust. We highlight that ML+LG is superior to direct state injection for RML+LG ≈ 0.017 ,which is an improvement over the result of LG only at 6
+
+RLG ≈ 0.014 [15]. 
+
+IV. APPLICATION II: GROSS BIVARIATE-BICYCLE CODE 
+
+Next, we study the [[144 , 12 , 12]] Gross bivariate-bicycle code, a qLDPC code with weight-6 checks [41]. The sim-ulations use a circuit-level depolarizing-noise model fol-lowing Ref. [41]. This setting is useful because it probes the method beyond the standard surface-code decoding graph and includes measurement and circuit faults, not only data-qubit errors. The classifier is trained on syndrome data sampled from high and low physical error rates. Then, the cutoff 
+
+C0 in Eq. (9) is swept to obtain different post-selection rates R. The accepted shots are then decoded using the same decoder as in the unfiltered baseline. In Fig. 4, we show the improvement of machine-learning post-selection for the Gross code. In Fig. 4a, we show ˜pL obtained via machine learning against p,finding that the logical error rate improves with de-creasing R relative to the non-postselection baseline at 
+
+R = 1 . In Fig. 4b, we show improvement I over the baseline against R for different p. We show machine learning post-selection as solid line, while dashed line is the syndrome-weight method. For the Gross-code, the machine-learning and syndrome-weight strategies show broadly similar trends for simple decoding graphs. This highlights that the machine learning model learns a sim-ilar strategy as counting flipped syndromes, which seems to already perform quite well. 
+
+V. APPLICATION III: SURFACE-CODE POST-SELECTION TRANSITION 
+
+Finally, we consider the rotated surface code [[ d2, 1, d ]] ,which provides a controlled setting in which to study scaling with code distance. We consider a code-capacity model where every qubit is subject to bit-flip noise with probability p and measurements are assumed to be noise-free. We find that the trained machine-learning classifier C
+
+that distinguishes low and high-error ensembles exhibits a finite-size crossing consistent with a phase transition. In particular, in Fig. 5a we plot C against p for different 
+
+d. The curves of C for different d cross near the point 
+
+pML ≈ 0.0866 . In fact, after finite-size rescaling, the data approximately collapse for all d onto a single curve, highlighting the universal behavior expected from a phase transition (see SM A). This implies that for large d, syn-dromes generated below this point are nearly always clas-sified as low-noise-like, while syndromes generated above this point are classified as high-noise-like and are prefer-entially rejected. Notably, the observed crossing is dis-tinct from the logical-error threshold pth ≈ 0.1037 , where we find pML < p th which we show in SM A. 0.001 0.002 0.004 0.006          
+
+> p
+> 10 6
+> 10 5
+> 10 4
+> 10 3
+> 10 2
+> 10 1
+> pL
+> RPS = 1.0
+> RPS = 0.5
+> RPS = 0.1
+
+# a0.0 0.2 0.4 0.6 0.8 1.0     
+
+> R
+> 2
+> 4
+> 6
+> 8
+> 10
+> 12
+> I
+> p= 0.0028
+> p= 0.0037
+> p= 0.0048
+
+# b
+
+FIG. 4. Syndrome post-selection enhancement of the Gross-code . For the [[144 , 12 , 12]] bivariate-bicycle code, we train a classifier model on an efficiently generated dataset of syndromes drawn at physical error rates p = {0.001 , 0.0013 }
+
+(low-noise) or p = {0.0062 , 0.008 } (high-noise). We use the trained model to post-select syndromes at each p and then decode with BP-OSD. a) Logical error rate ˜pL after post-selection at post-selection rate R (defined in (2)) as a func-tion of p. As expected, the lower R is, the lower ˜pL is. b) 
+
+Improvement factor I = pL/˜pL plotted against R for different 
+
+p. Solid lines correspond to our post-selection via machine learning, while dashed lines to the syndrome-weight criterion. The training set was a stratified 15% subset of the 2,199 ,720 
+
+available syndrome records, corresponding to 329 ,958 train-ing samples ( 283 ,104 from the low-error regime and 46 ,854 
+
+from the high-error one) with 2,016 features each. The logi-cal rates reported correspond to average rates per syndrome-extraction cycle, obtained from the total rates over 12 cycles as pL = 1 − (1 − p(12) L )1/12 and ˜pL = 1 − (1 − ˜p(12)  
+
+> L
+
+)1/12 where 
+
+p12 L is the logical error rate after 12 cycles. 
+
+This behavior suggests that machine-learning post-selection can detect a data-driven transition in the syn-drome distribution. The transition is not identical to the decoding threshold: it is a property of distinguisha-bility between two syndrome ensembles as represented by the learned classifier. Such a transition has also been observed for syndrome-weight post-selection method pro-posed in Ref. [21]. The transition identifies a scalable post-selection method that works even for large d: At p ≈ pML , sweep-ing the cutoff C0 produces a scalable post-selection curve whose improvement factor I = pL/˜pL is nearly indepen-dent of distance d. We confirm this in Fig. 5b, where we show I against post-selection rate R for different d
+
+at the post-selection transition. We show both machine learning and syndrome-weight method, which show sim-ilar improvement. We find that for d ≥ 18 , the rela-tionship between I and R is nearly independent of d.Thus, we expect that we can reliably improve the logical error rate with post-selection by a constant factor as d
+
+increases. 
+
+VI. DISCUSSION 
+
+We introduced a machine-learning method based on syndrome data for post-selecting quantum error correc-tion runs. Our method trains a machine-learning classi-70.050 0.075 0.100 0.125 0.150     
+
+> p
+> 0.0
+> 0.5
+> 1.0
+> C
+> d= 12
+> d= 18
+> d= 24
+> d= 30
+
+# a0.00 0.25 0.50 0.75 1.00      
+
+> R
+> 2
+> 4
+> 6
+> 8
+> I
+> d= 12
+> d= 18
+> d= 24
+> d= 30
+
+# b
+
+FIG. 5. Surface-code classifier threshold . a) The machine-learning predictor C against p, for different code dis-tances d. For all d, the curves cross at pML ≈ 0.0866(1) (ver-tical dashed line) and exhibit universal behavior (see SM A), reminiscent of a phase transition at a post-selection prob-ability threshold. Interestingly, pML differs from the usual physical-error threshold pth of the code (see main text). For the model’s training, we used syndrome data generated at physical error rates p = 0 .05 and p = 0 .06 , for low noise, and 
+
+p = 0 .14 and p = 0 .15 , for high noise. Approximately 10 5
+
+syndrome samples are available at each physical error rate, where we use 20% of the data for training and 80% for vali-dation, while the reported predictor values are averaged over 
+
+10 4 syndrome samples per error rate. We train the classifier for each d individually. b) Improvement I with post-selection against post-selection rate R for p ≈ pML and different values of d. We decode with MWPM. 
+
+fier on syndrome data from low- and high-noise ensem-bles and uses the classifier output as a pre-decoding abort score. Because training does not require decoded logical labels or information about whether a logical error has occurred, the method avoids one of the main obstacles to machine-learning-assisted QEC. Our method can serve as a low-cost pre-decoding filter. For each syndrome record, the classifier first estimates how strongly the record resembles the high-noise train-ing ensemble. Runs assigned a sufficiently high score can be rejected without invoking the full decoder, while ac-cepted runs are passed to the standard decoding pipeline. This can reduce classical decoding workload and improve the conditional logical performance of the accepted en-semble, at the cost of a reduced acceptance probability. Such a trade-off is particularly relevant to probabilis-tic protocols, including magic-state distillation [5, 15], magic-state cultivation [8], and repeat-until-success gad-gets [9], in which high conditional fidelity may be more important than deterministic output. In the experimen-tal magic-state-distillation data, the learned score out-performs syndrome-weight filtering, indicating that it captures structure beyond the total number of detection events. As baseline, we compare our method against the syndrome-weight post-selection method [7, 19–21], which aborts when the number of flipped syndromes exceeds a threshold. This method performs comparable to our machine-learning method for the Gross code and surface code, indicating that data-driven methods learn a clas-sifier that behaves similarly to counting the number of syndromes. As the surface code and Gross code simu-lations use relatively simple bit-flip and circuit-level de-polarising noise models, respectively, syndrome counting already contains sufficient information for post-selection. However, for the magic-state distillation experiment, our machine learning post-selection method outperforms sim-ple syndrome counting, implying that by learning from data, we can identify more reliably which runs should be aborted. As the magic-state distillation experiment uses a complex and realistic noise model with highly non-trivial relationships between syndromes and errors, counting syndrome events does not reliable indicate logi-cal failures. In contrast, our machine learning model can learn the structure in the syndrome distribution to more reliably decide when to post-select. We also observe a post-selection transition pML dis-tinct from the usual logical threshold pth for the sur-face code. In fact, the machine-learning predictor C
+
+exhibits universal behavior, evident by a universal col-lapse of the C against p curve under proper rescaling for different d, as shown in SM A. Around p ≈ pML ,our post-selection method is scalable as the post-selection probability remains non-trivial even for large d. A sim-ilar post-selection transition has been observed for the syndrome-weight post-selection method [21]. Thus, we show that machine learning can autonomously learn this post-selection transition. Our method has several practical advantages. First, it is modular: it can be inserted before any existing decoder without changing the decoding pipeline. In fact, we find that by first performing machine learning post-selection followed by logical gap post-selection, we can achieve su-perior fidelity compared to logical gap alone for a recent magic state distillation experiment by QuEra [15]. Second, it is flexible: the same principle applies to memory experiments, qLDPC codes, topological codes, magic state distillation, and logical state-preparation ex-periments. In fact, our decoder can be trained on both simulated and experimental data, as long as the physical error can be tuned to generate the high and low-error dataset. Finally, our machine learning approach shows trans-ferability from simulation to experiment, illustrated by the magic-state distillation application where we train on simulated data, then apply to experimental data. We believe it would be interesting to apply our approach to other recent experiments [42–45]. 
+
+ACKNOWLEDGMENTS 
+
+We thank André J. Ferreira-Martins for discussions. We are very grateful to Tommaso Macrì and Chen Zhao from QuEra for extensive and helpful discussions. AC also thanks UFAL for an unpaid license and CNPq (Grant No. 168785/2023-4). 8
+
+[1] B. M. Terhal, Quantum error correction for quantum memories, Reviews of Modern Physics 87 , 307 (2015). [2] E. H. Chen, T. J. Yoder, Y. Kim, N. Sundaresan, S. Srini-vasan, M. Li, A. D. Córcoles, A. W. Cross, and M. Takita, Calibrated decoders for experimental quantum error cor-rection, Physical Review Letters 128 , 110504 (2022). [3] E. Knill, Quantum computing with realistically noisy de-vices, Nature 434 , 39 (2005). [4] P. Aliferis, D. Gottesman, and J. Preskill, Accuracy threshold for postselected quantum computation, arXiv preprint quant-ph/0703264 (2007). [5] S. Bravyi and A. Kitaev, Universal quantum computa-tion with ideal clifford gates and noisy ancillas, Physical Review A—Atomic, Molecular, and Optical Physics 71 ,022316 (2005). [6] S. Bravyi and J. Haah, Magic-state distillation with low overhead, Physical Review A—Atomic, Molecular, and Optical Physics 86 , 052329 (2012). [7] H. Bombín, M. Pant, S. Roberts, and K. I. Seetharam, Fault-tolerant postselection for low-overhead magic state preparation, PRX Quantum 5, 010302 (2024). [8] C. Gidney, N. Shutty, and C. Jones, Magic state culti-vation: growing t states as cheap as cnot gates, arXiv preprint arXiv:2409.17595 (2024). [9] Y. Akahoshi, K. Maruyama, H. Oshima, S. Sato, and K. Fujii, Partially fault-tolerant quantum computing ar-chitecture with error-corrected clifford gates and space-time efficient analog rotations, PRX quantum 5, 010337 (2024). [10] J. W. Staples, W. Fu, and J. D. Thompson, Scal-able postselection of quantum resources, arXiv preprint arXiv:2603.08697 (2026). [11] N. Meister, C. A. Pattison, and J. Preskill, Efficient soft-output decoders for the surface code, arXiv preprint arXiv:2405.07433 (2024). [12] H. Chen, D. Xu, G. M. Sommers, D. A. Huse, J. D. Thompson, and S. Gopalakrishnan, Scalable accuracy gains from postselection in quantum error correcting codes, arXiv preprint arXiv:2510.05222 (2025). [13] S. C. Smith, B. J. Brown, and S. D. Bartlett, Mitigating errors in logical qubits, Communications Physics 7, 386 (2024). [14] C. Gidney, M. Newman, P. Brooks, and C. Jones, Yoked surface codes, Nature Communications 16 , 4498 (2025). [15] P. Sales Rodriguez, J. M. Robinson, P. N. Jepsen, Z. He, C. Duckering, C. Zhao, K.-H. Wu, J. Campo, K. Bagnall, M. Kwon, et al. , Experimental demonstration of logical magic state distillation, Nature 645 , 620 (2025). [16] S.-H. Lee, L. H. English, and S. D. Bartlett, Efficient post-selection for general quantum ldpc codes, npj Quan-tum Information (2026). [17] M.-H. Hsieh and F. Le Gall, Np-hardness of decoding quantum error-correction codes, Physical Review A 83 ,052331 (2011). [18] P. Iyer and D. Poulin, Hardness of decoding quantum sta-bilizer codes, IEEE Transactions on Information Theory 
+
+61 , 5209 (2015). [19] Y. Li, A magic state’s fidelity can be superior to the operations that created it, New Journal of Physics 17 ,023037 (2015). [20] S. Singh, A. S. Darmawan, B. J. Brown, and S. Puri, High-fidelity magic-state preparation with a biased-noise architecture, Physical Review A 105 , 052410 (2022). [21] L. H. English, D. J. Williamson, and S. D. Bartlett, Thresholds for postselected quantum error correction from statistical mechanics, Physical Review Letters 135 ,120603 (2025). [22] G. Torlai and R. G. Melko, Neural decoder for topological codes, Physical review letters 119 , 030501 (2017). [23] S. Krastanov and L. Jiang, Deep neural network proba-bilistic decoder for stabilizer codes, Scientific reports 7,11003 (2017). [24] P. Baireuther, M. D. Caio, B. Criger, C. W. Beenakker, and T. E. O’Brien, Neural network decoder for topolog-ical color codes with circuit level noise, New Journal of Physics 21 , 013003 (2019). [25] K. Meinerz, C.-Y. Park, and S. Trebst, Scalable neural decoder for topological surface codes, Physical Review Letters 128 , 080505 (2022). [26] J. Bausch, A. W. Senior, F. J. H. Heras, T. Edlich, A. Davies, M. Newman, C. Jones, K. Satzinger, M. Y. Niu, S. Blackwell, et al. , Learning high-accuracy error de-coding for quantum processors, Nature 635 , 834 (2024). [27] M. Lange, P. Havström, B. Srivastava, I. Bengtsson, V. Bergentall, K. Hammar, O. Heuts, E. van Nieuwen-burg, and M. Granath, Data-driven decoding of quantum error correcting codes using graph neural networks, Phys-ical Review Research 7, 023181 (2025). [28] A. S. Maan and A. Paler, Machine learning message-passing for the scalable decoding of qldpc codes, npj Quantum Information 11 , 10.1038/s41534-025-01033-w (2025). [29] S. Gicev, L. C. L. Hollenberg, and M. Usman, Fully con-volutional 3d neural network decoders for surface codes with syndrome circuit noise, arXiv preprint (2025), arXiv:2506.16113 [quant-ph]. [30] D. Dentelski, Neural network decoder confidence as a learned proxy for the logical gap, arXiv:2606.08758 (2026). [31] A. Gu, J. Ataides, M. D. Lukin, and S. F. Yelin, Scal-able neural decoders for practical fault-tolerant quantum computation, arXiv preprint arXiv:2604.08358 (2026). [32] D. Seip, L. Colmenarez, M. Schmitt, and M. Müller, Machine Learning Optimal Quantum Error Correction Thresholds, arXiv:2606.22194v1 (2026). [33] D. J. Spencer, S. P. Jain, A. Tanggara, Z. Sun, T. Haug, D. Khu, and K. Bharti, Quantum error correction and fault tolerance: A comprehensive tutorial, arXiv preprint arXiv:2605.29137 (2026). [34] scikit-learn developers, Tuning the decision threshold for class prediction, https://scikit-learn.org/stable/ modules/classification_threshold.html (2026), scikit-learn User Guide, accessed June 29, 2026. [35] scikit-learn developers, Probability calibration, https:// scikit-learn.org/stable/modules/calibration.html 
+
+(2026), scikit-learn User Guide, accessed June 29, 2026. [36] D. Gottesman, The heisenberg representation of quan-tum computers, arXiv preprint quant-ph/9807006 (1998). [37] C. Gidney, Stim: a fast stabilizer circuit simulator, Quan-tum 5, 497 (2021). [38] R. S. Olson, N. Bartley, R. J. Urbanowicz, and J. H. 9
+
+Moore, Evaluation of a tree-based pipeline optimiza-tion tool for automating data science, in Proceedings of the Genetic and Evolutionary Computation Conference 2016 , GECCO ’16 (ACM, New York, NY, USA, 2016) pp. 485–492. [39] P. Ribeiro, A. Saini, J. Moran, N. Matsumoto, H. Choi, M. Hernandez, and J. H. Moore, Tpot2: A new graph-based implementation of the tree-based pipeline opti-mization tool for automated machine learning, in Genetic programming theory and practice XX (Springer, 2024) pp. 1–17. [40] QuEra Computing and collaborators, Data for “experi-mental demonstration of logical magic state distillation”, 10.1038/s41586-025-09367-3 (2025). [41] S. Bravyi, A. W. Cross, J. M. Gambetta, D. Maslov, P. Rall, and T. J. Yoder, High-threshold and low-overhead fault-tolerant quantum memory, Nature 627 ,778 (2024). [42] E. Rosenfeld, C. Gidney, G. Roberts, A. Morvan, N. Lacroix, D. Kafri, J. Marshall, M. Li, V. Sivak, D. Abanin, et al. , Magic state cultivation on asuperconducting quantum processor, arXiv preprint arXiv:2512.13908 (2025). [43] R. S. Gupta, N. Sundaresan, T. Alexander, C. J. Wood, S. T. Merkel, M. B. Healy, M. Hillenbrand, T. Jochym-O’Connor, J. R. Wootton, T. J. Yoder, et al. , Encoding a magic state with beyond break-even fidelity, Nature 625 ,259 (2024). [44] D. Bluvstein, S. J. Evered, A. A. Geim, S. H. Li, H. Zhou, T. Manovitz, S. Ebadi, M. Cain, M. Kalinowski, D. Hangleiter, et al. , Logical quantum processor based on reconfigurable atom arrays, Nature 626 , 58 (2024). [45] Google Quantum AI and Collaborators, Quantum error correction below the surface code threshold, Nature 638 ,920 (2025). [46] F. H. Watson and S. D. Barrett, Logical error rate scaling of the toric code, New Journal of Physics 16 , 093045 (2014). 10 
+
+# Supplemental Information 
+
+In the Supplemental Material, we provide additional analyses and methodological details. 
+
+CONTENTS 
+
+A. Post-selection and error correction threshold 10 B. Machine-learning methodology 10 1. Dataset construction 10 2. Automated pipeline search 11 3. Probabilistic inference 12 4. Post-selection rule 12 
+
+SM A: Post-selection and error correction threshold 
+
+In this section, we show for the surface code the explicit collapse of machine-learning predictor C onto a single curve by appropriate rescaling. To get pML , we fit the data with the polynomial [46] 
+
+C = A + Bx + Dx 2 with x = ( p − pML )d1/ν . (A1) For the fitting, we remove data with very small and large p which are too far from the threshold pML . Then, we rescale in Fig. 6 the physical error rate p as (p − pML )d1/ν , observing that close to the threshold indeed all curves have universal behavior, i.e. are a simple function of d.0.5 0.0 0.5 1.0 
+
+(p pML )d1/     
+
+> 0
+> 1
+> C
+> d= 12
+> d= 18
+> d= 24
+> d= 30
+
+FIG. 6. Surface-code classifier threshold. The machine-learning predictor C against p with fitted selection probability threshold 
+
+pML ≈ 0.0866(1) . By rescaling, curves for different d can be collapsed onto a single curve around the post-selection probability threshold pML , demonstrating the universality of C. The dashed line is the fitted function (A1). 
+
+We also note that the post-selection threshold is distinct from the usual error correction threshold. As reference, we show the usual error correction threshold by fitting logical error pL against physical error p in Fig. 7, where we find pth ≈ 0.1037(2) where indeed we have pth > p ML .
+
+SM B: Machine-learning methodology 
+
+In this section, we provide further details on the construction, training and application of the machine-learning model used for syndrome post-selection. 
+
+1. Dataset construction 
+
+As an example, we describe the dataset generation for our Gross bivariate-bicycle code application. For the Gross bivariate-bicycle code, each input sample was constructed from the syndrome information associated with a single 11 0.050 0.075 0.100 0.125 0.150     
+
+> p
+> 0.0
+> 0.2
+> 0.4
+> pL
+> d= 12
+> d= 18
+> d= 24
+> d= 30
+
+# b        
+
+> FIG. 7. As reference, we show the (non-post-selected) logical error rate pLagainst physical error rate pfor different distances
+> d, with fitted threshold pth ≈0.1037(2) marked as vertical dashed line.
+
+simulated QEC run. The syndrome arrays corresponding to the two error components were concatenated into a single feature vector. Each syndrome record was therefore represented by 2016 binary input features. The target labels identify the physical-error-rate ensemble from which each syndrome was generated. The two lowest physical error rates, 
+
+p ∈ { 0.001 , 0.0013 } , (B1) were assigned to class 0, corresponding to the low-error-rate ensemble. The two highest physical error rates, 
+
+p ∈ { 0.0062 , 0.008 } , (B2) were assigned to class 1, corresponding to the high-error-rate ensemble. The complete labeled dataset contained 2,199 ,720 syndrome records. Of these, 1,887 ,360 samples belonged to the low-error-rate class and 312 ,360 samples belonged to the high-error-rate class. A stratified train–test split was used to preserve the relative class frequencies. We used 15% of the complete dataset for model training and retained the remaining 85% for evaluation. The training subset therefore contained 
+
+329 ,958 syndrome records, comprising 283 ,104 low-error-rate samples and 46 ,854 high-error-rate samples. The split was performed using random seed 7. 
+
+> 2. Automated pipeline search
+
+The classifier was selected using the Tree-based Pipeline Optimization Tool, TPOT, version 0.12 .1 [38, 39]. TPOT formulates model selection and hyperparameter optimization as a genetic-programming problem in which candidate machine-learning pipelines are generated, evaluated through cross-validation, and iteratively evolved according to their predictive performance. Our post-selection procedure requires a continuous score representing the inferred probability that a syndrome belongs to the high-error-rate class. We therefore restricted the TPOT search space to classification models to learn the predicted probability C(s) = Pr (y = 1 | s). This restriction ensures that every candidate pipeline returns class probabilities and can consequently provide the class-1 score. The restricted search space included logistic regression, random forests, gradient-boosting classifiers, Gaussian naive Bayes, k-nearest-neighbor classifiers, and support-vector classifiers with probability estimation enabled. The hyperparameter search space was defined as follows: 
+
+• Logistic regression with regularization terms Λ ∈ { 10 −4, 10 −3, 10 −2, 10 −1, 1, 10 , 100 }, ℓ2 regularization, and the 
+
+lbfgs solver. 
+
+• Random forests with 100 or 200 estimators, maximum depth in {None , 5, 10 }, minimum split size in {2, 5}, and minimum leaf size in {1, 2}.
+
+• Gradient-boosting classifiers with 100 or 200 estimators, learning rate in {0.01 , 0.1}, and maximum tree depth in {3, 5}.12 
+
+• Gaussian naive Bayes using its standard hyperparameters. 
+
+• k-nearest-neighbor classifiers with k ∈ { 3, 5, 7}.
+
+• Support-vector classifiers with Λ ∈ { 0.1, 1, 10 }, either a linear or radial-basis-function kernel, and probability estimation enabled. The TPOT optimization was performed using a population size of 10 over 5 generations. The TPOT random seed was set to 11 . No explicit scoring function or cross-validation scheme was provided, and therefore the defaults of TPOT version 0.12 .1 were used. The best internal cross-validation score reached 1.0. The pipeline selected by TPOT was an ℓ2-regularized logistic-regression classifier with 
+
+Λ = 1 , (B3) using the lbfgs solver. After model selection, the selected pipeline was refitted on the full training subset and frozen before being applied to the remaining syndrome data.  
+
+> 3. Probabilistic inference
+
+For each new syndrome record s, the selected classifier returns the estimated probabilities of the two training classes. We define the machine-learning score as the inferred probability of class 1,
+
+C(s) = Pr (y = 1 | s), (B4) where class 1 denotes the high-error-rate ensemble. Larger values of C(s) indicate that the observed syndrome is more characteristic of the high-error-rate training data, whereas smaller values indicate greater similarity to the low-error-rate ensemble. The model is not trained to predict whether decoding succeeds, whether a logical error occurs, or which correction operator should be applied. Instead, the class-1 probability provides a scalar ranking of syndrome records according to their similarity to the high-error-rate ensemble.  
+
+> 4. Post-selection rule
+
+For a chosen cutoff C0 ∈ [0 , 1] , a QEC run with syndrome s is accepted when 
+
+C(s) < C 0, (B5) and rejected otherwise. Syndromes assigned a sufficiently large probability of belonging to class 1 are therefore discarded before decoding. By varying C0, we control the trade-off between the fraction R of accepted runs and the conditional logical error rate ˜pL of the retained ensemble. The classifier is frozen during this analysis, and only the post-selection cutoff is varied. Although the score is returned as a class probability, the post-selection procedure primarily depends on the ordering induced by C(s). Thus, perfect calibration of the score is not required for ranking syndromes, instead we only need that syndromes characteristic of higher-error regimes tend to receive larger class-1 scores.

@@ -6,29 +6,29 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-07-23
-- 运行时间：2026-07-23 20:30:36 UTC
+- 最新运行日期：2026-07-24
+- 运行时间：2026-07-24 21:48:35 UTC
 - 运行状态：成功
-- 本次总论文数：3
-- 精读区：1
-- 速读区：2
+- 本次总论文数：2
+- 精读区：2
+- 速读区：0
 
 ### 今日简报（AI）
-今日共阅读3篇量子纠错前沿论文，其中《Learning to Decode Quantum LDPC Codes via Cluster-Based Sequential Belief Propagation》以9.0/10高分揭示机器学习驱动的解码新路径。最值得关注的是集群顺序置信传播解码器与机器学习后选择（7.0/10）分别显著提升量子LDPC码纠错效率及可靠性。建议未来实践中优先探索ML与传统解码的融合方案，并注意纠错中间过程对规模化量子计算的延迟约束（6.0/10）。
-- 详情：[/202607/23/README](/202607/23/README)
+今日精读两篇高评分编码理论论文，聚焦LDPC码的玻璃态景观与自正交码新构造。  
+值得关注的方向：LDPC码在复杂能景中的稳定谷结构，以及自正交码的新判据与高效构造方法。  
+建议跟进：深入理解这两种编码在低延迟通信或量子纠错中的应用潜力。
+- 详情：[/202607/24/README](/202607/24/README)
 
 ### 精读区论文标签
-1. [Learning to Decode Quantum LDPC Codes via Cluster-Based Sequential Belief Propagation](/202607/23/2607.20130v1-learning-to-decode-quantum-ldpc-codes-via-cluster-based-sequential-belief-propagation)  
-   标签：评分：9.0/10、query:qec-decoding
-   evidence：提出基于聚类的顺序置信传播解码量子LDPC码
+1. [Stable valleys in the glassy landscape of a low-density parity-check (LDPC) code](/202607/24/2607.20421v1-stable-valleys-in-the-glassy-landscape-of-a-low-density-parity-check-ldpc-code)  
+   标签：评分：8.0/10、query:qec-decoding
+   evidence：研究扩展图上的经典LDPC码，是构建量子LDPC码的基础
+2. [New Criteria and Constructions for Self-Orthogonal Codes](/202607/24/2607.20805v1-new-criteria-and-constructions-for-self-orthogonal-codes)  
+   标签：评分：8.0/10、query:qec-code
+   evidence：用于量子纠错的自正交码
 
 ### 速读区论文标签
-1. [Machine-learned syndrome post-selection for reliable quantum error correction](/202607/23/2607.19563v1-machine-learned-syndrome-post-selection-for-reliable-quantum-error-correction)  
-   标签：评分：7.0/10、query:qec-decoding
-   evidence：机器学习综合征后选择用于可靠量子纠错，提升解码器性能
-2. [Latency-Constrained Encoded Quantum Teleportation with Punctured Codes](/202607/23/2607.19770v1-latency-constrained-encoded-quantum-teleportation-with-punctured-codes)  
-   标签：评分：6.0/10、query:qec-code
-   evidence：使用凿孔量子纠错码的编码隐形传态
+- 本次无速读推荐。
 
 
 <div class="dpr-home-promo-card">

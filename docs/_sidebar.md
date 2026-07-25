@@ -1,6 +1,9 @@
 * <a class="dpr-sidebar-root-link" href="#/">首页</a>
 * <a class="dpr-sidebar-root-link dpr-sidebar-noactive-link" href="javascript:void(0)" data-dpr-hash="#/tutorial/README">使用教程</a>
 * Daily Papers
+  * 2026-07-25 <!--dpr-date:20260725-->
+    * 速读区
+      * <a class="dpr-sidebar-item-link dpr-sidebar-item-structured" href="#/202607/25/2607.17319v1-constraints-on-recovering-quantum-information-after-erasure" data-sidebar-item="{&quot;title&quot;: &quot;Constraints on recovering quantum information after erasure&quot;, &quot;link&quot;: &quot;https://arxiv.org/abs/2607.17319v1-constraints-on-recovering-quantum-information-after-erasure&quot;, &quot;score&quot;: &quot;7.0&quot;, &quot;tags&quot;: [{&quot;kind&quot;: &quot;query&quot;, &quot;label&quot;: &quot;qec-code&quot;}], &quot;evidence&quot;: &quot;擦除后量子信息恢复的约束&quot;}">Constraints on recovering quantum information after erasure</a>
   * 2026-07-24 <!--dpr-date:20260724-->
     * 精读区
       * <a class="dpr-sidebar-item-link dpr-sidebar-item-structured" href="#/202607/24/2607.20421v1-stable-valleys-in-the-glassy-landscape-of-a-low-density-parity-check-ldpc-code" data-sidebar-item="{&quot;title&quot;: &quot;Stable valleys in the glassy landscape of a low-density parity-check (LDPC) code&quot;, &quot;link&quot;: &quot;https://arxiv.org/abs/2607.20421v1-stable-valleys-in-the-glassy-landscape-of-a-low-density-parity-check-ldpc-code&quot;, &quot;score&quot;: &quot;8.0&quot;, &quot;tags&quot;: [{&quot;kind&quot;: &quot;query&quot;, &quot;label&quot;: &quot;qec-decoding&quot;}], &quot;evidence&quot;: &quot;研究扩展图上的经典LDPC码，是构建量子LDPC码的基础&quot;}">Stable valleys in the glassy landscape of a low-density parity-check (LDPC) code</a>

@@ -6,29 +6,24 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-07-24
-- 运行时间：2026-07-24 21:48:35 UTC
+- 最新运行日期：2026-07-25
+- 运行时间：2026-07-25 21:21:11 UTC
 - 运行状态：成功
-- 本次总论文数：2
-- 精读区：2
-- 速读区：0
+- 本次总论文数：1
+- 精读区：0
+- 速读区：1
 
 ### 今日简报（AI）
-今日精读两篇高评分编码理论论文，聚焦LDPC码的玻璃态景观与自正交码新构造。  
-值得关注的方向：LDPC码在复杂能景中的稳定谷结构，以及自正交码的新判据与高效构造方法。  
-建议跟进：深入理解这两种编码在低延迟通信或量子纠错中的应用潜力。
-- 详情：[/202607/24/README](/202607/24/README)
+今日速读1篇关于量子擦除信息恢复的论文。该研究揭示了擦除后恢复量子信息的约束条件，对量子纠错有重要启示。建议关注量子信息基础与容错计算领域的后续进展。
+- 详情：[/202607/25/README](/202607/25/README)
 
 ### 精读区论文标签
-1. [Stable valleys in the glassy landscape of a low-density parity-check (LDPC) code](/202607/24/2607.20421v1-stable-valleys-in-the-glassy-landscape-of-a-low-density-parity-check-ldpc-code)  
-   标签：评分：8.0/10、query:qec-decoding
-   evidence：研究扩展图上的经典LDPC码，是构建量子LDPC码的基础
-2. [New Criteria and Constructions for Self-Orthogonal Codes](/202607/24/2607.20805v1-new-criteria-and-constructions-for-self-orthogonal-codes)  
-   标签：评分：8.0/10、query:qec-code
-   evidence：用于量子纠错的自正交码
+- 本次无精读推荐。
 
 ### 速读区论文标签
-- 本次无速读推荐。
+1. [Constraints on recovering quantum information after erasure](/202607/25/2607.17319v1-constraints-on-recovering-quantum-information-after-erasure)  
+   标签：评分：7.0/10、query:qec-code
+   evidence：擦除后量子信息恢复的约束
 
 
 <div class="dpr-home-promo-card">

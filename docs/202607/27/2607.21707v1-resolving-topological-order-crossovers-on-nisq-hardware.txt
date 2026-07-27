@@ -1,0 +1,949 @@
+Title: Resolving topological order crossovers on NISQ hardware
+
+URL Source: https://arxiv.org/pdf/2607.21707v1
+
+Published Time: Mon, 27 Jul 2026 00:07:46 GMT
+
+Number of Pages: 22
+
+Markdown Content:
+# Resolving topological order crossovers on NISQ hardware 
+
+Ruizhe Shen, 1, ∗ Yin Zhong, 2, 3, † and Ching Hua Lee 1, ‡
+
+> 1
+
+Department of Physics, National University of Singapore, Singapore 117551 
+
+> 2
+
+School of Physical Science and Technology & Key Laboratory for Magnetism and Magnetic Materials of the MoE, Lanzhou University, Lanzhou 730000, China 
+
+> 3
+
+Lanzhou Center for Theoretical Physics, Key Laboratory of Theoretical Physics of Gansu Province, Lanzhou 730000, China 
+
+(Dated: July 27, 2026) Topological phases of matter provide a promising route toward robust quantum information pro-cessing, but on present-day noisy intermediate-scale quantum devices the experimentally relevant question is whether signatures of topological crossovers remain resolvable under realistic imperfec-tions. Here, we address this question in the Wen–plaquette model through a two-stage strategy on the IBM Quantum hardware. We first use a tractable system to systematically characterize crossover signatures. Using variationally compiled equilibrium and quench-generated states, we re-solve crossovers between stabilizer-dominated and trivial or disorder-dominated regimes through local plaquette stabilizers and a Wilson loop, and quantify their robustness against static disorder, deliberately amplified circuit noise, and effective non-Hermitian fields. The quench dynamics further reveal that plaquette-sector signatures remain substantially more stable deep in the strong-stabilizer regime than near the finite-size crossover. Building on the properties established in the small sys-tem, we extend the implementation to a physical two-dimensional IBM processor using a layered representative-qubit construction. The resulting lattice-averaged plaquette response exhibits only weak degradation under intentionally amplified local coherent perturbations. Together, these results connect controlled finite-size characterization with a scalable hardware implementation, providing a practical route for preparing and probing topological signatures on near-term quantum processors. 
+
+I. INTRODUCTION 
+
+Understanding quantum phases that cannot be char-acterized solely by local order parameters and sponta-neous symmetry breaking remains a central challenge in condensed-matter physics [1–5]. This broader per-spective was strongly stimulated by landmark discov-eries in strongly correlated quantum matter, most no-tably the fractional quantum Hall effect (FQHE) [6–11] and high-temperature superconductivity in the cuprates [12–15]. These developments exposed the limitations of descriptions based only on weakly interacting quasipar-ticles and conventional local order, and motivated the search for more general organizing principles for quan-tum matter. In particular, the FQHE established topo-logical order as a fundamentally new paradigm charac-terized by long-range entanglement, topology-dependent ground-state degeneracy, fractionalized anyonic excita-tions, and nonlocal observables rather than a conven-tional symmetry-breaking order parameter [4, 5, 16–21]. Within the quantum Hall setting, model wave func-tions and their parent Hamiltonians further revealed how clustering, pseudopotential, and geometric princi-ples encode strongly correlated topological states [22– 25]. Beyond their fundamental significance, topologi-cally ordered phases provide a natural foundation for ro-bust quantum-information processing because quantum information may be stored nonlocally and manipulated    
+
+> ∗e0554228@u.nus.edu
+> †zhongy@lzu.edu.cn
+> ‡phylch@nus.edu.sg
+
+through the fusion and braiding of anyonic excitations [16, 20, 26–28]. Rapid advances in programmable quan-tum platforms have now enabled the preparation, detec-tion, and manipulation of increasingly complex topolog-ical states, including toric-code and spin-liquid states, measurement- and feedforward-assisted preparation, and Abelian and non-Abelian anyonic processes on supercon-ducting, trapped-ion, and neutral-atom processors [29– 38]. More recent studies have extended these capabili-ties to qutrit topological codes, non-equilibrium topolog-ical order, digital simulations of the Kitaev honeycomb model, and the preparation of a fermionic Laughlin state [39–42]. Topological order defines a class of quantum phases characterized by long-range entanglement and funda-mentally distinct from conventional symmetry-breaking phases [4, 5, 17–19, 21]. A central hallmark is the pres-ence of ground-state degeneracy determined by global topological properties and stable against local pertur-bations. This nonlocal robustness makes topologi-cally ordered phases especially attractive for quantum-information applications, especially in the context of topological quantum memory and fault-tolerant quan-tum computation [16, 20, 26–28, 43]. Beyond this stabil-ity, such phases can host exotic quasiparticles, including Abelian and non-Abelian anyons, whose exchange statis-tics go beyond those of ordinary bosons and fermions [10, 20, 32, 35, 36, 39, 44–46]. These excitations enable topologically protected manipulations of quantum infor-mation. Their unconventional exchange statistics and nonlocal protection have therefore driven sustained in-terest across condensed-matter physics, quantum simu-lation, and quantum information science [29, 30, 32, 34– arXiv:2607.21707v1 [quant-ph] 23 Jul 2026 21472 368 951472 368 95 
+
+> Wilson loop around plaquette Large Wilson loop
+
+# (a)  (b) (c) (d) 
+
+Jg
+
+> Z2A Z2B
+> Spin-polarized +++... Z2B
+
+Without disorder (e) 
+
++1 Z2A 
+
++1 +1 +1 
+
++1 +1 +1 Excitation Z2A 
+
+> Excitation
+> 2J
+
+With disorder -1 Spin-polarized +++... Z2A Z2B Jg
+
+FIG. 1. Illustration of the Wen–plaquette model and its finite-size diagnostic structure. (a) Schematic of the Wen–plaquette model [Eq. 1] on a square lattice. (b,c) Schematic definitions of the elementary plaquette operator [ F1, Eq. (3)] and the extended Wilson-loop operator [Eq. (5)], respectively. The latter corresponds to the nonlocal boundary string W . (d) 
+
+Local excitation of the Wen–plaquette Hamiltonian: flipping a single plaquette eigenvalue from +1 to −1 creates a localized defect separated from the reference stabilizer sector by an energy cost 2 J. (e) Schematic finite-size response maps of the Wen–plaquette model in the clean case (left, Eq. 4) and in the presence of disorder (right, Eq. 6). In both panels, the red arrows indicate the trajectory used to probe the crossover between the two stabilizer-dominated regimes, distinguished by the sign of the plaquette expectation value. In the clean system, the blue arrow indicates the trajectory used to probe the crossover from a regime with a strong Wilson-loop response to a transverse-field-dominated trivial regime. 
+
+36, 39–41, 45, 47–53]. Although the early concept of topological order was strongly motivated by the FQHE, major theoretical progress has come from exactly solvable lattice mod-els, most notably Kitaev’s toric code [16, 18, 26, 54– 57] and the Wen–plaquette model [58–62]. These mod-els provide canonical and analytically controlled frame-works for understanding the structure of emerging topo-logical phases. Crucially, these models also provide tractable settings for quantum simulation and implemen-tation on programmable quantum hardware, and have therefore played a central role in connecting topological many-body theory with experimental quantum platforms [29, 30, 32, 34–36, 39–41, 45, 52, 53, 63–68]. Following these theoretical developments, substantial progress has been made in quantum-hardware simula-tions of topological phases in lattice models [29, 30, 33– 36, 39, 42, 45, 52, 53, 63, 64, 66, 67, 69–73], includ-ing the first realization of the Wen–plaquette model re-ported in Ref. [63] and recent demonstrations of non-equilibrium topological order and topological matter dy-namics [40, 41, 70–73]. Building on this progress, the present work has two objectives. First, we use a tractable finite system to characterize how local plaquette stabiliz-ers and nonlocal Wilson-loop signals remain observable on real quantum hardware. This controlled setting allows us to compare directly with classical reference calcula-tions and to determine how equilibrium and dynamical crossover signatures are modified by static disorder, accu-mulated circuit noise, and effective non-Hermitian imag-inary fields. Second, guided by the stabilizer structure established in the small system, we extend the imple-mentation to a larger square lattice using a projection-inspired preparation protocol on a two-dimensional pro-cessor. Together, these two components connect quanti-tative characterization with a hardware-compatible route toward scalable Wen–plaquette simulations. 
+
+II. RESULTS A. Models and topological diagnostics 
+
+In this section, we introduce the Wen-plaquette models and the finite-size diagnostics used to quantify their ro-bustness on quantum hardware. Our focus is on two ob-servables: a local plaquette stabilizer, which probes the stabilizer-sector structure, and a nonlocal Wilson loop, which probes the persistence of finite-size loop response. For quantum simulation, guided by the properties estab-lished in the small system, we then employ a scalable stabilizer-sector preparation method to extend the hard-ware implementation to larger square lattices and exam-ine whether the local plaquette structure remains observ-able. 3 
+
+> 1. Wen–plaquette model and its extensions
+
+We consider the spin-1 /2 Wen–plaquette model [59, 63], an exactly solvable model realizing intrinsic topolog-ical order in the thermodynamic limit, 
+
+Hwen = −J X
+
+> i,j
+
+Fi,j , Fi,j = σxi,j σyi+1 ,j σxi+1 ,j +1 σyi,j +1 ,
+
+(1) where Fi,j acts on the four spins surrounding plaquette (i, j ) [Fig. 1(a)]. Disorder and other effects are intro-duced below. We first study a 3 × 3 open lattice of nine qubits [Fig. 1(b)] and later extend the protocol to a larger lattice. Using a single plaquette index, 
+
+H3×3wen = −J X
+
+> i
+
+Fi, Fi = σxi σyi+1 σxi+4 σyi+3 , (2) with 
+
+F1 = σx 
+
+> 1
+
+σy 
+
+> 2
+
+σx 
+
+> 5
+
+σy 
+
+> 4
+
+, F2 = σx 
+
+> 2
+
+σy 
+
+> 3
+
+σx 
+
+> 6
+
+σy 
+
+> 5
+
+,F4 = σx 
+
+> 4
+
+σy 
+
+> 5
+
+σx 
+
+> 8
+
+σy 
+
+> 7
+
+, F5 = σx 
+
+> 5
+
+σy 
+
+> 6
+
+σx 
+
+> 9
+
+σy 
+
+> 8
+
+. (3) Although this finite geometry does not itself realize ther-modynamic topological order, it retains the stabilizer structure and nonlocal loop diagnostics required for hard-ware measurements. It can also be mapped with modest overhead onto a linear IBM Quantum qubit chain (see Appendix S5). Exact solvability follows from [ Fi, F j ] = 0 and F 2 
+
+> i
+
+= I, so the eigenstates are labeled by {Fi = ±1}.For J > 0, the ground-state manifold ΨAg belongs to the Z2A sector with ⟨Fi⟩ = +1; for J < 0, ΨBg belongs to the Z2B sector with ⟨Fi⟩ = −1. Fig. 1(d) illustrates the simplest local plaquette excita-tion above the Z2A sector. In the reference ground-state sector, all plaquettes satisfy Fi = +1. A local Pauli operation acting on a given spin flips the eigenvalues of those adjacent plaquette operators with which it anti-commutes. Thus, in the bulk, a single-spin Pauli per-turbation may create several neighboring plaquette de-fects, whereas on an open boundary or corner it can flip a single adjacent plaquette. Since each plaquette term contributes −JF i to the energy, changing one plaquette eigenvalue from +1 to −1 raises the energy by 2 J. More generally, a configuration with nflip flipped plaquettes has an excitation energy 2 Jn flip above the reference stabilizer sector. This defines the elementary energy cost per local plaquette defect. On the present finite lattice, this gap provides the basic energetic protection of the stabilizer structure: weak local perturbations do not readily mix the low-energy sector unless they create such plaquette defects. To tune the system away from the stabilizer-dominated regime, we introduce a uniform transverse field [60, 63], 
+
+HX = H3×3wen − g X
+
+> i
+
+σxi , (4) where g is the field strength. Since the field term does not commute with the plaquette stabilizers, increasing 
+
+g drives the ground state toward a trivial x-polarized paramagnet. In the thermodynamic limit, the transition occurs at |J| = |g|; on the finite open lattice, it appears as a smooth crossover visible in the local plaquette stabilizer 
+
+F1 and the boundary Wilson loop 
+
+W = σx 
+
+> 1
+
+σy 
+
+> 2
+
+σx 
+
+> 3
+
+σy 
+
+> 6
+
+σx 
+
+> 9
+
+σy 
+
+> 8
+
+σx 
+
+> 7
+
+σy 
+
+> 4
+
+. (5) The alternating σx and σy operators follow the lattice boundary and are compatible with the Wen–plaquette stabilizer structure . Further details are provided in Ap-pendix S1. To investigate the robustness of the Wen–plaquette regime against static inhomogeneity, we introduce on-site disorder, 
+
+Hdis = H3×3wen − g X
+
+> i
+
+σxi − X
+
+> i
+
+hiσzi , (6) where the disorder fields are independently drawn from 
+
+hi ∈ [−h/ 2, h/ 2]. These spatially varying fields break translation invariance and compete with the coherent plaquette structure of the clean Wen model. As the disorder strength increases, the plaquette and Wilson-loop diagnostics are expected to weaken and eventually become strongly suppressed. Fig. 1(e) summarizes the schematic finite-size response of the clean and disordered Wen–plaquette models. In the clean limit, the competi-tion between the plaquette coupling and the transverse field produces a crossover near J ≃ g, which sharpens into a quantum phase transition only in the thermody-namic limit. Disorder shifts and broadens this crossover: for moderate disorder, the stabilizer- and loop-based di-agnostics remain visible, whereas in the strongly disor-dered regime, J, g ≪ h, the response becomes disorder-dominated and the diagnostic crossover is washed out. We also consider the non-Hermitian extension 
+
+Hγ = H3×3wen − g X
+
+> i
+
+σxi + iγ X
+
+> i
+
+σzi , (7) where γ controls an imaginary field that serves as a min-imal phenomenological model of loss-like nonunitary ef-fects, see more details in Appendix. S4. We do not imple-ment the nonunitary propagator through postselection. Instead, Hγ is used to generate the relevant normalized right-eigenstate or time-evolved target states, which are subsequently compiled into hardware-efficient variational circuits.  
+
+> B. State preparation
+
+Quantum circuits in this work are used to prepare the states required for measuring the plaquette stabilizer F1
+
+and the Wilson loop W in both equilibrium and quench settings. We employ two complementary preparation strategies. For the general Hamiltonians in Eqs. 4, 6, and 7, including their quench dynamics, we compile target states into a hardware-efficient variational circuit. For 4variational circuit 
+
+> Projector
+
+(a) (b) Projection-based method for scalable simulation Variational method for feature characterization 
+
+FIG. 2. Simulation strategies for the Wen–plaquette model. (a) Variational method used for the detailed characteri-zation of crossover signatures. The red arrows indicate the one-dimensional qubit ordering used to embed the two-dimensional plaquette geometry into a hardware-efficient brickwork circuit. The target states of the finite Wen–plaquette Hamiltonian [Eq. 2] are approximated by a variational circuit composed of trainable local blocks (yellow), whose parameters are optimized using the loss function in Eq. 9. This approach enables controlled comparisons with exact results for the small system and is used to study the effects of disorder, accumulated hardware noise, and non-Hermitian fields. Further circuit details are pro-vided in Fig. S1 of Appendix S3. (b) Projection-inspired method for extending the implementation to larger two-dimensional lattices. Starting from a product state, local plaquette constraints are imposed across the square lattice using the coherent representative-qubit construction motivated by the projector Π i,j = ( I + Fi,j )/2 [Eq. 10]. The resulting state lies in the target stabilizer sector, illustrated by the blue plaquettes, without requiring variational optimization or mid-circuit measurement. The corresponding large-lattice implementation is presented in Fig. 7. 
+
+the clean commuting-projector Hamiltonian in Eq. 1, we additionally use its stabilizer structure to construct a rep-resentative state directly in the Z2A ground-state sector on a larger two-dimensional processor. For the variational workflow shown in Fig. 2(a), the target state depends on the physical task. For the Her-mitian equilibrium calculations, it is the ground state of 
+
+HX or Hdis . For the static non-Hermitian calculations, it is the normalized right eigenstate of Hγ whose eigenvalue has the smallest real part. For the quench calculations, the target at each time t is the corresponding unitary or normalized nonunitary time-evolved state. These target states are computed classically for the nine-qubit system and then approximated by an n-layer circuit Vn(θ) sat-isfying 
+
+Vn(θopt ) |ϕ0⟩ ≈ | ψtar ⟩ , (8) where |ϕ0⟩ is a fixed product-state input and |ψtar ⟩ de-notes the task-dependent target state. The variational parameters are obtained by minimizing 
+
+C(θ) = 1 − F [Vn(θ) |ϕ0⟩ , |ψtar ⟩] , (9) with the state fidelity F(|φ⟩ , |ψ⟩) = | ⟨ φ|ψ⟩ | 2. Once optimized, the compiled circuits are executed on IBM Quantum hardware, where F1 and W are measured to determine how the corresponding finite-size topological diagnostics are modified by hardware noise. As shown in Fig. 2, each building block consists of one ECR and two U3 gates, and further implementation details are pro-vided in Appendix S2. Unless otherwise stated, the hard-ware results for the 3 × 3 system are obtained using this variational compilation workflow. For the clean Wen–plaquette Hamiltonian, the mutu-ally commuting stabilizers also provide a direct route to the Z2A ground-state sector. As shown in Fig. 2(b), a representative state in the simultaneous Fi,j = +1 sector can be written formally, up to normalization, as 
+
+|GA⟩ ∝ Y
+
+> i,j
+
+Πi,j |0⟩⊗N , Πi,j = I + Fi,j 
+
+2 . (10) Each projector Π i,j enforces the +1 eigenvalue constraint of the corresponding plaquette stabilizer, and the mutual commutativity of the Fi,j makes the order of the formal projections irrelevant. This state is distinct from the product-state input |ϕ0⟩ used in the variational work-flow: |GA⟩ is itself the desired clean stabilizer-sector state. In Sec. II D, we implement a hardware-compatible representative-qubit construction motivated by Eq. 10 and use it to prepare and verify the stabilizer sector on a larger square-lattice IBM quantum processor; see also Fig. 7 below. 
+
+C. Hardware-resolved topological crossovers through variational simulation 
+
+1. Noise resilience of preparation and readout 
+
+We begin with the central practical question of this work: over what range of accumulated hardware noise do finite-size topological diagnostics remain experimen-tally distinguishable from trivial behavior [74–80]? Using the classically tractable small system as a calibrated ref-erence, we increase the physical circuit depth by inserting 5(a) (b)   
+
+> Vprep VId State preparation Noise amplification
+
+IBM Quantum hardware                          
+
+> FIG. 3. Noise resilience of topological diagnostics via the Wilson loop. (a) Noise-amplification protocol [Eq. 11]. The circuit Vprep (blue) denotes the optimized variational ansatz, while VId (green) denotes the inserted identity block. This construction increases the physical circuit depth, and hence the accumulated gate and decoherence errors, while leaving the ideal unitary evolution unchanged. Explicit circuit layouts and transpilation details are provided in Appendix S5. (b) Robustness of the Wilson-loop crossover (between
+> J/g ∈[1 ,2]) under noise, measured on IBM Quantum hard-ware by preparing approximate ground states of Eq. (4) and evaluating the large Wilson loop W[Eq. (5)]. Noise amplifi-cation is implemented by inserting j= 0 ,1,5 additional iden-tity blocks (red, violet, and brown curves, respectively). De-spite the increased circuit depth, the crossover profile near
+> J/g ∈[1 ,2] remains clearly resolved. Data are shown for the disorder-free Wen–plaquette model [Eq. 4] at fixed g= 1 and
+> J∈[−4,4].
+
+identity-like variational layers that leave the ideal target state unchanged. To effectively amplify hardware noise without changing the ideal computation, we append j
+
+identity layers to the optimized state-preparation circuit, 
+
+Vextend (j) = ( Vid )j Vprep , (11) where Vprep denotes the optimized variational circuit used to prepare the target ground state (see Ap-pendix. S2), and Vid is a single layer with the same gate structure as the variational ansatz but parameterized so that its noiseless action is the identity. The exponent j
+
+therefore explicitly denotes the number of appended iden-tity layers. Increasing j raises the physical gate count and circuit duration, thereby increasing the accumulated gate and decoherence errors, while leaving the ideal out-put state unchanged: ( Vid )j Vprep |ψ0⟩ = Vprep |ψ0⟩ in the noiseless limit. Here, |ψ0⟩ is the reference product state, and Vprep |ψ0⟩ approximates the target ground state. As illustrated in Fig. 3(a), varying j therefore provides a con-trolled measure of the sensitivity of the prepared state and its Wilson-loop response to accumulated hardware noise. We apply this protocol to the disorder-free Wen– plaquette model [Eq. 4], so that the observed degradation can be attributed primarily to hardware noise rather than to intrinsic disorder. Fig. 3(b) presents a hardware demonstration of the robustness of the Wilson-loop signal under controllably amplified circuit noise. We probe the finite-size crossover between the Wen–plaquette and trivial polarized regimes by sweeping J/g at fixed g = 1 and measuring the bound-ary Wilson loop ⟨W ⟩ [Eq. 5]. To read out this long Pauli string, we use an ancilla-assisted interferometric protocol: the ancilla is prepared in |+⟩, a controlled-W operation is applied, and a final Hadamard rotation maps the Wilson-loop expectation value onto the ancilla population, 
+
+⟨W ⟩ = 2 Pa(0) − 1. (12) Because the signal is extracted from a single ancilla mea-surement rather than from the parity of all system-qubit outcomes, this protocol reduces sensitivity to accumu-lated multi-qubit readout errors, although it introduces additional controlled-gate overhead (see Appendix S3). Two trends are evident. First, at the baseline depth (j = 0), the measured Wilson-loop response closely fol-lows the noiseless result, showing that the nonlocal di-agnostic is preserved by the hardware implementation. Second, ⟨W ⟩ increases rapidly for J/g ∈ [1 , 2], marking the finite-size crossover into a regime with strong loop response. Importantly, this crossover remains clearly re-solved as additional identity layers are inserted, demon-strating that the circuit and readout protocol retain the relevant topological signal under systematically and ef-fectively increased hardware noise.  
+
+> 2. Equilibrium diagnostics via plaquettes and Wilson loops
+
+Following the above analysis, we test whether the sta-bilizer and loop diagnostics remain distinguishable from topologically trivial behavior on quantum hardware in both clean and disordered settings. Using variationally prepared states [Fig. 2(a)], we measure a representative plaquette stabilizer and the largest boundary Wilson loop for the disorder-free Hamiltonian [Eq. 4] and its disor-dered extension [Eq. 6], as summarized in Fig. 4. Each plaquette expectation value probes the same lo-cal stabilizer structure of the Wen–plaquette model, so we use F1 as a representative observable throughout. Af-ter preparing the variational state Vn |ψ0⟩, we evaluate 
+
+⟨F1⟩ as a function of the plaquette coupling J at fixed 
+
+g = 1, following the trajectory indicated in Fig. 1(e). For both the clean model [Fig. 4(a)] and the disordered model [Fig. 4(b)], the hardware results reproduce the same qual-itative crossover structure. At sufficiently large |J|, the system enters stabilizer-dominated regimes in which ⟨F1⟩
+
+approaches ±1, corresponding on the finite lattice to the two plaquette sectors selected by the sign of J. The per-sistence of this crossover profile in the presence of dis-order shows that the local plaquette stabilizer remains a robust diagnostic of the finite-size Wen–plaquette struc-ture. To probe the weak-coupling region more directly, we sweep along the trajectory 
+
+J(ϕ) = cos ϕ, g(ϕ) = sin ϕ, (13) indicated by the blue arrow in Fig. 1(e). Along this path, the Wilson loop ⟨W ⟩ provides a sensitive nonlocal di-6(a) (b) Disorder-free systems Disordered systems 
+
+> Jg
+> Z2A Z2B
+
+Jg
+
+> Z2A Z2B
+
+(c) (d) Disordered systems Disorder-free systems 
+
+> Jg
+> Z2A
+> Jg
+> Z2A
+
+FIG. 4. Measurement of finite-size stabilizer and loop diagnostics in clean and disordered Wen–plaquette models on IBM Quantum. We compare the disorder-free and disordered Hamiltonians in Eqs. (4) and (6), following the parameter trajectories illustrated in Fig. 1(e). Disorder is included in panels (b) and (d) with h = 5, while panels (a) and (c) show the clean case, h = 0. (a,b) Expectation value of the single-plaquette stabilizer F1 as J is varied at fixed g = 1, revealing the finite-size crossover between the ⟨F1⟩ ≃ − 1 and ⟨F1⟩ ≃ +1 stabilizer sectors. (c,d) Expectation value of the boundary Wilson loop W
+
+[Eq. (5)] along the path ( J, g ) = (cos ϕ, sin ϕ), which probes the crossover between the stabilizer-dominated regime with a strong loop response and the transverse-field-dominated trivial regime. Blue, yellow, and green curves denote exact diagonalization, noiseless circuit simulations, and IBM Quantum measurements, respectively. For the Wilson-loop measurements, an ancilla-assisted interferometric protocol maps ⟨W ⟩ onto a single ancilla-qubit population, reducing sensitivity to multi-qubit readout errors; see Fig. S1 in the Appendix. The local stabilizer-sector crossover remains clearly resolved even at h = 5, whereas strong disorder strongly suppresses the nonlocal Wilson-loop response, demonstrating the contrasting robustness of local and nonlocal finite-size topological diagnostics. All hardware states are prepared using the variational circuit shown in Fig. 2(a). 
+
+agnostic. In the clean system [Fig. 4(c)], ⟨W ⟩ exhibits a pronounced crossover near ϕ ≃ 0.25 π, where J = g,separating the plaquette-dominated regime with a strong loop response from the transverse-field-dominated trivial regime. In the strongly disordered system [Fig. 4(d)], by contrast, ⟨W ⟩ remains strongly suppressed throughout the sweep, indicating that disorder destroys the coher-ent nonlocal loop response. These measurements repro-duce the qualitative finite-size structure obtained from the classical calculations summarized in Fig. 1(e) and Appendix S4. 
+
+3. Unitary quenches: dynamical stability across topological sectors 
+
+In the previous section, we characterized the equilib-rium structure of the Wen–plaquette model using lo-cal plaquette expectations and nonlocal Wilson-loop ob-servables. Because the system studied here is small, the corresponding equilibrium changes appear as smooth crossovers rather than sharp singularities. Dynami-cal probes nevertheless provide a useful complementary route for distinguishing different finite-size regimes on digital quantum hardware. Here, we show that the underlying topological-to-trivial transition can also leave dynamical signatures through non-equilibrium critical-like behavior, which can be revealed using quantum quench protocols [81]. In such a protocol, the system is initially prepared in the ground state of one Hamiltonian and then evolved under a dif-ferent Hamiltonian. Even in finite systems, the result-ing non-equilibrium dynamics can exhibit characteristic differences between distinct parameter regimes, thereby providing a complementary method for probing the re-sponse of the underlying phase transition. To probe the dynamical signatures of the finite-size Wen–plaquette regimes, we simulate the following quench protocol for the unitary case: 
+
+|ψ(t)⟩ = e−itH dis |ψ−J ⟩ , (14) where |ψ−J ⟩ denotes the ground state of the disorder-free 7(a) 
+
+(b) 
+
+Jg
+
+> Z2A
+> Z2B
+> Spin-polarized
+
+Jg
+
+> Z2A
+> Z2B
+> Spin-polarized
+
+(c) (d) 
+
+(e) (f)     
+
+> F1(t) F1(h) F1(t)
+> Initial state (-J) in the parameter space Evolved Hamiltonian (+J) in parameter space Unitary quench dynamics
+> F1(h)
+> Steady state
+> J= 1J= 1
+> J= 4J= 4Noiseless h=1
+> IBM Q h=1
+> Noiseless h=10
+> IBM Q h=10
+> Noiseless h=1
+> IBM Q h=1
+> Noiseless h=10
+> IBM Q h=10
+> Disorder strength h Disorder strength h Time t
+> Time t
+
+FIG. 5. Unitary quench dynamics of finite-size plaquette diagnostics. (a,b) Finite-size response maps of the disordered model [Eq. 6]. Black curves denote the disorder-reshaped crossover lines obtained from exact diagonalization. Orange arrows indicate the quench protocols of Eq. 14: panel (a) considers a weak-coupling quench near the finite-size crossover, while panel (b) considers a strong-coupling quench deep in the stabilizer-dominated regime. The dashed orange segment connects the late-time trajectory to the post-quench Hamiltonian at + J (blue dot). (c,d) Time evolution of the plaquette expectation 
+
+F1(t) for initial states prepared at the red dots in panels (a,b) . Solid curves show noiseless results, and dashed curves show IBM Quantum measurements. We set J = 1 in (c) and J = 4 in (d) , and compare weak ( h = 1, red) and strong ( h = 10, blue) disorder. Near the crossover, disorder rapidly suppresses the plaquette response, whereas deep in the strong-coupling regime the response decays more slowly and remains appreciably nonzero throughout the evolution window. (e,f ) Long-time response F1(t=20) [Eq. 16] as a function of disorder strength h for J = 1 (violet) and J = 4 (green). At large disorder, the weak-coupling response becomes nearly vanishing, while the strong-coupling case retains a finite plaquette signal. The central takeaway is that the dynamical survival of the finite-size stabilizer signature is controlled by the competition between disorder and the plaquette energy scale: it is fragile near the crossover but substantially more robust in the strong-coupling regime. In all panels, g = 1. Each dynamical snapshot is variationally compiled using the circuit architecture shown in Fig. 2(a). 
+
+Hamiltonian [Eq. 4] with coupling −J, and Hdis is the disordered Hamiltonian with coupling + J. This proce-dure effectively drives the system between the two stabi-lizer sectors distinguished by the sign of J. By preparing the system in one stabilizer-dominated regime and sud-denly quenching to the opposite parameter regime, we can monitor how the state evolves under unitary dynam-ics and identify dynamical signatures associated with the change between these distinct finite-size configurations. For each evolution time t, the state |ψ(t)⟩ is used as the target for variational compilation, yielding a hardware-efficient circuit Vn(t) such that 
+
+Vn(t) |ψ0⟩ ≈ | ψ(t)⟩ (15) (see Sec. S2 in Methods for details). We then measure the plaquette stabilizer F1 on the variationally prepared state. The quench reverses the sign of the plaquette cou-pling, from an initial ground state prepared at −J to evo-lution under a disordered Hamiltonian with coupling + J.It therefore switches the energetically favored plaquette sector from Z2B to Z2A. We compare two realizations of this sector-changing protocol, illustrated in Figs. 5(a) and 5(b). For J = 1, the plaquette and transverse-field en-ergy scales are comparable, and both the initial and post-quench Hamiltonians lie near the finite-size topological crossover. For J = 4, the initial and post-quench Hamil-tonians lie deep in the two opposite stabilizer-dominated sectors. The purpose of this comparison is therefore not to realize a direct topological-to-trivial quench, but to determine how the dynamical stability of the plaquette-sector signature depends on the distance from the finite-size crossover. Near the crossover at J = 1, disorder competes effi-ciently with the relatively weak plaquette energy scale. Consequently, the plaquette response rapidly decreases toward small values, particularly for strong disorder, as shown by the blue curve in Fig. 5(c). By contrast, for 
+
+J = 4, the larger energy cost of creating plaquette de-fects suppresses disorder-induced mixing between stabi-lizer sectors. The responses in Fig. 5(d) therefore decay more slowly and remain appreciably nonzero through-out the simulated time window. The blue curve still exhibits a visible reduction, but this reduction is sub-stantially weaker than in the near-crossover case. These 8results show that the dynamical survival of the finite-size topological diagnostic is controlled by the competition between the disorder strength and the stabilizer energy scale, rather than simply by the presence of a nonzero ini-tial plaquette signal. We also observe an approximately time-independent offset between the noiseless and hard-ware results in Fig. 5(d). The persistence of this off-set over time suggests a systematic attenuation of the measured plaquette expectation, arising from accumu-lated gate and readout errors, rather than an additional hardware-induced decay of the dynamics. Accordingly, the hardware data reproduce the temporal stability of the plaquette response more accurately than its abso-lute magnitude. The results shown here are reported without correcting this systematic offset; in principle, it could be reduced through calibrated readout mitigation or reference-based rescaling. To further quantify the disorder dependence, we eval-uate the long-time plaquette response 
+
+F (h) = ⟨ψ(t)| F1 |ψ(t)⟩ t=20 , (16) with the post-quench state 
+
+|ψ(t)⟩ = e−itH dis (h) |ψ−J ⟩ . (17) As shown in Figs. 5(e) and 5(f), the weak-coupling regime (J = 1) rapidly loses its plaquette signal as the disorder strength increases. By contrast, in the strong-coupling regime, the long-time response remains nonzero over a broad range of h. A pronounced reduction appears only when the disorder strength becomes comparable to the stabilizer energy scale, 4 J = 16 [Fig. 1(d)]. These results demonstrate that the finite-size stabilizer structure ac-quires substantially greater dynamical robustness upon entering the strong-coupling regime, whereas it remains fragile near the weak-coupling crossover.  
+
+> 4. Simulation of nonunitary quenches
+
+We next extend the above quench protocol to the non-Hermitian regime. For each observation time t, we first evolve the initial state under the full non-Hermitian prop-agator and then normalize the resulting right state for state preparation and observable evaluation: 
+
+|ψ′(t)⟩ = e−itH γ |ψ−J ⟩∥e−itH γ |ψ−J ⟩∥ . (18) The normalization in Eq. 18 is performed only after the evolution to the selected time t; no intermediate normal-ization is applied during the nonunitary dynamics. Ac-cordingly, all observables in this subsection are evaluated as normalized right-state expectation values. Here, |ψ−J ⟩
+
+denotes the ground state of the clean Hermitian model (γ = 0 and h = 0) at plaquette coupling −J. After the quench, the state evolves under the non-Hermitian Hamiltonian Hγ with nonzero γ and coupling + J. Since the nonunitary propagator is not implemented directly on the gate-based hardware, the normalized state |ψ′(t)⟩
+
+at each selected time is used as the target for variational compilation, Vn(t) |ψ0⟩ ≈ | ψ′(t)⟩ , as detailed in Sec. S2 of Methods. As shown in Fig. 6(a), we first consider the strong-coupling case at J = 5, where the initial state is prepared deep inside the stabilizer-dominated regime. In this pa-rameter range, the time-dependent plaquette response 
+
+⟨F1(t)⟩ remains large under weak non-Hermitian effects, 
+
+γ = 0 .1 for the blue curves, throughout the full evolu-tion window shown. This behavior indicates that the finite-size stabilizer structure survives weak nonunitary effects if the coherent plaquette scale set by J is large. When γ is increased to 0 .5, the responses represented by the red curves decay much more visibly, showing that stronger nonunitary evolution progressively breaks the plaquette-sector signal. Nevertheless, the early-time re-sponse remains at a high level, which indicates that the loss of stabilizer structure is not instantaneous but de-velops over evolution. Then, in Fig. 6(b), we show that the weak-coupling case J = 1 is substantially more fragile. At fixed g = 1, this parameter choice lies close to the finite-size crossover, where the plaquette interaction and transverse field com-pete on comparable energy scales and the stabilizer po-larization is already weakened. Moreover, the imagi-nary field iγ P 
+
+> i
+
+σzi anticommutes with the σx and σy
+
+factors entering the adjacent plaquette operators, and therefore promotes the creation and mixing of plaquette defects. Consequently, even γ = 0 .1 causes ⟨F1(t)⟩ to de-cay rapidly, while γ = 0 .5 suppresses the response more strongly. By contrast, for J = 5, the system lies deep in the stabilizer-dominated Wen–plaquette regime, where the larger defect energy scale set by J suppresses such mixing. The comparison therefore provides a dynamical signature of the finite-size topological crossover: the pla-quette response is robust far inside the Wen–plaquette regime but becomes increasingly fragile as the system approaches the crossover to the trivial polarized regime. To quantify this distinction, we evaluate the finite-time response 
+
+F (γ) = ⟨ψ′(γ, t )| F1 |ψ′(γ, t )⟩ t=20 . (19) In the strong-coupling regime [Fig. 6(c)], F (γ) remains close to its large-J value for weak γ, reflecting the en-ergetic protection of the stabilizer sector against non-Hermitian defect generation. It then decreases across a finite-size crossover near γ ≃ 0.1, beyond which the imaginary-field scale becomes sufficiently large to sub-stantially mix the plaquette sectors. The inset shows that this suppression occurs in the same parameter range in which a nonzero fraction of the spectrum becomes com-plex, 
+
+R = Num( |Im E| > 0) Num total 
+
+. (20) The simultaneous growth of R and reduction of F (γ)9(a) (b) (c) (d) Steady state 
+
+> Complex eigenenergy fraction
+
+Time t Time t
+
+Imaginary field Imaginary field Steady state Quench dynamics Quench dynamics 
+
+FIG. 6. Signatures of finite-size stabilizer response under non-Hermitian quenches. We study the effect of the non-Hermitian model defined by Eq. 7. Here, we simulate the normalized right-state evolution in Eq. 18 and monitor the plaquette expectation ⟨F1⟩. (a,b) Time-dependent ⟨F1(t)⟩ for strong coupling ( J = 5) and weak coupling ( J = 1), respectively. Solid lines correspond to noiseless circuit simulations, and dashed lines to IBM Quantum measurements. We compare weak (γ = 0 .1, blue and green) with stronger fields ( γ = 0 .5, red and violet). For γ = 0 .1, the strong-coupling case preserves a large plaquette response over the simulated window, whereas larger γ progressively suppresses the signal. (c,d) Long-time value ⟨F1(t=20) ⟩ [Eq. 19] versus γ for J = 5 in (c) and J = 1 in (d). In the strong-coupling case, ⟨F1⟩ remains large for weak perturbation and then decreases across a crossover near γ ≃ 0.1. This crossover coincides with the emergence of a nonzero fraction of eigenvalues with finite imaginary parts, quantified by R = Num( |Im E| > 0) /Num total (inset), signaling the onset of appreciable nonunitary spectral broadening. In contrast, for weak coupling, even modest γ strongly reduces the long-time plaquette response. Across all panels, the close agreement between noiseless (solid) and experimental (dashed) curves indicates that the implemented protocol faithfully reproduces the target normalized right-state dynamics. The transverse-field strength is fixed to g = 1. All simulations are conducted on the variational circuit [Fig. 2(a)]. 
+
+indicate that the loss of the plaquette response is corre-lated with the onset of appreciable non-Hermitian spec-tral complex fraction. In the weak-coupling regime [Fig. 6(d)], no comparable plateau is observed. Because J
+
+is already comparable to g, the system lies near the finite-size topological crossover and the stabilizer structure is only weakly protected. A modest imaginary field is therefore sufficient to mix plaquette sectors and strongly suppress the long-time response. The contrast between Figs. 6(c) and 6(d) shows that the nonunitary dynam-ics retain a clear memory of the underlying equilibrium crossover: states deep in the Wen–plaquette regime ex-hibit a robust plaquette response, whereas states near the crossover are rapidly destabilized. 
+
+D. Scalable stabilizer-projection simulations for larger lattices 
+
+Here, we further discuss how a large-scale Wen– plaquette stabilizer-sector state can be prepared with-out resorting to variational training. As shown in Fig. 2(b), the clean Wen–plaquette model admits a direct projection-based preparation scheme in which the stabi-lizer constraints are sequentially enforced. Starting from a trivial product state, a representative state in the target sector can be written as Q 
+
+> i,j
+
+Πi,j |0⟩⊗N [Eq. 10], where each local projector is Π i,j = I+Fi,j  
+
+> 2
+
+. Acting with Π i,j 
+
+projects the system onto the +1 eigenspace of the cor-responding plaquette operator. Since all Wen–plaquette stabilizers mutually commute, these projectors may be applied in any order, greatly simplifying the prepara-tion. A schematic overview of the protocol is shown in 10 Random Rx gate Projector (a) (b) 
+
++|  
+
+> 0|
+
+ 
+
+> 0|
+
+ 
+
+> 0|
+
+    
+
+> 012340 1 2 3 4
+
+FIG. 7. Square-lattice non-variational stabilizer-sector preparation and robustness benchmark. (a) Schematic of the coherent representative-qubit construction used to generate local Wen–plaquette stabilizer-sector structure on a square-lattice layout. Each plaquette (blue) is projected onto the +1 stabilizer subspace using the local projector [Eq. 23], which is applied across the entire lattice. After completing the full projection, sparse single-qubit Rx rotations (green circles) are inserted to emulate controlled local perturbations. This protocol prepares a larger-scale topological state without variational optimization, and implementation details are provided in Appendix S6. (b) Hardware demonstration on the 2D IBM miami device. We select a 5 × 5 sector (layout shown in (a)), and evaluate the average plaquette stabilizer ¯F over the entire lattice as a function of the number of inserted coherent random single-qubit Rx perturbations with rotation angles drawn from [ −0.1, 0.1]. The insignificant decay indicates robustness against imperfections. Data in (b) are averaged over five random realizations. 
+
+Fig. 7(a). The left panel illustrates the sweeping pattern used to apply the projectors across the lattice, thereby building up the target stabilizer-sector state. The right panel depicts an additional perturbative unitary step, in which sparse random single-qubit rotations are applied throughout the system. For the hardware demonstration, we adopt a coher-ent representative-qubit construction [45], which gener-ates the desired local stabilizer-sector structure for a pre-scribed plaquette input configuration without requiring mid-circuit measurement. For each plaquette stabilizer 
+
+Fi,j , we choose one corner qubit r as a representative con-trol qubit and coherently generate a map proportional to (I ± Fi,j ) using a controlled Pauli string on the remaining corners. Writing 
+
+Fi,j = Pr eFi,j , Pr ∈ { σxr , σ yr }, (21) where Pr acts on the representative qubit r and eFi,j is the product of the remaining Pauli factors on the plaquette, we define 
+
+Cr ( eFi,j ) = |0⟩⟨ 0|r ⊗ I + |1⟩⟨ 1|r ⊗ eFi,j . (22) If Pr = σxr , preparing r in |+x⟩r = ( |0⟩r + |1⟩r )/√2 gives 
+
+Cr ( eFi,j ) |+x⟩r |000 ⟩ = 1
+
+√2
+
+
+
+|0⟩r |000 ⟩ + |1⟩r eFi,j |000 ⟩
+
+
+
+= 1
+
+√2 (I + Fi,j ) |0⟩r |000 ⟩ ,
+
+(23) where we use |1⟩r = σxr |0⟩r . An analogous construction holds for Pr = σyr , with the representative qubit prepared in the state |+y ⟩r = ( |0⟩ + i |1⟩)/√2. More details are provided in Appendix S6. In our implementation, we choose the representa-tive qubit to be the upper-right corner, r = (i +1, j + 1). For the plaquette convention used here, this gives Fi,j = σx/y i+1 ,j +1 eFi,j , so the corresponding input state for the coherent projector construction is 
+
++x/y i+1 ,j +1 |0⟩i,j |0⟩i+1 ,j |0⟩i,j +1 [Fig. 7 (a)]. We next implement this stabilizer-sector preparation protocol on IBM Quantum hardware. Taking advantage of the native two-dimensional connectivity of the IBM 
+
+ibm miami device, we prepare a 5 × 5 state in the Z2A
+
+stabilizer sector and measure the lattice-averaged plaque-tte response, ¯F = 1Num( F )
+
+X
+
+> i,j
+
+⟨Fi,j ⟩, (24) where Num( F ) is the number of measured plaquettes. This prepared state represents the stabilizer-dominated endpoint of the finite-size crossover studied in the smaller variational simulations; the corresponding trivial end-point at large transverse field is the σx-polarized product state. To test the local stability of the prepared sector, we ap-ply additional single-qubit Rx(θ) rotations to randomly selected qubits after state preparation [Fig. 7(a)]. The rotation angles are drawn from a narrow interval around zero, but their magnitudes are deliberately chosen to ex-ceed the typical residual coherent error associated with a calibrated native single-qubit gate. Each inserted rota-tion therefore represents a controlled, intentionally am-plified local perturbation rather than merely the intrin-11 sic error of an additional hardware gate. As shown in Fig. 7(b), ¯F decreases only weakly over the investigated range of up to 15 inserted rotations and remains close to its unperturbed value. Thus, the prepared stabi-lizer response remains resolvable even under local coher-ent perturbations stronger than the nominal single-qubit control-error level of the device. Moreover, as illustrated in Fig. 7(a), the full prepara-tion circuit retains a layered local structure: plaquette operations acting on non-overlapping regions can be ex-ecuted in parallel within the same layer. Consequently, increasing the lattice size primarily increases the num-ber of repeated local layers rather than requiring a fully nonlocal circuit, which provides a favorable route to-ward larger-scale implementations. Scaling the proto-col to substantially larger systems will thus require suf-ficiently low two-qubit error rates, and the detailed es-timation of noise effects is provided in Appendix. S6 3. In Appendix S6 2, we also discuss alternative scalable preparation schemes, including ancilla-assisted projec-tion, postselection, and measurement-based feedforward. Their practical efficiency depends on the capabilities of the specific hardware platform, such as the availability of mid-circuit measurement and real-time classical control.  
+
+> III. DISCUSSION
+
+In this work, we used programmable quantum cir-cuits to determine how finite-size Wen–plaquette signa-tures survive experimentally relevant imperfections. The central result is not a thermodynamic demonstration of topological order on present-day devices, but a hardware-resolved study of the parameter and noise regimes over which finite-size Wen–plaquette features remain measur-able and distinguishable from trivial behavior. Relative to prior work, which has primarily emphasized the prepa-ration, detection, or manipulation of topological states and anyonic excitations on programmable quantum plat-forms [29, 30, 33–36, 39–41, 45, 52, 63], our study ex-amines their robustness within a unified Wen–plaquette framework that incorporates static disorder, accumulated hardware noise, and effective non-Hermitian imaginary fields. The persistence of the topological stabilizer signa-ture is further demonstrated through a complementary square-lattice stabilizer-sector preparation, which pro-vides a hardware-compatible route toward larger systems beyond the minimal variational implementation. From the perspective of near-term implementation, these results help clarify a realistic path toward larger-scale simulations. In particular, the projection-based preparation protocol shows that scalable stabilizer-sector construction need not rely exclusively on deep variational optimization, and therefore offers a complementary route for studying larger Wen–plaquette systems on hardware with suitable connectivity [33, 34, 39, 41, 45, 52, 82, 83]. Looking forward, simulations on larger devices will help determine how the finite-size robustness identified here evolves toward sharper collective behavior as the system size increases [40, 41, 52, 57]. 
+
+> ACKNOWLEDGMENTS
+
+We acknowledge the use of IBM Quantum services for this work. The views expressed are those of the au-thors and do not reflect the official policy or position of IBM or the IBM Quantum team. All data and code for this work are available from the corresponding au-thors upon reasonable request. This work is supported by the Singapore Ministry of Education Academic Research Fund Tier-II Grant (Awards MOE-T2EP50224-0007 and MOE-T2EP50224-0021)).                              
+
+> [1] S. M. Girvin and K. Yang, Modern condensed matter physics (Cambridge University Press, 2019). [2] M. P. Marder, Condensed matter physics (John Wiley & Sons, 2010). [3] A. Beekman, L. Rademaker, and J. Van Wezel, An in-troduction to spontaneous symmetry breaking, SciPost Physics Lecture Notes , 011 (2019). [4] X.-G. Wen, Topological orders in rigid states, Interna-tional Journal of Modern Physics B 4, 239 (1990). [5] X. Chen, Z.-C. Gu, and X.-G. Wen, Local unitary trans-formation, long-range quantum entanglement, wave func-tion renormalization, and topological order, Physical Re-view B 82 , 155138 (2010). [6] D. C. Tsui, H. L. Stormer, and A. C. Gossard, Two-dimensional magnetotransport in the extreme quantum limit, Physical Review Letters 48 , 1559 (1982). [7] R. B. Laughlin, Anomalous quantum hall effect: An in-compressible quantum fluid with fractionally charged ex-citations, Physical Review Letters 50 , 1395 (1983). [8] H. L. Stormer, D. C. Tsui, and A. C. Gossard, The frac-tional quantum hall effect, Reviews of Modern Physics
+> 71 , S298 (1999). [9] J. Jain, Theory of the fractional quantum hall effect, Physical Review B 41 , 7653 (1990). [10] G. Moore and N. Read, Nonabelions in the fractional quantum hall effect, Nuclear Physics B 360 , 362 (1991). [11] G. Murthy and R. Shankar, Hamiltonian theories of the fractional quantum hall effect, Reviews of Modern Physics 75 , 1101 (2003). [12] J. G. Bednorz and K. A. M¨ uller, Possible high-Tcsuper-conductivity in the Ba–La–Cu–O system, Zeitschrift f¨ ur Physik B Condensed Matter 64 , 189 (1986). [13] P. W. Anderson, The resonating valence bond state in La 2CuO 4and superconductivity, Science 235 , 1196 (1987). [14] P. W. Anderson, P. Lee, M. Randeria, T. Rice, N. Trivedi, and F. Zhang, The physics behind high-temperature su-perconducting cuprates: the ‘plain vanilla’version of rvb,
+
+12 
+
+Journal of Physics: Condensed Matter 16 , R755 (2004). [15] L. Taillefer, Scattering and pairing in cuprate supercon-ductors, Annu. Rev. Condens. Matter Phys. 1, 51 (2010). [16] A. Y. Kitaev, Fault-tolerant quantum computation by anyons, Annals of Physics 303 , 2 (2003). [17] M. Levin and X.-G. Wen, Detecting topological order in a ground state wave function, Phys. Rev. Lett. 96 , 110405 (2006). [18] A. Kitaev and J. Preskill, Topological entanglement en-tropy, Physical Review Letters 96 , 110404 (2006). [19] H.-C. Jiang, Z. Wang, and L. Balents, Identifying topo-logical order by entanglement entropy, Nature Physics 8,902 (2012). [20] C. Nayak, S. H. Simon, A. Stern, M. Freedman, and S. Das Sarma, Non-abelian anyons and topological quan-tum computation, Reviews of Modern Physics 80 , 1083 (2008). [21] T. Johnson-Freyd, On the classification of topological or-ders, Communications in Mathematical Physics 393 , 989 (2022). [22] B. A. Bernevig and F. Haldane, Generalized clustering conditions of jack polynomials at negative jack parameter 
+
+α, Physical Review B—Condensed Matter and Materials Physics 77 , 184502 (2008). [23] B. Estienne, N. Regnault, and R. Santachiara, Clustering properties, jack polynomials and unitary conformal field theories, Nuclear physics B 824 , 539 (2010). [24] C. H. Lee and X.-L. Qi, Lattice construction of pseu-dopotential hamiltonians for fractional chern insulators, Physical Review B 90 , 085103 (2014). [25] C. H. Lee, Z. Papi´ c, and R. Thomale, Geometric con-struction of quantum hall clustering hamiltonians, Phys-ical Review X 5, 041003 (2015). [26] E. Dennis, A. Kitaev, A. Landahl, and J. Preskill, Topological quantum memory, Journal of Mathematical Physics 43 , 4452 (2002). [27] R. Raussendorf, J. Harrington, and K. Goyal, Topologi-cal fault-tolerance in cluster state quantum computation, New Journal of Physics 9, 199 (2007). [28] H. Bombin, C. Dawson, R. V. Mishmash, N. Nickerson, F. Pastawski, and S. Roberts, Logical blocks for fault-tolerant topological quantum computation, PRX Quan-tum 4, 020303 (2023). [29] K. Satzinger, Y.-J. Liu, A. Smith, C. Knapp, M. New-man, C. Jones, Z. Chen, C. Quintana, X. Mi, A. Dunsworth, et al. , Realizing topologically ordered states on a quantum processor, Science 374 , 1237 (2021). [30] G. Semeghini, H. Levine, A. Keesling, S. Ebadi, T. T. Wang, D. Bluvstein, R. Verresen, H. Pichler, M. Kali-nowski, R. Samajdar, et al. , Probing topological spin liquids on a programmable quantum simulator, Science 
+
+374 , 1242 (2021). [31] T. Chen, H.-T. Ding, R. Shen, S.-L. Zhu, and J. Gong, Direct probe of topology and geometry of quantum states on the ibm q quantum processor, Physical Review B 110 ,205402 (2024). [32] Google Quantum AI and Collaborators, Non-abelian braiding of graph vertices in a superconducting proces-sor, Nature 618 , 264 (2023). [33] N. Tantivasadakarn, A. Vishwanath, and R. Verresen, Hierarchy of topological order from finite-depth unitaries, measurement, and feedforward, PRX Quantum 4, 020339 (2023). [34] M. Iqbal, N. Tantivasadakarn, T. M. Gatterman, J. A. Gerber, K. Gilmore, D. Gresh, A. Hankin, N. Hewitt, C. V. Horst, M. Matheny, T. Mengle, B. Neyenhuis, A. Vishwanath, M. Foss-Feig, R. Verresen, and H. Dreyer, Topological order from measurements and feed-forward on a trapped ion quantum computer, Communications Physics 7, 205 (2024). [35] M. Iqbal, N. Tantivasadakarn, R. Verresen, S. L. Camp-bell, J. M. Dreiling, C. Figgatt, J. P. Gaebler, J. Jo-hansen, M. Mills, S. A. Moses, et al. , Non-abelian topo-logical order and anyons on a trapped-ion processor, Na-ture 626 , 505 (2024). [36] S. Xu, Z.-Z. Sun, K. Wang, H. Li, Z. Zhu, H. Dong, J. Deng, X. Zhang, J. Chen, Y. Wu, et al. , Non-abelian braiding of fibonacci anyons with a superconducting pro-cessor, Nature Physics 20 , 1469 (2024). [37] R. Shen, T. Chen, B. Yang, Y. Zhong, and C. H. Lee, Robust simulations of many-body symmetry-protected topological phase transitions on a quantum processor, npj Quantum Information 11 , 179 (2025). [38] T. Y. Ng, Y. Wang, W. J. Chan, R. Shen, T. Chen, and C. H. Lee, Digital simulation of non-hermitian knotted bands on quantum hardware, arXiv preprint arXiv:2604.26914 (2026). [39] M. Iqbal, A. Lyons, C. F. B. Lo, N. Tantivasadakarn, J. Dreiling, C. Foltz, T. M. Gatterman, D. Gresh, N. He-witt, C. A. Holliman, et al. , Qutrit toric code and parafermions in trapped ions, Nature Communications 
+
+16 , 6301 (2025). [40] M. Will, T. A. Cochran, E. Rosenberg, B. Jobst, N. M. Eassa, P. Roushan, M. Knap, A. Gammon-Smith, and F. Pollmann, Probing non-equilibrium topological order on a quantum processor, Nature 645 , 348 (2025). [41] S. J. Evered, M. Kalinowski, A. A. Geim, T. Manovitz, D. Bluvstein, S. H. Li, N. Maskara, H. Zhou, S. Ebadi, M. Xu, et al. , Probing the kitaev honeycomb model on a neutral-atom quantum computer, Nature 645 , 341 (2025). [42] L. Shen, M. Lin, C. Y.-Y. Lin, D. Xiao, et al. , Realiza-tion of fermionic laughlin state on a quantum processor, Nature Communications 17 , 4919 (2026). [43] P. Webster, M. Vasmer, T. R. Scruby, and S. D. Bartlett, Universal fault-tolerant quantum computing with stabi-lizer codes, Physical Review Research 4, 013092 (2022). [44] N. Tantivasadakarn, R. Verresen, and A. Vishwanath, Shortest route to non-abelian topological order on aquantum processor, Physical Review Letters 131 , 060405 (2023). [45] S. Xu, Z.-Z. Sun, K. Wang, L. Xiang, Z. Bao, Z. Zhu, F. Shen, Z. Song, P. Zhang, W. Ren, et al. , Digital sim-ulation of projective non-abelian anyons with 68 super-conducting qubits, Chinese Physics Letters 40 , 060301 (2023). [46] P. Vojta, G. Ortiz, and Z. Nussinov, Topological orders beyond topological quantum field theories, Physical Re-view B 111 , 045142 (2025). [47] S. Fujimoto, Topological order and non-abelian statistics in noncentrosymmetric s-wave superconductors, Physical Review B—Condensed Matter and Materials Physics 77 ,220501 (2008). [48] M. Sato, Y. Takahashi, and S. Fujimoto, Non-abelian topological orders and majorana fermions in spin-singlet superconductors, Physical Review B—Condensed Matter and Materials Physics 82 , 134521 (2010). 13 
+
+[49] X. Chen, L. Fidkowski, and A. Vishwanath, Symmetry enforced non-abelian topological order at the surface of a topological insulator, Physical Review B 89 , 165132 (2014). [50] L. Fidkowski, X. Chen, and A. Vishwanath, Non-abelian topological order on the surface of a 3d topological super-conductor from an exactly solved model, Physical Review X 3, 041016 (2013). [51] Y. Qin, C. H. Lee, and L. Li, Dynamical suppression of many-body non-hermitian skin effect in anyonic systems, Communications Physics 8, 18 (2025). [52] A. Gammon-Smith, M. Knap, and F. Pollmann, Simu-lating topological order on quantum processors, Nature Reviews Physics 8, 160 (2026). [53] R. Shen, T. Chen, T. Tai, J. M. Koh, P. Ghaemi, and C. H. Lee, Simulating condensed matter physics on quan-tum hardware, arXiv preprint arXiv:2606.02721 (2026). [54] C. Castelnovo and C. Chamon, Entanglement and topo-logical entropy of the toric code at finite temperature, Physical Review B—Condensed Matter and Materials Physics 76 , 184442 (2007). [55] C. Stark, L. Pollet, A. Imamo˘ glu, and R. Renner, Local-ization of toric code defects, Physical review letters 107 ,030504 (2011). [56] A. Kitaev and C. Laumann, Topological phases and quantum computation, Exact methods in low-dimensional statistical physics and quantum computing , 101 (2010). [57] S. M. Linsel, L. Pollet, and F. Grusdt, Independent e-and m-anyon confinement in the parallel field toric code on non-square lattices, PRX Quantum 7, 010332 (2026). [58] M. Levin and X.-G. Wen, Fermions, strings, and gauge fields in lattice spin models, Physical Review B 67 ,245316 (2003). [59] X.-G. Wen, Quantum orders in an exact soluble model, Physical review letters 90 , 016803 (2003). [60] J. Yu, S.-P. Kou, and X.-G. Wen, Topological quantum phase transition in the transverse wen-plaquette model, Europhysics Letters 84 , 17004 (2008). [61] Y.-Z. You and X.-G. Wen, Projective non-abelian statis-tics of dislocation defects in a zn rotor model, Physical Review B—Condensed Matter and Materials Physics 86 ,161107 (2012). [62] J. Yu, X.-H. Zhang, and S.-P. Kou, Majorana edge states for z 2 topological orders of the wen plaquette and toric code models, Physical Review B—Condensed Matter and Materials Physics 87 , 184402 (2013). [63] X. Peng, Z. Luo, W. Zheng, S. Kou, D. Suter, and J. Du, Experimental implementation of adiabatic passage be-tween different topological orders, Physical Review Let-ters 113 , 080404 (2014). [64] X.-W. Luo, X. Zhou, C.-F. Li, J.-S. Xu, G.-C. Guo, and Z.-W. Zhou, Quantum simulation of 2d topological physics in a 1d array of optical cavities, Nature commu-nications 6, 7704 (2015). [65] Y.-P. Zhong, D. Xu, P. Wang, C. Song, Q. Guo, W. Liu, K. Xu, B. Xia, C.-Y. Lu, S. Han, et al. , Emulating any-onic fractional statistical behavior in a superconduct-ing quantum circuit, Physical review letters 117 , 110501 (2016). [66] M. Sameti, A. Potoˇ cnik, D. E. Browne, A. Wallraff, and M. J. Hartmann, Superconducting quantum simulator for topological order and the toric code, Physical Review A 
+
+95 , 042330 (2017). [67] K. Li, Y. Wan, L.-Y. Hung, T. Lan, G. Long, D. Lu, B. Zeng, and R. Laflamme, Experimental identification of non-abelian topological orders on a quantum simulator, Physical Review Letters 118 , 080502 (2017). [68] C. Song, D. Xu, P. Zhang, J. Wang, Q. Guo, W. Liu, K. Xu, H. Deng, K. Huang, D. Zheng, et al. , Demonstra-tion of topological robustness of anyonic braiding statis-tics with a superconducting quantum circuit, Physical Review Letters 121 , 030502 (2018). [69] Y.-J. Hai, Z. Zhang, et al. , Uniquely identifying topologi-cal order based on boundary–bulk duality and anyon con-densation, National Science Review 10 , nwac264 (2023). [70] L. Xiang, W. Jiang, Z. Bao, Z. Song, S. Xu, K. Wang, 
+
+et al. , Long-lived topological time-crystalline order on a quantum processor, Nature Communications 15 , 8963 (2024). [71] S. Xu, Z.-Z. Sun, K. Wang, H. Li, Z. Zhu, H. Dong, et al. ,Non-abelian braiding of fibonacci anyons with a super-conducting processor, Nature Physics 20 , 1469 (2024). [72] Z. K. Minev, K. Najafi, S. Majumder, J. Wang, A. Stern, E.-A. Kim, C.-M. Jian, and G. Zhu, Realizing string-net condensation: Fibonacci anyon braiding for univer-sal gates and sampling chromatic polynomials, Nature Communications 16 , 6225 (2025). [73] C. F. B. Lo, A. Lyons, D. Gresh, M. Mills, P. E. Siegfried, M. D. Urmey, N. Tantivasadakarn, H. Dreyer, A. Vish-wanath, R. Verresen, and M. Iqbal, Universal gates from braiding and fusing anyons on quantum hardware, Na-ture 655 , 591 (2026). [74] Z. Cai, R. Babbush, S. C. Benjamin, S. Endo, W. J. Hug-gins, Y. Li, J. R. McClean, and T. E. O’Brien, Quantum error mitigation, Reviews of Modern Physics 95 , 045005 (2023). [75] K. Temme, S. Bravyi, and J. M. Gambetta, Error miti-gation for short-depth quantum circuits, Physical review letters 119 , 180509 (2017). [76] S. Endo, S. C. Benjamin, and Y. Li, Practical quan-tum error mitigation for near-future applications, Physi-cal Review X 8, 031027 (2018). [77] R. Takagi, S. Endo, S. Minagawa, and M. Gu, Funda-mental limits of quantum error mitigation, npj Quantum Information 8, 1 (2022). [78] E. Knill, Quantum computing with realistically noisy de-vices, Nature 434 , 39 (2005). [79] J. Preskill, Quantum Computing in the NISQ era and beyond, Quantum 2, 79 (2018). [80] R. Shen, T. Chen, and C. H. Lee, Circuit structure-preserving error mitigation for high-fidelity quantum sim-ulations, arXiv preprint arXiv:2505.17187 (2025). [81] A. Haldar, K. Mallayya, M. Heyl, F. Pollmann, M. Rigol, and A. Das, Signatures of quantum phase transitions af-ter quenches in quantum chaotic one-dimensional sys-tems, Phys. Rev. X 11 , 031062 (2021). [82] L. Piroli, G. Styliaris, and J. I. Cirac, Quantum circuits assisted by local operations and classical communication: Transformations and phases of matter, Physical Review Letters 127 , 220503 (2021), arXiv:2103.13367 [quant-ph]. [83] T.-C. Lu, L. A. Lessa, I. H. Kim, and T. H. Hsieh, Measurement as a shortcut to long-range entangled quantum matter, PRX Quantum 3, 040337 (2022), arXiv:2206.13527 [quant-ph]. [84] S. Y.-C. Chen, C.-H. H. Yang, J. Qi, P.-Y. Chen, X. Ma, and H.-S. Goan, Variational quantum circuits for deep reinforcement learning, IEEE access 8, 141007 (2020). 14 
+
+[85] M. Cerezo, A. Arrasmith, R. Babbush, S. C. Benjamin, S. Endo, K. Fujii, J. R. McClean, K. Mitarai, X. Yuan, L. Cincio, et al. , Variational quantum algorithms, Nature Reviews Physics 3, 625 (2021). [86] L.-H. Gong, J.-J. Pei, T.-F. Zhang, and N.-R. Zhou, Quantum convolutional neural network based on vari-ational quantum circuits, Optics Communications 550 ,129993 (2024). [87] J. M. Koh, T. Tai, and C. H. Lee, Simulation of interaction-induced chiral topological dynamics on a dig-ital quantum computer, Physical Review Letters 129 ,140502 (2022). [88] R. Shen, T. Chen, B. Yang, and C. H. Lee, Observa-tion of the non-hermitian skin effect and fermi skin on a digital quantum computer, Nature Communications 16 ,1340 (2025). [89] J. M. Koh, W.-T. Xue, T. Tai, D. E. Koh, and C. H. Lee, Interacting non-hermitian edge and cluster bursts on a digital quantum processor, arXiv preprint arXiv:2503.14595 (2025). [90] T. Chen, R. Shen, C. H. Lee, and B. Yang, High-fidelity realization of the aklt state on a nisq-era quantum pro-cessor, SciPost Physics 15 , 170 (2023). [91] T. Chen, R. Shen, C. Hua Lee, B. Yang, and R. Weda Bo-mantara, A robust large-period discrete time crystal and its signature in a digital quantum computer, Quantum Science and Technology 11 , 025030 (2026). [92] R. Shen, F. Qin, J.-Y. Desaules, Z. Papi´ c, and C. H. Lee, Enhanced many-body quantum scars from the non-hermitian fock skin effect, Physical Review Letters 133 ,216601 (2024). [93] A. Javadi-Abhari, M. Treinish, K. Krsulich, C. J. Wood, J. Lishman, J. Gacon, S. Martiel, P. D. Nation, L. S. Bishop, A. W. Cross, et al. , Quantum computing with qiskit, arXiv preprint arXiv:2405.08810 (2024). [94] M. Steffen, D. P. DiVincenzo, J. M. Chow, T. N. Theis, and M. B. Ketchen, Quantum computing: An ibm per-spective, IBM Journal of Research and Development 55 ,13 (2011). [95] A. C. Santos, The ibm quantum computer and the ibm quantum experience, arXiv preprint arXiv:1610.06980 (2016). [96] IBM Quantum, https://quantum.ibm.com/ (2021). [97] R. Cleve, A. Ekert, C. Macchiavello, and M. Mosca, Quantum algorithms revisited, Proceedings of the Royal Society of London. Series A: Mathematical, Physical and Engineering Sciences 454 , 339 (1998). [98] A. K. Ekert, C. M. Alves, D. K. L. Oi, M. Horodecki, P. Horodecki, and L. C. Kwek, Direct estimations of lin-ear and nonlinear functionals of a quantum state, Physi-cal Review Letters 88 , 217901 (2002). [99] O. Crawford, B. v. Straaten, D. Wang, T. Parks, E. Campbell, and S. Brierley, Efficient quantum measure-ment of pauli operators in the presence of finite sampling error, Quantum 5, 385 (2021). S15 
+
+APPENDIX Appendix S1: Gauge-invariant construction of Wilson-loop diagnostics 
+
+The construction of the Wilson-loop diagnostic in Eq. 5 is rooted in gauge invariance. Although the Wen–plaquette model is not formulated as a conventional lattice gauge theory, an emergent Z2 gauge structure becomes explicit upon representing the spins in terms of Majorana fermions χαi . Introducing four Majorana operators per site, the Pauli operators may be written as 
+
+σxi = iχ ¯yi χxi , σyi = iχ ¯xi χyi , σzi = iχ xi χ¯xi , (S1) together with the local constraint 
+
+χxi χyi χ¯xi χ¯yi = 1 , (S2) which projects the enlarged Majorana Hilbert space onto the physical spin sector. In this representation, Z2 link operators arise naturally by pairing nearest-neighbour Majoranas along the edges of the Wen–plaquette model: 
+
+Ki,i +ˆ x = iχ xi χ¯xi+ˆ x,Ki+ˆ x,i +ˆ x+ˆ y = iχ yi+ˆ xχ¯yi+ˆ x+ˆ y ,Ki+ˆ x+ˆ y,i +ˆ y = iχ xi+ˆ x+ˆ y χ¯xi+ˆ y ,Ki+ˆ y,i = iχ ¯yi χyi+ˆ y .
+
+(S3) The plaquette operator is then given by the closed product of the four link operators around a plaquette, 
+
+Fi = Ki,i +ˆ xKi+ˆ x,i +ˆ x+ˆ y Ki+ˆ x+ˆ y,i +ˆ y Ki+ˆ y,i . (S4) Under a local Z2 gauge transformation at site i, the four Majorana operators on that site transform as 
+
+χxi , χ ¯xi , χ yi , χ ¯yi −→ − χxi , −χ¯xi , −χyi , −χ¯yi . (S5) A single link operator attached to site i therefore changes sign under this transformation. By contrast, the plaquette operator Fi remains invariant because each site contributes an even number of Majorana operators to the closed product. More generally, any closed product of link operators is gauge invariant. The Wilson loop used in the main text, 
+
+W = σx 
+
+> 1
+
+σy 
+
+> 2
+
+σx 
+
+> 3
+
+σy 
+
+> 6
+
+σx 
+
+> 9
+
+σy 
+
+> 8
+
+σx 
+
+> 7
+
+σy 
+
+> 4
+
+, (S6) is precisely such a closed product and therefore serves as a natural nonlocal diagnostic of the finite-size Wen–plaquette regime. 
+
+Appendix S2: Variational circuits 
+
+Digital simulations reported in Figs. 3, 4, 5, and 6 are implemented using hardware-efficient variational quantum circuits [84–92]. For an N -qubit register, we employ an n-layer ansatz of the form 
+
+Vn =
+
+> n
+
+Y
+
+> k=1
+
+V (k), (S1) where each layer V (k) consists of alternating entangling blocks on even and odd bonds, interleaved with single-qubit Euler rotations: 
+
+V (k) =
+
+" Y
+
+> j∈even
+
+ECR j,j +1  
+
+> N−1
+
+Y
+
+> j=0
+
+U 3
+
+> k,j
+
+ θk,j , ϕ k,j , λ k,j 
+
+#
+
+×
+
+" Y
+
+> j∈odd
+
+ECR j,j +1  
+
+> N−1
+
+Y
+
+> j=0
+
+U 3
+
+> k,j
+
+ θ′ 
+
+> k,j
+
+, ϕ ′ 
+
+> k,j
+
+, λ ′
+
+> k,j
+
+#
+
+.
+
+(S2) S16 Each U 3 
+
+> k,j
+
+is a single-qubit parameterized rotation acting on qubit j in layer k, with the standard form 
+
+U 3(θ, ϕ, λ ) = 
+
+ cos   θ
+
+> 2
+
+ −eiλ sin   θ
+
+> 2
+
+
+
+eiϕ sin   θ
+
+> 2
+
+ ei(ϕ+λ) cos   θ
+
+> 2
+
+
+
+. (S3) The two-qubit entangling gate ECR j,j +1 denotes the echoed cross-resonance (ECR) gate used on IBM hardware [93], represented in the computational basis as ECR = 1
+
+√2
+
+
+
+0 0 1 i
+
+0 0 i 11 −i 0 0 
+
+−i 1 0 0 
+
+ . (S4) To approximate a target state |ψtarget ⟩, we optimize the variational parameters by minimizing the fidelity loss 
+
+C = 1 − F (Vn |ψ0⟩ , |ψtarget ⟩) , (S5) where F (|ϕ⟩ , |ψ⟩) = |⟨ ϕ|ψ⟩| 2, |ψ0⟩ is a chosen reference state, and the parameters in Vn are collectively denoted by the angles {θ, ϕ, λ } across all layers and qubits. Each experimental data point is estimated from 20000 shots on IBM Quantum devices [94–96], providing stable statistics in the presence of hardware noise. 
+
+> Appendix S3: Ancilla-assisted interferometric readout
+
+In this work, we employ an ancilla-assisted interferometric readout protocol, equivalent to a Hadamard-test measure-ment, to evaluate expectation values of Pauli-string observables while reducing susceptibility to multi-qubit readout errors [97–99]. We consider an operator O, such as a Pauli string, and the corresponding target state |ψ⟩. The protocol introduces an ancilla qubit: 
+
+|Ψ0⟩ = 1
+
+√2
+
+  |0a⟩ + |1a⟩  |ψ⟩ . (S1) Applying a controlled-O gate, followed by a Hadamard gate on the ancilla, yields 
+
+|Ψ1⟩ = 12
+
+h
+
+|0a⟩ (I + O) |ψ⟩ + |1a⟩ (I − O) |ψ⟩
+
+i
+
+. (S2) A Z-basis measurement of the ancilla returns outcome 0 with probability 
+
+P (0) = 12
+
+ 1 + ⟨O⟩, ⟨O⟩ = ⟨ψ| O |ψ⟩ , (S3) leading to 
+
+⟨O⟩ = 2 P (0) − 1. (S4) In contrast to direct measurement of a long Pauli string, which requires readout of all involved system qubits and is therefore vulnerable to any single readout error among them, this protocol concentrates the relevant information into a single-ancilla measurement. As a concrete example, to measure the four-body plaquette operator F1, we first prepare the system register in the ground state |ψg ⟩ using a variational circuit V , namely |ψg ⟩ = V |ψ0⟩. An ancilla qubit is initialized in |0a⟩,a Hadamard gate creates the required superposition, and a controlled-F1 operation is applied with the ancilla as control. A final Hadamard gate on the ancilla completes the interferometric readout, as shown in Fig. S1. The overall transformation can be written as 
+
+|ψ′⟩ = (H a ⊗ I) (C −F1) (H a ⊗ I) |0a⟩ ⊗ V |ψ0⟩ . (S5) The expectation value ⟨F1⟩ is then extracted from the ancilla statistics via Eq. (S3). To further reduce the circuit depth, we variationally compress the full interferometric circuit into another parameterized circuit V ′. Denoting the input state by |Φ0⟩ = |0a⟩ ⊗ | ψ0⟩, the compressed circuit is trained so that 
+
+V ′ |Φ0⟩ ≈ (H a ⊗ I) (C −F1) (H a ⊗ I) |0a⟩ ⊗ V |ψ0⟩ . (S6) The results shown in Figs. 3, 4, 5, and 6 are obtained using this compressed readout workflow. For results reported in Fig. 3, the circuit structure is V Identity V ′.S17 VC-F 1
+
+# H H Mes 
+
+## F1               
+
+> FIG. S1. Workflow for the ancilla-based measurement of the plaquette operator. The circuit first prepares the ground state using a variational circuit V.An ancilla qubit, initialized in 0, is then placed in superposition by a Hadamard gate. Acontrolled-F1operation entangles the ancilla with the system qubits. Measurement of the ancilla in the Z basis yields the probability P(0), leading to ⟨F1⟩= 2 P(0) −1.
+> Appendix S4: Finite-size ground-state diagram under disorder and imaginary fields
+
+In the main text, we consider the disordered Wen–plaquette model, 
+
+Hdis = Hwen − g X
+
+> i
+
+σxi − X
+
+> i
+
+hiσzi , (S1) where the transverse-field deformation is 
+
+HX = Hwen − g X
+
+> i
+
+σxi , (S2) and the underlying plaquette Hamiltonian is 
+
+Hwen = −J X
+
+> i
+
+Fi, Fi = σxi σyi+ˆ xσxi+ˆ x+ˆ y σyi+ˆ y . (S3) Here, for notational simplicity, each plaquette is labeled by a single index i; the corresponding site and plaquette labeling convention is shown in Fig. 1(b) of the main text. The corresponding finite-size response structure obtained from exact diagonalization is shown in Fig. S2. Upon introducing disorder, the Wilson-loop diagnostic develops a broadened crossover boundary that separates a regime with appreciable nonlocal loop response from a disorder-dominated regime. At the same time, the overall organization of the finite-size response map remains qualitatively similar to that of the clean system. These results indicate that the finite-size stabilizer and loop diagnostics of the Wen–plaquette model remain robust against moderate on-site disorder. We next examine a non-Hermitian extension that incorporates an effective onsite nonunitary loss, 
+
+Hγ = Hwen − g X
+
+> i
+
+σxi + iγ X
+
+> i
+
+σzi . (S4) To characterize the associated finite-size response structure, we select the right eigenstate |ψR⟩ whose eigenvalue has the smallest real part and evaluate observables using the normalized right-state expectation value. In particular, the Wilson-loop response shown in Fig. S3 is computed from ⟨W ⟩R under this convention. The resulting response map closely resembles that obtained for the disordered Hermitian model in Fig. S2: as γ increases, the nonlocal loop signal is progressively suppressed, in close analogy with the effect of increasing disorder strength h. This correspondence suggests that, at the level of the finite-size Wilson-loop diagnostic studied here, onsite non-Hermitian fields and static disorder disrupt the plaquette structure in qualitatively similar ways. S18 (a) Without disorder With disorder 
+
+> Representative phase diagram
+
+# (b) 
+
+FIG. S2. Classically estimated ground-state diagram of the disordered Wen–plaquette model [Eq. S1], obtained by exact diagonalization. The diagnostic W is the large Wilson loop defined in Eq. 5. Panels (a) and (b) correspond to disorder strengths h = 1 and h = 5, respectively. (a) (b) 
+
+FIG. S3. Classically estimated ground-state diagram of the non-Hermitian Wen–plaquette model [Eq. S4], obtained by exact diagonalization. The diagnostic W is the large Wilson loop defined in Eq. 5. Panels (a) and (b) correspond to the strength of imaginary fields: γ = 0 .1 and γ = 0 .5, respectively. Throughout, we fix J = 5 and g = 1. 
+
+Appendix S5: Quantum hardware 
+
+We present hardware data obtained on the IBM Quantum ibm brisbane processor, which comprises 127 qubits, as shown in Fig. S4. For the simulations reported here, we use the qubit chain [56 , . . . , 66], selected for its comparatively low noise levels. Along this chain, the average error rate of the echoed cross-resonance (ECR) gates is approximately 0.5%. This backend is used for the simulations shown in Figs. 3–6 of the main text. For the results presented in Fig. 7 of the main text, we instead use the two-dimensional IBM Quantum ibm miami NightHawk device; additional details are provided in Fig. S5. 
+
+Appendix S6: Large-scale ground-state preparation protocols 1. Ancilla-assisted projector implementation (block encoding, LCU, and feedforward) 
+
+In this section, we propose a scalable protocol for preparing the Wen–plaquette ground-state sector. A representative state in the clean Wen–plaquette ground-state sector has the simple stabilizer form 
+
+|G⟩ ∝ Y
+
+> i
+
+(I + Fi) |0⟩⊗N , (S1) S19 (a) 
+
+(b) (c) 
+
+FIG. S4. Layout of the IBM ibm brisbane processor (127 qubits). (a) In this work, we use the linear chain of physical qubits [56, . . . , 66] for our simulations. For the ancilla-assisted interferometric readout protocol, qubit 56 serves as the ancilla, while the remaining qubits act as system qubits. (b,c) Mapping from the physical qubit chain to the effective square-lattice geometry of the target model. (b) Configuration used to measure the large Wilson loop. (c) Configuration used to measure the plaquette operator F1 (see Fig. 9 in Appendix). 0 1 2 3 40 1 2 3 4
+
+FIG. S5. Layout and the error information of the 2D IBM Miami device. 
+
+where N is the number of qubits and I denotes the identity operator. Here, for notational simplicity, each plaquette operator is labeled by a single index i.This construction explicitly enforces the +1 stabilizer constraint on every plaquette. Indeed, for any j,
+
+Fj
+
+Y
+
+> i
+
+(I + Fi) |0⟩⊗N = Fj (I + Fj ) Y
+
+> i̸=j
+
+(I + Fi) |0⟩⊗N = ( I + Fj ) Y
+
+> i̸=j
+
+(I + Fi) |0⟩⊗N = Y
+
+> i
+
+(I + Fi) |0⟩⊗N , (S2) S20 where we used F 2 
+
+> j
+
+= I and [ Fj , F i] = 0 for i̸ = j. Hence |G⟩ satisfies 
+
+Fj |G⟩ = |G⟩ (S3) for all plaquettes and is therefore a simultaneous +1 eigenstate of the full stabilizer set. To prepare this state on quantum hardware, one must implement the nonunitary projector ( I + Fi)/2 on each plaquette. Below, we outline several approaches. First, the nonunitary projector can be implemented via a unitary dilation (block encoding). Concretely, one constructs a unitary Ui acting on the four plaquette qubits and an ancilla such that the desired map appears as a block in the ancilla-|0⟩ subspace. Preparing the ancilla in |0⟩, applying Ui, and post-selecting the ancilla outcome |0⟩
+
+implements the projector ( I + Fi)/2 on the system. This unitary-dilation viewpoint is closely connected to the linear-combination-of-unitaries (LCU) framework. The stabilizer projector can be written as 
+
+I + Fi
+
+2 = 12
+
+ U0 + U1
+
+, U0 = I, U1 = Fi. (S4) In the LCU implementation, an ancilla qubit is prepared in |+⟩ = ( |0⟩ + |1⟩)/√2 and used to coherently select between the two branches: conditioned on the ancilla state, one applies either U0 or U1, equivalently a controlled-Fi. Measuring the ancilla in the {| +⟩ , |−⟩} basis and post-selecting the |+⟩ outcome then realizes the nonunitary map ( I + Fi)/2 on the system. A more experimentally accessible strategy exploits mid-circuit measurements and real-time classical control. In this approach, the four qubits of plaquette i are coupled to an ancilla initially prepared in |0⟩. A short sequence of controlled-Pauli gates maps the eigenvalue of Fi onto the ancilla: 
+
+|ψ⟩ | 0⟩ −→ 12
+
+h
+
+(I + Fi) |ψ⟩
+
+i
+
+|0⟩ + 12
+
+h
+
+(I − Fi) |ψ⟩
+
+i
+
+|1⟩ . (S5) Measuring the ancilla gives an outcome m ∈ { 0, 1}.If m = 0, the system has been projected into the +1 stabilizer sector |ψ+⟩, thereby implementing ( I + Fi)/2. If m = 1, the system is projected into the −1 stabilizer sector |ψ−⟩. One must then apply a corrective operator Ci
+
+that anticommutes with Fi. For the Wen–plaquette stabilizer, this can be achieved by applying a single-qubit Pauli 
+
+σz on any one of the four plaquette qubits, which flips the eigenvalue of Fi.Technically, this method requires real-time classical feedforward, meaning that the corrective operation must be conditioned explicitly on the measurement outcome. Compared with the block-encoding or LCU-based constructions discussed above, this introduces additional experimental overhead and may therefore be more challenging to implement on hardware with limited mid-circuit control capabilities. While conceptually straightforward, implementing this approach on present-day IBM Quantum processors faces architectural limitations. In superconducting-qubit devices, restricted qubit connectivity makes it difficult to perform the required multi-qubit stabilizer measurements without extensive SWAP operations, which rapidly increase circuit depth and noise. By contrast, trapped-ion platforms naturally provide all-to-all connectivity and long coherence times, making them well suited to this preparation scheme. Their ability to execute arbitrary multi-qubit interactions and mid-circuit feedback makes them particularly promising for realizing large-scale topological states following the protocol outlined above.  
+
+> 2. Coherent representative-qubit method
+
+To avoid mid-circuit measurements and postselection in the hardware demonstration, we employ the coherent representative-qubit construction introduced in Ref. [45]. The method generates a state in a prescribed plaquette-stabilizer sector through unitary controlled operations. It realizes the state-construction identity 
+
+Φ± 
+
+> i
+
+∝ (I ± Fi) |0⟩r |ψ⟩ , (S6) provided that the representative qubit r is initialized in |0⟩r . It should therefore be distinguished from a deterministic implementation of the nonunitary projector Π i = ( I + Fi)/2 acting on an arbitrary many-body input state. For a plaquette i, we choose one of its four corner qubits as the representative qubit r and decompose the stabilizer as 
+
+Fi = Pr eFi, Pr ∈ { σxr , σ yr }, (S7) S21 where Pr acts on the representative qubit and eFi is the product of the remaining three Pauli operators. For example, for 
+
+Fi,j = σxi,j σyi+1 ,j σxi+1 ,j +1 σyi,j +1 , (S8) choosing the upper-right corner r = ( i + 1 , j + 1) gives 
+
+Pr = σxi+1 ,j +1 , eFi,j = σxi,j σyi+1 ,j σyi,j +1 . (S9) We then define the representative-controlled Pauli string 
+
+Cr ( eFi) = |0⟩⟨ 0|r ⊗ I + |1⟩⟨ 1|r ⊗ eFi. (S10) Because the three Pauli factors in eFi act on different qubits, this operation can be decomposed as 
+
+Cr ( eFi) = Y
+
+> q∈∂i \r
+
+Cr (P (i) 
+
+> q
+
+), (S11) where P (i) 
+
+> q
+
+∈ { σxq , σ yq } is the Pauli factor acting on corner q. At the circuit level, a controlled-σx operation is a CNOT gate, while a controlled-σy operation can be implemented as 
+
+Cr (σyq ) = Sq CNOT r,q S† 
+
+> q
+
+, (S12) before transpilation into the native gate set of the selected processor. If Pr = σxr , the representative qubit is prepared in 
+
+|+x⟩r = Hr |0⟩r = |0⟩r + |1⟩r
+
+√2 . (S13) Applying Eq. (S10) gives 
+
+|+x⟩r |ψ⟩ Cr ( eFi)
+
+−−−−−→ 1
+
+√2
+
+
+
+|0⟩r |ψ⟩ + |1⟩r eFi |ψ⟩
+
+
+
+= 1
+
+√2 (I + Fi) |0⟩r |ψ⟩ , (S14) where Fi = σxr eFi and σxr |0⟩r = |1⟩r . The two branches are orthogonal because they contain different representative-qubit states, so the factor 1 /√2 provides the correct normalization. The resulting state satisfies 
+
+Fi Φ+ 
+
+> i
+
+= Φ+ 
+
+> i
+
+, (S15) and therefore lies exactly in the Fi = +1 stabilizer sector. If Pr = σyr , the representative qubit is instead prepared in 
+
+|+y ⟩r = Sr Hr |0⟩r = |0⟩r + i |1⟩r
+
+√2 . (S16) Using σyr |0⟩r = i |1⟩r , one obtains 
+
+|+y ⟩r |ψ⟩ Cr ( eFi)
+
+−−−−−→ 1
+
+√2
+
+
+
+|0⟩r |ψ⟩ + i |1⟩r eFi |ψ⟩
+
+
+
+= 1
+
+√2 (I + Fi) |0⟩r |ψ⟩ , (S17) which likewise satisfies Fi Φ+ 
+
+> i
+
+= Φ+ 
+
+> i
+
+. The corresponding Fi = −1 state can be generated by preparing |− x⟩ or 
+
+|− y ⟩, producing a state proportional to ( I − Fi) |0⟩r |ψ⟩.No measurement or probabilistic postselection is required because the representative qubit remains part of the final many-body state. However, the construction is not equivalent to applying ( I + Fi)/2 to an arbitrary state: its validity as a unitary state-preparation identity relies on the prescribed initialization of the representative qubit. Moreover, because neighboring plaquettes share qubits, a multi-plaquette implementation must specify the representative-qubit assignment and gate ordering. In the hardware protocol, we use the fixed lattice sweep shown in Fig. 7(a) and assess the final prepared sector by measuring all accessible plaquette expectations and their lattice average ¯F , rather than interpreting each circuit block as an independent nonunitary projection. In this work, the representative-qubit construction is used to prepare and verify the Wen–plaquette stabilizer-sector state employed in Fig. 7 of the main text. Its decomposition into local controlled-Pauli operations avoids variational optimization and provides a hardware-compatible route toward larger square-lattice implementations, with the required routing determined by the connectivity of the selected processor. S22  
+
+> 3. Noise effect
+
+The scalability of the coherent representative-qubit construction is governed primarily by the compiled circuit depth. As illustrated in Fig. 7(a), the plaquette constraints are imposed through a layered sweep across the lattice. Projector blocks within the same sweep stage may be executed in parallel provided that they do not share physical qubits. Thus, although the total number of plaquettes scales as Np = ( Lx − 1)( Ly − 1), the number of ideal sweep stages grows only with the linear dimensions of the lattice, approximately as Nsweep ∼ Lx + Ly − 3, up to hardware-dependent scheduling and routing factors. The actual entangling-gate depth must therefore be determined from the transpiled circuit for the chosen processor. For each plaquette, the representative qubit is directly connected to two neighboring corners, whereas the diagonally opposite corner is reached through an intermediate qubit. After the required local Clifford basis rotations, the resulting three-target controlled operation is compiled into four physical CZ gates arranged in three local entangling layers. For the 5 × 5 implementation, the circuit contains 16 plaquettes, and the compiled preparation used here has 
+
+Np = 16 , NCZ = 64 , DCZ = 48 . (S18) Here, NCZ is the total number of physical CZ gates, whereas DCZ is the number of sequential CZ layers after parallel scheduling. The former determines the accumulated exposure to entangling-gate errors, while the latter controls the entangling-gate contribution to the circuit duration and decoherence. To obtain an order-of-magnitude estimate of the resulting attenuation, we treat gate errors and decoherence inde-pendently. Under a two-qubit depolarizing approximation, an average CZ infidelity ¯ ϵCZ produces the Pauli attenuation factor λCZ ≃ 1 − 4¯ ϵCZ /3. The lattice-averaged plaquette response may then be estimated as 
+
+F hw 
+
+F ideal 
+
+≃ λ N cone CZ  
+
+> CZ
+
+exp 
+
+
+
+− DCZ τCZ + D1q τ1q 
+
+Teff 
+
+
+
+, (S19) where N cone CZ denotes the number of compiled CZ gates within the effective causal cone of the measured response. As a conservative estimate, we take N cone CZ = NCZ = 64. Using the representative calibration values ¯ ϵCZ = 2 .5 × 10 −3, τCZ = 68 ns, and Teff = 100 μs, the entangling-gate attenuation is λ64 CZ ≃ 0.808. The sequential CZ layers contribute a duration DCZ τCZ = 3 .264 μs, corresponding to a coherence factor of approximately 0 .968. Neglecting the smaller single-qubit contribution therefore gives 
+
+F hw 
+
+F ideal 
+
+≃ 0.808 × 0.968 ≃ 0.78 , (S20) which fits our measured data shown in Fig. 7 (main text). This simplified estimate is consistent with the experimentally observed visibility of the plaquette response on the 5 × 5 lattice. Nevertheless, it shows quantitatively that extending the construction to larger lattices will require lower two-qubit error rates, reduced routing overhead, and more efficient parallel scheduling.

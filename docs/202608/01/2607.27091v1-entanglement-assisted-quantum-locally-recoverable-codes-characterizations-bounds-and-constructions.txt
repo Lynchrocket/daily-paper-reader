@@ -1,0 +1,1942 @@
+Title: Entanglement-Assisted Quantum Locally Recoverable Codes: Characterizations, Bounds, and Constructions
+
+URL Source: https://arxiv.org/pdf/2607.27091v1
+
+Published Time: Thu, 30 Jul 2026 01:09:11 GMT
+
+Number of Pages: 22
+
+Markdown Content:
+# Entanglement-Assisted Quantum Locally Recoverable Codes: Characterizations, Bounds, and Constructions ∗
+
+Yang Li, San Ling, Zhenliang Lu, Gaojun Luo, and Shixin Zhu †
+
+Abstract 
+
+Quantum locally recoverable codes (qLRCs) allow a single qudit erasure to be corrected by accessing only a small number of other qudits. Standard CSS and Hermitian constructions, however, impose dual-containing or self-orthogonal constraints on the underlying classical codes, thereby restricting the well-structured classical LRCs (cLRCs) that can be used to construct qLRCs. To relax these constraints, we introduce entanglement-assisted quantum locally recoverable codes (EAQLRCs) by assuming that halves of the pre-shared maximally entangled pairs are noiseless. We characterize sufficient support conditions on extended stabilizers under which entanglement-assisted stabilizer codes have locality r and derive a CSS-like construction from two classical codes without imposing the ordinary dual-containing condition. We further establish an upper bound on locality and a Singleton-like bound for arbitrary CSS-like EAQLRCs, and characterize the pure codes attaining equality in the latter bound. These results yield a general framework for constructing optimal pure EAQLRCs from pairs of cLRCs. Applying this framework to ℓ-intersection pairs of MDS codes and block parity-check matrices, we obtain two families of optimal pure CSS-like EAQLRCs with flexible parameters and nontrivial localities. To the best of our knowledge, these represent the first explicit families of EAQLRCs. 
+
+Keywords: Locally recoverable code, entanglement-assisted quantum code, CSS construction, 
+
+ℓ-intersection pair, block parity-check matrix 
+
+AMS Classification (MSC 2020) : 94B05, 94B35, 81P45 
+
+1 Introduction and motivation 
+
+Throughout this paper, q is a prime power, Fq is the finite field with q elements, and [ m] = 
+
+{1, 2, . . . , m } for every nonnegative integer m, with [0] = ∅. An [ n, k, d ]q linear code C is a 
+
+k-dimensional linear subspace of Fnq with minimum distance d = d(C). Given an [ n, k ]q linear code 
+
+C, its Euclidean dual is the [ n, n − k]q linear code 
+
+C⊥ =
+
+(
+
+y = ( y1, y 2, . . . , y n) ∈ Fnq :
+
+> n
+
+X
+
+> i=1
+
+xiyi = 0 , ∀ x = ( x1, x 2, . . . , x n) ∈ C 
+
+)
+
+,
+
+and its Euclidean hull is the intersection code Hull( C) = C ∩ C ⊥. A linear code C is Euclidean self-orthogonal if Hull( C) = C, and Euclidean dual-containing if Hull( C) = C⊥.
+
+> ∗
+
+The work of Yang Li and San Ling was supported by the Nanyang Technological University under Research Grant 04INS000047C230GRT01. The work of Gaojun Luo was supported by the National Natural Science Foundation of China under Grant 12401690. (Corresponding author: Gaojun Luo) 
+
+> †
+
+Yang Li is with the School of Physical and Mathematical Sciences, Nanyang Technological University, 21 Nanyang Link, Singapore 637371, Singapore (e-mail: yanglimath@163.com). San Ling is with the School of Physical and Mathematical Sciences, Nanyang Technological University, 21 Nanyang Link, Singapore 637371, Singapore (e-mail: lingsan@ntu.edu.sg). He is also with VinUniversity, Vinhomes Ocean Park, Hanoi 100000, Vietnam (e-mail: ling.s@vinuni.edu.vn). Zhenliang Lu is with the Department of Computer Science, City University of Hong Kong, Hong Kong, China (e-mail: zhenliang.lu@cityu.edu.hk). Gaojun Luo is with the School of Mathematics, Nanjing University of Aeronautics and Astronautics, Nanjing 210016, China (e-mail: gaojun luo@nuaa.edu.cn). He is the corresponding author. Shixin Zhu is with the School of Mathematics, Hefei University of Technology, Hefei 230601, China (e-mail: zhushixin@hfut.edu.cn). 
+
+1arXiv:2607.27091v1 [cs.IT] 29 Jul 2026 1.1 Classical and quantum locally recoverable codes 
+
+In classical and quantum error correction, an erasure means an error whose position is known [17]. Erasure errors are common failure modes in modern distributed storage systems (DSSs), where they correspond to failures of storage nodes. In particular, the failure of a single storage node occurs more frequently than the simultaneous catastrophic failure of multiple nodes in large DSSs [34]. To repair a single failed node efficiently, Gopalan et al. [16] introduced the notion of classical locally recoverable codes (cLRCs) . Specifically, for each i ∈ [n] and each codeword 
+
+c = ( c1, c 2, . . . , c n) ∈ C , if the ith symbol ci can be recovered by accessing at most r other code symbols of c, then the [ n, k, d ]q linear code C is called an ( n, k, d, q ; r)-cLRC , or a cLRC with locality r. During the past decade, fundamental bounds and many optimal constructions of cLRCs have been obtained in [4, 8, 16, 21, 31–33, 35, 37] and the references therein. With the rapid development of quantum computing and quantum storage, large-scale quantum data storage may become feasible in the future. This motivates a quantum counterpart of cLRCs, namely quantum locally recoverable codes (qLRCs) . Following the standard terminology of quantum error correction [23,27], an Jn, κ, δ Kq quantum error-correcting code (QECC) Q is a qκ-dimensional subspace of ( Cq)⊗n with minimum distance δ. It can correct every set of qudit erasures affecting at most δ − 1 known positions. Golowich and Guruswami [15] introduced qLRCs with locality r.Informally, an Jn, κ, δ Kq QECC Q has locality r if, whenever any single qudit of a state |φ⟩ ∈ Q 
+
+is erased, the state can be recovered by a recovery channel that accesses at most r other qudits. Thus, instead of invoking a global recovery procedure, a single qudit erasure can be corrected using a small quantum subsystem. By restricting recovery to a small subsystem, qLRCs can reduce the number of qudits accessed and the number of measurements required to correct a single qudit erasure [9, 30]. Golowich and Guruswami [15] also established a connection between qLRCs and quantum low-density parity-check (qLDPC) codes, highlighting that qLRCs serve as a foundational step toward studying stronger locality properties in qLDPC codes. Motivated by these applications and theoretical connections, qLRCs have attracted increasing attention. Golowich and Guruswami [15] and Galindo et al. [11] established useful links between the localities of QECCs derived from the CSS and Hermitian constructions [22] and those of the Euclidean and Hermitian dual-containing classical codes, respectively. These links give CSS-like and Hermitian-like construction criteria for obtaining qLRCs from cLRCs. The definition of qLRCs has also been generalized to qLRCs with ( r, δ )-locality [11], hierarchical locality [18], and asymmetric locality [24]. Furthermore, the following advances have been made in the study of qLRCs. 
+
+• On the bound side, Golowich and Guruswami first established a Singleton-like bound for general qLRCs [15]. Subsequent work derived bounds for qLRCs from the CSS and Hermitian constructions, including Singleton-like, Griesmer-like, Cadambe-Mazumdar-like, Plotkin-like, and sphere-packing-like bounds, with separate refinements for pure codes [11,26] and general codes [25, 28]. 
+
+• On the construction side, the CSS-like construction has been applied to obtain qLRCs from variations of hypergraph products [3], Tamo-Barg codes [15], good polynomials [34], parity-check matrices and cyclic codes [28], and trace codes [36]. The Hermitian-like construction has been developed using dual-containing MDS codes [11], Hamming, generalized Reed-Muller, and Solomon-Stiffler codes [26], and codes supporting combinatorial designs [25]. Further constructions use matrix-product codes [5 –7, 14, 38], BCH and homothetic BCH codes [12], and impure stabilizer codes [10]. 
+
+• On the optimality side, the available bounds are not generally attained for arbitrary parameters. Most explicit families of qLRCs currently proved optimal are pure and are with respect to the Singleton-like bound specialized to the CSS-like or Hermitian-like construction [5–7, 11, 12, 14, 25, 26, 28, 36, 38]. 21.2 Motivation for introducing locality into entanglement-assisted QECCs 
+
+Although the locality of a QECC is defined in terms of local recovery channels, the standard algebraic constructions of qLRCs cannot be applied to arbitrary cLRCs. For a CSS-like construction from two classical codes CX , CZ ⊆ Fnq [15], one requires the dual-containing condition C⊥ 
+
+> X
+
+⊆ C Z .Similarly, the Hermitian-like construction [11] requires an appropriate Hermitian self-orthogonal or dual-containing cLRC. These conditions guarantee that the corresponding quantum stabilizers commute, but they also restrict the cLRCs that can be used directly. Indeed, cLRCs are usually designed to optimize locality, minimum distance, length, or dimension, and an optimal cLRC need not satisfy any dual-containing condition. Consequently, requiring the dual-containing property excludes many optimal and well-known constructions of cLRCs and narrows the attainable parameter ranges of qLRCs. Entanglement-assisted QECCs (EAQECCs), introduced by Brun et al. [2], use pre-shared entanglement to remove the dual-containing constraint. In an EAQECC, Alice and Bob share 
+
+c maximally entangled qudit pairs in advance, with Bob’s halves assumed to remain reliable. This shared entanglement permits noncommuting stabilizer checks, thereby replacing the self-orthogonality or dual-containing property by the consumption of maximally entangled pairs [2, 19]. Consequently, pairs of classical codes that do not satisfy dual-containing conditions can be directly employed to construct EAQECCs [13]. Assume that a qudit has Hilbert space Cq with computational basis {| x⟩ : x ∈ Fq}. For an ordered register A = ( A1, A 2, . . . , A t) of qudits, write HA = Ntj=1 HAj ∼= (Cq)⊗t for its joint Hilbert space, with HA = C when |A| = 0. Let 
+
+Q[n] = ( Q1, Q 2, . . . , Q n) be the transmitted register and let B[c] = ( B1, B 2, . . . , B c) be Bob’s reliable register. When n and c are clear from the context, we abbreviate Q[n] and B[c] as Q and 
+
+B, respectively. Then an EAQECC can be defined as follows. 
+
+Definition 1. An Jn, κ, δ ; cKq EAQECC Q ⊆ H Q[n] ⊗ H B[c] encodes κ logical qudits into n
+
+transmitted physical qudits with the help of c maximally entangled pairs shared in advance by the sender Alice and the receiver Bob, and has minimum distance δ, which means that Q can correct every set of qudit erasures affecting at most δ − 1 transmitted positions. More precisely, 
+
+Q is the image of the encoding isometry V given by 
+
+V : ( Cq)⊗κ −→ (Cq)⊗n ⊗ (Cq)⊗c,V |ϕ⟩ = 1
+
+√qc
+
+X
+
+> x∈Fcq
+
+Uenc 
+
+
+
+|ϕ⟩ ⊗ | 0⟩⊗(n−κ−c) ⊗ | x⟩
+
+
+
+⊗ | x⟩B[c] ,
+
+where 0 ≤ c ≤ n − κ, |ϕ⟩ is a state of κ logical qudits, |x⟩ = Ncj=1 |xj ⟩ for x = ( x1, x 2, . . . , x c) ∈ Fcq,and Uenc is a unitary operator acting on Alice’s n input qudits and producing the transmitted register Q[n].By Definition 1, only the register Q[n] is transmitted through the noisy channel, while B[c]
+
+remains with Bob and is assumed to be noiseless. Since Uenc acts only on Alice’s n qudits and leaves Bob’s register unchanged, the overall encoding operation is Uenc ⊗IB[c] . Setting c = 0 in Definition 1 recovers the standard definition of ordinary QECCs. Therefore, the possibility of recovering an erased transmitted qudit by accessing only a small number of other transmitted qudits, together with the removal of the dual-containing constraint through entanglement assistance, naturally motivates the introduction of locality into EAQECCs. We call EAQECCs with such a local recovery property entanglement-assisted quantum locally recoverable codes (EAQLRCs) . These considerations lead to the following problem. 
+
+Problem 1. How should locality be defined for EAQECCs, and how can optimal EAQLRCs be constructed? 
+
+1.3 Our contributions 
+
+This paper answers Problem 1. We summarize our contributions as follows. 31) We model a single transmitted qudit erasure by the quantum channel in Definition 4, give an equivalent Pauli representation in Lemma 5, and define recovery sets in Definition 5. Each recovery set indexes only transmitted qudits, while the recovery channel may also access Bob’s reliable register. Based on the sizes of these recovery sets, we define EAQLRCs in Definition 6. For entanglement-assisted stabilizer codes (EASCs), we construct local recovery channels from extended stabilizers satisfying suitable support conditions, yielding a characterization of sufficient conditions such that an EASC has locality r in Theorem 1. Moreover, we give a CSS-like construction of EAQLRCs from two classical codes CX and CZ
+
+without imposing the ordinary dual-containing condition in Theorem 2. In this construction, the locality of the resulting EAQLRC depends on the joint supports of the codewords in 
+
+C⊥ 
+
+> X
+
+and C⊥ 
+
+> Z
+
+, whereas we show that the locality of a single classical code with CX = CZ = C
+
+transfers directly to the resulting EAQLRC in Corollary 1. 2) For an arbitrary Jn, κ, δ ; cKq CSS-like EAQLRC arising from Theorem 2, whether pure or impure, we establish the following two bounds for evaluating optimality. 
+
+• We establish the upper bound 
+
+r ≤ min {n − 1, dim( CX + CZ )}
+
+in Theorem 3, where CX and CZ are the two underlying classical codes. We call an EAQLRC whose locality attains this upper bound trivial . We further show that applying Corollary 1 to an MDS code produces only a trivial EAQLRC in Remark 2. 
+
+• We establish the Singleton-like bound 2δ ≤ n + c − κ − 2
+
+l κr
+
+m
+
++ 4 in Theorem 4. For pure CSS-like EAQLRCs, we further present necessary and sufficient conditions for attaining equality in this bound in Theorem 5. Based on these conditions, we develop a general framework for constructing optimal pure CSS-like EAQLRCs in Subsection 5.1, where we begin with parity-check matrices HX and HZ of suitable classical codes and use a nonsingular diagonal matrix D to adjust the number of maximally entangled pairs c and improve the possibility that the resulting EAQLRCs have optimal parameters. 3) We apply this framework in the following two ways and obtain the first two families of optimal pure EAQLRCs with flexible parameters and nontrivial localities. 
+
+• We take HX and HZ to be parity-check matrices of CX = C⊥ 
+
+> 1
+
+and CZ = C2, respectively, where C1 and C2 are MDS codes satisfying dim (C1 ∩ C 2) = d − 1 − c. We set D = In. For 
+
+q ≥ 3 and integers n, d, c satisfying 2 ≤ d ≤ n ≤ q+1 and max {0, 2d−n−1} ≤ c ≤ d−1, except for the parameter triples ( q+1 , 2, 1) and ( q+1 , q +1 , q ), as well as ( q+1 , q/ 2+1 , 0) when q is even, we construct a family of optimal pure Jn, n + c − 2d + 2 , d ; cKq EAQLRCs with locality n − d + 1 in Theorem 6. We further show that this family can have nontrivial locality even though its classical codes are MDS in Remark 4. 
+
+• We take HX = HZ = H, where H is the block parity-check matrix in (18) , and choose the nonidentity diagonal matrix D = Ds in (19) . We then use H′ 
+
+> Z
+
+= HZ Ds as the parity-check matrix of the second classical code. Under the arithmetic conditions of Theorem 7, we construct a family of optimal pure Ju(r + 1) , ur − 2d + 4 + s, d ; u + sKq
+
+EAQLRCs with locality r for every 0 ≤ s ≤ d − 2. We also provide two explicit examples in Examples 1 and 2 to illustrate the constructions of optimal pure EAQLRCs with nontrivial localities in Theorems 6 and 7, respectively. 4The remainder of this paper is organized as follows. We review the necessary background on classical codes and quantum codes in Section 2. We define EAQLRCs, characterize sufficient conditions under which EASCs have locality r, and present the CSS-like construction of EAQLRCs in Section 3. We derive a locality upper bound and a Singleton-like bound in Section 4 for arbitrary EAQLRCs arising from the CSS-like construction in Section 3. We also establish necessary and sufficient conditions for pure EAQLRCs to attain equality in the Singleton-like bound. In Section 5, we develop a general framework for constructing optimal pure CSS-like EAQLRCs and construct the first two families of optimal pure EAQLRCs with flexible parameters and nontrivial localities. Finally, we conclude the paper in Section 6. 
+
+2 Preliminaries 
+
+For any vector u = ( u1, u 2, . . . , u n) ∈ Fnq , let supp (u) = {i : ui̸ = 0 } be the support of u, and let wt (u) = |supp (u)| be the (Hamming) weight of u. For any subset S ⊆ Fnq containing a nonzero vector, let wt (S) be the minimum weight of all nonzero vectors in S. An [ n, k, d ]q linear code C
+
+is a k-dimensional subspace of Fnq with minimum distance d. We also write dim (C) and d(C) for its dimension and minimum distance . For a matrix H, we use ker (H) to denote its null space 
+
+and row (H) to denote its row space . A parity-check matrix H for an [ n, k ]q linear code C is an (n − k) × n matrix chosen over Fq such that C = ker( H) and C⊥ = row( H). We first recall several basic facts on classical locally recoverable codes (cLRCs). Following Gopalan et al. [16], a classical LRC permits each erased coordinate of a codeword to be recovered from a set of other coordinates in the same codeword. 
+
+Definition 2. An [ n, k, d ]q linear code C is said to have locality r if each symbol ci of a codeword 
+
+c = ( c1, c 2, . . . , c n) ∈ C with i ∈ [n] can be recovered from at most r other distinct symbols of c.More precisely, for each i ∈ [n], there exist a subset Ii = {i1, i 2, . . . , i si } ⊆ [n] \ { i} with si ≤ r
+
+and a function fi : Fsi 
+
+> q
+
+→ Fq such that ci = fi(ci1 , c i2 , . . . , c isi ) for every c ∈ C . The set Ii is called a recovery set for ci.Given a linear code, we have the following characterization on its locality and the Singleton-like bound on its parameters. 
+
+Lemma 1. ([28, Definition 1]) An [n, k, d ]q linear code C has locality r if, for each i ∈ [n], there exists a codeword hi ∈ C ⊥ such that i ∈ supp( hi) and |supp( hi)| ≤ r + 1 .
+
+Lemma 2. ([16, Theorem 5]) For an [n, k, d ]q linear code C with locality r, we have 
+
+d ≤ n − k −
+
+ kr
+
+
+
++ 2 . (1) Let q = pm be a prime power and let tr : Fq → Fp be the field trace . Set ωp = e2πi/p . For 
+
+a, b, x ∈ Fq, define the q-ary Pauli operators by 
+
+X(a)|x⟩ = |x + a⟩ and Z(b)|x⟩ = ωtr( bx ) 
+
+> p
+
+|x⟩.
+
+They satisfy Z(b)X(a) = ωtr( ab ) 
+
+> p
+
+X(a)Z(b) and are unitary, with X(a)† = X(−a) and Z(b)† =
+
+Z(−b). For an ordered register A = ( A1, A 2, . . . , A t) of t qudits and a = ( a1, a 2, . . . , a t), b =(b1, b 2, . . . , b t) ∈ Ftq, put 
+
+XA(a) = 
+
+> t
+
+O
+
+> j=1
+
+X(aj ) and ZA(b) = 
+
+> t
+
+O
+
+> j=1
+
+Z(bj ).
+
+These tensor-product operators are again unitary. The q-ary commutation relation between 
+
+XA(a)ZA(b) and XA(a′)ZA(b′) is 
+
+XA(a)ZA(b)XA(a′)ZA(b′) = ωtr( ⟨a′,b⟩−⟨ a,b′⟩) 
+
+> p
+
+XA(a′)ZA(b′)XA(a)ZA(b). (2) 5The q-ary Pauli group on HA, including scalar phases, is 
+
+GA(q) = 
+
+n
+
+ωℓpXA(a)ZA(b) : a, b ∈ Ftq, ℓ ∈ Zp
+
+o
+
+. (3) By Definition 1, every transmitted Pauli error occurring in an EAQECC has the form EQ[n] ⊗ IB[c] ,where EQ[n] ∈ G Q[n] (q) and IB[c] is the identity operator on Bob’s register B[c]. The joint Pauli group GQ[n]∪B[c] (q) is used below to define entanglement-assisted stabilizer codes. 
+
+Definition 3. An Jn, κ, δ ; cKq entanglement-assisted stabilizer code (EASC) is an EAQECC Q for which there exists an abelian subgroup SEA ⊆ G Q[n]∪B[c] (q) such that 
+
+Q =
+
+n
+
+|ψ⟩ ∈ H Q[n] ⊗ H B[c] : G|ψ⟩ = |ψ⟩ for every G ∈ SEA 
+
+o
+
+. (4) The group SEA is called the extended stabilizer group , and its elements are called extended stabilizers . Unlike a transmitted channel error EQ[n] ⊗ IB[c] , an extended stabilizer may act nontrivially on Bob’s register. With (3) and (4), every G ∈ SEA can be written as 
+
+G = ωℓpXQ[n] (a)ZQ[n] (b) ⊗ XB[c] (r)ZB[c] (s),
+
+where a, b ∈ Fnq , r, s ∈ Fcq, and ℓ ∈ Fp. Its Pauli label and support are, respectively, lab( G) = ( a, r | b, s) ∈ F2( n+c) 
+
+> q
+
+and supp Q(G) = {j ∈ [n] : (aj , b j )̸ = (0 , 0) }.
+
+The Pauli label set of SEA is L(SEA ) = {lab (G) : G ∈ SEA } ⊆ F2( n+c) 
+
+> q
+
+. Moreover, the identity lab (GG ′) = lab (G)+ lab (G′) for G, G ′ ∈ SEA shows that L(SEA ) is an Fp-linear subspace of F2( n+c) 
+
+> q
+
+.To prove label uniqueness, suppose that λI ∈ SEA . For any nonzero |ψ⟩ ∈ Q , λ|ψ⟩ = ( λI )|ψ⟩ = |ψ⟩,which implies λ = 1. If G, G ′ ∈ SEA have the same Pauli label, then G′G−1 = λI ∈ SEA for some scalar λ. The preceding argument gives λ = 1, so G′ = G. Thus, every element of L(SEA )determines a unique extended stabilizer despite the omitted scalar phase. We recall the EA-CSS construction from pairs of classical linear codes. The resulting EAQECCs are EASCs. 
+
+Lemma 3. (EA-CSS construction [13, Theorems 2 and 4]) Let CX and CZ be [n, k X , d X ]q and 
+
+[n, k Z , d Z ]q linear codes, respectively. Then there exists an EAQECC Q(CX , CZ ) with parameters 
+
+Jn, κ, δ ; cK, where 
+
+c = n − kX − dim( C⊥ 
+
+> X
+
+∩ C Z ) = n − kZ − dim( CX ∩ C ⊥ 
+
+> Z
+
+),κ = kX + kZ − n + c and 
+
+δ =
+
+( min {dX , d Z }, if CX ⊆ C ⊥ 
+
+> Z
+
+,
+
+min {wt( CX \ (CX ∩ C ⊥ 
+
+> Z
+
+)) , wt( CZ \ (C⊥ 
+
+> X
+
+∩ C Z )) }, otherwise. 
+
+(5) 
+
+Moreover, the EAQECC Q(CX , CZ ) is called pure if δ = min {dX , d Z } and impure otherwise. 
+
+Lemma 4. ([13, Proposition 4]) Let CX and CZ be [n, k X ]q and [n, k Z ]q linear codes, respectively. If HX and HZ are respective parity-check matrices of CX and CZ , then 
+
+dim( C⊥ 
+
+> X
+
+∩ C Z ) = n − kX − rank( HX H⊤ 
+
+> Z
+
+) and dim( CX ∩ C ⊥ 
+
+> Z
+
+) = n − kZ − rank( HX H⊤ 
+
+> Z
+
+).
+
+For the Jn, κ, δ ; cKq EA-CSS code Q(CX , CZ ) obtained from Lemma 3, let HX and HZ be parity-check matrices of CX and CZ , respectively. By Lemma 4, c = rank (HX H⊤ 
+
+> Z
+
+). Choose a rank factorization 
+
+−HX H⊤ 
+
+> Z
+
+= FX F⊤ 
+
+> Z
+
+with FX ∈ F(n−kX )×cq and FZ ∈ F(n−kZ )×cq .
+
+6Then the extended stabilizer group of the EA-CSS code Q(CX , CZ ) is 
+
+SEA = {XQ(uH X )ZQ(vH Z ) ⊗ XB (uF X )ZB (vF Z ) : u ∈ Fn−kX 
+
+> q
+
+, v ∈ Fn−kZ 
+
+> q
+
+}. (6) In fact, with the notation G(u, v) = XQ(uH X )ZQ(vH Z ) ⊗ XB (uF X )ZB (vF Z ), it follows from (2) that 
+
+G(u, v)G(u′, v′) = ωtr (u′(HX H⊤   
+
+> Z+FXF⊤
+> Z)v⊤
+
+) 
+
+> p
+
+G(u + u′, v + v′) = G(u + u′, v + v′).
+
+Thus, the set SEA in (6) is closed under multiplication without additional scalar phases. In particular, every element is represented with scalar phase 1, and L(SEA ) is Fq-linear. 
+
+Remark 1. If c = 0, then FX and FZ have no columns, implying that XB (uF X )ZB (vF Z ) = IB[0] .
+
+In this case, the extended stabilizer group SEA reduces to 
+
+SCSS = {XQ(uH X )ZQ(vH Z ) ⊗ IB[0] : u ∈ Fn−kX 
+
+> q
+
+, v ∈ Fn−kZ 
+
+> q
+
+}
+
+= {XQ(hX )ZQ(hZ ) : hX ∈ C ⊥ 
+
+> X
+
+, hZ ∈ C ⊥ 
+
+> Z
+
+},
+
+which is exactly the stabilizer group of an ordinary quantum CSS code (see for example [24, Definition 10]). 
+
+3 Characterizations and construction methods of EAQLRCs 
+
+In this section, we define locality for EAQECCs and give sufficient criteria for EASCs to have locality r.
+
+3.1 Introducing locality into EAQECCs 
+
+According to Definition 1, the transmitted register Q[n] passes through the noisy channel, whereas Bob’s register B[c] is retained and remains reliable. Therefore, the definition of locality must count access to transmitted qudits separately from access to Bob’s qudits. For a finite register A, let M(A) denote the set of density operators on HA, namely, the positive semidefinite operators ρ on HA satisfying Tr (ρ) = 1. Given an EAQECC Q ⊆ H Q[n] ⊗ H B[c] ,a density operator ρ ∈ M (Q[n] ∪ B[c]) is called a code state of Q if it can be written as ρ =P 
+
+> j
+
+pj |ψj ⟩⟨ ψj |, where each |ψj ⟩ is a unit vector in Q, pj ≥ 0, and P 
+
+> j
+
+pj = 1. A code state is called 
+
+pure if ρ = |ψ⟩⟨ ψ| for some unit vector |ψ⟩ ∈ Q . By the usual identification of a pure state with its rank-one density operator, we also refer to |ψ⟩ as a pure code state when no confusion can arise. We write IA for the identity operator on HA, id A for the identity channel on A, and U †
+
+for the conjugate transpose of a linear operator U . For disjoint registers A and C, we write Tr A
+
+for the partial trace over A. For any orthonormal basis {| x⟩} of HA and every density operator 
+
+ρ ∈ M (A ∪ C), it is defined by Tr A(ρ) = X
+
+> x
+
+(⟨x| ⊗ IC )ρ(|x⟩ ⊗ IC ). (7) A quantum channel from register A to register C is a map K : M(A) → M (C) that admits a completely positive trace-preserving (CPTP) linear extension from the linear operators on 
+
+HA to those on HC . In finite dimensions, this is equivalent to the existence of linear operators 
+
+Kν : HA → H C , called Kraus operators , such that 
+
+K(ρ) = X
+
+> ν
+
+Kν ρK † 
+
+> ν
+
+and X
+
+> ν
+
+K† 
+
+> ν
+
+Kν = IA. (8) In the studies of qLRCs [11, 15, 18, 24], the erasure of a qudit at a known position is modeled by the completely depolarizing channel on that qudit. Following the model in [24, Definition 14], we apply the completely depolarizing channel to one transmitted qudit and the identity channel to all the other transmitted qudits and Bob’s register. Then we have the following definition. 7Definition 4. For i ∈ [n], define the map Γi : M(Q[n] ∪ B[c]) −→ M (Q[n] ∪ B[c])for every quantum state ρ ∈ M (Q[n] ∪ B[c]) by Γi(ρ) = IQi
+
+q ⊗ Tr Qi (ρ).
+
+Thus, Γ i traces out Qi and replaces it by a maximally mixed qudit, while leaving all other labelled subsystems unchanged. For i ∈ [n], let Xi(a) and Zi(b) act as X(a) and Z(b) on Qi and as the identity on Q[n]\{ i} ∪B[c].The following identity (9) is included in Lemma 5 for completeness. It expresses Γ i in terms of the operators Xi(a)Zi(b) used below and verifies that Γ i is a quantum channel. 
+
+Lemma 5. For every i ∈ [n] and ρ ∈ M (Q[n] ∪ B[c]), the map Γi in Definition 4 satisfies 
+
+Γi(ρ) = 1
+
+q2
+
+X
+
+> a,b ∈Fq
+
+ Xi(a)Zi(b)ρ Xi(a)Zi(b)†. (9) 
+
+Consequently, Γi is a quantum channel. Proof. Let A = Q[n]\{ i} ∪ B[c]. Since {| x⟩⟨ y| : x, y ∈ Fq} is a basis for the linear operators on HQi , the density operator ρ has a unique block decomposition ρ = P 
+
+> x,y ∈Fq
+
+|x⟩⟨ y| ⊗ ρx,y ,
+
+where each ρx,y is a linear operator on HA given by ρx,y = ( ⟨x| ⊗ IA)ρ(|y⟩ ⊗ IA). With (7) , we derive Tr Qi (ρ) = P 
+
+> x∈Fq
+
+ρx,x . Note that P 
+
+> b∈Fq
+
+ωtr( bt ) 
+
+> p
+
+= 0 for t ∈ F∗ 
+
+> q
+
+and P 
+
+> b∈Fq
+
+ωtr( bt ) 
+
+> p
+
+= q for 
+
+t = 0. Together with the facts X(a)Z(b)|x⟩ = ωtr( bx ) 
+
+> p
+
+|x + a⟩ and P 
+
+> a∈Fq
+
+|x + a⟩⟨ x + a| = IQi , since 
+
+Xi(a)Zi(b) acts as X(a)Z(b) on Qi and as the identity on A, it can be verified that 1
+
+q2
+
+X
+
+> a,b ∈Fq
+
+ Xi(a)Zi(b)ρ Xi(a)Zi(b)† = 1
+
+q2
+
+X
+
+> a,b,x,y ∈Fq
+
+ωtr( b(x−y))  
+
+> p
+
+|x + a⟩⟨ y + a| ⊗ ρx,y 
+
+= 1
+
+q
+
+X
+
+> a,x ∈Fq
+
+|x + a⟩⟨ x + a| ⊗ ρx,x 
+
+= IQi
+
+q ⊗ X
+
+> x∈Fq
+
+ρx,x 
+
+= IQi
+
+q ⊗ Tr Qi (ρ)=Γ i(ρ).
+
+This proves (9). It remains to verify that Γ i is a quantum channel. With (9) , it is clear to see that Γ i is a linear map. Hence, it suffices to find a family of linear operators satisfying the two conditions in (8) . Take Ka,b = Xi(a)Zi(b) 
+
+> q
+
+for ( a, b ) ∈ F2 
+
+> q
+
+. Then the first condition in (8) immediately holds from (9). Since every Xi(a)Zi(b) is unitary, 
+
+X
+
+> a,b ∈Fq
+
+K†
+
+> a,b
+
+Ka,b = 1
+
+q2
+
+X
+
+> a,b ∈Fq
+
+IQ[n]∪B[c] = IQ[n]∪B[c] .
+
+This completes the proof. Recall that a code state of an EAQECC can be pure or mixed, and every mixed code state is a convex combination of pure code states. Since quantum channels are linear, recovery of every pure code state also recovers every mixed code state in an EAQECC. These facts yield the following definitions of recovery sets and localities for EAQECCs. 8Definition 5. Let Q ⊆ H Q[n] ⊗ H B[c] be an EAQECC. Let i ∈ [n] and let R ⊆ [n] \ { i}. The set 
+
+R is a recovery set for Qi if there exists a quantum channel Rec i,R : M(Q{i}∪ R ∪ B[c]) −→ M (Q{i}∪ R ∪ B[c])such that, for every pure code state |ψ⟩ ∈ Q , one has (Rec i,R ⊗ id Q[n]\({i}∪ R) ) Γi(|ψ⟩⟨ ψ|) = |ψ⟩⟨ ψ|. (10) 
+
+Definition 6. An Jn, κ, δ ; cKq EAQECC Q is said to have locality r if, for every i ∈ [n], there exists Ri ⊆ [n] \ { i} with |Ri| ≤ r such that Ri is a recovery set for Qi. We also call Q an 
+
+Jn, κ, δ ; cKq entanglement-assisted quantum locally recoverable code (EAQLRC) with locality r.
+
+3.2 A characterization of EASCs with locality 
+
+In the following theorem, we characterize sufficient conditions for an EASC to have locality r in terms of properties of its extended stabilizers. The proof constructs a local recovery channel by distinguishing all Pauli errors on an erased transmitted qudit through their commutation relations with suitable extended stabilizers. 
+
+Theorem 1. Let Q ⊆ H Q[n] ⊗ H B[c] be an EASC such that L(SEA ) is Fq-linear. Suppose that for every i ∈ [n], there exist Gi, K i ∈ SEA whose respective Pauli labels are 
+
+lab( Gi) = ( ai, ri | bi, si) and lab( Ki) = ( ui, ti | vi, wi),
+
+where ai, bi, ui, vi ∈ Fnq and ri, si, ti, wi ∈ Fcq, and such that 
+
+1)  (ai)i, (bi)i
+
+ = (1 , 0) and  (ui)i, (vi)i
+
+ = (0 , 1) .
+
+2) (supp Q(Gi) ∪ supp Q(Ki)) \ { i} ≤ r.Then Q is an EAQLRC with locality r.Proof. For a given index i ∈ [n], let Ri = ( supp Q(Gi) ∪ supp Q(Ki)) \ { i}. Then |Ri| ≤ r by condition 2). Let q = pm and let η1, η 2, . . . , η m be an Fp-basis of Fq. As shown after Definition 3, the label map is injective on SEA . Since L(SEA ) is Fq-linear, for each j ∈ [m] there are unique 
+
+Gi,j , K i,j ∈ SEA satisfying lab( Gi,j ) = ηj (ai, ri | bi, si) and lab( Ki,j ) = ηj (ui, ti | vi, wi).
+
+Let Si = {Gi,j , K i,j : 1 ≤ j ≤ m}. Their Pauli labels at Qi are respectively ( ηj , 0) and (0 , η j ), implying that the 2 m operators in Si are distinct. Moreover, every operator in Si acts trivially on the transmitted qudits outside {i} ∪ Ri.Define Ei = {Ex,z = Xi(x)Zi(z) : x, z ∈ Fq}, where every Ex,z acts as the identity on 
+
+Q[n]\{ i} ∪ B[c]. For Pauli operators A and E, define σ(A, E ) ∈ Fp by AE = ωσ(A,E ) 
+
+> p
+
+EA . Note also that the exponent σ(A, E ) is unchanged if either operator is multiplied by a scalar phase and hence depends only on their Pauli labels. Order Si as ( Gi, 1, G i, 2, . . . , G i,m , K i, 1, K i, 2, . . . , K i,m )and define 
+
+σSi (E) =  σ(Gi, 1, E ), σ (Gi, 2, E ), . . . , σ (Gi,m , E ), σ (Ki, 1, E ), σ (Ki, 2, E ), . . . , σ (Ki,m , E ) ∈ F2mp .
+
+By the q-ary Pauli commutation relation in (2) and condition 1), we have σ(Gi,j , E x,z ) = −tr (ηj z)and σ(Ki,j , E x,z ) = tr( ηj x), where tr is the field trace from Fq to Fp. It then follows that 
+
+σSi (Ex,z ) =  −tr( η1z), −tr( η2z), . . . , −tr( ηmz), tr( η1x), tr( η2x), . . . , tr( ηmx).
+
+If σSi (Ex,z ) = σSi (Ex′,z ′ ), then tr (ηj (z − z′)) = 0 and tr (ηj (x − x′)) = 0 for every j ∈ [m]. Since 
+
+{η1, η 2, . . . , η m} is an Fp-basis and the field trace is Fp-linear, we deduce that tr (λ(z − z′)) = 0 9and tr (λ(x − x′)) = 0 for every λ ∈ Fq. In addition, tr (λμ ) = 0 for every λ ∈ Fq only if μ = 0, as the bilinear form ( λ, μ ) 7 → tr (λμ ) is nondegenerate. Hence, z = z′ and x = x′, that is to say the map E 7 → σSi (E) is injective on Ei. Since |E i| = q2 = p2m = |F2mp |, this map is bijective. By Definition 3, the operators in Si commute and fix Q pointwise. Since they are Pauli operators, they are unitary. Moreover, for every G ∈ S i, we have Gp ∈ SEA and lab (Gp) = 
+
+plab (G) = 0 = lab (I). The injectivity of the label map on SEA therefore gives Gp = I. Each 
+
+G ∈ S i acts trivially on Q[n]\({i}∪ Ri). Hence, including its scalar phase, G is the identity extension of an operator on HQ{i}∪ Ri ∪B[c] . We henceforth use the same symbol G for this local operator; whenever it acts on the full system, its identity action on Q[n]\({i}∪ Ri) is understood. For 
+
+s = ( sG)G∈S i ∈ F2mp , let Π s be the orthogonal projector onto 
+
+n
+
+|ϕ⟩ ∈ H Q{i}∪ Ri ∪B[c] : G|ϕ⟩ = ωsG 
+
+> p
+
+|ϕ⟩ for every G ∈ S i
+
+o
+
+.
+
+Since the operators in Si commute and satisfy Gp = I, this projector has the explicit expression Πs = Q
+
+> G∈S i
+
+ 1
+
+> p
+
+Pp−1 
+
+> ℓ=0
+
+ω−ℓs G 
+
+> p
+
+Gℓ
+
+
+
+. The nonzero joint eigenspaces of the commuting unitaries in Si
+
+form an orthogonal decomposition of HQ{i}∪ Ri ∪B[c] . This yields that 
+
+X
+
+> s∈F2mp
+
+Πs = IQ{i}∪ Ri ∪B[c] .
+
+We now use the projectors Π s to construct a local recovery channel. Since the map E 7 → σSi (E)is bijective, for every s ∈ F2mp there exists a unique Es ∈ E i such that σSi (Es) = s. Let Cs = E† 
+
+> s
+
+,regarded as an operator on HQ{i}∪ Ri ∪B[c] . It acts nontrivially only on Qi and as the identity on 
+
+QRi ∪ B[c]. For τ ∈ M (Q{i}∪ Ri ∪ B[c]), define Rec i,R i (τ ) = X
+
+> s∈F2mp
+
+CsΠsτ ΠsC† 
+
+> s
+
+, (11) which is clearly linear in τ . Since Es is a Pauli operator, Cs is unitary and satisfies C† 
+
+> s
+
+Cs =
+
+IQ{i}∪ Ri ∪B[c] . Moreover, since Π s is an orthogonal projector, Π † 
+
+> s
+
+= Π 2 
+
+> s
+
+= Π s. It follows that 
+
+X
+
+> s∈F2mp
+
+(CsΠs)†(CsΠs) = X
+
+> s∈F2mp
+
+ΠsC† 
+
+> s
+
+CsΠs = X
+
+> s∈F2mp
+
+Πs = IQ{i}∪ Ri ∪B[c] .
+
+Thus, Rec i,R i has Kraus operators {CsΠs : s ∈ F2mp } satisfying the conditions in (8) , and hence is a quantum channel. Fix a unit vector |ψ⟩ ∈ Q and let ρψ = |ψ⟩⟨ ψ|. Since every operator in Si fixes |ψ⟩, for every 
+
+E ∈ E i and G ∈ S i, we have 
+
+GE |ψ⟩ = ωσ(G,E ) 
+
+> p
+
+EG |ψ⟩ = ωσ(G,E ) 
+
+> p
+
+E|ψ⟩.
+
+It implies that the corrupted state E|ψ⟩ belongs to the joint eigenspace indexed by σSi (E). Moreover, it can be checked that 
+
+ Πs ⊗ IQ[n]\({i}∪ Ri)
+
+E|ψ⟩ =
+
+(
+
+E|ψ⟩, s = σSi (E),
+
+0, s̸ = σSi (E)holds for every s ∈ F2mp . By the bijectivity of E 7 → σSi (E), we also derive that EσSi (E) = E and 
+
+CσSi (E) = E†. Hence, only the term indexed by s = σSi (E) remains in the definition of Rec i,R i in (11). It then follows that 
+
+ Rec i,R i ⊗ id Q[n]\({i}∪ Ri)
+
+(Eρ ψE†) = E†Eρ ψE†E = ρψ
+
+10 for every E ∈ E i. Using (9) and the linearity of Rec i,R i , we immediately obtain 
+
+ Rec i,R i ⊗ id Q[n]\({i}∪ Ri)
+
+  Γi(ρψ) = 1
+
+q2
+
+X
+
+> E∈E i
+
+ Rec i,R i ⊗ id Q[n]\({i}∪ Ri)
+
+(Eρ ψE†) = 1
+
+q2
+
+X
+
+> E∈E i
+
+ρψ = ρψ,
+
+where the last equality follows from |E i| = q2. This is precisely the recovery condition (10) with 
+
+R = Ri. Hence, Ri is a recovery set for Qi. Since i is arbitrary and |Ri| ≤ r, it turns out from Definition 6 that Q is an EAQLRC with locality r. This completes the proof. 
+
+3.3 CSS-like constructions of EAQLRCs 
+
+Recall that the label set of the extended stabilizer group SEA in (6) of an EA-CSS code must be Fq-linear. In this case, the extended stabilizers Gi, K i ∈ SEA used in Theorem 1 can be characterized by dual codewords of the underlying classical codes CX and CZ .
+
+Theorem 2. Let CX and CZ be [n, k X , d X ]q and [n, k Z , d Z ]q linear codes with parity-check matrices 
+
+HX and HZ , respectively. Assume that, for every i ∈ [n], there exist hXi ∈ C ⊥ 
+
+> X
+
+and hZi ∈ C ⊥ 
+
+> Z
+
+such that 
+
+i ∈ supp( hXi ) ∩ supp( hZi ) and |(supp( hXi ) ∪ supp( hZi )) | ≤ r + 1 . (12) 
+
+Then the EA-CSS code Q(CX , CZ ) is an Jn, κ, δ ; cKq EAQLRC of locality r, where the specific parameters are given in (5) .Proof. By Lemma 3, the pair ( CX , CZ ) gives an EA-CSS code Q(CX , CZ ) with parameters as in (5) and extended stabilizer group SEA as in (6) . Moreover, SEA has an Fq-linear Pauli label set. To verify locality, it remains to find extended stabilizers Gi, K i ∈ SEA satisfying the conditions 1) and 2) of Theorem 1 for each i ∈ [n]. For a given i ∈ [n], by assumption, we can choose hXi ∈ C ⊥ 
+
+> X
+
+and hZi ∈ C ⊥ 
+
+> Z
+
+such that 
+
+i ∈ supp (hXi ) ∩ supp (hZi ) and |( supp (hXi ) ∪ supp (hZi )) | ≤ r + 1. Multiplying hXi and hZi by nonzero scalars if necessary, we may assume that ( hXi )i = ( hZi )i = 1. Since HX and HZ
+
+are parity-check matrices, there exist coefficient vectors yXi ∈ Fn−kX 
+
+> q
+
+and yZi ∈ Fn−kZ 
+
+> q
+
+such that hXi = yXi HX and hZi = yZi HZ . Taking ( u, v) = ( yXi , 0n−kZ ) and ( u, v) = ( 0n−kX , yZi ), respectively, in (6) gives the extended stabilizers 
+
+Gi = XQ(hXi )ZQ(0n) ⊗ XB (yXi FX )ZB (0c) and Ki = XQ(0n)ZQ(hZi ) ⊗ XB (0c)ZB (yZi FZ ).
+
+Their respective Pauli labels are lab (Gi) = ( hXi , yXi FX | 0n, 0c) and lab (Ki) = ( 0n, 0c | hZi , yZi FZ ).
+
+Therefore, it is easy to check that 
+
+ (hXi )i, (0n)i
+
+ = (1 , 0) and  (0n)i, (hZi )i
+
+ = (0 , 1) ,
+
+and supp Q(Gi) = supp( hXi ) and supp Q(Ki) = supp( hZi ).
+
+Since i ∈ supp( hXi ) ∩ supp( hZi ), we obtain 
+
+ supp Q(Gi) ∪ supp Q(Ki) \ { i} = supp( hXi ) ∪ supp( hZi ) − 1 ≤ r. 
+
+We conclude that both the conditions 1) and 2) of Theorem 1 hold. By Theorem 1, Q(CX , CZ ) is an EAQLRC with locality r.
+
+Corollary 1. Let C be an [n, k, d ]q linear code with locality r and ℓ-dimensional Euclidean hull. Then the EA-CSS code Q(C, C) is an Jn, k − ℓ, δ ; n − k − ℓKq EAQLRC of locality r, where 
+
+δ =
+
+(
+
+d, if C ⊆ C ⊥,
+
+wt  C \ (C ∩ C ⊥), otherwise .
+
+Moreover, the EAQLRC Q(C, C) is pure if δ = d and impure otherwise. Proof. The desired result follows directly from combining with Lemma 1 and Theorem 2. 11 4 Two bounds for CSS-like EAQLRCs 
+
+In this section, we derive two bounds for CSS-like EAQLRCs obtained from Theorem 2. The first is an upper bound on the locality of a CSS-like EAQLRC, which is independent of its distance and entanglement consumption. 
+
+Theorem 3. Let CX and CZ be [n, k X , d X ]q and [n, k Z , d Z ]q linear codes, respectively, where 
+
+dX , d Z ≥ 2. Let r denote the minimum locality of the CSS-like EAQLRC Q(CX , CZ ) obtained from Theorem 2. Then 
+
+r ≤ min {n − 1, k X + kZ − dim( CX ∩ C Z )}.
+
+Proof. For any given i ∈ [n], since dX , d Z ≥ 2, the punctured codes C′ 
+
+> X
+
+and C′ 
+
+> Z
+
+obtained by deleting the ith coordinate of CX and CZ have dimensions kX and kZ , respectively. Let t = dim (CX ∩ C Z ). Since every nonzero codeword of CX ∩ C Z has weight at least 2, puncturing CX ∩ C Z at the ith 
+
+coordinate preserves its dimension. Hence, we can choose a set Ji ⊆ [n] \ { i} with |Ji| = t such that the restriction of CX ∩ C Z to Ji, denoted by ( CX ∩ C Z )Ji , has dimension t. Let GX and GZ
+
+be generator matrices of CX and CZ , respectively. Since CX ∩ C Z is a subcode of both CX and CZ
+
+and dim (( CX ∩ C Z )Ji ) = t, the columns indexed by Ji are linearly independent in both GX and 
+
+GZ . Extend Ji to column bases Ji ⊆ IXi ⊆ [n] \ { i} and Ji ⊆ IZi ⊆ [n] \ { i} of generator matrices of the punctured codes C′ 
+
+> X
+
+and C′ 
+
+> Z
+
+, respectively. We then derive that |IXi | = kX , |IZi | = kZ , and 
+
+|IXi ∪ IZi | ≤ kX + kZ − t.Since the ith column of each generator matrix is a linear combination of the columns in the corresponding basis, there exist hXi ∈ C ⊥ 
+
+> X
+
+and hZi ∈ C ⊥ 
+
+> Z
+
+such that i ∈ supp (hXi ) ∩ supp (hZi ), supp( hXi ) ⊆ IXi ∪ { i}, and supp( hZi ) ⊆ IZi ∪ { i}. It then follows that 
+
+|supp( hXi ) ∪ supp( hZi )| ≤ 1 + |IXi ∪ IZi | ≤ 1 + kX + kZ − t = 1 + dim( CX + CZ ).
+
+Moreover, supp (hXi )∪supp (hZi ) ⊆ [n]. Therefore, |supp (hXi )∪supp (hZi )| ≤ 1+ min {n−1, dim (CX +
+
+CZ )}. Set r0 = min {n − 1, dim (CX + CZ )}. The codewords constructed above satisfy the paired-support condition in (12) with parameter r0. Hence, Q(CX , CZ ) has locality at most r0. Since r
+
+denotes its minimum locality, we obtain 
+
+r ≤ r0 = min {n − 1, k X + kZ − dim( CX ∩ C Z )}.
+
+This completes the proof. Note that Theorem 2 and Corollary 1 allow us to derive the locality of a CSS-like EAQLRC from local properties of the underlying classical codes. Since they provide only sufficient conditions for local recovery, the actual minimum locality of the resulting EAQLRC may be smaller than the guaranteed value. In what follows, we call a locality provided by either Theorem 2 or Corollary 1 
+
+trivial if it coincides with the upper bound in Theorem 3, and nontrivial if it is strictly smaller than this bound. 
+
+Remark 2. Let C be an [ n, k, n − k + 1] q MDS code with 1 ≤ k ≤ n − 1 and an ℓ-dimensional Euclidean hull. Note that k = n is meaningless for locality since C⊥ = {0} in this case. Taking 
+
+CX = CZ = C, we have dim (CX ∩ C Z ) = k. By Corollary 1, we can get a pure CSS-like EAQLRC 
+
+Q(C, C) with parameters Jn, k − ℓ, n − k + 1; n − k − ℓKq and locality k. Furthermore, Theorem 3 gives 
+
+k = min {n − 1, k + k − dim( CX ∩ C Z )} = min {n − 1, k }.
+
+This shows that the locality derived from Corollary 1 attains the upper bound in Theorem 3. According to the above convention, such EAQLRCs are regarded as trivial for quantum local recovery. To describe the dependence among all parameters of CSS-like EAQLRCs, the following theorems present a Singleton-like bound and establish a criterion for such EAQLRCs being optimal with respect to this bound. The techniques are combinations of those used in [29, Theorem 16] and [28, Theorem 4]. 12 Theorem 4. Let Q be an Jn, κ, δ ; cKq CSS-like EAQLRC with locality r obtained from Theorem 2. Then 
+
+2δ ≤ n + c − κ − 2
+
+l κr
+
+m
+
++ 4 . (13) 
+
+Proof. By Theorem 2, there exist two linear codes CX and CZ with respective parameters [n, k X , d X ]q and [ n, k Z , d Z ]q such that c = n − kX − ℓZ = n − kZ − ℓX and κ = kX + kZ − n + c,where ℓX = dim (CX ∩ C ⊥ 
+
+> Z
+
+) and ℓZ = dim (C⊥ 
+
+> X
+
+∩ C Z ). For every i ∈ [n], Theorem 2 also provides 
+
+hXi ∈ C ⊥ 
+
+> X
+
+and hZi ∈ C ⊥ 
+
+> Z
+
+. For each α ∈ { X, Z }, the paired support condition gives 
+
+i ∈ supp( hαi ) and |supp( hαi )| ≤ | supp( hXi ) ∪ supp( hZi )| ≤ r + 1 .
+
+Hence, Lemma 1 shows that both CX and CZ have locality at most r.The relations defining c also give κ = kX − ℓX = kZ − ℓZ . We consider separately the cases 
+
+κ = 0 and κ > 0. 
+
+Case 1. Assume that κ = 0. Then ℓX = kX and ℓZ = kZ , implying that CX ⊆ C ⊥ 
+
+> Z
+
+and 
+
+CZ ⊆ C ⊥ 
+
+> X
+
+. Hence, (5) gives δ = min {dX , d Z }. Applying Lemma 2 to CX and CZ yields 2δ ≤ dX + dZ ≤ 2n − kX − kZ −
+
+ kX
+
+r
+
+
+
+−
+
+ kZ
+
+r
+
+
+
++ 4 = n + c −
+
+ kX
+
+r
+
+
+
+−
+
+ kZ
+
+r
+
+
+
++ 4 ≤ n + c + 4 .
+
+This is (13) when κ = 0. 
+
+Case 2. Assume that κ > 0. We can choose a generator matrix of CX whose first ℓX rows generate CX ∩ C ⊥ 
+
+> Z
+
+. Note that permutation of coordinates does not change the locality of a code. After a coordinate permutation and elementary row operations, this generator matrix can be written as IℓX RℓX ×(n−ℓX )
+
+0 AX
+
+
+
+,
+
+where AX has row rank κ. Let DX be the [ n, κ ]q linear code generated by ( 0 A X ). Since DX ⊆ C X ,we have DX ∩ C ⊥ 
+
+> Z
+
+= DX ∩  CX ∩ C ⊥
+
+> Z
+
+ = {0}. Therefore, DX \ { 0} ⊆ C X \ C ⊥ 
+
+> Z
+
+⊆ C X \ (CX ∩ C ⊥ 
+
+> Z
+
+). With (5), we derive that 
+
+d(DX ) = min   
+
+> x∈D X\{ 0}
+
+wt( x) ≥ wt( CX \ (CX ∩ C ⊥ 
+
+> Z
+
+)) ≥ δ. 
+
+Since the first ℓX coordinates of every codeword in DX are zero, puncturing these coordinates gives an [ n − ℓX = kZ + c, κ, d ′ 
+
+> X
+
+≥ δ]q code D′ 
+
+> X
+
+. Since DX ⊆ C X , one has C⊥ 
+
+> X
+
+⊆ D ⊥ 
+
+> X
+
+. For every 
+
+i ∈ [n] \ [ℓX ], deleting the first ℓX entries from the local check hXi therefore gives a dual word of D′ 
+
+> X
+
+that contains the corresponding coordinate and has weight at most r + 1. Thus, D′ 
+
+> X
+
+has locality at most r. Interchanging X and Z gives a [ kX + c, κ, d ′ 
+
+> Z
+
+≥ δ]q code D′ 
+
+> Z
+
+with locality at most r. Again, applying Lemma 2 to D′ 
+
+> X
+
+and D′ 
+
+> Z
+
+, and using the fact kX + kZ = κ + n − c, we have 2δ ≤ d′ 
+
+> X
+
++ d′ 
+
+> Z
+
+≤ kX + kZ + 2 c − 2κ − 2
+
+l κr
+
+m
+
++ 4 = n + c − κ − 2
+
+l κr
+
+m
+
++ 4 ,
+
+which proves (13). Combining the above two cases completes the proof. The Singleton-like bound in (13) applies to every CSS-like EAQLRC, whether pure or impure, but is not always attainable. The following theorem presents necessary and sufficient conditions for the attainability of the bound in (13) for pure CSS-like EAQLRCs. 
+
+Theorem 5. Let CX and CZ be [n, k X , d X ]q and [n, k Z , d Z ]q codes, respectively, such that (CX , CZ )
+
+satisfies the paired support conditions in (12) . Let Q(CX , CZ ) be the pure Jn, κ, δ ; cKq CSS-like EAQLRC of locality r constructed from Theorem 2. Then the EAQLRC Q(CX , CZ ) is optimal with respect to the bound in (13) if and only if the following three conditions hold: 
+
+1) CX and CZ have the same parameters. 
+
+13 2) Both CX and CZ are optimal cLRCs meeting the Singleton-like bound in (1) .
+
+3) 
+
+l kX
+
+> r
+
+m
+
+=
+
+l kZ
+
+> r
+
+m
+
+=  κr
+
+.Proof. Substituting the three conditions into (13) yields equality and proves sufficiency. We next prove necessity. Suppose that Q(CX , CZ ) is optimal with respect to the bound in (13) . Recall that we have shown in the proof of Theorem 4 that both CX and CZ have locality at most r. Therefore, applying the classical Singleton-like LRC bound in (1) to CX and CZ gives 
+
+dX ≤ n − kX −
+
+ kX
+
+r
+
+
+
++ 2 and dZ ≤ n − kZ −
+
+ kZ
+
+r
+
+
+
++ 2 .
+
+Since δ = min {dX , d Z } and κ = kX + kZ − n + c ≤ min {kX , k Z }, we obtain 2δ ≤ dX + dZ ≤ 2n − kX − kZ −
+
+ kX
+
+r
+
+
+
+−
+
+ kZ
+
+r
+
+
+
++ 4 
+
+≤ 2n − kX − kZ − 2
+
+l κr
+
+m
+
++ 4 = n + c − κ − 2
+
+l κr
+
+m
+
++ 4 .
+
+(14) Since Q(CX , CZ ) is optimal, the first and last terms in (14) are equal. Hence, all the inequalities in this chain must be equalities. Note also that the following facts hold. (i) The first equality in (14) holds if and only if dX = dZ .(ii) Combining the classical Singleton-like bound for cLRCs in (1) with the fact that dX = dZ , the second equality in (14) holds if and only if dX = n−kX −
+
+l kX
+
+> r
+
+m
+
++2 and dZ = n−kZ −
+
+l kZ
+
+> r
+
+m
+
++2. Equivalently, CX and CZ are optimal cLRCs meeting the classical Singleton-like bound in (1). This gives condition 2). (iii) The third equality in (14) holds if and only if 
+
+l kX
+
+> r
+
+m
+
++
+
+l kZ
+
+> r
+
+m
+
+= 2  κr
+
+. Since κ ≤ min {kX , k Z },we have 
+
+l kX
+
+> r
+
+m
+
+=
+
+l kZ
+
+> r
+
+m
+
+=  κr
+
+. This gives condition 3). (iv) By (i) and (ii), we deduce that kX +
+
+l kX
+
+> r
+
+m
+
+= kZ +
+
+l kZ
+
+> r
+
+m
+
+. The equality of the ceiling terms in (iii) therefore yields kX = kZ . Together with dX = dZ , this proves that CX and CZ have the same parameters, giving condition 1). This completes the proof. 
+
+5 Two explicit families of optimal pure CSS-like EAQLRCs 
+
+In this section, we develop a framework for constructing optimal pure CSS-like EAQLRCs with respect to the Singleton-like bound in (13) and apply this framework to obtain two explicit families of optimal pure CSS-like EAQLRCs. We also provide two concrete examples to illustrate our constructions. 
+
+5.1 A framework 
+
+By combining Theorem 2 and Lemmas 1 and 3, the problem of constructing optimal CSS-like EAQLRCs with respect to the Singleton-like bound can be reduced to the problem of designing classical parity-check matrices of CX and CZ . We have a framework with the following three steps for constructing an optimal pure Jn, κ, d ; cKq EAQLRC with locality r with respect to the Singleton-like bound in (13): 14 • Step 1: Choose two parity-check matrices HX and HZ such that the corresponding codes CX
+
+and CZ are optimal [ n, k, d ]q cLRCs with locality r and satisfy the paired support condition in (12). This step guarantees that the resulting CSS-like EAQLRC Q(CX , CZ ) has locality r and the conditions 1) and 2) in Theorem 5 hold. In particular, there are many candidates for such parity-check matrices in the literature where optimal cLRCs were constructed. 
+
+• Step 2: Choose a nonsingular n × n diagonal matrix D over Fq such that 
+
+ kr
+
+
+
+=
+
+ 2k − n + rank( HX DH ⊤ 
+
+> Z
+
+)
+
+r
+
+
+
+,
+
+where κ = 2 k − n + c with c = rank( HX DH ⊤ 
+
+> Z
+
+) by Lemmas 3 and 4. It is clear that each row of HZ has the same support as the corresponding row of HZ D. Let 
+
+C′ 
+
+> Z
+
+be the code with parity-check matrix HZ D. Then CZ and C′ 
+
+> Z
+
+have the same parameters and locality. Therefore, C′ 
+
+> Z
+
+is an optimal [ n, k, d ]q cLRC with locality r if and only if CZ is an optimal [ n, k, d ]q cLRC with locality r. As a result, the CSS-like EAQLRC Q(CX , C′ 
+
+> Z
+
+)has locality r and all the conditions 1)-3) in Theorem 5 hold. In addition, the introduction of D may improve the possibility for making condition 3) hold compared to directly using 
+
+HX and HZ as parity-check matrices of CX and CZ constructed in the literature. 
+
+• Step 3: Show that Q(CX , C′ 
+
+> Z
+
+) is pure. From Theorem 5, we finally obtain a pure 
+
+Jn, 2k − n + rank( HX DH ⊤ 
+
+> Z
+
+), d ; rank( HX DH ⊤ 
+
+> Z
+
+)Kq
+
+EAQLRC with locality r, which is optimal with respect to the Singleton-like bound in (13) .
+
+Remark 3. We have the following remarks about the above framework. 1) The introduction of the nonsingular diagonal matrix D in the above framework has at least the following three effects. 
+
+• Compared with directly using parity-check matrices HX and HZ from existing con-structions of optimal cLRCs CX and CZ , the freedom to choose D can make condition 3) easier to satisfy. 
+
+• Since D is nonsingular and diagonal, multiplication by D rescales the coordinates without changing their zero positions. Consequently, the paired support condition in (12) is preserved for the new pair ( CX , C′ 
+
+> Z
+
+). 
+
+• Different choices of D may change the numbers of the maximally entangled pairs and dimensions of the resulting EAQLRCs while keeping their code lengths, minimum distances, and localities. This is important for constructing EAQLRCs with flexible parameters. 2) Anderson et al. [1] proved that, for q > 2, monomial equivalence can reduce the relative hull dimension. Their result guarantees a monomial transformation, which may contain a coordinate permutation, whereas the existence of a suitable diagonal transformation is not guaranteed, as emphasized in [1, Remark 3.10]. Although monomial equivalence preserves the individual locality of each classical code, a permutation applied only to CZ may misalign its local dual checks with those of the fixed code CX and hence need not preserve the paired support condition in (12) . Therefore, the results in [1] cannot be directly applied to our framework. In the following subsections, we apply the above framework to construct optimal EAQLRCs. Specifically, we choose HX and HZ to be parity-check matrices of previously well-constructed optimal cLRCs and find appropriate nonsingular diagonal matrices D described in the framework. 15 5.2 Optimal EAQLRCs from ℓ-intersection pairs of MDS codes 
+
+Recall that Remark 2 shows that a single MDS code can be used to construct a pure CSS-like EAQLRC, while its locality achieves the maximum possible. For quantum local recovery, such CSS-like EAQLRCs are regarded as trivial. In this subsection, we set HX and HZ to be parity-check matrices of two different MDS codes, and take D = In in the framework of Subsection 5.1. Note that each [ n, k, n − k + 1] q MDS code is an optimal cLRC with locality r = k. As a result, we can obtain a family of optimal pure CSS-like EAQLRCs with flexible parameters and nontrivial locality. To this end, we need the following lemma. 
+
+Lemma 6. ([20, Proposition 1, Remark 1, and Theorems 2 and 3]) Let q ≥ 3 be a prime power, let 
+
+n, k 1, k 2 > 0 and ℓ ≥ 0 be integers satisfying n ≤ q + 1 , k1, k 2 ≤ n − 1, max {k1 + k2 − n, 0} ≤ ℓ ≤
+
+min {k1, k 2}, (n, k 1, k 2) /∈ { (q + 1 , ℓ, ℓ + 1) , (q + 1 , ℓ + 1 , ℓ )}, and (n, ℓ, min {k1, k 2})̸ = ( q + 1 , 0, 1) .Then there exist an [n, k 1, n − k1 + 1] q MDS code C1 and an [n, k 2, n − k2 + 1] q MDS code C2 such that dim( C1 ∩ C 2) = ℓ.
+
+Theorem 6. Let q ≥ 3 be a prime power, and let d, n be positive integers satisfying 2 ≤ d ≤
+
+n ≤ q + 1 . For every integer c satisfying max {0, 2d − n − 1} ≤ c ≤ d − 1 and (n, d, c ) /∈{(q + 1 , 2, 1) , (q + 1 , q + 1 , q )}, with the additional restriction (n, d, c )̸ = ( q + 1 , q/ 2 + 1 , 0) when q
+
+is even, there exists a pure Jn, n + c − 2d + 2 , d ; cKq EAQLRC with locality r = n − d + 1 that is optimal with respect to the Singleton-like bound in (13) .Proof. Step 1. Set k1 = d − 1, k2 = n − d + 1, and ℓ = d − 1 − c. Then k1 + k2 = n, and the assumed range of c gives 0 ≤ ℓ ≤ min {d − 1, n − d} ≤ min {k1, k 2}. (15) Moreover, 1 ≤ k1, k 2 ≤ n − 1. Under the above substitution, the condition ( n, d, c ) /∈ { (q +1, 2, 1) , (q + 1 , q + 1 , q )} excludes the case ( n, ℓ, min {k1, k 2}) = ( q + 1 , 0, 1). By (15) , ℓ ≤ k2 − 1, implying that ( k1, k 2) = ( ℓ+1 , ℓ ) is impossible. The additional condition ( n, d, c )̸ = ( q+1 , q/ 2+1 , 0), imposed when q is even, also excludes the remaining case ( n, k 1, k 2) = ( q + 1 , ℓ, ℓ + 1). Therefore, it follows from Lemma 6 that there exist two MDS codes C1 and C2 with respective parameters [n, d − 1, n − d + 2] q and [ n, n − d + 1 , d ]q, respectively, such that dim (C1 ∩ C 2) = ℓ. Let HX be a generator matrix of C1, and let HZ be a generator matrix of C⊥ 
+
+> 2
+
+. Equivalently, HX and HZ are respective parity-check matrices of 
+
+CX = C⊥ 
+
+> 1
+
+and CZ = C2,
+
+where both CX and CZ are optimal [ n, k = n − d + 1 , d ]q cLRCs with locality r = n − d + 1. Since the dual of an MDS code is also MDS, both C⊥ 
+
+> X
+
+= C1 and C⊥ 
+
+> Z
+
+= C⊥ 
+
+> 2
+
+are [ n, d − 1, n − d + 2] q
+
+MDS codes. For each i ∈ [n], choose Si ⊆ [n] such that i ∈ Si and |Si| = n − d + 2 = r + 1. Since every set of n − d + 2 coordinates is the support of a minimum weight codeword in an [n, d − 1, n − d + 2] q MDS code, there exist hXi ∈ C ⊥ 
+
+> X
+
+and hZi ∈ C ⊥ 
+
+> Z
+
+such that 
+
+i ∈ supp( hXi ) = supp( hZi ) = Si.
+
+Hence, the paired support condition in (12) holds. 
+
+Step 2. Take D = In. Let C′ 
+
+> Z
+
+be the code with parity-check matrix H′ 
+
+> Z
+
+= HZ D = HZ . Then 
+
+C′ 
+
+> Z
+
+= CZ . By Lemma 4, we have rank( HX DH ⊤ 
+
+> Z
+
+) =rank( HX H⊤ 
+
+> Z
+
+)=n − kX − dim( C⊥ 
+
+> X
+
+∩ C Z ) = k1 − dim( C1 ∩ C 2) = d − 1 − ℓ = c. (16) Combining (15) and (16), we verify that 
+
+ 2k − n + rank( HX DH ⊤ 
+
+> Z
+
+)
+
+r
+
+
+
+=
+
+ n − d − ℓ + 1 
+
+n − d + 1 
+
+
+
+= 1 = 
+
+ kr
+
+
+
+16 holds. 
+
+Step 3. It remains to prove purity. On the one hand, it follows from Theorem 2 that Q(CX , C′ 
+
+> Z
+
+)has parameters Jn, n + c − 2d + 2 , δ ≥ d; cKq and locality r = n − d + 1. On the other hand, the Singleton-like bound in Theorem 4 yields 2δ ≤ n + c − κ − 2
+
+l κr
+
+m
+
++ 4 = 2 d. 
+
+Hence, δ = d and the CSS-like EAQLRC Q(CX , C′ 
+
+> Z
+
+) is pure. By the framework of Subsection 5.1, we conclude that Q(CX , C′ 
+
+> Z
+
+) is a pure Jn, n +c−2d+2 , d ; cKq
+
+EAQLRC with locality r = n − d + 1 that is optimal with respect to the Singleton-like bound in (13). This completes the proof. The following remark and example indicate that the optimal EAQLRCs constructed in Theorem 6 can have nontrivial locality. 
+
+Remark 4. From the proof of Theorem 6, the two underlying classical codes CX and C′ 
+
+> Z
+
+have the same dimension k = n − d + 1 and locality r = k. By Theorem 3, the corresponding upper bound on the locality of Q(CX , C′ 
+
+> Z
+
+) is min {n − 1, 2k − dim (CX ∩ C ′ 
+
+> Z
+
+)}. Since dim (CX ∩ C ′ 
+
+> Z
+
+) ≤ k
+
+and k ≤ n − 1, both terms in this minimum are at least k. Therefore, the constructed locality 
+
+r = k attains this upper bound if and only if n − 1 = k or dim (CX ∩ C ′ 
+
+> Z
+
+) = k, which is further equivalent to d = 2 or CX = C′ 
+
+> Z
+
+. However, d > 2 and CX̸ = C′ 
+
+> Z
+
+are possible in the construction of Theorem 6. This fact implies that optimal EAQLRCs obtained in Theorem 6 can also have nontrivial locality even if we employ MDS codes as the underlying classical codes. 
+
+Example 1. Let q = 5 and define 
+
+HX =
+
+1 1 1 1 10 1 2 3 4
+
+
+
+and HZ =
+
+1 1 2 3 40 1 4 4 1
+
+
+
+.
+
+In the framework of Subsection 5.1, set D = I5. Then 
+
+H′ 
+
+> Z
+
+= HZ D =
+
+1 1 2 3 40 1 4 4 1
+
+
+
+.
+
+Set C1 = row (HX ) and C2 = ker (HZ ). Then C1 and C2 are [5 , 2, 4] 5 and [5 , 3, 3] 5 MDS codes, respectively. A direct calculation gives dim (C1 ∩ C 2) = 1. Thus, ( C1, C2) is a 1-intersection pair corresponding to ( q, n, d, c ) = (5 , 5, 3, 1) in Theorem 6. With the proof of Theorem 6, we take 
+
+CX = C⊥ 
+
+> 1
+
+and C′ 
+
+> Z
+
+= C2 to be both [5 , 3, 3] 5 MDS codes. By Theorem 6, we immediately obtain an optimal pure J5, 2, 3; 1 K5 EAQLRC Q(CX , C′ 
+
+> Z
+
+) with locality r = n − d + 1 = 3. We also verify that dim( CX ∩ C ′ 
+
+> Z
+
+) = 1. Consequently, the upper bound in Theorem 3 gives min {n − 1, k X + kZ − dim( CX ∩ C ′ 
+
+> Z
+
+)} = min {4, 3 + 3 − 1} = 4 .
+
+Since r = 3 < 4, the optimal EAQLRC Q(CX , C′ 
+
+> Z
+
+) has a nontrivial locality. 
+
+5.3 Optimal EAQLRCs from block parity-check matrices 
+
+In this subsection, we construct optimal EAQLRCs using the single matrix specialization of the framework in Subsection 5.1, namely setting HX = HZ = H. In this case, the nonsingular diagonal matrices D are generally not the identity matrix In. Note also that there is a systematic construction of optimal cLRCs of length n and locality r such that r + 1 | n by using block parity-check matrices with components that are parity-check matrices of generalized Reed-Solomon (GRS) codes, as summarized in [28, Lemma 10]. We first recall the definition of GRS codes. Let a = ( a1, a 2, . . . , a r) consist of pairwise distinct elements of Fq, and let v = ( v1, v 2, . . . , v r) ∈ (F∗ 
+
+> q
+
+)r. For 1 ≤ k ≤ r ≤ q, the generalized Reed-Solomon (GRS) code 
+
+GRS k(a, v) = {(v1f (a1), v 2f (a2), . . . , v rf (ar)) : f ∈ Fq[x] with deg( f ) < k }
+
+17 is an [ r, k, r − k + 1] q MDS code with generator matrix 
+
+Gk, a,v =
+
+
+
+v1 v2 · · · vr
+
+v1a1 v2a2 · · · vrar
+
+... ... . . . ...
+
+v1ak−11 v2ak−12 · · · vrak−1
+
+> r
+
+ .
+
+Let q be a prime power, and let d, u, r be positive integers satisfying 3 ≤ d ≤ r + 1 ≤ q.For each i ∈ [u], choose ai = ( ai, 1, a i, 2, . . . , a i,r +1 ) ∈ Fr+1  
+
+> q
+
+with pairwise distinct coordinates and 
+
+vi ∈ (F∗ 
+
+> q
+
+)r+1 , and write 
+
+Gd−1,ai,vi =
+
+ vi
+
+Gi
+
+
+
+and Ai = {ai, 1, a i, 2, . . . , a i,r +1 }. (17) Let V = diag( v1, v2, . . . , vu) and G = ( G1 · · · Gu). Consider the block matrix 
+
+H =
+
+VG
+
+
+
+=
+
+
+
+v1 0r+1 · · · 0r+1 
+
+0r+1 v2 · · · 0r+1 
+
+... ... . . . ...
+
+0r+1 0r+1 · · · vu
+
+G1 G2 · · · Gu
+
+
+
+. (18) 
+
+Lemma 7. ([28, Lemma 10]) Let q be a prime power and let u, d, r be positive integers such that 
+
+1 ≤ d − 2 < r ≤ q − 1. Let C be a linear code with parity-check matrix H in (18) . Then C is an optimal [u(r + 1) , ur − d + 2 , d ]q linear code with locality r if one of the following conditions holds. 
+
+1) d ∈ { 3, 4}, a1 = · · · = au, and v1 = · · · = vu.
+
+2) d ≥ 5 and S 
+
+> i∈S
+
+Ai ≥ r|S| + 1 , with Ai as defined in (17) , for every S ⊆ [u] with 
+
+1 ≤ | S| ≤ ⌊ (d − 1) /2⌋.
+
+Theorem 7. Let d, u, r be positive integers with r > 2d − 4 ≥ 2, (r + 1) | (q − 1) , and r + 1 < q − 1.For each integer s satisfying 0 ≤ s ≤ d − 2, if one of the following conditions holds: 
+
+1) d ∈ { 3, 4};
+
+2) d ≥ 5 and u(r + 1) ≤ q − 1,then there exists a pure Ju(r + 1) , ur − 2d + 4 + s, d ; u + sKq EAQLRC with locality r, which is optimal with respect to the Singleton-like bound in (13) .Proof. Step 1. Let G be a subgroup of F∗ 
+
+> q
+
+of order r + 1. According to the prescribed integer d,we consider two cases. 
+
+• If d ∈ { 3, 4}, we fix an ordering G = {a1, a 2, . . . , a r+1 }, and take Ai = G and ai =(a1, a 2, . . . , a r+1 ) for every i ∈ [u]. Thus, ai,j = aj for all i ∈ [u] and j ∈ [r + 1]. 
+
+• If d ≥ 5 and u(r + 1) ≤ q − 1, we choose pairwise distinct cosets Ai = βiG and fix an ordering 
+
+Ai = {ai, 1, a i, 2, . . . , a i,r +1 } for each i ∈ [u]. Take ai = ( ai, 1, a i, 2, . . . , a i,r +1 ) for every i ∈ [u]. Moreover, since the sets Ai are pairwise disjoint, then, for every nonempty S ⊆ [u], we have S 
+
+> i∈S
+
+Ai = ( r + 1) |S| ≥ r|S| + 1 .
+
+For either case, we further take v1 = v2 = · · · = vu = (1 , 1, . . . , 1) ∈ (F∗ 
+
+> q
+
+)r+1 in (18) , so that 
+
+Gi =  a ti,j 
+
+ 
+
+> 1≤t≤d−2,1≤j≤r+1
+
+. Let CX = CZ = C be the linear code with parity-check matrix H
+
+in (18) . Moreover, the inequality r > 2d − 4 implies r > d − 2, and the assumptions on q give 
+
+r ≤ q − 1. It then follows from Lemma 7 that CX = CZ = C is an optimal [ u(r + 1) , ur − d + 2 , d ]q
+
+cLRC with locality r.18 For each i ∈ [u], let bi denote the ith row of the block-diagonal matrix V in (18) . Then supp (bi) = Ji = {(i − 1)( r + 1) + 1 , (i − 1)( r + 1) + 2 , . . . , i (r + 1) } with |Ji| = r + 1 and the sets 
+
+J1, J 2, . . . , J u form a partition of [ u(r + 1)]. For every coordinate j, let i(j) be the unique index such that j ∈ Ji(j) and take hXj = hZj = bi(j). It then follows that 
+
+j ∈ supp( hXj ) ∩ supp( hZj ) and supp( hXj ) ∪ supp( hZj ) = r + 1 .
+
+Thus, the paired support condition in (12) holds. 
+
+Step 2. For every integer s with 0 ≤ s ≤ d − 2, put es = 2 d − s − 3. Since r > 2d − 4, we have 
+
+d − 2 < e s ≤ 2d − 3 ≤ r < r + 1 . Moreover, |A1| = r + 1 < q − 1. Hence, for each 0 ≤ s ≤ d − 2, we can choose an element θs ∈ F∗ 
+
+> q
+
+\ {− aes : a ∈ A1}. With the ordering A1 = {a1,1, a 1,2, . . . , a 1,r +1 }
+
+fixed in Step 1 , we define the ( u(r + 1)) × (u(r + 1)) diagonal matrix 
+
+Ds = diag 
+
+1 + θsa−es 
+
+> 1,1
+
+, 1 + θsa−es 
+
+> 1,2
+
+, . . . , 1 + θsa−es
+
+> 1,r +1
+
+, 1, 1, . . . , 1
+
+| {z }
+
+> (u−1)( r+1)
+
+ . (19) In particular, the choice of θs guarantees that Ds is nonsingular. For every coset Ai = βiG and every integer e with |e| < r + 1, we have 
+
+X
+
+> a∈Ai
+
+ae =
+
+(
+
+r + 1 , e = 0 ,
+
+0, 0 < |e| < r + 1 . (20) It follows from (20) that, for 0 ≤ e ≤ 2d − 4, 
+
+X
+
+> a∈A1
+
+ 1 + θsa−es ae =
+
+
+
+r + 1 , e = 0 ,θs(r + 1) , e = es,
+
+0, otherwise .
+
+(21) When s = 0, we have e0 = 2 d − 3 > 2d − 4, and hence the second case in (21) does not occur in this range. Since H =
+
+VG
+
+
+
+, it can be checked that HD sH⊤ =
+
+VD sV⊤ VD sG⊤
+
+GD sV⊤ GD sG⊤
+
+
+
+. From (20) and (21) , we deduce that VD sV⊤ = ( r + 1) Iu and VD sG⊤ = GD sV⊤ = 0. Moreover, for 1 ≤ j, k ≤ d − 2, we have (GD sG⊤)j,k =
+
+(
+
+θs(r + 1) , j + k = es,
+
+0, otherwise .
+
+There are exactly 2( d − 2) − es + 1 = s pairs ( j, k ) satisfying j + k = es, and they occupy distinct rows and columns. In particular, there are no such pairs when s = 0. Since r + 1 | (q − 1), the element r + 1 is nonzero in Fq. Therefore, rank( HX DsH⊤ 
+
+> Z
+
+) = rank( HD sH⊤) = u + s. 
+
+Let C′ 
+
+> Z
+
+be the code with parity-check matrix HZ Ds. Then both CX and C′ 
+
+> Z
+
+are optimal [n = u(r + 1) , k = ur − d + 2 , d ]q cLRCs with locality r. Furthermore, since r > d − 2 ≥ 1 and 0 < 2d − 4 − s < r , we have 
+
+ kr
+
+
+
+=
+
+
+
+u − d − 2
+
+r
+
+
+
+= u and 
+
+ 2k − n + rank( HX DsH⊤ 
+
+> Z
+
+)
+
+r
+
+
+
+=
+
+
+
+u − 2d − 4 − sr
+
+
+
+= u, 
+
+implying that  kr
+
+ =
+
+l 2k−n+rank( HX DsH⊤ 
+
+> Z)
+> r
+
+m
+
+holds. 19 Step 3. It remains to prove purity. On the one hand, it follows from Theorem 2 that Q(CX , C′ 
+
+> Z
+
+)has parameters Ju(r + 1) , ur − 2d + 4 + s, δ ≥ d; u + sKq and locality r. On the other hand, the Singleton-like bound in Theorem 4 yields 2δ ≤ u(r + 1) + u + s − (ur − 2d + 4 + s) − 2u + 4 = 2 d. 
+
+Therefore, δ = d, and the CSS-like EAQLRC Q(CX , C′ 
+
+> Z
+
+) is pure. By the framework of Subsection 5.1, we conclude that Q(CX , C′ 
+
+> Z
+
+) is a pure Ju(r + 1) , ur − 2d +4 + s, d ; u + sKq EAQLRC with locality r that is optimal with respect to the Singleton-like bound in (13). This completes the proof. 
+
+Example 2. Let ( q, d, r, u, s ) = (13 , 3, 3, 2, 1), which satisfies all the conditions in Theorem 7. Let 
+
+G = ⟨5⟩ = {1, 5, 12 , 8}, which is a subgroup of F∗ 
+
+> 13
+
+of order r + 1 = 4. Let a1 = a2 = (1 , 5, 12 , 8) and let v1 = v2 = (1 , 1, 1, 1). The block matrix in (18) gives 
+
+HX = HZ = H =
+
+
+
+1 1 1 1 0 0 0 00 0 0 0 1 1 1 11 5 12 8 1 5 12 8
+
+ .
+
+For s = 1, we have es = 2 d − s − 3 = 2. Set θs = 2, which is admissible in the proof of Theorem 7 since {− a2 : a ∈ G} = {1, 12 }. This choice yields D = diag (3 , 12 , 3, 12 , 1, 1, 1, 1) in (19) and hence 
+
+H′ 
+
+> Z
+
+= HZ D =
+
+
+
+3 12 3 12 0 0 0 00 0 0 0 1 1 1 13 8 10 5 1 5 12 8
+
+ .
+
+Let CX and C′ 
+
+> Z
+
+be the codes with parity-check matrices HX and H′ 
+
+> Z
+
+, respectively. Then both CX
+
+and C′ 
+
+> Z
+
+are optimal [8 , 5, 3] 13 cLRCs with locality 3. By Theorem 7, the code Q(CX , C′ 
+
+> Z
+
+) is an optimal pure J8, 5, 3; 3 K13 EAQLRC with locality 
+
+r = 3. We also verify that dim( CX ∩ C ′ 
+
+> Z
+
+) = 3. Consequently, the upper bound in Theorem 3 gives min {n − 1, k X + kZ − dim( CX ∩ C ′ 
+
+> Z
+
+)} = min {7, 5 + 5 − 3} = 7 .
+
+Since r = 3 < 7, the optimal EAQLRC Q(CX , C′ 
+
+> Z
+
+) has a nontrivial locality. 
+
+6 Conclusion 
+
+In this paper, we introduced EAQLRCs in Definition 6 and established a sufficient criterion for EASCs to have locality r in terms of the supports of their extended stabilizers in Theorem 1. Building on this criterion, we developed a CSS-like construction of EAQLRCs in Theorem 2 and Corollary 1. For the resulting CSS-like EAQLRCs, we derived an upper bound on their minimum locality in Theorem 3 and a Singleton-like bound in Theorem 4. Both bounds apply to arbitrary CSS-like EAQLRCs, whether pure or impure. For pure CSS-like EAQLRCs, we further established necessary and sufficient conditions for attaining equality in the Singleton-like bound in Theorem 5. These results led to a general framework for constructing optimal pure CSS-like EAQLRCs from pairs of cLRCs in Subsection 5.1. Finally, applying this framework to 
+
+ℓ-intersection pairs of MDS codes and block parity-check pairs, we constructed two families of optimal pure CSS-like EAQLRCs with flexible parameters and nontrivial localities, as stated in Theorems 6 and 7, respectively. 
+
+References 
+
+[1] S.E. Anderson, E. Camps-Moreno, H.H. L´ opez, G.L. Matthews, D. Ruano, I. Soprunov, Relative hulls and quantum codes, IEEE Trans. Inf. Theory 70 (2024) 3190–3201. 20 [2] T.A. Brun, I. Devetak, M.-H. Hsieh, Correcting quantum errors with entanglement, Science 
+
+314 (2006) 436–439. [3] K. Bu, W. Gu, X. Li, Quantum locally recoverable code with intersecting recovery sets, arXiv:2501.10354 (2025). [4] V.R. Cadambe, A. Mazumdar, Bounds on the size of locally recoverable codes, IEEE Trans. Inf. Theory 61 (2015) 5787–5794. [5] M. Cao, K. Zhou, An open problem on NSC quasi-unitary matrices and its application to quantum codes, IEEE Trans. Inf. Theory 72 (2026) 3885–3898. [6] M. Cao, K. Zhou, Optimal quantum ( r, δ )-locally repairable codes from matrix product codes, 
+
+IEEE Trans. Inf. Theory (2026), early access, https://doi.org/10.1109/TIT.2026.3691784. [7] M. Cao, K. Zhou, Quantum codes and optimal pure quantum ( r, δ )-LRCs via the MP construction, arXiv:2606.14253 (2026). [8] B. Chen, J. Huang, A construction of optimal ( r, δ )-locally recoverable codes, IEEE Access 7(2019) 180349–180353. [9] N. Delfosse, G. Z´ emor, Linear-time maximum likelihood decoding of surface codes over the quantum erasure channel, Phys. Rev. Res. 2 (2020) 033042. [10] C. Galindo, F. Hernando, H. Mart´ ın-Cruz, R. Matsumoto, Impure codes exceeding the pure bounds for quantum local recovery, Quantum Inf. Process. 25 (2026) 241. [11] C. Galindo, F. Hernando, H. Mart´ ın-Cruz, R. Matsumoto, Quantum ( r, δ )-locally recoverable codes, Finite Fields Appl. 111 (2026) 102785. [12] C. Galindo, F. Hernando, R. Matsumoto, Quantum ( r, δ )-locally recoverable BCH and homothetic BCH codes, arXiv:2601.22567 (2026). [13] C. Galindo, F. Hernando, R. Matsumoto, D. Ruano, Entanglement-assisted quantum error-correcting codes over arbitrary finite fields, Quantum Inf. Process. 18 (2019) 116. [14] C. Galindo, F. Hernando, C. Munuera, D. Ruano, Optimal quantum locally recoverable codes from matrix product construction, arXiv:2310.15703 (2025). [15] L. Golowich, V. Guruswami, Quantum locally recoverable codes, in: Proc. 2025 Annu. ACM-SIAM Symp. Discrete Algorithms (SODA) , SIAM, 2025, pp. 5512–5522. [16] P. Gopalan, C. Huang, H. Simitci, S. Yekhanin, On the locality of codeword symbols, IEEE Trans. Inf. Theory 58 (2012) 6925–6934. [17] M. Grassl, T. Beth, T. Pellizzari, Codes for the quantum erasure channel, Phys. Rev. A 56 (1997) 33–38. [18] V. Guruswami, R. Kshirsagar, P. Trivedi, Quantum hierarchical locally recoverable codes, arXiv:2606.06736 (2026). [19] M.-H. Hsieh, I. Devetak, T.A. Brun, General entanglement-assisted quantum error-correcting codes, Phys. Rev. A 76 (2007) 062313. [20] Z. Huang, W. Fang, F.-W. Fu, Linear ℓ-intersection pairs of MDS codes and their applications to AEAQECCs, Cryptogr. Commun. 14 (2022) 1189–1206. [21] L. Jin, Explicit construction of optimal locally recoverable codes of distance 5 and 6 via binary constant weight codes, IEEE Trans. Inf. Theory 65 (2019) 4658–4663. [22] A. Ketkar, A. Klappenecker, S. Kumar, P.K. Sarvepalli, Nonbinary stabilizer codes over finite fields, IEEE Trans. Inf. Theory 52 (2006) 4892–4914. [23] E. Knill, R. Laflamme, Theory of quantum error-correcting codes, Phys. Rev. A 55 (1997) 900–911. [24] J. Li, L. Jin, C. Xing, Quantum locally recoverable codes with asymmetric locality, IEEE Trans. Inf. Theory (2026), early access, https://doi.org/10.1109/TIT.2026.3703812. [25] Y. Li, S. Li, H. Lao, G. Luo, S. Ling, On optimal quantum LRCs from the Her-mitian construction and t-designs, IEEE Trans. Inf. Theory (2026), early access, https://doi.org/10.1109/TIT.2026.3697209. [26] Y. Li, S. Li, G. Luo, S. Ling, Improved bounds and optimal constructions of pure quantum locally recoverable codes, arXiv:2512.07256 (2025). [27] D.A. Lidar, T.A. Brun (Eds.), Quantum Error Correction , Cambridge University Press, Cambridge, 2013. [28] G. Luo, B. Chen, M.F. Ezerman, S. Ling, Bounds and constructions of quantum locally 21 recoverable codes from quantum CSS codes, IEEE Trans. Inf. Theory 71 (2025) 1794–1802. [29] G. Luo, M.F. Ezerman, M. Grassl, S. Ling, Constructing quantum error-correcting codes that require a variable amount of entanglement, Quantum Inf. Process. 23 (2024) 4. [30] R. Matsumoto, Reducing measurements in quantum erasure correction by quantum local recovery, arXiv:2510.22890 (2025). [31] D.S. Papailiopoulos, A.G. Dimakis, Locally repairable codes, IEEE Trans. Inf. Theory 60 (2014) 5843–5855. [32] N. Prakash, G.M. Kamath, V. Lalitha, P.V. Kumar, Optimal linear codes with a local-error-correction property, in: Proc. IEEE Int. Symp. Inf. Theory (ISIT) , IEEE, 2012, pp. 2776–2780. [33] A.S. Rawat, D.S. Papailiopoulos, A.G. Dimakis, S. Vishwanath, Locality and availability in distributed storage, IEEE Trans. Inf. Theory 62 (2016) 4481–4493. [34] S. Sharma, V. Ramkumar, I. Tamo, Quantum locally recoverable codes via good polynomials, 
+
+IEEE J. Sel. Areas Inf. Theory 6 (2025) 100–110. [35] I. Tamo, A. Barg, A family of optimal locally recoverable codes, IEEE Trans. Inf. Theory 60 (2014) 4661–4676. [36] D. Xie, S. Zhu, Z. Sun, Two families of optimal quantum locally recoverable codes, Int. J. Theor. Phys. 64 (2025) 86. [37] C. Xing, C. Yuan, Construction of optimal ( r, δ )-locally recoverable codes and connection with graph theory, IEEE Trans. Inf. Theory 68 (2022) 4320–4328. [38] K. Zhou, M. Cao, Optimal quantum ( r, δ )-locally repairable codes via classical ones, J. Combin. Theory Ser. A 223 (2026) 106212. 22

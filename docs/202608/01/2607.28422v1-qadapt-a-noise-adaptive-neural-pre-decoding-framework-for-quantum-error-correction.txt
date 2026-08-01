@@ -1,0 +1,537 @@
+Title: QAdapt: A Noise-Adaptive Neural Pre-Decoding Framework for Quantum Error Correction
+
+URL Source: https://arxiv.org/pdf/2607.28422v1
+
+Published Time: Fri, 31 Jul 2026 01:28:21 GMT
+
+Number of Pages: 11
+
+Markdown Content:
+# QAdapt: A Noise-Adaptive Neural Pre-Decoding Framework for Quantum Error Correction 
+
+Ran Miao 1, Rui Luo 1,2 , Xiaohan Shan 1, Xiaoming Sun 31Beijing Zhongke Qhub Technology Co., Ltd. (Qhub), Beijing, China 
+
+> 2
+
+Center for Quantum Information, Institute for Interdisciplinary Information Sciences, Tsinghua University, Beijing, China 
+
+> 3
+
+Institute of Computing Technology, Chinese Academy of Sciences, Beijing, China 
+
+July 2026 
+
+# Abstract 
+
+Fault-tolerant quantum computing (FTQC) relies on quantum error correction to suppress physical errors and preserve logical information at scale. In practice, however, performance is constrained not only by physi-cal noise but also by the latency of classical decoders processing rapidly generated syndrome data. This chal-lenge is exacerbated by hardware noise that is strong, heterogeneous, and nonstationary, as well as by the simulation-to-hardware distribution shift that can sub-stantially degrade fixed neural decoders. We present QAdapt, a noise-adaptive neural pre-decoding frame-work for surface-code quantum error correction. QAdapt captures local spatiotemporal correlations in syndrome data, sequentially adapts to evolving noise conditions while mitigating catastrophic forgetting, and forwards the residual syndrome to a conventional global decoder. Across 110 synthetic out-of-distribution noise configura-tions for rotated surface-code memory circuits, QAdapt consistently reduces the logical error rate relative to the neural pre-decoding baseline. On Google’s Willow benchmark data, without target-domain fine-tuning, it achieves reductions of up to 5.79% in logical error rate and 9.32% in backend decoding latency on the resid-ual syndrome. These results demonstrate that QAdapt provides a practical and decoder-compatible approach to improving the robustness and backend decoding ef-ficiency of quantum error correction under evolving hardware noise. 
+
+Keywords: quantum error correction; surface code; neural decoder; pre-decoding; continual learning; elastic weight consolidation; out-of-distribution generalization 
+
+# 1 Introduction 
+
+Fault-tolerant quantum computing (FTQC) relies on quantum error correction (QEC) to protect logical infor-mation encoded in noisy physical qubits. QEC operates as a continuous quantum–classical feedback loop: stabi-lizer measurements generate syndrome data, classical decoders infer likely error configurations, and correc-tions or Pauli-frame updates guide subsequent computa-tion [1, 2]. The scalability of FTQC therefore depends not only on physical error rates and code thresholds, but also on the accuracy, latency, and robustness of the classical decoding stack. As quantum processors, code distances, and circuit depths grow, decoders must process increasingly large syndrome streams within the latency budget of logical operations [3, 4]. Meeting these requirements on realistic hardware is challenging. Quantum noise is heterogeneous and non-stationary: the contributions of measurement errors, entangling-gate errors, idle errors, leakage, crosstalk, and noise bias can vary across devices, qubits, and calibration cycles. Moreover, decoders are often devel-oped using simulated data that cannot fully capture hardware-specific behavior. A decoder optimized for one noise distribution may therefore suffer substantial performance degradation under another, even when the underlying quantum code remains unchanged. Retrain-ing for each new operating condition is costly, requires representative target-domain data, and may overwrite knowledge acquired under previously encountered noise regimes. Robustness to distribution shift is therefore a system-level requirement for scalable QEC, rather than merely a machine-learning generalization objec-tive [5, 6]. Surface codes provide a leading experimental setting for studying these challenges because of their local stabi-lizer structure and favorable error thresholds [ 7 –9]. Ex-perimental demonstrations of logical-error suppression with increasing code distance, followed more recently by below-threshold quantum memories and real-time decoding on Google’s Willow processors, mark impor-tant progress toward practical FTQC [ 10 , 11 ]. These advances also highlight the growing interdependence between quantum-hardware performance and classical decoding capacity. Independently of improvements in hardware scale and quality, operating conditions with higher or more strongly correlated physical noise pro-duce denser detector streams and more challenging de-coding instances. Moreover, hardware drift can invali-date the fixed noise assumptions, parameters, or learned weights used by a decoder. Conventional global decoders, such as minimum-weight perfect matching, are accurate, well understood, and supported by efficient implementations such as Py-Matching [ 12 ]. However, they must solve a global match-1arXiv:2607.28422v1 [cs.LG] 30 Jul 2026 ing problem over all active detector events, causing the backend decoding workload to grow with syndrome den-sity. This creates a system-level trade-off among logical accuracy, throughput, and latency [ 13 , 14 ]. Neural de-coders can learn local and correlated error patterns that are difficult to represent explicitly in matching graphs, but replacing a mature global decoder with a fully learned model raises additional concerns about in-tegration complexity, reliability, and out-of-distribution generalization. Neural pre-decoding offers a modular alternative. A learned model first identifies and removes locally recog-nizable error patterns, after which the resulting resid-ual syndrome is passed to an established global de-coder [ 15 , 16 ]. By reducing the number and complexity of residual detector events, this hybrid pipeline can lower the workload of the backend decoder while retain-ing the global consistency of conventional decoding. Its practical effectiveness, however, depends on whether the learned component remains reliable as the hardware noise distribution evolves. We present QAdapt, a noise-adaptive neural pre-decoding framework designed to improve the robustness of this hybrid decoding strategy under nonstationary hardware noise. QAdapt learns local spatiotemporal cor-relations in syndrome data and is sequentially adapted across physically meaningful noise regimes, with reg-ularization designed to preserve knowledge acquired under previously encountered conditions. The result-ing residual syndrome is then passed to a conventional global decoder. Rather than replacing established de-coders, QAdapt serves as an adaptive interface between a changing quantum-hardware layer and a stable classi-cal decoding backend. This interface may broaden the operating range of existing decoding pipelines. By allowing the learned component to accommodate hardware-induced distri-bution shifts, QAdapt can improve robustness without modifying the quantum code or replacing the global decoder. By reducing the number and complexity of residual detector events, it can also relieve pressure on the classical latency budget as QEC systems scale. More broadly, QAdapt illustrates how adaptive classical processing can complement advances in qubit quality, control, and code design to support reliable FTQC sys-tems. The main contributions of this work are as follows: 1. Noise-adaptive pre-decoding. QAdapt supports sequential adaptation to changing measurement, entangling-gate, idle, and biased-noise conditions while preserving performance on previously encoun-tered noise regimes. 2. Robustness under distribution shift. QAdapt is evaluated across 110 synthetic out-of-distribution noise configurations and on Google’s Willow bench-mark data, without target-domain fine-tuning. 3. Accuracy and backend-efficiency improve-ments. The results show that adaptive pre-decoding can simultaneously improve logical accuracy and re-duce backend decoding latency under evolving hard-ware noise. 
+
+# 2 Related Work 
+
+Decoding at FTQC scale. Decoders in an FTQC system must balance logical accuracy with throughput and response latency [ 13 , 14 ]. Parallel-window methods address the backlog produced by continuous syndrome streams [ 3], and recent control-stack demonstrations show that scalable FPGA decoding can operate with sub-microsecond mean processing time per QEC round [ 4]. These results establish classical decoding as part of the FTQC systems path rather than an offline post-processing task. 
+
+Matching and noise-aware decoding. MWPM maps detector events to a weighted graph and finds a minimum-weight set of pairings consistent with the observed syndrome. PyMatching provides a practical software interface [ 12 ], while sparse-blossom data struc-tures substantially improve matching throughput for large detector graphs [ 17 ]. Calibration to device-specific noise can further improve error suppression [ 5]. Match-ing accuracy and runtime nevertheless depend on the residual graph and its weights; dense detector streams enlarge the active problem and make locally ambiguous patterns more common. 
+
+Learned decoding and pre-decoding. Data-driven decoders can learn correlated noise beyond the assump-tions of simple matching graphs. Recurrent models have improved decoding on small-distance experimen-tal surface-code data [ 18 ], and AlphaQubit combines recurrent, convolutional, and attention mechanisms to achieve high accuracy on experimental and realistic simulated data [ 19 ]. These methods predict logical outcomes or decoder state directly. Local–global ap-proaches instead remove locally recognizable errors and pass the residual syndrome to an established global de-coder, preserving modular integration while reducing backend work [ 15 ]. Recent neural pre-decoders ex-plore this strategy with learned local correction models [16, 20]. QAdapt focuses on a different system require-ment: maintaining the effectiveness of this modular pipeline when hardware noise changes over time. 
+
+Adaptation under noise drift. Noise-aware calibra-tion improves decoding when a representative device model is available [ 5], while syndrome-based estimation can track time-dependent noise and enable adaptive decoding [6]. QAdapt complements these directions by adapting a neural pre-decoder across physically inter-pretable noise perturbations. It uses EWC to protect parameters important to earlier tasks during sequential learning [ 21 ], and is evaluated without target-domain adaptation on the Willow benchmark data. 23 Problem Formulation and Hardware-Load Motivation 
+
+3.1 Detector tensors and the pre-decoding objective 
+
+Repeated stabilizer measurements convert physical faults into detector events. For a batch of N detector observations si ∈ { 0, 1}, we define the input syndrome density as 
+
+ρsyn = 1
+
+N
+
+> N
+
+∑
+
+> i=1
+
+si. (1) Unlike device-specific summaries of individual gate er-rors, Equation (1) directly measures the event load presented to a decoder at fixed code distance, logical basis, and number of rounds. It is not a complete noise characterization: different correlated processes can pro-duce similar density. It is nevertheless a useful common observable for comparing decoder workloads. A neural pre-decoder predicts local corrections ˆe from the detector tensor s. Applying the correction through the detector topology yields a residual stream 
+
+sres = s ⊕ H ˆe, (2) where H denotes the appropriate detector–correction incidence map and ⊕ is addition modulo two. PyMatch-ing then decodes sres . This modular pattern follows prior local–global pre-decoding work [ 15 , 16 ]; our fo-cus is robustness to dense, heterogeneous, and shifting noise. 
+
+3.2 Hardware-load evidence 
+
+We use Willow as an external hardware reference. The Willow study demonstrated a distance-7 surface-code memory on a 105-qubit processor and a distance-5 mem-ory integrated with a real-time decoder [ 11 ]. For the open surface-code data aggregated over logical X and 
+
+Z bases at ten rounds, the input syndrome densities used here are 0.07142 for d = 5 and 0.07341 for d = 7 .The device-mapped high-noise training environment, denoted T0, is a 25-parameter circuit-level Pauli model derived from hardware preparation, measurement, idle, and CNOT error parameters. At the same ten-round, X/Z -aggregated operating point, its densities are 0.09072 for d = 5 and 0.09649 for d = 7 : respectively 1.27 and 1.31 times the Willow values. At d = 3 , logical 
+
+Z, and nine rounds, the mean density measured over five batches on an anonymized superconducting cloud platform is 0.13106 ± 0.00057 (standard error), 1.70 times the matched T0 simulation density of 0.07717. 
+
+3.3 Design requirements 
+
+The workload comparison imposes three requirements. First, dense syndromes increase overlap among local chains and therefore require a representation that sep-arates within-round structure, cross-round propaga-tion, and their joint correlations. Second, the relative strengths of measurement, CNOT, idle, and biased er-rors can change across operating points, so a useful model must adapt without overwriting all knowledge of earlier noise states. Third, the local model should reduce the burden on a globally consistent decoder rather than replace it. The observed positive association between noise multiplier and density ( ρ = 0 .878 , p = 2 .2 × 10 −36 
+
+over the 110-point grid) supports the use of syndrome density as a workload indicator, while the limitations of density as a complete noise descriptor motivate direct OOD and cross-hardware evaluation. 
+
+# 4 QAdapt Method 
+
+4.1 Local–global pipeline 
+
+QAdapt has an offline and an online stage (Figure 2). Offline, we generate a task sequence comprising base noise (T0), enhanced measurement noise (T1), enhanced CNOT noise (T2), enhanced idle noise (T3), and en-hanced Z bias (T4). HTNet learns local correction logits, while Q-EWC regularizes sequential updates. Online, HTNet transforms the raw detector tensor into local corrections and a residual detector tensor; Py-Matching performs the final global decode. 
+
+4.2 Heterogeneous spatiotemporal fea-ture extraction 
+
+HTNet separates spatial, temporal, and joint cor-relations before learning how strongly each branch should contribute for each sample and feature chan-nel. The input is a four-channel detector tensor x ∈{0, 1}4×T ×D×D . A 3-D convolutional stem maps it to 
+
+C = 112 channels. The representation then passes through three HTNet blocks with an expanded width of 168 and grouped joint convolutions. The three blocks give an effective receptive field of nine rounds or lattice positions along each convolved dimension. Within a block, a normalized pointwise projection first produces z. Three branches then specialize by correlation direction: 
+
+zs = DWConv 1×3×3(z), (3) 
+
+zt = DWConv 3×1×1(z), (4) 
+
+zj = GConv 3×3×3(z). (5) The spatial branch captures within-round local chains, the temporal branch captures propagation across rounds, and the joint branch captures coupled local space–time patterns. Adaptive branch fusion computes per-sample, per-channel weights. With P (·) denoting global average pooling and gϕ a two-layer pointwise network, 
+
+α = softmax b(gϕ([ P (zs), P (zt), P (zj )])) , (6) 
+
+zf = 3 ∑
+
+> b∈{ s,t,j }
+
+αb ⊙ zb. (7) The factor of three preserves the initial scale because the fusion logits are zero-initialized and therefore begin with uniform branch weights. 3d = 5 d = 7 
+
+> 0.00
+> 0.02
+> 0.04
+> 0.06
+> 0.08
+> 0.10
+> Input syndrome density
+> 0.071
+> 0.091
+> T0 / Willow = 1.27×
+> 0.073
+> 0.096
+> T0 / Willow = 1.31×
+
+aMatched hardware workload ( r = 10, X/Z)        
+
+> Willow Mapped T0
+> 1.2 1.5 2.0 2.5 3.0
+> OOD noise multiplier
+> 0.12
+> 0.14
+> 0.16
+> 0.18
+> 0.20
+> Input syndrome density  Spearman ρ= 0.878
+> p= 2.2 × 10 −36
+
+b                                  
+
+> d= 7 mean
+> d= 9 mean
+> Hardware-density anchor
+> C+I C+Z I+Z M+C M+I M+Z C+I+Z M+C+I M+C+Z M+I+Z M+C+I+Z
+> Activated noise axes
+> d= 7
+> d= 9
+> Code distance
+> 0.157 0.161 0.135 0.165 0.115 0.139 0.163 0.169 0.167 0.142 0.170
+> 0.162 0.166 0.140 0.171 0.119 0.144 0.169 0.174 0.172 0.147 0.175
+
+c
+
+> 0.10
+> 0.12
+> 0.14
+> 0.16
+> 0.18
+> 0.20
+> 0.22
+> 0.24
+> Mean input syndrome density
+
+Figure 1: Input syndrome load across hardware references and the selected synthetic OOD grid. (a) Willow and the device-mapped T0 environment at ten rounds, aggregated over logical X and Z bases. (b) Mean input syndrome density averaged across the 11 axis combinations at each multiplier; individual configuration points are omitted for clarity. The dashed green line marks the anonymized cloud-platform density. (c) Mean input density for each activated-axis combination at d = 7 and d = 9 , averaged across the five retained multipliers. 
+
+4.3 Axis-aware calibration and evidence preservation 
+
+Branch fusion selects among correlation directions, but it does not determine where within a sample a fused feature should remain active. HTNet therefore applies a second, factorized calibration stage. Channel weights summarize which learned mechanisms are relevant; tem-poral weights emphasize particular syndrome rounds; and spatial weights emphasize local lattice regions. The three logits are added before the sigmoid rather than applied as independent multiplicative gates, allowing evidence on one axis to compensate for weaker evidence on another. After grouped pointwise mixing and projection, an axis–channel gate combines channel, temporal, and spa-tial logits: 
+
+G(u) = u ⊙ σ(gc(u) + gt(u) + gs(u)) . (8) The block output is a dropout-regularized residual up-date. Finally, a raw-evidence skip concatenates the original four detector channels with the deep representa-tion before the output head. This gives the head direct access to strong detector evidence that might otherwise be attenuated by repeated feature transformations. The full architecture is shown in Figure 3. 
+
+4.4 Q-EWC continual adaptation 
+
+Straight sequential fine-tuning can overwrite parameters that are important to earlier noise states. Elastic weight consolidation (EWC) mitigates this form of catastrophic forgetting by penalizing changes to parameters with high Fisher importance [ 21 ]. After task k, we store the parameter estimate θ⋆k and diagonal Fisher estimate Fk.When learning task t, Q-EWC minimizes 
+
+Lt(θ) = LBCE ,t (θ) + λ
+
+2
+
+∑
+
+> k<t
+
+∑
+
+> i
+
+Fk,i 
+
+(θi − θ⋆k,i 
+
+)2 . (9) The implementation uses λ = 100 and estimates each diagonal Fisher state from 65,536 samples. Tasks T0– T4 are trained sequentially for 20 epochs each, for 100 4Table 1: Input syndrome load and its role in the evaluation. Cross-device ratios are reported only under matched distance, round, and basis aggregation.                                     
+
+> Setting Mapped/platform Willow Relation Role T0, d= 3 /Z/r 90.07717 ——Base mapped-noise training point Cloud hardware,
+> d= 3 /Z/r 9
+> 0.13106 —1.70 ×T0 High-load anchor; five batches
+> d= 5 /r 10 ,X/Z 0.09072 0.07142 1.27 ×Willow Matched decoder workload
+> d= 7 /r 10 ,X/Z 0.09649 0.07341 1.31 ×Willow Matched decoder workload Synthetic OOD grid ρ= 0 .878 ,p= 2 .2×10 −36 Noise–density association
+
+Figure 2: QAdapt workflow. The design connects hardware-informed noise modeling, heterogeneous spatiotemporal feature extraction, continual adaptation, and hybrid neural–matching inference. cumulative epochs. Fisher states are captured after T0–T3 and loaded during later tasks. 
+
+4.5 Online residual decoding 
+
+At inference time, HTNet produces four-channel local-correction logits. Thresholded corrections are mapped back through the detector topology to construct sres in Equation (2). PyMatching receives the same detector graph used by the baseline but with detector events updated by the neural corrections. The final logical decision therefore remains the output of a globally con-sistent matching problem. This separation is deliberate. HTNet is optimized to resolve parallelizable local structure within its receptive field, whereas PyMatching handles error chains that remain ambiguous or extend beyond that field. The reported backend-latency measurements characterize the cost of this residual problem. They do not include neural inference, host–device transfer, or residual-tensor construction. 
+
+# 5 Experimental Setup 
+
+5.1 Circuit-level data generation and T0 
+
+Training and synthetic evaluation use repeated rotated-surface-code memory circuits sampled with Stim [ 22 ]. T0 is the hardware-mapped base environment. It uses preparation error 0.1%, measurement error 1.0%, per-channel idle-CNOT error 0.0333%, per-channel idle-SPAM error 0.0667%, and 0.0667% for each of the 15 non-identity two-qubit Pauli channels following a CNOT. The complete 25-parameter specification appears in Section A. Unless stated otherwise, reported synthetic results combine logical X and Z bases. 
+
+5.2 Models and training protocol 
+
+Ising-fast is the fast convolutional pre-decoder trained under the same T0 environment, input representation, and PyMatching backend. HTNet uses three HTNet blocks, 112 hidden channels, 168 expanded channels, six joint-convolution groups, eight normalization groups, GELU activations, and an effective receptive field of nine. It contains 650,374 parameters, compared with 912,772 for Ising-fast. The continual schedule follows T0 base, T1 measurement-enhanced, T2 CNOT-enhanced, T3 idle-enhanced, and T4 Z-bias-enhanced tasks. Each stage contributes 20 epochs. From T1 onward, training loads all available Fisher states from prior tasks and applies Equation (9) with λ = 100 . Each Fisher state is esti-mated from 65,536 samples. This protocol is summa-rized in Section B. 
+
+5.3 Synthetic OOD protocol 
+
+The OOD grid varies four axes—measurement, CNOT, idle, and Z bias—over all six two-axis combinations, four three-axis combinations, and one four-axis com-bination. Each combination is evaluated at multipli-ers {1.2, 1.5, 2.0, 2.5, 3.0} for d ∈ { 7, 9}. The design therefore contains 11 × 5 × 2 = 110 configurations, or 5Figure 3: HTNet architecture. (a) The detector tensor passes through a 112-channel 3-D stem, three HTNet blocks, raw-evidence concatenation, and a four-channel correction head. (b) Each block expands to 168 channels and separates spatial, temporal, and joint operators before sample- and channel-adaptive fusion, grouped feature mixing, projection, axis–channel gating, dropout, and a 112-channel identity residual. 55 configurations per distance. The high-load subset is defined before comparing methods: it contains all configurations with ρsyn ≥ 0.13106 , the mean density observed on the anonymized cloud platform under its reported operating point. The grid construction is listed in Section C. 
+
+5.4 Willow zero-shot protocol 
+
+We evaluate open Willow surface-code data at ten rounds without fine-tuning, parameter updates, or target-domain calibration: 400,000 shots at d = 5 and 100,000 shots at d = 7 . The underlying hardware ex-periment and open data release are described in Google Quantum AI and Collaborators [11] . Willow is treated as an external distribution rather than as a matched-noise benchmark. 
+
+5.5 Metrics and timing scope 
+
+We report logical error rate, the fraction of detector ob-servations that are active at the pre-decoder input, and PyMatching latency per round after neural pre-decoding. The timing measurement includes only decoding of the residual syndrome. It excludes neural-network inference, device/host data movement, and residual-tensor con-struction; it is therefore a measurement of backend load rather than end-to-end deployment latency. Relative d = 7 d = 9          
+
+> 0.00
+> 0.01
+> 0.02
+> 0.03
+> 0.04
+> 0.05
+> 0.06
+> Logical error rate
+> 0.051
+> 0.043
+> HTNet ↓15.59%
+> 0.040
+> 0.033
+> HTNet ↓18.61%
+> aMapped T0 simulation
+> Ising-fast HTNet
+> Parameters
+> (×10 6)
+> Latency d= 7
+> (μs/round)
+> Latency d= 9
+> (μs/round)
+> 0.0
+> 0.5
+> 1.0
+> 1.5
+> 2.0
+> 2.5
+> 3.0
+> Value
+> 0.913
+> 0.650
+> HTNet ↓28.75%
+> 1.249 1.157
+> HTNet ↓7.34%
+> 2.427
+> 2.135
+> HTNet ↓12.04%
+> bModel and backend cost
+> Ising-fast HTNet
+
+Figure 4: Mapped-noise comparison between HTNet and Ising-fast. (a) LER at d = 7 and d = 9 . (b) Parameter count at d = 9 and residual-syndrome PyMatching latency at both d = 7 and d = 9 .6Table 2: LER under the device-mapped T0 simulation environment. 
+
+Distance Ising-fast LER HTNet LER Reduction 
+
+d = 7 0.05071 0.04280 15.59% 
+
+d = 9 0.04037 0.03286 18.61% 
+
+Table 3: Mean synthetic-OOD results. Each row aggre-gates 55 configurations and logical X/Z bases.                
+
+> LER Backend latency ( μs/round)
+> dIsing-fast QAdapt Ising-fast QAdapt
+> d= 7 0.23447 0.22701 2.329 2.195
+> d= 9 0.24444 0.23653 4.884 4.608
+
+improvement is 
+
+∆rel = mbaseline − mQAdapt 
+
+mbaseline 
+
+× 100% , (10) for metrics such as LER or latency where lower is better. 
+
+# 6 Results 
+
+6.1 In-distribution architecture evi-dence 
+
+Under the fixed T0 noise environment, HTNet improves LER at both evaluated medium-to-large code distances (Table 2 and Figure 4). At d = 7 , LER decreases from 0.05071 to 0.04280 (15.59%); at d = 9 , it decreases from 0.04037 to 0.03286 (18.61%). At d = 9 , the model is 28.75% smaller. The residual PyMatching latency de-creases from 1.249 to 1.157 μs round −1 at d = 7 (7.34%) and from 2.427 to 2.135 μs round −1 at d = 9 (12.04%). 
+
+6.2 Generalization across the full syn-thetic OOD grid 
+
+QAdapt achieves lower LER than Ising-fast in all 110 retained OOD configurations. Averaged over the 55 configurations at each distance, LER decreases by 3.18% at d = 7 and 3.23% at d = 9 (Table 3 and Figure 5). Residual PyMatching latency decreases by 5.72% and 5.65%, respectively. The agreement of accuracy and backend-latency improvements indicates that QAdapt generally leaves both a less ambiguous and a less costly residual problem. 
+
+6.3 Generalization in the hardware-anchored high-load subset 
+
+The OOD grid spans input densities from 0.09919 to 0.23624 and therefore contains the cloud-platform an-chor of 0.13106. Among the 74 synthetic configurations at or above that density, QAdapt improves LER in all cases, with mean ∆ LER = −0.00788 . This is evidence of robustness in a synthetic load regime relevant to the observed hardware density. It is not, by itself, an end-to-end decoding result on the anonymized platform. 
+
+6.4 Zero-shot transfer to Willow 
+
+Without target-domain fine-tuning, QAdapt improves both metrics at both Willow distances (Table 4 and Fig-ure 6). At d = 5 , LER decreases by 5.79% and backend latency by 1.43%. At d = 7 , LER decreases by 2.51% and backend latency by 9.32%. These results show that the learned local corrections transfer beyond the mapped T0 noise family. Table 4: Zero-shot Willow results at ten rounds. Back-end latency is reported in μs/round.                         
+
+> Setting Metric Ising-fast QAdapt Reduction
+> d= 5 LER 0.09963 0.09386 5.79%
+> d= 5 Latency 0.704 0.694 1.43%
+> d= 7 LER 0.08412 0.08201 2.51%
+> d= 7 Latency 1.405 1.274 9.32%
+
+7d = 7 d = 9 
+
+0.0 
+
+0.1 
+
+0.2 
+
+0.3   
+
+> Mean logical error rate
+> 0.234 0.227
+> QAdapt ↓3.18%
+> 0.244 0.237
+> QAdapt ↓3.23%
+
+a
+
+Ising-fast QAdapt 
+
+d = 7 d = 9 
+
+0
+
+2
+
+4
+
+6  
+
+> Backend latency ( μs/round)
+> 2.329 2.195
+> ↓5.72%
+> 4.884 4.608
+> ↓5.65%
+
+b
+
+Ising-fast QAdapt 
+
+0.10 0.12 0.14 0.16 0.18 0.20 0.22 0.24 
+
+Input syndrome density 
+
+−1.2 
+
+−1.0 
+
+−0.8 
+
+−0.6 
+
+−0.4 
+
+−0.2 
+
+0.0 
+
+> ΔLER (QAdapt − Ising-fast)
+> [percentage points]
+
+All configurations: 110/110 wins 
+
+At or above anchor: 74/74 wins 
+
+c
+
+d = 7 d = 9 Hardware-density anchor Figure 5: Synthetic OOD evaluation over the five retained noise multipliers. (a) Mean LER over 55 configurations at each distance. (b) Mean residual-syndrome PyMatching latency; arrows report the relative reduction. (c) Point-level LER difference for all 110 configurations as a function of input syndrome density; negative values favor QAdapt, and the dashed line marks the hardware-density anchor. d = 5 d = 7  
+
+> 0.00
+> 0.02
+> 0.04
+> 0.06
+> 0.08
+> 0.10
+> 0.12
+> Logical error rate
+> 0.100
+> 0.094
+> QAdapt ↓5.79%
+> 0.084 0.082
+> QAdapt ↓2.51%
+
+a Willow zero-shot accuracy ( r = 10)      
+
+> Ising-fast QAdapt
+> d= 5 d= 7
+> 0.0
+> 0.2
+> 0.4
+> 0.6
+> 0.8
+> 1.0
+> 1.2
+> 1.4
+> 1.6
+> Backend latency ( μs/round)
+> 0.704 0.694
+> QAdapt ↓1.43%
+> 1.405
+> 1.274
+> QAdapt ↓9.32%
+
+b Residual decoding cost  
+
+> Ising-fast QAdapt
+
+Figure 6: Zero-shot transfer to Willow at ten rounds. (a) LER at d = 5 and d = 7 . (b) Residual-syndrome PyMatching latency. 
+
+# 7 Discussion 
+
+7.1 Interpreting the architecture gains 
+
+The T0 comparison is consistent with the design premise that dense detector streams contain correlation struc-ture at more than one orientation. A single isotropic 3-D path must use the same representation to describe within-round chains, time-like propagation, and their intersections. HTNet allocates separate operators to these patterns and selects their relative contribution 8per sample and channel. The axis–channel gate then changes where the fused representation is active, while the raw-evidence skip protects strong local detector evidence. The current data establish a gain for the complete architecture; without a module-by-module ab-lation, they do not isolate the causal contribution of any individual component. 
+
+7.2 Accuracy and residual-decoder workload 
+
+A neural pre-decoder does not replace global decoding; it changes the instance that the global decoder must solve. Across the synthetic OOD grid and Willow, lower mean LER occurs together with lower residual-syndrome PyMatching latency. This agreement suggests that the local corrections generally remove useful structure rather than merely changing the detector count. It does not prove that density reduction alone causes the LER improvement, because residual topology and edge weights also affect matching difficulty. The timing boundary is important. Lower residual-syndrome latency demonstrates reduced backend work. An end-to-end deployment claim requires joint mea-surement of neural inference, data transfer, residual construction, and matching. Prior work shows that pre-decoding and integrated QEC decoding can operate in low-latency accelerator pipelines [ 4, 16 ], but the present measurements cover only the final component. 
+
+7.3 OOD and cross-hardware evidence 
+
+QAdapt wins in all retained configurations of both the full synthetic grid and the hardware-anchored high-load subset. This coverage indicates that the aggregate advantage is not confined to low-density perturbations. The Willow experiment tests a different direction of shift: an external hardware dataset whose matched detector load is lower than T0. Improvement without target fine-tuning shows that the learned local corrections are not specific to a single mapped-noise family. Together, the two evaluations probe variation in noise intensity and hardware origin, although they do not exhaust all forms of distribution shift. 
+
+7.4 Limitations and next steps 
+
+The anonymized cloud-platform measurements provide detector density but not a complete public logical-decoding benchmark; consequently, the synthetic high-load analysis uses hardware density only as an anchor. Density does not identify the underlying correlation structure, so matching density across environments does not establish distributional equivalence. The cur-rent evidence also lacks confidence intervals for LER, a controlled comparison of Q-EWC with unregularized sequential fine-tuning, and per-component end-to-end latency. Results cover rotated-surface-code memory experiments over the reported distances and rounds; broader claims require longer windows, additional de-vices, leakage-dominated regimes, and logical opera-tions. A complete follow-up should evaluate paired shots from the anonymized platform, report binomial confi-dence intervals and seed variation, compare EWC with replay and joint mixed-noise training, ablate each HT-Net component, and time the deployed pipeline end to end. Online Fisher updates and drift detection are natural extensions for calibration-aware adaptation. 
+
+# 8 Conclusion 
+
+We introduced QAdapt, a noise-adaptive neural pre-decoding framework that combines continual adapta-tion of local syndrome correction with an established global decoding backend. QAdapt is designed to remain effective as hardware noise evolves, while mitigating catastrophic forgetting and reducing the residual syn-drome workload presented to the global decoder. Across 110 synthetic out-of-distribution noise configurations for rotated surface-code memory circuits, QAdapt con-sistently improves logical accuracy, and its zero-shot results on Google’s Willow benchmark data further demonstrate that these benefits can extend beyond the simulated noise distributions used for training. The broader value of QAdapt lies in its role as a modu-lar interface between nonstationary quantum hardware and stable classical decoding algorithms. Because it does not require modification of the quantum code or replacement of the global decoder, QAdapt can be in-tegrated into existing QEC pipelines while retaining the global consistency of conventional decoding. Its simultaneous improvements in logical error rate and residual-syndrome backend latency suggest that adap-tive classical processing can contribute to the scalability of FTQC by helping the decoding stack accommodate changing hardware conditions and increasing syndrome-processing demands. More generally, this work high-lights the potential of adaptive classical decoding to complement advances in qubits and quantum codes. Future work should move beyond predefined noise-task sequences toward fully online adaptation driven by real-time noise estimation and drift detection. This includes automatic identification of emerging noise regimes, online updates of parameter importance, uncertainty-aware correction, and safeguards against unstable adaptation. Evaluation should also be ex-tended to longer error-correction windows, larger code distances, logical operations, leakage- and crosstalk-dominated noise, additional quantum processors, and other QEC codes and decoding backends. Finally, end-to-end deployment within a real-time control stack will be necessary to quantify total latency, resource consump-tion, and long-term logical reliability. These directions could establish adaptive pre-decoding as a general com-ponent of hardware–software co-design for fault-tolerant quantum computing. 
+
+# Data Availability 
+
+The third-party Willow data analysed in this study are available through the data release associated with 9Google Quantum AI and Collaborators [11] . The syn-thetic and device-mapped simulation records generated and analysed in this study are not publicly available at the time of submission. Data required for editorial as-sessment and peer review will be supplied confidentially to editors and reviewers upon request. Other access requests may be directed to the corresponding author and will be considered subject to applicable institutional and commercial restrictions. 
+
+# A Complete T0 Noise Specifica-tion 
+
+Table 5 lists the 25 independent probabilities used by the device-mapped T0 circuit-level Pauli environment. Probabilities are applied per occurrence of the corre-sponding circuit location or Pauli channel. 
+
+Table 5: Complete 25-parameter T0 noise model. 
+
+Component Parameter(s) Probability Preparation pprep ,X , pprep ,Z 0.001000 Measurement pmeas ,X , pmeas ,Z 0.010000 Idle during CNOT 
+
+pidleCNOT ,X , pidleCNOT ,Y ,
+
+pidleCNOT ,Z 
+
+0.000333 Idle during SPAM 
+
+pidleSPAM ,X , pidleSPAM ,Y ,
+
+pidleSPAM ,Z 
+
+0.000667 CNOT, identity on control 
+
+pIX , pIY , pIZ 0.000667 CNOT, X on control 
+
+pXI , pXX , pXY , pXZ 0.000667 CNOT, Y on control 
+
+pY I , pY X , pY Y , pY Z 0.000667 CNOT, Z on control 
+
+pZI , pZX , pZY , pZZ 0.000667 
+
+# B Continual Noise-Task Sched-ule 
+
+Table 6: Q-EWC task sequence. “Scaled parameters” are multiplied by 1.5 relative to T0; all unlisted parameters retain their T0 values. 
+
+Task Scaled parameters Epochs Fisher? T0: Base None 20 Yes T1: Mea-surement 
+
+pmeas ,X , pmeas ,Z 40 Yes T2: CNOT All 15 non-identity CNOT Pauli channels 60 Yes T3: Idle All idle-CNOT and idle-SPAM 
+
+X/Y /Z channels 80 Yes T4: Z bias pprep ,X , pmeas ,X , idle Z channels, and CNOT channels 
+
+IZ, XZ, Y Z, ZI, ZX, ZY, ZZ 
+
+100 No 
+
+# C Synthetic OOD Grid 
+
+Let M, C, I, and Z denote the measurement, CNOT, idle, and Z-bias axes. The 11 simultaneous-axis envi-ronments are 
+
+{MC , MI , MZ , CI , CZ , IZ ,
+
+MCI , MCZ , MIZ , CIZ , MCIZ }.
+
+For each environment, every active parameter is multi-plied by one common factor in 
+
+{1.2, 1.5, 2.0, 2.5, 3.0}.
+
+The active parameters on each axis are: 
+
+• M: pmeas ,X and pmeas ,Z ;
+
+• C: all 15 non-identity CNOT Pauli channels; 
+
+• I: all six idle-CNOT and idle-SPAM channels; and 
+
+• Z: pprep ,X , pmeas ,X , both idle-Z channels, and CNOT channels IZ , XZ , Y Z , ZI , ZX , ZY , and 
+
+ZZ .Evaluating both d = 7 and d = 9 gives 11 × 5 × 2 = 110 
+
+configurations. 
+
+# D Reproducibility Checklist 
+
+• Record the exact code revision, configuration file, checkpoint, and random seed for each reported eval-uation. 
+
+• Preserve separate shot counts and logical-error counts for each distance and logical basis before aggregation. 
+
+• Report neural inference, transfer, residual construc-tion, and PyMatching latency separately before quot-ing end-to-end latency. 
+
+• Regenerate Figures 1 and 5 from the retained point-level evaluation records before submission. 
+
+• Verify that the data and code availability statements match the access conditions agreed with the journal. 
+
+# References 
+
+[1] V. V. Sivak, A. Eickbusch, B. Royer, S. Singh, I. Tsioutsios, S. Ganjam, A. Miano, B. L. Brock, A. Z. Ding, L. Frunzio, S. M. Girvin, R. J. Schoelkopf, and M. H. Devoret. Real-time quantum error correction beyond break-even. Nature , 616: 50–55, 2023. doi: 10.1038/s41586-023-05782-6. [2] Neereja Sundaresan, Theodore J. Yoder, Youngseok Kim, Muyuan Li, Edward H. Chen, Grace Harper, Ted Thor-beck, Andrew W. Cross, Antonio D. Córcoles, and Maika Takita. Demonstrating multi-round subsystem quantum error correction using matching and maximum likelihood decoders. Nature Communications , 14:2852, 2023. doi: 10.1038/s41467-023-38247-5. [3] Luka Skoric, Dan E. Browne, Kenton M. Barnes, Neil I. Gillespie, and Earl T. Campbell. Parallel window decod-ing enables scalable fault tolerant quantum computation. 
+
+Nature Communications , 14:7040, 2023. doi: 10.1038/ s41467-023-42482-1. [4] Laura Caune, Luka Skoric, Nick S. Blunt, Archibald Ruban, Jimmy McDaniel, Joseph A. Valery, Andrew D. Patter-son, Alexander V. Gramolin, Joonas Majaniemi, Kenton M. Barnes, Tomasz Bialas, Okan Buğdaycı, Ophelia Craw-ford, György P. Gehér, Hari Krovi, Elisha Matekole, Can-berk Topal, Stefano Poletto, Michael Bryant, Kalan Snyder, Neil I. Gillespie, Glenn Jones, Kauser Johar, Earl T. Camp-bell, and Alexander D. Hill. Demonstrating real-time and low-latency quantum error correction with superconduct-ing qubits. arXiv preprint arXiv:2410.05202 , 2024. doi: 10.48550/arXiv.2410.05202. 
+
+10 [5] Evan T. Hockings, Andrew C. Doherty, and Robin Harper. Improving error suppression with noise-aware decoding. 
+
+arXiv preprint arXiv:2502.21044 , 2025. doi: 10.48550/arXiv. 2502.21044. [6] Devansh Bhardwaj, Evangelia Takou, Yingjia Lin, and Ken-neth R. Brown. Adaptive estimation of drifting noise in quantum error correction. arXiv preprint arXiv:2511.09491 ,2025. doi: 10.48550/arXiv.2511.09491. [7] Eric Dennis, Alexei Kitaev, Andrew Landahl, and John Preskill. Topological quantum memory. Journal of Math-ematical Physics , 43(9):4452–4505, 2002. doi: 10.1063/1. 1499754. [8] Austin G. Fowler, Matteo Mariantoni, John M. Martinis, and Andrew N. Cleland. Surface codes: Towards practical large-scale quantum computation. Physical Review A , 86(3): 032324, Sep 2012. doi: 10.1103/PhysRevA.86.032324. [9] Barbara M. Terhal. Quantum error correction for quantum memories. Reviews of Modern Physics , 87(2):307–346, Apr 2015. doi: 10.1103/RevModPhys.87.307. [10] Google Quantum AI. Suppressing quantum errors by scaling a surface code logical qubit. Nature , 614:676–681, 2023. doi: 10.1038/s41586-022-05434-1. [11] Google Quantum AI and Collaborators. Quantum error correction below the surface code threshold. Nature , 638: 920–926, 2025. doi: 10.1038/s41586-024-08449-y. [12] Oscar Higgott. PyMatching: A Python package for decod-ing quantum codes with minimum-weight perfect matching. 
+
+arXiv preprint arXiv:2105.13082 , 2021. doi: 10.48550/arXiv. 2105.13082. [13] Antonio deMarti iOlius, Patricio Fuentes, Román Orús, Pe-dro M. Crespo, and Josu Etxezarreta Martinez. Decoding algorithms for surface codes. Quantum , 8:1498, 2024. doi: 10.22331/q-2024-10-10-1498. [14] Nicolas Delfosse, Andres Paz, Alexander Vaschillo, and Krysta M. Svore. How to choose a decoder for a fault-tolerant quantum computer? the speed vs accuracy trade-off. 
+
+arXiv preprint arXiv:2310.15313 , 2023. doi: 10.48550/arXiv. 2310.15313. [15] Christopher Chamberland, Luis Goncalves, Prasahnt Sivara-jah, Eric Peterson, and Sebastian Grimberg. Techniques for combining fast local decoders with global decoders un-der circuit-level noise. Quantum Science and Technology , 8: 045011, 2023. doi: 10.1088/2058-9565/ace64d. [16] Christopher Chamberland, Jan Olle, Muyuan Li, Scott Thornton, and Igor Baratta. Fast and accurate AI-based pre-decoders for surface codes. arXiv preprint arXiv:2604.12841 ,2026. doi: 10.48550/arXiv.2604.12841. [17] Oscar Higgott and Craig Gidney. Sparse blossom: Cor-recting a million errors per core second with minimum-weight matching. Quantum , 9:1600, 2025. doi: 10.22331/ q-2025-01-20-1600. [18] Boris M. Varbanov, Marc Serra-Peralta, David Byfield, and Barbara M. Terhal. Neural network decoder for near-term surface-code experiments. arXiv preprint arXiv:2307.03280 ,2023. doi: 10.48550/arXiv.2307.03280. [19] Johannes Bausch, Andrew W. Senior, Francisco J. H. Heras, Thomas Edlich, Alex Davies, Michael Newman, Cody Jones, Kevin Satzinger, Murphy Yuezhen Niu, Sam Blackwell, George Holland, Dvir Kafri, Juan Atalaya, Craig Gid-ney, Demis Hassabis, Sergio Boixo, Hartmut Neven, and Pushmeet Kohli. Learning high-accuracy error decoding for quantum processors. Nature , 635:834–840, 2024. doi: 10.1038/s41586-024-08148-8. [20] Pan Gao, Xu-Sheng Xu, Ji-Ze Han, Jing-Wei Wen, Ling Qian, Xu-Dong Lv, Run-Qing Zhang, Xiao-Xiao Hu, and Gui-Lu Long. QuantiSpect: A structure-aware lightweight 3d CNN pre-decoder for scalable surface code quantum error correction. arXiv preprint arXiv:2607.18204 , 2026. doi: 10.48550/arXiv.2607.18204. [21] James Kirkpatrick, Razvan Pascanu, Neil Rabinowitz, Joel Veness, Guillaume Desjardins, Andrei A. Rusu, Kieran Milan, John Quan, Tiago Ramalho, Agnieszka Grabska-Barwinska, Demis Hassabis, Claudia Clopath, Dharshan Kumaran, and Raia Hadsell. Overcoming catastrophic forgetting in neural networks. Proceedings of the National Academy of Sciences ,114(13):3521–3526, 2017. doi: 10.1073/pnas.1611835114. [22] Craig Gidney. Stim: A fast stabilizer circuit simulator. 
+
+Quantum , 5:497, 2021. doi: 10.22331/q-2021-07-06-497. 
+
+11

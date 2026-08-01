@@ -1,0 +1,362 @@
+Title: High-Performance Reinforcement-Learned BP Decoding of Quantum LDPC Codes
+
+URL Source: https://arxiv.org/pdf/2607.24891v1
+
+Published Time: Wed, 29 Jul 2026 00:05:25 GMT
+
+Number of Pages: 4
+
+Markdown Content:
+# High-Performance Reinforcement-Learned BP Decoding of Quantum LDPC Codes 
+
+Mohsen Moradi ∗, Vahid Nourozi †, Taejoon Kim ∗, Rémi A. Chou ‡, and David G. M. Mitchell †∗School of Electrical, Computer and Energy Engineering, Arizona State University, Tempe, AZ 85287, USA (Corresponding author e-mail: mmorad11@asu.edu), 
+
+> †
+
+Klipsch School of Electrical and Computer Engineering, New Mexico State University, Las Cruces, NM, USA 
+
+> ‡
+
+Department of Computer Science and Engineering, University of Texas at Arlington, Arlington, TX 76019, USA 
+
+Abstract —Belief-propagation (BP) decoding is attractive for quantum low-density parity-check (QLDPC) codes because it uses local message passing on sparse Tanner graphs. However, conven-tional flooding BP often stalls due to stabilizer degeneracy and short cycles. Reinforcement-learning-based sequential variable-node scheduling (RL-S), which learns the update order offline, has shown that adaptive scheduling can improve BP convergence. In this paper, we extend this idea with a second-order local update decoder, RL-S2LU. The proposed decoder preserves BP locality and low complexity, while numerical results show significant error-correction gains over conventional BP and the considered BP-OSD-10 baseline. 
+
+I. I NTRODUCTION 
+
+Quantum error correction (QEC) protects quantum infor-mation by encoding logical qubits and measuring stabilizer syndromes without directly measuring the encoded state [1], [2]. Quantum low-density parity-check (QLDPC) codes are promising because their stabilizers are sparse and the number of logical qubits can grow with the block length [3], [4]. Re-cent lifted-product and quantum Tanner constructions provide asymptotically good families [5], [6], while bivariate-bicycle (BB) codes demonstrate strong finite-length performance and low-overhead memory potential [7]. These advances make efficient QLDPC decoding a central practical problem. Belief propagation (BP) is natural for sparse Tanner graphs [8] and is highly successful for classical LDPC codes [9]. For QLDPC codes, however, flooding BP often fails because stabilizer commutation creates many short cy-cles and degeneracy gives many Pauli errors with the same syndrome [10], [11]. BP with ordered-statistics decoding (BP-OSD) improves reliability by adding an algebraic post-processing step [11], [12], but this moves beyond purely local BP updates. A complementary approach is to change the BP schedule. Sequential and shuffled BP reuse newly computed messages within the same iteration and often converge faster than flooding BP [13]–[15]. Scheduling can also be learned: re-inforcement learning (RL) has been used to select effective message-passing orders [16]–[18]. For QLDPC codes, RL-S learns a sequential variable-node (VN) update schedule from local residual-syndrome states while leaving the BP update rule unchanged [19]. This approach was subsequently extended to list-based and cluster-based decoding [20], [21]. In this paper, we propose RL-S2LU, a second-order local-update extension of RL-S. RL-S2LU uses the same trained RL table as RL-S, but changes the inference-time action: when the policy selects a VN, the decoder updates that VN and then updates the neighboring VNs that share a stabilizer check with it. Thus each learned scheduling decision propagates informa-tion farther before the next decision, while remaining local on sparse Tanner graphs. For the [[288 , 12 , 18]] BB code [7], RL-S2LU with only T = 10 decoder sweeps outperforms BP and BP-OSD-10 with T = 1000 iterations, and larger sweep caps further improve the low-error-rate regime. II. B ACKGROUND 
+
+A. CSS QLDPC codes and depolarizing noise 
+
+We consider a CSS QLDPC code defined by two sparse binary matrices HX ∈ FmX ×n 
+
+> 2
+
+, HZ ∈ FmZ ×n 
+
+> 2
+
+, satisfying 
+
+HX H⊤ 
+
+> Z
+
+= 0 . The rows of HX and HZ define the X-type and 
+
+Z-type stabilizer checks, respectively. For a qubit v, let ∂X v
+
+and ∂Z v be its neighboring checks in the Tanner graphs of HX
+
+and HZ ; for a check c, let ∂X c and ∂Z c be the corresponding neighboring qubits. Let P1 = {I, X, Y, Z }.Under the independent depolarizing channel, each qubit error Ev ∈ P 1 satisfies Pr( Ev = I) = 1 − p, Pr( Ev =
+
+X) = Pr( Ev = Y ) = Pr( Ev = Z) = p/ 3. We represent 
+
+Ev by its binary X- and Z-components av = 1[Ev ∈{X, Y }], bv = 1[Ev ∈ { Z, Y }]. Since X-type checks detect the Z-component and Z-type checks detect the X-component, the measured Calderbank-Shor-Steane (CSS) syn-dromes are sX = HX b (mod 2) , sZ = HZ a (mod 2) .
+
+The decoder outputs a Pauli estimate ˆE, equivalently binary components (ˆ a, ˆb). We declare BP convergence when HXˆb =
+
+sX , HZ ˆa = sZ .
+
+B. Sequential BP scheduling 
+
+Flooding BP updates all messages in parallel at each iteration, whereas sequential BP updates one local part of the Tanner graph at a time and immediately reuses the new messages. We use the quaternary sequential VN update and the residual-syndrome RL state of RL-S [19]. III. RL-S2LU D ECODING 
+
+RL-S2LU is an inference-time second-order local-update extension of RL-S [19]. It uses the same trained table QRL ,residual state, and greedy anchor-selection rule as RL-S. After selecting a VN, RL-S2LU also updates the VNs that share an adjacent X- or Z-type check with it. arXiv:2607.24891v1 [cs.IT] 27 Jul 2026 A. Inherited RL-S quaternary VN update 
+
+We use the two-scalar-stream quaternary BP update of RL-S [19]. The superscript X labels messages on the HX
+
+graph, which estimate the Z-component b, while the super-script Z labels messages on the HZ graph, which estimate the X-component a. Both streams are initialized with μ =log 1−2p/ 3 
+
+> 2p/ 3
+
+. On either Tanner graph G ∈ { X, Z }, the CN-to-VN message is 
+
+mGc→v = 2 tanh −1
+
+(−1) sG(c) ∏ 
+
+> u∈∂Gc\v
+
+tanh 
+
+( mGu→c
+
+2
+
+) .
+
+(1) Let aP and bP denote the X- and Z-components of P ∈ P 1,and let p0 = 1 − 2p 
+
+> 3
+
+, κ I = log(1 − p) − 2 log p0, κ X = κZ =log(1 /2) − log p0, κ Y = log 3 
+
+> 4p
+
+. For scalar beliefs (LX , L Z ),define the Pauli score 
+
+ℓP (LX , L Z ) = κP + 1
+
+2 (1 − 2bP )LX + 1
+
+2 (1 − 2aP )LZ . (2) With lse( x, y ) = log( ex +ey), the coupled extrinsic VN-to-CN maps are 
+
+ΦX (LX , L Z ) = lse( ℓI , ℓ X ) − lse( ℓY , ℓ Z ), (3) 
+
+ΦZ (LX , L Z ) = lse( ℓI , ℓ Z ) − lse( ℓX , ℓ Y ), (4) where all scores are evaluated at (LX , L Z ). Thus ΦX updates the HX -stream LLR for b, and ΦZ updates the HZ -stream LLR for a.A quaternary sequential VN update at v, denoted QSVN-SU PDATE (v), first computes (1) for all c ∈ ∂X v ∪ ∂Z v, and forms 
+
+LG, pre  
+
+> v
+
+= μ + ∑
+
+> c∈∂Gv
+
+mGc→v, G ∈ { X, Z }.
+
+Then the outgoing messages from v are updated as 
+
+mXv→c ← ΦX
+
+(LX, pre  
+
+> v
+
+− mXc→v, L Z, pre 
+
+> v
+
+) , c ∈ ∂X v, (5) 
+
+mZv→c ← ΦZ
+
+(LX, pre  
+
+> v
+
+, L Z, pre  
+
+> v
+
+− mZc→v
+
+) , c ∈ ∂Z v. (6) Afterward, the incoming check messages for v are recomputed, the post-update beliefs 
+
+LGv = μ + ∑
+
+> c∈∂Gv
+
+mGc→v, G ∈ { X, Z },
+
+are formed, and the hard decision is 
+
+ˆEv = arg max  
+
+> P∈P 1
+
+ℓP (LXv , L Zv ), (7) with 
+
+ˆav = 1[ ˆEv ∈ { X, Y }], ˆbv = 1[ ˆEv ∈ { Z, Y }].
+
+B. Inherited RL-S residual state and anchor rule 
+
+For a tentative estimate (ˆ a, ˆb), define the residual mismatch vectors δX = sX ⊕ HXˆb, δZ = sZ ⊕ HZ ˆa, and the total mismatch weight w = ‖δX ‖1 + ‖δZ ‖1. Then w = 0 if and only if the estimated Pauli error satisfies both measured CSS syndromes. RL-S assigns each candidate VN a local residual state. Fix a deterministic ordering of the edges incident to each VN. Let ord X (v, c ) ∈ { 0, . . . , |∂X v| − 1} and ord Z (v, c ) ∈{0, . . . , |∂Z v| − 1} denote the local positions of c in ∂X v and 
+
+∂Z v. Define 
+
+σX (v) = ∑ 
+
+> c∈∂Xv
+
+δX (c) 2 ord X (v,c ), (8) 
+
+σZ (v) = ∑ 
+
+> c∈∂Zv
+
+δZ (c) 2 ord Z (v,c ). (9) Let Amax = max {max v |∂X v|, max v |∂Z v|} . The combined RL state index is σ(v) = σX (v) + 2 Amax σZ (v). During inference, the trained RL-S table is used greedily: 
+
+v⋆ = arg max  
+
+> v∈R
+
+QRL (σ(v), v ), (10) where R is the set of active VNs that have not yet been selected as anchors in the current sweep. Let Vact = {v :
+
+|∂X v| + |∂Z v| > 0}.
+
+C. Second-order local update 
+
+RL-S2LU starts after the greedy rule in (10) selects an anchor v⋆. Instead of updating only v⋆, RL-S2LU updates 
+
+v⋆ and its local second-order VN neighborhood. For a VN v,define 
+
+U2(v) = {u : ∃c ∈ ∂X v such that u ∈ ∂X c}∪ { u : ∃c ∈ ∂Z v such that u ∈ ∂Z c}. (11) Thus U2(v) contains v and all VNs that share at least one adjacent X- or Z-type check with v. In the implementation used for the numerical results, L2(v) is an ordered duplicate-free traversal of U2(v), with v placed first and the remaining VNs visited according to the deterministic graph order. Algorithm 1 summarizes the decoder. The operation T OG -
+
+> GLE
+
+X(u) is called when the Z-component ˆbu changes; it flips the residual bits in ∂X u, updates w, updates the affected 
+
+σX (·) values, and marks the affected remaining VNs for priority refresh. Similarly, T OGGLE Z(u) is called when the 
+
+X-component ˆau changes; it performs the analogous update on the HZ -side residuals and states. Only the anchor v⋆ is removed from R. The other VNs updated inside U2(v⋆) remain eligible to be selected as anchors later in the same sweep if they have not already been selected. Conversely, a VN that has already served as an anchor can still be updated later as part of another anchor’s local neighborhood. Hence R controls only the without-replacement anchor schedule; it does not mask the deterministic local BP updates. The LU cascade can change later residual states and priorities, so RL-S2LU reuses the RL-S anchor-selection rule and trained table, not necessarily the identical realized anchor sequence of a separate RL-S run. 
+
+D. Complexity and Latency 
+
+We measure complexity and latency in terms of local VN updates. Let ∆v = max v (|∂X v| + |∂Z v|) , ∆c =max {max c |∂X c|, max c |∂Z c|} . Then 
+
+|U 2(v)| ≤ 1 + ∆ v (∆ c − 1) , Umax .Algorithm 1: RL-S2LU inference                                                                                                                               
+
+> Input: HX, H Z, syndromes sX, s Z, physical error rate p, trained table QRL , sweep cap T.
+> Output: ˆE,(ˆ a, ˆb), convergence flag, and number of sweeps.
+> 1Initialize mXv→c=mZv→c=μusing μ; Initialize ˆEvfor all v
+> using channel-only beliefs LXv=LZv=μin (7)
+> 2Compute (δX, δ Z),w, and all states σ(v)
+> 3for t= 1 , . . . , T do
+> 4R ← V act , with key QRL (σ(v), v )for each v∈ R
+> 5while R 6 =∅do
+> 6if w= 0 then
+> 7return ( ˆE, ˆa, ˆb, true , t )
+> 8v⋆←arg max v∈R QRL (σ(v), v )
+> 9R ← R \ { v⋆}
+> 10 Form the ordered duplicate-free list L2(v⋆)from U2(v⋆),with v⋆first
+> 11 S ← ∅
+> 12 foreach u∈ L 2(v⋆)do
+> 13 (a0, b 0)←(ˆ au,ˆbu)
+> 14 Apply QSVNSU PDATE (u)using (1)–(7)
+> 15 if ˆbu6=b0then
+> 16 Apply T OGGLE X(u), and add the affected VNs in Rto S
+> 17 if ˆau6=a0then
+> 18 Apply T OGGLE Z(u), and add the affected VNs in Rto S
+> 19 Refresh the priority keys QRL (σ(v), v )for v∈ S
+> 20 if w= 0 then
+> 21 return ( ˆE, ˆa, ˆb, true , t )
+> 22 return ( ˆE, ˆa, ˆb, false , T )
+
+For bounded-degree QLDPC families, Umax = O(1) . Conven-tional flooding BP has O(T n ) work for sparse Tanner graphs and, under ideal parallel hardware, O(T ) update latency. RL-S performs sequential VN updates, giving O(T n ) local-update work and serial latency. RL-S2LU performs at most Umax 
+
+local VN updates after each selected VN, so its worst-case work is 
+
+O(T nU max ) = O(T n )
+
+for bounded-degree codes, with a larger constant factor than RL-S. Under a fully serial implementation, the corresponding latency is also O(T nU max ). However, the updates within 
+
+U2(v⋆) are local and can be parallelized with appropriate synchronization, since they are triggered by the same selected VN. In such a locally parallel implementation, the Umax factor mainly appears as additional local hardware parallelism rather than as an asymptotic latency factor. In addition, the sequential selection of v⋆ can be partially parallelized using clustering or coloring methods. IV. N UMERICAL RESULTS 
+
+We evaluate the decoders using the block error rate, where a decoding failure includes both non-convergence and logical error events; BP-OSD-10 denotes BP followed by order-10 OSD post-processing. Fig. 1 compares RL-S2LU with BP, BP-OSD-10, and RL-S for the [[288 , 12 , 18]] BB code of [7] over the depolarizing channel. Even with only T = 10 
+
+iterations, RL-S2LU outperforms BP-OSD-10 with T = 1000 
+
+0.05 0.06 0.07 0.08 0.09 0.1 
+
+p
+
+10 -7 
+
+10 -6 
+
+10 -5 
+
+10 -4 
+
+10 -3 
+
+10 -2 
+
+10 -1 
+
+> Block Error Rate
+
+BP, T = 1000 BP-OSD-10, T = 1000 RL-S, T = 10 RL-S, T = 100 RL-S, T = 1000 RL-S2LU, T = 10 RL-S2LU, T = 100 RL-S2LU, T = 1000                                             
+
+> Fig. 1. Error-correction performance comparison for the [[288 ,12 ,18]] BB code using the proposed RL-S2LU decoder and other state-of-the-art decoders. TABLE I PERCENTAGE OF NON -CONVERGENCE ERRORS AMONG THE TOTAL DECODING ERRORS (NON -CONVERGENCE +LOGICAL ERRORS )FOR THE
+> [[288 ,12 ,18]] BB CODE CORRESPONDING TO FIG . 1.
+> Decoder p
+> 0.05 0.06 0.07 0.08 0.09 0.10
+> RL-S2LU, T= 10 85.2 92.5 93.8 96.0 96.7 98.0
+> RL-S2LU, T= 100 41.0 73.0 85.3 90.5 93.7 97.7
+> RL-S2LU, T= 1000 27.0 60.0 67.5 85.7 89.9 92.3
+
+BP iterations over the simulated range. Increasing the iteration cap to T = 100 further improves the low-error-rate regime and gives about one order of magnitude gain over BP-OSD-10 at small values of p. Table I shows that increasing T also reduces the fraction of failures caused by non-convergence; for example, at p = 0 .05 , this fraction decreases to 27% 
+
+for T = 1000 . Table II reports the average number of outer decoding sweeps. For RL-S and RL-S2LU, one outer sweep consists of sequential VN selections; in RL-S2LU, each selected VN v⋆ additionally triggers local updates over U2(v⋆).Our proposed RL-S2LU typically converges within the first outer sweep in the simulated low-error-rate regime. Fig. 2 reports the results for the [[180 , 10 , 15 ≤ d ≤ 18]] A5 code of [11]. Our proposed RL-S2LU decoder again improves the performance of the underlying RL-S decoder and provides a clear gain over BP and BP-OSD-10. In particular, at p =0.04 , RL-S2LU with only T = 10 iterations achieves about one order of magnitude lower block error rate than BP-OSD-10 with T = 1000 BP iterations. Fig. 3 shows the corresponding comparison for the 
+
+[[144 , 12 , 12]] BB code of [7]. For this shorter BB code, RL-S2LU with T = 10 already improves over BP-OSD-10 with 
+
+T = 100 at p = 0 .03 , while keeping the decoding process purely BP-based. For this code, almost all remaining failures of RL-S2LU are logical errors rather than non-convergence errors, suggesting that the block error rate has reached the logical-error-limited regime for the simulated parameters. TABLE II AVERAGE NUMBER OF OUTER ITERATIONS REQUIRED BY THE DECODING METHODS CONSIDERED IN FIG . 1 FOR THE [[288 , 12 , 18]] BB CODE UNDER THE DEPOLARIZING CHANNEL .
+
+p 0.05 0.06 0.07 0.08 0.09 0.10 
+
+BP, T = 1000 4.0 5.2 6.8 9.8 16.7 31.6 
+
+BP-OSD-10, T = 1000 4.0 5.2 6.9 9.9 16.6 34.2 
+
+RL-S, T = 10 1.9 2.2 2.5 3.0 3.5 4.2 
+
+RL-S, T = 100 1.9 2.2 2.6 3.1 4.1 6.0 
+
+RL-S, T = 1000 1.9 2.2 2.6 3.6 6.7 16.0 
+
+RL-S2LU, T = 10 1.0 1.0 1.0 1.0 1.0 1.2 
+
+RL-S2LU, T = 100 1.0 1.0 1.0 1.1 1.3 2.1 
+
+RL-S2LU, T = 1000 1.0 1.0 1.0 1.3 3.2 9.6 
+
+0.04 0.05 0.06 0.07 0.08 0.09 0.1 
+
+p
+
+10 -6 
+
+10 -5 
+
+10 -4 
+
+10 -3 
+
+10 -2 
+
+10 -1 
+
+10 0
+
+> Block Error Rate
+
+BP, T = 1000 BP-OSD-10, T = 1000 RL-S, T = 100 RL-S, T = 1000 RL-S2LU, T = 10 RL-S2LU, T = 100 
+
+Fig. 2. Error-correction performance comparison for the [[180 , 10 , 15 ≤ d ≤
+
+18]] A5 code using the proposed RL-S2LU decoder and other state-of-the-art decoders. 
+
+0.03 0.04 0.05 0.06 0.07 0.08 0.09 0.1 
+
+p
+
+10 -5 
+
+10 -4 
+
+10 -3 
+
+10 -2 
+
+10 -1 
+
+> Block Error Rate
+
+BP, T = 100 BP, T = 1000 BP-OSD-10, T = 100 RL-S, T = 10 RL-S, T = 100 RL-S2LU, T = 10 
+
+Fig. 3. Error-correction performance comparison for the [[144 , 12 , 12]] BB code using the proposed RL-S2LU decoder and other state-of-the-art decoders. 
+
+V. C ONCLUSION 
+
+We proposed RL-S2LU, a purely BP-based decoder that replaces each selected VN action with a deterministic second-order local-update cascade. Numerical results show improved error-correction performance and faster convergence on the tested QLDPC codes, indicating that learned sequential BP schedules can be strengthened by local propagation without retraining or algebraic post-processing. VI. A CKNOWLEDGMENT 
+
+This work is in part supported by the National Science Foundation (NSF) under grants CNS2451268, CNS2514415, ITE2515378, and CCF-2145917, and the Office of Naval Research (ONR) under Grant N000142112472. REFERENCES [1] P. W. Shor, “Scheme for reducing decoherence in quantum computer memory,” Physical Review A , vol. 52, no. 4, pp. R2493–R2496, 1995. [2] D. Gottesman, “Stabilizer codes and quantum error correction,” Ph.D. dissertation, California Institute of Technology, 1997, arXiv:quant-ph/9705052. [3] J.-P. Tillich and G. Zémor, “Quantum LDPC codes with positive rate and minimum distance proportional to the square root of the blocklength,” 
+
+IEEE Transactions on Information Theory , vol. 60, no. 2, pp. 1193– 1202, 2014. [4] A. A. Kovalev and L. P. Pryadko, “Quantum Kronecker sum-product low-density parity-check codes with finite rate,” Physical Review A ,vol. 88, no. 1, p. 012311, 2013. [5] P. Panteleev and G. Kalachev, “Asymptotically good quantum and locally testable classical LDPC codes,” in Proceedings of the 54th Annual ACM SIGACT Symposium on Theory of Computing , 2022, pp. 375–388. [6] A. Leverrier and G. Zémor, “Quantum Tanner codes,” in Proceedings of the 63rd IEEE Annual Symposium on Foundations of Computer Science ,2022, pp. 872–883. [7] S. Bravyi, A. W. Cross, J. M. Gambetta, D. Maslov, P. Rall, and T. J. Yoder, “High-threshold and low-overhead fault-tolerant quantum memory,” Nature , vol. 627, pp. 778–782, 2024. [8] R. G. Gallager, “Low-density parity-check codes,” IRE Transactions on Information Theory , vol. 8, no. 1, pp. 21–28, 1962. [9] D. J. C. MacKay and R. M. Neal, “Good error-correcting codes based on very sparse matrices,” IEEE Transactions on Information Theory ,vol. 45, no. 2, pp. 399–431, 1999. [10] D. Poulin and Y. Chung, “On the iterative decoding of sparse quantum codes,” Quantum Information and Computation , vol. 8, no. 10, pp. 987– 1000, 2008, arXiv:0801.1241. [11] P. Panteleev and G. Kalachev, “Degenerate quantum LDPC codes with good finite length performance,” Quantum , vol. 5, p. 585, 2021. [12] J. Roffe, D. R. White, S. Burton, and E. T. Campbell, “Decoding across the quantum low-density parity-check code landscape,” Physical Review Research , vol. 2, no. 4, p. 043423, 2020. [13] J. Zhang and M. P. C. Fossorier, “Shuffled belief propagation decoding,” 
+
+IEEE Transactions on Communications , vol. 53, no. 2, pp. 209–213, 2005. [14] D. E. Hocevar, “A reduced complexity decoder architecture via layered decoding of LDPC codes,” in IEEE Workshop on Signal Processing Systems , 2004, pp. 107–112. [15] M. Moradi, S. Habib, V. Nourozi, and D. G. M. Mitchell, “Sequential BP-based decoding of QLDPC codes,” in ICC 2026 - IEEE International Conference on Communications , 2026, pp. 1–6. [16] S. Habib and D. G. M. Mitchell, “Reinforcement learning for sequential decoding of generalized LDPC codes,” arXiv preprint arXiv:2307.13905 ,2023. [17] S. Habib, A. Beemer, and J. Kliewer, “RELDEC: Reinforcement learning-based decoding of moderate length LDPC codes,” arXiv preprint arXiv:2112.13934 , 2021. [18] M. Moradi, S. Habib, and D. G. M. Mitchell, “Enhancing belief prop-agation decoding of polar codes: A reinforcement learning approach,” 
+
+IEEE Communications Letters , vol. 29, no. 6, pp. 1285–1289, 2025. [19] M. Moradi, V. Nourozi, S. Habib, and D. G. M. Mitchell, “Learning to decode quantum LDPC codes via belief propagation,” arXiv preprint arXiv:2603.10192 , 2026. [20] M. Moradi, T. Kim, and R. A. Chou, “Learning-based list sequential belief propagation decoding of quantum LDPC codes,” 2026. [Online]. Available: https://arxiv.org/abs/2606.20926 [21] M. Moradi, T. Kim, R. A. Chou, and D. G. M. Mitchell, “Learning to decode quantum LDPC codes via cluster-based sequential belief propagation,” 2026. [Online]. Available: https://arxiv.org/abs/2607.20130

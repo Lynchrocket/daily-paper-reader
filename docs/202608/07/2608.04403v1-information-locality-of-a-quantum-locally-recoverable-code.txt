@@ -1,0 +1,481 @@
+Title: Information locality of a quantum locally recoverable code
+
+URL Source: https://arxiv.org/pdf/2608.04403v1
+
+Published Time: Thu, 06 Aug 2026 00:25:37 GMT
+
+Number of Pages: 19
+
+Markdown Content:
+# Information locality of a quantum locally recoverable code 
+
+Ryutaroh Matsumoto a, ∗
+
+> aDepartment of Information and Communications Engineering, Institute of Science Tokyo, 2-12-1 Ookayama, Meguro, 152-8550, Tokyo, Japan
+
+Abstract 
+
+A classical linear code 𝐶 of length 𝑛 is said to have symbol locality (𝑟, 𝛿 ) if for any index 𝑗 there exists a repair group 𝐽 𝑗 ⊆ {1 , … , 𝑛 } with 𝑗 ∈ 𝐽 𝑗 and 
+
+|𝐽 𝑗 | ≤ 𝑟 +𝛿 −1 such that any 𝛿 −1 or fewer erasures in 𝐽 𝑗 can be corrected by us-ing codeword symbols only in 𝐽 𝑗 . Later it turned out that this way of defining 𝑟 
+
+overestimates the number of necessary codeword symbols for multiple-erasure correction, and information locality was proposed to define 𝑟 as the dimension of the punctured code of 𝐶 onto 𝐽 𝑗 . Recently locality (𝑟, 𝛿 ) was proposed for quantum error-correcting codes by following the original definition of symbol locality (𝑟, 𝛿 ). We propose a quantum counterpart of the information local-ity for quantum stabilizer codes constructed by Hermitian orthogonality, and a linear algebraic procedure computing a smaller repair group predicted by the proposed information locality and simultaneously reducing the number of measured observables in decoding to its minimum possible value. Then we demonstrate that the previously proposed definition of quantum locality (𝑟, 𝛿 )
+
+has the same drawback of overestimating the number of necessary codeword symbols for erasure correction by providing an explicit example of a quantum stabilizer code. Finally, we will give another example of a quantum stabilizer code constructed by Euclidean orthogonality and two different linear codes, with which a natural translation of the classical information locality into the quantum setting underestimates the number of necessary codeword symbols for erasure correction. 
+
+Keywords: erasure correction, local recovery, quantum error correction 
+
+2020 MSC: 81P73, 94B65, 94B35   
+
+> ∗ORCID: 0000-0002-5085-8879
+> Email address: ryutaroh@ict.e.titech.ac.jp (Ryutaroh Matsumoto) arXiv:2608.04403v1 [quant-ph] 5 Aug 2026
+
+1. Introduction 
+
+An erasure in quantum and classical error correction means an error whose position in a codeword is known [2, 19, 32]. It is known that a quantum error-correcting code can correct twice as many erasures as errors. In light of this, recent papers [24, 38] take advantage of erasures in quantum fault-tolerant computation, as some physical devices allow identification of qubits with era-sures in a codeword without destruction of encoded quantum information or stabilizer measurements [24, 38]. Measurements are costly on some physical devices and measurement-free fault-tolerant computation has been actively investigated recently [22, 31, 37]. Reducing the number of measurements in quantum error correction has also been investigated [41]. In particular, measurements cause disturbance of mea-sured qubits on some devices [22, 31, 37, 41]. The standard procedure for quan-tum erasure correction involves measurements as described in [10]. An approach to minimize the number of qudits acted on during an erasure correction procedure is the quantum local recovery [16], which is based on the classical local recovery [17] of a single erasure. Recent developments of quan-tum local recovery track those of classical local recovery, some of which will be briefly reviewed here. After [17], Prakash et al. [33] considered multiple-erasure correction and introduced (𝑟, 𝛿 ) symbol locality, which roughly allows correction of (𝛿 − 1) or fewer erasures by a repair group consisting of at most 
+
+(𝑟 + 𝛿 − 1) codeword symbols including erasures. The parameter 𝑟 was meant to capture the number of additional codeword symbols required for correct-ing (𝛿 − 1) erasures in its repair group. Later the same authors [23] observed that the original definition 𝑟 of symbol locality sometimes overestimates the number of required codeword symbols and proposed (𝑟, 𝛿 ) information local-ity. From the same research group, the hierarchical local recovery was pro-posed [34], in which the punctured code onto a repair group has smaller local-ity (𝑟 2, 𝛿 2) and roughly allows correction of (𝛿 2 − 1) or fewer erasures by using only 𝑟 2 additional codeword symbols instead of 𝑟 (> 𝑟 2) ones. The classical hi-erarchical local recovery was defined by using the information locality instead of the symbol locality. After the introduction of quantum local recovery for single-erasure correc-tion [16], many results followed [3, 26, 27, 28, 29, 35, 39] for single-erasure correction. Following the classical development as reviewed above, Galindo et al. [14] proposed the quantum (𝑟, 𝛿 ) locality correcting multiple erasures, which was a direct translation of the classical (𝑟, 𝛿 ) symbol locality [33]. We also observe very active research for quantum local recovery of multiple era-sures [7, 8, 9, 12, 15, 40]. Very recently, Guruswami et al. [21] introduced quantum hierarchical lo-2cal recovery, in which the quantum symbol locality by Galindo et al. [14] was generalized, while the corresponding classical definition [34] used the more accurate information locality. Our goal is to define a quantum counterpart of the classical information locality so that we can estimate more accurately the number of required codeword symbols for erasure correction than the locality defined in [14]. The classical information locality is defined as the maximum dimension of the punctured codes onto repair groups [23, Definition 2]. This definition is based on the fact that an [𝑛, 𝑘, 𝛿 ] linear code always has a set of 𝑘 codeword symbols which is disjoint from (𝛿 − 1) erasures and allows reconstruction of encoded messages consisting of 𝑘 symbols. This is no longer true for quan-tum error-correcting codes. For example, each codeword symbol in the binary 
+
+[[5 , 1, 3]] 2 stabilizer code [18] has no information, which can be seen from the fact that the density matrix of every symbol of any codeword is (1∕2) 𝐼 2×2 in-dependently of encoded messages. This is a stark contrast to a binary [𝑛, 1] 2
+
+linear code 𝐶 whose dual has the minimum Hamming distance ≥ 2. Every codeword bit in 𝐶 varies with encoded 1-bit messages, which can be recon-structed from any codeword bit in 𝐶 . So we cannot use the number of infor-mation symbols in the punctured quantum error-correcting code onto a repair group as a definition of quantum information locality, as it underestimates the number of required codeword symbols. We will propose another algebraic quantity that is a tighter upper bound on the number of required codeword symbols than the quantum symbol locality proposed in [14]. After reviewing necessary notions in Section 2, in order to capture the lo-cality of quantum erasure correction in a more accurate way, in Section 3 we will propose quantum (𝑟, 𝛿 ) information locality for the quantum stabilizer codes [1, 5, 6, 18, 25] defined by the Hermitian dual-containing classical lin-ear codes. We also propose a linear algebraic procedure computing a smaller repair group predicted by the proposed information locality and simultane-ously computing observables to be measured in quantum local recovery that reduce the number of measured observables to its minimum possible value. In Section 4 an advantage of quantum information locality over symbol one is demonstrated by an explicit small quantum stabilizer code with which the in-formation locality is smaller than the symbol one, which means the proposed locality more accurately captures the number of required codeword symbols for erasure correction. Finally, in Section 5 we give an obstacle for defining the quantum information locality for a wider class of quantum error-correcting codes than the class of quantum stabilizer codes considered in this paper. 32. Preliminaries 
+
+Let 𝑞 be a prime power, 𝑛 a positive integer and 𝐅 𝑞 2 the finite field with 𝑞 2
+
+elements. We will consider quantum error-correcting codes (QECCs) of length 
+
+𝑛 . For ⃗ 𝑥 = ( 𝑥 1, … , 𝑥 𝑛 ) and ⃗ 𝑦 = ( 𝑦 1, … , 𝑦 𝑛 ) ∈ 𝐅 𝑛 𝑞 2 , their Hermitian inner product is defined by 
+
+⟨⃗ 𝑥,⃗ 𝑦 ⟩ℎ =
+
+> 𝑛
+
+∑
+
+> 𝑖 =1
+
+𝑥 𝑞 𝑖 𝑦 𝑖 ,
+
+and the Hamming weight of ⃗ 𝑥 is denoted by 𝑤 𝐻 (⃗𝑥 ). For a set 𝐶 of vectors, by 
+
+𝑤 𝐻 (𝐶 ) we denote the minimum Hamming weight of nonzero vectors in 𝐶 . For a subset 𝐽 ⊂ {1 , … , 𝑛 } and ⃗ 𝑥 = ( 𝑥 1, … , 𝑥 𝑛 ), 𝜋 𝐽 (⃗𝑥 ) denotes the projected vector 
+
+(𝑥 𝑗 )𝑗 ∈𝐽 ∈ 𝐅 |𝐽 | 
+
+> 𝑞 2
+
+. For an 𝐅 𝑞 2 -linear space 𝐶 ⊂ 𝐅 𝑛 𝑞 2 and 𝐽 ⊂ {1 , … , 𝑛 }, the punctured code of 𝐶 onto 𝐽 is defined as 
+
+𝜋 𝐽 (𝐶 ) = { 𝜋 𝐽 (⃗𝑥 ) ∶ ⃗ 𝑥 ∈ 𝐶 },
+
+the shortened code of 𝐶 onto 𝐽 is defined as 
+
+𝜎 𝐽 (𝐶 ) = { 𝜋 𝐽 (⃗𝑥 ) ∶ ⃗ 𝑥 ∈ 𝐶 such that 𝜋 𝐽 (⃗𝑥 ) = ⃗ 0} 
+
+as in [32], where 𝐽 = {1 , … , 𝑛 } ⧵ 𝐽 , and the dual code of 𝐶 with respect to the Hermitian inner product is defined as 
+
+𝐶 ⟂ℎ = { ⃗𝑦 ∈ 𝐅 𝑛 𝑞 2 ∶ ⟨⃗𝑥,⃗ 𝑦 ⟩ℎ = 0 for all ⃗ 𝑥 ∈ 𝐶 }.
+
+It was noted in [11] that 
+
+𝜋 𝐽 (𝐶 )⟂ℎ = 𝜎 𝐽 (𝐶 ⟂ℎ),𝜎 𝐽 (𝐶 )⟂ℎ = 𝜋 𝐽 (𝐶 ⟂ℎ). (1) Let ℋ𝑞 be the 𝑞 -dimensional complex linear space 𝐂 𝑞 , which is the state space of a single qudit. A 𝑞 -ary QECC of length 𝑛 is a complex subspace 𝑄 ⊂ 
+
+ℋ⊗𝑛 𝑞 . Each vector ⃗ 𝑥 ∈ 𝐅 𝑛 𝑞 2 defines the quantum error 𝑀 (⃗ 𝑥 ) acting on 𝑛 qudits [1, 25]. A QECC 𝑄 is said to have distance 𝑑 if there exists a vector ⃗ 𝑥 ∈ 𝐅 𝑛 𝑞 2
+
+with 𝑤 𝐻 (⃗𝑥 ) = 𝑑 such that 𝑀 (⃗ 𝑥 )𝑄 = 𝑄 and 𝑀 (⃗ 𝑥 ) changes some quantum codeword |𝜑 ⟩ ∈ 𝑄 to another quantum codeword, and for all vectors ⃗ 𝑦 ∈ 𝐅 𝑛 𝑞 2
+
+with 𝑤 𝐻 (⃗𝑦 ) < 𝑑 and all quantum codewords |𝜑 ⟩ ∈ 𝑄 we have either 𝑀 (⃗𝑦 )𝑄 ⟂
+
+𝑄 or 𝑀 (⃗ 𝑦 )|𝜑 ⟩ is a scalar multiple of |𝜑 ⟩. The code 𝑄 with distance 𝑑 is said to be 
+
+pure if every quantum error 𝑀 (⃗𝑦 ) sends 𝑄 to another space orthogonal to 𝑄 for 
+
+𝑤 𝐻 (⃗𝑦 ) < 𝑑 and is said to be impure otherwise. A QECC 𝑄 ⊂ ℋ⊗𝑛 𝑞 of dimension 
+
+𝑞 𝑘 and distance 𝑑 is said to be an [[ 𝑛, 𝑘, 𝑑 ]] 𝑞 code [6], and it can correct 𝑡 errors 4and 𝑒 erasures simultaneously if 2𝑡 + 𝑒 < 𝑑 . It was shown in [1, 6, 25] that a dual-containing space 𝐶 ⊋ 𝐶 ⟂ℎ defines an [[ 𝑛, 2 dim 𝐶 − 𝑛, 𝑤 𝐻 (𝐶 ⧵ 𝐶 ⟂ℎ)]] 𝑞 
+
+code 𝑄 (𝐶 ) that is called the stabilizer code. Let 𝐼 ⊊ 𝐽 ⊆ {1 , … , 𝑛 }. It was shown in [14] that erasures in 𝐼 can be corrected by quantum measurements and unitary operations acting on qudits only in 𝐽 if and only if 
+
+𝜎 𝐼 (𝜋 𝐽 (𝐶 )) = 𝜎 𝐼 (𝐶 ⟂ℎ), (2) which can be seen equivalent to 
+
+𝜋 𝐼 (𝐶 ) = 𝜋 𝐼 (𝜎 𝐽 (𝐶 ⟂ℎ)) , (3) by using (1). Galindo et al. [14] also showed that any erasure correction pro-cedure for the punctured stabilizer code 𝑄 (𝜋 𝐽 (𝐶 )) can be used for correcting erasures in 𝐼 if (2) or (3) holds. 
+
+3. Information locality 
+
+3.1. Definitions of locality 
+
+Consider an 𝐅 𝑞 2 -linear code 𝐶 ⊂ 𝐅 𝑛 𝑞 2 . The code 𝐶 is said to have classical symbol locality (𝑟 𝐶,𝑠 , 𝛿 𝐶 ) [23, Definition 1] if for each index 𝑗 there exists 𝐽 𝑗 ⊆
+
+{1 , 2, … , 𝑛 } with 𝑗 ∈ 𝐽 𝑗 such that the punctured code 𝜋 𝐽 𝑗 (𝐶 ) has the minimum Hamming distance ≥ 𝛿 𝐶 and 
+
+|𝐽 𝑗 | ≤ 𝑟 𝐶,𝑠 + 𝛿 𝐶 − 1 . (4) In this paper we will call 𝛿 𝐶 the classical local distance . It was observed in [20, 23] that the number of necessary codeword symbols for correcting 𝛿 𝐶 − 1 
+
+erasures is often less than |𝐽 𝑗 | − 𝛿 𝐶 + 1 . In order to better estimate the number of necessary codeword symbols for correcting 𝛿 𝐶 − 1 erasures, the information locality [23, Definition 2] was defined as follows: The code 𝐶 is said to have classical information locality (𝑟 𝐶,𝑖 , 𝛿 𝐶 ) if the same set of conditions holds with (4) replaced by 
+
+dim 𝜋 𝐽 𝑗 (𝐶 ) ≤ 𝑟 𝐶,𝑖 . (5) With the information locality there is no condition on the size of 𝐽 𝑗 . The in-formation locality for classical linear codes was later generalized to classical quasi-uniform codes and called dimension locality [20, Definition 4]. Since every codeword symbol in 𝜋 𝐽 (𝐶 ) can be reconstructed by at most dim 𝜋 𝐽 (𝐶 )
+
+symbols, classical information locality captures the local property more ac-curately. The set 𝐽 𝑗 is called a repair group for index 𝑗 in both definitions of locality. 5If an [𝑛, 𝑘, 𝑑 ] linear code has either information or symbol locality (𝑟, 𝛿 ),then those parameters must satisfy the classical Singleton-like bound [23, 33] 
+
+𝑘 + 𝑑 + (⎡ ⎢
+
+𝑘 𝑟 ⎤⎥ − 1 ) (𝛿 − 1) ≤ 𝑛 + 1 . (6) Consider a QECC 𝑄 ⊂ ℋ⊗𝑛 𝑞 . The code 𝑄 is said to have quantum symbol locality (𝑟 𝑄,𝑠 , 𝛿 𝑄 ) [14] if for each index 𝑗 there exists 𝐽 𝑗 ⊆ {1 , 2, … , 𝑛 } with 𝑗 ∈ 𝐽 𝑗 
+
+such that any 𝛿 𝑄 − 1 or fewer erasures in 𝐽 𝑗 satisfying (4) can be corrected by a quantum operation (completely positive trace-preserving map) acting on codeword qudits in 𝐽 𝑗 of 𝑄 . In this paper we call 𝛿 𝑄 the quantum local distance .
+
+3.2. Information locality of quantum locally recoverable codes by Hermitian or-thogonality 
+
+Fix a Hermitian dual-containing linear code 𝐶 ⊂ 𝐅 𝑛 𝑞 2 and we will consider the stabilizer code 𝑄 (𝐶 ) defined by it. We also fix an erasure index 𝑗 , its repair group 𝐽 𝑗 ⊂ {1 , … , 𝑛 } and the set 𝐼 ⊂ 𝐽 𝑗 of actual erasures. Recall that 𝐽 ⊂ 
+
+{1 , … , 𝑛 } can be a repair group for the erasure set 𝐼 if and only if (3) holds. 
+
+Proposition 1. For a given erasure set 𝐼 ∋ 𝑗 and a repair group 𝐽 𝑗 satisfying (3) with 𝐽 replaced by 𝐽 𝑗 , there exists a subset 𝐽 ⊆ 𝐽 𝑗 with 𝐽 ⊇ 𝐼 such that 𝐽 satisfies (3) and 
+
+|𝐽 | − |𝐼 | ≤ dim 𝜋 𝐽 𝑗 (𝐶 ) − dim 𝜎 𝐼 (𝐶 ⟂ℎ). (7) 
+
+Such a set 𝐽 can be computed in 𝑂 (|𝐽 𝑗 |3) arithmetic operations in 𝐅 𝑞 2 . The com-putational procedure also simultaneously provides an 𝐅 𝑞 2 -basis defining a set of observables needed in quantum local recovery. Proof. In this proof, by abuse of notation all vectors are assumed to have |𝐽 𝑗 |
+
+components. For example, (|𝐽 𝑗 |−|𝐼 |) zeros are appended for vectors in 𝜎 𝐼 (𝐶 ⟂ℎ).Decompose 𝜎 𝐽 𝑗 (𝐶 ⟂ℎ) = 𝑉 ⊕ 𝜎 𝐼 (𝐶 ⟂ℎ) ⊕ 𝜎 𝐽 𝑗 ⧵𝐼 (𝐶 ⟂ℎ) as a direct sum of three linear spaces. By (3), 
+
+dim 𝜋 𝐼 (𝐶 ) = dim 𝜋 𝐼 (𝜎 𝐽 𝑗 (𝐶 ⟂ℎ)) = dim 𝜎 𝐽 𝑗 (𝐶 ⟂ℎ) − dim 𝜎 𝐽 𝑗 (𝐶 ⟂ℎ) ∩ ker( 𝜋 𝐼 )= dim 𝜎 𝐽 𝑗 (𝐶 ⟂ℎ) − dim 𝜎 𝐽 𝑗 ⧵𝐼 (𝐶 ⟂ℎ)= dim 𝑉 + dim 𝜎 𝐼 (𝐶 ⟂ℎ).
+
+(8) After finding bases for 𝜎 𝐼 (𝐶 ⟂ℎ), 𝑉 and 𝜎 𝐽 𝑗 ⧵𝐼 (𝐶 ⟂ℎ) by linear algebra, we can find the following dim 𝜎 𝐽 𝑗 (𝐶 ⟂ℎ) × |𝐽 𝑗 | matrix 
+
+𝐵 = ⎛⎜⎝
+
+𝐵 𝐼 
+
+𝐵 1,rem 
+
+𝐵 2
+
+⎞⎟⎠
+
+∈ 𝐅 dim 𝜎 𝐽 𝑗 (𝐶 ⟂ℎ )× |𝐽 𝑗 | 
+
+> 𝑞 2
+
+,
+
+6where: 
+
+• 𝐵 𝐼 ∈ 𝐅 dim 𝜎 𝐼 (𝐶 ⟂ℎ )× |𝐽 𝑗 | 
+
+> 𝑞 2
+
+forms a basis for 𝜎 𝐼 (𝐶 ⟂ℎ). The submatrix 𝐵 𝐼 |𝐽 𝑗 ⧵𝐼 of 𝐵 
+
+consisting of columns corresponding to 𝐽 𝑗 ⧵ 𝐼 is the zero matrix. 
+
+• 𝐵 1,rem ∈ 𝐅 (dim 𝜋 𝐼 (𝐶 )−dim 𝜎 𝐼 (𝐶 ⟂ℎ ))× |𝐽 𝑗 | 
+
+> 𝑞 2
+
+forms a basis for 𝑉 .
+
+• 𝐵 2 ∈ 𝐅 (dim 𝜎 𝐽 𝑗 (𝐶 ⟂ℎ )−dim 𝜋 𝐼 (𝐶 ))× |𝐽 𝑗 | 
+
+> 𝑞 2
+
+forms a basis for 𝜎 𝐽 𝑗 ⧵𝐼 (𝐶 ⟂ℎ). The submatrix 
+
+𝐵 2|𝐼 is the zero matrix. Secondly, compute a reduced row echelon form 𝑅 2 of 𝐵 2. Let 𝑃 ⊆ 𝐽 𝑗 ⧵ 𝐼 be the set of pivot column indices of 𝑅 2, with size |𝑃 | = rank( 𝐵 2) = dim 𝜎 𝐽 𝑗 (𝐶 ⟂ℎ)− dim 𝜋 𝐼 (𝐶 ).Thirdly, eliminate pivot columns 𝑃 in 𝐵 1,rem using rows of 𝑅 2:
+
+˜𝐵 1,rem = 𝐵 1,rem − 𝑀𝑅 2, (9) where a matrix 𝑀 is chosen to zero out all columns in 𝑃 . Let ⃗ 𝑣 1, … ,⃗ 𝑣 dim 𝜋 𝐼 (𝐶 )−dim 𝜎 𝐼 (𝐶 ⟂ℎ )
+
+denote the rows of ˜𝐵 1,rem .For a vector ⃗ 𝑣 = ( 𝑣 1, … , 𝑣 |𝐽 𝑗 |) by supp( ⃗𝑣 ) we denote {𝓁 ∶ 𝑣 𝓁 ≠ 0} . Let 
+
+𝑆 =     
+
+> dim 𝜋 𝐼 (𝐶 )−dim 𝜎 𝐼 (𝐶 ⟂ℎ)
+
+⋃
+
+> 𝑚 =1
+
+(supp( ⃗ 𝑣 𝑚 ) ⧵ 𝐼 ) ⊆ (𝐽 𝑗 ⧵ 𝐼 ) ⧵ 𝑃, 
+
+and we obtain 𝐽 = 𝐼 ∪ 𝑆 ⊆ 𝐽 𝑗 . The overall computational complexity is easily seen as 𝑂 (|𝐽 𝑗 |3).We will verify 𝜋 𝐼 (𝐶 ) = 𝜋 𝐼 (𝜎 𝐽 (𝐶 ⟂ℎ)) of condition (3). For a matrix 𝐴 , by ⟨𝐴 ⟩
+
+we denote its row space. Because 𝜋 𝐼 ⟨𝐵 2⟩ = { ⃗0} , subtraction of 𝑀𝑅 2 in (9) leaves columns of 𝐵 1,rem indexed by 𝐼 unchanged: 
+
+𝜋 𝐼 (⟨˜𝐵 1,rem ⟩) = 𝜋 𝐼 (⟨𝐵 1,rem ⟩).
+
+Thus, the rows of 𝐵 𝐼 together with ˜𝐵 1,rem generate a subspace of 𝜎 𝐽 (𝐶 ⟂ℎ) whose projection onto 𝐼 spans 𝜋 𝐼 (𝜎 𝐽 𝑗 (𝐶 ⟂ℎ)) = 𝜋 𝐼 (𝐶 ). Every row vector ⃗ 𝑢 in 𝐵 𝐼 or ˜𝐵 1,rem 
+
+belongs to 𝜎 𝐽 𝑗 (𝐶 ⟂ℎ) and has support contained in 𝐽 = 𝐼 ∪ 𝑆 . Consequently, 
+
+𝜋 𝐽 (⃗𝑢 ) ∈ 𝜎 𝐽 (𝐶 ⟂ℎ), establishing 𝜋 𝐼 (𝐶 ) ⊆ 𝜋 𝐼 (𝜎 𝐽 (𝐶 ⟂ℎ)) . The reverse inclusion 
+
+𝜋 𝐼 (𝐶 ) ⊇ 𝜋 𝐼 (𝜎 𝐽 (𝐶 ⟂ℎ)) follows from 𝐶 ⊋ 𝐶 ⟂ℎ. Therefore (3) holds. Next, we establish the size bound (7). Since all pivot columns 𝑃 are zeroed out in ˜𝐵 1,rem , the support set 𝑆 is restricted to (𝐽 𝑗 ⧵ 𝐼 ) ⧵ 𝑃 . Counting symbols gives: 
+
+|𝑆 | ≤ |𝐽 𝑗 ⧵ 𝐼 | − |𝑃 | = ( |𝐽 𝑗 | − |𝐼 |) − (dim 𝜎 𝐽 𝑗 (𝐶 ⟂ℎ) − dim 𝜋 𝐼 (𝐶 )) = ( |𝐽 𝑗 | − dim 𝜎 𝐽 𝑗 (𝐶 ⟂ℎ)) − ( |𝐼 | − dim 𝜋 𝐼 (𝐶 )) . (10) 7By (1) we see |𝐼 | − dim 𝜋 𝐼 (𝐶 ) = dim 𝜎 𝐼 (𝐶 ⟂ℎ). Substituting this into (10) and noting that dim 𝜋 𝐽 𝑗 (𝐶 ) = |𝐽 𝑗 | − dim 𝜎 𝐽 𝑗 (𝐶 ⟂ℎ) yields: 
+
+|𝐽 |−|𝐼 | = |𝑆 | ≤ (|𝐽 𝑗 |−dim 𝜎 𝐽 𝑗 (𝐶 ⟂ℎ))−dim 𝜎 𝐼 (𝐶 ⟂ℎ) = dim 𝜋 𝐽 𝑗 (𝐶 )−dim 𝜎 𝐼 (𝐶 ⟂ℎ).
+
+Finally, we will clarify that the computational procedure in this proof pro-vides a set of observables measured in quantum local recovery. Recall that quantum local recovery with a repair group 𝐽 𝑗 is standard erasure correction on punctured quantum codewords in 𝑄 (𝜋 𝐽 (𝐶 )) , whose stabilizer is defined by 
+
+𝜎 𝐽 𝑗 (𝐶 ⟂ℎ) [14]. Observables defined by basis vectors for 𝜎 𝐽 𝑗 (𝐶 ⟂ℎ) can be used for measurement in the above local recovery procedure. On the other hand, since erasures exist only in 𝐼 , observables corresponding to 𝜎 𝐽 𝑗 ⧵𝐼 (𝜎 𝐽 𝑗 (𝐶 ⟂ℎ)) = 
+
+𝜎 𝐽 𝑗 ⧵𝐼 (𝐶 ⟂ℎ) are of no use for identifying erasures in 𝐼 , which was formally proved in [30]. From the observations in this proof we see that the computed 𝐽 satisfies 
+
+𝜎 𝐽 𝑗 (𝐶 ⟂ℎ) = 𝜎 𝐽 𝑗 ⧵𝐼 (𝐶 ⟂ℎ) ⊕ 𝜎 𝐽 (𝐶 ⟂ℎ), (11) and that the row vectors of 𝐵 𝐼 and ˜𝐵 1,rem form a 𝐅 𝑞 2 -basis for 𝜎 𝐽 (𝐶 ⟂ℎ). As con-dition (3) holds for the computed 𝐽 , we can just measure observables defined by row vectors of 𝐵 𝐼 and ˜𝐵 1,rem and identify the erasures in 𝐼 , which completes the proof of the last sentence in Proposition 1. 
+
+Remark 2. As mentioned in Section 1, since measurements often disturb quan-tum states of measured qudits, it is also important to reduce the number of measured observables as well as that of measured qudits. By [30, Theorem 5] and (11) we see that the observables computed in the proof of Proposition 1 attain the minimum possible number of observables for the punctured code 
+
+𝑄 (𝜋 𝐽 𝑗 (𝐶 )) to correct erasures in 𝐼 .
+
+Definition 3. In the same spirit as the classical information locality, the code 
+
+𝑄 (𝐶 ) is said to have quantum information locality (𝑟 𝑄,𝑖 , 𝛿 𝑄 ), which is a novel notion in this paper, if for each index 𝑗 there exists 𝐽 𝑗 ⊆ {1 , 2, … , 𝑛 } with 𝑗 ∈ 𝐽 𝑗 
+
+such that we have 𝑤 𝐻 (𝜋 𝐽 𝑗 (𝐶 ) ⧵ 𝜎 𝐽 𝑗 (𝐶 ⟂ℎ)) ≥ 𝛿 𝑄 and dim 𝜋 𝐽 𝑗 (𝐶 ) ≤ 𝑟 𝑄,𝑖 .We will omit “classical” and “quantum” from locality if it is clear from con-text. Observe that 𝑟 𝑄,𝑖 is defined in exactly the same way as 𝑟 𝐶,𝑖 . Observe also that for a fixed 𝐶 we have 𝑟 𝐶,𝑖 = 𝑟 𝑄,𝑖 but 𝑟 𝐶,𝑠 ≠ 𝑟 𝑄,𝑠 if 𝛿 𝐶 ≠ 𝛿 𝑄 .The operational meaning of the quantum information locality is clarified below. 
+
+Proposition 4. Suppose that 𝑄 (𝐶 ) has the information locality (𝑟 𝑄,𝑖 , 𝛿 𝑄 ) and there is an erasure at 𝑗 -th codeword qudit. Then erasures in 𝐼 (⊊ 𝐽 𝑗 ) can be cor-rected by using at most 𝑟 𝑄,𝑖 additional codeword qudits if |𝐼 | ≤ 𝛿 𝑄 − 1 .
+
+8Proof. As shown in [14], the local erasure correction on 𝐽 𝑗 can be done by a standard erasure correction procedure for 𝑄 (𝜋 𝐽 𝑗 (𝐶 )) ⊂ ℋ⊗|𝐽 𝑗 | 
+
+> 𝑞
+
+. Therefore, since the Hermitian dual of 𝜋 𝐽 𝑗 (𝐶 ) is 𝜎 𝐽 𝑗 (𝐶 ⟂ℎ) by (1), the maximum number of correctable erasures is 𝑤 𝐻 (𝜋 𝐽 𝑗 (𝐶 ) ⧵ 𝜎 𝐽 𝑗 (𝐶 ⟂ℎ)) − 1 . In addition to the codeword qudits erased, by Proposition 1, the number of additional codeword qudits nec-essary for erasure correction is ≤ dim 𝜋 𝐽 𝑗 (𝐶 ).In [14] relations between the classical and the quantum localities were clar-ified. We will clarify relations between information localities below. They can be proved in the same way as [14] so their proofs will be omitted. 
+
+Proposition 5. Let 𝐶 ⊂ 𝐅 𝑛 𝑞 2 with 𝐶 ⊋ 𝐶 ⟂ℎ. Assume that 𝐶 has classical infor-mation locality (𝑟 𝐶,𝑖 , 𝛿 𝐶 ). Then 𝑄 (𝐶 ) has quantum information locality (𝑟 𝐶,𝑖 , 𝛿 𝐶 ).
+
+By Proposition 5, one can construct a QECC 𝑄 (𝐶 ) with quantum informa-tion locality (𝑟, 𝛿 ) by designing a classical code 𝐶 with classical information locality (𝑟, 𝛿 ) such that 𝐶 ⊋ 𝐶 ⟂ℎ. A converse of Proposition 5 needs an addi-tional assumption. 
+
+Proposition 6. Let 𝐶 ⊂ 𝐅 𝑛 𝑞 2 with 𝐶 ⊋ 𝐶 ⟂ℎ. Assume that 𝑄 (𝐶 ) has quantum information locality (𝑟 𝑄,𝑖 , 𝛿 𝑄 ). If 
+
+1. either 𝛿 𝑄 ≤ 𝑤 𝐻 (𝐶 ⟂ℎ) or 
+
+2. 𝑄 (𝐶 ) is pure, that is, 𝑤 𝐻 (𝐶 ) = 𝑤 𝐻 (𝐶 ⧵ 𝐶 ⟂ℎ)
+
+then 𝐶 has classical information locality (𝑟 𝑄,𝑖 , 𝛿 𝑄 ).
+
+By (6) and Proposition 6, if an [[ 𝑛, 𝑘, 𝑑 ]] pure stabilizer code 𝑄 (𝐶 ) has either information or symbol locality (𝑟, 𝛿 ) then those parameters must satisfy 
+
+𝑘 + 𝑛 
+
+2 + 𝑑 + (⎡ ⎢
+
+𝑘 + 𝑛 
+
+2𝑟 ⎤⎥ − 1 ) (𝛿 − 1) ≤ 𝑛 + 1 (12) which was called the quantum pure Singleton-like bound for quantum local recovery in [14]. Galindo et al. [13] showed that (12) can be violated if 𝑄 (𝐶 ) is impure. 
+
+4. Example differentiating information and symbol localities Proposition 7. There exist 𝐅 4-linear codes 𝐶 ⟂ℎ ⊊ 𝐶 ⊊ 𝐅 16 4 whose stabilizer code 
+
+𝑄 (𝐶 ) has parameters [[16 , 2, 3]] 2 with symbol locality (6 , 3) and information lo-cality (5 , 3) .
+
+9Proof. We construct a binary quantum stabilizer code 𝑄 (𝐶 ) from a classical linear code over the finite field 𝐅 4 = {0 , 1, 𝜔, 𝜔 2} (where 𝜔 2 + 𝜔 + 1 = 0 ) of length 𝑛 = 16 .We begin by defining a 3×8 matrix 𝐻 0 whose columns are pairwise linearly independent over 𝐅 4:
+
+𝐻 0 = ⎛⎜⎝
+
+1 1 1 1 1 1 1 10 1 𝜔 𝜔 2 0 1 𝜔 𝜔 2
+
+0 0 0 0 1 1 1 1
+
+⎞⎟⎠
+
+.
+
+By evaluating the Hermitian inner products of the rows of 𝐻 0, we verify that 
+
+𝐻 0𝐻 †0 = 𝟎 , where 𝐻 †0 is the transpose of 𝐻 0 followed by component-wise squar-ing. We identify a vector ⃗ 𝑣 ∈ ⟨𝐻 0⟩⟂ℎ ⧵⟨𝐻 0⟩ defined as ⃗ 𝑣 = (0 , 1, 𝜔 2, 𝜔, 0, 0, 0, 0) .Its Hermitian inner product with itself is ⟨⃗𝑣,⃗ 𝑣 ⟩ℎ = 1 .We construct the generator matrix 𝐺 ⟂ℎ of the dual code 𝐶 ⟂ℎ for 𝑛 = 16 
+
+by placing two identical blocks of 𝐻 0 on the diagonal and appending a global parity-check row (⃗𝑣,⃗ 𝑣 ) to glue them together: 
+
+𝐺 ⟂ℎ = ⎛⎜⎝
+
+𝐻 0 𝟎 𝟎 𝐻 0⃗𝑣⃗ 𝑣 
+
+⎞⎟⎠
+
+.
+
+The matrix 𝐺 ⟂ℎ has size 7×16 . We see the self-orthogonality condition 𝐺 ⟂ℎ(𝐺 ⟂ℎ)† =
+
+𝟎 from 
+
+• The blocks 𝐻 0 satisfy 𝐻 0𝐻 †0 = 𝟎 .
+
+• The row (⃗𝑣,⃗ 𝑣 ) is Hermitian-orthogonal to the 𝐻 0 blocks because ⃗ 𝑣 ∈
+
+⟨𝐻 0⟩⟂ℎ.
+
+• The Hermitian inner product of the row (⃗𝑣,⃗ 𝑣 ) with itself is ⟨⃗𝑣,⃗ 𝑣 ⟩ℎ +
+
+⟨⃗ 𝑣,⃗ 𝑣 ⟩ℎ = 0 .The dimension of the dual code is dim 𝐶 ⟂ℎ = 7 .The primary code 𝐶 = ⟨𝐺 ⟩ has dimension dim 𝐶 = 𝑛 − dim 𝐶 ⟂ℎ = 16 − 7 = 9 . To explicitly construct the generator matrix 𝐺 for 𝐶 , we find a weight-3 vector ⃗ 𝑢 ∈ ⟨𝐻 0⟩⟂ℎ with a support completely disjoint from ⃗ 𝑣 . We define ⃗𝑢 = (0 , 0, 0, 0, 0, 1, 𝜔 2, 𝜔 ). Because their supports are disjoint, ⟨⃗𝑢,⃗ 𝑣 ⟩ℎ = 0 . We form the remaining basis vectors 𝐺 rem using ⃗ 𝑢 :
+
+𝐺 rem = (⃗𝑢⃗ 0⃗
+
+0⃗ 𝑢 ) = (0 0 0 0 0 1 𝜔 2 𝜔 0 0 0 0 0 0 0 00 0 0 0 0 0 0 0 0 0 0 0 0 1 𝜔 2 𝜔 ) ,
+
+10 𝐺 = ( 𝐺 ⟂ℎ
+
+𝐺 rem 
+
+) .
+
+This explicitly demonstrates that 𝐺 ⟂ℎ is a submatrix of 𝐺 , satisfying 𝐶 ⊋ 𝐶 ⟂ℎ.We proved that 𝑄 (𝐶 ) has parameters [[16 , 2]] .We will compute 𝑤 𝐻 (𝐶 ⟂ℎ). Any non-zero linear combination of rows strictly within an 𝐻 0 block yields a weight ≥ 4. If a vector includes the row (⃗ 𝑣,⃗ 𝑣 ), its nonzero scalar multiple takes the form ⃗ 𝑦 = ( ⃗𝑥 1 +⃗ 𝑣,⃗ 𝑥 2 +⃗ 𝑣 ), where ⃗ 𝑥 1,⃗ 𝑥 2 ∈ ⟨𝐻 0⟩.Because ⃗ 𝑣 ∉ ⟨𝐻 0⟩, neither ⃗ 𝑥 1 +⃗ 𝑣 nor ⃗ 𝑥 2 +⃗ 𝑣 can be the zero vector ⃗ 0. Because 
+
+𝐻 0 can be seen as parity-check for ⃗ 𝑥 1 +⃗ 𝑣 and ⃗ 𝑥 2 +⃗ 𝑣 and 𝐻 0 contains no parallel columns, we observe 𝑤 𝐻 (⃗𝑥 1 +⃗ 𝑣 ) ≥ 3 and 𝑤 𝐻 (⃗𝑥 2 +⃗ 𝑣 ) ≥ 3, meaning 𝑤 𝐻 (⃗𝑦 ) ≥ 6.The absolute minimum weight is bounded solely by the 𝐻 0 subcodes and we see 
+
+𝑤 𝐻 (𝐶 ⟂ℎ) = 4 .
+
+We will compute 𝑤 𝐻 (𝐶 ) and 𝑤 𝐻 (𝐶 ⧵𝐶 ⟂ℎ). The vector ⃗ 𝑐 = ( ⃗𝑢,⃗ 0) corresponds to the first row of 𝐺 rem and belongs to 𝐶 . Counting its non-zero elements gives an immediate upper bound 
+
+𝑤 𝐻 (⃗𝑐 ) = 𝑤 𝐻 (⃗𝑢 ) = 3 ⇐⇒ 𝑤 𝐻 (𝐶 ) ≤ 3.
+
+Because 𝐺 ⟂ℎ contains no parallel or zero columns, no weight-1 or weight-2 codewords exist in 𝐶 . Therefore, 𝑤 𝐻 (𝐶 ) = 3 . Since 𝑤 𝐻 (𝐶 ⟂ℎ) = 4 , the distance of 𝑄 (𝐶 ) is 
+
+𝑤 𝐻 (𝐶 ⧵ 𝐶 ⟂ℎ) = 3 .
+
+We will define repair groups and compute their quantum local distances. Let 𝐾 = {1 , … , 8} and 𝐿 = {9 , … , 16} , which will be repair groups for 𝐶 . For erased position 1 ≤ 𝑗 ≤ 8, the repair group 𝐾 is used and otherwise 𝐿 is used. The shortened dual code 𝜎 𝐾 (𝐶 ⟂ℎ) restricts vectors to be zero on 𝐿 . This forces the coefficient of the row (⃗ 𝑣,⃗ 𝑣 ) to be exactly 0, isolating the top-left block 
+
+𝜎 𝐾 (𝐶 ⟂ℎ) = ⟨𝐻 0⟩ ⇐⇒ dim 𝜎 𝐾 (𝐶 ⟂ℎ) = 3 ,𝜋 𝐾 (𝐶 ) = ⟨𝐻 0⟩⟂ℎ ⇐⇒ dim 𝜋 𝐾 (𝐶 ) = 8 − 3 = 5 .
+
+Because the vector ⃗ 𝑢 is completely captured in this projection, we see the min-imum Hamming weight 
+
+𝑤 𝐻 (𝜋 𝐾 (𝐶 )) = 𝑤 𝐻 (⃗𝑢 ) = 3 .
+
+Because 𝜎 𝐾 (𝐶 ⟂ℎ) = ⟨𝐻 0⟩, its minimum Hamming weight is 4. Therefore, we see 
+
+𝑤 𝐻 (𝜋 𝐾 (𝐶 ) ⧵ 𝜎 𝐾 (𝐶 ⟂ℎ)) = 3 .
+
+11 We have the same analysis for the other repair group 𝐿 , and we see that the quantum local distance 𝛿 𝑄 = 3 . We also see that information locality (𝑟 𝑄,𝑖 , 𝛿 𝑄 ) = (5 , 3) and symbol locality (𝑟 𝑄,𝑠 , 𝛿 𝑄 ) = (6 , 3) .In order to differentiate the symbol and the information localities, we must ensure that there is no choice of repair groups that makes (𝑟 𝑄,𝑠 , 𝛿 𝑄 ) = (5 , 3) . For this purpose, we will introduce notations and lemmas. For 𝑆 ⊆ {1 , … , 8} , 𝐻 0(𝑆 )
+
+denotes the submatrix of 𝐻 0 consisting of the 𝑖 -th columns for 𝑖 ∈ 𝑆 . For 𝑖 ,⃗ 𝑐 𝑖 
+
+denotes the 𝑖 -th column of 𝐻 0.
+
+Lemma 8. For a subset 𝑆 ⊂ {1 , … , 8} with |𝑆 | ≥ 2, we have rank( 𝐻 0(𝑆 )) ≥
+
+2.
+
+Lemma 9. For a subset 𝑆 ⊂ {1 , … , 8} with |𝑆 | ≥ 5, we have rank( 𝐻 0(𝑆 )) = 3 .Proof. Let 𝑉 1 = span( ⃗𝑐 1, … ,⃗ 𝑐 4) and 𝑉 2 = span( ⃗𝑐 5, … ,⃗ 𝑐 8). Since every vector in 
+
+𝑉 1 has a third coordinate of 0, 𝑉 1 = {( 𝑎, 𝑏, 0) 𝑇 ∣ 𝑎, 𝑏 ∈ 𝐅 4}. Conversely, every column in the second half of 𝐻 0 takes the form (1 , 𝑥, 1) 𝑇 . Because its third coordinate is 1 ≠ 0, no column from ⃗ 𝑐 5, … ,⃗ 𝑐 8 exists in 𝑉 1. We also observe 
+
+𝑉 2 = {( 𝑎, 𝑏, 𝑎 )𝑇 ∣ 𝑎, 𝑏 ∈ 𝐅 4} and no column from ⃗ 𝑐 1, … ,⃗ 𝑐 4 exists in 𝑉 2.Let 𝑆 = 𝑆 1∪𝑆 2 where 𝑆 1 = 𝑆 ∩{1 , 2, 3, 4} and 𝑆 2 = 𝑆 ∩{5 , 6, 7, 8} . Let 𝑠 1 = |𝑆 1|
+
+and 𝑠 2 = |𝑆 2|. We are given 𝑠 1 + 𝑠 2 = |𝑆 | ≥ 5, which implies 1 ≤ 𝑠 1 ≤ 4 and 
+
+1 ≤ 𝑠 2 ≤ 4. Furthermore, 𝑠 1 + 𝑠 2 ≥ 5 implies that either 𝑠 1 ≥ 2 or 𝑠 2 ≥ 2.Without loss of generality, assume 𝑠 1 ≥ 2. By Lemma 8, the columns in 𝑆 1
+
+span the 2-dimensional space 𝑉 1. Because 𝑠 2 ≥ 1, there exists at least one index 
+
+𝑖 ∈ 𝑆 2. As established, ⃗ 𝑐 𝑖 ∉ 𝑉 1. Adding this linearly independent vector ⃗ 𝑐 𝑖 to the 2-dimensional subspace 𝑉 1 strictly increases its dimension to 3, proving 
+
+rank( 𝐻 0(𝑆 )) = 3 .
+
+Proposition 10. For the quantum stabilizer code 𝑄 (𝐶 ) constructed in the proof of Proposition 7, no choice of repair groups makes the symbol locality (𝑟 𝑄,𝑠 , 𝛿 𝑄 ) = (5 , 3) .Proof. In order to have symbol locality (𝑟 𝑄,𝑠 , 𝛿 𝑄 ) = (5 , 3) , there must exist a repair group 𝐽 ⊊ {1 , … , 16} such that 
+
+• |𝐽 | = 7 , and 
+
+• 𝑤 𝐻 (𝜋 𝐽 (𝐶 ) ⧵ 𝜎 𝐽 (𝐶 ⟂ℎ)) ≥ 3.In order to prove Proposition 10, we will show that for any 𝐽 with |𝐽 | = 7 , we have 𝑤 𝐻 (𝜋 𝐽 (𝐶 ) ⧵ 𝜎 𝐽 (𝐶 ⟂ℎ)) ≤ 2.Since 𝜎 𝐽 can be seen as the kernel of linear map 𝜋 𝐽 , we see that 
+
+dim 𝜎 𝐽 (𝐶 ⟂ℎ) = dim 𝐶 ⟂ℎ − dim 𝜋 𝐽 (𝐶 ⟂ℎ). (13) 12 Firstly we consider the case 𝐽 ⊊ {1 , … , 8} . We have 𝜎 𝐽 (𝐶 ⟂ℎ) = 𝜎 𝐽 (⟨𝐻 0⟩). Since 
+
+𝑤 𝐻 (⟨𝐻 0⟩) = 4 as seen in the proof of Proposition 7, by (13) we have 
+
+dim 𝜎 𝐽 (⟨𝐻 0⟩) = dim ⟨𝐻 0⟩ − dim 𝜋 {1 ,…,8} ⧵𝐽 (⟨𝐻 0⟩)
+
+⏟⎴⎴⎴⎴⎴⏟⎴⎴⎴⎴⎴⏟ 
+
+> =1
+
+= 2 .
+
+For the case 𝐽 ⊊ {9 , … , 16} we also see that dim 𝜎 𝐽 (𝐶 ⟂ℎ) = 2 .We consider the case 𝐽 is contained in neither {1 , … , 8} nor {9 , … , 16} . Let 
+
+𝑇 1 = {1 , … , 8} ⧵ 𝐽 and 𝑇 2 = {1 ≤ 𝑖 ≤ 8 ∶ 8 + 𝑖 ∉ 𝐽 }. We have 𝐽 ∪ 𝑇 1 ∪ (8 + 
+
+𝑇 2) = {1 , … , 16} , |𝐽 | + |𝑇 1| + |𝑇 2| = 16 and |𝑇 1| + |𝑇 2| = 9 . Let 𝑡 1 = |𝑇 1|
+
+and 𝑡 2 = |𝑇 2|. Since 𝐽 is contained in neither {1 , … , 8} nor {9 , … , 16} , we have 
+
+(𝑡 1, 𝑡 2) ∈ {(2 , 7) , (3 , 6) , (4 , 5) , (5 , 4) , (6 , 3) , (7 , 2)} , which implies max{ 𝑡 1, 𝑡 2} ≥ 5.By using Lemma 8 combined with min{ 𝑡 1, 𝑡 2} ≥ 2 and Lemma 9 combined with max{ 𝑡 1, 𝑡 2} ≥ 5, we see 
+
+dim 𝜋 𝑇 1 (⟨𝐻 0⟩) + dim 𝜋 𝑇 2 (⟨𝐻 0⟩) ≥ 2 + 3 = 5 . (14) By the shape of 𝐺 ⟂ℎ we also see 
+
+dim 𝜋 {1 ,…,16} ⧵𝐽 (𝐶 ⟂ℎ) ≥ dim 𝜋 𝑇 1 (⟨𝐻 0⟩) + dim 𝜋 𝑇 2 (⟨𝐻 0⟩). (15) By combining (13), (14) and (15) we see that dim 𝜎 𝐽 (𝐶 ⟂ℎ) ≤ 2.When dim 𝜎 𝐽 (𝐶 ⟂ℎ) ≤ 1 it is clear that 𝑤 𝐻 (𝜋 𝐽 (𝐶 )) ≤ 2. Suppose that dim 𝜎 𝐽 (𝐶 ⟂ℎ) = 2. If every pair of distinct vectors in a subset 𝑈 ⊆ 𝐅 24 is linearly independent, then |𝑈 | ≤ 5. On the other hand, the size of a parity-check matrix for 𝜋 𝐽 (𝐶 )
+
+is 2 × 7 , so it must have a pair of columns that is linearly dependent. This means that 𝑤 𝐻 (𝜋 𝐽 (𝐶 )) ≤ 2. Since 𝑤 𝐻 (𝐶 ⟂ℎ) = 4 , we have 𝑤 𝐻 (𝜎 𝐽 (𝐶 ⟂ℎ)) ≥ 4 and 
+
+𝑤 𝐻 (𝜋 𝐽 (𝐶 ) ⧵ 𝜎 𝐽 (𝐶 ⟂ℎ)) ≤ 2.
+
+5. Quantum locally recoverable codes by Euclidean orthogonality 
+
+In this section we will argue that there is difficulty in defining a quantum information locality for quantum stabilizer codes constructed by Euclidean orthogonality. Let 𝐶 𝑋 , 𝐶 𝑍 ⊊ 𝐅 𝑛 𝑞 be two 𝐅 𝑞 -linear codes. The Euclidean dual of an 𝐅 𝑞 -linear code will be denoted by ⟂𝑒 . If 𝐶 𝑋 ⊇ 𝐶 ⟂𝑒 𝑍 and 𝐶 𝑍 ⊇ 𝐶 ⟂𝑒 𝑋 then we can construct an [[ 𝑛, dim 𝐶 𝑋 + dim 𝐶 𝑍 − 𝑛, min{ 𝑤 𝐻 (𝐶 𝑋 ⧵ 𝐶 ⟂𝑒 𝑍 ), 𝑤 𝐻 (𝐶 𝑍 ⧵ 𝐶 ⟂𝑒 𝑋 )}]] 
+
+stabilizer code 𝑄 (𝐶 𝑋 , 𝐶 𝑍 ) [1, 4, 25, 36]. Let {𝜔, 𝜔 𝑞 } be a normal basis of 𝐅 𝑞 2
+
+over 𝐅 𝑞 . 𝑄 (𝐶 𝑋 , 𝐶 𝑍 ) can be written as 𝑄 (𝐶 ) by 𝐶 ⟂ℎ ⊊ 𝐶 ⊆ 𝐅 𝑛 𝑞 2 if and only if 𝐶 𝑋 = 𝐶 𝑍 and 𝐶 = 𝜔𝐶 𝑋 + 𝜔 𝑞 𝐶 𝑍 . Therefore all the mathematical claims in Section 3 hold for the Calderbank-Shor-Steane quantum codes constructed from 𝐶 ⟂𝑒 ⊊ 𝐶 ⊆ 𝐅 𝑛 𝑞 if ⟂ ℎ is replaced by ⟂ 𝑒 .13 Suppose that erasures in 𝐼 are corrected by a repair group 𝐽 ⊋ 𝐼 . 𝑄 (𝐶 𝑋 , 𝐶 𝑍 )
+
+can correct those erasures if and only if [14] 
+
+𝜋 𝐼 (𝐶 𝑋 ) = 𝜋 𝐼 (𝜎 𝐽 (𝐶 ⟂𝑒 𝑍 )) ,𝜋 𝐼 (𝐶 𝑍 ) = 𝜋 𝐼 (𝜎 𝐽 (𝐶 ⟂𝑒 𝑋 )) . (16) By using Proposition 1 and the relations 𝐶 = 𝜔𝐶 𝑋 + 𝜔 𝑞 𝐶 𝑍 ⊆ 𝐅 𝑛 𝑞 2 , we have 
+
+dim 𝐅 𝑞 2 𝐶 = (dim 𝐅 𝑞 𝐶 𝑋 + dim 𝐅 𝑞 𝐶 𝑍 )∕2 for 𝐶 𝑋 = 𝐶 𝑍 , and we immediately deduce the following proposition: 
+
+Proposition 11. Assume that 𝐶 𝑋 = 𝐶 𝑍 . For a given erasure set 𝐼 ∋ 𝑗 and a repair group 𝐽 𝑗 satisfying (16) with 𝐽 replaced by 𝐽 𝑗 , there exists a subset 𝐽 ⊆ 𝐽 𝑗 
+
+with 𝐽 ⊇ 𝐼 such that 𝐽 satisfies (16) and 
+
+|𝐽 | − |𝐼 | ≤ ⎡⎢⎢
+
+dim 𝐅 𝑞 𝜋 𝐽 𝑗 (𝐶 𝑋 ) + dim 𝐅 𝑞 𝜋 𝐽 𝑗 (𝐶 𝑍 )2
+
+⎤⎥⎥
+
+. (17) When 𝐶 𝑋 = 𝐶 𝑍 , by Proposition 11 we can define the quantum information locality by 
+
+max 
+
+> 1≤𝑗 ≤𝑛
+
+⎡⎢⎢
+
+dim 𝐅 𝑞 𝜋 𝐽 𝑗 (𝐶 𝑋 ) + dim 𝐅 𝑞 𝜋 𝐽 𝑗 (𝐶 𝑍 )2
+
+⎤⎥⎥
+
+, (18) which is equal to previously defined 𝑟 𝑄,𝑖 for 𝐶 𝑋 = 𝐶 𝑍 and 𝐶 = 𝜔𝐶 𝑋 + 𝜔 𝑞 𝐶 𝑍 .However, when 𝐶 𝑋 ≠ 𝐶 𝑍 , 𝐶 = 𝜔𝐶 𝑋 + 𝜔 𝑞 𝐶 𝑍 may not be 𝐅 𝑞 2 -linear, Proposi-tion 11 can fail and we cannot define a quantum information locality by (18), which will be shown by an example below. We will give index sets 𝐼 ⊊ 𝐽 𝑗 , and codes 𝐶 𝑋 × 𝐶 𝑍 ⊋ 𝐶 ⟂𝑒 𝑍 × 𝐶 ⟂𝑒 𝑋 satisfying (16) with 𝐽 replaced by 𝐽 𝑗 such that no subset 𝐽 ⊆ 𝐽 𝑗 with 𝐼 ⊊ 𝐽 satisfies both (16) and (17). Let 𝑞 = 2 , 𝑛 = 6 , 𝐽 𝑗 = {1 , 2, 3, 4, 5, 6} for all 𝑗 , and 𝐼 = {1} . The cardinalities are |𝐽 𝑗 | = 6 and |𝐼 | = 1 , giving |𝐽 𝑗 | − |𝐼 | = 5 . Define the component codes 
+
+𝐶 𝑋 , 𝐶 𝑍 ⊂ 𝐅 62 by specifying 𝐶 ⟂𝑒 𝑍 and 𝐶 ⟂𝑒 𝑋 :
+
+𝐶 ⟂𝑒 𝑍 = span 𝐅 2 {(1 , 1, 1, 1, 1, 1)} ,𝐶 ⟂𝑒 𝑋 = span 𝐅 2 {(1 , 1, 0, 0, 0, 0) , (0 , 1, 1, 0, 0, 0) , (0 , 0, 1, 1, 0, 0)} .
+
+Taking Euclidean duals in 𝐅 62, the primal component codes are: 
+
+𝐶 𝑍 = {⃗ 𝑦 ∈ 𝐅 62 ∶
+
+> 6
+
+∑
+
+> 𝑚 =1
+
+𝑦 𝑚 = 0 } ,𝐶 𝑋 = {⃗ 𝑦 ∈ 𝐅 62 ∶ 𝑦 1 + 𝑦 2 = 0 , 𝑦 2 + 𝑦 3 = 0 , 𝑦 3 + 𝑦 4 = 0 } .
+
+14 By straightforward computation we can confirm 𝐶 𝑋 ⊋ 𝐶 ⟂𝑒 𝑍 , 𝐶 𝑍 ⊋ 𝐶 ⟂𝑒 𝑋 , and condition (16) holds with 𝐽 replaced by 𝐽 𝑗 . We will verify non-existence of valid subsets 𝐽 ⊆ 𝐽 𝑗 by evaluating all candidate subsets 𝐽 ⊆ 𝐽 𝑗 containing 𝐼 = {1} :
+
+Full set candidate ( 𝐽 = 𝐽 𝑗 = {1 , 2, 3, 4, 5, 6} ): The projection equalities (16) hold. However, the size difference is |𝐽 𝑗 | − |𝐼 | = 6 − 1 = 5 . Since 5 > 4, the required bound in (17) fails. 
+
+Proper subset candidates ( 𝐽 ⊊ 𝐽 𝑗 ): If 𝐽 is a proper subset of 𝐽 𝑗 , the comple-ment 𝐽 = 𝐽 𝑗 ⧵ 𝐽 is non-empty. Any non-zero vector in 𝐶 ⟂𝑒 𝑍 is a scalar multiple of ⃗ 1 = (1 , 1, 1, 1, 1, 1) , which has non-zero entries on all 6 co-ordinates. Because 𝐽 contains at least one coordinate, restricting to zero on 𝐽 forces the shortened code 𝐶 ⟂𝑒 𝑍 to be trivial: 𝜎 𝐽 (𝐶 ⟂𝑒 𝑍 ) = { ⃗ 0} . Conse-quently, 𝜋 𝐼 (𝜎 𝐽 (𝐶 ⟂𝑒 𝑍 )) = {0} ≠ 𝐅 2 = 𝜋 𝐼 (𝐶 𝑋 ). The projection equalities (16) fail for all proper subsets. Therefore, no subset 𝐽 ⊆ 𝐽 𝑗 with 𝐼 ⊊ 𝐽 satisfies both (16) and (17), and we have confirmed that Proposition 11 fails in this situation. 
+
+6. Concluding remarks 
+
+In this paper, we proposed the quantum information locality in Definition 3 by following an idea behind its classical counterpart [23, Definition 2], and a computational procedure in Proposition 1 that provides a repair group whose size is predicted by the proposed information locality and a smallest set of ob-servables measured during quantum local recovery. After that, we showed in Section 4 an example of a quantum stabilizer code with which the proposed information locality gave a tighter estimate on the number of required code-word symbols for erasure correction than the previously proposed quantum symbol locality [14]. In Section 5 we argued that it seems unobvious to de-fine the quantum information locality for a wider class of QECC by showing an explicit example. In the classical local recovery, the (𝑟, 𝛿 ) symbol locality can be defined for any block error-correcting codes including nonlinear ones [33], and the (𝑟, 𝛿 ) information locality was only defined for the quasi-uniform codes [20, Definition 4], which include linear codes while they form a proper subclass of general block error-correcting codes. So the limited applicability of information locality seems somewhat natural even for the quantum local recovery. 
+
+Acknowledgments. The author would like to thank Carlos Galindo and Fer-nando Hernando for drawing his attention to classical and quantum hierar-chical local recovery [21, 34], which initiated this research. This work was 15 partially funded by the Japan Society for Promotion of Science under Grant No. 23K10980. 
+
+Data availability. A C program to verify all the mathematical claims in Section 4 by examining all related vectors was included in source files of the arxiv.org eprint (version 1) with the same title as this manuscript. 
+
+Declarations. The author has no competing interests to declare that are rele-vant to the content of this paper. 
+
+Declaration of AI use. Examples in Sections 4 and 5 were discovered by Google Gemini 3.1Pro. Their descriptions were written by the author. Google Gemini 3.1Pro was also used to generate a C program to verify all the mathematical claims in Section 4 by brute-force computation. 
+
+References 
+
+[1] A. Ashikhmin, E. Knill, Nonbinary quantum stabilizer codes, IEEE Trans. Inform. Theory 47 (2001) 3065–3072. doi: 10.1109/18.959288 .[2] C. H. Bennett, D. P. DiVincenzo, J. A. Smolin, Capacities of quantum erasure channels, Phys. Rev. Lett. 78 (1997) 3217–3220. doi: 10.1103/ PhysRevLett.78.3217 .[3] K. Bu, W. Gu, X. Li, Quantum locally recoverable code with intersecting recovery sets, 2025. ArXiv:2501.10354. [4] A. R. Calderbank, P. W. Shor, Good quantum error-correcting codes exist, Phys. Rev. A 54 (1996) 1098–1105. doi: 10.1103/PhysRevA.54.1098 .[5] A. R. Calderbank, E. M. Rains, P. W. Shor, N. J. A. Sloane, Quantum error correction and orthogonal geometry, Phys. Rev. Lett. 78 (1997) 405–408. doi: 10.1103/PhysRevLett.78.405 .[6] A. R. Calderbank, E. M. Rains, P. W. Shor, N. J. A. Sloane, Quantum error correction via codes over GF(4), IEEE Trans. Inform. Theory 44 (1998) 1369–1387. doi: 10.1109/18.681315 .[7] M. Cao, K. Zhou, An open problem on NSC quasi-unitary matrices and its application to quantum codes, IEEE Trans. Inform. Theory 72 (2026) 3885–3898. doi: 10.1109/TIT.2026.3681560 .[8] M. Cao, K. Zhou, Optimal quantum (𝑟, 𝛿 )-locally repairable codes from matrix-product codes, IEEE Trans. Inform. Theory 72 (2026) 5572–5591. doi: 10.1109/TIT.2026.3691784 .16 [9] M. Cao, K. Zhou, Quantum codes and optimal pure quantum (𝑟, 𝛿 )-LRCs via the MP construction, 2026. arXiv:2606.14253 .[10] N. Delfosse, G. Zémor, Linear-time maximum likelihood decoding of sur-face codes over the quantum erasure channel, Physical Review Research 2 (2020) 033042. doi: 10.1103/PhysRevResearch.2.033042 .[11] C. Galindo, F. Hernando, R. Matsumoto, D. Ruano, Entanglement-assisted quantum error-correcting codes over arbitrary finite fields, Quantum Inf. Process. 18 (2019) 116. doi: 10.1007/s11128-019-2234-5 .[12] C. Galindo, F. Hernando, C. Munuera, D. Ruano, Optimal quan-tum locally recoverable codes from matrix-product construction, 2025. arXiv:2310.15703. [13] C. Galindo, F. Hernando, H. Martín-Cruz, R. Matsumoto, Impure codes exceeding the pure bounds for quantum local recovery, Quantum Inf. Process. 25 (2026) 241. doi: 10.1007/s11128-026-05259-1 .[14] C. Galindo, F. Hernando, H. Martín-Cruz, R. Matsumoto, Quantum 
+
+(𝑟, 𝛿 )-locally recoverable codes, Finite Fields and Their Applications 111 (2026) 102785. doi: 10.1016/j.ffa.2025.102785 .[15] C. Galindo, F. Hernando, R. Matsumoto, Quantum (𝑟, 𝛿 )-locally recover-able BCH and homothetic-BCH codes, 2026. arXiv:2601.22567. [16] L. Golowich, V. Guruswami, Quantum locally recoverable codes, in: Proc. 2025 ACM-SIAM Symp. Discrete Algorithms (SODA), 2025, pp. 5512–5522. doi: 10.1137/1.9781611978322.188 .[17] P. Gopalan, C. Huang, H. Simitci, S. Yekhanin, On the locality of code-word symbols, IEEE Transactions on Information Theory 58 (2012) 6925–6934. doi: 10.1109/TIT.2012.2208937 .[18] D. Gottesman, Class of quantum error-correcting codes saturating the quantum Hamming bound, Phys. Rev. A 54 (1996) 1862–1868. doi: 10. 1103/PhysRevA.54.1862 .[19] M. Grassl, T. Beth, T. Pellizzari, Codes for the quantum erasure channel, Phys. Rev. A 56 (1997) 33–38. doi: 10.1103/PhysRevA.56.33 .[20] M. Grezet, R. Freij-Hollanti, T. Westerbäck, C. Hollanti, Alphabet-dependent bounds for linear locally repairable codes based on residual codes, IEEE Trans. Inform. Theory 65 (2019) 6089–6100. doi: 10.1109/ TIT.2019.2911595 .17 [21] V. Guruswami, R. Kshirsagar, P. Trivedi, Quantum hierarchical locally recoverable codes, 2026. arXiv:2606.06736. [22] S. Heußen, D. F. Locher, M. Müller, Measurement-free fault-tolerant quantum error correction in near-term devices, PRX Quantum 5 (2024) 010333. doi: 10.1103/PRXQuantum.5.010333 .[23] G. M. Kamath, N. Prakash, V. Lalitha, P. V. Kumar, Codes with local re-generation and erasure correction, IEEE Trans. Inform. Theory 60 (2014) 4637–4660. doi: 10.1109/TIT.2014.2329872 .[24] M. Kang, W. C. Campbell, K. R. Brown, Quantum error correction with metastable states of trapped ions using erasure conversion, PRX Quan-tum 4 (2023) 020358. doi: 10.1103/PRXQuantum.4.020358 .[25] A. Ketkar, A. Klappenecker, S. Kumar, P. K. Sarvepalli, Nonbinary sta-bilizer codes over finite fields, IEEE Trans. Inform. Theory 52 (2006) 4892–4924. doi: 10.1109/TIT.2006.883612 .[26] Y. Li, S. Li, G. Luo, S. Ling, Improved bounds and optimal constructions of pure quantum locally recoverable codes, 2025. arXiv:2512.07256. [27] J. Li, L. Jin, C. Xing, Quantum locally recoverable codes with asymmetric locality, IEEE Trans. Inform. Theory 72 (2026) 5888–5896. doi: 10.1109/ TIT.2026.3703812 .[28] Y. Li, S. Li, H. Lao, G. Luo, S. Ling, On optimal quantum LRCs from the Hermitian construction and 𝑡 -designs, IEEE Trans. Inform. Theory 72 (2026) 5556–5571. doi: 10.1109/TIT.2026.3697209 .[29] G. Luo, B. Chen, M. F. Ezerman, S. Ling, Bounds and constructions of quantum locally recoverable codes from quantum CSS codes, IEEE Transactions on Information Theory 71 (2025) 1794–1802. doi: 10.1109/ TIT.2025.3533494 .[30] R. Matsumoto, Reducing measurements in quantum erasure correction by quantum local recovery, Computational and Applied Mathematics (2026). doi: 10.1007/s40314-026-03881-4 .[31] M. A. Perlin, V. N. Premakumar, J. Wang, M. Saffman, R. Joynt, Fault-tolerant measurement-free quantum error correction with multiqubit gates, Physical Review A 108 (2023) 062426. doi: 10.1103/PhysRevA. 108.062426 .18 [32] V. S. Pless, W. C. Huffman, R. A. Brualdi, An introduction to algebraic codes, in: V. S. Pless, W. C. Huffman (Eds.), Handbook of Coding Theory, Elsevier, Amsterdam, 1998, pp. 3–139. [33] N. Prakash, G. M. Kamath, V. Lalitha, P. V. Kumar, Optimal linear codes with a local-error-correction property, in: 2012 IEEE International Symposium on Information Theory Proceedings, 2012, pp. 2776–2780. doi: 10.1109/ISIT.2012.6284028 .[34] B. Sasidharan, G. K. Agarwal, P. V. Kumar, Codes with hierarchical lo-cality, in: 2015 IEEE International Symposium on Information Theory (ISIT), 2015, pp. 1257–1261. doi: 10.1109/ISIT.2015.7282657 .[35] S. Sharma, V. Ramkumar, I. Tamo, Quantum locally recoverable codes via good polynomials, IEEE Journal on Selected Areas in Information Theory 6 (2025) 100–110. doi: 10.1109/JSAIT.2025.3567480 .[36] A. M. Steane, Multiple particle interference and quantum error correc-tion, Proc. Roy. Soc. London Ser. A 452 (1996) 2551–2577. doi: 10.1098/ rspa.1996.0136 . arXiv:arXiv:quant-ph/9601029 .[37] S. Veroni, M. Müller, G. Giudice, Optimized measurement-free and fault-tolerant quantum error correction for neutral atoms, Physical Review Research 6 (2024) 043253. doi: 10.1103/PhysRevResearch.6.043253 .[38] Y. Wu, S. Kolkowitz, S. Puri, J. D. Thompson, Erasure conver-sion for fault-tolerant quantum computing in alkaline earth Rydberg atom arrays, Nature Communications 13 (2022) 4657. doi: 10.1038/ s41467-022-32094-6 .[39] D. Xie, S. Zhu, Z. Sun, Two families of optimal quantum locally recov-erable codes, International Journal of Theoretical Physics 64 (2025) 86. doi: 10.1007/s10773-025-05943-5 .[40] K. Zhou, M. Cao, Optimal quantum (𝑟, 𝛿 )-locally repairable codes via classical ones, J. Combin. Theory Ser. A 223 (2026) 106212. doi: 10.1016/ j.jcta.2026.106212 .[41] H. Zhou, C. Zhao, M. Cain, et al., Low-overhead transversal fault toler-ance for universal quantum computation, Nature 646 (2025) 303–308. doi: 10.1038/s41586-025-09543-5 .19

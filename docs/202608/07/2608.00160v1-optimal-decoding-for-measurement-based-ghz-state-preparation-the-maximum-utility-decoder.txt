@@ -1,0 +1,1510 @@
+Title: Optimal Decoding for Measurement-Based GHZ State Preparation: The Maximum-Utility Decoder
+
+URL Source: https://arxiv.org/pdf/2608.00160v1
+
+Published Time: Tue, 04 Aug 2026 00:06:51 GMT
+
+Number of Pages: 16
+
+Markdown Content:
+# Optimal Decoding for Measurement-Based GHZ State Preparation: The Maximum-Utility Decoder 
+
+Misha Yutushui, Theo Haas, and Simon Trebst 
+
+Institute for Theoretical Physics, University of Cologne, Zülpicher Straße 77, 50937 Cologne, Germany 
+
+The meticulous preparation of macroscopic Greenberger-Horne-Zeilinger (GHZ) states provides a founda-tional resource for quantum technologies such as metrology, cryptography, and fault-tolerant codes. While state-of-the-art measurement-based protocols offer efficient low-depth execution, their performance can be bot-tlenecked by conventional decoders, such as minimum weight perfect matching (MWPM) or even maximum-likelihood decoding (MLD), which optimize for binary logical recovery and fail to maximize the continuous 
+
+long-range order characteristic of a GHZ state for two-dimensional geometries. Here we overcome this limita-tion by framing the decoding problem as minimum Bayesian risk inference, introducing a general paradigm that maximizes the expected utility of the decoded state. Implementing this maximum-utility approach, we construct an algorithm that achieves the highest possible per-shot decoded quantum order and thereby establish an optimal decoding strategy for measurement-based GHZ state preparation. To improve its computational efficiency, we design a scalable two-stage decoder, which first encodes the syndromes into the edge weights of MWPM and then refines the result with a convolutional neural network trained to maximize the expected utility, at a fraction of the cost of the optimal decoder. Remarkably, we find that the first stage alone—which makes the matching aware of the gauge choice at no cost beyond bare MWPM—already performs near-optimally up to the largest sizes we study, N = 256 × 256 , closing up to 87% of the gap between the bare-MWPM and optimal decoding thresholds. Generalizing MWPM and MLD, the maximum-utility decoder (MUD) establishes a versatile frame-work that can be explicitly tailored to the operational demands of specific experiments by redefining the utility function. 
+
+I. INTRODUCTION 
+
+The Greenberger-Horne-Zeilinger (GHZ) state is a paradig-matic example of a quantum state with many-qubit entangle-ment [1] that acts as an indispensable resource across quan-tum information science. Its macroscopic superposition and perfect multi-qubit correlations enable metrological sensing at the Heisenberg limit [2–6] and ensure robust security in cryptographic secret sharing [7–9]. GHZ states also provide the essential entanglement infrastructure for distributed quan-tum networking [10–12], and serve as vital “cat states" in repetition-code architectures [13–18]. Deterministically preparing macroscopic long-range entan-gled states, such as the GHZ state, remains a challenging problem on near-term hardware. In local unitary circuits, the entanglement growth is constrained by Lieb-Robinson bounds [19, 20], i.e., the circuit depth scales linearly with the number of qubits. On current noisy intermediate-scale quan-tum (NISQ) devices [21], this extended circuit execution time still remains a critical liability; the long execution times sub-ject the physical qubits to continuous environmental noise, po-tentially leading to catastrophic decoherence before the entan-glement can be safely utilized. Measurement-based protocols [22] overcome this limita-tion by employing mid-circuit measurements to bypass Lieb-Robinson bounds and prepare long-range entangled states in constant depth [23, 24]. However, the immediate post-measurement system is not the target state; the joint parity-check measurements naturally collapse the system into a ran-domized, “glassy” GHZ state characterized by domains of opposite orientation [25, 26]. Consequently, the success of the protocol relies on a classical decoder to process the mea-surement outcomes, infer the domain boundaries, and apply restorative feedforward corrections. While a perfect decoder operating on noiseless hardware would restore a pristine GHZ state, near-term hardware suffers from imprecise gates and readout noise [27]. Under these realistic conditions, it is impossible to deterministically recover the maximally corre-lated state. Nevertheless, the noisy protocol prepares a finite amount of long-range entanglement, and the target of an opti-mal decoder shifts to restoring the macroscopic order. The objective of decoding a GHZ state fundamentally dif-fers from decoding standard topological codes [28–30]. For the toric code, the precise microscopic path of an applied cor-rection is unimportant, provided it achieves the correct logical Glassy GHZ 
+
+〈M 2〉Glassy 
+
+MWPM 
+
+〈M 2〉MWPM <
+
+or 
+
+SW-MWPM 
+
+〈M 2〉SW -MWPM 
+
+FIG. 1. Glassy GHZ state decoding. Shown are schematic data-qubit configurations (white and black circles) along with measured syndromes (domain walls) indicated by red lines. If the lines form a closed loop, they enclose a uniform domain, while in the case of an open loop, they terminate on fluxes marked by pink diamonds, leaving the identification of domains to a decoder. The two panels on the right show two possible decoding outcomes that aim to close the open loop configurations employing a minimum weight perfect matching (MWPM) or a syndrome-weighted SW-MWPM approach, with the shaded regions indicating which qubits will be flipped in the correction step. The quality of a decoder can be quantified via the squared magnetization ⟨ ˆM 2⟩, a continuous variable that quantifies the amount of long-range quantum correlations. arXiv:2608.00160v1 [quant-ph] 31 Jul 2026 2(a) Cluster state                                               
+
+> Measure
+> aij
+> Glassy GHZ
+> Decode
+> GHZ
+> XXX
+> XXX
+> qi
+> aij
+> qj
+> RZZ (tA)
+> RZZ (tB)
+> Z
+> sij
+> Decoder feedback correction τi
+> X
+> X1−tA[𝜋 /4]
+> 0.0 0.1 0.2 0.3 0.4
+> 1 − tB [𝜋 /4]
+> 0.0 0.1 0.2 0.3 0.4
+> maximally gauge-broken
+> Nishimori line (gauge-symm.)
+> Optimal SW-MWPM MWPM
+> (b)
+> FIG. 2. Measurement-based GHZ state preparation and decoding. (a) The measurement-based preparation and decoding protocol starts from a two-dimensional Lieb-lattice structure, with data qubits qi(white dots) and auxiliary stabilizer qubits aij (orange squares). Measuring the stabilizers produces a glassy GHZ state whose outcomes define syndrome variables sij on the links. Links with outcome sij =−1
+> are drawn as red lines; connected segments form syndrome strings, whose open endpoints define flux excitations marked by pink diamonds. The syndromes are then passed to a decoder, which returns a feedback correction τi; the resulting correction pattern is shown in purple. (b) Decoding thresholds in the (tA, t B)plane are shown for MWPM (yellow squares), syndrome-weighted MWPM (blue circles), and the theoretical optimal limit (star markers). The dotted line marks the Nishimori line ( tA=π/ 4or tB=π/ 4), where the decoding problem exhibits a local Z2gauge symmetry, while the dashed diagonal line ( tA=tB) marks the case of maximal gauge-symmetry breaking. The threshold estimates are obtained by a finite-size scaling analysis of the Binder cumulant of the squared magnetization ⟨ˆM2⟩, as shown in Fig. 4.
+
+operation. By contrast, when preparing a GHZ state, local de-viations directly impact the physical long-range order. Any discrepancy between the true error and the applied correc-tion leaves behind an uncorrected domain that reduces macro-scopic correlations; see Fig. 1. Minimum weight perfect matching (MWPM) [31, 32] is a natural heuristic for this task, producing the shortest, most likely error configuration. However, MWPM is fundamentally suboptimal because it cannot differentiate between highly de-generate shortest paths that yield different amounts of long-range order, see Fig. 1. In more technical terms, MWPM in-fers the correction solely from gauge-invariant data—the end-points of the syndrome chains. This is justified only when the decoding problem maps to a Nishimori line, where the system indeed exhibits a local Z2 gauge symmetry [33]. Away from the Nishimori line, the gauge symmetry is broken, and the precise configuration of syndromes becomes actionable infor-mation ignored by the MWPM decoder, making it suboptimal. To overcome this limitation, we introduce a decoding paradigm where success is measured by a continuous utility function and which guides the implementation of an optimal decoder for a specific task. Rooted in minimum Bayesian risk inference [34], the decoder maximizing the expected utility—maximum-utility decoder (MUD)—presents a gener-alized architecture that naturally reduces to MWPM or max-imum likelihood decoding (MLD) when the utility function is tailored for standard surface-code decoding [28, 35]. For GHZ state preparation, we define the utility as the squared magnetization—a direct measure of long-range order. Specif-ically, the decoder searches the landscape of possible cor-rections and selects the configuration that maximizes the ex-pected macroscopic correlations. By natively processing the full geometric information of the syndromes rather than just their endpoints, the MUD systematically extracts the highest-fidelity GHZ state from the noisy hardware, establishing an optimal decoding paradigm for measurement-based state preparation.  
+
+> II. SURFACE-CODE DECODING
+
+To establish MUD as a generalized decoding paradigm, we first frame standard topological code decoding within a Bayesian decision-making framework. Consider the toric code subjected to bit-flip noise. The error configuration e
+
+occurs on the edge qubits with probability P (e). Measur-ing the plaquette syndromes f = ∂e identifies parity viola-tions, where ∂ denotes the dual boundary operator that maps the dual edge chain e to its endpoints. Based on the observed syndromes f , a decoder must suggest a correction chain c
+
+such that ∂c = f .Within decision theory, a decoder’s objective can be uni-versally defined by a utility function U(c, e) that quantifies the success of a correction c given a true error e. The optimal inference problem is equivalent to maximizing the expected utility given the syndrome information MUD: f → c = argmax 
+
+> c
+
+X
+
+> e
+
+U(c, e)P (e|f ) , (1) where P (e|f ) = P (e)δ(f − ∂e)/P (f ) is the conditional 
+
+error probability. Standard decoding algorithms merely corre-3spond to different choices of the utility function 
+
+U(c, e) = 
+
+(
+
+δ(e − c) , for MWPM ,δ([ e] − [c]) , for MLD , (2) where [·] denotes the homology class of the chain. By pe-nalizing any microscopic mismatch, MWPM finds the most likely error configuration given the syndrome. In contrast, MLD prioritizes logical fidelity instead of microscopic accu-racy by recognizing that any error in the same homology class as the correction forms a trivial loop that does not change the logical information. Because all errors within this class yield identical logical outcomes, the MLD utility function treats the entire class uniformly , maximizing the aggregate probability of a successful recovery. In the topological cases, the utility landscape is binary ,
+
+U(c, e) = 0 or 1, and the utility function merely defines cer-tain sets of errors. Conversely, for non-topological states, a utility function is needed as the quality of the decoded state is characterized by a continuous order parameter, e.g., the decoded magnetization squared UGHZ (c, e) = ⟨ ˆM 2⟩ for the GHZ state, which is closely related to the fidelity [36]. We now demonstrate how MUD improves the performance of the measurement-based GHZ-state preparation protocol.  
+
+> III. MEASUREMENT-BASED PROTOCOL
+
+To prepare a macroscopic GHZ state, we employ aconstant-depth measurement protocol on a square Lieb lattice geometry; see Fig. 2(a). The procedure first entangles data qubits on the vertices with auxiliary stabilizer qubits on the lattice edges. Measuring these auxiliary qubits implements a joint parity check of the two adjacent data qubits that yields a classical outcome sij = ±1, which we treat as a syndrome configuration. The latter can be viewed as a chain of dual edges; see the middle panel of Fig. 2(a). Even in a noise-less scenario, this measurement projects the data qubits into a “glassy” GHZ state, where domains of opposite orientation are separated by closed dual loops of sij = −1, correspond-ing to “antiferromagnetic” domain walls. Such closed-loop configurations can be decoded deterministically by flipping one type of domains to produce a pristine GHZ state; this is the classical decoding step that every measurement-based state preparation protocol requires. However, realistic hardware suffers from imprecise oper-ations, which we model here by replacing ideal entangling gates with asymmetric coherent rotations RZZ (2 tA/B ) =
+
+e−it A/B ZZ applied between sub-lattices A and B; see Fig. 2. With these imperfections, open antiferromagnetic chains are produced ∂s = f with endpoints at gauge-invariant plaquette fluxes f□ = −1 that cannot be eliminated by bit-flip correc-tions, see Fig. 1. Observing the syndrome chain s implies that the data qubits are weakly measured and their wavefunction is partially projected with the Kraus operator 
+
+|Ψ( s)⟩ ∝ e β   
+
+> 2
+> P
+> ⟨ij ⟩Jsij ZiZj
+
+|+⟩⊗N , (3) where the summation is over neighboring vertices and the effective bond couplings satisfy tanh βJ s 
+
+> 2
+
+=
+
+s[tan tB ][tan tA]−s for tA ≥ tB [25]. (The case of tA < t B
+
+follows from symmetry by swapping tA ↔ tB .) The probability of measuring a syndrome configuration s is given by the partition function of the 2D random-bond Ising model (RBIM) P (s) = ZRBIM [s] ∝ P 
+
+> σ
+
+e−βH (s) with Hamiltonian 
+
+H(s) = − X
+
+> ⟨ij ⟩
+
+ Jsij σiσj + hs ij 
+
+ , (4) where βh = 12 log | tan( tA + tB ) tan( tA − tB )| and σi = ±1
+
+can be viewed as the Zi eigenvalue of the vertex qubits.  
+
+> A. Domain walls and open loops
+
+Prior to syndrome measurements, the protocol prepares a quantum state with a joint spin-syndrome probability distri-bution 
+
+P (σ, s) = 12N
+
+Y
+
+> ⟨ij ⟩
+
+1 − sij cos 2( σitA + σj tB )2 . (5) If we marginalize over the spin configurations σ, the distribu-tion reduces to the RBIM partition function P 
+
+> σ
+
+P (σ, s) = 
+
+ZRBIM [s] with the Hamiltonian in Eq. (4). Conversely, marginalizing over s yields a uniform distribution of vertex spins, P (σ) = 12N . Hence, prior to the correction stage, the data qubits exhibit no long-range order. The conditional probability P (s|σ) implies that the relative alignment of spins σiσj = ±1 biases the syndrome measure-ment toward sij = σiσj . Consequently, a typical configura-tion s contains a large number of loops enclosing domains of opposite orientation. Concurrently, the gate imperfections tA, t B < π/ 4 intro-duce open syndrome chains , as illustrated in Fig. 1. By anal-ogy with the Ising model, we say that a plaquette contains a flux if it is the endpoint of the dual syndrome chain, i.e., plaquettes with an odd number of antiferromagnetic bonds 
+
+f□ = Q 
+
+> ⟨ij ⟩∈ □
+
+sij = −1. These fluxes are gauge-invariant objects in the sense that they cannot be eliminated by bit flips. In contrast to domain walls that reduce long-range order but do not affect long-range entanglement, fluxes are detrimen-tal to both. The structure of the fluxes simplifies along the symmetric Nishimori line, where the syndrome paths become gauge-redundant.  
+
+> B. Nishimori line
+
+On the Nishimori line ( tA = π/ 4 or tB = π/ 4), the cou-plings become symmetric βJ + = −βJ − and βh = 0 . A bit-flip Xi0 reverses the signs of all edge syndromes si0j adjacent to vertex i0
+
+Xi0 e βJ     
+
+> 2si0jZi0Zj
+
+= e βJ     
+
+> 2(−si0j)Zi0Zj
+
+Xi0 , (6) 4Measured bond-stabilizers and fluxes 
+
+SW-MWPM proposal CNN refinement Correction       
+
+> XX
+> XX
+> XXX
+> X
+> X
+> X
+> XX
+> XX
+
+Hybrid-CNN decoder 
+
+s f c τ (1) τ (2) X τ = τ (1) τ (2) 
+
+FIG. 3. Schematic decoding pipeline for the hybrid-CNN decoder. Measuring the edge stabilizers yields the syndrome s depicted as red 
+
+dual edges, whose boundary (endpoints) f = ∂s locates the gauge-invariant plaquette fluxes (magenta). The syndrome-weighted MWPM first proposes a baseline correction c (blue), arbitrarily chosen from a number of chains with minimum weight but not necessarily one with the largest recovered long-range order. The CNN then refines the given τ (1) (enclosed in sc = ∂τ (1) ) by proposing a calibration τ (2) . Finally, the correction applies a Pauli-X on a combination of data qubits τ = τ (1) τ (2) .
+
+where we used Jsij = sij J on the Nishimori line. The bit-flip correction X(τ ) = Q 
+
+> i∈τ
+
+Xi parametrized by τi = ±1, with 
+
+i ∈ τ if τi = −1, deforms the syndrome chain 
+
+X(τ ) |Ψ( s)⟩ = |Ψ( s∂τ )⟩ = |Ψ( c)⟩ , (7) where cij = sij τiτj is the edge chain deformed from the syn-drome chain s by the boundary ∂τ . This gauge transforma-tion effectively erases the information about the microscopic path of s from the corrected wavefunction. Consequently, the position of the fluxes f = ∂s represents the only non-trivial information available to a decoder. 
+
+C. Away from the Nishimori line 
+
+For arbitrary gate parameters tA, t B < π/ 4, the local Z2
+
+gauge symmetry is explicitly broken. Ferromagnetic and anti-ferromagnetic bonds have asymmetric contributions ( βJ +̸ =
+
+−βJ −), and Eqs. (6) and (7) no longer hold. The bit-flip cor-rection 
+
+X(τ )|Ψ( s)⟩ ∝ | Ψ( s, τ )⟩ = Y
+
+> ⟨ij ⟩∈ ∂τ
+
+e−β∆JZ iZj |Ψ( s∂τ )⟩
+
+(8) does not yield a wavefunction of the form in Eq. (3) due to a non-trivial contribution for ∆J ≡ J++J−
+
+> 2
+
+̸ = 0 . The oper-ator acting on the boundary ∂τ reflects this explicit symme-try breaking. Consequently, the corrected quantum state de-pends on both the original syndrome chain s and the deformed chain c = s∂τ . Identifying the optimal correction, there-fore, requires a decoding procedure that accounts for the com-plete microscopic syndrome path rather than just its boundary 
+
+f = ∂s.
+
+IV. DECODING 
+
+To restore macroscopic order, the decoder processes the ob-served syndromes s and outputs a correction on a set of ver-tices τ . Applying the bit-flip correction X(τ ) results in the decoded state Eq. (8), whose squared magnetization is 
+
+⟨ ˆM 2⟩s,τ =
+
+P 
+
+> σ
+
+M 2e−βH (s,τ )
+
+˜Z[s, τ ] , (9) with the magnetization M = P 
+
+> i
+
+σi/N and the transformed Hamiltonian 
+
+H(s, τ ) = − X
+
+> ⟨ij ⟩
+
+Jsij σiσj τiτj . (10) This quantum expectation value can be written as a classical a posteriori expectation value, 
+
+⟨ ˆM 2⟩s,τ = X
+
+> σ
+
+U(τ , σ)P (σ|s) , (11) 
+
+U(τ , σ) = 1
+
+N
+
+X
+
+> i
+
+σiτi
+
+!2
+
+, (12) derived explicitly in Appendix A 1. Thus, the value ⟨ ˆM 2⟩s,τ
+
+is precisely the expected utility of the correction τ given the underlying spins σ that the optimal decoder seeks to max-imize. Notice that compared to the surface code, the syn-dromes s here live on edges and the ‘noise’ induces vertex flips σ; thus, the utility function is a function of vertex vari-ables σ and τ , cf. Eq. (2) for the surface code. 5 
+
+> A. Optimal decoder
+
+The expected utility ⟨ ˆM 2⟩s,τ can be expressed in terms of the spin-spin correlation function Cij (s) = ⟨σiσj ⟩s as 
+
+⟨ ˆM 2⟩s,τ = 1
+
+N 2
+
+X
+
+> i,j
+
+Cij (s)τiτj . (13) Therefore, maximizing the expected utility amounts to a standard quadratic unconstrained binary optimization prob-lem [37] of the real-symmetric matrix Cij (s). In general, this problem is strongly NP-hard [37]. In the present case, we find that the matrix Cij (s) has, in the physically relevant regime, a large spectral gap and in practice admits a polynomial-time solution; see Appendix A 2. Nevertheless, the problem re-quires computation of all Cij (s) correlation functions and can be done, at reasonable computational cost, for lattice sizes up to L = 20 only. In the following, we introduce two practical, 
+
+scalable decoding schemes that approach an almost optimal decoder for lattice sizes up to L = 256 and L = 64 , respec-tively.  
+
+> B. Minimum-energy heuristic
+
+On the Nishimori line, the Hamiltonian of Eq. (10) reduces to Eq. (4), i.e., H(s, τ ) = H(s∂τ ) = H(c). Then, the en-ergy of the fully polarized spin configuration ( σi = ±1 for all i) is proportional to the length of the correction chain, 
+
+H(c) = −J P cij ∝ −| c|. Hence, the MWPM can be in-terpreted as the decoder minimizing the energy of this spin configuration. To adapt this heuristic argument away from the Nishimori line, we note that the energy of the fully polarized spin con-figuration can be written as 
+
+H(s, τ )|σiσj =1 = − X
+
+> ⟨ij ⟩
+
+cij wij , (14) where c = s∂τ and we defined positive weights wij =[sJs]ij . To minimize the energy Eq. (14) with respect to c,we deploy an MWPM algorithm on a weighted graph , where each edge is assigned a weight that explicitly depends on the measured syndrome value 
+
+wij =
+
+(
+
+J+, sij = 1 
+
+|J−|, sij = −1 . (15) This syndrome-weighted MWPM (SW-MWPM) algorithm serves as a direct, physically motivated generalization of MWPM away from the Nishimori line. (Note that in the ex-treme case tA = tB , J+ = ∞, and the corrections only pass through antiferromagnetic bonds.) Crucially, SW-MWPM breaks the degeneracy between multiple shortest paths down to a much smaller set of lowest-weight paths; see Fig. 8 in Ap-pendix B. Even for moderate lattice sizes, the degeneracy is frequently broken down to a single path, whereas unweighted MWPM must arbitrarily choose one out of 10-100 degener-ate shortest paths, often resulting in suboptimal macroscopic order.  
+
+> C. Neural-network decoder
+
+To resolve the issue of the remaining degeneracy— especially on the Nishimori line where J+ = |J−| and thus SW-MWPM is equivalent to unweighted MWPM—we deploy a convolutional neural network (CNN). Specifically, we de-vise a two-stage [38] hybrid-CNN decoder (Fig. 3): First, the bare observed syndromes s are decoded using (SW-)MWPM to produce a baseline chain c and the correction τ (1) inside 
+
+sc . Then, taking both the initial syndromes s and the baseline chain c as inputs, the CNN refines the correction to yield a higher-utility correction τ (2) . Finally, the bit-flip correction is applied to the region τ = τ (1) τ (2) . The CNN is trained with the loss function LM = −⟨ ˆM 2⟩s,τ and thus designed to maximize the utility. The specific network architecture and training details are given in Appendix B.  
+
+> V. NUMERICAL SIMULATIONS
+
+To compare the quality of the decoders, we rely on two pri-mary benchmarks: the decoding threshold and the value of the decoded magnetization squared. The latter is an analyt-ically tractable quantity that is closely related to the fidelity, which in the preparation of a GHZ state on a given device is the operational benchmark one wants to maximize. The threshold is an intrinsic property of a given decoder that defines the phase boundary beyond which the macroscopic or-der cannot be decoded. This boundary in the (tA, t B ) plane [Fig. 2(b)] corresponds to the crossing point of the decoded magnetization squared lines for different system sizes; see Fig. 4 below. To evaluate the threshold in a way that is less susceptible to finite-size effects, we retrieve it from a data col-lapse of the Binder cumulant of the magnetization [39].  
+
+> A. Sampling the protocol
+
+Both the finite-size magnetization moments and the thresh-old extraction require simulation of the protocol over many shots and system sizes. Sampling the syndromes directly from 
+
+P (s) ∝ ZRBIM [s] requires evaluation of the RBIM partition function and is prohibitively expensive. The joint distribution Eq. (5), however, is easy to sample in the opposite order. First, we draw an unbiased spin configuration, σi = ±1 with equal probability. Second, we draw each syndrome independently, conditioned on the relative alignment σiσj of its two adjacent spins, 
+
+P (sij | σiσj ) = 1 − sij cos 2( σitA + σj tB )2 , (16) that is, sij = 1 with probability sin 2(σitA + σj tB ). By con-struction, this reproduces Eq. (5) exactly, while avoiding the partition function altogether. We pass the sampled syndromes s to the decoder, which returns a correction τ , and record the decoded magnetization of the shot, M = 1
+
+> N
+
+P 
+
+> i
+
+σiτi. Averaging over shots yields 6
+
+⟨ ˆM 2⟩ and, analogously, the higher moment ⟨ ˆM 4⟩ entering the Binder cumulant. With moderate computational resources we collect Nshots = 10 6–10 7 configurations per point in the 
+
+(tA, t B ) plane. The accessible system size is set by the de-coders’ complexity. For SW-MWPM, which is computation-ally equivalent to regular MWPM, we study systems with up to 256 × 256 data qubits. The subsequent CNN stage reduces accessible systems to L = 64 (Fig. 4). The exact MUD re-quires evaluating all-to-all spin correlations and is feasible for the linear system sizes of up to L = 20 . 
+
+> B. Numerical results: Decodability threshold
+
+We extract the threshold by evaluating the decoded mag-netization squared for multiple system sizes, from the small-est L = 4 up to the largest system accessible to each de-coder. In Fig. 4, we present a representative example of the decoded magnetization with the largest system size capped by the hybrid-CNN decoder. For every decoder presented, we observe the expected behavior of perfectly recoverable long-range order, ⟨ ˆM 2⟩ = 1 , in the strong measurement limit 
+
+t → π/ 4, and an inability of the decoder to correct for weakly measured syndromes t → 0, where ⟨ ˆM 2⟩ → 0. Larger sys-tems exhibit a more rapid transition, which for L → ∞ be-comes a Heaviside theta function; while smaller systems have a more gradual change from ordered to disordered phase. The Entanglement MUD SW −MWPM MWPM 0.633 0.634 0.642 0.702 t                                     
+
+> measurement strength t[𝜋 /4]
+> 0.4 0.5 0.6 0.7 0.8 0.9
+> ⟨M̂ 2
+> ⟩
+> 0.0 0.2 0.4 0.6 0.8 1.0
+> tB=tA=t
+> 1−tA
+> 1 − t B
+> linear system size  L
+> 612 20 32 64 Hybrid-CNN SW-MWPM MWPM
+> FIG. 4. Scalable decoding of long-range order. Decoded ⟨ˆM2⟩
+> for L= 6 –64 is plotted along the diagonal tA=tB=t. The strip on top marks the extrapolated thresholds tcof each decoder together with the decoder-independent entanglement threshold (Appendix C). The SW-MWPM decoder nearly reaches the entanglement bound— recovering 87% of the gap to bare MWPM [Eq. (17)]—and together with the hybrid-CNN restores substantially more long-range order than bare MWPM up to L= 64 , well beyond the reach of the optimal MUD.
+
+data for all of the systems cross at approximately one point that (roughly) corresponds to the threshold. To precisely ex-tract the threshold for a given decoder, we perform a data col-lapse of the Binder cumulant of the magnetization; see Ap-pendix D. Remarkably, simply weighting the syndromes in the SW-MWPM decoder yields a substantially lower (i.e., improved) threshold than conventional MWPM, as the crossing point shifts to weaker measurements (to the left). The subsequent CNN stage of the hybrid decoder results in a marginal addi-tional improvement of the threshold. To map out an entire threshold phase diagram, we repeat the numerical experiment for fixed tB = 0 .7, 0.8, 0.9, 1.0 in units of π/ 4 and sweep tA to find the threshold tc
+
+> A
+
+(tB ) plotted in Fig. 2(b). Similar to the diagonal line tA = tB of Fig. 4, we find that SW-MWPM greatly improves the threshold that now closely follows the theoretical maximum inferred from the entanglement (decoder-independent) characteristics of the protocol; see Appendix C. We quantify the threshold improve-ment by comparing how much closer the threshold of the SW-MWPM decoder is to the optimal threshold than the one of the conventional MWPM. We compute this relative ‘thresh-old gap’ as 
+
+T = tcSW-MWPM − tcMWPM 
+
+tcopt − tcMWPM 
+
+(17) and find that for tB = 0 .7, 0.8, 0.9, 1.0 in units of π/ 4, the rel-ative threshold gaps are T = 86 ± 1% , 85 ± 1% , 64 ± 6% , 0% ,respectively. The largest value is found on the diagonal tA =
+
+tB , where T = 87 ± 1% indicates that about 7/8 of the gap between the MWPM-threshold and the optimal threshold can be overcome by the SW-MWPM decoder. Finally, we observe that the MWPM phase boundary is roughly circular, i.e. equidistant from the strong measurement limit, tA = tB = π/ 4, at the origin of Fig. 2(b). This prop-erty follows from the gauge ‘obliviousness’ of the MWPM decoder that discards the precise syndrome configuration and only uses the gauge-invariant flux. In Appendix E, we show that the phase boundary of any gauge-oblivious decoder fol-lows a curve sin 2 tA sin 2 tB = const. (with const. = 0 .794 
+
+for the MWPM) in the leading order in a small parameter 
+
+[cos 2 tA cos 2 tB ]4 ≤ 1.8 × 10 −3 in the physically relevant regime.  
+
+> C. Numerical results: Decoded magnetization squared
+
+In a practical context, a more important figure of merit than the threshold might be the average decoded magnetiza-tion squared (which is connected to the fidelity of the final state). To quantify the performance of a new decoder (dec-1) relative to the baseline decoder (dec-2), we define the relative improvement 
+
+∆dec-1, dec-2 = ⟨ ˆM 2⟩dec-1 − ⟨ ˆM 2⟩dec-2 
+
+⟨ ˆM 2⟩dec-1 + ⟨ ˆM 2⟩dec-2 
+
+. (18) 7(a) (b)                                                     
+
+> SW-MWPM vs. MWPM Hybrid-CNN vs. SW-MWPM
+> (c) Exact MUD vs. Hybrid-CNN
+> measurement strength tA[𝜋 /4]
+> 0.4 0.6 0.8 1.0 0.6 0.8 1.0 0.6 0.8 1.0
+> Δ rel ⟨M̂ 2
+> ⟩ [%]
+> 025 50 75 100
+> t B = 0.7  𝜋 /4
+> t B = 0.8  𝜋 /4
+> t B = 1.0  𝜋 /4
+> Nishimori line
+> measurement strength tA[𝜋 /4]
+> 0.4 0.6 0.8 1.0 0.6 0.8 1.0 0.6 0.8 1.0
+> Δ rel ⟨M̂ 2
+> ⟩ [%]
+> 02468
+> measurement strength tA[𝜋 /4]
+> 0.4 0.6 0.8 1.0 0.6 0.8 1.0 0.6 0.8 1.0
+> Δ rel ⟨M̂ 2
+> ⟩ [%]
+> 01234
+> linear system size  L
+> 16 32 64 128 256
+> linear system size  L
+> 816 32 64
+> linear system size  L
+> 812 16 20
+> FIG. 5. Relative decoder performances. Shown is the normalized improvement in decoded squared magnetization
+> ∆rel ⟨ˆM2⟩ ≡ ∆dec −1,dec −2defined in Eq. (18). (a) Syndrome-weighted MWPM relative to conventional MWPM. (b) Hybrid-CNN decoder relative to syndrome-weighted MWPM. (c) Exact MUD rel-ative to the Hybrid-CNN decoder. Each column corresponds to a cut through the phase diagram of Fig. 2(b), with varying measurement strength tAat fixed tB. The color bars indicate the lattice sizes.
+
+When two decoders have different thresholds t1/2 
+
+> c
+
+, there is an intermediate regime t1 
+
+> c
+
+< t < t 2 
+
+> c
+
+where the system size affects the decoded order parameter oppositely. In the extreme case, 
+
+⟨ ˆM 2⟩dec-1 = 1 and ⟨ ˆM 2⟩dec-2 = 0 (which is realized for L →∞), the relative improvement reaches ∆dec-1, dec-2 = 100% .In Fig. 5, we compare the decoders in the order of increas-ing numerical complexity, and also increasing accuracy. In the top panel, we compare the syndrome-weighted and the standard MWPM decoders. On the Nishimori line (right-most panel), the two decoders are equivalent since weights 
+
+|J+| = |J−|. Going away from the Nishimori line, the rela-tive improvement reaches almost maximal ∆rel ⟨ ˆM 2⟩ = 100% 
+
+for the largest systems studied in the intermediate regime 
+
+tSW-MWPM  
+
+> A
+
+< t A < t MWPM  
+
+> A
+
+.In the middle panel, we quantify the CNN performance in the hybrid decoder by subtracting the magnetization squared decoded with only the first stage, versus the SW-MWPM decoder as baseline. The largest improvement of 
+
+∆rel ⟨ ˆM 2⟩ ≈ 8% is observed on the Nishimori line, where syndrome weights are trivial. Away from the Nishimori line, the improvement decreases; nevertheless, it is not negligible. These benefits, however, increase the numerical complexity of the decoder and limit the system sizes to L ≤ 64 .Finally, in panel (c) of Fig. 5, we analyze how close the hybrid-CNN decoder approaches the theoretically pos-sible maximum given by the optimal MUD decoder. The improvement for all the systems and regimes is under 
+
+∆rel ⟨ ˆM 2⟩ ≲ 3% , while the decoding complexity is signif-icantly larger and does not allow us to study large systems 
+
+L > 20 . 
+
+> VI. DISCUSSION
+
+Our results recast decoding as a Bayesian decision problem in which the decoder is fixed by the utility function encoding the operational goal. Viewed this way, MUD is not specific to GHZ-state preparation: any task whose success admits a 
+
+quantitative figure of merit can be decoded optimally by max-imizing the corresponding expected utility. This directly connects to conventional quantum error cor-rection . For the 2D repetition code, we show that MUD repro-duces the standard decoders as special cases; see Appendix F. The utility UMLD (τ , σ) = θ(P 
+
+> i
+
+σiτi) recovers maximum-likelihood decoding, whereas the simpler magnetization util-ity UM (τ , σ) = 1
+
+> N
+
+P 
+
+> i
+
+σiτi yields a per-qubit decoder with optimum τi = sign ⟨σi⟩s—the blockwise and bitwise maxi-mum a posteriori estimators, respectively. Because the bitwise decoder avoids the nonlinearity of the θ-function, we expect it to deliver competitive logical fidelity at a fraction of the cost; a quantitative investigation of MUD applied to the 2D repeti-tion code is left to future work. A second consequence is hardware-aware decoding. On NISQ hardware, the feedforward correction is applied with imperfect gates, so a recovery that is optimal under ideal ap-plication may cease to be optimal once the errors introduced by its own execution are taken into account. Whereas stan-dard decoders use device-characterization data to build a noise model, MUD can leverage the same data one step further, en-coding the faults of the recovery operation itself into the util-ity function and returning the correction that is optimal for the actual noisy hardware. A further direction opens up when decoding logical oper-ations rather than a static memory. For a logical gate acting jointly on several code blocks—as in transversal entangling gates [40, 41] or lattice surgery [42, 43]—the fidelity of the executed gate is a natural utility. The MUD then optimizes the success of the operation itself rather than the recovery of 8each logical qubit in isolation. By promoting the objective of decoding to an explicit design choice, MUD provides a template for such operation-tailored decoders. 
+
+Data availability.— The numerical data shown in the figures are available on Zenodo [44]. 
+
+Acknowledgments.— We thank Guo-Yi Zhu for discus-sions. M.Y. acknowledges support from an ML4Q post-doctoral fellowship. The Cologne research group is sup-ported, in part, by the Deutsche Forschungsgemeinschaft (DFG, German Research Foundation) under Germany’s Ex-cellence Strategy—Cluster of Excellence Matter and Light for Quantum Computing (ML4Q) EXC 2004/1 – 390534769, the CRC network TR 183 (Project Grant No. 277101999), as well as Research Unit FOR5919 (Project Grant No. 550495627). Our numerical simulations were performed on the RAMSES cluster at RRZK Cologne. 
+
+Appendix A: Maximum-utility decoder 
+
+In this appendix, we provide additional details on the maximum-utility decoder (MUD) and derive certain proper-ties cited in the main text. 
+
+1. The expected utility as a quantum expectation value 
+
+We first explicitly derive the relation between the quantum expectation value of the magnetization squared, Eq. (9), and the expected utility in Eq. (12). Using the gauge symmetry, the partition function ˜Z[s, τ ] of the Hamiltonian Eq. (10) can be explicitly rewritten as 
+
+˜Z[s, τ ] = X
+
+> σ
+
+eβ P    
+
+> ⟨ij ⟩Jsij τiσiτjσj
+
+(A1) 
+
+= X
+
+> σ′
+
+eβ P   
+
+> ⟨ij ⟩Jsij σ′
+> iσ′
+> j
+
+= ZRBIM [s], (A2) where ZRBIM [s] is a standard RBIM partition function with Eq. (4), and we changed variables as σ′ 
+
+> i
+
+= σiτi. Then, we express the conditional probability in terms of this partition function 
+
+P (σ|s) ≡ P (σ, s)
+
+P 
+
+> σ
+
+P (σ, s) = eβ P  
+
+> ⟨ij ⟩Jsij σiσj
+
+ZRBIM [s] . (A3) Finally, for the expected utility, we obtain 
+
+E[U] ≡ X
+
+> σ
+
+U(τ , σ)P (σ|s) (A4) 
+
+= X
+
+> σ
+
+"
+
+1
+
+N
+
+X
+
+> i
+
+σiτi
+
+#2
+
+eβ P  
+
+> ⟨ij ⟩Jsij σiσj
+
+ZRBIM [s] (A5) 
+
+=
+
+P
+
+> σ′
+
+ 1
+
+> N
+
+P 
+
+> i
+
+σ′
+
+> i
+
+2 eβ P   
+
+> ⟨ij ⟩Jsij τiτjσ′
+> iσ′
+> j
+
+ZRBIM [s] ≡ ⟨ ˆM 2⟩s,τ .
+
+(A6) This equivalence proves that maximizing the long-range order of the decoded state is achieved via a decision based on the maximum expected utility. 
+
+2. Exact MUD 
+
+The equivalence of quantum and classical expectation val-ues allows us to reformulate the exact MUD decision in terms of a standard computational problem—the quadratic uncon-strained binary optimization [37], which in general is strongly NP-hard. The expected utility in the form Eq. (A5) can be expressed in terms of the spin-spin correlation functions as 
+
+E[U] = X
+
+> σ
+
+"
+
+1
+
+N
+
+X
+
+> i
+
+σiτi
+
+#2
+
+eβ P  
+
+> ⟨ij ⟩Jsij σiσj
+
+ZRBIM [s] (A7) 
+
+= 1
+
+N 2
+
+X
+
+> i,j
+
+τiτj
+
+P 
+
+> σ
+
+σiσj eβ P  
+
+> ⟨ij ⟩Jsij σiσj
+
+ZRBIM [s] (A8) 
+
+= 1
+
+N 2
+
+X
+
+> i,j
+
+τiCij (s)τj ≡ 1
+
+N 2 M ˆC (τ ) (A9) where Cij (s) = ⟨σiσj ⟩s, which we compute via the Kac-Ward formula [45–49]. Then, the optimal correction τi =
+
+±1 maximizes the binary quadratic form M ˆC of the real-symmetric matrix Cij (s).For an arbitrary matrix Cij (s), the problem is intractable even for moderate linear system sizes, since the number of corrections {τi} is 2L2
+
+. However, in the ordered phase, the matrix ˆC is rank-1 dominant and has a large spectral gap; see Fig. 6. Moreover, we empirically find that this holds even in the disordered phase not too far from the transition. In this case, we can typically find the solution in polynomial time following the program described below. 
+
+Local iterative optimization.— The spectrum of ˆC is dom-inated by a single large eigenvalue; see Fig. 6. Therefore, the eigenvector v with the largest eigenvalue provides a good starting point τ (0) = sign( v) for an iterative optimization procedure. We iteratively flip a random spin τi if ∆Mi ≡−4τi
+
+P  
+
+> j̸=i
+
+Cij τj
+
+
+
+> 0 until no spin can be flipped. We restart the optimization process multiple times and select the best-performing solution τ ∗.
+
+Certifying the solution.— The output of the optimization procedure τ ∗ is not proven to be optimal, because there may be a global maximum that local updates do not reach even after multiple restarts. However, the solution τ ∗ can be easily certified, i.e., proven to be optimal if it is a global maximum. To this end, we define a vector di = τ ∗ 
+
+> i
+
+[ ˆCτ ∗]i and a matrix 
+
+Sij = δij di − Cij . If the matrix ˆS is positive semidefinite, then the candidate τ ∗ is a global maximum of the quadratic form M (τ ∗).We now show that for a positive-semidefinite ˆS, the quadratic form is bounded by M (τ ∗), i.e., τ ∗ is a global max-imum. In other words, for any candidate solution τi = ±1, we show that M (τ ) ≤ M (τ ∗). Expressing ˆC = diag( d) − ˆS,9we find that 
+
+τ T ˆCτ = τ T diag( d)τ − τ T ˆSτ ≤ X
+
+> i
+
+di ≡ M (τ ∗)
+
+(A10) for positive-semidefinite ˆS, which satisfies τ T ˆSτ ≥ 0. Here, we used 
+
+τ T diag( d)τ = X
+
+> i,j
+
+τiδij diτj = X
+
+> i
+
+τ 2 
+
+> i
+
+di = X
+
+> i
+
+di, (A11) for any τi = ±1, and by definition 
+
+X
+
+> i
+
+di = X
+
+> i,j
+
+τ ∗ 
+
+> i
+
+Cij τ ∗ 
+
+> j
+
+≡ M (τ ∗). (A12) Note that positive semidefiniteness of ˆS proves that τ ∗ is optimal; however, the converse is not true, and an indefinite ˆS
+
+does not prove that τ ∗ is not optimal. 
+
+Branch and bound.— When the certificate is inconclusive, we prove or improve τ ∗ with an exact branch-and-bound search [50, 51]. Since τ ∗ is almost always already optimal and ˆC is rank-1 dominant, the search tree typically collapses, and the proof costs far less than assembling the correlation matrix ˆC. If the search exceeds a predefined node budget, the algorithm returns τ ∗ without a proof of optimality; the returned correction remains valid and at least of the heuristic quality. 
+
+Practice.— In the regime of sufficiently strong measure-ments where the GHZ state can be recovered, the local iter-ative procedure almost always finds the optimal solution. The certificate and branch-and-bound stages are primarily used to prove that the solution is optimal. To test this, we perform a benchmark simulation of the algorithm. We randomly choose 10 4, 10 3, and 10 2 points 
+
+tA, t B ∈ [0 .4 π/ 4, π/ 4] for L = 8 , 16 and 20 , respectively. For each point and system size, we draw an uncorrelated sam-ple from the distribution Eq. (5). We then decode the obtained syndromes with the optimal MUD algorithm and collect the statistics. We find that the certification fails in 19 .8% , 28 .7% ,and 27 .0% of the samples, respectively. Nevertheless, the lo-cal iterative solution τ ∗ was proven to be a global maximum in 99 .5% , 82 .9% , and 79% of cases, respectively. For all three systems, we find that all of the cases where the iterative solu-tion is either not optimal or where the branch-and-bound ex-ceeds the node budget occur below or near the threshold, i.e., in the paramagnetic phase. We expect that in this regime, the search terminates without improving τ ∗ due to the presence of near-degenerate optima; thus, the deviation from the true optimum is negligible. 
+
+Correlation-function truncation.— The runtime of the de-coder is dominated by computing the all-to-all correlation-function matrix Cij . This cost can be greatly reduced by trun-cating the matrix ˆC by setting Cij = 0 for |i − j| > r max 
+
+without computing the correlation function. For rmax = 4 
+
+we find that the algorithm produces comparable results with a much shorter runtime for large systems; see Fig. 11. This measurement strength t A [𝜋 /4]                                                   
+
+> 0.4 0.5 0.6 0.7 0.8 0.9 1.0
+> Δ𝜆  12  = 𝜆  1 − 𝜆  2
+> 𝜆  1
+> 0.3 0.4 0.5 0.6 0.7 0.8 0.9 tB= 0.6 𝜋 /4 , L= 10 rank
+> 150 100
+> eigenvalue  𝜆
+> 0510 tA= 0.4
+> tB= 0.6
+> 𝜆 1
+> 𝜆 2
+> FIG. 6. Correlation-matrix spectral gap. The relative gap ∆λ12 =(λ1−λ2)/λ 1between the two largest eigenvalues of the correla-tion matrix C(s)
+> ij =⟨σiσj⟩sis plotted as a function of tA, for fixed
+> tB= 0 .6π/ 4and lattice size L= 10 .The data ∆λ12 are aver-aged over 500 disorder configurations, with standard-deviation error bars. The inset contains the ranked eigenvalue spectrum of C(s)
+> ij for a representative measurement configuration at tA= 0 .4π/ 4and
+> tB= 0 .6π/ 4.
+
+approximation is justified as away from the strong measure-ment limit, the spin-spin correlation function decays with the distance between spins.  
+
+> 3. Performance of the optimal and truncated MUD decoders
+
+The exact optimal and truncated MUD decoders are much more numerically demanding than the SW-MWPM or even hybrid-CNN decoders. The former two we study for the lin-ear system sizes of up to L = 20 and L = 32 , respectively, while the latter two are amenable to the lattice sizes L = 256 
+
+and L = 64 , respectively. The optimal MUD yields the max-imal possible per-shot decoded magnetization squared by ex-plicitly maximizing the quadratic form of the correlation ma-trix; see Fig. 7. Nevertheless, the SW-MWPM and hybrid-CNN perform almost identically to the optimal MUD, with the deviations Eq. (18) between them being ∆rel ≲ 10% and 
+
+∆rel ≲ 3% , respectively; see Fig. 5. At the same time, the thresholds of the SW-MWPM and the optimal and truncated MUD closely follow each other when accounting for finite-size effects; see Fig. 11. 
+
+> Appendix B: Hybrid-CNN decoder
+
+In this appendix, we provide additional details on the hybrid-CNN decoder as a practical implementation of the er-satz MUD decoder. To make a scalable, nearly optimal de-coder, we use the approach that leverages neural networks for decoding. We first note that the joint probability Eq. (5) yields 10 measurement strength t A [𝜋 /4] 
+
+0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 
+
+> ⟨M̂ 2
+> ⟩
+
+0.0 0.2 0.4 0.6 0.8 1.0 
+
+t B = 0.8 𝜋 /4 1 − t A
+
+> 1 − t B
+> linear system size  L
+
+4812 16 20 Optimal MUD SW-MWPM MWPM 
+
+FIG. 7. Benchmarking the scalable decoders against the optimal MUD. Average decoded magnetization squared ⟨ ˆM 2⟩ is shown as a function of the measurement strength tA at fixed tB = 0 .8 π/ 4.Data are shown for the exact optimal MUD (green), the syndrome-weighted MWPM (SW-MWPM, blue), and bare MWPM (yellow); within each decoder, the color shading encodes the linear system size 
+
+L = 4 –20 . The scalable SW-MWPM closely tracks the optimal MUD across the entire cut, and both restore markedly more long-range order than bare MWPM. 
+
+a non-trivial dependence on s of the conditional distribution 
+
+P (σ|s) = P (σ, s)
+
+P 
+
+> σ
+
+P (σ, s) . (B1) This implies that s contains a learnable signal for predict-ing σ. (Note that the distribution of the gauge-invariant vor-tices f = ∂s does not contain any information about σ since 
+
+P (σ|f ) = 12N .) The problem possesses translational invari-ance (up to the boundary of the sample); hence, we use a con-volutional neural network (CNN) architecture. A practical challenge in training the model is the presence of a large number of antiferromagnetic bonds. (Recall that Eq. (5) implies that any given syndrome has a marginal proba-bility P (sij ) = 1+ sij cos 2 tA cos 2 tB 
+
+> 2
+
+, which is close to 1/2 near 
+
+tA = tB = π/ 4). However, most antiferromagnetic bonds be-long to closed domain walls that can be trivially eliminated by flipping all the spins inside them. Hence, to simplify training, we first apply the SW-MWPM decoder, which identifies all closed antiferromagnetic domains with τ (1) . The deformed chain c = s∂τ (1) now contains only antiferromagnetic bonds that belong to open chains spanning between the fluxes. To focus the model on these non-trivial chains, we pass the orig-inal syndromes s and the smallest-weight deformed chain c
+
+to the CNN that outputs predictions for the correction τ that maximizes ⟨ ˆM 2⟩.Note that c is chosen arbitrarily by the algorithm from a large pool of chains with the same (weight) length; see Fig. 8. Although reducing the length of the domain walls increases the magnetization squared, the domain walls of the same length can yield different order parameters. The objective of the CNN is to resolve this ambiguity in c (and thus in τ (1) ,measurement strength t A [𝜋 /4] 
+
+0.4 0.5 0.6 0.7 0.8 0.9 
+
+> average degeneracy  N deg
+
+150 100 
+
+t c
+
+> MWPM
+
+t c
+
+> SW
+
+t B = 0.7 𝜋 /4 
+
+(a) 
+
+> linear system size  L
+
+678
+
+1 − t A
+
+> 1 − t B
+
+degeneracy N deg 
+
+0 250 500 count 110 100 1000 MWPM 
+
+(b) 
+
+degeneracy N deg 
+
+250 500 
+
+SW-MWPM 
+
+(c) 
+
+1 − t A
+
+0.2 0.4 0.6 
+
+> 1 − t B
+
+0.2 0.4 0.6 
+
+(d) 
+
+1 − t A
+
+0.2 0.4 0.6 
+
+(e) 
+
+> degeneracy
+
+10 100 
+
+MWPM SW-MWPM 
+
+FIG. 8. Degeneracy of minimum-weight corrections. (a) The average degeneracy Ndeg of minimum-weight correction chains is plotted as a function of tA at fixed tB = 0 .7π/ 4 for MWPM and syndrome-weighted MWPM. Color shades indicate the lattice size L,and dashed vertical lines mark the corresponding threshold estimates. The inset indicates the horizontal cut through the phase diagram at 
+
+tB = 0 .7. Panels (b) and (c) show the distribution of degeneracies over individual disorder snapshots for L = 8 and tA = 0 .5. Panels (d) and (e) show the average degeneracy in the (tA, t B ) plane for 
+
+L = 10 for MWPM and syndrome-weighted MWPM, respectively, with color shade encoding Ndeg .
+
+the boundary of sc = ∂τ (1) ) by calibrating the choice with 
+
+τ (2) to obtain the largest expected magnetization squared. 
+
+1. Model and training details 
+
+Model.— Specifically, we use the residual CNN with Feature-Wise Linear Modulation (FiLM) to encode the infor-11 (a) (b) 
+
+> second moment  C c
+> (2)
+
+0.0 0.2 0.4 0.6 0.8 1.0 
+
+t c = 0.625 𝜋 /4 
+
+𝜈 = 1.59 measurement strength t [𝜋 /4] 
+
+0.4 0.6 0.8 1.0 
+
+> domain-wall entropy  I c
+
+0.0 0.2 0.4 0.6 0.8 1.0 t c = 0.627 𝜋 /4 
+
+𝜈 = 1.54 
+
+x L
+
+−1 0 1
+
+x L
+
+−1 0 1
+
+> linear system size  L
+
+4812 16 20 
+
+FIG. 9. Second moment C(2)  
+
+> c
+
+and domain-wall entropy Ic. The data are presented along the radial line tA = tB = π/ 4 − trad . The upper plot (a) depicts the second moment of C(2)  
+
+> c
+
+plotted against the measurement strength trad for different linear system sizes L.Panel (b) shows the domain-wall entropy for the same cut. The color shades encode the lattice size, and the insets show the correspond-ing finite-size scaling collapse as a function of the rescaled variable 
+
+xL = ( trad − tc)L1/ν /t c.
+
+mation of the physical parameters tA and tB . As a compro-mise between efficiency and runtime, we chose a 3 × 3 kernel with 12 blocks and 64 channels (normalized over 8 groups). The total number of learnable parameters is 990,401. We find that the number of parameters needed is significantly larger than typically required for toric code decoding, and reducing the number deteriorates the performance of our architecture. 
+
+Features.— To embed 2L(L − 1) edges into a L × L square lattice, we separate edges into vertical and horizontal, consti-tuting two L × (L − 1) channels. Further, we map the edge 
+
+L × (L − 1) to the vertex L × L configurations by assign-ing to each vertex in horizontal/vertical channels the sum of adjacent horizontal/vertical edges. The resulting input of the model is zero-padded for L × L channels for s and c edge configurations in addition to tA, t B passed through the FiLM layers. 
+
+Loss function.— For each shot of the experiment (sij , σ i),the objective of the model is to predict the correction τ (2)  
+
+> i
+
+that would result in the largest averaged decoded magnetization inverse linear system size 1/ L
+
+0 0.05 0.10 0.15 
+
+> threshold  t c [𝜋 /4]
+
+0.54 0.55 0.56 0.57 
+
+linear system size L
+
+∞ 32 20 16 12 10 8
+
+I cC c
+
+> (2)
+
+FIG. 10. Finite-size analysis of the entanglement transition. Each point represents an estimate of the tc 
+
+> A
+
+threshold at fixed tB = 0 .9π/ 4
+
+for a lattice size L. Error bars on the data indicate the bootstrap uncertainty of the threshold. The solid lines show linear fits in the inverse linear size of the lattice 1/L , and shaded bands represent the uncertainty of the fit. When extrapolated to the thermodynamic limit L → ∞ , both observables converge to the same value within numerical uncertainty. The averaged value of the threshold obtained from the two observables is used in the main text. 
+
+squared 
+
+−L M = X
+
+> i
+
+τ (1)  
+
+> i
+
+τ (2)  
+
+> i
+
+σi
+
+!2
+
+, (B2) where τ (1)  
+
+> i
+
+is the first-stage corrections inside the loops sc .Perfectly predicting τ (2)  
+
+> i
+
+= τ (1)  
+
+> i
+
+σi in each shot is not math-ematically possible since away from the strong measurement point tA = tB = π/ 4, the probability distribution P (σ|s) is 
+
+not a delta function δ(σiσj − sij ). Hence, the ultimate goal of training is to minimize the loss function LM averaged over a sufficient number of shots. To make training more efficient in the initial stages, we in-troduce additional terms 
+
+LBCE = BCE( τ (2)  
+
+> i
+
+, σ iτ (1)  
+
+> i
+
+), (B3) 
+
+Lalign = − X
+
+> ⟨ij ⟩
+
+τ (2)  
+
+> i
+
+τ (2)  
+
+> j
+
+[c]ij . (B4) The binary cross-entropy term LBCE produces a large number of gradients that facilitate fast learning. The edge-alignment term Lalign penalizes the model for flipping domains that are not aligned with the remaining antiferromagnetic frustrations 
+
+c. This term ensures that the model does not introduce new domains away from the frustrations. We train the model by scheduling the loss function by smoothly changing the weights of the loss functions starting from (λM , λ BCE , λ align ) = (0 .3, 0.3, 0.2) at the first epoch to 
+
+(1 .0, 0.02 , 0.04) at the last epoch. 12 0 0.05 0.10 
+
+> threshold  t c [𝜋 /4]
+
+0.55 0.60 0.65 0.70 
+
+t B = 0.7 𝜋 /4 
+
+(a)    
+
+> 1−tA
+> 1 − t B
+
+0 0.05 0.10 
+
+t B = 0.8 𝜋 /4 
+
+(b)    
+
+> 1−tA
+> 1 − t B
+
+0 0.05 0.10 
+
+t B = 0.9 𝜋 /4 
+
+(c)    
+
+> 1−tA
+> 1 − t B
+
+0 0.05 0.10 
+
+t B = 1.0 𝜋 /4 
+
+(d)    
+
+> 1−tA
+> 1 − t B
+
+inverse linear system size 1/ L
+
+MWPM SW-MWPM Truncated MUD Optimal MUD I c C c
+
+> (2)
+
+FIG. 11. Finite-size analysis of thresholds. The finite-size thresholds obtained from the expanding window technique are plotted. The entanglement thresholds are computed from the data collapse of the domain-wall entropy Ic and boundary-boundary correlation functions 
+
+C(2)  
+
+> c
+
+. The decoding thresholds are extrapolated for the MWPM, SW-MWPM, the exact optimal MUD decoder, and the rmax = 4 truncated MUD decoder. On the Nishimori line ( tB = π/ 4), panel (d), all thresholds are relatively close to each other. The performance of the bare MWPM decoder significantly degrades away from the Nishimori line, while the SW-MWPM, optimal MUD, and truncated MUD decoders maintain close thresholds to the entanglement transition. 
+
+Appendix C: Entanglement threshold 
+
+We compute the optimal threshold as the location of the 
+
+entanglement transition using the domain-wall entropy [52], which is equivalent to the coherent mutual information. We augment the square L × L lattice by coupling the left (right) boundary spins σx, 1 (σx,L ) to an additional spin σL (σR); see Fig. 9. The couplings between these new spins and the boundaries are the same as for the bulk spins. For a fixed syn-drome configuration s, we compute the correlation function 
+
+Cs = ⟨σLσR⟩s. The domain-wall entropy of this syndrome configuration is computed as 
+
+Is = − 1 + Cs
+
+2 log 2
+
+1 + Cs
+
+2 − 1 − Cs
+
+2 log 2
+
+1 − Cs
+
+2 . (C1) We then average the domain-wall entropy and squared corre-lation function over the syndrome configurations: 
+
+Ic = X
+
+> s
+
+IsP (s), C(2)  
+
+> c
+
+= X
+
+> s
+
+[Cs]2P (s). (C2) 
+
+1. Numerical technique 
+
+Since we are interested in the nonlinear moments of Cs,we cannot use the procedure defined in the main text, which relies on computing averages of the joint distribution P (σ, s).Therefore, for a specific configuration s, we compute Cs as a contraction of the tensor network closely following Ref. [25]. We define the tensor network on a (L + 2) × L lattice. We then force the left and right boundary spins to be aligned by inserting the identity bond matrix corresponding to an infinite ferromagnetic coupling strength. This ensures that σ0,y ≡ σL
+
+and σL+1 ,y ≡ σR for all y. Contracting the tensor network on this augmented lattice results precisely in Cs.The efficient numerical sampling procedure does not allow us to compute the nonlinear expectation value. However, it is well suited to sampling independent syndrome configurations 
+
+s from P (s), where we simply discard the latent variable σi
+
+used for conditioning in Eq. (16). (To obey the boundary con-ditions at x = 0 and x = L + 1 , we sample only one spin, σL
+
+and σR, per boundary.) We compute Ic and C(2)  
+
+> c
+
+by averaging over Nshots = 50 , 000 independent syndrome configurations for L = 4 –20 .
+
+2. Finite-size analysis 
+
+Both Ic and C(2)  
+
+> c
+
+exhibit threshold behavior shown in Fig. 9. However, even on the Nishimori line, the thresholds obtained from the data collapse for L ≤ 20 deviate from the value reported in the literature. We attribute this discrepancy to finite-size effects and open boundary contributions. We extrapolate the data to the thermodynamic limit to take into account these corrections. We perform the data col-lapse over the expanding window of data using system sizes 
+
+L = 4 – L0 with L0 = 7 –20 . Then, we plot the obtained threshold values tc
+
+> A
+
+(L0) versus 1 
+
+> L0
+
+for both Ic and C(2)  
+
+> c
+
+; see Fig. 10 for tB = 0 .9π/ 4. Although the finite-size thresh-olds obtained from the two observables differ significantly, 13 1 − t A    
+
+> 0.0 0.1 0.2 0.3 0.4
+> 1 − t B
+> 0.0 0.1 0.2 0.3 0.4
+> maximally gauge-broken Nishimori line (gauge-symm.)
+> MWPM Exact MUD Optimal
+
+FIG. 12. Decodability and entanglement threshold phase dia-gram. Extrapolated thresholds in the (tA, t B ) plane for the bare MWPM decoder (yellow squares) and the exact MUD (green cir-cles), together with the decoder-independent entanglement threshold (star markers); see Fig. 11. The shaded regions mark where the re-spective decoder recovers long-range order. The green wedge indi-cates the regime decodable by MUD but not by MWPM. The dotted lines mark the Nishimori line ( tA = π/ 4 or tB = π/ 4) and the dashed diagonal ( tA = tB ) the case of maximal gauge-symmetry breaking, where the gain of MUD over MWPM is largest. 
+
+their thermodynamic extrapolations agree well within numer-ical accuracy. As our best estimate of the true threshold, we take the average of the two extrapolated thermodynamic val-ues. 
+
+Appendix D: Finite-size analysis of decoding thresholds 
+
+In this appendix, we present the finite-size analysis of the decoding threshold. We observe that the Binder cumulant, even for moderately large systems ( L = 20 –64 ), yields thresh-old values that differ from those reported in the literature for the Nishimori line [53, 54], which we attribute to finite-size effects and open-boundary contributions. Indeed, when we perform the data collapse for progressively larger systems as in Appendix C 2, we find that the obtained finite-size threshold is roughly a linear function of 1/L ; see Fig. 11. Extrapolating this function to 1/L → 0 yields our estimate of the intrinsic decoder’s threshold, free of finite-size and boundary correc-tions, though subject to the uncertainty of the extrapolation. Surprisingly, we find that the entanglement threshold ex-tracted from Ic and C(2)  
+
+> c
+
+is somewhat smaller than that of the optimal MUD decoder; see Fig. 12. On the tA = tB line, the two thresholds agree within the numerical accuracy. It is unclear whether the discrepancy stems from the linear extrap-olation (the data for the optimal decoding threshold seem to have a little curvature) or reflects a fundamental separation between the decodability and entanglement thresholds, as in Ref. [55]. 
+
+Appendix E: Analytic properties of gauge-oblivious decoding 
+
+In this Appendix, we show that the leading contribution to the thresholds of the gauge-oblivious MWPM decoder with high accuracy depends only on A ≡ sin 2 tA sin 2 tB . To this end, we compute the decoded expectation value of the two-point correlation function Cij = ⟨σiσj ⟩dec to analyze its para-metric dependence on tA/B parameters. Since odd moments 
+
+⟨Q2n+1  
+
+> i=1
+
+σi⟩ vanish and the analysis is the same for any even moment ⟨Q2ni=1 σi⟩, the results hold for any observable of σ.Given the observed syndromes s, the MWPM decoder out-puts the chain c(f ), which depends only on the endpoint 
+
+f = ∂s. Then, the vertex spins inside the closed dual loops 
+
+sc (f ) = ∂D(s) are corrected. The decoded correlation func-tion can be computed as 
+
+Cij = X
+
+> σ
+
+X
+
+> s
+
+σiσj Di(s)Dj (s)P (σ, s) (E1) 
+
+= X
+
+> σ
+
+X
+
+> s
+
+σiσj
+
+ Y
+
+> l∈S ij
+
+slcl(f )
+
+ P (σ, s), (E2) where we expressed the region D(s) inside the loop sc 
+
+through Di(s)Dj (s) = Q 
+
+> l∈S ij
+
+slcl(f ) the product over an edge chain Sij connecting vertices i and j. (Recall that 
+
+b = ∂D implies that bij = DiDj for any edge ⟨ij ⟩.) We now exchange the sum over all 1D chains s for sums over the endpoints f = ∂s and all vertex configurations r. Any chain 
+
+s can be expressed in terms of f and r as sij = [ sf ]ij rirj ,where sf is a chain with the same endpoints f = ∂s = ∂sf
+
+[56]. Without loss of generality, we choose sf = c(f ) and obtain 
+
+Cij = 12
+
+X
+
+> σ
+
+X 
+
+> f,r
+
+σiσj rirj P (σ, c(f )∂r) (E3) 
+
+= 12
+
+X
+
+> σ′
+
+X
+
+> f
+
+σ′
+
+> i
+
+σ′
+
+> j
+
+X
+
+> r
+
+P (σ′r, c(f )∂r), (E4) where we defined σ′ = σr . Now, we express the joint proba-bility distribution Eq. (5) as 
+
+P (σ′r, c∂r) ∝ Y
+
+> ⟨ij ⟩
+
+(1 + Ac ij σ′
+
+> i
+
+σ′ 
+
+> j
+
++ Bc ij rirj ), (E5) where A = sin 2 tA sin 2 tB and B = − cos 2 tA cos 2 tB . The 
+
+B term parametrizes the explicit gauge symmetry breaking and vanishes on the Nishimori line tB = π/ 4. For B = 0 , the gauge symmetry implies P (σ′r, c∂r) = P (σ′, c).We then use the high-temperature loop expansion 
+
+Y
+
+> ⟨ij ⟩
+
+(1 + Kij ) = X
+
+> E′⊆E
+
+Y
+
+> ⟨ij ⟩∈ E′
+
+Kij , (E6) where the sum is over all subsets of edges E′ ⊆ E. To apply the expansion, we factorize the right-hand side of Eq. (E5) and obtain 14 
+
+P (σ′r, c∂r) ∝ Y
+
+> ⟨ij ⟩
+
+(1 + Ac ij σ′
+
+> i
+
+σ′ 
+
+> j
+
+) Y
+
+> ⟨ij ⟩
+
+(1 + rirj Kij ) (E7) 
+
+= Y
+
+> ⟨ij ⟩
+
+(1 + Ac ij σ′
+
+> i
+
+σ′ 
+
+> j
+
+) X
+
+> E′⊆E
+
+Y
+
+> ⟨ij ⟩∈ E′
+
+rirj Kij , (E8) where Kij = Bc ij  
+
+> 1+ Ac ij σ′
+> iσ′
+> j
+
+.Notice that Eq. (E4) depends only on the gauge-averaged probability distribution 
+
+Peff (σ′, c) = X
+
+> r
+
+P (σ′r, c∂r). (E9) We insert Eq. (E8) into Eq. (E9) and analyze which con-figuration of E′ gives a non-zero contribution to the sum. Any term that has an odd power of ri vanishes under sum-mation over ri = ±1. Thus, only if E′ is a loop, the product Q 
+
+> ⟨ij ⟩∈ E′
+
+rirj = 1 is trivial and gives a non-zero contribution. Hence, we obtain the averaged probability distribution 
+
+Peff (σ′, c) = Y
+
+> ⟨ij ⟩
+
+(1 + Ac ij σ′
+
+> i
+
+σ′ 
+
+> j
+
+) X
+
+> L⊆E:∂L =0
+
+Y
+
+> ⟨ij ⟩∈ L
+
+Kij 
+
+(E10) 
+
+= X
+
+> L⊆E:∂L =0
+
+Y
+
+> ⟨ij ⟩∈ E\L
+
+(1 + Ac ij σ′
+
+> i
+
+σ′ 
+
+> j
+
+) Y
+
+> ⟨ij ⟩∈ L
+
+Bc ij .
+
+(E11) We now arrange terms according to their power of B, since the parameter B is bounded |B| ≤ 1, and near the strong mea-surement limit tA = tB = π/ 4 is small. Therefore, the lead-ing contribution O(B0) comes from an empty set L = ∅. The first sub-leading contribution comes from the shortest non-trivial loop. On a square lattice, the shortest possible loops have length |L| = 4 and thus the corresponding terms have a suppression factor B4.We now estimate the magnitude of B = − cos 2 tA cos 2 tB
+
+in the physically relevant regime. Recall that on the Nishimori line (tB = π/ 4) , the threshold is tc 
+
+> A
+
+≈ 0.584 π/ 4 correspond-ing to an error rate pc = 0 .103 . In the region on the (tA, t B )
+
+plane where MWPM can decode the GHZ state (approxi-mately given by sin(2 tA) sin(2 tB ) ≥ sin(2 tc
+
+> A
+
+) ≈ 0.794 ), the parameter is bounded by B ≤ 0.206 , with the bound saturated at tA = tB , and the first sub-leading term is suppressed by a factor of at most B4 ≤ 1.8 × 10 −3.If we neglect small corrections due to B in Eq. (E5), we im-mediately see that all observables depend only on the parame-ter A. In particular, this implies that the threshold depends on 
+
+A with the first correction of the order O(B4). Numerically, we find remarkable agreement between the MWPM thresh-old in the (tA, t B ) parameter space and the analytic curve 
+
+sin(2 tA) sin(2 tB ) = 0 .794 = 1 − 2pc.More generally, for any gauge-oblivious decoder, in the sense that the correction c(f ) depends only on the fluxes, the observables can be computed from the distribution averaged over the gauge variables 
+
+Peff (σ′, c) = X
+
+> r
+
+P (σ′r, c∂r), (E12) which corresponds to the Nishimori line ( tB = π/ 4) with an effective teff  
+
+> A
+
+satisfying sin(2 teff  
+
+> A
+
+) = sin(2 tA) sin(2 tB ) (up to the corrections B4). 
+
+> Appendix F: 2D repetition code
+
+The MUD decoder is designed to maximize the long-range order of the GHZ state parametrized by the magnetization squared. In the context of the repetition code, the GHZ state is the |+⟩L eigenstate of the logical XL operator. As in measurement-based state preparation, bit-flip noise introduces domain walls that are identified by measuring syndromes— parity checks on the edges between two data qubits. When the syndrome measurements are perfect tA = tB =
+
+π/ 4, the domain walls can always be eliminated, and the log-ical information is preserved if fewer than half of the data qubits are flipped by the noise, i.e., the bit-flip error rate is px < 0.5. However, away from the fine-tuned strong-measurement point tA, t B < π/ 4, two distinct situations arise: the 1D repetition chain and the 2D repetition lattice. In the former case, the syndromes are not redundant. Any syndrome error propagates uncontrollably, so there is no fi-nite threshold, tc 
+
+> A
+
+= tc 
+
+> B
+
+= π/ 4. In the 2D case, any parity check sij between qubits i and j can be independently ver-ified by any chain of syndromes Sij with endpoints i and j.This redundancy results in a finite threshold tc
+
+> A
+
+, t c 
+
+> B
+
+< π/ 4.As in the GHZ-state preparation, the data and syndrome qubits in the weak-measurement 2D repetition code are gov-erned by the RBIM-like distribution 
+
+P (σ, s) ∝ eβ[P
+
+> ⟨ij ⟩
+
+(Jsij σiσj +hs ij )+P 
+
+> ihxσi
+
+], (F1) where βh x controls the strength of the bit-flip noise. The statistics of the measurement-based protocol are recovered when px = 0 .5 and hx = 0 . 
+
+> 1. Maximum likelihood decoder
+
+In the repetition code, the logical information is preserved if, after the correction, the majority of the data qubits point in the same direction as the original logical state. For concrete-ness, we assume that the logical state is |1⟩L, and the logical information is restored by the decoder if ⟨ ˆMz ⟩dec > 0. Given the observed syndromes s, the MLD decoder chooses the cor-rection c that is most likely (with respect to P (σ|s)) to result in ⟨ ˆMz ⟩dec > 0. The probability that the correction c recovers the logical information given s is 
+
+PL(c|s) = X
+
+> σ:
+
+(P 
+
+> iσiτi
+
+)>0
+
+P (σ|s), (F2) where τi = τi(cs ) is the smallest region whose boundary is a loop cs , i.e., τiτj = cij sij . The maximum-likelihood decoder then chooses the most probable correction MLD: s → c = argmax 
+
+> c
+
+PL(c|s). (F3) 15 
+
+2. Maximum-utility decoder 
+
+The MLD for the 2D repetition code can be formulated as MUD with expected utility given by the logical recovery prob-ability 
+
+PL(τ |s) = X
+
+> σ
+
+U(τ , σ)P (σ|s), (F4) and the utility function 
+
+UMLD (τ , σ) = θ X
+
+> i
+
+σiτi
+
+!
+
+, (F5) where θ(x) is a Heaviside step function. This choice of utility function is analytically intractable due to the nonlinearity of the θ-function. Another natural choice of the utility function corresponds to magnetization 
+
+UM (τ , σ) = 1
+
+N
+
+X
+
+> i
+
+σiτi. (F6) In this case, the expected utility is 
+
+E[UM ] = 1
+
+N
+
+X
+
+> i
+
+τi⟨σi⟩s. (F7) The solution for τ that maximizes the expected utility is then 
+
+τi = sign( ⟨σi⟩s). This choice of utility function corresponds to correcting the most-likely error on each qubit individually. In Bayesian statistics, it is known as a (qu-)bitwise maximum a posteriori (MAP) decoder. By contrast, MLD is a blockwise MAP decoder that maximizes the probability of correcting all qubits simultaneously. 
+
+[1] D. M. Greenberger, M. A. Horne, and A. Zeilinger, Going Be-yond Bell’s Theorem, in Bell’s Theorem, Quantum Theory and Conceptions of the Universe , edited by M. Kafatos (Springer Netherlands, Dordrecht, 1989) pp. 69–72. [2] J. J. . Bollinger, W. M. Itano, D. J. Wineland, and D. J. Heinzen, Optimal frequency measurements with maximally correlated states, Phys. Rev. A 54 , R4649 (1996). [3] D. Leibfried, M. D. Barrett, T. Schaetz, J. Britton, J. Chiaverini, W. M. Itano, J. D. Jost, C. Langer, and D. J. Wineland, To-ward Heisenberg-Limited Spectroscopy with Multiparticle En-tangled States, Science 304 , 1476 (2004). [4] V. Giovannetti, S. Lloyd, and L. Maccone, Quantum-Enhanced Measurements: Beating the Standard Quantum Limit, Science 
+
+306 , 1330 (2004). [5] V. Giovannetti, S. Lloyd, and L. Maccone, Advances in quan-tum metrology, Nature Photonics 5, 222 (2011). [6] C. D. Marciniak, T. Feldker, I. Pogorelov, R. Kaubruegger, D. V. Vasilyev, R. van Bijnen, P. Schindler, P. Zoller, R. Blatt, and T. Monz, Optimal metrology with programmable quantum sensors, Nature 603 , 604 (2022). [7] M. Hillery, V. Bužek, and A. Berthiaume, Quantum secret shar-ing, Phys. Rev. A 59 , 1829 (1999). [8] R. Cleve, D. Gottesman, and H.-K. Lo, How to Share a Quan-tum Secret, Phys. Rev. Lett. 83 , 648 (1999). [9] Y.-A. Chen, A.-N. Zhang, Z. Zhao, X.-Q. Zhou, C.-Y. Lu, C.-Z. Peng, T. Yang, and J.-W. Pan, Experimental Quantum Se-cret Sharing and Third-Man Quantum Cryptography, Phys. Rev. Lett. 95 , 200502 (2005). [10] L. K. Grover, Quantum Telecomputation (1997), arXiv:quant-ph/9704012. [11] J. I. Cirac, A. K. Ekert, S. F. Huelga, and C. Macchiavello, Dis-tributed quantum computation over noisy channels, Phys. Rev. A 59 , 4249 (1999). [12] S. de Bone, R. Ouyang, K. Goodenough, and D. Elkouss, Pro-tocols for Creating and Distilling Multipartite GHZ States With Bell Pairs, IEEE Transactions on Quantum Engineering 1, 1 (2020). [13] P. W. Shor, Scheme for reducing decoherence in quantum com-puter memory, Phys. Rev. A 52 , R2493 (1995). [14] P. W. Shor, Fault-tolerant quantum computation, in Proceedings of 37th conference on foundations of computer science (IEEE, 1996) pp. 56–65. [15] J. Guillaud and M. Mirrahimi, Repetition Cat Qubits for Fault-Tolerant Quantum Computation, Phys. Rev. X 9, 041053 (2019). [16] K. Takeda, A. Noiri, T. Nakajima, T. Kobayashi, and S. Tarucha, Quantum error correction with silicon spin qubits, Nature 608 , 682 (2022). [17] T. Bergamaschi and Y. Liu, On Fault Tolerant Single-Shot Log-ical State Preparation and Robust Long-Range Entanglement, in 16th Innovations in Theoretical Computer Science Confer-ence (ITCS 2025) , Leibniz International Proceedings in Infor-matics (LIPIcs), Vol. 325, edited by R. Meka (Schloss Dagstuhl – Leibniz-Zentrum für Informatik, Dagstuhl, Germany, 2025) pp. 16:1–16:9. [18] H. Putterman, K. Noh, C. T. Hann, G. S. MacCabe, S. Aghaeimeibodi, R. N. Patel, M. Lee, W. M. Jones, H. Moradinejad, R. Rodriguez, N. Mahuli, J. Rose, J. C. Owens, H. Levine, E. Rosenfeld, P. Reinhold, L. Moncelsi, J. A. Alcid, N. Alidoust, P. Arrangoiz-Arriola, J. Barnett, P. Bienias, H. A. Carson, C. Chen, L. Chen, H. Chinkezian, E. M. Chisholm, M.-H. Chou, A. Clerk, A. Clifford, R. Cosmic, A. V. Curiel, E. Davis, L. DeLorenzo, J. M. D’Ewart, A. Diky, N. D’Souza, P. T. Dumitrescu, S. Eisenmann, E. Elkhouly, G. Evenbly, M. T. Fang, Y. Fang, M. J. Fling, W. Fon, G. Garcia, A. V. Gor-shkov, J. A. Grant, M. J. Gray, S. Grimberg, A. L. Grimsmo, A. Haim, J. Hand, Y. He, M. Hernandez, D. Hover, J. S. C. Hung, M. Hunt, J. Iverson, I. Jarrige, J.-C. Jaskula, L. Jiang, M. Kalaee, R. Karabalin, P. J. Karalekas, A. J. Keller, A. Kha-lajhedayati, A. Kubica, H. Lee, C. Leroux, S. Lieu, V. Ly, K. V. Madrigal, G. Marcaud, G. McCabe, C. Miles, A. Mil-sted, J. Minguzzi, A. Mishra, B. Mukherjee, M. Naghiloo, E. Oblepias, G. Ortuno, J. Pagdilao, N. Pancotti, A. Panduro, J. P. Paquette, M. Park, G. A. Peairs, D. Perello, E. C. Pe-terson, S. Ponte, J. Preskill, J. Qiao, G. Refael, R. Resnick, A. Retzker, O. A. Reyna, M. Runyan, C. A. Ryan, A. Sah-moud, E. Sanchez, R. Sanil, K. Sankar, Y. Sato, T. Scaffidi, S. Siavoshi, P. Sivarajah, T. Skogland, C.-J. Su, L. J. Swen-son, S. M. Teo, A. Tomada, G. Torlai, E. A. Wollack, Y. Ye, J. A. Zerrudo, K. Zhang, F. G. S. L. Brandão, M. H. Matheny, 16 
+
+and O. Painter, Hardware-efficient quantum error correction via concatenated bosonic qubits, Nature 638 , 927 (2025). [19] S. Bravyi, M. B. Hastings, and F. Verstraete, Lieb-Robinson Bounds and the Generation of Correlations and Topological Quantum Order, Phys. Rev. Lett. 97 , 050401 (2006). [20] M. B. Hastings, Locality in quantum systems, in Quantum The-ory from Small to Large Scales: Lecture Notes of the Les Houches Summer School: Volume 95, August 2010 , edited by J. Frohlich, M. Salmhofer, V. Mastropietro, W. De Roeck, and L. F. Cugliandolo (Oxford University Press, 2012). [21] J. Preskill, Quantum Computing in the NISQ era and beyond, Quantum 2, 79 (2018). [22] R. Raussendorf and H. J. Briegel, A One-Way Quantum Com-puter, Phys. Rev. Lett. 86 , 5188 (2001). [23] R. Verresen, N. Tantivasadakarn, and A. Vishwanath, Ef-ficiently preparing Schrödinger’s cat, fractons and non-Abelian topological order in quantum devices (2021), arXiv:2112.03061. [24] T.-C. Lu, L. A. Lessa, I. H. Kim, and T. H. Hsieh, Measurement as a Shortcut to Long-Range Entangled Quantum Matter, PRX Quantum 3, 040337 (2022). [25] G.-Y. Zhu, N. Tantivasadakarn, A. Vishwanath, S. Trebst, and R. Verresen, Nishimori’s Cat: Stable Long-Range Entangle-ment from Finite-Depth Unitaries and Weak Measurements, Phys. Rev. Lett. 131 , 200201 (2023). [26] J. Y. Lee, W. Ji, Z. Bi, and M. Fisher, Decoding measurement-prepared quantum phases and transitions: From Ising model to gauge theory, and beyond (2022), arXiv:2208.11699. [27] E. H. Chen, G.-Y. Zhu, R. Verresen, A. Seif, E. Bäumer, D. Lay-den, N. Tantivasadakarn, G. Zhu, S. Sheldon, A. Vishwanath, S. Trebst, and A. Kandala, Nishimori transition across the error threshold for constant-depth quantum circuits, Nature Physics 
+
+21 , 161 (2025). [28] E. Dennis, A. Kitaev, A. Landahl, and J. Preskill, Topological quantum memory, Journal of Mathematical Physics 43 , 4452 (2002). [29] A. G. Fowler, M. Mariantoni, J. M. Martinis, and A. N. Cleland, Surface codes: Towards practical large-scale quantum compu-tation, Phys. Rev. A 86 , 032324 (2012). [30] A. deMarti iOlius, P. Fuentes, R. Orús, P. M. Crespo, and J. Etxezarreta Martinez, Decoding algorithms for surface codes, Quantum 8, 1498 (2024). [31] V. Kolmogorov, Blossom V: A New Implementation of a Min-imum Cost Perfect Matching Algorithm, Mathematical Pro-gramming Computation 1, 43 (2009). [32] O. Higgott and C. Gidney, Sparse Blossom: Correcting a Mil-lion Errors per Core Second with Minimum-Weight Matching, Quantum 9, 1600 (2025). [33] H. Nishimori, Exact results and critical properties of the Ising model with competing interactions, Journal of Physics C: Solid State Physics 13 , 4071 (1980). [34] J. O. Berger, Statistical Decision Theory and Bayesian Analy-sis , 2nd ed. (Springer, 1985). [35] S. Bravyi, M. Suchara, and A. Vargo, Efficient algorithms for maximum likelihood decoding in the surface code, Phys. Rev. A 90 , 032326 (2014). [36] A shot fidelity is F = 1 for a perfectly decoded shot ( ⟨ ˆM 2⟩ =1) and F = 0 otherwise. It corresponds to the utility function 
+
+UF (τ , σ) = θ  1
+
+> N
+
+P 
+
+> i
+
+σiτi − 1, whose Heaviside nonlinear-ity renders it analytically intractable. [37] M. Lewis and F. Glover, Quadratic Unconstrained Binary Opti-mization Problem Preprocessing: Theory and Empirical Anal-ysis (2017), arXiv:1705.09844 [cs.AI]. [38] K. Meinerz, C.-Y. Park, and S. Trebst, Scalable Neural Decoder for Topological Surface Codes, Phys. Rev. Lett. 128 , 080505 (2022). [39] The Binder cumulant is defined as U = 32
+
+
+
+1 − ⟨ ˆM 4⟩  
+
+> 3⟨ˆM2⟩2
+
+
+
+.[40] B. Eastin and E. Knill, Restrictions on Transversal Encoded Quantum Gate Sets, Phys. Rev. Lett. 102 , 110502 (2009). [41] D. Bluvstein, S. J. Evered, A. A. Geim, S. H. Li, H. Zhou, T. Manovitz, S. Ebadi, M. Cain, M. Kalinowski, D. Hangleiter, J. P. Bonilla Ataides, N. Maskara, I. Cong, X. Gao, P. Sales Rodriguez, T. Karolyshyn, G. Semeghini, M. J. Gul-lans, M. Greiner, V. Vuleti´ c, and M. D. Lukin, Logical quantum processor based on reconfigurable atom arrays, Nature 626 , 58 (2024). [42] D. Horsman, A. G. Fowler, S. Devitt, and R. V. Meter, Sur-face code quantum computing by lattice surgery, New Journal of Physics 14 , 123011 (2012). [43] D. Litinski, A Game of Surface Codes: Large-Scale Quantum Computing with Lattice Surgery, Quantum 3, 128 (2019). [44] M. Yutushui, T. Haas, and S. Trebst, Datasets for “Optimal De-coding for Measurement-Based GHZ State Preparation: The Maximum-Utility Decoder" (2026). [45] P. W. Kasteleyn, Dimer Statistics and Phase Transitions, Journal of Mathematical Physics 4, 287 (1963). [46] Y. L. Loh and E. W. Carlson, Efficient Algorithm for Random-Bond Ising Models in 2D, Phys. Rev. Lett. 97 , 227205 (2006). [47] C. K. Thomas and A. A. Middleton, Exact algorithm for sam-pling the two-dimensional Ising spin glass, Phys. Rev. E 80 ,046708 (2009). [48] W. Kager, M. Lis, and R. Meester, The Signed Loop Approach to the Ising Model: Foundations and Critical Point, Journal of Statistical Physics 152 , 353 (2013). [49] D. Chelkak, D. Cimasoni, and A. Kassel, Revisiting the com-binatorics of the 2D Ising model, Annales de l’Institut Henri Poincaré D 4, 309 (2017). [50] A. H. Land and A. G. Doig, An Automatic Method of Solving Discrete Programming Problems, Econometrica 28 , 497 (1960). [51] N. Krislock, J. Malick, and F. Roupin, BiqCrunch: a semidef-inite branch-and-bound method for solving binary quadratic problems, ACM Transactions on Mathematical Software 43 ,Article No. 32 (2017). [52] M. Pütz, S. J. Garratt, H. Nishimori, S. Trebst, and G.-Y. Zhu, Learning Transitions in Classical Ising Models and Deformed Toric Codes, Phys. Rev. Lett. 136 , 190402 (2026). [53] Z.-Q. Wan, X.-D. Dai, and G.-Y. Zhu, Revisiting Nishimori multicriticality through the lens of information measures, Phys. Rev. Res. 8, 023059 (2026). [54] R. Mukherjee and S. Trebst, Nishimori Threshold Estimation for Bayesian Inference and Zq Surface Code Decoding (2026), arXiv:2607.18374 [quant-ph]. [55] F. Roser, H. P. Büchler, and N. Lang, Decoding the projective transverse field Ising model, Phys. Rev. B 107 , 214201 (2023). [56] This parametrization is unique modulo total sign flip r → − r.

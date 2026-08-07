@@ -1,0 +1,438 @@
+Title: Real-time decoding of quantum error correction codes using high-performance computing
+
+URL Source: https://arxiv.org/pdf/2608.03948v1
+
+Published Time: Wed, 05 Aug 2026 01:23:00 GMT
+
+Number of Pages: 11
+
+Markdown Content:
+## Real-time decoding of quantum error correction codes using high-performance computing 
+
+Lingling Lao, Qiang Wang, Yuanqi Liu, Yantong Liu, Haowen Wang, Yitao Chen, Yankang Zhao, Zhenwei Wu, Wei Zhang, Yong Dong, Yingwen Liu, Mingche Lai, ∗ and Junjie Wu †
+
+College of Computer Science and Technology, National University of Defense Technology, Changsha 410073, China 
+
+(Dated: August 5, 2026) Quantum error correction (QEC) is indispensable for building scalable fault-tolerant quantum computers. Effective QEC demands stringent real-time decoding: the decoder must process syn-drome measurements and determine corrections within a time scale—typically on the order of mi-croseconds, to avoid data backlog. Scaling to large number of logical qubits further necessitates significant computational resources. In this work, we propose an architecture, called THQLink ,for real-time decoding of quantum error correction codes using high-performance computing (HPC) resources. The network connecting the HPC and the control system of quantum processing unit (QPU) is built on TH-Express and can be adapted to different quantum technologies and their as-sociated control stacks. We report a round-trip latency of 2.944 μs on average, with an incremental overhead of 130 ns per additional hop. Using a parallel window strategy, we demonstrate real-time decoding (1 μs per QEC round) of the surface code up to distance 19 using a matching-based de-coder on CPUs. Our work presents a scalable framework for real-time decoding in fault-tolerant quantum computing. It can be readily applied to quantum-centric supercomputers that feature tight integration between QPU and HPC resources, thereby enabling efficient support for hybrid quantum-classical algorithms and computation-intensive workloads offloaded from the QPU. 
+
+I. INTRODUCTION 
+
+Quantum computing holds the promise of solving prob-lems intractable for classical supercomputers, yet its practical realization hinges critically on the ability to suppress physical errors through quantum error correc-tion (QEC) [1–3]. The key idea of QEC is to protect in-formation by redundantly encoding many physical qubits into one logical qubit and periodically measure auxil-iary qubits to extract error syndromes without collaps-ing the logical state [3, 4]. A classical decoder processes the syndrome data to diagnose the most probable er-rors and prescribe corrective actions [5]. To be viable for large-scale quantum computing, a decoder must satisfy three stringent and often conflicting requirements. First, it should achieve accuracy approaching the optimal de-coder, thereby minimizing the qubit overhead needed to reach a target logical error rate [6]. Second, it must pro-cess syndromes within the hardware’s generation clock rate, typically around 1 μs for superconducting qubits, to prevent an exponential data backlog [3, 7]. This process-ing time includes both the actual decoding computation and the communication latency between the decoder and the quantum system controller(QSC). Meeting the real-time budget necessitates that the computing unit hosting the decoder be either tightly coupled with or physically integrated into QSC [8, 9]. Third, the decoder should be scalable to support hundreds or thousands of logical qubits at large code distances for utility-scale quantum computing.   
+
+> ∗mingchelai@nudt.edu.cn
+> †junjiewu@nudt.edu.cn
+
+Various decoding algorithms have been developed in both software and dedicated hardware to satisfy one or all the requirements. Minimum-weight perfect matching (MWPM) is a widely used decoder for topological codes [10, 11]. Sparse blossom is a highly optimized sequential implementation of MWPM designed for fast single-core performance, it decodes a distance-17 surface code with 1 us per QEC round [12]. Fusion blossom is a paral-lel MWPM solver to leverage multi-core CPUs, enabling it to decode surface codes up to distance 33 with sub-microsecond per-round latency on a 64-core processor [13]. The Union-Find decoder achieves near-linear time complexity but typically sacrifices some accuracy com-pared to MWPM [14]. Belief propagation with ordered statistics decoding (BP+OSD) is applicable to various codes such as surface codes and bicycle codes [15]. Nev-ertheless, the post-processing step of OSD may become a bottleneck for real-time performance. Relay-BP intro-duces asymmetric memory strengths to enable faster and more accurate convergence to the final error belief [16]. It achieves roughly a 10-fold improvement in accuracy over BP+OSD, while maintaining or even improving the speed of standard BP. Except the conventional algorithms, machine learning (ML) decoding is emerging as a highly viable solution because it can learn directly from data without need-ing to fit a precise noise model, allowing them to adapt to the complex and unpredictable noise present in real hardware and thereby achieve near-optimal logical error rates. Decoders based on reinforcement learning [17–20], graph neural networks [21–23], diffusion models [24, 25], and transformers [26–30] are being explored. These software decoders often run on CPUs or GPUs and face prohibitive and non-deterministic delays when connecting to QSC via TCP/IP Network. While Periph-arXiv:2608.03948v1 [quant-ph] 4 Aug 2026 2eral Component Interconnect Express (PCIe) is widely adopted for high-speed peripheral interconnects, its chassis-confined electrical reach creates a fundamental roadblock to cross-node scaling of QEC decoding re-sources. On the other hand, decoders implemented on dedicated classical hardware—such as field-programmable gate ar-rays (FPGAs) [31–36]or application-specific integrated circuits (ASICs) [31] can be naturally integrated with the control system of quantum processors and offer supe-rior decoding speed to meet the real-time latency require-ments. FPGAs are widely used for their reconfigurabil-ity and ability to achieve high throughput. The collision clustering decoder on an FPGA achieves megahertz de-coding speeds for surface codes up to distance 21 [31]. For BP+OSD, a parallel architecture on a single FPGA can operate at 200 MHz for surface codes up to distance 9 [32]. The Relay-BP algorithm on an AMD FPGA, and the GARI decoder for correlated errors has shown a pre-liminary FPGA implementation with an average latency of just 273 ns [33]. ASICs are fixed-function chips that provide the higher performance and lower energy con-sumption than FPGAs. The ASIC implementation of the collision clustering decoder decodes a distance-23 surface code in 0.24 μs, occupying just 0.064 mm 2 of die area and consuming only 7.72 mW of power [31]. While impressive in speed and energy efficiency, this hardware-firmware co-design is inherently rigid. Any modification to the QEC code, noise model, or decoding algorithm necessi-tates costly and time-consuming chip redesigns. Google’s AlphaQubit 2 demonstrated that transformer-based de-coders can achieve near-optimal logical error rates and enable real-time decoding for surface codes up to distance 11 on commercial TPUs [27]. However, its reliance on specialized machine-learning accelerators creates a closed ecosystem that is difficult to adapt, or integrate into stan-dard quantum computing workflows. To summarize, cus-tom hardware such as FPGAs, ASICs, and TPUs delivers peak deterministic performance but sacrifices scalability or programmability or adaptability. NVIDIA’s recently NVQLink architecture offers afoundational blueprint for tightly coupling QPUs with HPC resources via a low-latency, deterministic intercon-nect reporting a mean round-trip latency of 3.839 μs over RoCE Ethernet[37], and balancing performance with scalability, programmability, and support for heteroge-neous QPU modalities. However, its design prioritizes commercial deployability: it retains generic Ethernet protocol overhead and current validation is limited to pure network loopback tests without real-time decoding demonstration. In this work, we introduce a scalable real-time QEC de-coding architecture, THQLink , that leverages a general-purpose HPC cluster as its primary computational en-gine, tightly coupled to the QSC via a high-speed in-terconnection network, TH-Express. Our interconnect strips redundant protocol fields, achieving a measured mean round-trip latency of 2.944 μs — a 23 .3% reduc-tion over NVQLink. Critically, THQLink supports seam-less scaling to additional decoding compute nodes via its switching fabric, with a measured incremental latency overhead of just 130 ns on average per additional network hop. For the first time, we demonstrate a full closed-loop decoding pipeline spanning FPGA-driven transmission of syndrome data, low-latency transport, decoding, and cor-rection feedback to the FPGA. With a carefully designed parallel window decoding strategy and optimized soft-ware implementations, We demonstrate real-time (1 μsper round) decoding requirement at scale using HPC while offering flexibility and scalability that are challeng-ing to achieve with hardware-fixed alternatives.   
+
+> II. BACKGROUND A. Quantum error correction
+
+Quantum systems are inherently fragile: interactions with the environment cause decoherence, while imper-fect quantum operations introduce errors that accumu-late throughout a computation. Unlike classical infor-mation, quantum states cannot be copied due to the no-cloning theorem, making straightforward classical error correction inapplicable [38]. Quantum error correction (QEC) overcomes this fundamental limitation by encod-ing a logical qubit into an entangled state of many phys-ical qubits, allowing errors to be detected and corrected without directly measuring the encoded quantum infor-mation [1, 3, 39, 40]. Among the various QEC architectures proposed to date, topological codes, represented by the surface code [5, 6, 41, 42] and the color code [43–46], have become the predominant choice for near-term QEC demonstra-tions owing to their local connectivity and compatibility with current hardware. In parallel, emerging quantum low-density parity-check (QLDPC) codes have drawn in-creasing attention for their potential to achieve higher encoding rates and reduce the physical qubit overhead required for fault tolerance, offering a promising path-way toward large-scale quantum computation [47, 48]. Recent experimental progress has further demonstrated the practical viability of QEC: logical qubits have been operated below the surface-code threshold in both su-perconducting [8] and neutral-atom [49] platforms, while trapped-ion systems have demonstrated break-even QEC performance [50]. Fault-tolerant quantum computing extends the princi-ples of QEC from protecting quantum memories to ex-ecuting reliable logical computations. In this scenario, the decoder is no longer merely responsible for identify-ing errors; it must also provide timely feedback to sup-port logical operations. If decoding cannot keep pace with syndrome generation, syndrome data accumulate into a decoding backlog, potentially stalling the computa-tion and compromising fault-tolerance. Moreover, unlike quantum-memory experiments, where Pauli corrections 3can generally be deferred through Pauli frame tracking, the execution of non-Clifford gates such as the logical 
+
+T gate requires the pending Pauli frame to be resolved and the corresponding corrections to be applied before the gate can proceed. These requirements place stringent demands on decoding latency, making low-latency decod-ing a key enabling technology for scalable fault-tolerant quantum computing.  
+
+> B. Decoding surface codes
+
+The surface code encodes a logical qubit into a two-dimensional lattice of physical qubits [6], as shown in Fig. 1(a). The lattice contains data qubits which store the logical information, and ancilla qubits which per-form stabilizer measurements—either X-type or Z-type plaquette checks on their four neighboring data qubits. By periodically measuring these stabilizers, the quantum control system extracts syndrome data: a binary string indicating which stabilizer measurements have flipped relative to their expected outcomes. A single physical error on a data qubit flips the two adjacent stabilizers, producing a pair of syndrome defects in the spatial lat-tice. Measurement errors add a critical complication: a faulty readout of a stabilizer can produce a false syn-drome defect in a single time step, even when no physical error occurred. This creates a temporal dimension to the decoding problem, where defects may appear and disap-pear over successive measurement rounds. To distinguish data errors from measurement faults, the decoder must track syndrome changes across multiple rounds, treating a measurement error as a defect that persists for only one time step before vanishing in the next round. One can formulate the decoding problem as a graph-theoretic matching problem on the space-time graph shown in Fig. 1(b), where vertices represent syndrome events at specific measurement rounds and edges repre-sent either data errors (connecting defects across space within the same round) or measurement errors (connect-ing a defect in one round to its absence in the next round via a temporal edge). A widely used decoder based on this formulation is the minimum-weight per-fect matching (MWPM) decoder, which seeks a perfect matching that pairs all syndrome defects across the entire space-time graph, yielding the most probable combina-tion of data and measurement errors consistent with the observed syndrome stream. The decoder must process each new round of syndrome data in real time—typically within ∼1 us for superconducting qubits—to prevent a decoding backlog that would compromise fault tolerance. This stringent timing constraint has catalyzed exten-sive research into hardware-accelerated decoders [31, 34], transformer-based approaches [27], and parallel-window decoding architectures [7, 51] to keep pace with kilohertz to megahertz syndrome rates anticipated in near-term quantum devices. X stabilizer Z stabilizer Z-type decoding graph X-type decoding graph          
+
+> (a) (b)
+> M
+> XX
+> YY
+> ZZ
+> FIG. 1. The rotated surface code and its decoding graphs. (a) A distance-5 rotated surface code. (b) Corresponding Z- and
+> X-type space-time decoding graphs, where horizontal edges represent data-qubit errors and vertical dashed edges repre-sent measurement ( M) errors. Red nodes denote detection events, and orange edges indicate their matching.
+> III. THQLINK A. Architecture overview
+
+The proposed architecture, THQLink , integrates aquantum control system with high-performance comput-ing resources to support low-latency, real-time decoding of quantum error-correction codes. During quantum ex-ecution, the control system performs qubit manipulation and measurement while continuously collecting syndrome information from the quantum processor. The result-ing syndrome stream is transferred through a high-speed 
+
+TH-Express interconnect to the decoding infrastructure [52, 53]. A hierarchy of TH-Express switches connects the quantum control system to multiple HPC racks, provid-ing high-bandwidth and low-latency communication be-tween the syndrome data source and distributed classical computing resources. This switched fabric allows decod-ing traffic to be routed to suitable compute nodes while supporting scalable deployment across multiple racks. Each HPC rack contains CPU- and/or GPU-based compute nodes that cooperate to execute the decoding pipeline. The computing nodes are responsible for both executing the decoding algorithms and handling a range of pre-/post-processing tasks, including communication, syndrome preprocessing, task scheduling, decoder coordi-nation, and the delivery of recovery decisions. Incoming syndrome data can be partitioned across racks according to logical qubits, code patches, or decoding windows, en-abling multiple decoding tasks to execute concurrently. After computation, the inferred error corrections are re-turned through the TH-Express network to the quantum control system. By combining scalable high-speed net-work with high-performance computing, the THQLink 
+
+architecture could increase decoding throughput while preserving the low response latency required for fault-tolerant quantum computing. 
+
+THQLink is also inherently well suited for the paradigm of quantum-centric supercomputing, in which QPUs and classical HPC resources operate cooperatively within a tightly integrated system. These tasks include 4...                 
+
+> Quantum system controllor
+> (Distributed)
+> FPGA ... FPGA FPGA
+> Quantum processing unit (QPU)
+> (Superconducting, atom, ion, photon, ...)
+> TH Express network Switch 0 Switch S-1 ... Switch 1
+> Rack 0
+> Switches in rack (optional)
+> PCIE
+> CPU GPU/...
+> NIC
+> DIMM
+> Rack 1
+> Switches in rack (optional)
+> PCIE
+> CPU GPU/...
+> NIC
+> PCIE
+> DIMM
+> Rack R-1
+> Switches in rack (optional)
+> PCIE
+> CPU GPU/...
+> NIC
+> PCIE
+> DIMM
+> NRC NRC NRC
+> TH Express link
+> Switch TH Express switch
+> NIC TH Express network interface card
+> FPGA FPGA with TH Express NIC core
+> NRC TH Express network routing chip
+> PCIE
+
+FIG. 2. Overview of the THQLink architecture. 
+
+hybrid quantum-classical algorithms, error mitigation, calibration, etc. Consequently, the design not only ful-fills the stringent latency and throughput requirements of real-time decoding but also provides a scalable and re-silient communication and execution backbone for large-scale hybrid quantum-classical computing platforms. 
+
+B. High-speed interconnect 
+
+The high-speed interconnection network is bulit on 
+
+TH-Express developed for Tianhe supercomputers [52, 53]. It is designed to provide a low-latency, high-bandwidth, and scalable communication substrate. As shown in Figure 3, the THQLink via TH-Express net-work is mainly composed of three types of dedicated com-ponents: network interface cards (NICs) which connect compute nodes to the interconnection network, FPGAs with NIC core which send syndromes and receive correc-tions, and switches which perform packet switching and routing inside the network. The NIC implements the host-side protocol functions of TH-Express, covering the physical, link, network, and transport layers, together with the upper-layer communi-cation interfaces exposed to applications and runtime sys-tems. It supports both Mini-Packet (MP), a lightweight short-message communication mechanism, and Remote Direct Memory Access (RDMA) for efficient bulk data movement. With up to 800 Gbps of aggregate network bandwidth, sub-0.8 μs communication latency, RDMA read/write operations, and hardware-offloaded collec-tive communication, the NIC is optimized for latency-sensitive and communication-intensive workloads. The FPGAs in QSC implement the physical and link layers of TH-Express together with custom logic, syndrome-to-packet generator and correction for QEC. The switch implements the physical, link, and network layers of TH-Express and provides the core switching and routing capability of the interconnection fabric. It adopts a non-blocking full-line-rate switching architecture and enables TH-Express to support flexible topologies while maintaining high throughput under dynamic traffic con-ditions. Compared with conventional PCIe- or Ethernet-based communication solutions, TH-Express provides stronger topological flexibility and higher protocol efficiency for tightly coupled computing systems. Its dedicated proto-col stack reduces software overhead, supports zero-copy data movement, enables hardware-based reliable delivery and traffic control, and allows communication operations to be offloaded from host processors. Therefore, TH-Express is well suited for tight coupling between HPC and QPUs. 
+
+C. Real-time decoding via THQLink 
+
+Figure 3 illustrates the closed-loop real-time decoding flow in THQLink. On the FPGA side, the Syndrome-to-Packet generator encapsulates streaming syndromes into Mini-Packets and transmits them over the lightweight physical/link-layer interface. The packets are then for-5Switch     
+
+> Compute node
+> Physical layer
+> Link layer
+> Network layer
+> FPGA
+> Physical layer
+> Link layer
+> STP generator Correction
+> STP Generator Syndrome-To-Packet generator
+> Correction Corrective Pauli operators
+> Physical layer
+> Link layer
+> Network layer
+> Transport layer
+> Application layer (Decoding)
+> NIC
+> FIG. 3. The real-time decoding flow via the high-speed network TH-Express .
+
+warded by the switch. At the host side, the NIC inter-face passes the syndrome packets through the network and transport them to the application-layer (i.e., the de-coder) where the corresponding correction actions are computed. Before each run, the host constructs the decoding graphs and edge weights, generates lookup tables for mapping recovery edges to correction records, initializes a persistent worker pool and a decoder instance for each window if parallel-window is used, and pre-allocates the required working buffers. These setups remain resident and are reused throughout a run. As the syndromes ar-rive, the host prepares the corresponding input blocks of the decoder and stores them in pre-allocated buffers. We will evaluate both the global decoding strategy (that decodes all syndromes at once) and the parallel-window decoding strategy [7, 51] (that decodes overlapping syn-drome rounds to exploit parallelism, more details can be found in Appendix A). For parallel-window decoding, an A-window task is dispatched as soon as all data required by its core and buffer regions are available, without wait-ing for subsequent QEC rounds outside that window. After an A window has been decoded, recovery contri-butions supported entirely within its core are retained, whereas seam-crossing matching information is encoded as artificial boundary defects and passed as boundary information to the corresponding B window. The B-window task B i becomes eligible for execution once its two adjacent A-window tasks, A i and A i+1 , have com-pleted and provided the required boundary information. This dependency structure permits a ready B-window task to execute without waiting for unrelated A-window tasks, thereby enabling decoding to overlap syndrome acquisition and transmission. Once the final round of syndromes has been received by the host, all remain-ing window tasks whose input dependencies are satisfied can be executed. The window-decoding stage is com-plete when all A- and B-window tasks required for the current decoding instance have finished. Finally, the re-covery contributions produced by the completed A and B windows are combined so that duplicate contributions cancel. The resulting correction (i.e., corrective Pauli operators) are sent back along the reverse path to the FPGA correction logic, which will trigger the quantum control system for applying corresponding corrections on QPUs. The Switch decouples FPGA syndrome I/O from host decoder placement, enabling the system to scale out by attaching additional FPGA and HPC nodes through TH-Express ports. We measure the end-to-end decoding latency as τe2e =
+
+tcorr − tsyn ,last , where tsyn ,last denotes the time at which transmission of the final round of syndromes starts, and 
+
+tcorr denotes the time at which the complete correction set C has been received and made available at the FPGA correction module. Both timestamps are recorded in the same FPGA clock domain. This interval includes trans-mission of the syndromes to the host, the decoding time, correction calculation and mapping, and transmission of the correction back to the FPGA. Syndrome processing completed before tsyn ,last is hidden by its overlap with syndrome acquisition and streaming. Software-level decoding latency is evaluated separately using a batch method. For each sample, the complete syndrome streams are available in host memory before timing begins. The parallel-window decoder and the global decoder (that decodes all syndromes at once) are evaluated using identical syndrome instances and same timing strategies. Syndrome generation and offline ini-tialization are excluded for software-level decoding la-tency evaluation.   
+
+> IV. RESULTS A. Experiment setup
+
+We conduct experiments on Intel Xeon Gold 6348 CPUs running at 2.60GHz, featuring 28 physical cores 6and 56 logical processors, with 43,008 KB of cache, and a 46 bits physical and 57 bits virtual address space ar-chitecture.The server is equipped with 512GB of mem-ory. We also utilize an AMD Virtex UltraScale+ FPGA in our experimental setup. The FPGA emulates the quantum control system, while the HPC cluster performs syndrome decoding and returns corrections through TH-Express. This high-performance computing environment provides the necessary computational resources for our experimental evaluations. We use the MWPM decoder, Sparse blossom [12] as our base decoder. We evaluate the decoding latency under the circuit-level depolarizing noise model, where each single-qubit or two-qubit gate has depolarising noise with probability p, each reset or measurement flips with probability p. We first charac-terize the communication latency of TH-Express, which constitutes the communication component of the end-to-end decoding latency. We then evaluate the complete end-to-end decoding pipeline on the surface-code mem-ory experiments using both global and parallel-window decoding strategies. 
+
+B. Network latency characterization 
+
+Since communication latency directly contributes to the end-to-end decoding response time, we first quantify the raw performance of the TH-Express interconnect un-der decoding traffic. We measure the round-trip latency of direct interconnect between the FPGA and one HPC rack in Figure 4. The mean and median round-trip la-tencies are 2.944 μs and 2.870 μs respectively, with a standard deviation of 173 ns, a minimum of 2.66 μs, and a maximum of 3.24 μs. Figure 5 shows the incremental latency introduced by each additional switch hop when scaling to more computing nodes, the mean and median latencies are 0.130 μs and 0.130 μs respectively, with a minimum of 0.122 μs, and a maximum of 0.138 μs. 
+
+C. End-to-end decoding latency 
+
+We evaluate the end-to-end decoding latency for surface-code memory experiments running over the 
+
+THQLink architecture. During the execution of quan-tum error correction, the FPGA streams round-resolved syndrome data through TH-Express to the HPC system round by round as the syndrome measurements are gen-erated. Figure 6 reports the end-to-end latency for decoding 
+
+d rounds of syndromes (i.e., d × d × d) at physical er-ror rates p = 0 .1% and p = 0 .3% using global MWPM. For physical error rate p = 0 .1%, the THQLink architec-ture could implement real-time decoding for the distance-13 surface code. Interconnect latency limits the largest code distance that can be supported in real-time decod-ing. Figure 7 compares the end-to-end latency of global MWPM against parallel window decoding for 5 d rounds 0 200 400 600 800 1000                   
+
+> Sample Number
+> 2.60
+> 2.65
+> 2.70
+> 2.75
+> 2.80
+> 2.85
+> 2.90
+> 2.95
+> 3.00
+> 3.05
+> 3.10
+> 3.15
+> 3.20
+> 3.25
+> 3.30
+> End-to-End Latency ( s) 2.60 2.65 2.70 2.75 2.80 2.85 2.90 2.95 3.00 3.05 3.10 3.15 3.20 3.25 3.30
+> End-to-End Latency ( s)
+> 0
+> 2
+> 4
+> 6
+> 8
+> 10
+> 12
+> 14
+> 16
+> Percentage (%)
+> Mean: 2.944 s
+> Median: 2.870 s
+> Std Dev: +/-0.173 s
+> 95th %ile: 3.180 s
+
+FIG. 4. The round latency of TH-Express with direct inter-connect between HPC and FPGA. 0 200 400 600 800 1000        
+
+> Sample Number
+> 0.10
+> 0.12
+> 0.14
+> 0.16
+> Latency overhead ( s)
+> Mean 0.130 sMedian 0.130 s
+> Min 0.122 sMax 0.138 s
+
+FIG. 5. Latency overhead per additional hop 3 5 7 9 11 13 15 17 19 21  
+
+> Code Distance d
+> 0
+> 5
+> 10
+> 15
+> 20
+> Time per round (  s)
+
+d × d × d surface code circuits   
+
+> p= 0.1%
+> p= 0.3%
+
+FIG. 6. End-to-end decoding latency for d×d×d surface-code memory circuits ( p = 0 .1%) using global MWPM. Each point shows the median over independent syndrome instances. 73 5 7 9 11 13 15 17 19 21                                                        
+
+> Code Distance d
+> 0
+> 2
+> 4
+> 6
+> 8
+> Time per round (  s)
+> p= 0.1% ,d×d× 5 dsurface code circuits
+> Global Decode
+> Parallel Decode 357911 13 15 17 19 21
+> Code Distance d
+> 0
+> 5
+> 10
+> 15
+> 20
+> 25
+> Time per round (  s)
+> p= 0.3% ,d×d× 5 dsurface code circuits
+> Global Decode
+> Parallel Decode 357911 13 15 17 19 21
+> Code Distance d
+> 0
+> 2
+> 4
+> 6
+> Time per round (  s)
+> p= 0.1% ,d×d× 10 dsurface code circuits
+> Global Decode
+> Parallel Decode 357911 13 15 17 19 21
+> Code Distance d
+> 0
+> 5
+> 10
+> 15
+> 20
+> 25
+> Time per round (  s)
+> p= 0.3% ,d×d× 10 dsurface code circuits
+> Global Decode
+> Parallel Decode
+
+FIG. 7. End-to-end decoding latency for d × d × 5d (top) and d × d × 10 d (bottom) surface-code memory circuits using global MWPM and parallel window with buffer size b = ( d + 1) /2. 
+
+(i.e., d × d × 5d) and 1 d rounds (i.e., d × d × 1d) memo-ries, using window step size s = ( d + 1) /2 and buffer size 
+
+b = ( d+1) /2. The syndrome stream is partitioned across multiple cores in the HPC rack, enabling concurrent win-dow decoding. At small distances ( d ≤ 7), parallel win-dow carries overhead from window construction, seam stitching, and the additional network traffic for bound-ary information, so global MWPM retains a marginal advantage. As d increases, the parallel-window decod-ing amortizes its overhead and outperforms the global baseline decoding. For ×d × 5d at p = 0 .1%, the parallel window achieves real-time decoding for distance 15, while the global decoder reaches the time budget at distance 11. Real-time decoding for larger distances can be achieved by increasing the syndrome rounds. For d × d × 10 d (bot-tom) at p = 0 .1%, the parallel window achieves real-time decoding for distance 19, while the global decoder reaches the time budget at distance 11. At the higher physical er-ror rate ( p = 0 .3%), denser syndrome graphs increase the absolute latency for both strategies because more match-ing iterations are required. 
+
+V. DISCUSSION AND CONCLUSION 
+
+This work introduced THQLink, a scalable real-time decoding architecture that tightly couples a general-purpose HPC cluster to a quantum control system via a low-latency TH-Express network [52]. Our measurements show a mean round-trip latency of 2.944 μs and an incremental cost of only 130 ns per ad-ditional hop. Using a parallel window decoding strategy, we demonstrated real-time decoding of surface codes for up to distance 19 using a matching-based decoder on CPUs. These results demonstrate that a programmable HPC system with a high-speed interconnect can deliver real-time performance while preserving algorithmic flexibility and scalability. THQLink allows seamless adoption of emerging QEC codes and decoders without costly redesign cycles. The measured incremental latency suggests that this archi-tecture can scale to a large number of logical qubits provided the network topology and workload distribu-tion are carefully optimized. THQLink is also suited for quantum-centric supercomputers, where tight coupling between QPU and HPC resources enables efficient sup-port for hybrid quantum-classical applications. Future work includes validating the architecture with qLDPC codes, developing adaptive load-balancing mechanisms for heterogeneous HPC nodes. 
+
+ACKNOWLEDGMENTS 
+
+We acknowledge the support from QUANTA (QUan-tum fANs from iT Area) group. This work has been supported by the National Key R&D Program of China (Grant No. 2024YFB4504001), the National Natural Sci-ence Foundation of China (Grant No. 62302395 and 62421002), the Fundamental and Interdisciplinary Dis-ciplines Breakthrough Plan of the Ministry of Educa-tion of China (Grant No. JYB2025XDXM202), the 8Aid Program for Science and Technology Innovative Re- search Team in Higher Educational Institutions of Hunan Province. 
+
+[1] P. W. Shor, Physical review A 52 , R2493 (1995). [2] A. M. Steane, Physical Review Letters 77 , 793 (1996). [3] B. M. Terhal, Reviews of Modern Physics 87 , 307 (2015). [4] D. Gottesman, Stabilizer codes and quantum error cor-rection (California Institute of Technology, 1997). [5] E. Dennis, A. Kitaev, A. Landahl, and J. Preskill, Jour-nal of Mathematical Physics 43 , 4452 (2002). [6] A. G. Fowler, M. Mariantoni, J. M. Martinis, and A. N. Cleland, Phys. Rev. A 86 , 032324 (2012). [7] L. Skoric, D. E. Browne, K. M. Barnes, N. I. Gillespie, and E. T. Campbell, Nature Communications 14 , 7040 (2023). [8] G. Q. AI and Collaborators, Nature 638 , 920 (2025). [9] L. Caune, L. Skoric, N. S. Blunt, A. Ruban, J. McDaniel, J. A. Valery, A. D. Patterson, A. V. Gramolin, J. Ma-janiemi, K. M. Barnes, et al. , Nature Communications (2026). [10] E. Dennis, A. Kitaev, A. Landahl, and J. Preskill, Jour-nal of Mathematical Physics 43 , 4452 (2002). [11] O. Higgott, ACM Transactions on Quantum Computing 
+
+3, 1 (2022). [12] O. Higgott and C. Gidney, Quantum 9, 1600 (2025). [13] Y. Wu and L. Zhong, in 2023 IEEE International Con-ference on Quantum Computing and Engineering (QCE) ,Vol. 1 (IEEE, 2023) pp. 928–938. [14] N. Delfosse and N. H. Nickerson, Quantum 5, 595 (2021). [15] D. Poulin and Y. Chung, arXiv preprint arXiv:0801.1241 (2008). [16] T. M¨ uller, T. Alexander, M. E. Beverland, M. B¨ uhler, B. R. Johnson, T. Maurer, and D. Vandeth, arXiv preprint arXiv:2506.01779 (2025). [17] J. Olle, R. Zen, M. Puviani, and F. Marquardt, npj Quan-tum Information 10 , 136 (2024). [18] R. Sweke, M. S. Kesselring, E. P. van Nieuwenburg, and J. Eisert, Machine Learning: Science and Technology 2,025005 (2021). [19] E. S. Matekole, E. Ye, R. Iyer, and S. Y.-C. Chen, arXiv preprint arXiv:2212.11890 (2022). [20] A. Y. He and Z.-W. Liu, arXiv preprint arXiv:2502.14372 (2025). [21] M. Lange, P. Havstr¨ om, B. Srivastava, I. Bengtsson, V. Bergentall, K. Hammar, O. Heuts, E. van Nieuwen-burg, and M. Granath, Physical Review Research 7,023181 (2025). [22] A. Gong, S. Cammerer, and J. M. Renes, in 2024 IEEE International Symposium on Information Theory (ISIT) 
+
+(IEEE, 2024) pp. 2700–2705. [23] A. S. Maan and A. Paler, npj Quantum Information 11 ,78 (2025). [24] Z. Liu, A. Gong, and B. K. Clark, arXiv preprint arXiv:2509.22347 (2025). [25] H. Cao, F. Pan, D. Feng, Y. Wang, and P. Zhang, arXiv preprint arXiv:2503.21374 (2025). [26] J. Bausch, A. W. Senior, F. J. Heras, T. Edlich, A. Davies, M. Newman, C. Jones, K. Satzinger, M. Y. Niu, S. Blackwell, et al. , Nature 635 , 834 (2024). [27] A. W. Senior, T. Edlich, F. J. Heras, L. M. Zhang, O. Higgott, J. S. Spencer, T. Applebaum, S. Black-well, J. Ledford, A. ˇZemgulyt˙ e, et al. , arXiv preprint arXiv:2512.07737 (2025). [28] K. Zhang, Z. Yi, S. Guo, L. Kong, S. Wang, X. Zhan, T. He, W. Lin, T. Jiang, D. Gao, et al. , arXiv preprint arXiv:2601.09921 (2026). [29] Y. Choukroun and L. Wolf, in Advances in Neural In-formation Processing Systems (NeurIPS) , Vol. 35 (2022) pp. 23390–23402. [30] S.-e. Cohen, Y. Choukroun, and E. Nachmani, arXiv preprint arXiv:2505.17834 (2025). [31] B. Barber, K. M. Barnes, T. Bialas, O. Bu˘ gdaycı, E. T. Campbell, N. I. Gillespie, K. Johar, R. Rajan, A. W. Richardson, L. Skoric, et al. , Nature Electronics 8, 84 (2025). [32] S. Maurya, T. Maurer, M. B¨ uhler, D. Vandeth, and M. E. Beverland, arXiv preprint arXiv:2511.21660 (2025). [33] T. Maurer, M. B¨ uhler, M. Kr¨ oner, F. Haverkamp, T. M¨ uller, D. Vandeth, and B. R. Johnson, arXiv preprint arXiv:2510.21600 (2025). [34] A. B. Ziad, A. Zalawadiya, C. Topal, J. Camps, G. P. Geh´ er, M. P. Stafford, and M. L. Turner, Nature Com-munications 16 , 11048 (2025). [35] Y. Wu, N. Liyanage, and L. Zhong, in Proceedings of the 30th ACM International Conference on Architectural Support for Programming Languages and Operating Sys-tems, Volume 2 (2025) pp. 639–654. [36] P. Das, C. A. Pattison, S. Manne, D. Carmean, K. Svore, M. Qureshi, and N. Delfosse, arXiv preprint arXiv:2001.06598 (2020). [37] S. A. Caldwell, M. Khazraee, E. Agostini, T. Lassiter, C. Simpson, O. Kahalon, M. Kanuri, J.-S. Kim, S. Stan-wyck, M. Li, et al. , arXiv preprint arXiv:2510.25213 (2025). [38] M. A. Nielsen and I. L. Chuang, Quantum computation and quantum information (Cambridge university press, 2010). [39] P. W. Shor, in Proceedings of 37th conference on founda-tions of computer science (IEEE, 1996) pp. 56–65. [40] A. R. Calderbank and P. W. Shor, Physical Review A 
+
+54 , 1098 (1996). [41] A. Y. Kitaev, Annals of physics 303 , 2 (2003). [42] S. B. Bravyi and A. Y. Kitaev, quant-ph/9811052 (1998). [43] H. Bombin and M. A. Martin-Delgado, Phys. Rev. Lett. 
+
+97 , 180501 (2006). [44] A. Kubica and M. E. Beverland, Physical Review A 91 ,032330 (2015). [45] A. M. Kubica, The ABCs of the color code: A study of topological quantum codes as toy models for fault-tolerant quantum computation and quantum phases of matter (California Institute of Technology, 2018). [46] H. Bomb´ ın, New Journal of Physics 17 , 083002 (2015). [47] S. Bravyi, A. W. Cross, J. M. Gambetta, D. Maslov, P. Rall, and T. J. Yoder, Nature 627 , 778 (2024). [48] C. Zhao, C. Duckering, A. Gu, N. Maskara, and H. Zhou, arXiv preprint arXiv:2604.16209 (2026). [49] D. Bluvstein, A. A. Geim, S. H. Li, S. J. Evered, J. P. 9                            
+
+> Bonilla Ataides, G. Baranes, A. Gu, T. Manovitz, M. Xu, M. Kalinowski, et al. , Nature 649 , 39 (2026). [50] A. Paetznick, B. Reichardt, M. da Silva, C. Ryan-Anderson, D. Aasen, J. Bello-Rivas, J. Campora, R. Chao, A. Chernoguzov, W. van Dam, et al. , Nature
+> 654 , 349 (2026). [51] X. Tan, F. Zhang, R. Chao, Y. Shi, and J. Chen, PRX Quantum 4, 040344 (2023). [52] S. Xu, M. Lai, Y. Dai, J. Cao, and K. Wang, Neurocom-puting 393 , 126 (2020). [53] M. Xie, Y. Lu, K. Wang, L. Liu, H. Cao, et al. , IEEE micro 32 , 8 (2011). [54] P. Das, A. Locharla, and C. Jones, Proceedings of the 27th ACM International Conference on Architectural Support for Programming Languages and Operating Sys-tems , 541 (2022). [55] X. Tan, F. Zhang, R. Chao, Y. Shi, and J. Chen, PRX Quantum 4, 040344 (2023). [56] L. Skoric, D. E. Browne, K. M. Barnes, N. I. Gillespie, and E. T. Campbell, Nature Communications 14 , 7040 (2023).
+> Appendix A: Parallel window decoding
+
+For fault-tolerant quantum error correction, the de-coder will process syndromes over many rounds. Batch (global) decoders handle the full spacetime decoding graph at once, their runtime scales superlinearly with the number of rounds [10]. The sliding window decoder partitions the graph into overlapping temporal windows to reduce decoding complexity [54]. These adjacent win-dows, however, are coupled by a sequential dependency: each window uses the correction output of its predeces-sor to set its past boundary conditions. The decoding time therefore grows linearly with the number of win-dows. Eventually, the decoder’s processing speed will fall below the syndrome generation rate, resulting in data backlog. In comparison, the parallel-window decoder [55, 56]partitions the syndrome stream into independent Type-1 (A) sandwich windows and Type-2 (B) seam win-dows as shown in Figure 8. Each A window consists of a central core region flanked by buffer regions on both sides. The buffer provides contextual information to sup-press boundary effects on the core, but only corrections within the core are retained. When a defect lies near the core-buffer boundary, the A window forwards an artifi-cial defect to the adjacent B window so that the seam can be resolved globally. The B-layer consists of nar-row seam windows situated between adjacent A windows. Each B window spans the seam region and receives arti-ficial defects from its two neighbouring A windows. By resolving these seam defects on closed boundaries, the B layer recovers the global topological information that would otherwise be lost to the local A-window partitions. All A windows are decoded in parallel, followed by all B windows in parallel. The decoding time reduces to the sum of the worst-case decoding times for windows A and B, and is independent of the total number of windows if sufficient computing resources are provided. That is, the decoding throughput scales with the number of avail-able CPU/GPU cores. Both window types use the same or different inner decoder (e.g., minimum-weight per-fect matching (MWPM) in our implementation). The parallel-window decoder can achieve comparable accu-racy as the global decoder while providing the scalable throughput required for large code distances. In our demonstration, syndromes are generated round by round. The FPGA streams each new syndrome layer through the TH-Express interconnect to the host de-coder and writes it to a rolling buffer. The decoder par-titions the decoding graph into windows that progress incrementally as data streams in. Let d denote the code distance. The step size is s = ( d + 1) /2 and the buffer size is b = ( d + 1) /2, so each A window spans 
+
+w = s + 2 b = 3( d + 1) /2 rounds. The number of A windows is nA = ⌈tdr /s ⌉, where tdr is the total number of detector rounds received, and the number of B win-dows is nB = max(0 , n A − 1). The first A window begins decoding once it has received w rounds. Subsequent A 10 A1             
+
+> A2
+> A3
+> A4
+> B1B2B3Decode layer A
+> Decode layer B
+> A1A2A3A4
+> B1B2B3
+> Syndrome generation
+> Decoding order
+> stabilizer defect artificial defect
+> committed corrections tentative corrections
+> A core B core buffer
+
+FIG. 8. The parallel window scheme 3 5 7 9 11 13 15 17 19 21         
+
+> Code Distance d
+> 0
+> 5
+> 10
+> 15
+> 20
+> Time per round (  s)
+> d×d×dsurface code circuits
+> p= 0.1%
+> p= 0.3%
+
+FIG. 9. Software-level decoding latency per round for d ×
+
+d × d surface-code memory circuits ( p = 0 .1%) using global MWPM. Each point shows the median over independent syn-drome instances. 
+
+windows start at fixed intervals of s additional rounds. A B window starts after its two neighbouring A windows have completed; because the A windows are launched at fixed intervals, each B window starts with a bounded, deterministic delay. All B windows also execute with an offset timing according to the completion of their par-ent A windows. After both phases finish, the decoder assembles the final correction set by concatenating the retained matching edges from the cores of all A windows and the edges from all B windows. The decoder maps this edge set to physical qubit indices through a detector-to-qubit lookup table, producing the corresponding correc-tive Pauli operators. This correction is transmitted back to the FPGA through TH-Express, closing the real-time decoding loop. We characterize the software-level decoding latency and the logical error rates of the parallel-window decod-ing. Figure 9 shows the software-level decoding latency of global MWPM for d × d × d surface-code memory cir-cuits. Each point corresponds to the median of multiple independent syndrome realizations, with error bars in-dicating the 95% coverage interval. At p = 0 .1%, the latency remains below 1 μs for d ≤ 7 and grows approxi-mately linearly with code distances. It exceeds the real-time threshold once d > 11. Raising the physical error rate to p = 0 .3% increases the absolute latency because the syndrome graph becomes denser, but the scaling with 
+
+d remains similar. For d×d×5d and d×d×10 d memories, parallel-window decoding reduces the median latency compared to global decoding as the distance increases (Fig. 10). The parallel-window strategy achieves around 1 μs decoding latency at d = 21 for 10 d rounds and p = 0 .1%, while the global decoding achieves around 1 μs latency at d = 13. Figure 11 compares the logical error rate Pfail for 
+
+d×d×5d rounds at p = 0 .1% (sample sizes: 10 5 shots for 
+
+d = 3 , 5, 7, 9; 3 ×10 5 for d = 11; 5 ×10 5 for d = 13; 10 6 for 
+
+d = 15). Parallel window achieves a slightly higher log-ical error rates than the global decoding. This accuracy loss arises because defects near the core-buffer boundary are resolved locally within each A window, while the B-layer windows recover global topological information on closed boundaries formed by artificial defects forwarded from adjacent A windows. Thus, parallel window trades a slight increase in logical error rate for a substantial latency reduction on large number of syndrome rounds. 11 3 5 7 9 11 13 15 17 19 21 
+
+Code Distance d
+
+0
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+> Time per round (  s)
+
+p = 0.1% , d × d × 5 d surface code circuits 
+
+> Global Decode
+> Parallel Decode
+
+3 5 7 9 11 13 15 17 19 21 
+
+Code Distance d
+
+0
+
+5
+
+10 
+
+15 
+
+20 
+
+25 
+
+> Time per round (  s)
+
+p = 0.3% , d × d × 5 d surface code circuits 
+
+> Global Decode
+> Parallel Decode
+
+3 5 7 9 11 13 15 17 19 21 
+
+Code Distance d
+
+0
+
+1
+
+2
+
+3
+
+4
+
+5
+
+6
+
+> Time per round (  s)
+
+p = 0.1% , d × d × 10 d surface code circuits 
+
+> Global Decode
+> Parallel Decode
+
+3 5 7 9 11 13 15 17 19 21 
+
+Code Distance d
+
+0
+
+5
+
+10 
+
+15 
+
+20 
+
+25 
+
+> Time per round (  s)
+
+p = 0.3% , d × d × 10 d surface code circuits 
+
+> Global Decode
+> Parallel Decode
+
+FIG. 10. Decoder-level latency for d × d × 5d (top) and d × d × 10 d (bottom) surface-code memory circuits using global MWPM and parallel window with buffer size b = ( d + 1) /2. 3 5 7 9 11 13 15 
+
+Code Distance d
+
+10 9
+
+10 8
+
+10 7
+
+10 6
+
+10 5
+
+10 4
+
+10 3
+
+10 2
+
+> Logical Error Rate  Pfail
+
+p = 0.1% , d × d × 5 d surface code circuits 
+
+> Global MWPM Decode
+> Parallel MWPM Decode
+
+FIG. 11. Logical error rate Pfail for d × d × 5d surface-code memory circuits at p = 0 .1% using global MWPM and parallel window. Sample sizes: 10 5 shots ( d = 3 , 5, 7, 9), 3 × 10 5 shots (d = 11), 5 × 10 5 shots ( d = 13), and 10 6 shots ( d = 15).

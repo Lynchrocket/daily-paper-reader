@@ -1,0 +1,1915 @@
+Title: The Utility of Sparse Error Detection in Quantum Simulations
+
+URL Source: https://arxiv.org/pdf/2608.02944v1
+
+Published Time: Wed, 05 Aug 2026 00:23:27 GMT
+
+Number of Pages: 32
+
+Markdown Content:
+IQuS@UW-21-132, NTG@UW-26-19 
+
+# The Utility of Sparse Error Detection in Quantum Simulations 
+
+Henry Froland ∗ , Dorota M. Grabowska † , Sebastian Grieninger ‡ , Jeremy Hartse § , Anne L. Lashbrook ¶ , Zhiyao Li ∗∗ , Ziyuan Li †† , Sarah J. M. Powell ‡‡ ,Martin J. Savage §§ , Xiaojun Yao ¶¶ , and Nikita A. Zemlevskiy ∗∗∗ 
+
+(Dated: August 5, 2026) The recent success of error detecting codes points toward their potential application to fault-tolerant simulations of nature. In this work, we examine the utility of sparse error detection for simulat-ing lattice gauge theories using quantum computers. In particular, we study the time evolution of the lattice Schwinger model embedded into the Iceberg code family, [[ N + 2 , N, 2]], as well as the Hypercube code family, [[2 N , N, 2]]. The lattice of electrons and positrons in the axial gauge is embedded into a single code block or into multiple code blocks, and this work finds that large codeblocks are advantageous in the absence of connectivity constraints. Noisy classical simulations with realistic near-term error rates, infrequent syndrome measurements and physics-aware postselec-tion are found to improve observable estimation. Under realistic noise rates for near-term quantum computers, this work finds that sparse error detection in quantum simulations has the potential to improve accuracy of observable estimation. Additional rounds of error detection are found to systematically drive errors in observables to the noise floor set by the code. These findings suggest that incorporating minimal implementations of fault tolerance in the near-term will enhance the performance of quantum simulations in nuclear physics and high-energy physics. 
+
+CONTENTS 
+
+I. Introduction 1A. Road Map and Result Summary 3II. Error Detection and Fault-Tolerance 4A. A Single Block of [[4,2,2]] 5III. The L = 2 Schwinger Model 7A. Physical Qubits: Unencoded 7B. Encoding in [[4 , 2, 2]] ⊗2 81. The Encoding and Quantum Circuits 82. Results from Classical Simulations 10 3. Rejection Rates and Scaling 10 4. Noisy Ancillas 12 C. Encoding into [[6 , 4, 2]] 12 IV. The L = 4 Schwinger Model 13 A. Encoding into [[10 , 8, 2]] 14 B. Encoding into [[ N + 2 , N, 2]] with Partitions 16 V. The Scaling of [[ N + 2 , N, 2]] Encodings 17 1. Resource Requirements and Scalings with System Size 18 2. Injection model 19 3. Extrapolations to Large-L 20                    
+
+> ∗frolandh@uw.edu †grabow@uw.edu
+> ‡segrie@uw.edu (c) §jhartse@uw.edu
+> ¶alash@uw.edu ∗∗ zhiyaol@uw.edu
+> †† ziyuanli@uw.edu ‡‡ spow9@uw.edu
+> §§ mjs5@uw.edu (c) ¶¶ xjyao@uw.edu
+> ∗∗∗ zemlni@uw.edu
+> (c) Corresponding author
+
+VI. Encodings in Hypercube Codes: [[2 N , N, 2]] 21 A. The [[8 , 3, 2]] Hypercube Code 21 B. The [[16, 4, 2]] Hypercube Code 21 C. Iceberg vs Hypercube Comparison 22 VII. Summary and Outlook 23 Acknowledgments 24 A. Coherent Error Propagation 24 B. Details of [[4 , 2, 2]] ⊗2 24 C. Details of [[6,4,2]] 25 D. Results for the [[10,8,2]] Encoding 26 E. Resource Requirements for Scaling 26 F. Hypercube Codes 27 1. [[8,3,2]] 27 2. [[16,4,2]] 27 3. Comparison of gate counts: Hypercubic and Iceberg 28 References 28 
+
+I. INTRODUCTION 
+
+Recently, there have been several demonstrations of how logical qubits can be embedded onto quantum computers. This includes IBM using superconduct-ing qubits with LDPC codes [1], Google Quantum AI, ETH Z¨ urich, and USTC using superconducting qubits arXiv:2608.02944v1 [quant-ph] 3 Aug 2026 2with surface codes [2–4], Quantinuum and the Univer-sity of Innsbruck using trapped ions [5–9], the Harvard– MIT–QuEra collaboration using neutral atoms [10–12], the Atom Computing–Microsoft collaboration using cold atoms [13], and Yale, Amazon (AWS), and Alice & Bob using bosonic codes [14–16]. These demonstrations, car-ried out on a variety of qubit architectures and encod-ings, indicate that quantum computers with some de-gree of fault tolerance (FT) and quantum error correc-tion (QEC) [17–21] will become available in the near future. Before universal error-corrected simulations are achieved, heterogeneous simulations, where logical qubits are protected to differing degrees by error detection or er-ror correction, can be performed to potentially extend the scientific reach of quantum computers. For fixed-resource simulations of observables with a target precision, includ-ing both systematic errors and statistical errors, an op-timization of how resources are distributed within the simulation and workflow needs to be performed. This includes optimizing with respect to the distribution of fidelities, and optimizing the average fidelity of logical qubits versus the number of logical qubits supporting the physical system. Further, optimizations in the distribu-tion of error detecting and error correcting codes utilized in a given simulation are also necessary. Compared to conventional QEC, lightweight error-detection codes offer a reduction in the number of required qubits and gates, as well as device coherence time, required to implement a FT quantum simulation. Together with extrapolations in simulation parameters to connect to observables, this reduction in resources will enable simulations of physical systems in the near term. In fundamental physics, important quantum many-body systems require simulations that lie beyond the capabilities of classical computing alone, and near-term simulations [22–25] are expected to require hundreds or more high-fidelity qubits in order to be of scientific utility. Target simulations include establishing the properties of ground and excited states of strongly-interacting mat-ter as well as the dynamics of systems that are far from equilibrium. Specific examples of such processes are in-teractions among short-lived particles, high-multiplicity collisions created in accelerators, the preferential gener-ation of matter over anti-matter in the early universe, and the creation of new phases of matter in the high-energy collisions of nuclei. Results of such simulations will play key roles in extending predictive capabilities into new regimes, required for discovering new funda-mental particles and laws of nature. Since the formu-lation of the Standard Model of particle physics [26– 31], which describes the strong and electroweak inter-actions in terms of quantum field theories and gauge in-teractions, numerical simulations of classes of low-energy observables using Monte Carlo sampling techniques in Euclidean space have found enormous success [32–37]. Furthermore, lattice gauge theories (LGTs) are the only known formulations that provide systematically improv-able, first-principle calculations of the properties of the strong interactions, crucial for comparing theoretical pre-dictions of the Standard Model to experimental results. Rapid progress is being made toward using quantum computers to simulate complementary sets of observables in these theories in the real-time Hamiltonian formula-tion [33], focused on the dynamics of systems in highly-energetic initial states, with an expectation of near-term quantum advantages. Part of the reason for this focus is that time-evolution from a given initial state prepared on a quantum computer is known to be efficient for quan-tum computers at scale, lying within the bounded-error quantum polynomial time (BQP) complexity class [38]. There is an increasing effort to use the local gauge symmetries underlying LGTs as part of QEC protocols not only for simulation, but also as error correcting codes themselves. One of the important implications of local gauge symmetry is charge conservation. In the context of U(1) gauge theory (quantum electrodynamics), quantum circuits were designed to perform Gauss’s law checks for implementation in simulations in Refs. [39, 40]. Their circuits provide error detection using ancilla qubits, and hence a mechanism for post-selecting on states satisfying local charge conservation. Integrating local symmetries into QEC is a crucial direction and it has been shown that, in fact, overheads associated with QEC can be re-duced in U(1) theories by including local charge conser-vation as one of the error detection checks [41–43]. Adetailed analysis of implementation costs, along with a more general analysis of implementing Gauss’s law checks has been presented in Ref. [44]. In addition, efforts are being made to promote LGTs, specifically U(1) theo-ries and the connections to rotor codes, to QEC codes, 
+
+e.g. , Refs. [45, 46]. These analyses encode all dynam-ical elements contributing to Gauss’s law as dynamical degrees of freedom in the lattice simulation. As a re-sult, the choice of gauge used in mapping the theory to qubits affects QEC and error detection designs. With constraints on the number of qubits, other gauge-fixing protocols have been fruitfully explored. This has re-cently been extended to SU(2) theories for both trun-cated simulations [47] and with a generalized approxi-mate formulation for pure SU(2) [48]. Important progress is being made in studying the error-correction proper-ties of discrete group representations of gauge fields, in-cluding associated error thresholds and variations with regard to mappings to physical qubits and qudits, e.g. ,Refs. [49, 50]. These works have observed that increased redundancy associated with gauge symmetry is benefi-cial for identifying and correcting errors. In the context of classical and QEC codes, this is not surprising, and is an important point to consider when designing and optimizing simulations of LGTs. It is well known that the utility of QEC and error de-tection codes are contingent on noise thresholds [17, 18, 51–55]. When the noise falls below the threshold for a given code, the fidelity of logical computation rapidly improves. Error thresholds are well studied for many QEC codes and have set fabrication targets for physical 3qubits, and fidelity improvements of a small number of codes have been demonstrated [2–16, 56–58]. In addition, the structure of physical systems in simulations allows for fine-tuned optimizations in the FT design. During the present period in which error detection may have ad-vantages over QEC, dictated by the available quantum computers, optimizations of the non-universal error de-tection implementations are desirable for systems being simulated. In this work, we examine the potential of sparse er-ror detection in distance-two [[ N + 2 , N, 2]] codes, with 
+
+N even, [59–64] for lattice gauge theories. This family of codes is often referred to as Iceberg codes. We fo-cus on embedding small-spatial volumes of the Schwinger model using one or more combinations of [[ N + 2 , N, 2]] with small N . Axial gauge is chosen, as the lack of ex-plicit gauge degrees of freedom means that the Hamil-tonian construction scales to large spatial volumes more readily (made possible by confinement [65–68]). In ax-ial gauge, local checks of Gauss’s law are not possible, but violations appear as energy penalties via the Hamil-tonian. Integral to this analysis is the use of postselec-tion of measurements performed on the final state. If the initial state of the evolution is an eigenstate of the charge operator, then ideal time evolution will leave the state in the same charge sector. Post-selecting measure-ments of the final state, limited to the space of codewords (codespace) of that charge sector, removes all combina-tions of errors that change the charge sector. This typi-cally eliminates leading order bit-flip errors after the sim-ulation has concluded, but at the cost of a reduced en-semble size. Adding layers of stabilizer checks with pro-jective measurements throughout the simulations further removes leading-order Pauli errors. The size of the uncer-tainties can be optimized by adjusting the sparsity of the layers, determined by the overall errors induced by the evolution and by the stabilizer checks. Specifically, we compare the [[4 , 2, 2]] ⊗2 and [[6 , 4, 2]] embeddings of the Schwinger model with two lattice sites, and a selection of embeddings for four lattice sites, to identify potential ad-vantages of such embeddings for error-detected quantum simulations of quantum field theories. Embedding the Schwinger model into various combinations of Hypercube code families, [[2 N , N, 2]], is also explored, though due to the use of Trotter time-evolution, Iceberg code families are found to carry more benefit. Note that within this work, we will use the notation [[ k, n, d ]] ⊗m to indicate 
+
+m copies of the [[ k, n, d ]] code, encoding different code blocks. While simulations of the Schwinger model have been performed on more than 100 physical qubits [67, 68] (as well as analogous systems of Yang-Mills theories in com-parable [69] and smaller spatial volumes [65, 66, 70–84]) and local expectation values have been successfully ex-tracted using error-mitigation techniques [67, 68, 85–87], simulations necessary for late-time dynamics will require FT, error detection and QEC. Understanding how to op-timally include these protocols requires detailed studies of their behavior when integrated into LGTs.  
+
+> A. Road Map and Result Summary
+
+With an eye to retaining the underlying symmetries of lattice theories, including discrete spatial translation in-variance that smoothly recovers the continuum limit, we start with a general discussion of FT and error detec-tion (Section II), which includes, as a starting point, a detailed analysis of a single code block of the [[4 , 2, 2]] code. The reason for choosing the [[4 , 2, 2]] code is that a single spatial site of 1D quantum electrodynamics (the Schwinger model) defined in axial gauge maps to two qubits using the Jordan-Wigner mapping. Further, the techniques and mappings generalize to systems with ar-bitrary numbers of spatial sites. The [[4 , 2, 2]] encoding provides error-detection capabilities for a single site, and, while it is not a unique encoding, it is the one with the smallest quantum resource footprint for error detection. The encoding of two logical qubits into four physical qubits is presented, along with the logical state space, the stabilizers that identify single bit flips and phase flips which are fault-tolerantly implemented using two ancillas, and a discussion of the lack of fault-tolerance in implementing general unitary transformations. The contents of this section can be found in the existing lit-erature, and we review them for context. Following the discussion of the single [[4 , 2, 2]] code block, we consider the encoded dynamics of two spa-tial sites ( L = 2) of the Schwinger model, requiring four qubits, one for each of the two electron and two positron sites. The impact of sparse error detection combined with global charge post selection is studied in detail, including the approach to recovering noiseless results with increas-ing number of detection layers. For the sake of com-parison, we choose to focus mainly on two-qubit noise with p2 = 0 .001 and 0 .003. The results of this work reinforce the role of postselection (into the Gauss’s law preserving charge sector) in eliminating O(p2) bit-flip er-rors in both the unencoded and encoded simulations, and the suppression of O(p22) errors by mid-circuit measure-ment or postselection on the results of stabilizer measure-ments. Further, it shows the importance of embedding the logical states into a larger Hilbert space in order to reduce the O(p22) from several O(p2) errors conspiring to return the system into the codespace, generating an undetectable logical error. For resource-constrained sim-ulations, with the number of available shots fixed to be 10 4, a small number of rounds of FT error detection is shown to significantly reduce the systematic error over a large time interval, out to such times that remaining en-semble sizes are small enough for statistical uncertainty to become comparable to the systematic error. However, beyond a small number, increasing the density of error detection does not continue to reduce the systematic er-ror. By fitting a simple functional form to the L = 2 shot-acceptance results, predictions for shot-acceptance 4in larger systems are made from the ratio of Hilbert-space dimensions. Finally, we verify that given the limited number of operations performed on the error-detection ancilla qubits, they can be of lower fidelity without no-ticeably impacting the quality of the computed observ-ables. Regarding this, we mainly analyze a [[4 , 2, 2]] ⊗2
+
+encoding. In addition, we perform the same simulations using a [[6 , 4, 2]] encoding, where there are no cross-block operations required to implement time evolution. For this encoding, the stabilizers involved Z6 and X6 oper-ations. The results are consistently better than for the [[4 , 2, 2]] ⊗2 encoding for the studied observables. To provide confidence that our conclusions are not spe-cific to the L = 2 system, we study some of the aspects in larger systems. The larger systems are also richer with regard to the nature of the errors. We do not use the fea-tures related to the spacetime location of errors with re-spect to the location of local observables, and we restrict ourselves to global rejection of a given shot if an error is detected. A main focus is the L = 4 system encoded into a single [[10 , 8, 2]] code block. For the same error rates, the shot rejection is parametrically larger than for the L = 2 system, and some of the observations that we make require > 10 6 shots to clearly identify. This larger system is used to systematically study the reduction of systematic error as a function of time with increasing numbers of rounds of error detection. Simulations were performed out to T = 45, using up to 90 Trotter steps under the effect of depolarizing noise with p2 = 0 .001. At any given time, it is found that the systematic error is reduced by including error-detection layers, up to some number at which the improvement saturates. The longer the time interval, the greater number of layers required before saturation. For a given evolution operator and p,there is an optimal density of error-detection layers that can be included to reduce systematic errors due to noise. This number will need to be identified by pre-production run tuning, along with other run parameters. The larger system enables different partitions into code blocks from different codes, including [[10 , 8, 2]], [[8 , 6, 2]] ⊗ [[4 , 2, 2]], [[6 , 4, 2]] ⊗2, [[6 , 4, 2]] ⊗ [[4 , 2, 2]] ⊗2 and [[4 , 2, 2]] ⊗4. Fur-ther, there is a trade-off between shot rejection rates and the reduction of systematic errors. The code that per-forms the best evolves from [[10 , 8, 2]] for small numbers of shots to [[6 , 4, 2]] ⊗2 for large numbers of shots, with the difference between code performance largest at small shot numbers. The final aspect of Iceberg codes that we explore is the scaling of the “failure time” of monolithic codes (in which all of the logical qubits reside in single code block) of the form [[2 L + 2 , 2L, 2]], with the number of spatial sites, L, for fixed resources and error rate. By defining a point of failure of the error detection, determined by deviations from the exact result, these times decrease with increasing system size, reducing to ∼ 1 Trotter step for L = 13 spatial sites with p2 = 0 .003 and 10 4
+
+shots. This indicates that encoding into monolithic Ice-berg codes improves such partially FT simulations over some time interval but becomes impractical beyond that time with fixed resources. Given the exponential sup-pression of the final ensemble, exponentially increasing numbers of shots are required to extend the time interval by an order-one time. The numerical results from simula-tions are fit to functional forms and extrapolated to very large systems, to make resource-requirement predictions for [[102 , 100 , 2]], as an example. Another direction to build larger code blocks for larger systems is to utilize the Hypercube code family, [[2 N , N, 2]], as both the Iceberg code family and the Hy-percube code family coincide at N = 2. Systems com-prised of N = 3 code blocks, [[8 , 3, 2]], are explored in detail. Because of the structure of the encoding, the ac-ceptance probabilities for L = 2 , 4, 6 are found to be sig-nificantly lower than for the comparable embeddings in Iceberg codes. Consequently, for these simulations, the Hypercube codes are found to underperform compared to the Iceberg codes in fixed-resource scenarios. With regard to the error analysis and shot-rejection through error-detection, unlike more sophisticated shot-rejection methods based on correlations, e.g. , Ref. [88], here a shot is rejected if an error is detected anywhere in the system. This provides lower-bound estimates (within the context of the error model) for remaining ensemble sizes, as it does not include spacetime localization (back-ward light-cones for local operators) or noise that com-mutes with observables.  
+
+> II. ERROR DETECTION AND FAULT-TOLERANCE
+
+Error detection is designed to eliminate contributions from leading-order (LO) errors and partial higher-order errors, occurring with a two-qubit rate that is much greater than the single-qubit error rate. One way that is already used in quantum simulations is to only accept final quantum states that are permitted by physics. For example, charge-neutral states under charge-conserving dynamics should produce final states with vanishing to-tal electric charge, and violations of this detected in final measurements can be removed with postselection. This eliminates all O(p2) charge-violating errors and the cor-responding O(pn 
+
+> 2
+
+) errors. 1 When measuring observables commuting with electric charge, this physics-aware post-selection is “free” and should be implemented wherever practical. Introducing a number of stabilizer measurements dur-ing the time evolution increases the circuit depth and requires ancilla qubits. The time evolution of a system is simulated using an amount of machine time that de-pends on the depth of Trotterized circuits. Within this   
+
+> 1This does not preclude charge-violating errors from conspiring to produce a charge-neutral final state; these errors contribute at O(p22) and higher.
+
+5machine time, the total error rate, p, is determined by the error rate per unit evolution time, p. With the sparsely interspersed layers of stabilizer measurements, the error rate per unit evolution time is increased ps > p . The total error rate becomes p = 1 − (1 − ¯T ¯p)m for m layers, where ¯T is the time interval of evolution between layers. Without postselection, encoded circuits produce inferior logical error rates compared to unencoded circuits be-cause of the overhead associated with error detection. 2
+
+The code’s benefit comes from postselection, which sup-presses logical errors to O(p2) but discards an O(p) frac-tion of runs — turning a single-metric comparison into a tradeoff between logical fidelity and acceptance rate. With the stabilizers eliminating O(p) errors at each ap-plication, the total O(p2) is minimized when the extra machine time required for implementation of each stabi-lizer layer is equal to the Trotter step size. However, for a sufficiently large number of Trotter steps the quantum computer will decohere, and for a small number of Trot-ter steps, the systematic Trotter errors will likely domi-nate measured observable expectation values. Therefore, the inclusion of error detection into simulations requires further in-situ optimizations with regard to frequency to minimize the errors in the target observables. The discussion surrounding error detection is only par-tially decoupled from the discussion of FT. The stabiliz-ers and postselection identify errors that take the system out of the codespace. A fully FT circuit would ensure that any O(p) error would not propagate coherently, for instance, through the time evolution operator, into multi-ple errors, some of which may place the system back into the codespace (a discussion of error propagation through circuit elements can be found in App. A). Without FT, such coherent errors are present and may escape detec-tion, providing undetectable unphysical contributions to observables at O(p). A fully FT simulation with error detection parametrically suppresses such contributions to observables to O(p2), while partial fault-tolerance in-cludes O(p) errors with a reduced coefficient. There are a large number of ways to embed physical qubits into logical qubits. Compelling configurations for error detection in systems with regularly repeating units, such as lattice gauge theories, are the [[ N + 2 , N, 2]] ⊗q
+
+codes that furnish qN logical qubits from q(N + 2) phys-ical qubits with Hamming distance 2. With such embed-dings, errors that take the system out of the codespace can be detected with each layer of stabilizer checks, but not corrected.   
+
+> 2This assumes the overhead of mapping the system degrees of freedom to qubits is equal in encoded and unencoded implemen-tations.
+> A. A Single Block of [[4,2,2]]
+
+The [[4,2,2]] code (also known as the C4 code) is the sim-plest code with which to establish logical qubits from physical qubits and to include FT error detection. Four physical qubits are used to build two logical qubits with codewords separated by two bit flips. Fig. 1 shows the connectivity map of the [[4,2,2]] code, as well as its gener-alization to larger numbers of logical qubits. The phys-b            
+
+> 12
+> tt
+> b
+> 123N-2 N-1 N…
+> FIG. 1. The connectivity diagram for the [[4 ,2,2]] code (left) and the generalization to the Iceberg code [[ N+ 2 , N, 2]] (right). The top and bottom qubits are used to stabilize the
+> Nlogical qubits in the Iceberg code family.
+
+ical qubits shown in Fig. 1 are laid out in the order: 
+
+t, 1, 2, b , and the logical qubits are entangled states of these physical qubits. The |¯0¯ 0⟩ state in the [[4,2,2]] code, corresponding to the two logical qubits in the |0⟩ state, is simply the |GHZ(4) ⟩ state, 
+
+|¯0¯ 0⟩ = 1
+
+√2 [ |0000 ⟩ + |1111 ⟩ ] . (1) The logical operations are defined by 3
+
+bX1 = ˆX ˆX ˆI ˆI , bX2 = ˆX ˆI ˆX ˆI , 
+
+bZ1 = ˆI ˆZ ˆI ˆZ , bZ2 = ˆI ˆI ˆZ ˆZ , (2) which act on the |¯0¯ 0⟩ state to give the full logical basis 
+
+|¯0¯ 0⟩ = 1
+
+√2 [ |0000 ⟩ + |1111 ⟩ ] ,
+
+|¯1¯ 0⟩ = 1
+
+√2 [ |1100 ⟩ + |0011 ⟩ ] ,
+
+|¯0¯ 1⟩ = 1
+
+√2 [ |1010 ⟩ + |0101 ⟩ ] ,
+
+|¯1¯ 1⟩ = 1
+
+√2 [ |0110 ⟩ + |1001 ⟩ ] . (3) These are Hamming-distance 2 states, which permit error detection, as a single (physical qubit) error takes any of the states out of the code space to a state that could have originated from more than one codeword.          
+
+> 3The logical bYiare derived from the combined action bXibZi=
+> −ibYi.
+
+6The stabilizers for the logical states are ˆSz = ˆZ ˆZ ˆZ ˆZ and ˆSx = ˆX ˆX ˆX ˆX , (4) for which the logical states are eigenstates with eigen-values +1. For this to be the case, the states have a well-defined Hamming weight ( i.e. , the number of “1”s is even). These stabilizers, by definition, can be mea-sured during a computation (or period of sensing) and do not change a wavefunction in the logical space, as the measurement will always produce +1. In contrast, a measurement of either stabilizer producing a result that is different from +1 indicates that an error is present somewhere within the 4 physical qubits. While the O(p)errors are detected by these stabilizers, as well as with post selection, they also detect some of the O(p2) errors. While order-2 products of ˆX, ˆY and ˆZ with one flip can be detected, products ˆXi ˆXj , ˆYi ˆYj and ˆZi ˆZj with an even number of flips remain undetectable. This is true for the general [[ N + 2 , N, 2]] codes. A FT preparation of the Neel state (the strong-coupling vacuum in the Schwinger model) in this block, 
+
+|¯0¯ 1⟩, can be accomplished with the circuits shown in Fig. 2. The circuits in Fig. 2 are applied in the sequence       
+
+> FIG. 2. Quantum circuits for a FT preparation of the Neel state |¯0¯ 1⟩. The upper left circuit furnishes a non-FT prepara-tion of the Neel state (Neel0). The upper right circuit (the ˆSz
+> given in Eq. (4)) provides a FT stabilizer check for bit-flips ( ˆSz). The lower-left circuit (the ˆSxgiven in Eq. (4)) provides a FT stabilizer check for phase-flips ( ˆSx). The lower-right cir-cuit measures bZfor each logical qubit without undetectable errors.
+
+Neel0 , ˆSz , ˆSx , bZ , ˆSz , ˆSx (5) to obtain the logical Neel state after measurements on the ancilla such that ˆSz gives 00, ˆSx gives 00 and bZ gives 01. The Neel0 preparation (see Fig. 2) is not FT and can have errors that are detected and selected against with the subsequent stabilizer and bZ measurements. After the 
+
+bZ measurements, there can remain detectable errors only, which are then selected against with the two following stabilizer measurements. To create a chain of such Neel states, associated with the strong-coupling ground state of the Schwinger model, this preparation is repeated for each logical block. 4
+
+While the Hadamard, phase gate and CNOT gate are transversal, the T-gate is not, and as such, continuous ro-tations are not naively FT. For example, a non-FT rota-tion of the form e−i θ 
+
+> 2
+> bX1
+
+= e−i θ   
+
+> 2ˆX0ˆX1
+
+is implemented with entangling operations between qubits 0 and 1, and gener-ates undetectable correlated two-qubit errors of the form of a logical operation, see Fig. 3. The inter-block and              
+
+> FIG. 3. Non-FT circuits for rotating logical states in the [[4,2,2]] code through e−iθ
+> 2
+> bXj=e−iθ
+> 2ˆX0ˆXj, with j= 1 (left) and j= 2 (right).
+
+intra-block logical rotations cannot be made FT because of the CNOT gates between physical (data) qubits. 5
+
+This can only be overcome using magic state injection via transversal CNOT gates from “magic state facto-ries” [17, 91–98] and utilizing one logical qubit per code block, or by code switching [96, 97, 99–102]. Without these techniques, the time evolution of systems embed-ded in one or more [[4 , 2, 2]] error-detecting codes will not be FT, and errors from logical rotations could escape into the codespace. The use of non-FT rotations with other FT gadgets (such as syndrome extraction) can still sup-press errors provided the error propagation from non-FT gadgets is limited. Recent work has used this approach to demonstrate improvements of encoded circuits over un-encoded ones [8, 88], and is the approach taken in this work. The practical implementation of the stabilizer and log-ical checks requires a small number of ancilla qubits in each block, along with ancilla resets. The blockwise sta-bilizer and bZ checks shown in Fig. 2 produce four classical flags per block in each error detection round. Following this, runs that detect any errors are discarded. For suf-ficiently long runs with a fixed error rate, the number of surviving members of the ensemble becomes exponen-tially small (until the code floor is reached), scaling as 
+
+∼ exp( −p2 #gates). The practical upper limit on the length of any given run is reached when the statistical error becomes larger than the target uncertainty. For post-processing it can be helpful to map the phys-ical states defining the logical states into one basis state      
+
+> 4For larger systems we found it to be beneficial to skip the bZ
+> measurement which adds 4 LCNOT gates.
+> 5Propagation of errors can be minimized by incorporating ancilla qubits into logical rotation gadgets, see e.g. , Refs. [88–90].
+
+7(that is not an eigenstate of the stabilizers). For example, 
+
+|¯0¯ 1⟩ = 1√2 [ |1010 ⟩ + |0101 ⟩ ] → | 0101 ⟩. The quantum 
+
+FIG. 4. A quantum circuit to map the physical states con-tributing to each logical state into a single basis state. 
+
+circuit to achieve this in a single code block is shown in Fig. 4. 
+
+III. THE L = 2 SCHWINGER MODEL 
+
+The lattice Schwinger model provides a well-explored framework in which to examine error detection, providing an entry point toward studies in more complex theories describing fundamental physics. The Hamiltonian is most easily constructed in axial-gauge, where there are no space-like gauge links, and the time-like gauge links can be replaced by a non-local “Coulomb” interaction across the lattice, ˆH = ˆHm + ˆHel + ˆHkin ,
+
+= m
+
+2
+
+> 2L−1
+
+X
+
+> j=0
+
+h
+
+(−1) j+1 ˆZj + ˆI
+
+i
+
++ g2
+
+2
+
+> 2L−2
+
+X
+
+> j=0
+
+ X
+
+> k≤j
+
+ˆQk
+
+2
+
++ 12
+
+> 2L−2
+
+X
+
+> j=0
+
+ ˆσ+ 
+
+> j
+
+ˆσ− 
+
+> j+1
+
++ h .c. ,
+
+ˆQk = − 12
+
+h ˆZk − (−1) k ˆI
+
+i
+
+. (6) There are three distinct contributions: the mass term, the gauge term and the kinetic term. Here, L is the number of spatial lattice sites, corresponding to 2 L stag-gered (fermion) sites, m and g are the (bare) electron mass and charge, respectively, and the staggered lattice spacing a has been set to one. Starting from the left-most lattice site, with an embedding, e+, e −, e +, e −, e +, ..., e −,the electric field to the right of a given site is the sum of charges up to and including that site, and vanishing on the left and right hand sides of the lattice in the P Qi = 0 sector. For example, E0 = Q0, E1 = Q0 + Q1, and so forth, where we are labeling sites n = 0 , 1, 2, .., 2L − 1. An alternate (symmetric) construction in P Qi = 0 sec-tor involves forming the electric field from either end of the lattice. 
+
+A. Physical Qubits: Unencoded 
+
+Quantum simulations of the Schwinger model using phys-ical qubits are well-established, particularly for small sys-tems. The Hamiltonian in Eq. (6) reduces to ˆHkin = 14
+
+h ˆX0 ˆX1 + ˆY0 ˆY1 + ˆX2 ˆX3 + ˆY2 ˆY3
+
++ ˆX1 ˆX2 + ˆY1 ˆY2
+
+i
+
+ˆHmass = m
+
+2
+
+h
+
+4 ˆI − ˆZ0 + ˆZ1 − ˆZ2 + ˆZ3
+
+i
+
+ˆHgauge = g2
+
+2
+
+
+
+2 ˆI + ˆZ0 ˆZ1 + 12 ˆZ0 ˆZ2 + 12 ˆZ1 ˆZ2
+
+− ˆZ0 − 12 ˆZ1 − 12 ˆZ2
+
+
+
+, (7) after restricting the lattice to two spatial sites, L = 2. We perform classical simulations using NoiseModel() in the 
+
+qiskit AerSimulator [103] with isotropic depolarizing noise. The single-qubit error rate is one-tenth (1 /10) of 
+
+p2. 6 We compare sets of results obtained with p2 = 0 .001 and p2 = 0 .003. The former is consistent with present day hardware error rates, while the latter reflects error rates of the recent past. Working with a fixed number of shots is a realistic constraint for production runs on accessible quantum computers, and for L = 2 we restrict our analysis to simulations using 10 4 shots, and for larger lattices consider simulations with greater than 10 5 shots. As the focus of this work is on evaluating the utility of error detection, we perform simulations without imple-menting post-processing error mitigation, such as Deco-herence Renormalization (DR) [86, 104], Operator Deco-herence renormalization (ODR) [67, 68] and Zero-Noise Extrapolation (ZNE) [105–108]. Improvements or degra-dations resulting from error-detection will likely lead to the same trends after error mitigation, and quantifying the interplay between them is a study for the near future. Further, given some of our results, extrapolations in the number of detection layers may also prove fruitful. The quench dynamics from the strong-coupling vac-uum (Neel) state is studied. 7 While this process lies outside of the regime of applicability of the low-energy effective lattice theory, it enables direct comparisons be-tween different methods of error suppression. As dis-cussed above, to include the impact of fixed quantum resources, the total number of shots for each set of mea-surements is limited to 10 4. At each time step, performed            
+
+> 6This is implemented via noise model.add all qubit quantum error(depolarizing error( p2, 2), [’cx’]) .The transpiled basis set of gates is [’h’, ’x’, ’rz’, ’sx’, ’cx’] , and as rz
+> gates are generally implemented in software, those operations have been assigned prz = 0.
+> 7Quenching means evolving a pure state forward in time under dynamics defined by a Hamiltonian for which the state is not an eigenstate.
+
+8using leading-order Trotterized time evolution, the en-ergy in the electric field, the chiral condensate, Σ, and the number of e+e− pairs are computed. This corresponds to performing ensemble measurements after each n < N max 
+
+Trotter steps. The Trotter steps are chosen to furnish small systematic Trotter errors across the time interval of simulation, which depends on the selected parameters defining the Hamiltonian in Eq. (7). Given that the sys-tem with L = 2 is too small to reflect continuum, infinite-volume physics, we use parameters m = 0 .1 and g = 0 .3that result in a confinement length that is contained in near-term larger-scale simulations. Simulations are per-formed over a time interval from t = 0 to t = T = 30, with a Trotter step size of ∆ T = 0 .5. The different evolution scenarios we consider are (all performed using 4 qubits): 1. Exact unitary time evolution without noise; 2. Trotterized time evolution without noise; 3. Trotterized time evolution with noise (p2) and without postselection into the codespace; 4. Trotterized time evolution with noise and with postselection into the codespace; Note that we have not included measurement errors in this analysis. Figures 5 and 6 show the time evolution of the total energy in the electric field and the chiral con-densate, respectively, for these scenarios, starting from the Neel state. Postselection into the physical space (after measure-ments) for this system is an effective way to significantly reduce the systematic errors induced by the noise. This is equivalent to only keeping probabilities for states in the 
+
+Q = 0 sector, renormalizing to the total number of events in these states, and using these quantities to determine observables of interest. Thus, this is a global Gauss’s law check on the final state. While reducing the system-atic errors, postselection increases the statistical errors because of the reduced size of the surviving ensemble, as shown in Fig. 7. The large-time asymptotic value of the postselection acceptance rate is determined by the frac-tion of Q = 0 states compared with the total number of states in the Hilbert space. This is because complete depolarization results in all states in the Hilbert space being equally probable. The form of the decay is consis-tent with a single exponential shifted by a constant, from which estimates about the behavior of larger systems can be made. 
+
+B. Encoding in [[4 , 2, 2]] ⊗2
+
+We examine the potential of error detection in the Schwinger model using a small system with two spatial sites, mapped to four staggered fermion sites and embed-ded in a [[4 , 2, 2]] ⊗2 error-detection code. Each spatial site is embedded into a [[4 , 2, 2]] block. 0 5 10 15 20 25 30 
+
+t    
+
+> 0.00 0.02 0.04 0.06 0.08
+> 〈 ˆHel 〉
+> exact
+> 34g223g2
+> noiseless unencoded unencoded Q= 0
+
+FIG. 5. The total energy in the electric field in the L = 2 Schwinger model as a function of time starting from the Neel state. The solid black line corresponds to exact unitary evo-lution. The black circles correspond to noiseless Trotterized time evolution. The golden points correspond to noisy Trot-terized time evolution with p2 = 0.003 depolarizing noise without postselection into the physical space, while the brown points are the results obtained with postselection. The golden dashed line corresponds to the value in the limit of complete depolarization of g2L(L + 1) /8 = 0 .0675 (determined by the matrix elements of the identity operator of the symmetric gauge term). The postselection to the Q = 0 sector restricts this to g2L(L + 2) /12 = 0 .06 (brown dashed line). The Trot-terized simulations were performed using 10 4 shots. 
+
+1. The Encoding and Quantum Circuits 
+
+The L = 2 Hamiltonian given in Eq. (7), written in terms of physical qubits, can be embedded into a [[4 , 2, 2]] ⊗2
+
+code with layout ( t1, 1, 2, b 1)( t2, 3, 4, b 2), becoming ˆHkin = 14
+
+h ˆX1 ˆX2 + ˆY1 ˆY2 + ˆX3 ˆX4 + ˆY3 ˆY4
+
++ ˆXt1
+
+ˆX2 ˆXt2
+
+ˆX3 + ˆXt1
+
+ˆY2 ˆZb1
+
+ˆXt2
+
+ˆY3 ˆZb2
+
+i
+
+ˆHmass = m
+
+2
+
+h
+
+4 ˆI − ˆZ1 ˆZb1 + ˆZ2 ˆZb1 − ˆZ3 ˆZb2 + ˆZ4 ˆZb2
+
+i
+
+ˆHgauge = g2
+
+2
+
+
+
+ˆZ1 ˆZ2 + 12 ˆZ1 ˆZb1
+
+ˆZ3 ˆZb2 + 12 ˆZ2 ˆZb1
+
+ˆZ3 ˆZb2
+
+− ˆZ1 ˆZb1 − 12 ˆZ2 ˆZb1 − 12 ˆZ3 ˆZb2 + 2 ˆI
+
+
+
+. (8) The 6 codewords for the allowed states ( Q = 0), formed from those of a single [[4 , 2, 2]] block in Eq. (3), are 
+
+| ⟩ = |¯0¯ 1⟩ ⊗ | ¯0¯ 1⟩ ,
+
+|e+e− ⟩ = |¯1¯ 0⟩ ⊗ | ¯0¯ 1⟩ ,
+
+| e+e−⟩ = |¯0¯ 1⟩ ⊗ | ¯1¯ 0⟩ ,
+
+| e−e+ ⟩ = |¯0¯ 0⟩ ⊗ | ¯1¯ 1⟩ ,
+
+|e+ e−⟩ = |¯1¯ 1⟩ ⊗ | ¯0¯ 0⟩ ,90 5 10 15 20 25 30 
+
+t  
+
+> 0123
+> Σ
+> exact depol. noiseless unencoded unencoded Q= 0
+
+FIG. 6. The chiral condensate in the L = 2 Schwinger model as a function of time, starting from the Neel state. The solid black line corresponds to exact unitary evolution. The black circles correspond to noiseless Trotterized time evolution. The golden points correspond to noisy Trotterized time evolution with p2 = 0 .003 depolarizing noise without postselection into the physical space, while the brown points are the results ob-tained with postselection. The gray dashed line corresponds to the value in the limit of complete depolarization of 2 (de-termined by the matrix elements of the identity operator). The Trotterized simulations were performed using 10 4 shots. 0 5 10 15 20 25 30 
+
+t  
+
+> 0.40.50.60.70.80.91.0
+> S
+> 6/24
+> p2= 0 .001
+> p2= 0 .003
+
+FIG. 7. The postselection acceptance rate in the L = 2 Schwinger model as a function of time starting from the Neel state. The markers correspond to the acceptance rate S for post-selected noisy Trotterized time evolution with p2 = 0 .001 (blue) and 0 .003 (green), determined by the number of events in the Q = 0-sector after the evolution normalized to the number of shots. The Trotterized simulations were performed using 10 4 shots. The dashed gray line corresponds asymptotic acceptance rate, corresponding to the number of Q = 0 states divided by the total number of four-qubit states, 6 /16. 
+
+|e+e−e+e−⟩ = |¯1¯ 0⟩ ⊗ | ¯1¯ 0⟩ , (9) where a “ ” denotes an unoccupied staggered site. See App. B for more details. These states are eigenstates of the stabilizers given in Eq. (4) acting on both sites, and, as such, the Hamiltonian commutes with the stabilizers, as desired. As mentioned above, the circuit implementing time-evolution cannot be made FT when both logical qubits per code block are used in the mapping. If only one logical qubit of each block is used, transversal operations provide a fault-tolerant Clifford gate set [109–112], which can in principle be lifted to universal FT circuits through verified magic-state injection [54, 94], albeit with a sub-stantial overhead in both qubits and post-selection. In mapping two spatial sites to the [[4 , 2, 2]] ⊗2 code, individ-ually addressed logical operations are no longer transver-sal [95, 109], and the arbitrary-angle rotations required for the time evolution are necessarily non-FT. Instead, this work uses non-FT operations to implement time evo-lution ( e.g. , according to the Hamiltonian in Eq. (8)) by explicitly constructing the corresponding logical rota-tions in terms of physical gates. However, Trotterization of the evolution operator can be optimized with regard to the number of (coherent) errors escaping into the code-word space. The time evolution from the mass term and gauge term can be implemented together, as shown in Fig. 8, which can also be implemented parallel across the 
+
+FIG. 8. A non-FT quantum circuit implementing time evolu-tion of the mass and gauge terms in Eq. (8) for the [[4 , 2, 2]] ⊗2
+
+with L = 2 spatial sites. The angles are : θ1 = −t(m + g2 
+
+> 2
+
+), 
+
+θ2 = + tm , θ3 = + t g2 
+
+> 2
+
+, θ4 = −tm , θ5 = + t(m + g2 
+
+> 2
+
+). 
+
+spatial sites. The time evolution induced by the kinetic terms can be implemented in three layers, as shown in Fig. 9, with the operations confined to a single site per-formed in parallel. The encoded simulations proceed in several steps: 1. FT preparation of the Neel state, using the circuits in Fig. 2. 2. Non-FT time evolution using the Trotter steps shown in Figs. 8 and 9. 3. Sparse error detection using the FT stabilizer cir-cuits in Fig. 2. 4. Final measurements implemented on the states pro-duced by the non-FT circuit shown in Fig. 4. 10 
+
+FIG. 9. Quantum circuits implementing Trotterized time evolution of the kinetic term in Eq. (8) for the [[4 , 2, 2]] ⊗2 code with L = 2 spatial sites. The an-gles are : θ1 = π 
+
+> 2
+
+and θ2 = − t 
+
+> 2
+
+. The upper cir-cuit implements e−it 14 [ ˆX1 ˆX2+ ˆY1 ˆY2+ ˆX5 ˆX6+ ˆY5 ˆY6], the center cir-cuit implements e−it 14 ˆX0 ˆX2 ˆX4 ˆX5 , while the third implements 
+
+e−it 14 ˆX0 ˆY2 ˆZ3 ˆX4 ˆY5 ˆZ7 . The qubit ordering from top to bottom is: t1, 1, 2, b 1, t 2, 3, 4, b 2 ≡ q0, q 1, q 2, q 3, q 4, q 5, q 6, q 7, and the ancilla used for error detection are not shown. 
+
+2. Results from Classical Simulations 
+
+In this section, we consider noisy Trotterized time evo-lution with postselection with sets of FT error detection at the 1 /(nd + 1) , 2/(nd + 1) , ..., n d/(nd + 1) fractions of the evolution for a small number of layers of error detec-tion nd ≥ 1. The results are shown in Figs. 10 and 11, for a two-qubit error rate of p2 = 0 .003. One observes that the single-round of error-detection reduces the sys-tematic error in both the energy in the gauge field and the chiral condensate for each evaluation time. However, after t ∼ 20, the surviving sample size is substantially reduced from 10 4, resulting in noticeable statistical er-ror bars. Therefore, for this small system, tripling of the number of active physical qubits leads to an improvement in the overall post-diction of the considered observables. Zooming in on the convergence behavior in a given 0 5 10 15 20 25 30 
+
+t      
+
+> 0.00 0.02 0.04 0.06 0.08
+> 〈 ˆHel 〉
+> exact depol. Q= 0 noiseless unencoded Q= 0
+> nd= 1
+> nd= 2
+
+FIG. 10. The total energy in the electric field in the L = 2 Schwinger model embedded into the [[4 , 2, 2]] ⊗2 code as a function of time starting from the Neel state. The solid black line corresponds to exact unitary evolution. The black cir-cles correspond to noiseless Trotterized time evolution. The brown points correspond to noisy Trotterized time evolution using physical qubits with p2 = 0 .003 depolarizing noise with postselection. The blue points correspond to a 12-qubit sim-ulation using a single layer of FT error detection at the mid-point of the evolution, while the green points correspond to error detection at the 1 /3 and 2 /3 points during the evolu-tion. The Trotterized simulations were performed using 10 4
+
+shots. 
+
+time interval, Fig. 12 shows the chiral condensate around 
+
+t = 19 for p2 = 0 .003. Including one layer of error de-tection at the mid-point, and two layers at the 1 /3, 2/3points both improve upon the prediction obtained from unencoded simulations with postselection, while includ-ing another layer, (corresponding to syndrome measure-ments at 1 /4, 1/2 and 3 /4) does not noticeably improve upon the 1 /3, 2/3 results. Further, the results have not converged to their noiseless values. The rejection rate after some time is shown in Fig. 13. This is to be contrasted with the postselection-only ac-ceptance rate of the evolution of physical qubits, shown in Fig. 7. It is unsurprising that the rejection rate for 12 qubits with error detection is substantially greater than that for 4 qubits with only postselection. 
+
+3. Rejection Rates and Scaling 
+
+The results we have obtained for rejection rates as a func-tion of time permit an evaluation of scaling with system size and error rates, and a consideration of potential time intervals for physics extraction. First, it is no surprise that the acceptance rate scales exponentially with the product of two-qubit er-ror rate and time interval with sparse error detection, 
+
+∼ exp( −p2 #gates). Therefore, for simulations of ob-servables (in fixed volume) over a given time interval, 11 0 5 10 15 20 25 30 
+
+t    
+
+> 0123
+> Σ
+> exact depol. noiseless unencoded Q= 0
+> nd= 1
+> nd= 2
+
+FIG. 11. The chiral condensate in the L = 2 Schwinger model embedded into the [[4 , 2, 2]] ⊗2 code as a function of time starting from the Neel state. The solid black line cor-responds to exact unitary evolution. The black circles cor-respond to noiseless Trotterized time evolution. The green points correspond to noisy Trotterized time evolution using physical qubits with p2 = 0 .003 depolarizing noise with post-selection. The blue points correspond to a 12-qubit simulation using a single layer of FT error detection at the mid-point of the evolution, while the light-red points correspond to error detection at the 1 /3 and 2 /3 points during the evolution. The Trotterized simulations were performed using 10 4 shots. 
+
+improving two-qubit gates can reduce statistical errors substantially, with a globally reduced systematic error. While imperfect, an approximate scaling of the rejec-tion rates as a function of system size can be deter-mined. Assuming that the number of entangling gates scales with system size (which is only approximately true, modified by the confinement scale and boundary effects), the predicted rejection rates for increasing system sizes to L = 4 , 8, 16 respectively, are shown in Fig. 14 for 
+
+p2 = 0 .003. Fig. 14 shows the maximum time over which evolution can be fruitfully performed before all quantum states in the codespace are equally probable, with the po-tential to predict observables via error-mitigation tech-niques limited to t ∼ 10 (20 Trotter steps) for L = 16 with postselection alone. As the argument of the expo-nential depends on p2t, this time interval can be extended by a reduction in p2. The overall rejection rate is such that an increase in statistics of less than two orders of magnitude (10 6 shots) is sufficient to recover a statistical uncertainty in the L = 16 system comparable to that in the L = 2 system (modulo the caveats related to circuit depth in larger systems). It is interesting to note that even with a large increase in the number of shots (above 10 4), the Hilbert space is not large enough for postselec-tion to be effective because the maximally-mixed state provides a high probability of being in the Q = 0 sector. Fig. 15 shows the corresponding acceptance proba-bility as a function of time in the [[4 , 2, 2]] ⊗2 embed-0.00.51.01.5
+
+> Σ
+
+p2 = 0 .003     
+
+> 18 .018 .519 .019 .520 .0
+
+t
+
+> 0.00.51.01.5
+> Σ
+
+p2 = 0 .001      
+
+> exact noiseless unencoded Q= 0
+> nd= 1
+> nd= 2
+> nd= 3
+
+FIG. 12. The chiral condensate in the L = 2 Schwinger model embedded into the [[4 , 2, 2]] ⊗2 code as a function of time starting from the Neel state. The solid black line cor-responds to exact unitary evolution. The black circles cor-respond to noiseless Trotterized time evolution. The brown points correspond to noisy Trotterized time evolution using physical qubits with with p2 = 0.003 (upper panel) and 
+
+p2 = 0 .001 (lower panel) depolarizing noise with postselec-tion. The dark-blue points correspond to a 12-qubit simula-tion using a single layer of FT error detection at the mid-point of the evolution, the green points correspond to error detec-tion at the 1 /3 and 2 /3 points during the evolution, and the orange points correspond to error detection at the 1 /4, 1 /2and 3 /4 points during the evolution. The Trotterized simula-tions were performed using 10 4 shots. 
+
+ding with p2 = 0 .003. 8 The functional form used for the dashed lines consists of the gate count gL
+
+> tot
+
+(t) =
+
+gfixed (L, n d) + gstep (L)k, where the first part is the gate count of encoding, decoding and syndrome measurements and the second part the gate count per Trotter step (t = k dt ). 9 The larger Hilbert space significantly re-duces the maximally-mixed state probability of being in the Q = 0 sector, and being selected during postselec-tion. This means that a very high-statistics set of mea-surements, ∼ 10 10 , could provide an improved set of pre-dictions out to times t ∼ 15 for L = 8, but a much larger set would be required for comparable errors at L = 16. In order to have a high-statistics result ( ∼ 10 8 shots) with reduced systematic errors for t ≤ 30 (using a Trotter step size of ∆ t = 0 .5) through sparse error detection for systems with N = 100 logical qubits, we find that the two-qubit error rate (scaling the above results) should satisfy p2 ≤ 10 −4.                    
+
+> 8The data in this figure used qiskit AerSimulator with
+> optimization level=0 .
+> 9As explained in more detail in Section V: gfixed = 6 L(5 + 2 nd) + 0.0955 4 L(3 + nd); gstep = 6 L2+ 6 L−6 + 0 .0955 (14 L−10).
+
+12 0 5 10 15 20 25 30 
+
+t      
+
+> 0.01 0.02 0.05 0.1 0.2 0.5 1
+> S
+> p2= 0 .003
+> p2= 0 .001 unencoded, p2= 0 .003 unencoded, p2= 0 .001 6/24
+
+FIG. 13. The postselection acceptance rate in the L =2 Schwinger model embedded into the [[4 , 2, 2]] ⊗2 code as a function of time starting from the Neel state with a single layer of stabilizer projective measurements at the mid-point of the evolution. The orange points correspond to post-selected noisy Trotterized time evolution with p2 = 0 .001 and the blue points to p2 = 0 .003, determined by the number of events in the Q = 0 sector after the evolution normalized to the number of shots. The brown curves are the corresponding unencoded noisy simulations using Gauss law postselection only. The Trotterized simulations were performed using 10 4 shots. 
+
+4. Noisy Ancillas 
+
+Previously, it has been suggested that a heterogeneous distribution of qubit fidelities could be optimized in simu-lations. This is in standard practice for simulations using available machines in NISQ-era simulations, but has been suggested as a potentially fruitful avenue to explore for systems of logical qubits [113]. Since ancilla qubits are only used for sparsely-spaced syndrome measurements, a natural simplification is to dedicate the noisy device qubits to these ancillas. We have studied the impact of using ancilla qubits that have larger error rates than data qubits. With fidelity asymmetries among the ancilla and data qubits in the [[4 , 2, 2]] blocks, we find that, for these circuits implemented, the error rates in the ancilla qubits can be up to three times as large as in the [[4 , 2, 2]] blocks before noticeable degradation in the quality of the simu-lation results is observed. 
+
+C. Encoding into [[6 , 4, 2]] 
+
+The L = 2 system above can also be embedded into a single block of the [[6 , 4, 2]] code. The Hamiltonian given in Eq. (7), written in terms of physical qubits, can be embedded into a [[6 , 4, 2]] code with layout ( t, 1, 2, 3, 4, b ), becoming ˆHkin = 14
+
+h ˆX1 ˆX2 + ˆY1 ˆY2 + ˆX3 ˆX4 + ˆY3 ˆY40 5 10 15 20 25 30 
+
+t    
+
+> 0.15 0.2 0.3 0.5 0.7 1
+> S
+> (2LL
+> )2−2L
+> L= 2
+> L= 4
+> L= 8
+> L= 16 measured
+
+FIG. 14. The postselection acceptance rate S in the un-encoded L = 2, 4, 8, 16 Schwinger model as a function of time starting from the Neel state with only postselection. The filled markers correspond to post-selected noisy Trot-terized time evolution with p2 = 0 .003, determined by the number of events in the Q = 0 sector after the evolution normalized to the number of shots. The dashed curves are 
+
+SL(t) = fL +(1 −fL)e−βL t; dotted lines are the exact charge-sector floors fL =  2LL
+
+/22L. Using the L = 2 data, we fit-ted β2 = 0 .050 which determines the remaining decay con-stants through βL = β2(gL/g 2)(1 − f2)/(1 − fL). The factor 
+
+gL = 2 L2 + 0 .0955(8 L − 4) is the weighted noisy-gate count of one Trotter step. The data for L = 4 (yellow) and L = 8 (red) confirm the prediction. 
+
++ ˆX2 ˆX3 + ˆY2 ˆY3
+
+i
+
+ˆHmass = m
+
+2
+
+h
+
+4 ˆI − ˆZ1 ˆZb + ˆZ2 ˆZb − ˆZ3 ˆZb + ˆZ4 ˆZb
+
+i
+
+ˆHgauge = g2
+
+2
+
+
+
+2 ˆI + ˆZ1 ˆZ2 + 12 ˆZ1 ˆZ3 + 12 ˆZ2 ˆZ3
+
+− ˆZ1 ˆZb − 12 ˆZ2 ˆZb − 12 ˆZ3 ˆZb
+
+
+
+. (10) The logical states are found by acting with the logical Pauli operators on the |¯0¯ 0¯ 0¯ 0⟩ state, e.g. ,
+
+|¯0¯ 0¯ 0¯ 0⟩ = 1
+
+√2 [ |000000 ⟩ + |111111 ⟩ ] ,
+
+|¯1¯ 0¯ 0¯ 0⟩ = 1
+
+√2 [ |110000 ⟩ + |001111 ⟩ ] , (11) and the stabilizers for these states are ˆSz = ˆZ⊗6 , ˆSx = ˆX⊗6 . (12) The circuits required for implementing Trotterized time evolution are straightforward to determine (from those used in previous sections), as are the constructions of the codewords and observables (details of which can be found in App. C). The main difference between the [[4 , 2, 2]] ⊗2 (using 8+4=12 qubits) and the [[6 , 4, 2]] code 13 0 5 10 15 
+
+t      
+
+> 10 −4
+> 10 −3
+> 10 −2
+> 10 −1
+> 10 0
+> S
+> L= 2
+> L= 3
+> L= 4
+> L= 5
+> L= 8
+> L= 16 measured
+
+FIG. 15. The postselection acceptance rate S in the L = 2 Schwinger model embedded into the [[4 , 2, 2]] ⊗2 code as a function of time starting from the Neel state with postse-lection and error detection at the mid-point with p2 = 0 .003, determined by the number of events in the Q = 0 sector after the evolution normalized to the number of shots. The Trot-terized simulations were performed using up to 4 · 10 4 shots. The dashed lines are SL(t) = fL + (1 − fL)e−λg L
+
+> tot (t)
+
+, where 
+
+gL
+
+> tot
+
+(t) is the weighted noisy-gate count of the built circuit (in analogy with Fig. 14, see main text for functional form). The floors fL are fitted (order 10 −3 for L = 2 , 3, 10 −4 for L = 4) and λ = 2 .56 · 10 −3 ∼ p2.
+
+(using 6+2=8 qubits) embeddings is the fidelity of the stabilizer checks. While leading-order errors in the 2 log-ical qubits in each of the [[4 , 2, 2]] blocks are detected, they are detected only on the 4 logical qubits in the sin-gle [[6 , 4, 2]] block. Fig. 16 displays the behavior of the chiral condensate over a small time interval as a function of the number of stabilizer layers of ˆZ6 and ˆX6. Comparing these results with those displayed in Fig. 12 shows that the coarser error detection for this system is comparably effective in reducing the systematic errors. This suggests that these expectation values are approximately independent of the density of detectable errors at a fixed distance. Fig. 17 shows the acceptance rate for different numbers of uniformly-spaced stabilizer layers, followed by posts-election, associated with the results shown in Fig. 16. Increasing the number of layers reduces the acceptance rate, as expected, but less significantly than increasing the number of layers in the [[4 , 2, 2]] ⊗2 encoding. This is consistent with the discussion above related to the rel-atively lower stabilizer density per spatial lattice site. Some of the curves exhibit changes of slope. This is due to saturation of stabilizer layers at small numbers of Trotter steps (which are limited to no more than one per step). 18 .0 18 .5 19 .0 19 .5 20 .0
+
+t      
+
+> 0.00.51.01.5
+> Σ
+> exact noiseless unencoded Q= 0
+> nd= 1
+> nd= 2
+> nd= 4
+> nd= 8
+
+FIG. 16. The chiral condensate in the L = 2 Schwinger model embedded into the [[6 , 4, 2]] code as a function of time starting from the Neel state. The solid black line corresponds to exact unitary evolution. The black circles correspond to noiseless Trotterized time evolution. The brown points cor-respond to noisy Trotterized time evolution using physical qubits with p2 = 0 .003 depolarizing noise with postselection. The dark-blue points correspond to a (6+2) 8-qubit simula-tion using a single layer of ˆZ6 and ˆX6 FT error detection at the mid-point of the evolution, the green points correspond to error detection at the 1 /3 and 2 /3 points during the evo-lution, the orange points correspond to error detection at the 1/5, 2 /5, 3 /5 and 4 /5 points during the evolution, and the red points correspond to error detection at the points 1 /9, 2 /9, 3/9, 4 /9, 5 /9, 6 /9, 7 /9 and 8 /9 during the evolution. The Trotterized simulations were performed using 10 4 shots. 
+
+IV. THE L = 4 SCHWINGER MODEL 
+
+Doubling the spatial extent of the lattice more than doubles the system error rate for the same gate error rate. 10 The L = 4 system, mapped to 8 logical qubits, provides a (small) sandbox to begin studying the rela-tive effectiveness of error detection in subregions of the spatial lattice, using both homogeneous and heteroge-neous partitions. We compare the resulting uncertainties in the chiral condensate and energy in the gauge field as function of time for [[10 , 8, 2]], [[8 , 6, 2]] ⊗ [[4 , 2, 2]], [[6 , 4, 2]] ⊗2, [[6 , 4, 2]] ⊗ [[4 , 2, 2]] ⊗2 and [[4 , 2, 2]] ⊗4 encod-ings with equal resource constraints.      
+
+> 10 Without a confinement-guided truncation of the gauge contri-bution to the Hamiltonian in axial gauge, the number of gates grows O(L2), compared with O(ξL ) for large systems, where ξis the confinement scale [67, 68]. For small system sizes considered here, this truncation is not applicable.
+
+14 0 5 10 15 20 25 30 
+
+t       
+
+> 0.05 0.1 0.2 0.5 1
+> S
+> 6/24
+> unencoded Q= 0
+> nd= 1
+> nd= 2
+> nd= 4 nd= 8
+
+FIG. 17. The postselection acceptance rate in the L = 2 Schwinger model embedded into the [[6 , 4, 2]] code as a func-tion of time starting from the Neel state with a selection in the number of layers of FT error detection during the evolu-tion, followed by postselection onto the Q = 0 sector. The Trotterized simulations were performed using 10 5 shots. The dashed orange line corresponds asymptotic acceptance rate, corresponding to the number of Q = 0 states divided by the total number of four-qubit states, 624 .
+
+A. Encoding into [[10 , 8, 2]] 
+
+The quantum circuits used for state preparation, time evolution, final-state consolidation and stabilizer mea-surements for embedding the L = 4 Schwinger model in the [[10,8,2]] code are analogous to those discussed in previous sections. 11 The terms in the Hamiltonian describing the L = 8 system, written using logical oper-ators, are ¯Hm = m
+
+2
+
+h
+
+− bZ1 + bZ2 − bZ3 + bZ4
+
+− bZ5 + bZ6 − bZ7 + bZ8 + 8 ˆI
+
+i
+
+,
+
+¯Hkin = 14
+
+> 7
+
+X
+
+> i=1
+
+  bXi bXi+1 + bY i bY i+1 
+
+ ,
+
+¯Hg = g2
+
+2
+
+"
+
+5 ˆI − bZ1 − 12
+
+bZ2 − 12
+
+bZ3 + 12
+
+bZ6 + 12
+
+bZ7
+
++ bZ8 + 32
+
+bZ1 bZ2 + bZ1 bZ3 + 12
+
+bZ1 bZ4
+
++ bZ2 bZ3 + 12
+
+bZ2 bZ4 + 12
+
+bZ3 bZ4 + 12
+
+bZ6 bZ7
+
++ 12
+
+bZ6 bZ8 + bZ7 bZ8
+
+#
+
+, (13)    
+
+> 11 The stabilizers ˆX8and ˆZ8are implemented using the two-ancilla fault-tolerant circuits used in previous sections.
+
+Where i labels the lattice site, i = 1 , 2, ..., 8. The sym-metric representation of the energy in the gauge field has been used. As the L = 4 system is twice the spatial vol-ume of the L = 2 system, we expect the error rate to be at least twice as large. The increased gate depth associ-ated with the gauge interactions means that it will not simply be a factor of two larger. Computing the same observables as above, the chiral condensates and total energy in the gauge field are dis-played in Fig. 18 and Fig. 19, respectively. Because 0 10 20 30 40 
+
+t  
+
+> 012345
+> Σ
+> exact depol. noiseless unencoded unencoded Q= 0
+
+FIG. 18. The chiral condensate in the unencoded L = 4 Schwinger model as a function of time starting from the Neel state. The solid black line corresponds to exact uni-tary evolution. The black circles correspond to noiseless Trotterized time evolution. The golden points correspond to noisy Trotterized time evolution using 8 physical qubits with 
+
+p2 = 0 .001 depolarizing noise without postselection, while the brown points correspond to the inclusion of postselection. The dashed gray line corresponds to the completely depolar-ized limit of 4. The Trotterized simulations were performed using 1 .2 × 10 6 shots. 
+
+of the volume of this system, we use p2 = 0 .001 and 1.2 × 10 6 shots. The oscillatory behavior of both quan-tities is smaller than for L = 2. As such, variations be-tween different numbers of layers of error detection will be smaller in magnitude, and hence the need for increased statistical precision. With this system, we study the scaling of the reduction in systematic error of the chiral condensate resulting from one-qubit and two-qubit errors as a function of time and of the number of error-detection layers. We define the fraction of recovered errors by 
+
+fχ(t, n d) = |χ(t, n d) − χQ8ps (t)|
+
+χexact (t) − χQ8ps (t) , (14) where χexact (t) is the chiral condensate from noiseless Trotterized simulations, χQ8ps (t) is the 8-qubit post-selected chiral condensate computed with p2 = 0 .001 (the result obtained from noisy physical qubits with post-selection onto the Gauss’s law preserving final states), 15 0 10 20 30 40 
+
+t   
+
+> 0.00 0.05 0.10 0.15 0.20 0.25
+> 〈 ˆHel 〉
+> exact
+> 52g2
+> 2g2
+> noiseless unencoded unencoded Q= 0
+
+FIG. 19. The total energy in the gauge field in the unen-coded L = 4 Schwinger model as a function of time starting from the Neel state. The solid black line corresponds to exact unitary evolution. The black circles correspond to noiseless Trotterized time evolution. The golden points correspond to noisy Trotterized time evolution using 8 physical qubits with 
+
+p2 = 0 .001 depolarizing noise without postselection, while the brown points correspond to the inclusion of postselection. The golden (brown) dashed line corresponds to the depolar-ized limit without (with) postselection of 0.225 (0.18). The Trotterized simulations were performed using 1 .2 × 10 6 shots. 0.20.40.6
+
+> fΣ
+
+nd = 1 nd = 2   
+
+> 020 40
+
+t
+
+> 0.20.40.6
+> fΣ
+
+nd = 4   
+
+> 020 40
+
+tnd = 8 
+
+FIG. 20. The recovered fraction of errors in the chiral con-densate as a function of time for increasing numbers of error-detection layers, defined in Eq. (14). The Trotterized simula-tions were performed using 1 .2M shots with p2 = 0 .001. The blue, green, orange and red points correspond to nd = 1 , 2, 4and 8 layers respectively. Results are shown for fχ(t, n d) for which the associated uncertainty is less than δf < 0.04. The numerical values displayed can be found in Table III (App. D). 
+
+and χ(t, n d) is the chiral condensate computed from the [[10,8,2]] encoding with nd layers of error detection and p2 = 0.001. Results obtained from the qiskit 
+
+Parameter Value Description 
+
+A 0.92(24) Amplitude 
+
+γ 0.0133(46) Decay rate 
+
+C 0.545(7) Value at t = 0 
+
+χ2/dof 1.19 TABLE I. Correlated fit of the recovered fraction of the chiral condensate to the form given in Eq. (15). A single parameter set {A, γ, C } describes all four curves; the decay rate scales as γ/n d, so each doubling of detection layers halves the decay rate. 
+
+AerSimulator simulator are shown in Fig. 20. Be-cause the difference between the post-selected and exact-Trotterized values can coincide during the evolution, there are regions of time for which the denominator in Eq. (14) becomes small, and the uncertainties in fχ(t, n d)become large. To account for this, a cut of 0.04 has been placed on this uncertainty. As expected, the temporal density of the detection lay-ers impacts improvements in the chiral condensate, and at all times considered, the error detection layers improve the results. However, it is found that the improvement is saturated to ∼ 0.55 for 8 layers of error detection. A 0 10 20 30 40 
+
+t    
+
+> 0.10.20.30.40.50.6
+> fΣ
+> nd= 1
+> nd= 2
+> nd= 4
+> nd= 8
+
+FIG. 21. A correlated χ2-minimization fit to the recovered fraction of errors in the chiral condensate as a function of time for increasing numbers of error-detection layers, defined in Eq. (14). The Trotterized simulations were performed us-ing 1 .2M shots with p2 = 0 .001. The blue, green, orange and red points correspond to nd = 1 , 2, 4 and 8 layers respectively. Results are shown for fχ(t, n d) for which the associated un-certainty is less than δf < 0.04. The form of the correlated weighted χ2-minimization fit is given in Eq. (15), with the values of fit parameters and uncertainties displayed in Table I and Eq. (16). The fits with associated uncertainties are shown as the colored bands. The numerical values displayed can be found in Table III. 
+
+correlated χ2-minimization fit has been performed on the results shown in Fig. 20 of the form 
+
+f fit  
+
+> χ
+
+(t, n d; A, C, γ ) = Ae −γt/n d + ( C − A) , (15) with the results displayed in Fig. 21. This functional form describes the results well given their precision. The 16 covariance matrix resulting from the fit is shown in Eq. (16), Var( A, γ, C ) = 10 −2
+
+ 5.751 −0.1100 −0.1232 
+
+−0.1100 0.002122 0.002549 
+
+−0.1232 0.002549 0.005312 
+
+ .
+
+(16) A further reduction in the uncertainties of the results is required to scrutinize the limitations of the fit form we have assumed. As expected, the value of A differs signifi-cantly from unity, due to undetectable errors introduced by the time evolution operator. It is the case that this form is not applicable at late times, where it is expected that the recovered fraction vanishes. These results im-ply that there exists an optimal frequency of syndrome measurements for a fixed error rate, code, and target evolution time, beyond which the improvements from in-creased syndrome extraction frequency are diminished. 
+
+B. Encoding into [[ N + 2 , N, 2]] with Partitions 
+
+The N = 8 system can be represented with multiple Ice-berg encodings. The eight sites can occupy one large code block ([[10 , 8, 2]]), or be split into two ([[6 , 4, 2]] ⊗2
+
+and [[8 , 6, 2]] ⊗ [[4 , 2, 2]]), three ([[6 , 4, 2]] ⊗ [[4 , 2, 2]] ⊗2), or four ([[4 , 2, 2]] ⊗4) smaller blocks, down to the finest tiling the code family allows. Each block carries its own pair of stabilizer checks, so a finer split detects errors at a higher density. In order to make more robust numerical comparisons among encodings, we will work with variations of the metrics in previous sections. In the following, S(k) de-notes acceptance rate after k Trotter steps: the fraction of shots that pass every check (mid-circuit ancilla flags, final-state stabilizer checks, and the Gauss-law ( Q=0) postselection). To quantify the accuracy and perfor-mance of the different encodings in evaluating the chiral condensate, we measure its systematic error, denoted by “SysErr”, and its statistical uncertainty, by combining them in quadrature, 
+
+• SysErr ≡ ⟨ Σ⟩accepted −Σref : the systematic offset of the accepted-population mean from the reference. This is the error that postselection cannot remove. 
+
+• σ1: the per-accepted-shot standard deviation of Σ (the spread of single kept shots). The fixed-budget accuracy metric assembles bias, σ1, S,and the number of shots, ns, as RMSE( ns) = 
+
+q
+
+SysErr 2 + σ21 /(ns S) . (17) The naive expectation is that the code with the finest error-detection should perform the best. However, as il-lustrated in Fig. 22 the two-qubit gate count and hence 500 1000 1500 2000 
+
+GCX 
+
+> 0.10 0.15 0.20 0.25
+> ¯Σ − Σref
+
+(a)    
+
+> 500 1000 1500 2000
+
+GCX 
+
+> 0.01 0.1 1
+> S
+
+(b)                     
+
+> first-order floor [[10 ,8,2]] [[6 ,4,2]] ⊗2
+> [[8 ,6,2]] ⊗[[4 ,2,2]] [[6 ,4,2]] ⊗[[4 ,2,2]] ⊗2
+> [[4 ,2,2]] ⊗4
+> unencoded Q= 0
+
+FIG. 22. Partitioning cost at N = 8 (14 Trotter steps, p2 =0.003, nd = 4) as a function of two-qubit gate count GCX .The filled markers are measurements, open markers the exact single-fault prediction. The brown cross, labeled unencoded, corresponds to postselection only (no encoding) (a) SysErr falls steeply from the unencoded results once any encoding is applied, then plateaus. Within the encoded family it is not monotonic in GCX , falling to a minimum at the intermediate-density [[6 , 4, 2]] ⊗ [[4 , 2, 2]] ⊗2 and rising again at the finest tiling. (b) The acceptance rate falls exponentially with GCX 
+
+(log axis), from 50% unencoded through 12% at the monolith to 0 .6% at the finest tiling. The error bars denote σ1/√nkept .1 2 3 4 5 6
+
+nd
+
+> 0.10 0.15 0.20 0.25
+> ¯Σ − Σref
+
+(a)      
+
+> 123456
+
+nd
+
+> 0.01 0.1
+> S
+
+(b)                     
+
+> unencoded Q= 0 [[10 ,8,2]] [[6 ,4,2]] ⊗2
+> [[8 ,6,2]] ⊗[[4 ,2,2]] [[6 ,4,2]] ⊗[[4 ,2,2]] ⊗2
+> [[4 ,2,2]] ⊗4
+
+FIG. 23. The effects of the number of interior error-detection rounds nd at N = 8 (14 Trotter steps, p2 = 0 .003). Each nd =4 point pools nkept ≈ 2.3 × 10 5 accepted shots; the nd=5 , 6points pool 5 .7 − 7.1 × 10 4. (a) SysErr against nd (error bars 
+
+σ1/√nkept ): it falls through about nd = 3 for most codes, then flattens onto the single-fault floor. The finest tiling improves up to nd = 5 at this fixed number of Trotter steps. The intermediate-density [[6 , 4, 2]] ⊗[[4 , 2, 2]] ⊗2 is lowest across the sweep. (b) Acceptance rate as a function of nd (log axis): it falls with each added round, most steeply for the finest tiling. 
+
+the overhead increases significantly. 12 Fig. 22 (a) shows that all encodings significantly improve the accuracy (by     
+
+> 12 The circuits in this section and all remaining sections use qiskit AerSimulator with optimization level=0 .
+
+17 0 1 2 3 4 5 6                                                           
+
+> nd
+> 0.00.10.2
+> ¯Σ − Σref
+> (a)
+> 0123456
+> nd
+> 0.0001 0.001 0.01 0.1
+> S
+> (b)
+> unencoded Q= 0 [[10 ,8,2]] [[6 ,4,2]] ⊗2
+> [[8 ,6,2]] ⊗[[4 ,2,2]] [[6 ,4,2]] ⊗[[4 ,2,2]] ⊗2
+> [[4 ,2,2]] ⊗4
+> FIG. 24. Deviations on the chiral condensate as a function of the number of rounds of error detection, nd, for different encodings. The systematic error (a) and postselection accep-tance rate S(b) versus ndfor N=8 with k= 28 Trotter steps (t= 14) and two-qubit gate error rate p2= 0 .003, using the reference value of the chiral condensate Σ ref = 3 .6706. The dashed line is the unencoded results with postselection, +0 .175 ±0.004 at acceptance 0 .353. (a) At nd=0 no encoding outperforms the unencoded simulation. (b) The acceptance rate falls with increasing nd, and is ordered by block count: the monolithic [[10 ,8,2]] code retains the most, 0 .094 at nd=0, falling to 0 .021 at nd=6. The error bars are σ1/√nkept , with
+> nkept from 3 .1×10 3to 4 .3×10 4. Resource requirements are 1.5×10 8raw shots over 31 encoded cells and the unencoded baseline.
+
+a factor of 2) compared to the unencoded simulation af-ter 14 Trotter steps (with four midcircuit measurements). This is consistent with the L = 2 results in Sec. III. Further, all encodings perform comparably. However, as Fig. 22 (b) shows, the acceptance rate drops signif-icantly for the finer codes. Section IV A showed that additional midcircuit measurements improve the perfor-mance at later times significantly. However, above a cer-tain measurement frequency, the accuracy improvement saturates while the acceptance rate drops with any ad-ditional measurement. In Figs. 23 and 24, we compare the systematic error in Σ obtained from the different en-codings after 14 and 28 Trotter steps, respectively, as a function of number of rounds of error detection. We find that at 14 trotter steps, the [6,4] and [4,4] partitions have slight advantages over the others, but are not sig-nificantly better with sufficiently many rounds of error detection. After 3 rounds most codes are saturated ex-cept for the finest [2,2,2,2], which keeps improving to 5 rounds (but has the lowest acceptance rate). Conclusions after 28 Trotter steps are similar. We considered two sce-narios: measuring only ˆSx and measuring nd rounds of ˆSx with a single midcircuit ˆSz . Both performed worse compared to measuring both stabilizers throughout. Fig. 25 compares the accuracy of the encodings as a function of the number of shots. We find that for a small number, the monolithic code performs the best, while for a large number of shots, [6,4] has a slight advantage.      
+
+> V. THE SCALING OF [[ N+ 2 , N, 2]] ENCODINGS
+
+The previous sections discuss the performance and ac-curacy of Iceberg codes for small systems. In order to quantify the scaling of the monolithic Iceberg code with system size L, we introduce two failure horizons: 
+
+• Tshot (the shot horizon): the time at which shot acceptance falls below 1%, which is a property of the circuit and is generally independent of the total number of shots. 
+
+• Tacc (the accuracy horizon): the time at which the depolarizing noise has introduced a systematic er-ror that is a fixed fraction of the chiral condensate. We fit the noisy condensate to Σ( t) = N
+
+2 +
+
+
+
+Σref (κt ) − N
+
+2
+
+
+
+e−(at +bt 2) , (18) where Σ ref is the noiseless Trotter reference, κ aphase rescaling, and a and b the damping rates. We fix ϵacc = 0 .10. The exponential is exactly the fraction of the distance to the maximally mixed state with chiral condensate equal to N/ 2: = 1 at 
+
+t = 0, and = 0 once the state is fully mixed. Tacc 
+
+is the earliest time at which that factor has fallen to 1 − ϵacc 
+
+a T acc + b T 2acc = − ln(1 − ϵacc ) . (19) Fig. 11 and 18 illustrate that the magnitude and shape of the chiral condensate changes significantly with sys-tem size. Moreover, the deviations of the noisy values from the noiseless reference are influenced by local max-ima and minima (whose location in time changes with 
+
+N ). This motivated our choice of Tacc which is a phase adjusted, damping horizon. Fig. 26 shows the Tshot and Tacc as a function of system size at a fixed error rate p2 = 0 .003. The first Trotter step is excluded from the Tacc fit since it only allows for one layer of error detection. The accuracy horizon for the largest considered system sizes falls within 1-2 Trotter steps, and hence the determination has large ex-trapolation uncertainties. The affected points are indi-cated by open markers, and are labeled approximate in the figure. The accuracy horizon of the encoded system (red squares) is always reached later than for the unen-coded one (purple triangles), i.e. , the deviations from the noiseless simulations occur at later times for the encoded system. As expected, all curves fall monotonically with increasing N .The decay rate of the number of accepted shots as a function of time increases significantly with increasing 
+
+N . For the smallest system, N = 2, only 0.004 of the shots per Trotter step are lost. At N = 8, 0.094 are lost (24 × steeper); at N = 26, 0.76 are lost. The N = 2 point is labeled as approximate since the uncertainty of the crossing time t⋆ at which the acceptance rate drops to S(t⋆) = 1% is inversely proportional to the decay rate. 18 10 2 10 3 10 4 10 5 10 6
+
+ns
+
+> 0.05 0.1 0.3 1
+> RMSE
+
+(a)     
+
+> 10 210 310 410 510 6
+
+ns
+
+> 0.05 0.1 0.3 1
+> ¯Σ − Σref
+
+(b)                     
+
+> unencoded Q= 0 [[10 ,8,2]] [[6 ,4,2]] ⊗2
+> [[8 ,6,2]] ⊗[[4 ,2,2]] [[6 ,4,2]] ⊗[[4 ,2,2]] ⊗2
+> [[4 ,2,2]] ⊗4
+
+FIG. 25. Accuracy of the five N = 8 partitions as a function of the number of shots at fixed resources (condensate evaluated after 14 Trotter steps at p2 = 0 .003, nd = 4). The left panel (a) shows the accuracy defined using Eq. (17) and the right panel (b) shows the absolute deviation from the noiseless reference. The monolithic [[10 , 8, 2]] encoding is superior at a small number of shots. The intermediate-density [[6 , 4, 2]] ⊗ [[4 , 2, 2]] ⊗2 is slightly favored above ∼ 10 5 shots and achieves the smallest error near ns = 3 × 10 5. The lowest ns of the highest density codes [[4 , 2, 2]] ⊗2 and [[6 , 4, 2]] ⊗ [[4 , 2, 2]] ⊗2 were removed since their total number of accepted shots was too low to be representative. 2 6 10 14 18 22 26 
+
+N   
+
+> 10 0
+> 10 1
+> 10 2
+> T
+> Tshot
+> Tshot (approximate)
+> Tacc
+> Tacc (approximate) unencoded Q=0
+
+FIG. 26. Failure horizons of the monolithic [[ N +2 , N, 2]] code at p2 = 0 .003, for N = 2 to N = 26 ( nd = 2). A median of 10 4
+
+shots was used. Small and large N required a larger number of shots (up to 2 .5 · 10 7). 
+
+1. Resource Requirements and Scalings with System Size 
+
+In this section, we detail the scalings of the encoded cir-cuits, which are split into two parts. The two-qubit gate count associated with a single Trotter step is Gstep . The “fixed” part of the circuit refers to the constant overhead that does not depend on the number of Trotter steps: the encoding, midcircuit measurements and decoding which contribute Gfixed two-qubit gates. Together, they deter-mine Gtot = Gfixed + k G step , where k is the number of Trotter steps, which is the total two-qubit-equivalent gate count. The gate-count error budget x ≡ p2 Gtot is the defining characteristic of the circuit that captures the noise impact of the circuit on the acceptance rate. We will see that it reveals a universal scaling. For the monolithic [[ N +2 , N, 2]] code (with nd=2 and at least two Trotter steps): 
+
+Gfixed (N, n d) = 6 N + 18 + (2 N + 8) nd, (20) 
+
+Gstep (N ) = N 2 
+
+> 2
+
++ 2 N. (21) For a general partitioning, 
+
+Gfixed (N, P, n d) = (2 N + 2 P ) + ( nd + 2)(2 N + 8 P )= (6 + 2 nd)N + (18 + 8 nd)P , Gstep (N, P, X ) = N 2 
+
+> 2
+
++ 2 N + 14( P −1) + 4 ˜X, (22) where ˜X depends on the location of the boundary (see App. E for more details). It counts the nonzero electric 
+
+bZ bZ pairs that a boundary cuts, raising the requirements from 2 to 6 CNOT gates. With L = N/ 2, the nonzero contributions are exactly those with both sites below L
+
+and those with both sites above it (with coefficients pro-portional to L − max( l, n ) to min( l, n ) − L, respectively). Since no nonzero pair crosses the middle at L (which be-longs to the left half), a boundary can only split pairs whose two sites lie in the same half of the bipartition. Writing s<p and s>p for the number of sites of block p in 19 the left and right half, 13 
+
+˜X =
+
+h L
+
+> 2
+
+ − X
+
+> p
+
+ s<p
+
+> 2
+
+i
+
++
+
+h L−12
+
+ − X
+
+> p
+
+ s>p
+
+> 2
+
+i
+
+. (23) A boundary at the midpoint therefore does not gener-ate a split, which makes equal halves the one free two-block partition: 14 at N =8, [4 , 4] has ˜X=0 and Gstep =62, against [6 , 2] with ˜X=2 and 70 and [2 , 6] with ˜X=4 and 78, all three sharing the same Gfixed . In particular, this implies that the [6 , 2] encoding requires fewer resources than the [2 , 6] encoding, even though both are based on the same combination of Iceberg codes. Similarly [4,2,2] requires fewer resources than [2,2,4] and [2,4,2] which is the most resource heavy partition. We use these scaling considerations to understand as-pects of the structure of the monolithic Iceberg code. In particular, the acceptance re-scaling onto a single, uni-versal curve in the resource variable x = p2 Gtot (N, t ) = 
+
+p2 [Gfixed (N ) + k G step (N )] for all N ≥ 6 (see Fig. 27a). The predefined cutoff criterion is the time/depth at which the acceptance rate first reaches 1%. This crossing is reached for: x∗ = 6 .75 ± 0.2. The decay is not ex-actly an exponential, as is indicated by the black dashed line. Above x ∼ 7, the curves have reached their accep-tance floor and the points are scattered around a common mean. The two smallest N are excluded from the plot since they reach their floor too early. The post-selected acceptance rate does not decay to zero since a corrupted state still passes every check with nonzero probability. 
+
+Sfloor (N ) ≈ α f Gauss (N ) with fGauss =   NN/ 2
+
+/2N . The prefactor α ∼ 0.01 depends on nd and slightly on N . For the nd = 2 simulation, it is of order α ≈ 0.01 and varies slightly as a function of N .If the floor is subtracted, as shown in Fig. 27 (b), the decay is exponential ∼ e−0.74 x and the crossing sits at the universal value of x∗ = 6 .23 ± 0.16. After floor sub-traction, any considered system size can be included, see Fig. 27 (c). The blue dots show the unsubtracted data which collapses to the red band when the floor is sub-tracted. 
+
+2. Injection model 
+
+In each post-selected circuit, the acceptance rate curve 
+
+S(x) is the fraction of shots retained after postselection at a fixed number of shots. To understand the structure and scaling of the encoded time evolution circuits better, we compute the probability that one-qubit and two-qubit                      
+
+> 13 Note that s<pis strictly in the left half ( i < L ) and s>pstrictly in the right ( i > L ).
+> 14 The notation [ n1, n 2] and [ n1, n 2, n 3] is shorthand for [[ n1+2, n 1,2]] ⊗[[ n2+ 2 , n 2,2]] and [[ n1+ 2 , n 1,2]] ⊗[[ n2+ 2 , n 2,2]] ⊗
+> [[ n3+ 2 , n 3,2]], respectively.
+
+qubit errors are detected, and how many errors can re-main in accepted shots. The errors are assumed to follow independent Poisson processes. Starting from the same circuit used in the noisy simula-tions, the depolarizing noise is removed and specific Pauli errors are inserted after selected one-qubit and two-qubit gates. By injecting one error at a time, the probability that each error is rejected by postselection or stabilizer measurements can be measured. In this noise model, the expected numbers of one-qubit and two-qubit errors are 
+
+μ1 = 340 p G 1 + O(p2), μ2 = 15 16 p G 2 + O(p2) , (24) where G1 and G2 denote the number of noisy one-qubit and two-qubit gates, respectively. The acceptance prob-ability of a shot with Pauli error P inserted after gate location i is aiP . Hence, fiP ≡ 1 − aiP is the correspond-ing detection probability. This injection experiment determines how often such faults are detected, given by f1 (one-qubit errors) and f2
+
+(two-qubit errors), which are the averages of fiP over locations, and errors restricted to the Trotter part of the circuit. The two-qubit error in the fixed region are denoted by ¯f2 and the total number in the cir-cuit ˜f2 is the gate-weighted average of f2 and ¯f2, i.e. ˜f2 = Gfixed 
+
+> Gtot
+
+¯f2 +
+
+
+
+1 − Gfixed 
+
+> Gtot
+
+
+
+f2. 15 The expected total number of detected errors is therefore λdet = μ1f1 + μ2 ˜f2
+
+resulting in an acceptance probability of S = e−λdet .In the following, we fix N = 8. Denoting the probabil-ity that a shot contains exactly n faults by P (μ, n ) = 
+
+μne−μ/n ! and its probability to be accepted by an,then the acceptance rate can be decomposed as S =P 
+
+> n
+
+P (μ, n )an. The an are determined by: 
+
+a1 = μ2 (1 − ˜f2) + μ1 (1 − f1)
+
+μ , a0 = 1 , (25) 
+
+an = Sfloor + ( a2 − Sfloor )
+
+ a2
+
+a1
+
+n−2
+
+(n ≥ 2) . (26) We verify this ansatz for an by computing the first 13 
+
+an’s directly in the injection model. The measured error detection probabilities are 16 
+
+f1 ∼ 0.90 − 0.15 /k, f 2 ∼ 0.88 − 0.06 /k, ¯f2 = 0 .95 (27) indicating that errors in the encoding, decoding and syn-drome measurement part are caught at a higher rate. In practice, this allows to use qubits with a higher error rate as ancilla qubits. The acceptance rate curve for the in-jection model at N = 8 is shown in red in Fig. 27(a) and matches our simulated data.        
+
+> 15 The fault ratio of one-qubit gates to two-qubit gates in the fixed region is 225
+> N+36 20 N+68 and hence negligible so we omit them for brevity.
+> 16 The one-qubit errors in the non Trotter step part of the circuit are only caught with ¯f1= 0 .73.
+
+20 0 4 8 12 16 
+
+x = p2Gtot 
+
+> 0.001 0.01 0.1 1
+> S
+
+(a)     
+
+> acceptance floor
+> e−0.68 x
+> injection model
+> 04812 16
+
+x = p2Gtot 
+
+> 0.001 0.01 0.1 1
+> S − Sfloor (N )
+
+(b)    
+
+> e−0.74 x
+> 410 16 22
+
+N
+
+> 6789
+> x∗
+
+(c)        
+
+> raw floor-subtracted
+> 2610 14 18 22 26
+
+N
+
+FIG. 27. Acceptance rates for the monolithic [[ N +2 , N, 2]] code at p2 = 0 .003. (a) Acceptance rate vs. the gate requirements 
+
+x = p G tot (N, t ). Colored points: N = 6–26. The red curve is the injection-based model of Section V 2. The shaded band spans the measured acceptance floors for N = 6–12; dotted lines indicate the acceptance rate falling below the 1% threshold at the mean crossing budget x∗ = 6 .75. (b) The floor-subtracted acceptance rate collapses the lattice sizes N = 2 to 26 onto a single curve; the single curve decays exponentially as indicated by the dashed line corresponding to e−0.74 x. The dotted lines mark the 1% threshold x∗ = 6 .23. (c) x∗ against N . The raw crossing (open circles, taken from (a)) is inflated at small N , where the floor is a large fraction of the threshold, and drifts down at large N ; the floor-subtracted crossing (filled circles, taken from (b)) is flat, x∗ = 6 .23 and roughly independent of N .
+
+3. Extrapolations to Large-L
+
+The x⋆ crossing point, where the acceptance rate drops to 1%, is scale invariant information about a curve we find to be universal for all considered N = [2 , 26] (see 
+
+e.g. , Fig 27). To extrapolate x⋆ to 100 qubits, we take its universal value and add an extrapolated floor value Sfloor (N = 100) back in resulting in a crossing at 
+
+x⋆(100) = 6 .47 ± 0.21. For our given parameters, the shot horizon is reached within 
+
+Tshot (100) = dt x∗/p − Gfixed (100) 
+
+Gstep (100) (28) = 6.47 /0.003 − 1034 2 · 5200 ∼ 0.1, (29) which is much less than one Trotter step at dt = 0 .5. To estimate the precision required to stay within the shot horizon for k Trotter steps, we can solve this equation for p instead. The corresponding estimates are listed in Table II. To estimate the accuracy horizon for 100 qubits, the data displayed in Fig. 26 must be extrapolated. The 
+
+Tacc (N ) for systems with N ≥ 20 are excluded as they reach their accuracy horizon within 2-3 Trotter steps and carry non-negligible uncertainties. The nine smaller N
+
+follow a power law with exponent −1.06 (with χ2/dof = 0.95). Hence, the precision required to perform k Trotter steps with N = 100 within the accuracy horizon may be estimated as: 
+
+pacc ,req = p T acc (100) 
+
+dt k = 0.003 × 0.312 
+
+k/ 2 . (30) The corresponding values for 20, 40 and 60 steps are listed in Table II. 
+
+monolithic [[102 , 100 , 2]] unencoded steps Gtot pshot ,req pacc ,req Gtot pacc ,req 
+
+20 105 ,034 6.2 × 10 −5 9.4 × 10 −5 100 ,000 5.9 × 10 −5
+
+40 209 ,034 4.7 × 10 −5 1.2 × 10 −5 200 ,000 2.9 × 10 −5
+
+60 313 ,034 3.1 × 10 −5 7.0 × 10 −6 300 ,000 2.5 × 10 −5
+
+TABLE II. Extrapolated error rate estimates required to evolve 100 logical qubits (describing a L = 50 lattice) through 20, 40 and 60 Trotter steps. pacc ,req denotes the accuracy re-quired to stay within the accuracy horizon given in Eq. (19). 
+
+pshot ,req is the required accuracy for an acceptance rate larger than 1%. The unencoded reference value is given in the right column. 
+
+The results of this section indicate that with N ∼ 100 and two-qubit gate fidelities at the 10 −6 level on a quan-tum computer with all-to-all connectivity, monolithic Ice-berg encodings appear to be able to improve the quality of (some) local observables, based on this noise model. 21    
+
+> VI. ENCODINGS IN HYPERCUBE CODES:
+> [[2 N, N, 2]]
+
+The [[4 , 2, 2]] code is the smallest member of the Iceberg code family, [[ N + 2 , N, 2]], with N an even integer. It is also the smallest member of another code family, the Hy-percube code family, [[2 N , N, 2]], where N is any integer. These code families prioritize different aspects of quan-tum error detection: Iceberg codes maximize the ratio of logical to physical qubits for distance-two codes while Hypercube codes contain ladders of transversal logical entangling gates. Therefore, it is worthwhile to explore how the Hypercube code family performs, compared to Iceberg codes, when carrying out quantum simulations of Trotterized time evolution of the Schwinger model.      
+
+> A. The [[8 ,3,2]] Hypercube Code
+
+To understand the Hypercube code family, it is beneficial to first describe its next smallest member: [[8 , 3, 2]] [114]. This code uses eight physical qubits to encode three logi-cal qubits and therefore has five syndrome generators. Its key defining characteristics are that both the three logi-cal CZ gates and the logical CCZ gate are all transversal. The logical Pauli operators are defined by 
+
+bX1 = ˆX1 ˆX2 ˆX3 ˆX4 , bZ1 = ˆZ1 ˆZ5 ,
+
+bX2 = ˆX1 ˆX2 ˆX5 ˆX6 , bZ2 = ˆZ1 ˆZ3 ,
+
+bX3 = ˆX1 ˆX3 ˆX5 ˆX7 , bZ3 = ˆZ1 ˆZ2 , (31) where ˆXi is a Pauli X acting on the ith qubit. Analogous to the [[4,2,2]] code, the |¯0¯ 0¯ 0⟩ state is the |GHZ(8) ⟩ state, 
+
+|¯0¯ 0¯ 0⟩ =
+
+ |00000000 ⟩ + |11111111 ⟩√2
+
+
+
+, (32) these logical operators in Eq. (31) acting on the |¯0¯ 0¯ 0⟩
+
+give the full dimension eight logical basis. The set of stabilizers is comprised of four weight-four Z stabilizers and one weight-eight X stabilizer, ˆSZ =
+
+
+
+ˆZ1 ˆZ2 ˆZ3 ˆZ4
+
+ˆZ5 ˆZ6 ˆZ7 ˆZ8
+
+ˆZ1 ˆZ2 ˆZ5 ˆZ6
+
+ˆZ1 ˆZ3 ˆZ5 ˆZ7
+
+
+
+,
+
+ˆSX = ˆX1 ˆX2 ˆX3 ˆX4 ˆX5 ˆX6 ˆX7 ˆX8 . (33) To better understand the structure of [[8 , 3, 2]] and gen-eralize it to higher members of the Hypercube family, it is helpful to use its geometric representation, shown in Fig. 28. The eight physical qubits are represented as the vertices of a 3D cube. The Z stabilizers are associated with the six faces of the cube, of which only four are independent operators, and the X stabilizer acts on all eight physical qubits and is therefore associated with the entire cube. The logical X operators are associated with three faces of the cube and the corresponding logical Z operators are associated with edges of the cube. The po-tential benefit of utilizing the [[8 , 3, 2]] code (or any Hy-percube code) is that the multi-qubit entangling gates 
+
+C(n)Z, with 1 ≤ n ≤ D − 1, are transversal. An example of such a transversal gate within a [[8 , 3, 2]] codeblock is 
+
+dCZ 12 = ˆS1 ˆS† 
+
+> 3
+
+ˆS† 
+
+> 5
+
+ˆS7 . (34) Notice that in Fig. 28, the undaggered operators corre-spond to white vertices, while daggered ones correspond to black vertices. The benefit of using this encoding may not be manifest using Trotter time evolution, and post-Trotter methods, e.g. , Ref. [100], are better suited for this code family. Further details about this code can be found in App. F 1. The generalization to larger members of this code is carried out by utilizing this same geometric picture, but with higher dimensional codes. The generalization is: 
+
+• Physical qubits are associated with the corners of an N -dimensional Hypercube. 
+
+• X stabilizer is weight 2 N and acts on all 2 N phys-ical qubits. Z stabilizers are weight-four and asso-ciated with the  N
+
+> 2
+
+2N −2 two-dimensional faces of the Hypercube. Since there are only 2 N − N − 1Z stabilizers, there is a convention choice for which faces to choose. 
+
+• Logical |¯0⟩⊗N state is GHZ(2 N ) .
+
+• Logical Z operators are weight-2 and are associated with the edges of the Hypercube. Logical X oper-ators are weight 2 N −1, associated with the facets (co-dimension 1 faces) of the Hypercube and share one physical qubit with the corresponding logical Z operator. 
+
+• The CnZ gates within a codeblock are transversal, and are associated with ( n + 1)-dimensional faces of the Hypercube. Note that for N = 3, a two-dimensional face is also a facet of co-dimension one. This is why, for N = 3, both the Z stabilizers and logical X operators are associated with the faces of the cube. For more details see App. F. As the computations in this work are performed using classical simulators, the only two Hypercube codes that are considered are [[8 , 3, 2]] and [[16 , 4, 2]].  
+
+> B. The [[16, 4, 2]] Hypercube Code
+
+The Hypercube code corresponding to D = 4 is the [[16 , 4, 2]] code, using sixteen physical qubits to encode four logical qubits with a distance of two. Continuing with the geometric picture for the [[8, 3, 2]] code, the 22 [[16, 4, 2]] code is represented by a 4D Hypercube. Rep-resentative logical Pauli operators are (see App. F 2 for more details), 
+
+bX1 = ˆX9 ˆX10 ˆX11 ˆX12 ˆX13 ˆX14 ˆX15 ˆX16 ,
+
+bZ1 = ˆZ1 ˆZ9 . (35) Each set of logical X and Z operators share only one phys-ical qubit, ensuring the correct commutation relations are maintained. The sixteen codewords can be generalized as follows: 
+
+|¯l⟩ = 1
+
+√2
+
+> 16
+
+O
+
+> q=1
+
+|l · x(q)⟩ +
+
+> 16
+
+O
+
+> q=1
+
+|l · x(q) ⊕ 1⟩
+
+!
+
+(36) where |¯l⟩ = |¯l1 ¯l2 ¯l3 ¯l4⟩, and x(q) = ( x1, x 2, x 3, x 4) ∈ F42 is the coordinate vector of qubit q, defined by q = 8 x1 +4x2 + 2 x3 + x4 + 1. This is the superposition of l · x =
+
+l1x1 ⊕ l2x2 ⊕ l3x3 ⊕ l4x4 evaluated over the vertices of the Hypercube, together with its complement. Specifically, 
+
+|¯0¯ 0¯ 0¯ 0⟩ is the 16-qubit GHZ state. Further details about this code can be found in App. F 2. 1                        
+
+> 4
+> 6
+> 7
+> 2
+> 3
+> 8
+> 56
+> 7
+> 8
+> 5
+> 1
+> 42
+> 3
+> 1
+> 4
+> 6
+> 7
+> 2
+> 3
+> 8
+> 5
+> 1
+> 4
+> 6
+> 7
+> 2
+> 3
+> 8
+> 5
+> 1
+> 4
+> 6
+> 7
+> 2
+> 3
+> 8
+> 5
+> 1
+> 4
+> 6
+> 7
+> 2
+> 3
+> 8
+> 5
+> !"#$ :&!&"&#&$
+> !"#$ :&%&&&'&(
+> !"#$ :&!&"&%&&
+> !"#$ :&!&#&%&'
+> !"#$ :'!'"'#'$'%'&'''(6
+> 7
+> 8
+> 5
+> 1
+> 42
+> 31
+> 4
+> 6
+> 7
+> 2
+> 3
+> 8
+> 5
+> '!
+> )='!'"'#'$'"
+> )='!'"'%'&
+> 1
+> 4
+> 6
+> 7
+> 2
+> 3
+> 8
+> 5
+> '#
+> )=&!&#&%&'
+> 4
+> 6
+> 7
+> 2
+> 3
+> 8
+> 5
+> 11
+> 4
+> 6
+> 7
+> 2
+> 3
+> 8
+> 5
+> 1
+> 4
+> 6
+> 7
+> 2
+> 3
+> 8
+> 5
+> &!
+> )=&!&%&"
+> )=&!&#&#
+> )=&!&"
+
+FIG. 28. Geometric representation of the physical qubits, stabilizers and logical ˆX and ˆZ operators for the [[8,3,2]] quan-tum error detecting code. −0.50 
+
+−0.25 0.00 0.25 0.50 
+
+> ¯Σ − Σref
+
+(a) N = 2, p2 = 0 .01 (b) N = 6, p2 = 0 .003 
+
+0 10 20 
+
+t
+
+0.01 0.1 1
+
+> S
+
+(c) 
+
+0 5 10 
+
+t
+
+(d) 
+
+[[4 , 2, 2]] [[8 , 3, 2]] [[8 , 3, 2]] ⊗2
+
+[[8 , 6, 2]] unencoded Q = 0 
+
+FIG. 29. The chiral condensate in the (a): L = 1 and (b): 
+
+L = 3 Schwinger model embedded into the [[4 , 2, 2]] (orange), [[8 , 3, 2]] (green), [[8 , 3, 2]] ⊗2 (green, open) and [[8 , 6, 2]] (blue) code with Gauss law postselection. The postselected, unen-coded curve is drawn in brown. Shown is the deviation from the noiseless, unencoded reference as a function of time start-ing from the Neel state. The encoded points are using two layers of FT error detection at the 1 /3 and 2 /3 points during the evolution. The Trotterized simulations were performed using 10 5 shots and depolarizing noise p2 = 0 .01 ( L = 1) and 
+
+p2 = 0 .003 ( L = 3), respectively. The bottom panel shows the corresponding acceptance rate as a function of time. The 
+
+L = 1 simulation used 3 · 10 6 shots per point; L = 3 used up to 5 · 10 5.
+
+C. Iceberg vs Hypercube Comparison 
+
+The encoding of the Schwinger model Hamiltonian into the Hypercube codes works analogously to the Iceberg encoding that we discussed in detail in previous sections. The circuits of the Trotterized time evolution introduce non-FT rotations, as it was the case for the Iceberg en-coding. The state preparation circuits to encode the ini-tial Neel state for the Hypercube codes match the ones outlined in Fig. 2. For larger systems, such as the one considered in this section, we found it to be beneficial to skip the bZ which adds 2 N CNOT gates. Since the stabi-lizer structure is similar, i.e. ˆSX is a product of an even number of ˆXi and ˆSZ of ˆZi, we can use the same FT flag-ging for the stabilizer checks as for the Iceberg codes 2. After non-FT time evolution, we use the same decoding procedure as outlined in Fig 4 for the Iceberg codes in-cluding the syndrome measurement and final Gauss law postselection. For a comparison of gate counts between the Iceberg and Hypercube codes see App. F 3. The quantum simulations are performed using the same mass 
+
+m, coupling g, Trotter step dt and isotropic depolariz-ing noise model that was used throughout the previous sections. A point of comparison between the Iceberg codes and Hypercube codes is the accuracy of the chiral condensate 23 −0.2                              
+
+> −0.10.00.1
+> ¯Σ − Σref
+> (a) N= 4, p2= 0 .005
+> 012345
+> t
+> 0.01 0.1 1
+> S
+> (b)
+> [[16 ,4,2]] [[6 ,4,2]] [[4 ,2,2]] ⊗2
+> unencoded Q= 0
+> FIG. 30. The chiral condensate in the L= 2 Schwinger model embedded into the [[16 ,4,2]] (red), [[4 ,2,2]] ⊗2(orange) and [[6 ,4,2]] (blue) code with Gauss law postselection. The post-selected, unencoded curve is drawn in brown. Shown is the deviation from the noiseless, unencoded reference as a func-tion of time starting from the Neel state. The encoded points are using two layers of FT error detection at the 1 /3 and 2 /3points during the evolution. The Trotterized simulations were performed using 10 5shots and depolarizing noise p2= 0 .005. The bottom panel (b) shows the corresponding acceptance rate as a function of time.
+
+expectation value after a given number of Trotter steps, initialized on the Neel state for L = 1 , 2 and 3 of the Schwinger model, as discussed above. Due to the staggering of the lattice, the Schwinger model requires an even number of lattice sites which is at odds with the three logical sites of the [[8 , 3, 2]] code. Hence, we can only encode the L = 1 system and the im-plementation of the [[8 , 3, 2]] keeps one logical qubit idle. The corresponding Iceberg code is the [[4 , 2, 2]] code. The mismatch in encoding overhead is immediately obvious: The [[4 , 2, 2]] code requires 4 physical qubits and has two stabilizers. The FT flags 2 require 2 ancillas for measur-ing a stabilizer. The [[8 , 3, 2]] code requires 8 physical and has five stabilizers. The results of the simulation are presented in Fig. 29 and Fig. 30. Both Figures display the time evolution of the chiral condensate (with the noiseless reference value subtracted) as a function of time. While both the Ice-berg code and the Hypercube code have similar levels of accuracy, the acceptance rate of the Hypercube code is found to decay significantly faster.  
+
+> VII. SUMMARY AND OUTLOOK
+
+Optimizing the scientific impact of near-term quantum computers requires tuning all aspects of simulations to minimize a combination of systematic and statistical er-rors in target observables. With continually improving physical qubit fidelities and gate operations, simulations with partial FT and error detection provide a near-term step away from the NISQ era toward fully error-corrected simulations. Our recent work showing a substantial re-duction in simulation errors through encoded simulations with error detection using IBM’s quantum computers, along with a number of other works and foundational the-oretical papers, provides motivation for further exploring this path at this time. In this work, we have explored small instances of the Schwinger model encoded into logical qubits with Hamming-distance-two error-detecting codes using clas-sical simulations under single-qubit and two-qubit depo-larizing noise and all-to-all connectivity. Error detection was implemented by a small number of layers of FT sta-bilizer measurements. Post-processing error mitigation was not implemented to clearly isolate the role of error-detection. We anticipate that the combination of error detection removing leading-order errors with error mit-igation suppressing higher-order errors will further re-duce the uncertainties in observables of interest. We have quantified the performance of both Iceberg codes ([[ N + 2 , N, 2]]) and Hypercube codes ([[2 N , N, 2]]) for 
+
+L = 2 , 4, 6, with different degrees of error resolution, but without including spacetime optimizations in event rejec-tion. Imposing limits on the quantum resources available for simulation means that tunings are required for opti-mizing the quality of target observables, particularly in situations where the total shot-rejection rate is high, re-sulting in small ensembles for post processing. While an obvious point, embedding the codespace into a much larger Hilbert space usefully reduces O(p2) errors down to some easily calculable floor. This is helpful for signal ex-traction at late times through high statistics production runs, when the shot rejection rate remains exponential in time, increasing the time before the codespace becomes uniformly populated by shots. As the Schwinger model Hamiltonian conserves electric charge, final-state postselection into the same charge sec-tor as the initial state removes the charge-violating O(p)errors, without encoding. It is in the size of the sub-leading O(p2) errors where encoding into logical qubits and layers of FT error-detection is shown to reduce de-viations from exact results, limited by the circuit depth of one Trotter step and by the number of shots surviv-ing at the end of the simulation. While the encoding overhead degrades the quality of observables due to the increased noise per unit time, this is compensated for by a modest number of layers of error detection, out to large numbers of Trotter steps for the considered error rates. The [[10 , 8, 2]] code provides comparable results to the other possible partitions for L = 4, with [[6 , 4, 2]] ⊗2
+
+being optimal. For a fixed Trotter-step size, there is an optimal (uniform) density of detection layers interspersed between steps that minimizes the O(p2) errors (including postselection). For the [[10 , 8, 2]] code, the effectiveness of a fixed number of error-detection layers decreases with increasing number of Trotter steps, and for the selected 24 couplings in the Hamiltonian and noise parameters, evo-lution through 90 Trotter steps remains essentially op-timal for 8 layers. This effect is analogous to the error in Trotterized time evolution and is expected to be a generic feature of quantum simulations with sparse error detection. Simulations with the same parameters and constraints were performed using Hypercube encodings, and compared with the results of Iceberg encodings. The quality of the results in reducing systematic uncertainties is found to be comparable. However, the shot rejection rate is higher, due to the larger ratio of physical to logical qubits, and corresponding deeper circuit depths, relegat-ing them to second place behind Iceberg codes in resource constrained scenarios. Different simulation parameters will require a new tuning to identify the optimal density of error-detection layers. Simulations on present-day and near-term quantum computers will likely benefit from utilizing light-weight logical encodings, such as Iceberg and Hypercube codes, with sparse FT error-detection layers implemented dur-ing time evolution. This holds for simulations performed with sufficient resources to furnish post-selected ensem-bles that yield statistical errors within desired tolerances for target observables within the required time interval. Even prior to full FT powered by magic state injection or code switching, partially FT schemes such as those described in this work will prove advantageous. While these schemes require careful tuning to balance resource overhead with accuracy gains, their benefit to quantum simulations of fundamental physics can likely be realized on the current generation of quantum hardware. 
+
+> ACKNOWLEDGMENTS
+
+This work was supported by U.S. Department of En-ergy, Office of Science, Office of Nuclear Physics, In-Qubator for Quantum Simulation (IQuS) 17 under Award Number DOE (NP) Award DE-SC0020970 via the pro-gram on Quantum Horizons: QIS Research and Innova-tion for Nuclear Science 18 . Support is also acknowledged from the U.S. Department of Energy, Office of Science, National Quantum Information Science Research Cen-ters, Quantum Systems Accelerator (Award No. DE-SCL0000121). This work was also supported by the U.S. Department of Energy, Office of Science, Office of Nuclear Physics, Grant No. DE-FG02-97ER-41014 (UW Nuclear Theory). S.G. was supported in part by a Feodor Lynen Research fellowship of the Alexander von Humboldt foun-dation. This work was also supported, in part, through the Department of Physics 19 and the College of Arts and    
+
+> 17 https://iqus.uw.edu
+> 18 https://science.osti.gov/np/Research/ Quantum-Information-Science
+> 19 https://phys.washington.edu
+
+Sciences 20 at the University of Washington. This work was enabled, in part, by the use of advanced computa-tional, storage and networking infrastructure provided by the Hyak supercomputer system at the University of Washington. We acknowledge the use of Claude for code development. 
+
+> Appendix A: Coherent Error Propagation
+
+FT is central to parametric error suppression in quantum simulation. Specifically, as discussed in the main text, naively detectable single-qubit errors can become multi-qubit coherent errors with non-FT circuit designs, leaving the systems in the codeword space but with incorrect quantum amplitudes at O(p). The simplest examples of such error proliferation are shown in Figs. 31 and 32, where ˆX and ˆZ Pauli errors become correlated multi-Pauli errors via the CNOT gate.          
+
+> ,
+> FIG. 31. The propagation of single-qubit ˆXerrors via a CNOT gate.
+> FIG. 32. The propagation of single-qubit ˆZerrors via a CNOT gate.
+> Appendix B: Details of [[4 ,2,2]] ⊗2
+
+The Q = 0 codewords of the [[4 , 2, 2]] ⊗2 encoding, and the physical states they correspond to, are given by 
+
+| ⟩ = |¯0¯ 1⟩ ⊗ | ¯0¯ 1⟩
+
+= 12 (| 0101 0101 ⟩ + | 0101 1010 ⟩
+
++| 1010 0101 ⟩ + | 1010 1010 ⟩) ,
+
+|e+e− ⟩ = |¯1¯ 0⟩ ⊗ | ¯0¯ 1⟩
+
+= 12 (| 1100 0101 ⟩ + | 1100 1010 ⟩
+
++| 0011 0101 ⟩ + | 0011 1010 ⟩) ,
+
+| e+e−⟩ = |¯0¯ 1⟩ ⊗ | ¯1¯ 0⟩ 
+
+> 20 https://www.artsci.washington.edu
+
+25 = 12 (| 0101 1100 ⟩ + | 0101 0011 ⟩
+
++| 1010 1100 ⟩ + | 1010 0011 ⟩) ,
+
+| e−e+ ⟩ = |¯0¯ 0⟩ ⊗ | ¯1¯ 1⟩
+
+= 12 (| 0000 0110 ⟩ + | 0000 1001 ⟩
+
++| 1111 0110 ⟩ + | 1111 1001 ⟩) ,
+
+|e+ e−⟩ = |¯1¯ 1⟩ ⊗ | ¯0¯ 0⟩
+
+= 12 (| 0110 0000 ⟩ + | 0110 1111 ⟩
+
++| 1001 0000 ⟩ + | 1001 1111 ⟩) ,
+
+|e+e−e+e−⟩ = |¯1¯ 0⟩ ⊗ | ¯1¯ 0⟩
+
+= 12 (| 1100 1100 ⟩ + | 1100 0011 ⟩
+
++| 0011 1100 ⟩ + | 0011 0011 ⟩) ,
+
+(B1) 
+
+Appendix C: Details of [[6,4,2]] 
+
+In this appendix, we provide details of the quantum cir-cuits, codewords and observables used in simulations of the [[6 , 4, 2]] embedding of the L = 2 Schwinger model, with two and three stabilizer checks. We start by considering the evolution of this system without any flags or FT/EC. There are at least two ways we have identified for preparing the Neel state, as shown in Fig. 33. One may be more readily made FT than the 
+
+FIG. 33. Two quantum circuits for preparing the Neel state in [[6,4,2]]. 
+
+other, depending on the nature of the errors. The mass term given in Eq. (10) can be implemented with the circuit shown in Fig. 34. The kinetic term, after canceling contributions to the top and bottom qubits, is implemented by the circuit in Fig. 35. The contribution to the evolution operator from the gauge field, given in Eq. (10), is shown in Fig. 36. The single-qubit phase contributions to the gluon and mass circuits can be com-bined using the circuit in Fig. 34 with the replacement 
+
+θ1 = tm → t(m + g2) , θ2 = tm → t(m − g2
+
+2 )
+
+FIG. 34. The quantum circuit implementing the mass term, corresponding to e−i θ   
+
+> 2(−ˆZL1+ ˆZL2−ˆZL3+ ˆZL4)
+
+. Matching to the Hamiltonian gives θ = tm .
+
+FIG. 35. The quantum circuit implementing e−iθ (σ+2 σ− 
+
+> 3+h .c.)
+
+e−iθ (σ+1 σ−  
+
+> 2+h .c.)
+
+e−iθ (σ+3 σ− 
+
+> 4+h .c.)
+
+, from the Hamiltonian given in Eq. (10). Matching to the Hamiltonian gives θ = t/ 2. 
+
+FIG. 36. The quantum circuit implementing 
+
+e−iθ ( ˆZL1 ˆZL2+ 12 ˆZL1 ˆZL3+ 12 ˆZL2 ˆZL3) e−iθ (− ˆZL1− 12 ˆZL2− 12 ˆZL3) from the Hamiltonian given in Eq. (10). Matching to the Hamilto-nian gives θ = g2t/ 2. 
+
+θ3 = tm → t(m + g2
+
+2 ) , θ4 = tm → tm . (C1) and without including the corresponding gates in Fig. 36. In the case of the symmetric gauge circuit, the single-qubit phases can be combined to give 
+
+θ1 = tm → t(m + g2
+
+2 ) , θ2 = tm → tm θ3 = tm → tm , θ4 = tm → t(m + g2
+
+2 ) . (C2) Preparing the circuit for measurement, to reduce the post-processing overhead, the superposition logical states is transformed back to a single state. The states in the 26 
+
+Q = 0 sector are of the form 
+
+|ψ⟩ ∼ |0abcd 0⟩ + |1˜ a˜b˜c ˜d1⟩ , (C3) and Fig. 37 shows the final circuit element added to 
+
+FIG. 37. The final-stage circuit element, to be included immediately prior to measurement, to bring the wavefunction into a simpler form for post-processing, see Eq. (C3). 
+
+transform states in the Q = 0 sector (more precisely even-charge sectors) back to physical basis for post-processing, 
+
+|ψ⟩ ∼ | 0abcd 0⟩ + |1˜ a˜b˜c ˜d1⟩ → | 0abcd 0⟩ . (C4) This also has the nice feature of eliminating single- ˆZ er-rors, as 
+
+|ψ⟩ ∼ | 0abcd 0⟩ − | 1˜ a˜b˜c ˜d1⟩ → | 1abcd 0⟩ , (C5) which is projected out in post-processing. Counting CNOTs and circuit depth, there are 6-CNOTs with depth-4 for preparing the Neel state, 20-CNOTs with depth-18 for one Trotter step, and 5-CNOTs of depth-3 for the final transformation. This gives a total of 11 + 20 NTrott CNOTs with depth 7 + 18 NTrott .
+
+Appendix D: Results for the [[10,8,2]] Encoding 
+
+The numerical values for the post-selected chiral con-densate as a function of time in the [[10,8,2]] encoding for up to nd = 8 are listed in Table III. 
+
+Appendix E: Resource Requirements for Scaling 
+
+In this appendix, we generalize the counts for the circuit of the monolithic code to different partitions and detail their decomposition. We can partition N into P blocks (P = 1 is the monolith Iceberg). For a block containing 
+
+np logical sites, the encoding and decoding cost np + 1 CNOT gates each 
+
+Gencode+decode = 2 
+
+> P
+
+X
+
+> p=1
+
+(np + 1) = 2 N + 2 P (E1) 
+
+time nd = 1 nd = 2 nd = 4 nd = 8 6.5 0.410(40) 0 .460(40) 0 .430(40) 0 .410(40) 11.5 0 .401(34) 0 .471(35) 0 .490(40) 0 .500(40) 12.5 0 .382(26) 0 .496(27) 0 .498(27) 0 .501(29) 13.5 0 .367(29) 0 .406(30) 0 .490(31) 0 .518(32) 15.5 0 .380(21) 0 .448(21) 0 .508(22) 0 .491(22) 16.5 0 .354(19) 0 .406(19) 0 .482(20) 0 .483(21) 19.5 0 .342(26) 0 .422(26) 0 .543(28) 0 .513(28) 21.5 0 .242(35) 0 .390(40) 0 .450(40) 0 .410(40) 22.5 0 .328(21) 0 .468(22) 0 .518(23) 0 .511(24) 23.5 0 .285(13) 0 .383(14) 0 .506(14) 0 .518(15) 26.5 0 .276(17) 0 .412(18) 0 .477(18) 0 .525(20) 27.5 0 .263(13) 0 .424(15) 0 .487(15) 0 .528(15) 30.5 0 .270(40) – – –31.5 0 .244(20) 0 .371(22) 0 .458(23) 0 .505(26) 34.5 0 .230(23) 0 .327(25) 0 .456(29) 0 .497(29) 37.5 0 .172(16) 0 .306(18) 0 .432(21) 0 .486(23) 38.5 0 .206(12) 0 .341(13) 0 .441(15) 0 .515(16) 40.5 0 .240(40) – – –41.5 0 .165(15) 0 .304(17) 0 .407(19) 0 .504(21) 42.5 0 .106(29) 0 .380(35) 0 .490(40) –44.5 0 .150(32) 0 .240(40) – –TABLE III. Post-selected chiral condensate as a function of time for the [[10,8,2]] Iceberg code with Nlayers = 1 , 2, 4, 8 lay-ers of error detection from 1.2M shots. Values are bootstrap mean with the standard deviation on the last digits in paren-theses; “–” denotes data with errors exceeding 0 .04. 
+
+assuming one round of syndrome extraction each. The stabilizer of block p acts on 
+
+wp = np + 2 , (E2) physical code qubits. The flagged SX extraction uses 
+
+wp CNOT gates touching the code qubits and two flag CNOT gates, for a total wp + 2 = np + 4. The linked SZ
+
+extraction has the same CNOT count. One full SX + SZ
+
+round therefore requires 2( np + 4) = 2 np + 8 for block p,or 
+
+G1round = 2 N + 8 P , (E3) over the complete partition. There are nd interior rounds and two bracket rounds. Hence 
+
+Gfixed (N, P, n d) = (2 N + 2 P ) + ( nd + 2)(2 N + 8 P )= (6 + 2 nd)N + (18 + 8 nd)P . (E4) The monolithic per step CNOT count is 2( N − 1) + 2   N 
+
+> 2
+
+− 12 + 2 N = N 2/2 + 2 N corresponding to kinetic and the electric ZZ and Z contribution. Taking into ac-count the cross partition ZZ terms for general partitions yields the general per-step count 
+
+Gstep (N, P, eX) = N 2
+
+2 + 2 N + 14( P − 1) + 4 eX. (E5) The 14( P −1) term depends only on the number of blocks. The 4 eX term contains all dependence on the positions of their boundaries. 27 
+
+Appendix F: Hypercube Codes 
+
+In this appendix, we provide details supporting the dis-cussion of Hypercube codes in main text. 
+
+1. [[8,3,2]] 
+
+The complete set of logical states is 
+
+|¯0¯ 0¯ 0⟩ =
+
+ |00000000 ⟩ + |11111111 ⟩√2
+
+
+
+,
+
+|¯1¯ 0¯ 0⟩ =
+
+ |11110000 ⟩ + |00001111 ⟩√2
+
+
+
+,
+
+|¯0¯ 1¯ 0⟩ =
+
+ |11001100 ⟩ + |00110011 ⟩√2
+
+
+
+,
+
+|¯1¯ 1¯ 0⟩ =
+
+ |00111100 ⟩ + |11000011 ⟩√2
+
+
+
+,
+
+|¯0¯ 0¯ 1⟩ =
+
+ |10101010 ⟩ + |01010101 ⟩√2
+
+
+
+,
+
+|¯1¯ 0¯ 1⟩ =
+
+ |01011010 ⟩ + |10100101 ⟩√2
+
+
+
+,
+
+|¯0¯ 1¯ 1⟩ =
+
+ |01100110 ⟩ + |10011001 ⟩√2
+
+
+
+,
+
+|¯1¯ 1¯ 1⟩ =
+
+ |10010110 ⟩ + |01101001 ⟩√2
+
+
+
+. (F1) Examples of transversal gates within a [[8 , 3, 2]] code-block are 
+
+dCZ 12 = ˆS1 ˆS† 
+
+> 3
+
+ˆS† 
+
+> 5
+
+ˆS7 ,
+
+dCZ 13 = ˆS1 ˆS† 
+
+> 2
+
+ˆS† 
+
+> 5
+
+ˆS6 ,
+
+dCZ 23 = ˆS1 ˆS† 
+
+> 2
+
+ˆS† 
+
+> 3
+
+ˆS4 ,
+
+[CCZ 123 = ˆT1 ˆT † 
+
+> 2
+
+ˆT † 
+
+> 3
+
+ˆT4 ˆT † 
+
+> 5
+
+ˆT6 ˆT7 ˆT † 
+
+> 8
+
+. (F2) 
+
+2. [[16,4,2]] 
+
+One choice for the logical operators is given by 
+
+bX1 = ˆX9 ˆX10 ˆX11 ˆX12 ˆX13 ˆX14 ˆX15 ˆX16 ,
+
+bX2 = ˆX5 ˆX6 ˆX7 ˆX8 ˆX13 ˆX14 ˆX15 ˆX16 ,
+
+bX3 = ˆX3 ˆX4 ˆX7 ˆX8 ˆX11 ˆX12 ˆX15 ˆX16 ,
+
+bX4 = ˆX2 ˆX4 ˆX6 ˆX8 ˆX10 ˆX12 ˆX14 ˆX16 , (F3) and 
+
+bZ1 = ˆZ1 ˆZ9 ,
+
+bZ2 = ˆZ1 ˆZ5 ,
+
+bZ3 = ˆZ1 ˆZ3 ,
+
+bZ4 = ˆZ1 ˆZ2 . (F4) The twelve stabilizers of the [[16 , 4, 2]] code are given by: ˆSZ =
+
+
+
+ˆZ13 ˆZ14 ˆZ15 ˆZ16 
+
+ˆZ11 ˆZ12 ˆZ15 ˆZ16 
+
+ˆZ10 ˆZ12 ˆZ14 ˆZ16 
+
+ˆZ7 ˆZ8 ˆZ15 ˆZ16 
+
+ˆZ6 ˆZ8 ˆZ14 ˆZ16 
+
+ˆZ4 ˆZ8 ˆZ12 ˆZ16 
+
+ˆZ9 ˆZ10 ˆZ11 ˆZ12 
+
+ˆZ5 ˆZ6 ˆZ7 ˆZ8
+
+ˆZ3 ˆZ7 ˆZ11 ˆZ15 
+
+ˆZ2 ˆZ6 ˆZ10 ˆZ14 
+
+ˆZ1 ˆZ2 ˆZ3 ˆZ4
+
+
+
+ˆSX = ˆX⊗16 = ˆX1 ˆX2 ˆX3 ... ˆX16 . (F5) Lastly, the tower of transversal logical entangling gates is built from the single-qubit phase gates ˆRn =
+
+1 00 eiπ/ 2n
+
+
+
+; (F6) note that ˆR1 = ˆS and ˆR2 = ˆT . Defining ˆRn,q for ˆRn
+
+acting on qubit q, the tower is 
+
+dCZ 12 = ˆR1,1 ˆR† 
+
+> 1,5
+
+ˆR† 
+
+> 1,9
+
+ˆR1,13 
+
+dCZ 13 = ˆR1,1 ˆR† 
+
+> 1,3
+
+ˆR† 
+
+> 1,9
+
+ˆR1,11 
+
+dCZ 14 = ˆR1,1 ˆR† 
+
+> 1,2
+
+ˆR† 
+
+> 1,9
+
+ˆR1,10 
+
+dCZ 23 = ˆR1,1 ˆR† 
+
+> 1,3
+
+ˆR† 
+
+> 1,5
+
+ˆR1,7
+
+dCZ 24 = ˆR1,1 ˆR† 
+
+> 1,2
+
+ˆR† 
+
+> 1,5
+
+ˆR1,6
+
+dCZ 34 = ˆR1,1 ˆR† 
+
+> 1,2
+
+ˆR† 
+
+> 1,3
+
+ˆR1,4 (F7) for two-qubit gates, 
+
+[CCZ 123 = ˆR2,1 ˆR† 
+
+> 2,3
+
+ˆR† 
+
+> 2,5
+
+ˆR2,7 ˆR† 
+
+> 2,9
+
+ˆR2,11 ˆR2,13 ˆR†
+
+> 2,15
+
+[CCZ 124 = ˆR2,1 ˆR† 
+
+> 2,2
+
+ˆR† 
+
+> 2,5
+
+ˆR2,6 ˆR† 
+
+> 2,9
+
+ˆR2,10 ˆR2,13 ˆR†
+
+> 2,14
+
+[CCZ 134 = ˆR2,1 ˆR† 
+
+> 2,2
+
+ˆR† 
+
+> 2,3
+
+ˆR2,4 ˆR† 
+
+> 2,9
+
+ˆR2,10 ˆR2,11 ˆR†
+
+> 2,12
+
+[CCZ 234 = ˆR2,1 ˆR† 
+
+> 2,2
+
+ˆR† 
+
+> 2,3
+
+ˆR2,4 ˆR† 
+
+> 2,5
+
+ˆR2,6 ˆR2,7 ˆR† 
+
+> 2,8
+
+(F8) for three-qubit gates and 
+
+\CCCZ 1234 = ˆR3,1 ˆR† 
+
+> 3,2
+
+ˆR† 
+
+> 3,3
+
+ˆR3,4 ˆR† 
+
+> 3,5
+
+ˆR3,6 ˆR3,7 ˆR†
+
+> 3,8
+
+ˆR† 
+
+> 3,9
+
+ˆR3,10 ˆR3,11 ˆR† 
+
+> 3,12
+
+ˆR3,13 ˆR†
+
+> 3,14
+
+ˆR† 
+
+> 3,15
+
+ˆR3,16 (F9) for the four-qubit gate. 28 
+
+3. Comparison of gate counts: Hypercubic and Iceberg 
+
+The two codes considered here are D = 3 : [[8 , 3, 2]] , D =4 : [[16 , 4, 2]]. Their minimum logical weights are asym-metric: [[8 , 3, 2]] : (dX , d Y , d Z ) = (4 , 5, 2) , (F10) [[16 , 4, 2]] : (dX , d Y , d Z ) = (8 , 9, 2) . (F11) Thus increasing the Hypercube dimension raises the pro-tection against X-type logical faults but leaves dZ = 2. For both codes, bZi has weight two. Consequently, an electric bZi bZj rotation costs two CNOT gates when its sites share a block and six when they occupy different blocks, exactly as for the Iceberg codes. The same cross-block electric-pair count bX of Eq. (23) therefore produces the same additional cost of 4 bX. The difference appears in the kinetic operators. After optimization, the physical supports and CNOT costs of one logical XX +Y Y bond, as given in Table IV. The within-block XX and Y Y rota-
+
+code location w(XX ) w(Y Y ) CNOT per bond Iceberg within a block 2 2 2Iceberg across blocks 4 6 16 [[8 , 3, 2]] within a block 4 4 6[[8 , 3, 2]] across blocks 8 10 32 [[16 , 4, 2]] within a block 8 8 14 [[16 , 4, 2]] across blocks 16 18 64 TABLE IV. Gate counts for Hypercube encodings. 
+
+tions commute and share one support. Hence, a weight-w
+
+pair costs 2( w − 1) CNOT gates. The cross-block rows contain two distinct supports and their CNOT costs are 2(8 − 1) + 2(10 − 1) = 32 and 2(16 − 1) + 2(18 − 1) = 64, respectively. 
+
+[1] S. Bravyi, A. W. Cross, J. M. Gambetta, D. Maslov, P. Rall, and T. J. Yoder, High-threshold and low-overhead fault-tolerant quantum memory, Nature 627 ,778–782 (2024). [2] Google Quantum AI and Collaborators, Quantum er-ror correction below the surface code threshold, Nature 
+
+638 , 920 (2025). [3] S. Krinner, N. Lacroix, A. Remm, A. Di Paolo, E. Genois, C. Leroux, C. Hellings, S. Lazar, F. Swiadek, J. Herrmann, G. J. Norris, C. K. Andersen, M. M¨ uller, A. Blais, C. Eichler, and A. Wallraff, Realizing repeated quantum error correction in a distance-three surface code, Nature 605 , 669 (2022), arXiv:2112.03708 [quant-ph]. [4] Y. Zhao, Y. Ye, H.-L. Huang, Y. Zhang, D. Wu, H. Guan, Q. Zhu, Z. Wei, T. He, S. Cao, et al. , Re-alization of an error-correcting surface code with super-conducting qubits, Phys. Rev. Lett. 129 , 030501 (2022), arXiv:2112.13505 [quant-ph]. [5] B. W. Reichardt, D. Aasen, R. Chao, A. Chernoguzov, W. van Dam, J. P. Gaebler, D. Gresh, D. Lucchetti, M. Mills, S. A. Moses, B. Neyenhuis, A. Paetznick, A. Paz, P. E. Siegfried, M. P. da Silva, K. M. Svore, Z. Wang, and M. Zanner, Demonstration of quantum computation and error correction with a tesseract code (2024), arXiv:2409.04628 [quant-ph]. [6] A. Paetznick, M. P. da Silva, C. Ryan-Anderson, J. M. Bello-Rivas, J. P. C. I. au2, A. Chernoguzov, J. M. Dreiling, C. Foltz, F. Frachon, J. P. Gaebler, T. M. Gatterman, L. Grans-Samuelsson, D. Gresh, D. Hayes, N. Hewitt, C. Holliman, C. V. Horst, J. Johansen, D. Lucchetti, Y. Matsuoka, M. Mills, S. A. Moses, B. Neyenhuis, A. Paz, J. Pino, P. Siegfried, A. Sun-daram, D. Tom, S. J. Wernli, M. Zanner, R. P. Stutz, and K. M. Svore, Demonstration of logical qubits and repeated error correction with better-than-physical er-ror rates (2024), arXiv:2404.02280 [quant-ph]. [7] A. Paetznick, B. W. Reichardt, M. P. da Silva, C. Ryan-Anderson, D. Aasen, J. M. Bello-Rivas, J. P. Campora, R. Chao, A. Chernoguzov, W. van Dam, J. M. Dreiling, C. Foltz, F. Frachon, J. P. Gaebler, T. M. Gatterman, L. Grans-Samuelsson, D. Gresh, D. Hayes, N. Hewitt, C. Holliman, C. V. Horst, J. Johansen, D. Lucchetti, Y. Matsuoka, M. Mills, S. A. Moses, B. Neyenhuis, A. Paz, J. Pino, P. Siegfried, A. Sundaram, D. Tom, Z. Wang, S. J. Wernli, M. Zanner, R. P. Stutz, and K. M. Svore, Improved quantum processor logical er-ror rates via correction and detection, Nature 654 , 349 (2026). [8] S. Dasu et al. , Computing with many encoded logical qubits beyond break-even, (2026), arXiv:2602.22211 [quant-ph]. [9] L. Postler, S. Heußen, I. Pogorelov, M. Rispler, T. Feld-ker, M. Meth, C. D. Marciniak, R. Stricker, M. Ring-bauer, R. Blatt, P. Schindler, M. M¨ uller, and T. Monz, Demonstration of fault-tolerant universal quantum gate operations, Nature 605 , 675 (2022), arXiv:2111.12654 [quant-ph]. [10] D. Bluvstein, S. J. Evered, A. O. Geim, S.-X. Li, H. Zhou, T. Manovitz, S. Ebadi, M. Cain, M. Kali-nowski, R. Dominici, et al. , A logical quantum proces-sor based on reconfigurable atom arrays, Nature 626 ,58 (2024). [11] P. S. Rodriguez et al. , Experimental demonstration of logical magic state distillation, Nature 645 , 620 (2025), arXiv:2412.15165 [quant-ph]. [12] D. Bluvstein et al. , A fault-tolerant neutral-atom ar-chitecture for universal quantum computation, Nature 
+
+649 , 39 (2026), [Erratum: Nature 650, E3 (2026)], arXiv:2506.20661 [quant-ph]. [13] B. W. Reichardt, A. Paetznick, D. Aasen, I. Basov, J. M. Bello-Rivas, P. Bonderson, R. Chao, W. van Dam, M. B. Hastings, R. V. Mishmash, A. Paz, M. P. da Silva, A. Sundaram, K. M. Svore, A. Vaschillo, Z. Wang, M. Zanner, W. B. Cairncross, C.-A. Chen, 29 
+
+D. Crow, H. Kim, J. M. Kindem, J. King, M. McDon-ald, M. A. Norcia, A. Ryou, M. Stone, L. Wadleigh, K. Barnes, P. Battaglino, T. C. Bohdanowicz, G. Booth, A. Brown, M. O. Brown, K. Cassella, R. Coxe, J. M. Epstein, M. Feldkamp, C. Griger, E. Halperin, A. Heinz, F. Hummel, M. Jaffe, A. M. W. Jones, E. Kapit, K. Kotru, J. Lauigan, M. Li, J. Marjanovic, E. Megidish, M. Meredith, R. Morshead, J. A. Mu-niz, S. Narayanaswami, C. Nishiguchi, T. Paule, K. A. Pawlak, K. L. Pudenz, D. R. P´ erez, J. Simon, A. Smull, D. Stack, M. Urbanek, R. J. M. van de Veerdonk, Z. Vendeiro, R. T. Weverka, T. Wilkason, T.-Y. Wu, X. Xie, E. Zalys-Geller, X. Zhang, and B. J. Bloom, Fault-tolerant quantum computation with a neutral atom processor (2025), arXiv:2411.11822 [quant-ph]. [14] V. V. Sivak, A. Eickbusch, B. Royer, S. Singh, I. Tsiout-sios, S. Ganjam, A. Miano, B. L. Brock, A. Z. Ding, L. Frunzio, S. M. Girvin, R. J. Schoelkopf, and M. H. Devoret, Real-time quantum error correction beyond break-even, Nature 616 , 50 (2023), arXiv:2211.09116 [quant-ph]. [15] H. Putterman, K. Noh, C. T. Hann, G. S. MacCabe, S. Aghaeimeibodi, R. N. Patel, M. Lee, W. M. Jones, H. Moradinejad, R. Rodriguez, et al. , Hardware-efficient quantum error correction via concatenated bosonic qubits, Nature 638 , 1125 (2025). [16] U. R´ eglade, A. Bocquet, R. Gautier, J. Cohen, A. Marquet, E. Albertinale, N. Pankratova, M. Hallen, F. Rautschke, L.-A. Sellem, P. Rouchon, A. Sarlette, M. Mirrahimi, P. Campagne-Ibarcq, R. Lescanne, S. Je-zouin, and Z. Leghtas, Quantum control of a cat qubit with bit-flip times exceeding ten seconds, Nature 629 ,778 (2024), arXiv:2307.06617 [quant-ph]. [17] P. W. Shor, Fault-tolerant quantum computation, in 
+
+Proceedings of the 37th Annual Symposium on Foun-dations of Computer Science (FOCS ’96) (IEEE Com-puter Society Press, Burlington, VT, USA, 1996) pp. 56–65, preprint arXiv:quant-ph/9605011. [18] J. Preskill, Reliable quantum computers, Proceedings of the Royal Society of London. Series A: Mathematical, Physical and Engineering Sciences 454 , 385–410 (1998). [19] D. Gottesman, Stabilizer Codes and Quantum Error Correction , Ph.D. thesis, California Institute of Tech-nology (1997), arXiv:quant-ph/9705052. [20] D. Gottesman, Theory of fault-tolerant quantum computation, Physical Review A 57 , 127 (1998), arXiv:quant-ph/9702029. [21] D. Gottesman, Fault-tolerant quantum computation with local gates, Journal of Modern Optics 47 , 333 (2000), arXiv:quant-ph/9903099. [22] C. W. Bauer et al. , Quantum Simulation for High-Energy Physics, PRX Quantum 4, 027001 (2023), arXiv:2204.03381 [quant-ph]. [23] C. W. Bauer, Z. Davoudi, N. Klco, and M. J. Sav-age, Quantum simulation of fundamental particles and forces, Nat. Rev. Phys. 5, 420 (2023), arXiv:2404.06298 [hep-ph]. [24] Z. Davoudi et al. , Report of the Snowmass 2021 Topi-cal Group on Lattice Gauge Theory, in Snowmass 2021 
+
+(2022) arXiv:2209.10758 [hep-lat]. [25] D. Beck et al. , Quantum Information Science and Tech-nology for Nuclear Physics. Input into U.S. Long-Range Planning, 2023 (2023) arXiv:2303.00113 [nucl-ex]. [26] S. Glashow, Partial Symmetries of Weak Interactions, Nucl. Phys. 22 , 579 (1961). [27] P. W. Higgs, Broken Symmetries and the Masses of Gauge Bosons, Phys. Rev. Lett. 13 , 508 (1964). [28] S. Weinberg, A Model of Leptons, Phys. Rev. Lett. 19 ,1264 (1967). [29] A. Salam, Weak and Electromagnetic Interactions, Conf. Proc. C 680519 , 367 (1968). [30] H. Politzer, Reliable Perturbative Results for Strong In-teractions?, Phys. Rev. Lett. 30 , 1346 (1973). [31] D. J. Gross and F. Wilczek, Ultraviolet Behavior of Nonabelian Gauge Theories, Phys. Rev. Lett. 30 , 1343 (1973). [32] K. G. Wilson, Confinement of Quarks, Phys. Rev. D 10 ,2445 (1974). [33] J. B. Kogut and L. Susskind, Hamiltonian Formulation of Wilson’s Lattice Gauge Theories, Phys. Rev. D 11 ,395 (1975). [34] M. Creutz, Confinement and the critical dimensionality of space-time, Phys. Rev. Lett. 43 , 553 (1979). [35] J. B. Kogut, An introduction to lattice gauge theory and spin systems, Rev. Mod. Phys. 51 , 659 (1979). [36] M. Creutz, L. Jacobs, and C. Rebbi, Experiments with a gauge invariant Ising system, Phys. Rev. Lett. 42 , 1390 (1979). [37] M. Creutz, Monte carlo study of quantized SU(2) gauge theory, Phys. Rev. D 21 , 2308 (1980). [38] S. Lloyd, Universal quantum simulators, Science 273 ,1073 (1996). [39] D. B. Kaplan and J. R. Stryker, Gauss’s law, du-ality, and the Hamiltonian formulation of U(1) lat-tice gauge theory, Phys. Rev. D 102 , 094515 (2020), arXiv:1806.08797 [hep-lat]. [40] J. R. Stryker, Oracles for Gauss’s law on digital quan-tum computers, Phys. Rev. A 99 , 042301 (2019), arXiv:1812.01617 [quant-ph]. [41] A. Rajput, A. Roggero, and N. Wiebe, Quantum error correction with gauge symmetries, npj Quantum Inf. 9,41 (2023), arXiv:2112.05186 [quant-ph]. [42] L. Spagnoli, A. Roggero, and N. Wiebe, Fault-tolerant simulation of Lattice Gauge Theories with gauge covari-ant codes, Quantum 10 , 1968 (2026), arXiv:2405.19293 [quant-ph]. [43] J. Cobos, J. Fraxanet, C. Benito, F. di Marcanto-nio, P. Rivero, K. Kap´ as, M. A. Werner, ¨O. Leg-eza, A. Bermudez, and E. Rico, Real-Time Dynam-ics in a (2+1)-D Gauge Theory: The Stringy Nature on a Superconducting Quantum Simulator, (2025), arXiv:2507.08088 [quant-ph]. [44] B. Pato and N. Klco, Trade-offs in Gauss’s law error correction for lattice gauge theory quantum simulations, (2026), arXiv:2602.22121 [quant-ph]. [45] E. Rothlin, Exploring the Connection between Gauge Theory and Quantum Error Correction via Quantum Reference Frames , Master’s thesis, ETH Zurich (2025). [46] J. P. Lacambra, A. Chatwin-Davies, M. Honda, and P. A. Hoehn, Gauss law codes and vacuum codes from lattice gauge theories (2026), arXiv:2604.06087 [quant-ph]. [47] X. Yao, Quantum error correction codes for truncated SU(2) lattice gauge theories, Phys. Rev. D 113 , 114512 (2026), arXiv:2511.13721 [quant-ph]. 30 
+
+[48] Z. P. Bradshaw, Approximate error correction for quan-tum simulations of SU(2) lattice gauge theories, (2026), arXiv:2603.26819 [quant-ph]. [49] E. J. Gustafson and H. Lamm, Robustness of gauge dig-itization to quantum noise, (2023), arXiv:2301.10207 [hep-lat]. [50] M. Carena, H. Lamm, Y.-Y. Li, and W. Liu, Quantum error thresholds for gauge-redundant digitizations of lat-tice field theories, Phys. Rev. D 110 , 054516 (2024). [51] D. Aharonov and M. Ben-Or, Fault-Tolerant Quantum Computation with Constant Error Rate, SIAM J. Com-put. 38 , 1207 (2008), arXiv:quant-ph/9906129. [52] A. Y. Kitaev, Quantum computations: algorithms and error correction, Russ. Math. Surv. 52 , 1191 (1997). [53] E. Knill, R. Laflamme, and W. H. Zurek, Resilient quantum computation: error models and thresholds, Proc. R. Soc. Lond. A 454 , 365 (1998), arXiv:quant-ph/9702058. [54] E. Knill, Quantum computing with realistic noisy de-vices, Nature 434 , 39 (2005), arXiv:quant-ph/0410199. [55] P. Aliferis, D. Gottesman, and J. Preskill, Quan-tum accuracy threshold for concatenated distance-3 codes, Quant. Inf. Comput. 6, 97 (2006), arXiv:quant-ph/0504218. [56] N. Ofek, A. Petrenko, R. Heeres, P. Reinhold, Z. Legh-tas, B. Vlastakis, Y. Liu, L. Frunzio, S. M. Girvin, L. Jiang, M. Mirrahimi, M. H. Devoret, and R. J. Schoelkopf, Extending the lifetime of a quantum bit with error correction in superconducting circuits, Na-ture 536 , 441 (2016). [57] Z. Chen et al. (Google Quantum AI), Exponential sup-pression of bit or phase flip errors with repetitive error correction, Nature 595 , 383 (2021), arXiv:2102.06132. [58] C. Ryan-Anderson, J. G. Bohnet, K. Lee, D. Gresh, A. Hankin, J. P. Gaebler, D. Francois, A. Chernoguzov, D. Lucchetti, N. C. Brown, T. M. Gatterman, S. K. Halit, K. Gilmore, J. Gerber, B. Neyenhuis, D. Hayes, and R. P. Stutz, Realization of real-time fault-tolerant quantum error correction, Phys. Rev. X 11 , 041058 (2021), arXiv:2107.07505. [59] L. Vaidman, L. Goldenberg, and S. Wiesner, Error pre-vention scheme with four particles, Phys. Rev. A 54 ,R1745 (1996), arXiv:quant-ph/9603031. [60] M. Grassl, T. Beth, and T. Pellizzari, Codes for the quantum erasure channel, Phys. Rev. A 56 , 33 (1997), arXiv:quant-ph/9610042. [61] E. M. Rains, Quantum codes of minimum distance two, IEEE Trans. Inf. Theory 45 , 266 (1999), arXiv:quant-ph/9704043 [quant-ph]. [62] A. M. Steane, Simple quantum error-correcting codes, Phys. Rev. A 54 , 4741 (1996), arXiv:quant-ph/9605021. [63] D. Gottesman, Theory of fault-tolerant quantum com-putation, Phys. Rev. A 57 , 127 (1998), arXiv:quant-ph/9702029. [64] L. Viola, E. Knill, and S. Lloyd, Dynamical decoupling of open quantum systems, Phys. Rev. Lett. 82 , 2417 (1999), arXiv:quant-ph/9809071. [65] R. C. Farrell, I. A. Chernyshev, S. J. M. Powell, N. A. Zemlevskiy, M. Illa, and M. J. Savage, Preparations for quantum simulations of quantum chromodynamics in 1+1 dimensions. I. axial gauge, Physical Review D 107 ,054512 (2023), arXiv:2207.01731 [quant-ph]. [66] R. C. Farrell, I. A. Chernyshev, S. J. M. Powell, N. A. Zemlevskiy, M. Illa, and M. J. Savage, Prepa-rations for quantum simulations of quantum chromo-dynamics in 1+1 dimensions. II. single-baryon β-decay in real time, Physical Review D 107 , 054513 (2023), arXiv:2209.10781 [quant-ph]. [67] R. C. Farrell, M. Illa, A. N. Ciavarella, and M. J. Savage, Scalable Circuits for Preparing Ground States on Dig-ital Quantum Computers: The Schwinger Model Vac-uum on 100 Qubits, PRX Quantum 5, 020315 (2024), arXiv:2308.04481 [quant-ph]. [68] R. C. Farrell, M. Illa, A. N. Ciavarella, and M. J. Sav-age, Quantum simulations of hadron dynamics in the Schwinger model using 112 qubits, Phys. Rev. D 109 ,114510 (2024), arXiv:2401.08044 [quant-ph]. [69] J.-W. Chen, Y.-T. Chen, G. Meher, B. M¨ uller, A. Sch¨ afer, and X. Yao, Thermalization of SU(2) Lat-tice Gauge Fields on Quantum Computers (2026), arXiv:2603.23948 [hep-lat]. [70] A. Mezzacapo, E. Rico, C. Sab´ ın, I. L. Egusquiza, L. Lamata, and E. Solano, Non-abelian SU(2) lattice gauge theories in superconducting circuits, Physical Review Letters 115 , 240502 (2015), arXiv:1505.04720 [quant-ph]. [71] A. Ciavarella, N. Klco, and M. J. Savage, Trailhead for quantum simulation of SU(3) Yang-Mills lattice gauge theory in the local multiplet basis, Physical Review D 
+
+103 , 094501 (2021), arXiv:2101.10227 [quant-ph]. [72] Y. Y. Atas, J. Zhang, R. Lewis, A. Jahanpour, J. F. Haase, and C. A. Muschik, SU(2) hadrons on a quantum computer via a variational approach, Nature Communi-cations 12 , 6499 (2021), arXiv:2102.08920 [quant-ph]. [73] S. A. Rahman, R. Lewis, E. Mendicelli, and S. Powell, Self-mitigating Trotter circuits for SU(2) lattice gauge theory on a quantum computer, Physical Review D 106 ,074502 (2022), arXiv:2205.09247 [hep-lat]. [74] A. N. Ciavarella and I. A. Chernyshev, Preparation of the SU(3) lattice Yang-Mills vacuum with variational quantum methods, Physical Review D 105 , 074504 (2022), arXiv:2112.09083 [quant-ph]. [75] Y. Y. Atas, J. F. Haase, J. Zhang, V. Wei, S. M.-L. Pfaendler, R. Lewis, and C. A. Muschik, Simulating one-dimensional quantum chromodynamics on a quan-tum computer: Real-time evolutions of tetra- and pen-taquarks, Physical Review Research 5, 033184 (2023), arXiv:2207.03473 [quant-ph]. [76] A. N. Ciavarella, Quantum simulation of lattice QCD with improved hamiltonians, Physical Review D 108 ,094513 (2023), arXiv:2307.05593 [hep-lat]. [77] G. Calaj´ o, G. Magnifico, C. Edmunds, M. Ringbauer, S. Montangero, and P. Silvi, Digital quantum simula-tion of a (1+1)D SU(2) lattice gauge theory with ion qu-dits, PRX Quantum 5, 040309 (2024), arXiv:2402.07987 [quant-ph]. [78] Z. Li, M. Illa, and M. J. Savage, A framework for quantum simulations of energy-loss and hadronization in non-abelian gauge theories: SU(2) lattice gauge the-ory in 1+1D, arXiv preprint (2025), arXiv:2512.05210 [quant-ph]. [79] A. T. Than, Y. Y. Atas, A. Chakraborty, J. Zhang, M. T. Diaz, K. Wen, X. Liu, R. Lewis, A. M. Green, C. A. Muschik, and N. M. Linke, The phase diagram of quantum chromodynamics in one dimension on a quantum computer, Nature Communications 16 , 10288 (2025), arXiv:2501.00579 [quant-ph]. 31 
+
+[80] H. Froland, D. M. Grabowska, and Z. Li, Simulat-ing Fully Gauge-Fixed SU(2) Hamiltonian Dynamics on Digital Quantum Computers (2025), arXiv:2512.22782 [quant-ph]. [81] C. V. Cogburn, S. Grieninger, and D. E. Kharzeev, Quantum Simulation of Nucleon-Antinucleon Interac-tion in Large-N QCD 2 on an IBM Quantum Nighthawk Processor (2026), arXiv:2606.02574 [quant-ph]. [82] I. A. Chernyshev, R. C. Farrell, M. Illa, M. J. Savage, A. Maksymov, F. Tripier, M. A. Lopez-Ruiz, A. Ar-rasmith, Y. de Sereville, A. Brodutch, C. Girotto, A. Kaushik, and M. Roetteler, Pathfinding quantum simulations of neutrinoless double-β decay, Nature Communications 10.1038/s41467-026-68536-8 (2026), arXiv:2506.05757 [quant-ph]. [83] F. Ilcic, R. Majumdar, E. Mathew, M. O. Ali, N. Earnest-Noble, and I. Raychowdhury, Observation of robust and coherent non-abelian hadron dynamics on noisy quantum processors (2026), arXiv:2602.18080 [hep-lat]. [84] H. Froland and D. M. Grabowska, Measuring Non-Stabilizerness in an SU(2) Lattice Gauge Theory (2026), arXiv:2606.14842 [quant-ph]. [85] M. Urbanek, B. Nachman, V. R. Pascuzzi, A. He, C. W. Bauer, and W. A. de Jong, Mitigating depolarizing noise on quantum computers with noise-estimation circuits, Phys. Rev. Lett. 127 , 270502 (2021), arXiv:2103.08591 [quant-ph]. [86] S. A Rahman, R. Lewis, E. Mendicelli, and S. Powell, Self-mitigating Trotter circuits for SU(2) lattice gauge theory on a quantum computer, Phys. Rev. D 106 ,074502 (2022), arXiv:2205.09247 [hep-lat]. [87] E. van den Berg, Z. K. Minev, A. Kandala, and K. Temme, Probabilistic error cancellation with sparse Pauli–Lindblad models on noisy quantum processors, Nat. Phys. 19 , 1116 (2023), arXiv:2201.09866 [quant-ph]. [88] H. Froland et al. , Realizing Error Suppression in Par-tially Fault-Tolerant Quantum Simulations with IBM Quantum Computers, (2026), arXiv:2607.24947 [quant-ph]. [89] D. Zhong and T. A. Brun, Protection of Exponential Operation using Stabilizer Codes in the Early Fault Tol-erance Era, (2026), arXiv:2602.13399 [quant-ph]. [90] C. Gerhard and T. A. Brun, Weakly Fault-Tolerant Computation in a Quantum Error-Detecting Code, (2024), arXiv:2408.14828 [quant-ph]. [91] D. Gottesman, Theory of fault-tolerant quantum computation, Physical Review A 57 , 127 (1998), arXiv:quant-ph/9702029. [92] D. Gottesman and I. L. Chuang, Demonstrating the viability of universal quantum computation using tele-portation and single-qubit operations, Nature 402 , 390 (1999), arXiv:quant-ph/9908010. [93] X. Zhou, D. W. Leung, and I. L. Chuang, Methodology for quantum logic gate construction, Physical Review A 
+
+62 , 052316 (2000), arXiv:quant-ph/0002039. [94] S. Bravyi and A. Kitaev, Universal quantum computa-tion with ideal clifford gates and noisy ancillas, Physical Review A 71 , 022316 (2005), arXiv:quant-ph/0403025. [95] B. Eastin and E. Knill, Restrictions on transversal en-coded quantum gate sets, Physical Review Letters 102 ,110502 (2009), arXiv:0811.4262 [quant-ph]. [96] A. Paetznick and B. W. Reichardt, Universal fault-tolerant quantum computation with only transversal gates and error correction, Physical Review Letters 111 ,090505 (2013), arXiv:1304.3709 [quant-ph]. [97] J. T. Anderson, G. Duclos-Cianci, and D. Poulin, Fault-tolerant conversion between the steane and reed-muller quantum codes, Physical Review Letters 113 , 080501 (2014), arXiv:1403.2734 [quant-ph]. [98] E. T. Campbell, B. M. Terhal, and C. Vuillot, Roads towards fault-tolerant universal quantum computation, Nature 549 , 172 (2017), arXiv:1612.07330 [quant-ph]. [99] H. Bomb´ ın, Gauge color codes: optimal transver-sal gates and gauge fixing in topological stabilizer codes, New Journal of Physics 17 , 083002 (2015), arXiv:1311.0879 [quant-ph]. [100] A. Kubica and M. E. Beverland, Universal transversal gates with color codes: A simplified approach, Physical Review A 91 , 032330 (2015), arXiv:1410.0069 [quant-ph]. [101] M. E. Beverland, A. Kubica, and K. M. Svore, Cost of universality: A comparative study of the overhead of state distillation and code switching with color codes, PRX Quantum 2, 020341 (2021), arXiv:2101.02211 [quant-ph]. [102] I. Pogorelov et al. , Experimental fault-tolerant code switching, Nature Physics 21 , 298 (2025), arXiv:2403.13732 [quant-ph]. [103] A. Javadi-Abhari, M. Treinish, K. Krsulich, C. J. Wood, J. Lishman, J. Gacon, S. Martiel, P. D. Nation, L. S. Bishop, A. W. Cross, B. R. Johnson, and J. M. Gambetta, Quantum computing with Qiskit (2024), arXiv:2405.08810 [quant-ph]. [104] M. Urbanek, B. Nachman, V. R. Pascuzzi, A. He, C. W. Bauer, and W. A. de Jong, Mitigating depolarizing noise on quantum computers with noise-estimation circuits, Phys. Rev. Lett. 127 , 270502 (2021), arXiv:2103.08591 [quant-ph]. [105] Y. Li and S. C. Benjamin, Efficient Variational Quan-tum Simulator Incorporating Active Error Minimiza-tion, Phys. Rev. X 7, 021050 (2017), arXiv:1611.09301 [quant-ph]. [106] K. Temme, S. Bravyi, and J. M. Gambetta, Error Mit-igation for Short-Depth Quantum Circuits, Phys. Rev. Lett. 119 , 180509 (2017), arXiv:1612.02058 [quant-ph]. [107] N. Klco, E. F. Dumitrescu, A. J. McCaskey, T. D. Morris, R. C. Pooser, M. Sanz, E. Solano, P. Lougov-ski, and M. J. Savage, Quantum-classical computation of Schwinger model dynamics using quantum comput-ers, Phys. Rev. A 98 , 032331 (2018), arXiv:1803.03326 [quant-ph]. [108] A. Kandala, K. Temme, A. D. Corcoles, A. Mezzacapo, J. M. Chow, and J. M. Gambetta, Error mitigation extends the computational reach of a noisy quantum processor, Nature 567 , 491 (2019), arXiv:1805.04492 [quant-ph]. [109] D. Gottesman, Quantum fault tolerance in small exper-iments, (2016), arXiv:1610.03507 [quant-ph]. [110] N. M. Linke, M. Gutierrez, K. A. Landsman, C. Fig-gatt, S. Debnath, K. R. Brown, and C. Monroe, Fault-tolerant quantum error detection, Sci. Adv. 3, e1701074 (2017), arXiv:1611.06946 [quant-ph]. [111] C. Vuillot, Is error detection helpful on IBM 5Q chips?, Quant. Inf. Comput. 18 , 0949 (2018), arXiv:1705.08957 [quant-ph]. 32 
+
+[112] R. Harper and S. T. Flammia, Fault-tolerant logical gates in the IBM quantum experience, Phys. Rev. Lett. 
+
+122 , 080504 (2019), arXiv:1806.02359 [quant-ph]. [113] N. Klco and M. J. Savage, Hierarchical qubit maps and hierarchically implemented quantum error correction, Phys. Rev. A 104 , 062425 (2021), arXiv:2109.01953 [quant-ph]. [114] D. H. Menendez, A. Ray, and M. Vasmer, Imple-menting fault-tolerant non-Clifford gates using the [[8,3,2]] color code, Phys. Rev. A 109 , 062438 (2024), arXiv:2309.08663 [quant-ph].

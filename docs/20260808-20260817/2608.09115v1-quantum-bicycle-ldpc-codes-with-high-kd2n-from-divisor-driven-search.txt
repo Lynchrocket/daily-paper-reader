@@ -1,0 +1,1062 @@
+Title: Quantum Bicycle LDPC Codes with High kd^2/n from Divisor-Driven Search
+
+URL Source: https://arxiv.org/pdf/2608.09115v1
+
+Published Time: Tue, 11 Aug 2026 01:50:38 GMT
+
+Number of Pages: 14
+
+Markdown Content:
+> IEEE TRANSACTIONS ON INFORMATION THEORY, VOL. , NO. , 1
+
+# Quantum Bicycle LDPC Codes with High kd 2/n 
+
+# from Divisor-Driven Search 
+
+Liangdong Lu, Guanmin Guo, Yang Liu, and Ruipan Yang 
+
+Abstract 
+
+Bicycle (two-block circulant) quantum low-density parity-check (LDPC) codes include some of the best known small quantum codes, yet their design has relied on group-algebra formulations in which the dimension and distance are accessible only through matrix computation. We show that in the cyclic case the construction collapses into the polynomial ring F2[x]/(xl − 1) : self-orthogonality is automatic, the quantum dimension is read off from a polynomial gcd, and the minimum distance is certified exactly through the Calderbank correspondence to additive codes over F4, turning code search into an algebraically pre-filtered enumeration that reaches parameter regimes poorly covered by existing tables. A computer search based on this framework recovers the short codes [[42 , 12 , 4]] 2 and [[62 , 12 , 4]] 2 and produces a family of codes with competitive figure of merit kd 2/n , including 
+
+[[66 , 20 , 7]] 2 with kd 2/n = 14 .85 , above the bivariate bicycle code [[144 , 12 , 12]] 2 (kd 2/n = 12 ) at less than half the block length, together with [[46 , 2, 8]] 2, [[66 , 2, 9]] 2, [[66 , 4, 8]] 2, [[66 , 6, 8]] 2 and, at n = 90 , [[90 , 16 , 6]] 2, [[90 , 18 , 6]] 2, [[90 , 20 , 6]] 2.An exhaustive census at n = 48 delineates the boundary of this picture: we exhibit a [[48 , 10 , 6]] 2 code from a minimal 48 -element group (the Aydin–Tamo–Barg realization uses 72 elements), and prove that distance 5 forces a stabilizer-rank loss, which excludes 
+
+[[48 , 10 , 5]] 2 from the weight-8 symmetric coset family. The framework thus opens a systematic route to bicycle-type quantum LDPC codes beyond the reach of group-theoretic searches, and identifies exactly where genuinely coset-theoretic phenomena begin. 
+
+Index Terms 
+
+Quantum error correction, quantum LDPC codes, bicycle codes, stabilizer codes, cyclic codes, additive codes over GF(4), Calderbank correspondence, divisor-driven search. 
+
+I. I NTRODUCTION 
+
+A. From surface codes to bicycle codes 
+
+# THE cost of a quantum error-correcting code is ultimately measured by the overhead it adds to a fault-tolerant computation. Surface codes [1] remain the reference point: they are geometrically local and tolerate high error rates, but each patch encodes a single logical qubit, so the physical-qubit count grows quadratically with the target distance. Quantum low-density parity-check (LDPC) codes aim to remove this overhead by keeping every stabilizer measurement at bounded weight while letting the dimension and distance grow with the block length. The search for such codes has moved through three methodological phases. The first was product-based. The hypergraph product codes of Tillich and Z´ emor [2] combine two classical codes into a quantum CSS code with constant rate and distance 
+
+Θ( √n), and the hyperbicycle codes of Kovalev and Pryadko [3] showed that circulant structure is compatible with finite rate in the same distance regime. The second phase was asymptotic. Panteleev and Kalachev [4] constructed quantum LDPC codes with almost linear distance, and the quantum Tanner codes of Leverrier and Z´ emor [5], together with a linear-time decoder [6], established asymptotically good families that decode efficiently. The third phase, to which the present work belongs, is group-theoretic. Codes built from two commuting blocks go back to the sparse-graph constructions of MacKay, Mitchison, and McFadden [7] and to the generalized bicycle (GB) codes of Kovalev and Pryadko [8], in which both blocks are circulants. Lin and Pryadko extended the construction to arbitrary group algebras, giving the two-block group algebra (2BGA) codes [9], and Wang, Lin, and Pryadko analyzed the underlying commutation mechanism for abelian and non-abelian groups [10]. The bivariate bicycle (BB) codes of Bravyi et al. [11] then showed that this line of research has immediate practical content: the [[144 , 12 , 12]] code protects twelve logical qubits at distance twelve with weight-six checks, reducing the qubit overhead by roughly an order of magnitude relative to surface codes of comparable performance, on a layout compatible with superconducting hardware. Since the appearance of BB codes, the bicycle family has developed along four lines. The first is algebraic refinement of the univariate case: small codes from algebraic extensions of GB codes [12], GB codes with connectivity approaching that of surface codes [13], a classification of the lowest-weight (2 , 2) -GB family [14], univariate bicycle codes that reduce the two-polynomial search to a single polynomial [15], and a cyclic-submodule formulation that exposes the automorphism group and its fault-tolerant gates [16]. The second is multivariate generalization, from multivariate bicycle codes [17] and independent trivariate bicycle codes [18] to the multivariate multicycle framework, which unifies these constructions and supports single-shot 
+
+L. Lu, R. Yang, Y. Liu, and G. Guo are with the Department of Basic Science, Air Force Engineering University, Xi’an, Shaanxi, P. R. China e-mail: (see 
+
+kelinglv @163 .com, yangruipan @aliyun.com, liu yang 1@163 .com, gmguo xjtukgd @yeah.net ). Manuscript received ; revised , 2026. arXiv:2608.09115v1 [cs.IT] 10 Aug 2026 IEEE TRANSACTIONS ON INFORMATION THEORY, VOL. , NO. , 2
+
+decoding [19]; cyclic hypergraph product codes combine the circulant idea with the older product construction [20]. The third concerns logical structure and boundaries: explicit bases of logical operators and fold-transversal gates [21], self-dual BB codes with transversal Clifford gates [22], and open-boundary planar variants obtained by pruning [23] or by anyon condensation and lattice grafting [24]. The fourth is decoding and implementation. BP with ordered statistics decoding (BP-OSD) [25] remains the standard benchmark, now joined by almost-linear-time decoders under circuit-level noise [26], matching decoders that exploit the toric structure of BB codes [27], and list decoding of bicycle codes [28]. On the hardware side, the locality obstruction bounds of [29] have been answered by two-dimensional local protocols [30], morphing circuits that lower the required connectivity [31], multilayer placement and routing [32], erasure-biased neutral-atom processors [33], and modular architectures [34]. A second pillar of the present work predates all of the above. The stabilizer formalism of Calderbank, Rains, Shor, and Sloane (CRSS) [35] provides an algebraic bridge from classical coding theory to quantum codes: the error group modulo phases is an elementary abelian 2-group, operator commutation is captured by a symplectic inner product, and commuting stabilizer groups correspond to symplectic self-orthogonal codes, equivalently described as additive self-orthogonal codes over F4. This symplectic viewpoint has remained largely disjoint from the group-algebraic bicycle literature surveyed above; connecting the two is the starting point of this paper. 
+
+B. The problem we address 
+
+The group-theoretic constructions (GB, 2BGA, BB, and the coset-based codes of Aydin–Tamo–Barg [36]) are powerful, but they are phrased in the language of group actions, permutation representations, and group algebras. For code discovery this has two practical consequences. The search space is indexed by group–subgroup pairs and support sets of group-algebra elements, which is indirect and hard to prune; and the key quantum parameters, the dimension k and the distance d, cannot be read off algebraically before large parity-check matrices are built. We therefore ask: can the bicycle construction be reformulated entirely in the symplectic/polynomial domain, so that good quantum LDPC codes are obtained by analyzing and selecting polynomials, with the dimension and the self-orthogonality controlled algebraically before any matrix is built? C. Contributions 
+
+(1) A polynomial framework with algebraic dimension control. Under the cyclic specialization G = Zl, H = {e}, circulant blocks act as multiplication in R = F2[x]/(xl − 1) , so the CRSS self-orthogonality holds automatically (Theorem 2), and the quantum dimension is a polynomial gcd, k = 2 deg gcd( a, b, x l − 1) (Proposition 4), with a two-sided dimension window for the lift construction (Theorem 7): the dimension is fixed by deg g before any matrix is built. (2) An exact-distance search that finds high-ratio codes. The quantum distance is computed exactly as a two-kernel minimum with the stabilizer excluded (Lemma 10), inside a pipeline that applies three polynomial-level filters before building any matrix (Construction 6, Algorithm 1). A Magma implementation finds, among others, [[46 , 2, 8]] 2, [[66 , 2, 9]] 2, [[66 , 4, 8]] 2,
+
+[[66 , 6, 8]] 2, [[66 , 20 , 7]] 2, [[90 , 16 , 6]] 2, [[90 , 18 , 6]] 2, and [[90 , 20 , 6]] 2, and recovers the short codes [[42 , 12 , 4]] 2 and 
+
+[[62 , 12 , 4]] 2; the [[66 , 20 , 7]] 2 code attains kd 2/n = 14 .85 , above the bivariate bicycle code [[144 , 12 , 12]] 2 (kd 2/n = 12 )and all trivariate bicycle codes of [18] (Section V, Tables I–II). (3) A boundary theorem beyond the cyclic case. For the weight-8 symmetric coset-2BGA family at n = 48 , distance 5
+
+forces a stabilizer-rank loss, excluding [[48 , 10 , 5]] 2 from the family entirely (Theorem 16); we also give a [[48 , 10 , 6]] 2
+
+code realized by a minimal 48 -element group (Theorem 15). This identifies precisely which phenomena the polynomial framework captures and which are genuinely coset-theoretic (Section VII). 
+
+D. Organization 
+
+Section II fixes notation and recalls the CRSS and bicycle constructions. Section III develops the symplectic polynomial reformulation. Section IV presents the search algorithm. Section V reports the codes found, and Section VI benchmarks their BP-OSD decoding performance against BB reference codes. Section VII steps outside the cyclic case and locates the boundary of the polynomial framework through the n = 48 coset-2BGA family (minimal group realizations and rank degeneracy). Section VIII discusses significance and limitations, and Section IX concludes. II. P RELIMINARIES 
+
+A. Stabilizer codes and the symplectic inner product 
+
+Let n be the number of qubits. The error group En modulo phases is isomorphic to F2n 
+
+> 2
+
+via iλX(a)Z(b) 7 → (a | b). The standard symplectic inner product on F2n 
+
+> 2
+
+is 
+
+⟨(a | b), (a′ | b′)⟩s = a · b′ + a′ · b. IEEE TRANSACTIONS ON INFORMATION THEORY, VOL. , NO. , 3
+
+Two Pauli operators commute iff their images are symplectically orthogonal. A subspace C ≤ F2n 
+
+> 2
+
+is symplectic self-orthogonal 
+
+if C ⊆ C⊥ 
+
+> s
+
+, where C⊥ 
+
+> s
+
+= {v : ⟨v, c ⟩s = 0 , ∀c ∈ C}. A stabilizer code with C self-orthogonal has parameters 
+
+[[ n, k, d ]] = [[ n, n − dim C, min wt s(C⊥ 
+
+> s
+
+\ C) ]] ,
+
+where wt s counts coordinates with (ai, b i)̸ = (0 , 0) .
+
+B. The Calderbank correspondence 
+
+Map F2n 
+
+> 2
+
+→ Fn 
+
+> 4
+
+by ϕ(a | b) = a + ωb , where F4 = {0, 1, ω, ω 2}, ω2 = ω + 1 . Then C is symplectic self-orthogonal over 
+
+F2 iff ϕ(C) is additive self-orthogonal over F4 under the trace-symplectic form, and the quantum distance is the minimum weight of ϕ(C⊥ 
+
+> s
+
+) \ ϕ(C) [35]. This is how we compute d exactly; excluding the stabilizer image is essential (Section IV). 
+
+C. Bicycle (two-block circulant) codes 
+
+A bicycle code is a CSS code with 
+
+HX = [ A | B ], HZ = [ BT | AT ],
+
+where A, B are l × l circulant matrices over F2. This is the cyclic case of the generalized bicycle codes of [8] and of the two-block group algebra codes of [9]. Since circulants commute, HX HTZ = AB + BA = 0 in characteristic 2, so the CSS orthogonality holds automatically; the code length is n = 2 l and the stabilizer row weight is bounded by wt( a) + wt( b), giving the LDPC property when wt( a), wt( b) = O(1) .III. S YMPLECTIC POLYNOMIAL REFORMULATION 
+
+A. From group algebra to quotient ring 
+
+For G = Zl = ⟨t⟩, H = {e}, the group algebra is F2[Zl] ∼= R := F2[x]/(xl − 1) . The correspondence is Group language Polynomial language group element ti monomial xi
+
+element a = P 
+
+> i
+
+αiti a(x) = P 
+
+> i
+
+αixi
+
+left shift L(ti) multiplication by xi
+
+permutation matrix L(a) circulant circ( a(x)) 
+
+transpose L(a)T involution ¯a(x) = a(x−1)
+
+weight |supp( a)| number of nonzero terms of a(x)
+
+Hence A = circ( a(x)) , B = circ( b(x)) , and HZ = [ circ( ¯b) | circ(¯ a) ] .The involution interacts with the symplectic form through the following identity, which will also account for an additional symmetry observed in our search results (Remark 3). 
+
+Lemma 1. For every a(x), b (x) ∈ R = F2[x]/(xl − 1) ,
+
+a(x) ¯b(x) = b(x) ¯ a(x) ,
+
+and consequently a¯b + b¯a is a sum of pairs xt + x−t, i.e. it is fixed by the involution term by term. Proof. The involution p 7 → ¯p is a ring automorphism of R and an involution, so b¯a = ¯b ¯a = ¯b a = a¯b.
+
+B. Self-orthogonality becomes automatic 
+
+Theorem 2. With C = row  HX 00 HZ
+
+ ⊂ F4l 
+
+> 2
+
+, the following are equivalent: (i) C symplectic self-orthogonal; (ii) HX HTZ = 0 ;(iii) AB = BA ; (iv) the polynomial identity 
+
+a(x) b(x) + b(x) a(x) ≡ 0 (mod xl − 1) . (1) 
+
+Since R is commutative, (1) holds identically, so the bicycle structure yields symplectic self-orthogonal codes for free .Proof. (i) ⇔(ii) from GΩGT = diag( HX HTZ , H Z HTX ). (ii) ⇔(iii): HX HTZ = AB + BA , and char 2 gives HX HTZ = 0 ⇐⇒ 
+
+AB = BA . (iii) ⇔(iv): multiplication of circulants corresponds to polynomial multiplication, so AB + BA = circ( ab + ba ).Commutativity of R gives ab + ba = 2 ab = 0 in char 2.
+
+Remark 3. Theorem 2 turns commutation checking inside the search loop from 2l2 row-pair inner products into one polynomial identity (1), costing one cyclic convolution, O(l2) word operations or O(l log l) by FFT-style methods, independent of the matrix dimensions; in the commutative case the identity is void, so self-orthogonality is certified by the polynomial formalism itself. In our Magma implementation the orthogonality gate in fact tests the strictly stronger involution identity a¯b + b¯a ≡ 0, equivalently 
+
+AB T + BA T = 0 (i.e. AB T symmetric), a condition that random low-weight polynomial pairs violate with overwhelming probability. Every code in Tables I–V therefore enjoys this additional symmetry; a structural characterization of the resulting subclass of bicycle codes is an interesting open problem. IEEE TRANSACTIONS ON INFORMATION THEORY, VOL. , NO. , 4
+
+C. Algebraic dimension formula 
+
+The transpose of a circulant is a circulant, and the map a 7 → ¯a is an automorphism of R; hence rankcirc(¯ a) = rankcirc( a) and 
+
+rank HZ = rank HX identically. The quantum dimension is therefore governed by a single block rank, which the quotient-ring structure makes exact: 
+
+Proposition 4. Let l be odd and a, b ∈ R = F2[x]/(xl − 1) . Then 
+
+k = 2 l − rank HX − rank HZ
+
+= 2 deg gcd  a(x), b (x), x l − 1.
+
+Proof. Write A = circ( a), B = circ( b). The row space of A inside R (identified with Fl
+
+> 2
+
+) is the principal ideal (a) ⊆ R; since 
+
+R is commutative, the row space of HX = [ A | B ] in R2 is the submodule {(sa, sb ) : s ∈ R}, whose projection to either coordinate is the ideal 
+
+I = ( a, b ) =  gcd( a, b, x l − 1)  ⊆ R. 
+
+For l odd, xl − 1 is squarefree over F2, so R is a principal ideal ring and, for h = gcd( a, b, x l − 1) , dim F2 (h) = deg  (xl −
+
+1) /h  = l − deg h. Projection onto the first coordinate is injective on the row space: if sa = 0 in R then s ∈ Ann R(a) = (( xl −1) / gcd( a, x l −1)) ; since h = gcd( a, b, x l −1) divides both b and gcd( a, x l −1) , the annihilator (( xl −1) / gcd( a, x l −1)) 
+
+is contained in Ann R(b), whence sb = 0 as well. Therefore rank HX = dim I = l − deg h. Since rank HZ = rank HX by the involution symmetry, 
+
+k = 2 l − 2rank HX = 2 l − 2 l − deg h = 2 deg h. 
+
+Remark 5. Proposition 4 lets us pre-filter candidates by k using a polynomial gcd, before forming any matrix. Low-weight random a, b are generically coprime to xl − 1, giving rank HX = l and hence k = 0 ; to obtain k > 0 one must force a, b to share a divisor of xl − 1. This observation drives Construction 6 below. In the implementation the gcd filter is the first test applied to every candidate; only survivors pay for a matrix build, and a rank cross-check k ?
+
+= n − rank HX − rank HZ on those survivors has never disagreed with the gcd value, as the proposition predicts. IV. T HE SEARCH METHOD 
+
+A. Structured polynomial construction 
+
+Construction 6. Fix odd l and factor xl − 1 = Q 
+
+> j
+
+fj (x) over F2. For each divisor g = Q 
+
+> j∈S
+
+fj with deg g in a target range, and for low-weight u(x), v (x) ∈ R, set 
+
+a(x) = g(x)u(x), b(x) = g(x)v(x) (mod xl − 1) .
+
+Then g | gcd( a, b, x l −1) , so k ≥ 2 deg g, with equality when gcd( u, v, x l −1) = 1 . The row weight is at most wt( gu )+wt( gv ),keeping the code LDPC. The construction has a two-sided algebraic handle on k:
+
+Theorem 7. Let l be odd, g | xl − 1, and u, v ∈ R arbitrary. Put a = gu , b = gv in R. Then 
+
+2 deg g ≤ k ≤ 2 deg g + 2 deg gcd  u, v, xl−1
+
+> g
+
+.
+
+In particular, if u and v share no cyclotomic factor of (xl − 1) /g then k = 2 deg g exactly, so the divisor degree dials the quantum dimension; and every bicycle code of dimension k admits such a presentation with g = gcd( a, b, x l −1) , deg g = k/ 2.Proof. Since g | xl − 1 and xl − 1 is squarefree, gcd( g, (xl − 1) /g ) = 1 , hence gcd( gu, gv, x l − 1) = g · gcd  u, v, (xl − 1) /g .Apply Proposition 4. For the last claim, given any bicycle code from (a, b ), take g = gcd( a, b, x l − 1) , u = a/g , v = b/g :then gcd( u, v, (xl − 1) /g ) = 1 and k = 2 deg g.
+
+Lemma 8. For every t ∈ R, the vector 
+
+λ(t) :=   ¯a(x) t(x) ¯b(x) t(x)  ∈ F2l
+
+> 2
+
+lies in ker HZ . Writing wmin (a, b ) = min t∈R
+
+ wt( at ) + wt( bt ) (the minimum is over the cyclic translates-and-combinations of the pair, and wt(¯ at ) = wt( a ¯t)), the X-side distance satisfies 
+
+dX ≤ wmin (a, b ) ≤ wt( a) + wt( b)
+
+≤ wt( g)  wt( u) + wt( v),
+
+whenever the module {λ(t) : t ∈ R} is not entirely contained in row HX (equivalently, whenever the X-stabilizer does not already absorb the involution-translated pair; this holds generically and is checked explicitly by the exact distance computation). IEEE TRANSACTIONS ON INFORMATION THEORY, VOL. , NO. , 5
+
+Algorithm 1 Divisor-driven search for bicycle codes 
+
+Require: l-list L; weight sets Wu, Wv ; range [kmin , k max ]; dmin ; enumeration cap T 
+
+> 1:
+
+for all l ∈ L do  
+
+> 2:
+
+factor xl − 1 = Q 
+
+> j
+
+fj ; collect divisors g = Q 
+
+> j∈S
+
+fj with 2 deg g ∈ [kmin , k max ] 
+
+> 3:
+
+for all (wu, w v ) ∈ W u × W v do  
+
+> 4:
+
+for each candidate pair (u, v ) (exhaustive if few, else T samples) do  
+
+> 5:
+
+a ← gu , b ← gv in R; k ← 2 deg gcd( a, b, x l − 1)  
+
+> 6:
+
+if k / ∈ [kmin , k max ] then continue  
+
+> 7:
+
+end if  
+
+> 8:
+
+dedup on (a | b) 
+
+> 9:
+
+if a¯b + b¯a̸ ≡ 0 then continue  
+
+> 10:
+
+end if  
+
+> 11:
+
+build HX = [ A|B], HZ = [ BT |AT ]; cross-check k 
+
+> 12:
+
+if heuristic distance estimate < d min then continue  
+
+> 13:
+
+end if  
+
+> 14:
+
+d ← exact distance (Lemma 10)  
+
+> 15:
+
+if d ≥ dmin then store (g, u, v ) and parameters  
+
+> 16:
+
+end if  
+
+> 17:
+
+end for  
+
+> 18:
+
+end for  
+
+> 19:
+
+end for 
+
+Proof. The kernel condition for (p | q) ∈ ker HZ is BT p + AT q = 0 , i.e. ¯b p + ¯ a q = 0 in R. Substituting p = ¯ at , q = ¯bt 
+
+gives ¯b¯at + ¯ a¯bt = 0 in characteristic 2, since R is commutative. The weight chain uses wt(¯ at ) = wt( a¯t) (transpose preserves weight) and the sub-multiplicativity wt( gu ) ≤ wt( g)wt( u).
+
+Remark 9. Lemma 8 explains the design constraint wu, w v ≥ 3 used throughout our campaign: for wt( u) = wt( v) = 2 the translated pair (¯ at | ¯bt ) degenerates, since choosing t = Pm−1 
+
+> j=0
+
+xji with mi ≡ 0 (mod l) annihilates u = 1 + xi, and the surviving low-weight members of the kernel family empirically cap d ≤ 4; we never observed a weight-2 lift with d ≥ 5. A sharp closed form for wmin (a, b ) in terms of (g, u, v ), in particular whether d ≤ wt( u) + wt( v) holds when gcd( u, v ) = 1 
+
+(saturated by the [[66 , 20 , 6]] code of Table II, where wt( u) + wt( v) = 6 = d), is an interesting open problem; see Section VIII. 
+
+B. Exact distance: excluding the stabilizer 
+
+A subtle point is that the Calderbank image of C⊥ 
+
+> s
+
+contains the stabilizer itself, whose elements can have weight as low as the check weight; a naive computation of the minimum distance of the additive code therefore undercounts the quantum distance and rejects genuine high-distance candidates. The fix is a two-kernel computation: 
+
+Lemma 10. For the bicycle code with checks HX = [ A|B], HZ = [ BT |AT ], define 
+
+dX = min wt( c) : c ∈ ker HZ \ row HX ,dZ = min wt( c) : c ∈ ker HX \ row HZ .
+
+Then the quantum distance is d = min( dX , d Z ), and each side is computed by walking the weight classes of the kernel code in increasing weight and testing membership in the stabilizer row space. 
+
+The weight-enumeration of Lemma 10 is the bottleneck of the pipeline, so it is guarded by two cheap gates: the gcd pre-filter (Proposition 4) and a Monte-Carlo upper bound on d obtained by sampling the kernel and reweighting; candidates whose sampled upper bound already falls below dmin are vetoed before any exact call. For n > 50 , where Magma’s quantum tables are unavailable, the pipeline maintains a filtering reference dref , the best-known minimum distance of an F4 linear code at the near-full dimension n − k/ 2 (BKLC bounds). Because n − k/ 2 ≈ n, this reference is deliberately permissive: d > d ref holds for almost every survivor and carries no information about how a code compares with the best-known quantum codes at the same [[ n, k ]] 2. We therefore use dref only as a search-filter threshold and never as a performance benchmark. V. R ESULTS 
+
+We report on the sweep l ∈ { 21 , 23 , 25 , 27 , 31 , 33 , 35 , 39 , 45 }, low-weight lift pairs (u, v ) (realized weights 3 ≤ wu, w v ≤
+
+13 ), k ∈ [2 , 20] , dmin = 5 , with exhaustive enumeration of all lift pairs whenever   l−1
+
+> wu−1
+
+  l−1 
+
+> wv−1
+
+ ≤ 2 × 10 5 (satisfied at 
+
+l = 23 and, for the lightest weight pairs, at l ≤ 35 up to symmetry) and 2 × 10 5 random draws otherwise. Distances are exact IEEE TRANSACTIONS ON INFORMATION THEORY, VOL. , NO. , 6
+
+TABLE I BEST BICYCLE CODES FOUND BY THE POLYNOMIAL SEARCH . D ISTANCES ARE EXACT ; w = wt( a) + wt( b) IS THE STABILIZER ROW WEIGHT . F OR REFERENCE , THE BIVARIATE BICYCLE CODE [[144 , 12 , 12]] 2 OF [11] ATTAINS kd 2/n = 12 .
+
+[[ n, k, d ]] 2 l deg g (wu, w v ) w kd 2/n note 
+
+[[42 , 12 , 4]] 2 21 6 (2,2) ∗ – 4.57 weight-2 lift 
+
+[[46 , 2, 8]] 2 23 1 (4,4) 14 2.78 k = 2 family 
+
+[[62 , 12 , 4]] 2 31 6 (2,2) ∗ – 3.10 weight-2 lift 
+
+[[66 , 2, 9]] 2 33 1 (4,4) 16 2.45 k = 2 family 
+
+[[66 , 4, 8]] 2 33 2 (3,4) 13 3.88 lowest w
+
+[[66 , 6, 8]] 2 33 3 (4,11) 14 5.82 
+
+[[66 , 20 , 7]] 2 33 10 (11,12) 19 14.85 highest kd 2/n 
+
+[[66 , 20 , 6]] 2 33 10 (3,3) 22 10.91 same divisor as [[66 , 20 , 7]] 2
+
+[[66 , 20 , 5]] 2 33 10 (9,12) 15 7.58 lowest w at k = 20 [[90 , 16 , 6]] 2 45 8 (10,3) 31 6.40 
+
+[[90 , 18 , 6]] 2 45 9 (11,13) 30 7.20 
+
+[[90 , 20 , 6]] 2 45 8 (11,3) 28 8.00 
+
+> ∗
+
+Recovered by an earlier weight-2 lift scan; consistent with Remark 9, weight-2 lifts cap at d ≤ 4.
+
+2 4 6 20 2468
+
+> 2.45 3.88 5.82 14.85
+
+dimension k
+
+> distance  d
+
+n = 66 (l = 33 )
+
+this work (exact d)
+
+16 18 20 468  
+
+> 6.40 7.20 8.00
+
+dimension k
+
+> distance  d
+
+n = 90 (l = 45 )
+
+this work (exact d)Fig. 1. Parameter landscape at n = 66 and n = 90 : exact distance d against dimension k for the best code found at each k; labels give kd 2/n (the bivariate bicycle codes [[144 , 12 , 12]] 2 and [[90 , 8, 10]] 2 attain 12 and 8.9). 
+
+(Lemma 10). Table I collects the best code found at each parameter set; the quantum-LDPC figure of merit kd 2/n is used throughout as the quality measure, and for reference the bivariate bicycle code [[144 , 12 , 12]] 2 of [11] attains kd 2/n = 12 .The case l = 33 is the most productive in the sweep, owing to the factorization 
+
+x33 − 1 = ( x + 1)( x2 + x + 1) f10 f ′ 
+
+> 10
+
+f ′′  
+
+> 10
+
+over F2,
+
+with three distinct irreducible factors of degree 10 (e.g. f ′′  
+
+> 10
+
+= x10 + x7 + x5 + x3 + 1 ). By Theorem 7 the dimensions attainable within the searched range k ∈ [2 , 20] are exactly k ∈ { 2, 4, 6, 20 } (divisor degrees 1, 2, 3, 10 ; degree 11 would give k = 22 ,outside the range), and the search populates each of them with high-distance codes: the realized distances are 
+
+d = 5 , 6, 7, 8, 9 ( k=2) , d = 5 −8 ( k=4) ,d = 5 −8 ( k=6) , d = 5 , 6, 7 ( k=20) ,
+
+with 51 inequivalent codes in total. The k = 20 stratum is notable: a single irreducible divisor g = f ′′  
+
+> 10
+
+= x10 +x7 +x5 +x3 +1 
+
+of degree 10 supports codes at all three distances 5, 6, 7; the distance-7 code attains kd 2/n = 14 .85 , the highest value in the sweep and above the bivariate bicycle code [[144 , 12 , 12]] 2 (kd 2/n = 12 ). 
+
+Example 11. Take l = 33 , g = x10 + x7 + x5 + x3 + 1 (one of the three degree-10 irreducible factors of x33 − 1) and the lifts 
+
+u = {1, 2, 3, 4, 12 , 13 , 14 , 15 , 16 , 19 , 22 },v = {0, 1, 6, 8, 9, 10 , 11 , 12 , 16 , 19 , 20 , 22 }
+
+(support notation; wt( u) = 11 , wt( v) = 12 ). Then a = gu , b = gv have weights 7 and 12 , so the checks have row weight 19 ;the gcd pre-filter certifies k = 2 deg g = 20 before any matrix is built, and the exact computation of Lemma 10 gives d = 7 
+
+with kd 2/n = 14 .85 , outperforming the bivariate bicycle code [[144 , 12 , 12]] 2 (kd 2/n = 12 ) at less than half the block length. Table II gives the full construction data of representative codes, including all codes referenced in this paper’s search campaign. IEEE TRANSACTIONS ON INFORMATION THEORY, VOL. , NO. , 7                                                                                                                                                                                                                                                      
+
+> TABLE II EXPLICIT POLYNOMIAL CONSTRUCTIONS . S UPPORTS ARE EXPONENTS OF NONZERO TERMS IN F2[x]/(xl−1) ;a=gu ,b=gv ;w= wt( a) + wt( b)IS THE STABILIZER ROW WEIGHT ;dref IS THE INTERNAL FILTER THRESHOLD OF SECTION IV, NOT A PERFORMANCE BENCHMARK .
+> [[ n, k, d ]] 2lsupp gsupp usupp v(wu, w v)wdref
+> [[46 ,2,8]] 223 {0,1}{0,12 ,17 ,18 }{0,4,8,12 }(4,4) 14 2
+> [[66 ,2,9]] 233 {0,1}{0,4,21 ,25 }{0,5,20 ,25 }(4,4) 16 2
+> [[66 ,4,8]] 233 {0,1,2}{0,1,17 }{0,1,4,30 }(3,4) 13 2
+> [[66 ,6,8]] 233 {0,3}{0,5,14 ,23 }{1,2,3,6,9,12 ,15 ,18 ,
+> 21 ,24 ,27 }
+> (4,11) 14 2
+> [[66 ,20 ,5]] 233 {0,3,5,7,10 }{1,3,4,8,9,11 ,
+> 12 ,14 ,19 }{0,1,3,4,7,9,10 ,14 ,
+> 15 ,16 ,18 ,21 }
+> (9,12) 15 5
+> [[66 ,20 ,6]] 233 {0,3,5,7,10 }{0,1,7}{0,2,16 }(3,3) 22 5
+> [[66 ,20 ,7]] 233 {0,3,5,7,10 }{1,2,3,4,12 ,13 ,
+> 14 ,15 ,16 ,19 ,22 }{0,1,6,8,9,10 ,11 ,12 ,
+> 16 ,19 ,20 ,22 }
+> (11,12) 19 5
+> [[90 ,16 ,6]] 245 {0,1,3,4,5,7,
+> 8}{5,6,10 ,15 ,16 ,
+> 21 ,25 ,30 ,31 ,36 }{0,18 ,27 }(10,3) 31 4
+> [[90 ,18 ,6]] 245 {0,3,4,5,8,9}{0,2,3,5,9,17 ,
+> 18 ,20 ,32 ,33 ,35 }{0,2,3,5,9,17 ,18 ,20 ,
+> 24 ,30 ,32 ,33 ,35 }
+> (11,13) 30 5
+> [[90 ,20 ,6]] 245 {0,1,3,4,5,7,
+> 8}{4,5,6,11 ,15 ,20 ,
+> 21 ,26 ,30 ,35 ,36 }{0,14 ,31 }(11,3) 28 5
+
+Extending the search to lengths n ≤ 200 (i.e. l ≤ 100 , including l = 85 , n = 170 ) and to a wider range of asymmetric weight pairs (wu, w v ) yields a substantially larger catalogue of codes with competitive parameters. Table III collects the codes with the highest ratio kd 2/n ; Table IV lists the low-weight codes selected for the decoding study of Section VI; and Table V exhibits the k = 2 family (degree-one divisors g = x + 1 ) whose distance grows roughly with the block length while the stabilizer weight stays at most 16 .
+
+Remark 12 . The [[90 , 18 , 6]] 2 and [[90 , 20 , 6]] 2 codes have dimension well beyond the k = 8 of the BB code [[90 , 8, 10]] 2 at the same length, and the [[66 , 20 , 7]] 2 code shows the same behavior at n = 66 : the large-k, moderate-d region is under-sampled by group-theoretic searches that restrict to symmetric or regular weights. The polynomial search reaches it naturally because 
+
+k is set directly by deg g (Theorem 7) while the distance is protected by the lift weights (Lemma 8). 
+
+Remark 13 . Within the l = 33 , k = 20 family, all found codes share the same divisor g; the distance is therefore entirely a function of the lifts (u, v ). We observe that the maximal distance d = 7 is attained by lifts of weight (11 , 12) whose products with g cancel extensively, down to (wt( a), wt( b)) = (7 , 12) , while the sparsest lifts cap at d = 6 (Table I). This suggests that the relevant quantity is the reduced weight profile of (gu, gv ), not the nominal lift weights; cf. Lemma 8. The BP-OSD decoding performance of the selected low-weight codes is reported in Section VI. VI. D ECODING PERFORMANCE 
+
+We benchmark the finite-length error-correction performance of the low-weight codes of Table IV under the standard code-capacity noise model: each physical qubit independently suffers a depolarizing error with probability p, and syndrome measurements are assumed perfect. This is the benchmark setting of [11], [18] for comparing code families without circuit-level implementation details. The decoder is belief propagation with ordered statistics decoding (BP-OSD) [25], the decoder class used for the trivariate bicycle codes of [18]; we use the sum-product update with up to 50 iterations followed by an OSD combination-sweep of order 1. Because the codes are CSS, X-type and Z-type errors are decoded independently: the 
+
+X-syndrome sX = HZ eX is decoded against the check matrix HZ and likewise for Z, with single-sided depolarizing rate 
+
+q = 2 p/ 3. A trial is declared a failure if the residual error of either sector lies outside the corresponding stabilizer row space, i.e. if the decoder output differs from the actual error by a nontrivial logical operator. For reference we simulate, with the same decoder configuration, the two weight-6 bivariate bicycle (BB) codes of [11]: [[72 , 12 , 6]] and [[144 , 12 , 12]] , on 6 × 6
+
+and 12 × 6 tori with A = x3 + y + y2 and B = y3 + x + x2, respectively. 
+
+A. Logical error rates 
+
+Figures 2 and 3 show the per-shot logical error rate pL as a function of the physical error rate p, obtained by Monte Carlo simulation ( 300 –3000 trials per point, with up to 8000 trials at the lowest error rates). The codes are grouped by block length: Figure 2 compares the seven codes with n ≥ 90 against the distance-12 reference [[144 , 12 , 12]] ; Figure 3 compares the five codes with n ≤ 78 against [[72 , 12 , 6]] . For each code of distance d, the sub-threshold data is fit to the heuristic curve 
+
+˜pL(p) = pd/ 2 eα+βp +γp 2
+
+, (2) IEEE TRANSACTIONS ON INFORMATION THEORY, VOL. , NO. , 8
+
+TABLE III HIGH -kd 2/n CODES FROM THE POLYNOMIAL SEARCH . S UPPORTS ARE EXPONENTS OF NONZERO TERMS IN F2[x]/(xl − 1) ; a = gu , b = gv ;
+
+w = wt( a) + wt( b).
+
+[[ n, k, d ]] 2 l supp g supp a supp b w kd 2/n 
+
+[[66 , 20 , 7]] 2 33 {0, 3, 5, 7, 10 } {1, 2, 3, 5, 10 , 27 ,
+
+32 }{0, 1, 3, 4, 5, 7, 13 ,
+
+15 , 22 , 24 , 30 , 32 }
+
+19 14.85 
+
+[[42 , 16 , 6]] 2 21 {0, 1, 3, 6, 8} {0, 1, 2, 8, 9, 11 , 17 ,
+
+18 , 20 }{0, 1, 2, 3, 4, 6, 8,
+
+11 , 12 , 14 , 18 , 19 ,
+
+20 }
+
+22 13.71 
+
+[[90 , 18 , 8]] 2 45 {0, 3, 4, 5, 8, 9} {0, 1, 2, 3, 4, 6, 8,
+
+9, 12 , 15 , 16 , 17 , 20 ,
+
+21 , 36 , 39 , 40 , 41 , 42 ,
+
+44 }{0, 1, 2, 3, 4, 5, 8, 9,
+
+27 , 30 , 31 , 32 , 34 , 35 ,
+
+36 , 37 , 39 , 41 }
+
+38 12.80 
+
+[[42 , 14 , 6]] 2 21 {0, 1, 2, 4, 6} {1, 3, 5, 6, 7, 9, 12 ,
+
+13 , 14 , 16 , 17 , 19 }{1, 2, 4, 6, 11 , 12 ,
+
+13 , 14 , 15 , 18 , 19 ,
+
+20 }
+
+24 12.00 
+
+[[70 , 16 , 7]] 2 35 {0, 1, 3, 5, 6, 8} {0, 1, 3, 5, 6, 8, 10 ,
+
+11 , 13 , 15 , 16 , 18 , 21 ,
+
+23 , 24 , 25 , 26 , 28 , 29 ,
+
+30 }{1, 2, 3, 5, 6, 8, 11 ,
+
+13 , 14 , 15 , 16 , 18 , 19 ,
+
+20 , 29 , 30 , 32 , 34 }
+
+38 11.20 
+
+[[90 , 20 , 7]] 2 45 {0, 1, 2, 4, 5, 8,
+
+10 }{0, 1, 3, 5, 7, 8, 9,
+
+10 , 36 , 39 , 40 , 42 }{0, 1, 2, 4, 5, 8, 10 ,
+
+21 , 22 , 23 , 25 , 26 ,
+
+29 , 30 , 32 , 34 , 35 , 38 ,
+
+40 }
+
+31 10.89 
+
+[[42 , 18 , 5]] 2 21 {0, 2, 3, 4, 6, 7,
+
+8, 9}{0, 1, 2, 5, 7, 10 , 12 ,
+
+13 , 15 , 16 , 18 , 19 }{1, 3, 4, 6, 8, 9, 10 ,
+
+12 , 16 , 20 }
+
+22 10.71 
+
+[[54 , 16 , 6]] 2 27 {0, 3, 6} {0, 1, 2, 3, 4, 5, 6, 8,
+
+25 }{0, 1, 3, 5, 6, 8, 11 ,
+
+22 , 25 }
+
+18 10.67 
+
+[[42 , 12 , 6]] 2 21 {0, 1, 2} {1, 2, 13 , 14 , 15 , 17 ,
+
+18 , 20 }{0, 1, 2, 5, 6, 7, 8, 9,
+
+10 , 16 , 17 , 18 }
+
+20 10.29 
+
+[[70 , 20 , 6]] 2 35 {0, 2, 4, 5, 6, 8,
+
+10 }{1, 2, 3, 4, 5, 6, 7, 8,
+
+9, 11 , 13 , 15 , 30 , 32 ,
+
+34 }{0, 2, 5, 8, 10 , 11 ,
+
+34 }
+
+22 10.29 
+
+[[170 , 18 , 8]] 2 85 {0, 3, 4, 5, 6, 7,
+
+8}{0, 3, 4, 5, 6, 7, 8,
+
+46 , 49 , 50 , 51 , 52 , 53 ,
+
+54 , 59 , 62 , 63 , 64 , 65 ,
+
+66 , 67 , 72 , 75 , 76 , 77 ,
+
+78 , 79 , 80 }{0, 3, 4, 5, 6, 7, 8,
+
+46 , 49 , 50 , 51 , 52 , 53 ,
+
+54 , 61 , 64 , 65 , 66 , 67 ,
+
+68 , 69 , 70 , 73 , 74 , 75 ,
+
+76 , 77 , 78 }
+
+56 6.78 
+
+[[170 , 18 , 7]] 2 85 {0, 1, 3, 9} {0, 1, 3, 9, 22 , 23 ,
+
+25 , 31 , 38 , 39 , 41 , 47 ,
+
+69 , 70 , 72 , 78 }{0, 1, 3, 9, 11 , 12 ,
+
+14 , 20 , 22 , 23 , 25 ,
+
+31 }
+
+28 5.19 
+
+[[170 , 16 , 7]] 2 85 {0, 1, 5, 7, 8} {0, 1, 6, 7, 8, 10 ,
+
+12 , 13 , 45 , 46 , 50 , 52 ,
+
+53 }{0, 1, 6, 7, 8, 10 , 12 ,
+
+13 , 22 , 23 , 27 , 29 , 30 ,
+
+68 , 69 , 73 , 75 , 76 }
+
+31 4.61 
+
+[[170 , 18 , 6]] 2 85 {0, 1, 3, 9} {0, 1, 3, 9, 39 , 40 ,
+
+42 , 46 , 47 , 48 , 49 ,
+
+55 }{0, 1, 3, 9, 31 , 32 ,
+
+34 , 40 , 54 , 55 , 57 ,
+
+63 }
+
+24 3.81 
+
+[[170 , 10 , 8]] 2 85 {0, 5} {0, 1, 3, 5, 8, 78 , 81 ,
+
+83 }{0, 1, 10 , 76 } 12 3.76 The code [[66 , 20 , 7]] 2 reaches kd 2/n = 14 .85 , outperforming the bivariate bicycle code [[144 , 12 , 12]] 2 (kd 2/n = 12 ) and all trivariate bicycle codes of [18] ( kd 2/n ≤ 10 ) at less than half the block length. 
+
+following [11], [18]; the fit parameters are listed in Table VII. All codes exhibit a clear waterfall region. Among the n ≥ 90 
+
+codes, the steepest suppression is attained by the distance-10 codes [[90 , 2, 10]] 2 and [[90 , 4, 10]] 2: at p = 10 −3 their extrapolated logical error rates drop to pL ≈ 2.2 × 10 −7, roughly four orders of magnitude below the physical error rate, consistent with the 
+
+pd/ 2 scaling of (2). Even the shortest code, [[42 , 6, 7]] 2, reaches pL ≈ 7.8 × 10 −6 at p = 10 −3, already more than two orders of magnitude of suppression with only 42 physical qubits. The long code [[170 , 10 , 8]] 2 (w = 12 ) shows no logical failure at 
+
+p ≤ 2% within the sampled statistics. As expected from their low stabilizer weight w = 6 , the BB reference codes exhibit the steepest sub-threshold slopes: at 
+
+p = 10 −3, [[144 , 12 , 12]] reaches pL ≈ 4 × 10 −10 , about three orders of magnitude below the best n ≤ 90 code of Table IV, and [[72 , 12 , 6]] reaches pL ≈ 6.7 × 10 −7, on par with the shortest codes of Figure 3. All curves in Figures 2 and 3 were obtained with the same BP-OSD configuration, so the comparison is decoder-fair. IEEE TRANSACTIONS ON INFORMATION THEORY, VOL. , NO. , 9
+
+TABLE IV CODES SELECTED FOR DECODING SIMULATIONS : STABILIZER ROW WEIGHT w ≤ 20 AND DISTANCE d ≥ 6.
+
+[[ n, k, d ]] 2 l supp g supp a supp b w kd 2/n 
+
+[[42 , 6, 7]] 2 21 {0, 1, 2} {0, 1, 2, 3, 4, 5, 14 ,
+
+17 }{0, 2, 11 , 12 , 13 , 19 } 14 7.00 
+
+[[54 , 6, 8]] 2 27 {0, 3} {0, 1, 3, 4, 10 , 13 ,
+
+20 , 23 }{0, 2, 3, 6, 9, 19 , 22 ,
+
+26 }
+
+16 7.11 
+
+[[66 , 6, 8]] 2 33 {0, 3} {0, 3, 5, 8, 14 , 17 ,
+
+23 , 26 }{1, 2, 3, 4, 5, 30 } 14 5.82 
+
+[[78 , 6, 8]] 2 39 {0, 3} {1, 2, 3, 36 , 37 , 38 } {3, 15 , 18 , 21 , 24 ,
+
+36 }
+
+12 4.92 
+
+[[90 , 4, 10]] 2 45 {0, 1, 2} {1, 3, 4, 43 , 44 } {0, 1, 2, 7, 8, 9, 38 ,
+
+39 , 40 }
+
+14 4.44 
+
+[[90 , 2, 10]] 2 45 {0, 1} {1, 27 , 29 , 44 } {0, 1, 4, 5, 23 , 24 ,
+
+27 , 28 }
+
+12 2.22 
+
+[[90 , 10 , 8]] 2 45 {0, 3, 4} {0, 4, 6, 7, 20 , 23 ,
+
+24 , 28 , 31 , 32 }{0, 4, 6, 7, 19 , 22 ,
+
+23 , 29 , 32 , 33 }
+
+20 7.11 
+
+[[54 , 16 , 6]] 2 27 {0, 3, 6} {0, 1, 2, 3, 4, 5, 6, 8,
+
+25 }{0, 1, 3, 5, 6, 8, 11 ,
+
+22 , 25 }
+
+18 10.67 
+
+[[170 , 10 , 8]] 2 85 {0, 5} {0, 1, 3, 5, 8, 78 , 81 ,
+
+83 }{0, 1, 10 , 76 } 12 3.76 
+
+[[170 , 10 , 6]] 2 85 {0, 5} {0, 5, 11 , 16 , 74 , 79 } {0, 5, 27 , 32 , 58 , 63 } 12 2.12 
+
+[[170 , 2, 6]] 2 85 {0, 1} {0, 1, 41 , 42 , 44 , 45 } {2, 84 } 8 0.42 
+
+[[170 , 10 , 7]] 2 85 {0, 5} {0, 1, 5, 72 , 76 , 77 } {0, 5, 36 , 41 , 72 , 77 } 12 2.88 Among these, [[90 , 2, 10]] 2 (w = 12 ) and [[78 , 6, 8]] 2 (w = 12 ) have the smallest stabilizer weights; [[170 , 2, 6]] 2 has w = 8 , the smallest weight found at length n = 170 .TABLE V THE k = 2 FAMILY : DISTANCE d ≥ 8 AND STABILIZER ROW WEIGHT w ≤ 16 AT EVERY LENGTH n = 2 l, l = 23 , 25 , 27 , 33 , 35 , 39 , 45 .
+
+[[ n, k, d ]] 2 l supp g supp a supp b w kd 2/n 
+
+[[46 , 2, 8]] 2 23 {0, 1} {0, 1, 12 , 13 , 17 , 19 } {0, 1, 4, 5, 8, 9, 12 ,
+
+13 }
+
+14 2.78 
+
+[[50 , 2, 9]] 2 25 {0, 1} {0, 1, 10 , 11 , 14 , 15 ,
+
+21 , 22 }{0, 1, 10 , 11 , 16 , 17 ,
+
+19 , 20 }
+
+16 3.24 
+
+[[54 , 2, 9]] 2 27 {0, 1} {0, 1, 2, 3, 13 , 14 ,
+
+16 , 17 }{0, 1, 2, 3, 10 , 11 ,
+
+19 , 20 }
+
+16 3.00 
+
+[[66 , 2, 9]] 2 33 {0, 1} {0, 1, 4, 5, 21 , 22 ,
+
+25 , 26 }{0, 1, 5, 6, 20 , 21 ,
+
+25 , 26 }
+
+16 2.45 
+
+[[70 , 2, 10]] 2 35 {0, 1} {0, 1, 3, 4, 11 , 12 ,
+
+14 , 15 }{0, 1, 14 , 15 , 18 , 19 ,
+
+31 , 32 }
+
+16 2.86 
+
+[[78 , 2, 9]] 2 39 {0, 1} {0, 1, 16 , 18 , 33 , 34 } {0, 1, 14 , 15 , 19 , 20 ,
+
+33 , 34 }
+
+14 2.08 
+
+[[90 , 2, 10]] 2 45 {0, 1} {1, 27 , 29 , 44 } {0, 1, 4, 5, 23 , 24 ,
+
+27 , 28 }
+
+12 2.22 All codes share deg g = 1 (k = 2 ); the distance grows roughly with the length n while the stabilizer weight stays at most 16 .
+
+B. Pseudo-thresholds 
+
+Following [11], the pseudo-threshold p0 of each code is defined as the solution of the break-even equation 
+
+pL(p0) = 1 − (1 − p0)k, (3) the probability that at least one of the k unencoded qubits suffers an error. Table VI reports p0 together with the extrapolated logical error rates at p = 10 −3 and p = 10 −2 for the codes of Table IV and for the two BB reference codes. Among the new codes, p0 ranges from 3.1% ([[54 , 6, 8]] 2) to 11 .9% ([[54 , 16 , 6]] 2); the BB reference [[144 , 12 , 12]] attains p0 ≈ 12 .7% , while the measured pL of [[72 , 12 , 6]] remains below the break-even value at every sampled error rate ( p ≤ 0.13 ); the [[170 , 10 , 8]] 2
+
+code likewise stays below break-even throughout the sampled range (no logical failure was observed at p ≤ 2% ), so no p0 is reported for it either. The higher-k codes trade pseudo-threshold for encoding rate, as expected from (3). IEEE TRANSACTIONS ON INFORMATION THEORY, VOL. , NO. , 10 
+
+TABLE VI PSEUDO -THRESHOLDS AND EXTRAPOLATED LOGICAL ERROR RATES UNDER CODE -CAPACITY DEPOLARIZING NOISE (BP-OSD, 50 ITERATIONS ,OSD-CS ORDER 1). p0 SOLVES pL(p0) = 1 − (1 − p0)k ; pL IS EXTRAPOLATED FROM TABLE VII. T HE LAST TWO ROWS ARE THE BIVARIATE BICYCLE REFERENCE CODES OF [11], SIMULATED WITH THE SAME DECODER .
+
+[[ n, k, d ]] 2 w p0 pL(10 −3) pL(10 −2)[[42 , 6, 7]] 2 14 0.1041 7.8 × 10 −6 1.1 × 10 −2
+
+[[54 , 6, 8]] 2 16 0.0306 3.2 × 10 −6 1.3 × 10 −2
+
+[[66 , 6, 8]] 2 14 0.1098 2.8 × 10 −6 9.8 × 10 −3
+
+[[78 , 6, 8]] 2 12 0.1124 8.9 × 10 −7 3.6 × 10 −3
+
+[[90 , 4, 10]] 2 14 0.1041 2.2 × 10 −7 5.5 × 10 −3
+
+[[90 , 2, 10]] 2 12 0.0939 2.2 × 10 −7 5.1 × 10 −3
+
+[[90 , 10 , 8]] 2 20 0.0988 2.9 × 10 −6 1.2 × 10 −2
+
+[[54 , 16 , 6]] 2 18 0.1187 6.9 × 10 −5 3.5 × 10 −2
+
+[[170 , 10 , 8]] 2 12 – 6.8 × 10 −9 8.1 × 10 −5
+
+[[170 , 10 , 6]] 2 12 0.1081 9.3 × 10 −6 6.0 × 10 −3
+
+[[170 , 2, 6]] 2 8 0.0346 5.7 × 10 −6 4.0 × 10 −3
+
+[[170 , 10 , 7]] 2 12 0.1103 7.8 × 10 −6 1.2 × 10 −2
+
+BB reference codes of [11]: 
+
+[[72 , 12 , 6]] 2 6 – 6.7 × 10 −7 7.2 × 10 −4
+
+[[144 , 12 , 12]] 2 6 0.1273 4.0 × 10 −10 1.0 × 10 −4
+
+TABLE VII FIT PARAMETERS OF ˜pL(p) = pd/ 2 eα+βp +γp 2 
+
+> FOR THE CURVES OF
+
+FIGURES 2 AND 3 ( SUB -THRESHOLD DATA p ≥ 0.005 ). 
+
+[[ n, k, d ]] 2 d α β γ
+
+[[42 , 6, 7]] 2 7 12.50 -88 359 
+
+[[54 , 6, 8]] 2 8 15.10 -109 427 
+
+[[66 , 6, 8]] 2 8 14.96 -122 548 
+
+[[78 , 6, 8]] 2 8 13.80 -105 481 
+
+[[90 , 4, 10]] 2 10 19.38 -162 713 
+
+[[90 , 2, 10]] 2 10 19.37 -170 762 
+
+[[90 , 10 , 8]] 2 8 14.96 -97 355 
+
+[[54 , 16 , 6]] 2 6 11.21 -79 312 
+
+[[170 , 10 , 8]] 2 8 8.81 21 -205 
+
+[[170 , 10 , 6]] 2 6 9.19 -51 227 
+
+[[170 , 2, 6]] 2 6 8.69 -43 153 
+
+[[170 , 10 , 7]] 2 7 12.50 -87 367 BB reference codes of [11]: 
+
+[[72 , 12 , 6]] 2 6 6.50 8 -104 
+
+[[144 , 12 , 12]] 2 12 19.97 -162 790 
+
+These results confirm that the stabilizer row weight w is the primary driver of decoding performance, in agreement with the observation of [36] that doubling the check weight from 6 to 8 roughly halves the circuit-level threshold. The codes of Table IV, with 8 ≤ w ≤ 20 , are therefore the natural candidates for circuit-level fault-tolerance studies; in particular, the smallest weights w = 8 ([[170 , 2, 6]] 2) and w = 12 ([[90 , 2, 10]] 2, [[78 , 6, 8]] 2, [[170 , 10 , 8]] 2) are expected to admit the deepest sub-threshold suppression per round. VII. B EYOND THE CYCLIC CASE : R ANK DEGENERACY AT n = 48 
+
+The polynomial framework of Sections III–IV rests on the cyclic, regular-action specialization G = Zl, H = {e}:transposition is then a rank-preserving ring automorphism, and the dimension formula collapses to the gcd form k =2 deg gcd( a, b, x l − 1) of Proposition 4. This section states the main phenomena that appear when these consequences fail, i.e. which effects are captured by the polynomial picture and which are genuinely coset-theoretic. Proofs are only sketched; the full census data and the structural analysis will be developed in a companion paper. Let G be a finite group, H ≤ G a subgroup of index m = [ G:H], and a, b ∈ F2[G/H ] sums of wa, wb coset permutations. The symmetric coset-2BGA CSS code has checks HX = [ A | B ], HZ = [ BT | AT ] on n = 2 m qubits, with HX HTZ = 0 
+
+automatic in characteristic 2, and dimension 
+
+k = 2  m − rank HX
+
+ +  rank HX − rank HZ
+
+, (4) IEEE TRANSACTIONS ON INFORMATION THEORY, VOL. , NO. , 11 
+
+10 −3 10 −2 10 −1
+
+10 −8
+
+10 −7
+
+10 −6
+
+10 −5
+
+10 −4
+
+10 −3
+
+10 −2
+
+10 −1
+
+10 0
+
+physical error rate p
+
+> logical error rate  pL
+
+[[90,2,10]] [[90,4,10]] [[90,10,8]] [[170,10,8]] [[170,10,6]] [[170,2,6]] [[170,10,7]] [[144,12,12]] Fig. 2. Decoding performance: long codes vs BB [[144 , 12 , 12]] . Markers: Monte Carlo (BP-OSD, 50 iterations, OSD-CS order 1); dashed lines: the fit 
+
+˜pL(p) = pd/ 2eα+βp +γp 2
+
+on sub-threshold data, drawn over the full axis range for illustration. 
+
+10 −3 10 −2 10 −1
+
+10 −8
+
+10 −7
+
+10 −6
+
+10 −5
+
+10 −4
+
+10 −3
+
+10 −2
+
+10 −1
+
+10 0
+
+physical error rate p
+
+> logical error rate  pL
+
+[[42,6,7]] [[54,6,8]] [[66,6,8]] [[78,6,8]] [[54,16,6]] [[72,12,6]] Fig. 3. Decoding performance: short codes vs BB [[72 , 12 , 6]] . Markers: Monte Carlo (BP-OSD, 50 iterations, OSD-CS order 1); dashed lines: the fit 
+
+˜pL(p) = pd/ 2eα+βp +γp 2
+
+on sub-threshold data, drawn over the full axis range for illustration. 
+
+the coset generalization of Proposition 4: the first term is the generic (polynomial) contribution, while the rank defect rank HX −
+
+rank HZ vanishes identically in the cyclic case and can be nonzero for nontrivial coset actions. We specialize to the weight-8
+
+symmetric family G = SmallGroup(72 , 30) , H ∼= C3, m = 24 , n = 48 , wa = wb = 4 , enumerated exhaustively by computer into 123 equivalence classes under S48 coordinate permutation and the CSS X/Z swap. 
+
+A. Three codes: benchmark, surpass, boundary 
+
+Table VIII places our construction against the two reference points of Aydin–Tamo–Barg [36]. 
+
+Construction 14. Take G1 = SmallGroup(48 , 10) , H1 ≤ G1 with |H1| = 2 , [G1:H1] = 24 , and coset-support elements 
+
+a = [1 , 6, 26 , 28] , b = [1 , 6, 7, 8] . Then rank HX = rank HZ = 19 (GF(2) row reduction), hence k = 10 , with exact distance 
+
+d = 6 , constant row weight 8, and constant column weight 4.IEEE TRANSACTIONS ON INFORMATION THEORY, VOL. , NO. , 12                                                                                                                                                                          
+
+> TABLE VIII THE n= 48 COSET -2BGA DESIGN SPACE :BENCHMARK ,SURPASS ,BOUNDARY
+> this work C48 ATB C72 ATB [[48 ,8,6]]
+> parameters [[ n, k, d ]] [[48 ,10 ,6]] [[48 ,10 ,6]] [[48 ,8,6]]
+> group GSG (48 ,10) SG (72 ,30) SG (384 ,512)
+> group order |G|48 72 384
+> subgroup H|H|= 2 C3C16
+> index [G:H]24 24 24 (wa, w b)(4 ,4) (4 ,4) (3 ,3)
+> check weight w886
+> bit degree 443
+> rate k/n 20 .8% 20 .8% 16 .7%
+> kd/n 1.25 1.25 1.0
+> transpose self-dual verified not verified no TABLE IX THE SEVEN [[48 ,9,5]] EQUIVALENCE CLASSES .|Aut |IS THE AUTOMORPHISM GROUP ORDER ;NX
+> 5COUNTS WEIGHT -5X-TYPE LOGICALS . A LL CLASSES HAVE rank HX= 19 ,rank HZ= 20 ,dX= 5 ,dZ≥6.class members |Aut |abNX
+> 5
+> 680 48 [1 ,33 ,54 ,63] [1 ,5,9,10] 24 748 96 [1 ,22 ,53 ,72] [1 ,6,8,11] 24 848 96 [1 ,20 ,53 ,69] [1 ,5,7,10] 24 941 48 [1 ,35 ,38 ,62] [1 ,5,9,10] 12 10 16 192 [1 ,28 ,49 ,67] [1 ,6,8,11] 24 11 12 96 [1 ,21 ,46 ,68] [1 ,5,9,11] 36 12 848 [1 ,34 ,40 ,60] [1 ,5,7,10] 12
+
+The resulting code has the same public parameters (n, k, d, w ) = (48 , 10 , 6, 8) as the ATB code built from SmallGroup(72 , 30) ;since the group order and the coset index are invariants of a coset-2BGA construction, the two do not arise from the same construction data. 
+
+Theorem 15. Within the [G:H] = 24 , n = 48 , weight-8 coset-2BGA framework, Construction 14 is the minimal-order group realization of (48 , 10 , 6) : n = 2[ G:H] = 48 forces |G| = 24 |H|, and |H| = 2 is the smallest nontrivial choice ( |H| = 1 
+
+degenerates to the regular action, which the exhaustive 2BGA searches of [36] show does not contain these parameters). The group is 1/3 smaller than the ATB realization of the same parameters, and 7/8 smaller than the 384 -element group behind their [[48 , 8, 6]] code. B. The rank-degeneracy theorem 
+
+Theorem 16. In the weight-8 symmetric coset-2BGA family above, every code with quantum distance d = 5 satisfies 
+
+rank HX = 19 , rank HZ = 20 , k = 9 .
+
+Consequently, no [[48 , 10 , 5]] code exists in this family: distance 5 and the generic dimension k = 10 are mutually exclusive. Proof (computer-assisted, exhaustive). The census partitions the family into 123 equivalence classes; exactly 7 classes ( 253 
+
+member codes) have d = 5 (Table IX). For each class both check ranks and the kernel weight spectra were computed by exhaustive enumeration over all  48 
+
+> w
+
+ supports, w ≤ 5: in every case rank HX = 19 , rank HZ = 20 , hence k = 9 by (4), and the X-side kernel contains weight-5 vectors while both kernels are free of weight ≤ 4. All remaining classes — 110 with 
+
+d ≤ 4 and 6 with d = 6 — have full ranks 19 + 19 and k = 10 , so rank loss is tied to distance exactly 5, not to small or large distance as such. 
+
+C. Structural features and outlook 
+
+The seven classes share three features that single out the d = 5 stratum: every weight-5 X-kernel vector is a genuine logical operator (the Z stabilizer contains no weight-5 element at all); dX = 5 while dZ ≥ 6 despite the transpose symmetry; and the minimum-logical counts are quantized, N X 
+
+> 5
+
+∈ { 12 , 24 , 36 }, non-monotone in |Aut |.IEEE TRANSACTIONS ON INFORMATION THEORY, VOL. , NO. , 13 
+
+Conjecture 17. For this family, rank HZ > rank HX iff the cyclic G-submodule ⟨a⟩ ⊆ F2[G/H ] is contained in a proper submodule U with dim F2[G/H ]/U = 1 , while ⟨b⟩̸ ⊆ U . Whenever this happens the code has k = 9 and d = 5 ; otherwise 
+
+k = 10 and d ∈ { 3, 4, 6}.
+
+For the present paper the message is twofold. First, the gcd dimension formula of Proposition 4 is the defect-zero case of the general rank formula (4), so the polynomial framework knows exactly which degrees of freedom it has discarded. Second, the module-embedding mechanism of Conjecture 17 is the coset analogue of the divisor condition g | xl − 1: both say that dimension is controlled by where a sits inside a module, and both turn this into a pre-filter. VIII. D ISCUSSION 
+
+A. Theoretical significance 
+
+Theorem 2 shows that the group-theoretic commuting-action condition and the CRSS symplectic self-orthogonality are one equation read two ways; under the cyclic specialization it becomes the polynomial identity (1). Proposition 4 turns the quantum dimension into a polynomial gcd, which enables pre-filtering and a divisor-driven search that has no counterpart in the pure group formulation. The framework is the cyclic, regular-action case of the broader coset-based symplectic theory, and it makes precise when group-theoretic constructions admit a polynomial (circulant) form. Finally, the rank formula (4) shows that the gcd formula of Proposition 4 is the defect-zero case of a general two-term law, and Theorem 16 exhibits the defect term in action: at n = 48 it forbids [[48 , 10 , 5]] outright. The framework thus states not only what it constructs but also what it provably cannot see. 
+
+B. Practical significance 
+
+The Magma pipeline (factor xl −1, enumerate g, gcd pre-filter, fingerprint dedup, two-level distance filter) is fully automated and reproduces the short codes of Tables I–V within seconds to minutes, while reaching parameter combinations (e.g. large 
+
+k) poorly covered by existing tables. 
+
+C. Limitations and open problems 
+
+The scope of the algebraic control established here is the univariate, cyclic case. Extending it to the bivariate setting 
+
+G = Zl × Zm requires working in R2 = F2[x, y ]/(xl − 1, y m − 1) , where the single gcd of Proposition 4 must be replaced by a Gr¨ obner-basis or quotient-dimension computation; finding the right analogue is the natural next step and would bring the BB codes of [11] inside the same pre-filtered search framework. On the computational side, the exact distance evaluation of Lemma 10 is the bottleneck for large l. A two-level estimator, in which a BP-OSD decoder proposes low-weight logical candidates that are then certified exactly, would extend the reachable lengths considerably. Finally, the performance statements in this paper are made relative to the bicycle and bivariate/trivariate bicycle families ( kd 2/n comparisons, Section V); a systematic comparison against a comprehensive database of quantum LDPC codes, including generalized bicycle and lifted-product families, remains future work. Two open problems concern the coset direction of Section VII. Conjecture 17 predicts rank degeneracy from a module-embedding condition; proving it, and unifying the resulting criterion with the divisor pre-filter of Section IV, would merge the cyclic and coset searches into a single algebraic framework. Separately, the [[48 , 10 , 6]] code of Construction 14 has weight-8
+
+checks and therefore deeper syndrome-extraction circuits than the weight-6 ATB [[48 , 8, 6]] code; its circuit-level threshold behavior remains to be evaluated. IX. C ONCLUSION 
+
+We reformulated quantum bicycle LDPC codes in the symplectic polynomial domain, showing that self-orthogonality is automatic (Theorem 2), the dimension is a polynomial gcd (Proposition 4, Theorem 7), and the distance is computed exactly via the Calderbank correspondence with the stabilizer excluded (Lemma 10). The resulting divisor-driven search recovers short codes at n = 46 , 66 , and 90 with competitive kd 2/n , including a [[66 , 20 , 7]] 2 code from a single degree-10 irreducible divisor of x33 − 1 that attains kd 2/n = 14 .85 , above the bivariate bicycle code [[144 , 12 , 12]] 2, and reaches the large-k regime missed by group-theoretic searches. Stepping outside the cyclic case, we showed that the same framework exposes its own boundary: at n = 48 the coset rank defect produces a rank-degeneracy theorem excluding [[48 , 10 , 5]] from the family, while a minimal-order 48 -element group realizes [[48 , 10 , 6]] within the coset-2BGA framework, improving on the 72 -element construction of [36]. A bivariate extension, a sharp closed form for the kernel-family weight wmin (a, b ) of Lemma 8, and a proof of the module-embedding criterion are underway. ACKNOWLEDGMENT 
+
+The authors would like to thank Ruihu Li for the suggestions on our manuscript, which improved the manuscript significantly. This work is supported by the National Natural Science Foundation of China under Grant No. U21A20428, Natural Science Foundation of Shaanxi under Grant No. 2025-JC-YBQN-070. IEEE TRANSACTIONS ON INFORMATION THEORY, VOL. , NO. , 14 
+
+REFERENCES [1] A. Y. Kitaev, “Fault-tolerant quantum computation by anyons,” Ann. Phys. , vol. 303, no. 1, pp. 2–30, 2003. [2] J.-P. Tillich and G. Z´ emor, “Quantum LDPC codes with positive rate and minimum distance proportional to the square root of the blocklength,” IEEE Trans. Inf. Theory , vol. 60, no. 2, pp. 1193–1202, 2014. [3] ——, “Quantum ‘hyperbicycle’ low-density parity check codes with finite rate,” 2012, arXiv:1212.6703. [4] P. Panteleev and G. Kalachev, “Quantum LDPC codes with almost linear minimum distance,” IEEE Trans. Inf. Theory , vol. 68, no. 1, pp. 213–229, 2022. [5] A. Leverrier and G. Z´ emor, “Quantum tanner codes,” in Proc. 63rd IEEE Symp. Found. Comput. Sci. (FOCS) , 2022, pp. 872–883. [6] ——, “Decoding quantum tanner codes,” 2022, arXiv:2208.05537. [7] D. J. C. MacKay, G. Mitchison, and P. L. McFadden, “Sparse-graph codes for quantum error correction,” IEEE Trans. Inf. Theory , vol. 50, no. 10, pp. 2315–2330, 2004. [8] A. A. Kovalev and L. P. Pryadko, “Quantum kronecker sum-product low-density parity-check codes with finite rate,” Phys. Rev. A , vol. 88, no. 1, p. 012311, 2013. [9] H.-K. Lin and L. P. Pryadko, “Quantum two-block group algebra codes,” Phys. Rev. A , vol. 109, no. 2, p. 022415, 2024. [10] R. Wang, H.-K. Lin, and L. P. Pryadko, “Abelian and non-abelian quantum two-block codes,” 2023, arXiv:2305.06890. [11] S. Bravyi, A. W. Cross, J. M. Gambetta, D. Maslov, P. Rall, and T. J. Yoder, “High-threshold and low-overhead fault-tolerant quantum memory,” Nature ,vol. 627, pp. 778–782, 2024. [12] N. Koukoulekidis, I. ˇ Simkovic, F., M. Leib, and F. R. F. Pereira, “Small quantum codes from algebraic extensions of generalized bicycle codes,” 2024, arXiv:2401.07583. [13] R. Dastbasteh, O. S. Larrarte, A. J. Moncy, P. M. Crespo, J. E. Martinez, and R. M. Otxoa, “Generalized bicycle codes with low connectivity: Minimum distance bounds and hook errors,” 2025, arXiv:2508.09082. [14] F. Arnault, P. Gaborit, and N. Saussay, “ (2 , 2) -GB codes: Classification and comparison with weight-4 surface codes,” 2025, arXiv:2507.21237. [15] S. Rabeti and H. Mahdavifar, “Univariate bicycle quantum LDPC codes: Explicit logical structure and distance bounds,” 2026, arXiv:2605.14173. [16] A. J. Davenport, J. Blue, and I. Chuang, “Generalized bicycle codes as cyclic submodules and their automorphism structure,” 2026, arXiv:2606.05044. [17] L. Voss, S. J. Xian, T. Haug, and K. Bharti, “Multivariate bicycle codes,” 2024, arXiv:2406.19151. [18] A. A. Galimova, “Independent trivariate bicycle codes,” 2026, arXiv:2603.17703. [19] F. A. Mian, O. Gwilliam, and S. Krastanov, “Multivariate multicycle codes for complete single-shot decoding,” 2026, arXiv:2601.18879. [20] A. Aydin, N. Delfosse, and E. Tham, “Cyclic hypergraph product code,” 2025, arXiv:2511.09683. [21] J. N. Eberhardt and V. Steffan, “Logical operators and fold-transversal gates of bivariate bicycle codes,” 2024, arXiv:2407.03973. [22] Z. Liang and Y.-A. Chen, “Self-dual bivariate bicycle codes with transversal clifford gates,” 2025, arXiv:2510.05211. [23] J. N. Eberhardt, F. R. F. Pereira, and V. Steffan, “Pruning QLDPC codes: Towards bivariate bicycle codes with open boundary conditions,” 2024, arXiv:2412.04181. [24] Z. Liang, J. N. Eberhardt, and Y.-A. Chen, “Planar quantum low-density parity-check codes with open boundaries,” 2025, arXiv:2504.08887. [25] P. Panteleev and G. Kalachev, “Degenerate quantum LDPC codes with good finite length performance,” Quantum , vol. 5, p. 585, 2021. [26] A. deMarti iOlius, I. E. Martinez, J. Roffe, and J. E. Martinez, “An almost-linear time decoding algorithm for quantum LDPC codes under circuit-level noise,” 2024, arXiv:2409.01440. [27] K. Sahay, D. J. Williamson, and B. J. Brown, “A matching decoder for bivariate bicycle codes,” 2026, arXiv:2602.22770. [28] S. Rabeti and H. Mahdavifar, “List decoding and new bicycle code constructions for quantum LDPC codes,” 2025, arXiv:2511.02951. [29] N. Delfosse, M. E. Beverland, and M. A. Tremblay, “Bounds on stabilizer measurement circuits and obstructions to local implementations of quantum LDPC codes,” 2021, arXiv:2109.14599. [30] N. Berthusen, D. Devulapalli, E. Schoute et al. , “Toward a 2d local implementation of quantum LDPC codes,” 2024, arXiv:2404.17676. [31] M. H. Shaw and B. M. Terhal, “Lowering connectivity requirements for bivariate bicycle codes using morphing circuits,” 2024, arXiv:2407.16336. [32] M. Mathews, L. Pahl, D. Pahl et al. , “Placing and routing quantum LDPC codes in multilayer superconducting hardware,” 2025, arXiv:2507.23011. [33] L. Pecorari and G. Pupillo, “Quantum low-density parity-check codes for erasure-biased atomic quantum processors,” 2025, arXiv:2502.20189. [34] N. K. Chandra, E. Kaur, R. Nejabati, and K. P. Seshadreesan, “Distributed quantum error correction with bivariate bicycle codes in a modular architecture,” 2026, arXiv:2605.04663. [35] A. R. Calderbank, E. M. Rains, P. W. Shor, and N. J. A. Sloane, “Quantum error correction via codes over GF(4),” IEEE Trans. Inf. Theory , vol. 44, no. 4, pp. 1369–1387, 1998. [36] A. Aydin, I. Tamo, and A. Barg, “Breaking the bicycle frame: Coset-based quantum LDPC codes,” 2026, arXiv:2606.17268.

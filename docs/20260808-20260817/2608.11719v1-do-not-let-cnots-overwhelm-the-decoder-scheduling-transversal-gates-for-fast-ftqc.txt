@@ -1,0 +1,759 @@
+Title: Do Not Let CNOTs Overwhelm the Decoder: Scheduling Transversal Gates for Fast FTQC
+
+URL Source: https://arxiv.org/pdf/2608.11719v1
+
+Published Time: Thu, 13 Aug 2026 00:33:44 GMT
+
+Number of Pages: 16
+
+Markdown Content:
+# Do Not Let CNOTs Overwhelm the Decoder: Scheduling Transversal Gates for Fast FTQC 
+
+# Shota Ikari 
+
+The University of Tokyo / RIKEN Tokyo, Japan shota-ikari@g.ecc.u-tokyo.ac.jp 
+
+# Yuga Hirai 
+
+Keio University / RIKEN Kanagawa, Japan yuga917@keio.jp 
+
+# Yasunari Suzuki 
+
+RIKEN Saitama, Japan yasunari.suzuki@riken.jp 
+
+# Hiroshi Nakamura 
+
+The University of Tokyo Tokyo, Japan nakamura@hal.ipc.i.u-tokyo.ac.jp 
+
+# Yosuke Ueno 
+
+RIKEN / The University of Tokyo Saitama, Japan yosuke.ueno@riken.jp 
+
+## Abstract 
+
+Transversal CNOT (TCNOT) gates can accelerate fault-tolerant quantum computation (FTQC) in the surface code by reducing the number of syndrome extraction rounds required between logical operations from 𝑂 (𝑑 ) to 𝑂 (1). This is particularly attractive for quantum platforms with long-range connectivity, such as neutral-atom arrays. However, dense TCNOT schedules substantially in-crease the classical decoding workload. Error propagation through TCNOTs correlates detection events across multiple surface-code patches, enlarging the spatiotemporal region that must be decoded jointly. Consequently, denser TCNOT schedules increase decoding latency and memory requirements and potentially exceed avail-able decoder capacity. Moreover, because the detector error model (DEM) of each decoding window depends on the TCNOT schedule, exhaustively precomputing all possible window-level DEMs is in-feasible, requiring just-in-time (JIT) DEM compilation. Thus, the practical benefit of TCNOT gates is limited not only by quantum hardware performance but also by classical decoding and DEM-compilation capacity. We introduce PACE , a decoder-aware TCNOT scheduling frame-work for surface-code systems supporting TCNOT gates. PACE first mitigates the decoder-side costs of aggressive TCNOT scheduling through three complementary techniques. Hybrid Window Decoding 
+
+assigns different decoders for each decoding window according to its DEM structure. DEM Stitch generates schedule-specific window-level DEMs just in time by assembling reusable precompiled frag-ments. Sub-window Parallel Decoding decomposes large decoding windows into smaller sub-windows and uses a graph-coloring for-mulation to expose and schedule parallel decoding opportunities. Building on these techniques, PACE then performs decoder-aware scheduling to maximize TCNOT concurrency within the available decoder resources. Our evaluation characterizes the trade-off be-tween quantum acceleration and classical decoding cost, revealing the limitations of current decoding systems for TCNOT-based FTQC and highlighting directions for future decoder development. 
+
+## 1 Introduction 
+
+Fault-tolerant quantum computing (FTQC) enables quantum algo-rithms to run at low logical error rates by encoding logical infor-mation in quantum error-correcting (QEC) codes [28, 40]. Among the many proposed QEC codes, the surface code is one of the lead-ing candidates because it requires only nearest-neighbor stabilizer measurements and has a high error threshold [1, 20, 22]. During quantum computation, imperfect qubits and gates contin-uously introduce physical errors. Syndrome extraction (SE) repeat-edly measures stabilizers to detect these errors, producing syndrome data that must be decoded in real time. For online decoding, the stream of syndrome measurements is partitioned into overlapping decoding windows [20, 45], each decoded using its corresponding detector error model (DEM), a graph-based representation of the decoding problem [23]. To sustain real-time operation, decoding must keep pace with SE to prevent the backlog problem [2, 47]. Recent studies have proposed transversal logical operations to reduce the quantum execution time of surface-code compu-tation [16, 17, 54, 55]. Whereas lattice-surgery-based logical op-erations typically require 𝑂 (𝑑 ) rounds of SE, transversal CNOT (TCNOT) gates require only 𝑂 (1) rounds, where 𝑑 denotes the code distance [7, 21]. This is advantageous for quantum platforms with long-range connectivity, such as neutral-atom arrays [6], enabling TCNOTs to substantially reduce quantum execution time. However, existing studies have mainly focused on the quantum-side acceleration provided by TCNOTs, while their impact on the classical decoding system has received much less attention [46]. TCNOTs introduce three fundamental challenges for online de-coding. First, TCNOTs create correlated errors across multiple surface-code patches. As a result, a single physical error can flip more than two detectors, appearing as a hyperedge in the corre-sponding DEM. Such DEMs are no longer purely graphlike [31] and non-graphlike DEMs require more complex decoding algo-rithms [12, 13, 51], which increase decoder latency and runtime memory usage. Second, TCNOT scheduling exponentially increases the diversity of possible window-level DEMs. Exhaustively prepar-ing DEMs for every possible schedule is therefore impractical, re-quiring DEMs to be generated online before decoding can proceed. This online DEM preparation [56] is frequently overlooked, yet it can itself become a significant bottleneck for real-time decod-ing. Third, aggressive TCNOT scheduling can rapidly enlarge the decoding window [44, 54], increasing both decoder latency and working-memory requirements. Fully exploiting the quantum-side acceleration of TCNOTs would require decoding arbitrarily large correlated volumes within fixed latency and memory constraints,  
+
+> 1arXiv:2608.11719v1 [quant-ph] 12 Aug 2026 Shota Ikari, Yuga Hirai, Yasunari Suzuki, Hiroshi Nakamura, and Yosuke Ueno O(1) SE rounds Logical gate Errors O(d) decoding window Correlated errors
+> ...
+
+Expanding decoding window Decoding capability  
+
+> Existing scheduling
+> Constrained decoder Ideal decoder
+> Feasible scheduling with PACE
+
+Infeasible 
+
+> Average #SE per CNOT
+
+d1 ASAP All-d Sec. 5 Sec. 4 
+
+Cascading Error Propagation 
+
+(a) (b) 
+
+Figure 1: Motivation of PACE. (a) Dense TCNOT scheduling enlarges the decoding window, rapidly increasing decoder workload. (b) PACE schedules TCNOTs as densely as decoder capacity allows, balancing quantum acceleration with decoding capability. 
+
+which is infeasible because aggressive TCNOT scheduling rapidly increases both the decoding volume and its associated costs. Existing approaches make different tradeoffs between TCNOT concurrency and classical decoding complexity. Sahay et al. [44] keep each correlated decoding problem manageable by restricting a decoding block to a limited number of TCNOTs and separating successive blocks with sufficient SE rounds. This approach limits the size and diversity of DEMs, but reduces TCNOT concurrency and thus gives up part of the potential quantum-side acceleration. Cain et al. [12, 13] develop correlated-decoding methods that sup-port more aggressive TCNOT execution by reducing or reformu-lating the associated decoding work. These methods focus on de-coding a given transversal circuit, rather than selecting its TCNOT schedule under system-level decoder constraints. Consequently, existing work does not jointly consider online DEM preparation, per-window memory and decoding-latency limits, and their depen-dence on the TCNOT schedule. This gap motivates selecting the TCNOT schedule according to both quantum execution time and the capacity of the classical decoding system. This paper proposes PACE , a scheduling framework for surface-code systems with transversal CNOTs. PACE first mitigates the decoder-side costs of TCNOT by combining three techniques: hy-brid window decoding to reduce decoding latency and working memory, just-in-time (JIT) DEM compilation to construct window-level DEMs at runtime and sub-window parallel decoding to manage volume of each decoding window. These techniques directly ad-dress the three challenges. PACE then leverages these techniques to perform decoder-aware scheduling that maximizes quantum-side acceleration while maintaining decoder feasibility (Fig. 1(b)). Our contributions are as follows: 
+
+• We identify three decoder-side bottlenecks introduced by aggressive TCNOT scheduling: (i) correlated-unmatchable decoding cost, (ii) the growing diversity of DEM patterns, and (iii) decoding volume growth (Sec. 3). 
+
+• We present PACE , a decoder-aware framework for FTQC with TCNOT that mitigates these bottlenecks through three complementary techniques: hybrid window decoding, JIT DEM compilation, and sub-window parallel decoding. These techniques motivates decoder-aware scheduling that bal-ances quantum acceleration with classical decoding capa-bility (Sec.4, 5). 
+
+• We evaluate PACE using decoder evaluations, DEM con-struction experiments, and benchmark quantum circuits, demonstrating that it reduces quantum execution time while satisfying the decoder constraints (Sec.6, 7). 
+
+## 2 Background 2.1 Surface Code 
+
+The surface code is one of the most widely studied QEC codes because it combines a high error threshold with stabilizer mea-surements that require only nearest-neighbor interactions on a two-dimensional lattice [10, 20, 22]. As a CSS code, it employs sepa-rate 𝑋 - and 𝑍 -type stabilizers to detect phase-flip and bit-flip errors, respectively (Fig. 2(a)). SE repeatedly measures these stabilizers without directly disturbing the encoded logical state, producing a record of syndrome measurements. We denote the duration of one SE round by 𝜏 SE . Detectors are computed as parities of selected syn-drome measurements in this record. A detection event occurs when a detector’s outcome differs from its expected value, indicating a possible physical fault. During execution, classical decoders con-tinuously process the resulting stream of detection events to infer likely errors on the quantum device, and they must keep pace with its generation. In conventional surface-code error correction, the resulting DEM is typically graphlike, allowing efficient decoding using matching-based decoders [29, 31]. 
+
+## 2.2 Transversal CNOT (TCNOT) Gate 
+
+A TCNOT gate is a logical CNOT gate implemented by applying physical CNOT gates between corresponding data qubits in two surface-code patches [28]. This operation requires long-range con-nectivity between corresponding data qubits in the two surface code patches, making it well suited to reconfigurable architectures such as neutral-atom quantum computers [5, 6]. Recent works have shown that, under suitable decoding assumptions, TCNOT gates can be sequentially scheduled with only 𝑂 (1) SE rounds between other logical operations [54, 55]. This is substantially smaller than      
+
+> 2Do Not Let CNOTs Overwhelm the Decoder: Scheduling Transversal Gates for Fast FTQC Data qubit Error Error chain Ancilla qubit (X , Z) Stabilizer
+> Time Time Time Time Time
+
+(b) (a) (c) (d) 
+
+Commit Buffer O(d) 
+
+Figure 2: (a) A distance-three rotated surface code. (b) A DEM for a memory experiment. (c) A TCNOT can flip more than two detectors, which forms hyperedges in the corresponding DEM. (d) The diagram of window decoding. 
+
+the 𝑂 (𝑑 ) rounds required by lattice-surgery [21, 33]; 𝑑 denotes the code distance. 
+
+## 2.3 Detector Error Models (DEMs) 
+
+The decoder requires prior knowledge of the noise characteristics of the quantum device and the executed circuit to estimate errors correctly. This information is represented by a DEM [23], a graph-based model that characterizes the relationship between physical errors, detectors, and logical observables. A detector is a parity check over syndrome measurements whose value is deterministic in the absence of errors and is represented as a node in the DEM. Each physical error is represented as an edge connecting the detectors whose outcomes are flipped by that error, while logical observables are associated with the corresponding edges. Following [4], we represent a DEM as 𝐷 = (𝑝, 𝐻, 𝐴 ), where 
+
+𝑝 ∈ [ 0, 1]𝑁 is the fault-probability vector, 𝐻 ∈ F𝑀 ×𝑁  
+
+> 2
+
+is the detector check matrix, and 𝐴 ∈ F𝐾 ×𝑁  
+
+> 2
+
+is the logical-action matrix. Each fault mechanism corresponds to one column of 𝐻 and 𝐴 , together with its probability in 𝑝 . If a fault vector 𝑒 ∈ F𝑁  
+
+> 2
+
+occurs, it produces the detection events 𝜎 = 𝐻𝑒 . A decoder maps the observed detection events 𝜎 to an estimate ˆ 𝑒 satisfying 𝐻 ˆ𝑒 = 𝜎 . Decoding succeeds if 
+
+𝐴 ˆ𝑒 = 𝐴𝑒 , where all operations are over F2.Figure 2(b) illustrates this representation for a surface-code mem-ory experiment [24] and its DEM. When every fault mechanism flips at most two detectors, the resulting DEM is graphlike and can be decoded efficiently using matching-based decoders [19, 29, 31], which we refer to as matchable decoders. In contrast, TCNOT gates propagate Pauli errors between the control and target patches, al-lowing a single fault to flip more than two detectors across multiple surface-code patches. As illustrated in Fig. 2(c), the resulting hy-peredges break the graphlike structure of the DEM and require decoders capable of handling correlated faults, which we refer to as unmatchable decoders [3, 32, 39, 42]. 
+
+## 2.4 Window Decoding 
+
+Window decoding is an online decoding scheme in which the con-tinuous stream of detection events is decomposed into overlap-ping windows, each decoded using its corresponding DEM while Instruction Scheduler DEM Preparation Syndrome Extraction Quantum Programs Error Estimation   
+
+> DEMs Decoding task
+> Quantum Device Queue Syndrome
+> Estimated errors
+> Next inst. Next inst.
+
+Figure 3: Execution pipeline of the FTQC system considered in this study. The highlighted components indicate the scope of this work. 
+
+the quantum device continues producing later syndrome measure-ments [15, 20, 45, 48, 49]. To prevent the degradation of decoding performance caused by dividing the window, a commit region and a buffer region are often introduced, as shown in Fig. 2 (d). As de-coding proceeds, windows slide forward in time while overlapping through their buffer regions. The buffer region should have 𝑂 (𝑑 )
+
+rounds to preserve the code distance 𝑑 across the commit region, ensuring that errors outside the window do not affect the detectors in the commit region. Throughout this paper, we set the buffer region to 𝑊 𝐵 = 𝑑 rounds, and denote the window size by 𝑊 . The commit-region length, and hence the window stride, is therefore 
+
+𝑊 C = 𝑊 − 𝑑 rounds. 
+
+## 2.5 FTQC Computational Flow 
+
+Figure 3 illustrates the execution pipeline of an FTQC system. The instruction scheduler issues logical instructions according to circuit dependencies and decoded feedback. While the quantum device con-tinuously performs SE, the classical pipeline prepares window-level DEMs and decodes the resulting detection events. The estimated errors are fed back to the scheduler to support classically controlled operations. Because the quantum and classical pipelines operate concurrently, FTQC throughput is limited by the slower pipeline. DEM preparation and decoding must therefore sustain the rate at which SE generates new decoding tasks; otherwise, the tasks 
+
+> 3Shota Ikari, Yuga Hirai, Yasunari Suzuki, Hiroshi Nakamura, and Yosuke Ueno HHHHHHHHH
+> Rotate
+
+(a) (b) Type Instruction Preparation RZ Measurement MZ Logical Gate HCNOT Resource State Prepare Y Prepare T 
+
+Figure 4: (a) Instruction set assumed throughout this work. (b) Implementation of logical gates. Logical 𝐻 is realized by a direct patch rotation following the transversal 𝐻 gate; Logical 
+
+𝑆 and 𝑇 are implemented by magic-state teleportation using 
+
+|𝑌 ⟩ and |𝑇 ⟩, respectively. 
+
+accumulate, delaying decoder feedback and eventually preventing real-time FTQC execution [47]. 
+
+## 2.6 Instruction Set for FTQC with Transversal Gates 
+
+We assume a surface-code architecture supporting TCNOT gates for Clifford+ 𝑇 computation, following [46]. Our focus is on the decoder-side cost of TCNOT-based logical operations; quantum-circuit optimization is beyond the scope of this work [52]. Figure 4 summarizes the instruction set and logical-gate implementations in this study. Under the assumed instruction set, logical CNOT gates are implemented by TCNOTs between aligned logical patches, 𝐻 
+
+gates by direct patch rotation [18, 46], and 𝑆 / 𝑇 gates by magic-state teleportation [35]. The 𝑆 and 𝑇 gadgets consist of CNOT operations, measurements, and the corresponding Pauli-frame updates [14, 41]. Note that our proposal is not limited to this specific instruction set and applies to any FTQC architecture supporting transversal CNOT operations. 
+
+## 3 Motivation and PACE Overview 
+
+Although dense TCNOT scheduling substantially accelerates quan-tum execution, it also increases the computational burden on the classical decoder. We first observe the prevalence of TCNOTs in the instruction set. Then, the following subsections describe the three major decoder-side challenges introduced by dense TCNOT place-ment. Finally, we overview how our proposed framework PACE addresses them. 
+
+## 3.1 Prevalence of TCNOTs in FTQC 
+
+Using the instruction set in Fig. 4 (a), 𝑆 and 𝑇 gates in a given FTQC program are performed with magic-state teleportation, which in-troduces additional TCNOT operations, as shown in Fig. 4 (b). Con-sequently, TCNOTs constitute a substantial fraction of the FTQC program execution. To quantify this observation, Fig. 5 presents the instruction breakdown of the benchmark circuits summarized in Table 2. Across these benchmarks, TCNOTs account for 40–55% of all primitive quantum instructions. This high prevalence of TC-NOT gates motivates the decoder-side challenges due to TCNOTs discussed in the following subsections. 00.5 1Jel2(1) FH8(1) Hei12(1) Jel2(4) FH8(5) Hei12(6) qsvt6 hhl7 qft29 add64 Average Instruction breakdown  RZ MZ HCNOT 
+
+Figure 5: Instruction breakdown of the benchmark circuits in Table 2, using the instruction set in Fig. 4. The resource-state preparations are omitted because they are not primitive operations and do not lie on the execution critical path. 0100 200 300 400 500 050 100 150 200 250 300 3 5 7 9 11 13 15 17 19 21 23   
+
+> DEM Compilation Time [ms]
+> Memory Footprint [MiB] Code distance d DEM size PyMatching BP-LSD DEM compilation time
+
+Figure 6: The memory footprint of DEM construction and DEM preparation time measured with Stim [23] for surface-code memory experiments (rounds= 2𝑑 ). PyMatching [31] and BP-LSD [32] are used as examples of matchable and unmatch-able decoders, respectively. See Sec. 6 for the experimental setup. 
+
+## 3.2 Correlated Errors with TCNOTs 
+
+While the window-level DEM of surface-code memory experi-ments [24] is graphlike, a TCNOT makes the DEM non-graphlike by introducing correlated errors across logical patches. Thus, in order to decode DEMs with TCNOTs, we must use unmatchable decoders that can handle hyperedges in the DEM [3, 32, 44]. In general, these decoders are slower and more memory-expensive than matchable decoders due to their algorithmic complexity and the data structures needed to represent hyperedges. Figure 6 compares working mem-ory of PyMatching [31] and BP-LSD [32]. Consequently, TCNOTs drastically increase decoding loads. 
+
+## 3.3 The Variation of Window-Level DEMs 
+
+As shown in Fig. 3, timely DEM preparation is critical to sustain-ing the FTQC pipeline. Constructing DEMs requires propagating circuit-level faults through the quantum circuit to determine the detectors and logical observables affected by each fault [23], in-curring a non-negligible latency. As shown in Fig. 6, DEM con-struction using Stim [23] takes tens to hundreds of milliseconds, much longer than the typical SE period of a neutral-atom platform (e.g., 1 ms). A naive approach to ensuring that the corresponding DEM is ready when each decoding task begins is to precompile all possible window-level DEMs for a given program. However, aggressive TCNOT scheduling exponentially increases the num-ber of possible window-level DEMs; a window spanning 𝑂 (𝑑 ) SE rounds contains 𝑂 (𝑑 ) candidate TCNOT slots at 𝑂 (1)-round inter-vals, and the presence or absence of a TCNOT in each slot causes the number of possible window-level DEMs to grow exponentially with code distance 𝑑 . Moreover, as shown in Fig. 6, each DEM    
+
+> 4Do Not Let CNOTs Overwhelm the Decoder: Scheduling Transversal Gates for Fast FTQC (a) (b) Error Correlated Errors Error chain
+> Buffer
+> Commit
+
+Figure 7: (a) TCNOT creates correlated, non-graphlike DEMs across surface-code patches. (b) Dense TCNOT placement increases the decoding volume within a window rapidly. 
+
+has a non-negligible memory footprint. Consequently, exhaustive DEM precompilation is impractical, making low-latency JIT DEM compilation essential. 
+
+## 3.4 Increasing Volume of Decoding Window 
+
+As explained in Sec. 2.3, TCNOTs can propagate errors across mul-tiple surface-code patches. As shown in Fig. 7, aggressive TCNOT scheduling can cause error correlations induced by multiple TC-NOTs within a single decoding window, substantially increasing the volume that must be decoded jointly [13, 44]. Because practical de-coders have finite memory capacity and processing throughput, the resulting decoding workload may exceed their real-time processing capability. A straightforward mitigation is to separate consecutive TCNOTs by 𝑑 SE rounds, thereby bounding the decoding volume of each window [44]. However, this restriction reduces TCNOT concurrency and sacrifices much of the quantum-side speedup by aggressive scheduling. 
+
+## 3.5 Strategy and PACE Overview 
+
+Aggressive TCNOT scheduling reduces quantum execution time, but substantially increases the decoding workload. The conven-tional approach bounds this workload by separating consecutive TCNOTs by 𝑑 SE rounds, sacrificing much of the quantum-side speedup enabled by TCNOTs [44]. Our strategy is instead to reduce the decoding workload and schedule TCNOTs as densely as the available decoder resources permit. Based on this strategy, we propose PACE, a framework that com-bines three decoder-side techniques with a decoder-aware TCNOT scheduler. Sec. 4 presents the three complementary techniques for mitigating the bottlenecks, thereby increasing the TCNOT den-sity that the decoder can sustain. Sec. 5 presents a decoder-aware scheduler that constructs a high-density TCNOT schedule while satisfying decoder-side constraints. In this way, PACE exploits the available decoder resources to increase TCNOT concurrency while preserving the FTQC pipeline. 
+
+## 4 Mitigating Decoder-Side Bottlenecks 4.1 Hybrid Window Decoding 
+
+As discussed in Sec. 3.2, TCNOTs can make window-level DEMs non-graphlike by introducing hyperedges. A conservative approach is to use unmatchable decoders [3, 32, 39] to process every window in a program containing TCNOTs. However, whether unmatchable decoders are actually required depends on the structure of each 1st  
+
+> Matchable
+> Commit Buffer
+> Unmatchable Unmatchable
+
+2nd 3rd 
+
+Figure 8: Per-window decoder selection in Hybrid window. 
+
+window-level DEM, rather than on the presence of TCNOTs in the program. 
+
+Key observation: Many decoding windows in FTQC workloads with TCNOTs remain graphlike and can therefore be handled efficiently by matchable decoders. We exploit this per-window heterogeneity through Hybrid win-dow decoding , which consists of two steps: per-window decoder selection and window-wise correction . Per-window decoder selection assigns a matchable decoder to graphlike DEMs and an unmatch-able decoder otherwise, as shown in Fig. 8. Window-wise correction converts each decoder-specific fault estimate into a common logical Pauli-frame update and residual detection-event state for the next window. For 𝑖 -th window, given its DEM 𝐷 𝑖 = (𝑝 𝑖 , 𝐻 𝑖 , 𝐴 𝑖 ) with 𝑁 𝑖 fault mechanisms and detection-event vector 𝜎 𝑖 , the decoder estimates a fault vector ˆ 𝑒 𝑖 ∈ { 0, 1}𝑁 𝑖 satisfying 𝐻 𝑖 ˆ𝑒 𝑖 = 𝜎 𝑖 . Matchable and unmatchable decoders estimate different sets of fault mechanisms; thus, 𝑁 𝑖 and the dimensions of 𝐻 𝑖 and 𝐴 𝑖 may differ across win-dows. Conventional window decoding assumes a common fault representation: it uses ˆ 𝑒 𝑖 to update 𝜎 𝑖 +1 and eventually combines ˆ𝑒 𝑖 to estimate a global observable. This procedure is not directly applicable when estimates produced by different decoder types do not share a common fault mechanism. Window-wise correction instead consumes each estimate within the window, applying the corresponding action matrix before the estimate leaves its native fault space. Let D𝐶,𝑖 be the set of detectors in the commit region of the 𝑖 -th window. We define the commit-region mask 𝑚 𝑖 ∈ { 0, 1}𝑁 𝑖 as 
+
+(𝑚 𝑖 )𝑛 =
+
+Ü 
+
+> 𝑘 ∈ D 𝐶,𝑖
+
+(𝐻 𝑖 )𝑘,𝑛 , (1) which selects the fault mechanisms that affect the commit region. The corresponding logical correction and detection-event update are 
+
+ℓ𝑖 = 𝐴 𝑖 (𝑚 𝑖 ⊙ ˆ𝑒 𝑖 ), (2) 
+
+𝜎 𝑖 +1 ← 𝜎 𝑖 ⊕ 𝐻 𝑖 (𝑚 𝑖 ⊙ ˆ𝑒 𝑖 ) , (3) where ⊙ denotes element-wise product. The logical corrections ℓ𝑖 
+
+are accumulated in the logical Pauli frame, while the detection-event update for the next window removes the committed estimate. Thus, each decoder output is consumed in its native fault repre-sentation, preventing the decoder choice for one window from affecting subsequent windows. This generalizes standard sliding-window decoding [27] and extends naturally to parallel window decoding [45]. 
+
+> 5Shota Ikari, Yuga Hirai, Yasunari Suzuki, Hiroshi Nakamura, and Yosuke Ueno
+
+# TCNOT 
+
+Temporal ports 
+
+# IDLE H
+
+Measure 
+
+# (a) (c) (b)         
+
+> TCNOT 0 1 2 3
+> TICK H0
+> TCNOT 1 2
+> IDLE 3
+> TICK TCNOT 0 1
+> IDLE 2
+> Measure 3
+
+# JIT DEM compilation Stitching 
+
+Figure 9: Overview of DEM Stitch: (a) an example of a local template, (b) stitching local templates along the time dimension, (c) template-based JIT construction of the window-level DEM. 
+
+## 4.2 Just-in-Time (JIT) DEM Compilation 
+
+As discussed in Sec. 3.3, the window-level DEM depends on the TCNOT schedule, leading to exponentially many possible DEM patterns. However, for online decoding, the DEM for each decoding window must be ready before its decoding task begins. Because exhaustively precompiling all possible DEMs is infeasible, each schedule-specific DEM must be compiled just in time. Existing methods construct each window-level DEM from its cor-responding full circuit [23, 56]. Applying this approach at runtime treats every schedule-specific DEM as an independent compilation target, even though different DEMs repeatedly contain similar local structures. 
+
+Key observation: Although TCNOT scheduling yields many window-level DEM patterns, each DEM is composed of a small set of recurring local circuit blocks whose local fault-to-detector structures can be reused across windows. Based on this observation, we introduce DEM Stitch , a template-based JIT DEM construction technique, which separates DEM com-pilation into two phases: offline template generation and online tem-plate stitching . The offline phase precompiles recurring local blocks as reusable DEM templates, while the online phase instantiates and connects the templates according to the circuit and TCNOT schedule. During offline template generation, DEM Stitch constructs reusable templates for local circuit blocks: initialization, measurement, idle, and logical Clifford operations, including TCNOT between two surface-code patches, as shown in Fig. 9 (a). Each template captures spatial error propagation within one or two patches, while detector dependencies across temporal boundaries are exposed as temporal ports . These ports provide an interface through which neighboring template instances are connected during online assembly. To track both 𝑋 and 𝑍 logical observables within a single window, we gen-erate the templates with a noiseless Bell-pair ancilla following [25]. During online template stitching, DEM Stitch scans the time blocks of each decoding window and instantiates the template cor-responding to each circuit block. For each template instance, it 
+
+Algorithm 1 JIT DEM construction with DEM Stitch                                                 
+
+> Require: TCNOT schedule 𝑆 , current window W, templates T
+> Ensure: DEM 𝐷 =(𝑝, 𝐻, 𝐴 )for the current window 1: F ← ∅
+> 2: for each time block 𝑏 ∈ W in forward order do
+> 3: Identify patch groups G𝑏 induced by active TCNOTs
+> (e.g., TCNOT (0,2):G𝑏 ={0,2},{1})
+> 4: for each group 𝑔 ∈ G 𝑏 do
+> 5: Select 𝑇 ∈ T matching the local operations of 𝑔
+> 6: Remap detectors in 𝑇 to global detector rows 7: Map logical observables through subsequent TCNOTs 8: Append the remapped fault columns to F
+> 9: Resolve temporal ports between adjacent template instances 10: Merge equivalent fault columns 11: return 𝐷 =(𝑝, 𝐻, 𝐴 )assembled from F
+
+remaps local detector coordinates to global detector indices, propa-gates logical observables through subsequent TCNOT gates to de-termine their final indices, and appends the resulting fault columns to the window-level DEM. It then resolves the temporal ports be-tween adjacent template instances. Algorithm 1 summarizes this procedure. Thus, DEM Stitch replaces full-circuit DEM compilation with template instantiation, index remapping, logical-observable propa-gation, and temporal-port resolution. By reusing precompiled local structures, DEM Stitch substantially reduces online JIT compila-tion overhead. Moreover, any instruction sequence in Fig. 4 can be supported using only a small set of reusable templates. 
+
+## 4.3 Sub-window parallel decoding (SPD) 
+
+As explained in Sec. 2.4, conventional sliding-window decoding processes each height-𝑊 window as a single decoding task. Under dense TCNOT scheduling, correlations across many surface-code patches can cause the resulting decoding task to exceed the mem-ory capacity or real-time latency budget of a decoder instance, as discussed in Sec. 3.4. Dividing the window into smaller decoding tasks can reduce the per-task decoding volume, but the window cannot be divided 
+
+> 6Do Not Let CNOTs Overwhelm the Decoder: Scheduling Transversal Gates for Fast FTQC
+
+0
+
+A AB BC CD DEF FE
+
+0Commit Commit Buffer Buffer d d2d Time Time 2d      
+
+> ... ... ... ... ... ... ... ... ... ... ... ...
+
+#SE≥d #SE<d 
+
+> #SE<d #SE>d
+
+1
+
+> Matchable Unmatchable
+
+111
+
+22  
+
+> FA, B B, C A, B, C A, B, C
+
+Contraction Event graph Conflict graph 
+
+> Short-edge Long-edge
+
+Graph Coloring     
+
+> D, E D, E D, E C, D C, D C, D
+
+(a) (b) 
+
+Figure 10: (a) Example of a height-2𝑑 window with TCNOTs. SPD decomposes the window into smaller sub-windows when 
+
+#SE ≥ 𝑑 between consecutive TCNOT events on the same logical qubit. Sub-windows with the same color are decoded in parallel. (b) Graph construction for SPD. Short-edge components in the event graph define the sub-windows, while long-edges between distinct sub-windows define the conflict graph. Coloring the conflict graph gives the parallel stages shown in (a). 
+
+arbitrarily due to the buffer requirement discussed in Sec. 2.4. Impor-tantly, the requirement constrains the amount of syndrome history retained after the end of each commit region ; it does not require every decoding window to have the same height 𝑊 .
+
+Key observation: A height-𝑊 decoding window can be decom-posed into variable-height, overlapping sub-windows , provided that each commit region is followed by a buffer of 𝑊 𝐵 = 𝑑 rounds. PACE exploits this flexibility through Sub-window parallel de-coding (SPD) , which applies the principle of parallel-window de-coding [45] within each conventional sliding window. SPD forms smaller sub-windows whose commit regions collectively cover the original commit region and whose buffer regions may overlap. For consecutive TCNOT events on the same logical qubit, a separation of at least 𝑑 SE rounds permits a sub-window boundary; otherwise, the events must be decoded jointly. SPD consists of two steps: sub-window formation and decoding-layer assignment . We formulate these steps as graph contraction and coloring, respectively. The first step groups TCNOT events that must be decoded jointly into sub-windows, while the second assigns nonconflicting sub-windows to the same parallel decoding layer. Once the sub-window boundaries are determined, DEM Stitch (Sec. 4.2) efficiently assembles the DEM of each variable-height sub-window from reusable local templates. The layers are committed in dependency order using the window-wise correction described in Sec. 4.1. We explain the two steps using the example in Fig. 10. Figure 10(a) illustrates a height-𝑊 decoding window over logical qubits A–F.The horizontal axis denotes SE rounds, and only TCNOT events are shown for simplicity. 
+
+Sub-window formation: We first construct the event graph shown on the left of Fig. 10(b). Each node represents a TCNOT event, and an edge connects each pair of consecutive TCNOT events involving the same logical qubit. Let #SE denote the number of SE rounds between the two endpoint events. We classify an edge as a short-edge if #SE < 𝑑 and as a long-edge otherwise. The endpoints of a short-edge cannot be separated while retaining the required 𝑊 𝐵 = 𝑑 -round buffer and must therefore be decoded jointly. Accordingly, each connected component formed by short-edges defines the TCNOT-correlated core of one sub-window, which is extended with the required commit and buffer regions. In the example, this connected-component analysis decomposes the correlated region over A–E
+
+into the three sub-windows shown on the right of Fig. 10(a). Note that qubit F participates in no TCNOT and therefore remains an independent graphlike sub-window. 
+
+Decoding-layer assignment: We next contract each connected component induced by short-edges into one node to obtain the con-flict graph shown on the right of Fig. 10(b). Each long-edge connect-ing two nodes induces a conflict edge between the corresponding sub-windows. Although a long-edge permits a valid sub-window boundary, the two sub-windows have an ordered dependency along the same logical-qubit timeline and must therefore be assigned to different decoding layers. A proper coloring of the conflict graph as-signs conflicting sub-windows different colors, while sub-windows with the same color are decoded in parallel. In the example, the conflict graph can be colored with two colors; hence, the three sub-windows are executed in the two decoding layers shown in Fig. 10(a). Because conflict-graph coloring is tightly coupled with TCNOT scheduling, its detailed procedure is presented as part of the TCNOT scheduling method in Sec. 5. 
+
+## 5 Decoder-Aware TCNOT Scheduling 
+
+This section presents the decoder-aware TCNOT scheduling method of our PACE framework. Its objective is to minimize quantum ex-ecution time while ensuring the FTQC pipeline in Fig. 3. We first establish a generic decoder feasibility model. We then incorporate the three decoder-side techniques of Sec. 4 to derive the PACE-aware constraints evaluated for each decoding window. Finally, 
+
+> 7Shota Ikari, Yuga Hirai, Yasunari Suzuki, Hiroshi Nakamura, and Yosuke Ueno
+
+Table 1: Performance components and their modeling                      
+
+> Performance component Constraint Modeling with 𝑉
+> DEM preparation latency 𝑇 DEM 𝑇 DEM ≤Δ𝛼 DEM 𝑉 𝛾 DEM
+> Decoder working memory 𝑀 dec 𝑀 dec ≤𝑀 HW 𝛼 mem 𝑉 𝛾 mem
+> Decoding latency 𝑇 dec 𝑇 dec ≤Δ𝛼 dec 𝑉 𝛾 dec
+
+we present the method to find TCNOT scheduling with a short quantum execution time that satisfies these constraints. 
+
+## 5.1 Generic Decoder Feasibility Model 
+
+This subsection defines a generic resource model for determining whether an individual decoding task can be processed online. As discussed in Sec. 3.4, denser TCNOT schedules can enlarge the correlated region of a decoding task, thereby increasing its DEM preparation latency, decoder working-memory requirement, and decoding latency. To characterize the size of a decoding task, we define decoding volume as 𝑉 = 𝑞𝑤 /𝑊 , where 𝑞 is the number of logical patches covered by the task and 𝑤 is the window length. Thus, 𝑉 = 1represents one surface-code patch over a height-𝑊 window. For fixed code distance 𝑑 and window height 𝑊 , 𝑉 scales with the number of detectors in the task. To translate the per-task cost into online feasibility conditions, we next consider the rate at which decoding tasks are generated. Successive height-𝑊 windows advance by the commit-region length 
+
+𝑊 C. Thus, we define their arrival interval as Δ = 𝑊 C𝜏 SE . Let 𝑀 HW 
+
+denote the working memory available to one decoder instance. We model each performance component 𝑟 as a power-law func-tion of 𝑉 as summarized in Table 1. Assuming that DEM prepara-tion and decoding are pipelined across successive windows, each stage must complete one task within Δ1, while each task’s working-memory must fit within 𝑀 HW .
+
+## 5.2 PACE-Aware Feasibility Constraints 
+
+We next incorporate the three decoder-side techniques of Sec. 4 into the generic model above and derive the feasibility constraints used by the PACE scheduler. Hybrid window decoding (Sec. 4.1) assigns each task to a matchable or unmatchable decoder according to whether its DEM is graphlike. Under PACE, every graphlike task assigned to a matchable decoder has a fixed decoding volume of 
+
+𝑉 = 1, and we assume these fixed-volume tasks do not become system bottlenecks. Thus, unless otherwise stated, the decoding volumes and task sets refer only to non-graphlike tasks processed by unmatchable decoders. Moreover, DEM Stitch (Sec. 4.2) accelerates DEM preparation; it reduces 𝛼 DEM .SPD (Sec. 4.3) changes both the volume of each decoding task and their parallel execution structure, which we model as follows. For a given height-𝑊 window with volume 𝑉 , let S denote the set of non-graphlike sub-windows produced by SPD, and let 𝑉 𝑠 ≤ 𝑉 denote the decoding volume of sub-window 𝑠 ∈ S . Coloring the corresponding conflict graph produces the decoding layers C = {C 1, C2, . . . , C𝐾 }, 
+
+> 1Strictly, backlog-free execution is determined by the syndrome generation interval and aggregate throughput of each stage, which depend on hardware parallelism and the number of available instances. To keep the model simple and hardware-agnostic, we instead impose the conservative sufficient condition that the per-task latency of each stage does not exceed Δ.
+
+where sub-windows in the same layer are decoded in parallel. Then, the latency of layer C𝑘 is determined by its slowest sub-window, and the total decoding latency 𝑇 ∗ 
+
+> dec
+
+(C) is the sum of these per-layer latencies. Under the conservative feasibility model in Table 1, the con-straints for each height-𝑊 window become max   
+
+> 𝑠 ∈ S
+
+𝑇 DEM (𝑉 𝑠 ) ≤ Δ, (4a) max   
+
+> 𝑠 ∈ S
+
+𝑀 dec (𝑉 𝑠 ) ≤ 𝑀 HW , (4b) 
+
+𝑇 ∗ 
+
+> dec
+
+(C) ≡ ∑︁ 
+
+> 𝑘
+
+max  
+
+> 𝑠 ∈ C 𝑘
+
+𝑇 dec (𝑉 𝑠 ) ≤ Δ. (4c) The first two constraints bound the largest per-sub-window DEM preparation latency and memory requirement. The third bounds the total critical-path latency of the colored decoding layers. These constraints assume sufficient resources to prepare all sub-window DEMs concurrently and to decode all sub-windows in the same layer in parallel. Under this assumption, satisfying Eq. (4) is sufficient to prevent the backlog problem. 
+
+## 5.3 Decoder-Constrained TCNOT Scheduling 
+
+We present the decoder-aware TCNOT scheduler of our PACE framework. The spacing between consecutive TCNOTs controls the tradeoff between quantum execution time and decoder demand, as discussed in Sec. 3.4. Jointly optimizing all inter-TCNOT spac-ings is combinatorial because each spacing decision changes not only the quantum execution time, but also the SPD-induced sub-windows and conflict graphs. Thus, PACE restricts the search to a bounded family of spacing policies, greedily constructs an earliest-start schedule for each policy, and selects the shortest candidate for which every height-𝑊 decoding window satisfies Eq. (4). For each 𝑝 , PACE enforces a 𝑑 -round separation at every 𝑝 -th inter-TCNOT gap along each logical-qubit timeline and uses the minimum spacing permitted by circuit dependencies for the re-maining gaps. It greedily places each TCNOT at the earliest time satisfying the circuit dependencies and this spacing policy. The enforced separations provide potential SPD boundaries; thus, in-creasing 𝑝 generally produces a denser and shorter schedule at the cost of greater decoder demand. The choice 𝑝 = 1 yields the All-𝑑 
+
+baseline [44], while 𝑝 → ∞ yields the dependency-limited ASAP schedule. For each candidate schedule t, PACE constructs its height-𝑊 
+
+decoding windows and applies SPD and Hybrid Window Decoding to obtain the set of non-graphlike sub-windows S𝑗 for each window 
+
+𝑗 . It then obtains a coloring C𝑗 using a decoding-latency-aware DSatur-based heuristic [11] that approximately minimizes 𝑇 ∗ 
+
+> dec
+
+(C 𝑗 ).The candidate t is retained only if every decoding window satisfies Eq. (4). Algorithm 2 summarizes this bounded search. 
+
+## 6 Evaluation Setup 6.1 Decoder Configuration 
+
+We set 𝑊 = 2𝑑 and 𝑊 C = 𝑑 for all window-decoding-based experi-ments. Following [54], we assume 𝜏 SE = 1ms, which yields Δ = 𝑑𝜏 SE .Unless otherwise noted, we use a code distance of 𝑑 = 23 through-out the evaluation. We assume sufficient resources to prepare all sub-window DEMs concurrently and enough decoder instances 
+
+> 8Do Not Let CNOTs Overwhelm the Decoder: Scheduling Transversal Gates for Fast FTQC
+
+Algorithm 2 Decoder-constrained scheduling                                                                                
+
+> 1: function Feasible( 𝑝 )2: t←GenerateSchedule (𝑝 )
+> 3: for each decoding window 𝑗 induced by tdo
+> 4: S𝑗 ←DecomposeSub-window (𝑗 )
+> 5: C𝑗 ←Coloring ( S 𝑗 )⊲Heuristically minimize 𝑇 ∗
+> dec
+> 6: if window 𝑗 violates Eq. (4) then
+> 7: return False 8: return True 9: if Feasible (inf. )then
+> 10: return GenerateSchedule (inf. )⊲ASAP is already feasible 11: 𝑝 lo ←1
+> 12: if not Feasible (𝑝 lo )then
+> 13: return Infeasible ⊲All-𝑑 is infeasible; no feasible schedule exists 14: 𝑝 hi ←2
+> 15: while 𝑝 hi ≤𝑝 max and Feasible (𝑝 hi )do
+> 16: (𝑝 lo , 𝑝 hi ) ← ( 𝑝 hi ,2𝑝 hi )
+> 17: 𝑝 ←FindLargestFeasible (𝑝 lo ,min (𝑝 hi , 𝑝 max +1) )
+> 18: t←GenerateSchedule (𝑝 )
+> 19: return t
+
+to process all sub-windows within each layer in parallel. All CPU-based measurements are performed on an AMD Ryzen Threadripper 9970X system with 128 GiB of memory. 
+
+## 6.2 Normalized Decoder Capacities 
+
+As shown in Eq. (4), sustaining real-time decoding requires satis-fying three resource constraints. To express all three constraints in a common form, we rewrite them as equivalent bounds on de-coding volume. We define 𝑉 mem , 𝑉 DEM , and 𝑉 dec by 𝑀 dec (𝑉 mem ) =
+
+𝑀 HW , 𝑇 DEM (𝑉 DEM ) = Δ, and 𝑇 dec (𝑉 dec ) = Δ, respectively. Because DEM preparation and memory constrain each sub-window inde-pendently, we combine them into the per-sub-window capacity 
+
+𝑉 unit = min (𝑉 mem , 𝑉 DEM ). Decoding latency, in contrast, accumu-lates across sequential decoding layers and is therefore bounded separately by 𝑉 dec . For positive scaling exponents, Eq. (4) can be rewritten as max   
+
+> 𝑠 ∈ S
+
+𝑉 𝑠 ≤ 𝑉 unit , (5a) 
+
+𝑇 ∗ 
+
+> dec
+
+(C) =∑︁ 
+
+> 𝑘
+
+max  
+
+> 𝑠 ∈ C 𝑘
+
+ 𝛼 dec 𝑉 𝛾 dec 
+
+> 𝑠
+
+ ≤ 𝛼 dec 𝑉 𝛾 dec  
+
+> dec
+
+. (5b) for all windows. Equation (5a) bounds the largest individual sub-window, whereas Eq. (5b) bounds the accumulated decoding latency with SPD. 
+
+## 6.3 FTQC Benchmark workloads 
+
+We use 10 practical FTQC workloads spanning five representative algorithm classes with various logical-qubit scales, as summarized in Table 2. The four programs from FTCircuitBench [30] cover arithmetic, Quantum Fourier Transform (QFT), linear-algebra ker-nels, and quantum singular value transform (QSVT). For applica-tion workloads, we evaluate the SELECT subroutine of quantum phase estimation (QPE) for various Hamiltonians [9, 53]: Jellium, Fermi–Hubbard, and Heisenberg models. By using the technique in [53], we compile the same SELECT workload at two data-loading parallelism levels; the parenthesized number 𝑛 denotes 2 𝑛 -way par-allelism. This comparison isolates how instruction-level parallelism changes TCNOT concurrency and decoder demand without chang-ing the target application. To characterize the decoder demand before applying PACE, 𝑉 ASAP reports the largest decoding volume 
+
+Table 2: Benchmark circuit characteristics after Clifford+ 𝑇 
+
+compilation. LQ: logical qubits; OP: operations.        
+
+> Benchmark Class #LQ #Ops #CNOT #S #T
+
+𝑽 ASAP                                                                       
+
+> add64 Arith. 64 1,023 455 0392 70 qft29 QFT 29 296,196 812 60,966 116,775 656 hhl7 Lin. sys. 773,271 317 15,179 28,729 144 qsvt6 QSVT 6403,527 2,132 89,861 154,586 77 Jel2(1) QPE 36 23,888 7,536 2,912 2,560 48 Jel2(4) QPE 316 25,076 8,084 2,984 2,848 600 FH8(1) QPE 148 27,088 8,580 1,633 2,692 47 FH8(5) QPE 700 30,068 9,844 1,816 3,424 1,040 Hei12(1) QPE 166 37,308 11,352 3,783 6,492 48 Hei12(6) QPE 1,356 43,210 14,010 4,136 7,904 2,616
+
+under ASAP scheduling, with SPD disabled at 𝑑 = 23 and 𝑊 = 2𝑑 .A larger 𝑉 ASAP therefore indicates a higher decoder demand under the ASAP schedule. Rotation gates are synthesized into Clifford+ 𝑇 circuits using GridSynth [43] with a synthesis tolerance of 10 −10 . Logical 𝑆 and 𝑇 
+
+gates use the teleportation circuits in Fig. 4. We assume worst-case conditional 𝑆 corrections and resource states |𝑌 ⟩ and |𝑇 ⟩ are always available [26, 36]. 
+
+## 7 Evaluation Results 
+
+We evaluate PACE in four stages. First, we quantify the benefits of the three decoder-side mitigation techniques (Sec. 7.1–7.3). Second, we evaluate the end-to-end benefit of the decoder-aware TCNOT scheduler (Sec. 7.4). Third, we isolate the effects of the normal-ized decoder capacities and assess the sensitivity of the selected schedules to the decoding-latency scaling model (Sec. 7.5). Finally, we characterize the bottlenecks of current decoder systems and estimate the improvements required for fast FTQC with TCNOTs (Sec. 7.6). 
+
+## 7.1 Hybrid Window Decoding Preserves Accuracy 
+
+We first verify that the Hybrid window decoding scheme intro-duced in Sec. 4.1 preserves the decoding accuracy. We simulate the Bell-pair circuit with a TCNOT shown in Fig. 11 using Stim [23] under a uniform circuit-level depolarizing noise model. We use Py-Matching [31] and BP-LSD [32] for the matchable and unmatchable decoders, respectively, and compare three configurations: (1) Hy-brid Window Decoding; (2) window decoding with unmatchable decoder; and (3) full-circuit decoding with unmatchable decoder. Comparing (1) and (2) isolates the effect of the per-window decoder selection, while comparing (2) and (3) validates the window-wise correction against full-circuit decoding. As shown in Fig. 11, Hybrid Window Decoding achieves logical error rates consistent with both BP-LSD baselines. These results show that Hybrid Window Decoding can route graphlike windows to the lower-cost matchable decoder without degrading logical error rate. 
+
+## 7.2 DEM Stitch Accelerates Online DEM Compilation 
+
+We next evaluate whether DEM Stitch can prepare schedule-specific DEMs within the online deadline and characterize its scaling with 
+
+> 9Shota Ikari, Yuga Hirai, Yasunari Suzuki, Hiroshi Nakamura, and Yosuke Ueno
+
+Matchable Unmatchable 
+
+## Circuit 
+
+3d 3d 
+
+## DEM (a) 10 −4 10 −3 10 −2 
+
+Physical error rate    
+
+> 10 −6
+> 10 −4
+> 10 −2
+> 10 0
+> Logical error rate
+> d=5 d=7 d=9 Hybrid window decoding(BP-LSD+PyMatching) Window decoding(BP-LSD) Full circuit decoding(BP-LSD)
+
+# (b) 
+
+Figure 11: (a): Hybrid window decoding experiment using Bell-pair preparation with TCNOT. (b): Logical error rates for Hybrid window decoding. 0 4 8 12 16 Number of patches 1E-2 1E-1 1E+0 1E+1 1E+2 1E+3 1E+4 1 5 9 13 17 21 25 Compilation time [ms] Code distance d 
+
+Stim GreenPeas DEM Stitch (proposed) 
+
+0510 15 20 25 30 35 3 7 11 15 19 23 Memory Footprint [MiB] Code distance d 
+
+DEM size Templates of DEM 
+
+(a) Memory circuit (b) Parallel TCNOT (C) 
+
+d=15 d=19 d=23 
+
+Figure 12: Online construction of schedule-specific DEMs. (a) Preparation time for a 𝑊 = 2𝑑 memory window. (b) Preparation time versus the number of patches in a TCNOT window. (c) Template-cache footprint. 
+
+code distance and patch count. We measure DEM-preparation latency for 𝑊 = 2𝑑 memory experiments and for TCNOT win-dows spanning multiple surface-code patches. The baseline invokes Stim’s detector_error_model() on the complete window circuit, whereas DEM Stitch assembles the same DEM from cached tem-plates. We also report the template-cache footprint compared with that of full DEM with 𝑊 = 2𝑑 memory experiment. For context, we include the published GreenPeas results [56]; because they were obtained using a different implementation and hardware platform, we treat them as a reference rather than a controlled baseline. As shown in Fig. 12(a), for a 𝑑 = 23 memory window, DEM Stitch is 108 .4× faster than full-circuit Stim construction. Its measured latency is also lower than the reported GreenPeas values at the code distances evaluated by both studies. At 𝑑 = 23, DEM Stitch meets the 
+
+Δ = 23 ms deadline for the memory window and TCNOT windows spanning up to four patches, although larger correlated windows remain preparation-limited, as shown in Fig. 12(a) and (b). Over the evaluated range, its preparation latency scales approximately linearly with 𝑑 . The template-cache footprint remains modest over the evaluated code distances, reaching 17 .5 MiB at 𝑑 = 23, as shown in Fig. 12(c). The key implication is that template reuse removes most redundant construction work, but preparation must still be included in the decoding-system capacity contract. 
+
+## 7.3 SPD Reduces Decoding Volume 
+
+We next isolate the volume-reduction effect of SPD from that of the scheduler. We fix the spacing between consecutive TCNOTs on each logical qubit to 𝑘 ∈ { 1, 2, . . . , 𝑑 } SE rounds, and compare each schedule with and without SPD. Figure 13 reports the resulting distribution of peak decoding volume across active windows. SPD shifts the per-window volume distributions downward for all three workloads, including a 3 .0×
+
+median reduction for the dense FH8(5) benchmark at 𝑘 = 1. The benefit diminishes as 𝑘 approaches 𝑑 because temporal spacing itself increasingly provides valid window decomposition bound-aries. These results demonstrate that SPD is particularly effective at reducing decoding volume under dense TCNOT schedules. 
+
+## 7.4 PACE Exploits Available Decoder Capacity 
+
+Having evaluated the three decoder-side techniques individually, we next evaluate whether PACE can translate additional decoder ca-pacity into shorter quantum schedules while satisfying the modeled constraints. With SPD enabled, 𝑑 = 23, and 𝛾 dec = 1.25, we indepen-dently sweep 𝑉 dec and 𝑉 unit over {4, 8, 16 , 32 , 64 } while setting the other capacity to a nonlimiting value. This isolates the critical-path decoding constraint in Eq. (5b) from the per-sub-window constraint in Eq. (5a). For each capacity setting, PACE selects the shortest eval-uated schedule satisfying both constraints in Eq. (5). We report 
+
+> 10
+
+Do Not Let CNOTs Overwhelm the Decoder: Scheduling Transversal Gates for Fast FTQC 1 5 9 13 17 23 
+
+Fixed SE spacing k
+
+015 30 45 
+
+> Peak decoding volume
+
+FH8(1) 
+
+1 5 9 13 17 23 
+
+Fixed SE spacing k
+
+0300 600 900 FH8(5) 
+
+1 5 9 13 17 23 
+
+Fixed SE spacing k
+
+020 40 60 add64 w/ SPD w/o SPD Maximum 
+
+Figure 13: Peak decoding volume for fixed TCNOT spacing 𝑘 , with and without SPD, at 𝑑 = 23 . Each box summarizes the window distribution for the same schedule. The 𝑘 = 1 maximum without SPD equals 𝑉 ASAP in Table 2. 0510 15 Jel2(1) FH8(1) Hei12(1) Jel2(4) FH8(5) Hei12(6) qsvt6 hhl7 qft29 add64 Average 
+
+Vunit =64 Vunit =32 Vunit =8 Vunit =4 All-d(V unit =2) ASAP(V unit =inf) Vunit =16 
+
+0510 15           
+
+> J e l2 ( 1 ) F H 8 ( 1 ) H e i1 2 ( 1)J e l2 ( 4 ) F H 8 ( 5 ) H e i1 2 ( 6)q s v t 6h h l7q f t2 9 a d d 6 4A v e r a g e
+
+Vdec =32 Vdec =16 Vdec =8 Vdec =4 All-d(V dec =2) ASAP(V dec =inf) Vdec =64 (a) 
+
+> Speed-up over All-d
+
+(b) 
+
+Figure 14: Quantum-execution speedup of schedules adaptively selected by PACE under independent capacity sweeps. Each result shows the shortest evaluated schedule satisfying both modeled decoder constraints. (a) 𝑉 dec is swept with 𝑉 unit nonlimiting; (b) 𝑉 unit is swept with 𝑉 dec nonlimiting. 00.5 1Jel2(1) FH8(1) Hei12(1) Jel2(4) FH8(5) Hei12(6) qsvt6 hhl7 qft29 add64 Average 
+
+> Matchable ratio
+
+Vdec =16 ASAP(V dec =inf) All-d(V dec =2) Vdec =4 Vdec =8 Vdec =32 Vdec =64 
+
+Figure 15: Per-workload ratio of graphlike to total decoding volume for the schedules selected by the 𝑉 dec sweep in Fig. 14(a). 
+
+11 Shota Ikari, Yuga Hirai, Yasunari Suzuki, Hiroshi Nakamura, and Yosuke Ueno 
+
+quantum-execution speedup over the All-𝑑 baseline, including in-serted SE rounds, with ASAP providing the capacity-unconstrained reference. Figure 14 shows that the selected schedules become progres-sively denser as decoder capacity increases. At small capacities, only candidates with relatively wide TCNOT spacing satisfy the active constraint, so their execution times remain close to that of All-𝑑 . Larger values of either 𝑉 dec or 𝑉 unit permit denser schedules and greater speedups while preserving decoder feasibility. In the 
+
+𝑉 dec sweep, the geometric-mean speedup over All-𝑑 increases from 1.06 × at 𝑉 dec = 4 to 7 .86 × at 𝑉 dec = 64. The 𝑉 unit sweep exhibits the same overall trend. The required capacity also depends on workload structure. The low-parallelism SELECT variants place fewer mutually correlated TCNOTs in each decoding window and therefore admit dense sched-ules at smaller capacities. The high-parallelism variants place more TCNOTs within the same window, producing larger correlated re-gions and requiring greater decoder capacity before similarly dense schedules become feasible [44, 54]. PACE thus adapts TCNOT spac-ing to both the workload and the available decoder capacity. When 𝑉 unit ≥ 𝑉 dec , Eq. (5b) subsumes Eq. (5a). We therefore focus the remaining analyses on this decoding-limited regime, where the selected schedule is determined solely by 𝑉 dec .Within this regime, increasing 𝑉 dec allows PACE to select denser TCNOT schedules, reducing the fraction of graphlike decoding win-dows. Accordingly, Fig. 15 shows that the mean graphlike share across workloads decreases from 82 .7% at 𝑉 dec = 4 to 52 .3% at 
+
+𝑉 dec = 64. Nevertheless, even at the largest evaluated capacity, graphlike windows still account for more than half of the total decoding volume on average. Hybrid window decoding can there-fore continue to offload a substantial fraction of the workload to the matchable decoder while PACE exploits the additional decoder capacity. 
+
+## 7.5 Sensitivity to Decoding-Time Scaling 
+
+We next examine how the decoding-latency exponent 𝛾 dec affects schedule selection in the decoding-limited regime. Figure 16 sweeps 
+
+𝛾 dec and 𝑉 dec for three representative workloads. The 𝑉 dec = 2 and 
+
+𝑉 dec = ∞ columns provide the All-𝑑 and capacity-unconstrained ASAP references, respectively. At a fixed 𝑉 dec , changing 𝛾 dec changes the relative benefit of SPD through Eq. (5b). A larger 𝛾 dec penalizes large decoding units more strongly, making decomposition increasingly beneficial despite the additional buffer overlap and sequential decoding layers. Conse-quently, PACE generally selects denser TCNOT schedules as 𝛾 dec 
+
+increases. This benefit saturates once the effective decoding volume is sufficiently small to satisfy Eq. (5b), because further reductions do not enable a shorter candidate schedule. The transition points remain workload dependent, while the staircase boundaries arise from the discrete candidate schedules generated using the period 𝑝 .
+
+## 7.6 Case Study: Decoder Bottlenecks and Feasibility 
+
+Finally, we map representative decoder implementations to the normalized capacity model and identify the bottlenecks that limit 
+
+Table 3: Representative configurations                    
+
+> Parameter Configuration
+> Distance and window 𝑑 ∈ { 15 ,19 ,23 };𝑊 =2𝑑
+> Real-time deadline 𝑊 C𝜏 SE =𝑑𝜏 SE ;𝜏 SE =1 ms [54] Unmatchable decoders BP-LSD [32]; Relay-BP [39] Matchable decoders (reference) PyMatching [31] CPU memory 4 GiB (assumed) FPGA iteration latency 24 ns/complete iteration [37] FPGA memory 26.7 MiB (AMD VU19P FPGA)
+
+fast TCNOT-based FTQC. We measure decoding latency and resi-dent working memory using one-patch surface-code memory win-dows with 𝑊 = 2𝑑 and circuit-level noise 𝑝 = 10 −3. For each 
+
+𝑑 ∈ { 15 , 19 , 23 }, we generate one-patch rotated surface code mem-ory tasks with temporal extent 𝑑 ≤ 𝑤 ≤ 3𝑑 rounds under circuit-level noise 𝑝 = 10 −3. We use 𝑊 = 2𝑑 as the normalization reference in the decoding volume 𝑉 = 𝑞𝑤 /𝑊 . For each setting, we average five timed runs after warm-up, excluding circuit construction, DEM generation, and syndrome sampling, and fit the power-law models in Table 1. BP-LSD [32] and Relay-BP [39] represent unmatchable-decoder implementations, while PyMatching [31] is included as a graphlike reference. We extrapolate these measured volume-scaling models to the multi-patch decoding tasks induced by TCNOTs. This volume-only approximation does not model additional depen-dence on hyperedge density or topology and should therefore be interpreted as a case study rather than a complete performance prediction. Table 3 summarizes the evaluated configurations. The CPU con-figurations use the measured fits and assume a 4 GiB per-instance memory budget. We derive 𝑉 DEM from the measured DEM Stitch performance in Sec. 7.2. For the illustrative Relay-BP FPGA projec-tion, we estimate latency from the reported 24 ns per iteration [37] and our measured iteration counts, assume linear scaling with de-coding volume, and use a 26 .7 MiB memory budget, assuming a high-end FPGA. Figure 17 maps each memory budget to the corresponding capac-ity 𝑉 mem . PyMatching accommodates larger normalized volumes than either unmatchable decoder, while 𝑉 mem decreases with code distance for all three implementations. Figure 18 compares the resulting preparation, memory, and de-coding capacities. CPU BP-LSD is limited by decoding latency, whereas the Relay-BP FPGA projection is limited by memory ca-pacity. None of the evaluated unmatchable-decoder configurations reaches the minimum capacities required even for the All-𝑑 sched-ule, 𝑉 dec ≥ 2 and 𝑉 unit ≥ 2, corresponding to a two-patch TCNOT task. In contrast, PyMatching satisfies both decoder-capacity con-straints for graphlike decoding, leaving DEM preparation as the remaining bottleneck. This case study demonstrates that the proposed decoding-volume model can identify both the real-time feasibility and the limiting resource of a decoder configuration. For the evaluated systems, enabling fast FTQC based on TCNOT therefore requires faster un-matchable decoding, greater on-chip memory capacity for FPGA implementations, or faster JIT DEM preparation. Alternatively, in-creasing 𝜏 SE relaxes the classical deadline, but proportionally in-creases quantum execution time. 
+
+> 12 Do Not Let CNOTs Overwhelm the Decoder: Scheduling Transversal Gates for Fast FTQC
+
+2All-d
+
+8 32 128 512 ∞ASAP 
+
+Decoder volume Vdec 
+
+0.5 0.75 11.25 1.5 1.75 22.25 2.5 
+
+> Decoder exponent  γdec
+
+(a) FH8(1) 
+
+2All-d
+
+8 32 128 512 ∞ASAP 
+
+Decoder volume Vdec 
+
+(b) FH8(5) 
+
+2All-d
+
+8 32 128 512 ∞ASAP 
+
+Decoder volume Vdec 
+
+(c) add64 
+
+1.0 1.5 2.0 3.0 5.0 8.0 12.0 
+
+> Speedup over All-d
+
+Figure 16: Effect of the decoding-time scaling exponent 𝛾 dec on TCNOT scheduling across 𝑉 dec for three representative workloads. Each cell reports quantum-execution speedup over All-𝑑 for the shortest evaluated schedule satisfying Eq. (5b) at that or a smaller 𝑉 dec . The 𝑉 dec = 2 column is the All-𝑑 reference, and the separated 𝑉 dec = ∞ column is the ASAP reference. 16 128 1K 8K 32K 10 0
+
+10 1
+
+10 2
+
+10 3
+
+(a) 𝘥 = 𝟣𝟧 
+
+16 128 1K 8K 32K 
+
+(b) 𝘥 = 𝟣𝟫 
+
+16 128 1K 8K 32K 
+
+(c) 𝘥 = 𝟤𝟥 
+
+Hardware memory 𝘔 𝖧𝖶 [MiB] 
+
+> 𝘝 𝗆𝖾𝗆
+
+PyMatching Relay-BP BP-LSD 
+
+Figure 17: Memory-side capacity 𝑉 mem derived from the measured working-memory scaling of 𝑊 = 2𝑑 decoding windows. 10 −1 
+
+10 1
+
+10 3
+
+10 5 d = 15 10 −1 
+
+10 1
+
+10 3
+
+10 5
+
+> Decoding volume  V
+
+d = 19 PyMatching/CPU BP-LSD/CPU Relay-BP/FPGA 10 −1 
+
+10 1
+
+10 3
+
+10 5 d = 23 10 0 10 2 10 4
+
+Vunit = min( Vmem , VDEM )
+
+10 −1 
+
+10 0
+
+10 1
+
+10 2
+
+10 3
+
+10 4
+
+> Vdec
+
+Infeasible    
+
+> d= 15
+> d= 19
+> d= 23
+
+(a) (b) 
+
+Vmem Vdec VDEM Minimum PyMatching/CPU BP-LSD/CPU Relay-BP/FPGA 
+
+Figure 18: Capacities of the representative decoder configurations. (a) DEM preparation, working-memory, and decoding latency capacities. (b) The resulting 𝑉 unit and 𝑉 dec .
+
+> 13
+
+Shota Ikari, Yuga Hirai, Yasunari Suzuki, Hiroshi Nakamura, and Yosuke Ueno 
+
+## 8 Discussion 8.1 Finite Decoder Pools 
+
+Our evaluation assumes enough unmatchable-decoder instances to process all non-graphlike sub-windows in each decoding layer con-currently, as well as sufficient matchable-decoder capacity for Hy-brid Window Decoding. With finite decoder pools, some nominally parallel tasks would be serialized, introducing decoder-assignment, contention, and queueing effects across decoding layers and succes-sive windows. Formally, the per-layer maximum in Eq. (4c) would be replaced by the makespan of assigning the layer’s sub-windows to the available decoder instances. Extending PACE to this setting would therefore require jointly selecting the TCNOT schedule and assigning its decoding tasks to available decoders, similar to the decoder allocation problem studied by Triage [15]. 
+
+## 8.2 Complementarity with Fast Correlated Decoding 
+
+PACE and the fast correlated decoding [12] address complemen-tary aspects of the decoding bottleneck caused by fast TCNOTs; PACE modifies the TCNOT schedule to control decoder workload, whereas fast correlated decoding decomposes each non-graphlike task induced by a given schedule into a sequence of graphlike tasks. Although this approach accelerates decoding, it does not directly address the rapid growth in decoding volume and online DEM com-pilation of schedule-dependent DEMs, which our PACE framework addresses. Fast correlated decoding could serve as the backend for non-graphlike sub-windows identified by SPD and Hybrid Window Decoding of our PACE framework. Moreover, our case study in Sec. 7.6 shows that PACE can acceler-ate TCNOT-based quantum execution even when all non-graphlike tasks are converted into graphlike tasks and decoded using Py-Matching under the performance assumptions of current decoding systems. This result indicates that decoder-aware TCNOT schedul-ing remains beneficial even with a fast correlated-decoding back-end. 
+
+## 9 Related Work 
+
+Window decoding has been widely studied [27, 34, 47, 48], includ-ing the scheduling of dependent decoding tasks [8, 15, 38, 50]. Swiper [50] and Triage [15] improve decoder utilization by schedul-ing window-level tasks, whereas PACE reduces the size and prepara-tion cost of the correlated decoding tasks induced by dense TCNOT schedules. 
+
+## 10 Conclusion 
+
+In this work, we proposed the PACE framework, which leverages the three decoder-side techniques for mitigating the classical decod-ing bottleneck and enables decoder-aware scheduling for TCNOTs. Our evaluations using practical FTQC benchmarks showed that PACE effectively utilizes available decoding resources to accelerate quantum program execution compared with baseline scheduling policies. Furthermore, our case study with current decoding sys-tems identifies the limitations that impede fast TCNOT-based FTQC and guides future decoder development. 
+
+## Acknowledgments 
+
+This work was supported by MEXT Q-LEAP Grant No. JPMXS0120319794, JPMXS0118068682, JST Moonshot R&D Grant No. JPMJMS256E, JPMJMS256L, JST CREST Grant No. JPMJCR23I4, JPMJCR24I4, JP-MJCR25I4, JSPS KAKENHI Grant No. JP22H05000, JP25K21176. 
+
+## References 
+
+[1] Rajeev Acharya, Dmitry A. Abanin, Laleh Aghababaie-Beni, Igor Aleiner, Trond I. Andersen, Markus Ansmann, Frank Arute, Kunal Arya, Abraham Asfaw, Nikita Astrakhantsev, Juan Atalaya, Ryan Babbush, Dave Bacon, Brian Ballard, Joseph C. Bardin, Johannes Bausch, Andreas Bengtsson, Alexander Bilmes, Sam Black-well, Sergio Boixo, Gina Bortoli, Alexandre Bourassa, Jenna Bovaird, Leon Brill, Michael Broughton, David A. Browne, Brett Buchea, Bob B. Buckley, David A. Buell, Tim Burger, Brian Burkett, Nicholas Bushnell, Anthony Cabrera, Juan Campero, Hung-Shen Chang, Yu Chen, Zijun Chen, Ben Chiaro, Desmond Chik, Charina Chou, Jahan Claes, Agnetta Y. Cleland, Josh Cogan, Roberto Collins, Paul Conner, William Courtney, Alexander L. Crook, Ben Curtin, Sayan Das, Alex Davies, Laura De Lorenzo, Dripto M. Debroy, Sean Demura, Michel Devoret, Agustin Di Paolo, Paul Donohoe, Ilya Drozdov, Andrew Dunsworth, Clint Earle, Thomas Edlich, Alec Eickbusch, Aviv Moshe Elbag, Mahmoud Elzouka, Catherine Erickson, Lara Faoro, Edward Farhi, Vinicius S. Ferreira, Leslie Flores Burgos, Ebrahim Forati, Austin G. Fowler, Brooks Foxen, Suhas Ganjam, Gonzalo Garcia, Robert Gasca, Élie Genois, William Giang, Craig Gidney, Dar Gilboa, Raja Gosula, Alejandro Grajales Dau, Dietrich Graumann, Alex Greene, Jonathan A. Gross, Steve Habegger, John Hall, Michael C. Hamilton, Monica Hansen, Matthew P. Harrigan, Sean D. Harrington, Francisco J. H. Heras, Stephen Heslin, Paula Heu, Oscar Higgott, Gordon Hill, Jeremy Hilton, George Holland, Sabrina Hong, Hsin-Yuan Huang, Ashley Huff, William J. Huggins, Lev B. Ioffe, Sergei V. Isakov, Justin Iveland, Evan Jeffrey, Zhang Jiang, Cody Jones, Stephen Jordan, Chaitali Joshi, Pavol Juhas, Dvir Kafri, Hui Kang, Amir H. Karamlou, Kostyantyn Kechedzhi, Ju-lian Kelly, Trupti Khaire, Tanuj Khattar, Mostafa Khezri, Seon Kim, Paul V. Klimov, Andrey R. Klots, Bryce Kobrin, Pushmeet Kohli, Alexander N. Korotkov, Fedor Kostritsa, Robin Kothari, Borislav Kozlovskii, John Mark Kreikebaum, Vladislav D. Kurilovich, Nathan Lacroix, David Landhuis, Tiano Lange-Dei, Brandon W. Lan-gley, Pavel Laptev, Kim-Ming Lau, Loïck Le Guevel, Justin Ledford, Joonho Lee, Kenny Lee, Yuri D. Lensky, Shannon Leon, Brian J. Lester, Wing Yan Li, Yin Li, Alexander T. Lill, Wayne Liu, William P. Livingston, Aditya Locharla, Erik Lucero, Daniel Lundahl, Aaron Lunt, Sid Madhuk, Fionn D. Malone, Ashley Mal-oney, Salvatore Mandrà, James Manyika, Leigh S. Martin, Orion Martin, Steven Martin, Cameron Maxfield, Jarrod R. McClean, Matt McEwen, Seneca Meeks, Anthony Megrant, Xiao Mi, Kevin C. Miao, Amanda Mieszala, Reza Molavi, Sebastian Molina, Shirin Montazeri, Alexis Morvan, Ramis Movassagh, Wojciech Mruczkiewicz, Ofer Naaman, Matthew Neeley, Charles Neill, Ani Nersisyan, Hartmut Neven, Michael Newman, Jiun How Ng, Anthony Nguyen, Murray Nguyen, Chia-Hung Ni, Murphy Yuezhen Niu, Thomas E. O’Brien, William D. Oliver, Alex Opremcak, Kristoffer Ottosson, Andre Petukhov, Alex Pizzuto, John Platt, Rebecca Potter, Orion Pritchard, Leonid P. Pryadko, Chris Quintana, Ganesh Ramachandran, Matthew J. Reagor, John Redding, David M. Rhodes, Gabrielle Roberts, Eliott Rosenberg, Emma Rosenfeld, Pedram Roushan, Nicholas C. Rubin, Negar Saei, Daniel Sank, Kannan Sankaragomathi, Kevin J. Satzinger, Henry F. Schurkus, Christopher Schuster, Andrew W. Senior, Michael J. Shearn, Aaron Shorter, Noah Shutty, Vladimir Shvarts, Shraddha Singh, Volodymyr Sivak, Jin-dra Skruzny, Spencer Small, Vadim Smelyanskiy, W. Clarke Smith, Rolando D. Somma, Sofia Springer, George Sterling, Doug Strain, Jordan Suchard, Aaron Szasz, Alex Sztein, Douglas Thor, Alfredo Torres, M. Mert Torunbalci, Abeer Vaishnav, Justin Vargas, Sergey Vdovichev, Guifre Vidal, Benjamin Villalonga, Catherine Vollgraff Heidweiller, Steven Waltman, Shannon X. Wang, Brayden Ware, Kate Weber, Travis Weidel, Theodore White, Kristi Wong, Bryan W. K. Woo, Cheng Xing, Z. Jamie Yao, Ping Yeh, Bicheng Ying, Juhwan Yoo, Noureldin Yosri, Grayson Young, Adam Zalcman, Yaxing Zhang, Ningfeng Zhu, and Nicholas Zo-brist. 2025. Quantum error correction below the surface code threshold. Nature 
+
+638, 8052 (2025), 920–926. doi:10.1038/s41586-024-08449-y [2] F Battistel, C Chamberland, K Johar, R W J Overwater, F Sebastiano, L Skoric, Y Ueno, and M Usman. 2023. Real-time decoding for fault-tolerant quantum computing: progress, challenges and outlook. Nano Futures 7, 3 (2023), 032003. doi:10.1088/2399-1984/aceba6 [3] Laleh Aghababaie Beni, Oscar Higgott, and Noah Shutty. 2025. Tesseract: A Search-Based Decoder for Quantum Error Correction. arXiv:2503.10988. arXiv:2503.10988 [quant-ph] [4] Michael E. Beverland, Malcolm Carroll, Andrew W. Cross, and Theodore J. Yoder. 2025. Fail fast: techniques to probe rare events in quantum error correction. arXiv:2511.15177. arXiv:2511.15177 [quant-ph] [5] Dolev Bluvstein, Simon J. Evered, Alexandra A. Geim, Sophie H. Li, Hengyun Zhou, Tom Manovitz, Sepehr Ebadi, Madelyn Cain, Marcin Kalinowski, Dominik Hangleiter, J. Pablo Bonilla Ataides, Nishad Maskara, Iris Cong, Xun Gao, Pedro 14 Do Not Let CNOTs Overwhelm the Decoder: Scheduling Transversal Gates for Fast FTQC 
+
+Sales Rodriguez, Thomas Karolyshyn, Giulia Semeghini, Michael J. Gullans, Markus Greiner, Vladan Vuletić, and Mikhail D. Lukin. 2023. Logical quantum processor based on reconfigurable atom arrays. Nature 626, 7997 (2023), 58–65. doi:10.1038/s41586-023-06927-3 [6] Dolev Bluvstein, Alexandra A. Geim, Sophie H. Li, Simon J. Evered, J. Pablo Bonilla Ataides, Gefen Baranes, Andi Gu, Tom Manovitz, Muqing Xu, Marcin Kalinowski, Shayan Majidy, Christian Kokail, Nishad Maskara, Elias C. Trapp, Luke M. Stewart, Simon Hollerith, Hengyun Zhou, Michael J. Gullans, Susanne F. Yelin, Markus Greiner, Vladan Vuletić, Madelyn Cain, and Mikhail D. Lukin. 2025. A fault-tolerant neutral-atom architecture for universal quantum computation. 
+
+Nature 649, 8095 (2025), 39–46. doi:10.1038/s41586-025-09848-5 [7] Hector Bombin, Chris Dawson, Ryan V. Mishmash, Naomi Nickerson, Fernando Pastawski, and Sam Roberts. 2023. Logical blocks for fault-tolerant topological quantum computation. PRX Quantum 4 (2023), 020303. doi:10.1103/PRXQuantum. 4.020303 [8] Héctor Bombín, Chris Dawson, Ye-Hua Liu, Naomi Nickerson, Fernando Pastawski, and Sam Roberts. 2023. Modular decoding: parallelizable real-time decoding for quantum computers. arXiv:2303.04846. arXiv:2303.04846 [quant-ph] [9] Gregory Boyd. 2023. Low-overhead parallelisation of lcu via commuting opera-tors. arXiv:2312.00696. arXiv:2312.00696 [quant-ph] [10] S. B. Bravyi and A. Yu. Kitaev. 1998. Quantum codes on a lattice with boundary. arXiv:quant-ph/9811052. arXiv:quant-ph/9811052 [quant-ph] [11] Daniel Brélaz. 1979. New methods to color the vertices of a graph. Commun. ACM 22, 4 (1979), 251–256. doi:10.1145/359094.359101 [12] Madelyn Cain, Dolev Bluvstein, Chen Zhao, Shouzhen Gu, Nishad Maskara, Marcin Kalinowski, Alexandra A. Geim, Aleksander Kubica, Mikhail D. Lukin, and Hengyun Zhou. 2025. Fast correlated decoding of transversal logical algo-rithms. arXiv:2505.13587. arXiv:2505.13587 [quant-ph] [13] Madelyn Cain, Chen Zhao, Hengyun Zhou, Nadine Meister, J. Pablo Bonilla Ataides, Arthur Jaffe, Dolev Bluvstein, and Mikhail D. Lukin. 2024. Cor-related decoding of logical algorithms with transversal gates. Physical Review Letters 133, 24 (2024), 240602. doi:10.1103/PhysRevLett.133.240602 [14] Christopher Chamberland, Pavithran Iyer, and David Poulin. 2018. Fault-tolerant quantum computing in the Pauli or Clifford frame with slow error diagnostics. 
+
+Quantum 2 (2018), 43. doi:10.22331/q-2018-01-04-43 [15] Jiahan Chen, Chenghong Zhu, Ge Bai, and Xin Wang. 2026. Triage: An Adaptive Parallel Window Decoding Scheduler for Real-time Fault-Tolerant Quantum Computation. arXiv:2605.04459. arXiv:2605.04459 [quant-ph] [16] Zi-Han Chen, Ming-Cheng Chen, Chao-Yang Lu, and Jian-Wei Pan. 2026. Hi-erarchical Logical Processor on the Rotated Surface Code with Shuttle Buses. arXiv:2606.22594. arXiv:2606.22594 [quant-ph] [17] Zi-Han Chen, Ming-Cheng Chen, Chao-Yang Lu, and Jian-Wei Pan. 2026. Transversal logical Clifford gates on the rotated surface code with reconfig-urable neutral atom arrays. Physical Review Letters 136, 13 (2026), 130601. doi:10.1103/m7tq-9v3g [18] Cristina Cicali, Martino Calzavara, Eloisa Cuestas, Tommaso Calarco, Robert Zeier, and Felix Motzoi. 2025. Fast neutral-atom transport and transfer between optical tweezers. Physical Review Applied 24, 2 (2025), 024070. doi:10.1103/7r3w-8m61 [19] Nicolas Delfosse and Naomi H. Nickerson. 2021. Almost-linear time decoding algorithm for topological codes. Quantum 5 (2021), 595. doi:10.22331/q-2021-12-02-595 [20] Eric Dennis, Alexei Kitaev, Andrew Landahl, and John Preskill. 2002. Topological quantum memory. J. Math. Phys. 43, 9 (2002), 4452–4505. doi:10.1063/1.1499754 [21] Austin G. Fowler and Craig Gidney. 2018. Low overhead quantum computation using lattice surgery. arXiv:1808.06709. arXiv:1808.06709 [quant-ph] [22] Austin G. Fowler, Matteo Mariantoni, John M. Martinis, and Andrew N. Cle-land. 2012. Surface codes: Towards practical large-scale quantum computation. 
+
+Physical Review A 86, 3 (2012), 032324. doi:10.1103/PhysRevA.86.032324 [23] Craig Gidney. 2021. Stim: a fast stabilizer circuit simulator. Quantum 5 (2021), 497. doi:10.22331/q-2021-07-06-497 [24] Craig Gidney. 2022. Stability Experiments: The Overlooked Dual of Memory Experiments. Quantum 6 (2022), 786. doi:10.22331/q-2022-08-24-786 [25] Craig Gidney, Michael Newman, Peter Brooks, and Cody Jones. 2025. Yoked surface codes. Nature Communications 16, 1 (2025), 4498. doi:10.1038/s41467-025-59714-1 [26] Craig Gidney, Noah Shutty, and Cody Jones. 2024. Magic state cultivation: grow-ing T states as cheap as CNOT gates. arXiv:2409.17595. arXiv:2409.17595 [quant-ph] [27] Anqi Gong, Sebastian Cammerer, and Joseph M. Renes. 2024. Toward Low-latency Iterative Decoding of QLDPC Codes Under Circuit-Level Noise. arXiv:2403.18901. arXiv:2403.18901 [quant-ph] [28] Daniel Gottesman. 2010. An introduction to quantum error correction and fault-tolerant quantum computation. 13–58 pages. doi:10.1090/psapm/068/2762145 [29] Sam J. Griffiths and Dan E. Browne. 2024. Union-find quantum decoding with-out union-find. Physical Review Research 6, 1 (2024), 013154. doi:10.1103/ PhysRevResearch.6.013154 [30] Adrian Harkness, Shuwen Kan, Chenxu Liu, Meng Wang, John M. Martyn, Shifan Xu, Diana Chamaki, Ethan Decker, Ying Mao, Luis F. Zuluaga, Tamás Terlaky, Ang Li, and Samuel Stein. 2026. FTCircuitBench: A Benchmark Suite for Fault-Tolerant Quantum Compilation and Architecture. arXiv:2601.03185. arXiv:2601.03185 [quant-ph] [31] Oscar Higgott and Craig Gidney. 2025. Sparse Blossom: correcting a million errors per core second with minimum-weight matching. Quantum 9 (2025), 1600. doi:10.22331/q-2025-01-20-1600 [32] Timo Hillmann, Lucas Berent, Armanda O. Quintavalle, Jens Eisert, Robert Wille, and Joschka Roffe. 2025. Localized statistics decoding for quantum low-density parity-check codes. Nature Communications 16, 1 (2025), 8214. doi:10.1038/s41467-025-63214-7 [33] Clare Horsman, Austin G. Fowler, Simon Devitt, and Rodney Van Meter. 2012. Surface code quantum computing by lattice surgery. New Journal of Physics 14 (2012), 123011. doi:10.1088/1367-2630/14/12/123011 [34] Seok-Hyung Lee, Lucas H. English, and Stephen D. Bartlett. 2026. Efficient post-selection for general quantum LDPC Codes. npj Quantum Information 12, 1 (2026), 96. doi:10.1038/s41534-026-01242-x [35] Daniel Litinski. 2019. A game of surface codes: Large-scale quantum computing with lattice surgery. Quantum 3 (2019), 128. doi:10.22331/q-2019-03-05-128 [36] Daniel Litinski. 2019. Magic State Distillation: Not as Costly as You Think. 
+
+Quantum 3 (2019), 205. doi:10.22331/q-2019-12-02-205 [37] Thilo Maurer, Markus Bühler, Michael Kröner, Frank Haverkamp, Tristan Müller, Drew Vandeth, and Blake R. Johnson. 2025. Real-time decoding of the gross code memory with FPGAs. arXiv:2510.21600. arXiv:2510.21600 [quant-ph] [38] Satvik Maurya, Abtin Molavi, Aws Albarghouthi, and Swamit Tannu. 2024. Managing Classical Processing Requirements for Quantum Error Correction. arXiv:2406.17995. arXiv:2406.17995 [quant-ph] [39] Tristan Müller, Thomas Alexander, Michael E. Beverland, Markus Bühler, Blake R. Johnson, Thilo Maurer, and Drew Vandeth. 2025. Improved belief propaga-tion is sufficient for real-time decoding of quantum memory. arXiv:2506.01779. arXiv:2506.01779 [quant-ph] [40] Michael A. Nielsen and Isaac L. Chuang. 2010. Quantum Computation and Quantum Information: 10th Anniversary Edition . Cambridge University Press. doi:10.1017/CBO9780511976667 [41] L. Riesebos, X. Fu, S. Varsamopoulos, C. G. Almudever, and K. Bertels. 2017. Pauli Frames for Quantum Computer Architectures. In Proceedings of the 54th Annual Design Automation Conference 2017 (DAC ’17) . ACM, 1–6. doi:10.1145/3061639. 3062300 [42] Joschka Roffe, David R. White, Simon Burton, and Earl T. Campbell. 2020. De-coding Across the Quantum LDPC Code Landscape. Physical Review Research 2, 4 (2020), 043423. arXiv:2005.07016 [quant-ph] doi:10.1103/PhysRevResearch.2. 043423 [43] Neil J. Ross and Peter Selinger. 2016. Optimal ancilla-free Clifford+T approxi-mation of z-rotations. Quantum Information and Computation 16, 11&12 (2016), 901–953. doi:10.26421/QIC16.11-12-1 [44] Kaavya Sahay, Yingjia Lin, Shilin Huang, Kenneth R. Brown, and Shruti Puri. 2025. Error correction of transversal CNOT gates for scalable surface-code computation. 
+
+PRX Quantum 6, 2 (2025), 020326. doi:10.1103/PRXQuantum.6.020326 [45] Luka Skoric, Dan E. Browne, Kenton M. Barnes, Neil I. Gillespie, and Earl T. Campbell. 2023. Parallel window decoding enables scalable fault tolerant quan-tum computation. Nature Communications 14, 1 (2023), 7040. doi:10.1038/s41467-023-42482-1 [46] Shinichi Sunami, Akihisa Goban, and Hayata Yamasaki. 2025. Transversal surface-code game powered by neutral atoms. arXiv:2506.18979. arXiv:2506.18979 [quant-ph] [47] Barbara M. Terhal. 2015. Quantum error correction for quantum memories. 
+
+Reviews of Modern Physics 87, 2 (2015), 307–346. doi:10.1103/RevModPhys.87.307 [48] Riki Toshio, Kaito Kishi, Jun Fujisaki, Hirotaka Oshima, Shintaro Sato, and Keisuke Fujii. 2025. Decoder Switching: Breaking the Speed-Accuracy Tradeoff in Real-Time Quantum Error Correction. arXiv:2510.25222. arXiv:2510.25222 [quant-ph] [49] Joshua Viszlai, Jason D. Chadwick, Sarang Joshi, Gokul Subramanian Ravi, Yan-jing Li, and Frederic T. Chong. 2024. Predictive Window Decoding for Fault-Tolerant Quantum Programs. arXiv:2412.05115. arXiv:2412.05115 [quant-ph] [50] Joshua Viszlai, Jason D Chadwick, Sarang Joshi, Gokul Subramanian Ravi, Yanjing Li, and Frederic T Chong. 2025. Swiper: Minimizing fault-tolerant quantum program latency via speculative window decoding. In Proceedings of the 52nd Annual International Symposium on Computer Architecture . ACM, 1386–1401. doi:10.1145/3695053.3731022 [51] Kwok Ho Wan, Mark Webber, Austin G. Fowler, and Winfried K. Hensinger. 2024. An iterative transversal CNOT decoder. arXiv:2407.20976. arXiv:2407.20976 [quant-ph] [52] Meng Wang, Chenxu Liu, Samuel Stein, Yufei Ding, Poulami Das, Prashant J Nair, and Ang Li. 2026. Transpiler-Architecture Co-Design to Curb Clifford Costs in Fault-Tolerant Quantum Computing. In 2026 ACM/IEEE 53rd Annual International Symposium on Computer Architecture (ISCA) . IEEE, 889–904. doi:10. 1109/ISCA66397.2026.00072 15 Shota Ikari, Yuga Hirai, Yasunari Suzuki, Hiroshi Nakamura, and Yosuke Ueno 
+
+[53] Nobuyuki Yoshioka, Tsuyoshi Okubo, Yasunari Suzuki, Yuki Koizumi, and Wataru Mizukami. 2024. Hunting for quantum-classical crossover in condensed matter problems. npj Quantum Information 10, 1 (2024), 45. doi:10.1038/s41534-024-00839-4 [54] Hengyun Zhou, Casey Duckering, Chen Zhao, Dolev Bluvstein, Madelyn Cain, Aleksander Kubica, Sheng-Tao Wang, and Mikhail D. Lukin. 2025. Resource Analysis of Low-Overhead Transversal Architectures for Reconfigurable Atom Arrays. In Proceedings of the 52nd Annual International Symposium on Computer Architecture . Association for Computing Machinery, 1432–1448. doi:10.1145/ 3695053.3731039 [55] Hengyun Zhou, Chen Zhao, Madelyn Cain, Dolev Bluvstein, Nishad Maskara, Casey Duckering, Hongye Hu, Sheng-Tao Wang, Aleksander Kubica, and Mikhail D. Lukin. 2025. Low-overhead transversal fault tolerance for universal quantum computation. Nature 646, 8084 (2025), 303–308. doi:10.1038/s41586-025-09543-5 [56] Abbas B. Ziad, Jubo Xu, and Hongxiang Fan. 2026. GreenPeas: Unlocking adaptive quantum error correction with just-in-time decoding hypergraphs. arXiv:2604.16613. arXiv:2604.16613 [quant-ph] 16

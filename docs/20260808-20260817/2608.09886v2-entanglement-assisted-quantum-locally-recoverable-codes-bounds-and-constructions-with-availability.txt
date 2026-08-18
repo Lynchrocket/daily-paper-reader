@@ -1,0 +1,1781 @@
+Title: Entanglement-assisted quantum locally recoverable codes: bounds and constructions with availability
+
+URL Source: https://arxiv.org/pdf/2608.09886v2
+
+Published Time: Wed, 12 Aug 2026 00:42:33 GMT
+
+Number of Pages: 33
+
+Markdown Content:
+# Entanglement-assisted quantum locally recoverable codes: bounds and constructions with availability 
+
+Rutuja Kshirsagar ∗1, Gretchen L. Matthews †2, and Julia Shapiro ‡31Fujitsu Research of America, Inc., Santa Clara, CA, U.S.A 
+
+> 2,3
+
+Virginia Tech, Blacksburg, VA, U.S.A. 
+
+Abstract 
+
+In this work, we define entanglement-assisted quantum locally recoverable codes with avail-ability, in which any set of up to δ − 1 erased qudits can be recovered from any one of t local recovery sets, each of size at most r + δ − 1, with the recovery sets intersecting exactly in the erased coordinates, where r is a (small) positive integer. We show that shared entanglement permits t > 1, meaning that multiple local recovery sets can be available for the same set of up to δ − 1 erasures. We establish a Singleton-like bound for this family of codes and present ran-dom constructions based on classical linear codes with Vandermonde parity-check matrices. We also provide explicit constructions of entanglement-assisted quantum locally recoverable codes with availability from several classical code families and their folded versions, including Tamo– Barg codes, fiber-product codes, and algebraic-geometry codes such as one-point Hermitian and Suzuki codes. 
+
+# 1 Introduction 
+
+Locally recoverable codes (LRCs) were introduced in [19] for applications in distributed storage systems. An ( n, k, r ) LRC over the alphabet Fq provides an efficient framework for erasure recovery of alphabet symbols, encoding k symbols into n symbols in such a way that each codeword symbol can be recovered from a collection of at most r other symbols, referred to as a recovery set. Since any linear code of dimension k naturally has recovery sets of size k for each symbol, the focus is typically on LRCs with small locality r < k . This notion was generalized to ( r, δ ) LRCs [32], where each recovery set can tolerate up to δ − 1 erasures and further extended to include availability t in [39], meaning that each symbol admits t (disjoint) recovery sets. Explicit instances of LRCs based on families of algebraic-geometry codes over various curves have been demonstrated in [4, 5, 29, 31, 43]. We refer to this as the classical setting, in contrast to this paper’s focus on quantum error-correcting codes. The notion of quantum local recovery was introduced in [18] and extended to the ( r, δ ) setting in [14], giving rise to quantum locally recoverable codes (QLRCs). QLRCs provide a promising 
+
+> ∗
+
+Email: rkshirsagar@fujitsu.com 
+
+> †
+
+G. L. Matthews and the work at Virginia Tech is partially supported by NSF DMS-2502705, NSF CNS-2413218, and the Commonwealth Cyber Initiative. Email: gmatthews@vt.edu 
+
+> ‡
+
+J. Shapiro is also supported by the Department of Defense Cyber Service Academy Scholarship. Email: ju-liams22@vt.edu 
+
+1arXiv:2608.09886v2 [cs.IT] 11 Aug 2026 framework for future quantum data storage systems [40]. Constructions have been studied in recent works including [15, 35, 36, 37, 46]. Like their classical counterparts, QLRCs are developed as a step toward achieving quantum distributed storage. In such a model, an erroneous qubit (node) can be recovered by connecting to a small set of local qubits rather than requiring the device to have an all-to-all connectivity, thus minimizing the possibility of long-range connections. Erasure models assume that the positions of lost symbols or qubits are known in advance, reducing decoding to a reconstruction problem rather than error identification. This makes erasures fundamentally easier to handle than general errors in both classical and quantum settings [12, 20, 22]. Recent experimental results further support this approach, showing that in platforms such as neutral-atom and superconducting systems, detectable faults can be mapped to erasures [44, 45]. Thus, although QLRCs are motivated by erasure recovery, they support quantum error correction more broadly by enabling low-overhead local repair of detectable faults. More broadly, QLRCs are expected to be relevant to future quantum memory architectures. Many leading quantum error-correcting code families are Calderbank–Shor–Steane (CSS) codes, including surface codes [7, 13, 33] and numerous quantum low-density parity-check (QLDPC) con-structions [8], which require dual containment of the underlying classical codes. Entanglement-assisted quantum error-correcting codes (EAQECCs) were introduced in [9] to relax this dual-containment constraint required in CSS code constructions [11, 42]. EAQECCs not only allow more flexible constructions, but can also improve the achievable dimension–distance tradeoff by leveraging pre-shared entanglement [9, 30]. These codes directly inherit the structure of classical linear codes, allowing them to integrate with well-established classical coding theory. Moreover, pre-shared entanglement can improve quantum coding performance: entanglement-assisted quan-tum error-correcting codes may achieve better parameters than comparable unassisted schemes by relaxing orthogonality constraints and enabling constructions from arbitrary classical linear codes [21]. In [25], the authors present CSS ( r, δ ) QLRCs, including both random and explicit construc-tions. In [18], the authors show that availability is not possible in the case of quantum CSS constructions when using disjoint recovery sets that only intersect at the (erased) coordinate i.However, it is possible to have more than one recovery set (correcting a single erasure) if the sets are allowed to overlap in more than one coordinate [10, Proposition 23]. As an illustration, [10, Example 24] demonstrates that constructing the Steane code from two Hamming codes yields a QLRC with 4 recovery sets of size 3 for each qudit and the overlap at most 2. However, availability in the classical sense requires disjoint recovery sets, so that erased symbols in one recovery set do not impact the ability to recover an erasure from another recovery set. That is the motivation for this work: utilizing entanglement allows for multiple disjoint recovery sets for quantum codes. In this work, we introduce ( r, δ ) entanglement-assisted quantum locally recoverable codes (EAQLRCs) with availability t, with the property that any set of δ − 1 qudits can be recovered from one of t subsets of size at most r +δ −1, each containing the erased qudits, and whose pairwise intersections are exactly the erased set. Such codes combine the advantages of local recovery with the flexibility provided by shared entanglement. Consequently, one can build an EAQLRC from any two classical LRCs, including codes that are not dual-containing. This additional flexibility is particularly valuable for LRCs with locality and availability constraints, where enforcing dual containment may significantly restrict the achievable parameters. We determine a Singleton-like bound for these codes. We provide both random and explicit constructions of EAQLRCs, where the underlying codes are from several families of classical LRCs, including fiber product codes, Tamo–Barg codes, folded Tamo–Barg codes, one-point Hermitian codes, and codes from Suzuki curves. 2(r, 2) QLRCs (r, δ ) QLRCs (r, δ ) EAQLRCs Singleton (upper) bound on k                  
+
+> n−2( d−1)
+> −
+> n−(d−1)
+> r+ 1
+> 
+> −
+> n−2( d−1) −
+> jn−(d−1)
+> r+1
+> k
+> r+ 1
+> 
+
+[18, Theorem 35]                         
+
+> n−2( d−1)
+> −
+> n−(d−1) (r+δ−1)
+> 
+> −
+> n−2( d−1) −
+> jn−(d−1)
+> r+δ−1
+> k
+> r+δ−1
+> 
+
+[Extension of [18, Theorem 35]]                          
+
+> n−2( d−1)
+> −
+> n−(d−1)
+> t(r+δ−1)
+> 
+> −
+> n−2( d−1) −
+> jn−(d−1)
+> t(r+δ−1)
+> k
+> t(r+δ−1)
+> 
+> +c
+
+[Theorem 3.5] Random dim. 
+
+n − 2
+
+ nr+1 + ℓ
+
+
+
+[18, Lemma 38] 
+
+n − 2
+
+ nr+δ−1 (δ − 1) + ℓ
+
+
+
+[25, Lemma 3.3] 
+
+n − 2
+
+ nr+δ−1 (δ − 1) + ℓ
+
+
+
++ c
+
+[Proposition 4.1] QTB dim. 2( ℓ − q)
+
+
+
+1 − 2
+
+> r+1
+
+
+
++ ϵℓ ∈ [q]0, ϵ ∈ [−2, 2] [18, Lemma 56] 1 + 2( ℓ − q)
+
+
+
+1 − 2( δ−1) 
+
+> r+δ−1
+
+
+
++ ϵ, ℓ ∈ [q]0,
+
+ϵ ∈ [−2( δ − 1) , 2( δ − 1)] [25, Lemma 5.4] (q − 1) − 2
+
+j ℓr+δ−1
+
+k
+
++2 min( ℓ mod ( r + δ − 1) , r )+cℓ ∈ [q]0
+
+[Theorem 5.1] 
+
+Table 1: Comparison of bounds on the dimension of QLRCs from the literature and the entanglement-assisted codes studied in this work. Here c = dim( C1) − dim(Hull C2 (C1)) denotes the entanglement parameter (see Remark 2.4). We also normalize the comparison with prior bounds in [18] by replacing r with r + 1 to match the prevailing locality convention. We summarize the known results for QLRCs alongside our results for EAQLRCs in Table 1. To facilitate comparison, Table 1 uses a common parameter convention across the literature. In particular, we write c for the number of shared maximally entangled pairs (ebits) used in an entanglement-assisted construction. We also normalize the recovery-set notation when quoting results from sources that measure locality by the number of other coordinates needed for repair: in those cases, we replace r by r + 1. In the entanglement-assisted setting, the parameter c records the amount of shared entanglement available to the encoder and decoder. For constructions of the form EACSS (C1, C 2), the value of c is determined by the failure of the dual-containment condition and may be expressed in terms of the corresponding relative hull. In the check-space convention used for the constructions below, the special case EACSS (C, C ) has 
+
+c = dim( C) − dim(Hull( C)) .
+
+The table compares known bounds and construction parameters for QLRCs with the entanglement-assisted variants studied here. The row labeled “Singleton bound” gives the corresponding upper bound on the quantum dimension k, while “Random dim.” and “QTB dim.” refer to dimensions achieved by random constructions and quantum Tamo–Barg-type constructions, respectively. In many cases, sharper parameters can be obtained by determining the hull Hull( C) := C ∩ C⊥ or relative hull Hull C (C′) := C′ ∩ C⊥ of the underlying classical codes C and C′. The hull or relative hull of the underlying classical codes controls the entanglement consumption and therefore affects the resulting entanglement-assisted dimension. Compared with CSS-type constructions built from the same underlying classical data, the entanglement-assisted framework can allow more flexible parameter choices because it does not require dual containment. When t = 1 and c = 0 in Corollary 3.7, we recover the original QLRC Singleton bound of [18, Theorem 35] for the δ = 2 3case and the general ( r, δ ) bound from [25]. For t = 1 and c ≥ 0, our bound is a generalization of the other two Singleton bounds, applicable in the entanglement-assisted setting, where the c ebits relax the dual-containment constraint C⊥ 
+
+> 2
+
+⊆ C1, which is not required in the entanglement-assisted setting and therefore gives greater freedom in the choice of LRCs. In the entanglement-assisted quantum local recovery setting, we are able to provide a Singleton bound for ( r, δ ) EAQLRCs with availability t, whereas in the CSS setting previously considered, availability in this disjoint-recovery-set sense is not possible. The remainder of this paper is organized as follows. Section 2 establishes notation and contains background necessary for the later sections. Section 3 introduces entanglement-assisted quantum locally recoverable codes, and Section 4 provides random constructions. Constructions derived from algebraic-geometry codes and curves over finite fields are found in Section 5. The paper concludes with a summary and open problems in Section 6. 
+
+# 2 Preliminaries 
+
+In this section, we establish the notation used throughout the paper and introduce the main concepts needed for the code constructions developed in the subsequent sections. We begin with the necessary background on linear and quantum codes, and then review the key notions and results on local recovery in both the classical and quantum settings. 
+
+2.1 Classical and quantum codes 
+
+2.1.1 Linear codes 
+
+Let Z>0 be the set of positive integers, Z≥0 := Z>0 ∪ { 0}, and C be the field of complex numbers. For t ∈ Z≥0, define [ t]0 := {0, 1, . . . , t − 1}, and for t ∈ Z>0, set [ t] := {1, . . . , t }. Let Fq be the finite field with q = ps elements, where p is prime and s ∈ Z>0; let Fq∗ := Fq \ { 0} denote its multiplicative group of nonzero elements. Denote by Fnq the n-dimensional vector space over Fq.The support of a vector u ∈ Fnq is supp( u) = {j ∈ [n] | uj̸ = 0 }. The set of all m × n matrices over 
+
+Fq is written as Fm×nq ; for A ∈ Fm×nq , the ( i, j )-th entry is denoted by Aij . For a subset I ⊆ [n]with |I| = ℓ, let πI : Fnq → Fℓq denote the projection onto the coordinates indexed by I.Let C be an [ n, k, d ]q linear code over Fq, meaning a k-dimensional subspace of Fnq in which any two distinct vectors (called codewords) differ in at least d coordinates and there is a pair of codewords that differ in exactly d coordinates; we omit the subscript q when the field size is clear from context. Here n, k, and d denote the length, dimension, and minimum distance, respectively. A linear code is called maximum-distance separable (MDS) if and only if d = n−k+1, meaning that the Singleton Bound k + d ≤ n + 1 is met with equality. The weight of a codeword c ∈ C, denoted wt( c), is its distance from the zero codeword. Let G ∈ Fk×nq and H ∈ F(n−k)×nq be generator and parity-check matrices of C, respectively, meaning that C is the row space of G and is the nullspace of H. The dual code of C is its orthogonal complement with respect to the standard Euclidean inner product, defined as 
+
+C⊥ := {u ∈ Fnq | u · v = 0 for all v ∈ C}.
+
+The hull of code C is its intersection with its dual, that is Hull( C) = C ∩ C⊥. The relative hull of a code C′ with respect to code C is Hull C (C′) = C′ ∩ C⊥. The punctured code of C onto coordinates indexed by a subset I of cardinality ℓ is the [ ℓ, k ′, d ′] code 
+
+C|I := πI (C) = {(cj )j∈I | c = ( c1, . . . , c n) ∈ C}
+
+4where k − (n − ℓ) ≤ k′ ≤ k and d − (n − ℓ) ≤ d′ ≤ d.Another useful way to derive new codes from existing ones is folding, in which consecutive coordinates are grouped into symbols over an extended alphabet [26, 27]. Let C ⊆ Fnq be a linear code, and suppose m ∈ Z>0 is such that m | n. Let N := n/m . For each i ∈ [N ], define 
+
+Bi := {(i − 1) m + 1 , . . . , im }.
+
+The m-fold of C is the code 
+
+C(m) :=   (cj )j∈B1 , . . . , (cj )j∈BN
+
+ : ( c1, . . . , c n) ∈ C ⊆ (Fmq )N .
+
+Note that C(m) is linear over Fq, not necessarily over Fmq (or Fqm ) for m > 1. Under the folding op-eration, code C(m) is Fq-linear. We say that the code C(m) has dimension k/m over Fmq , where k/m 
+
+need not be an integer, acknowledging this is an abuse of notation. Indeed, Fmq is not a field itself (though it is isomorphic to Fqm ) and hence C(m) is not an Fmq -vector space; moreover, it may also be the case that the image of C(m) is not linear over Fqm . We say that C(m) has minimum distance 
+
+d′ := min d(u, v ) : u, v ∈ C(m), u ̸ = v ≥ ⌈ d/m ⌉, where d(c, c ′) := |
+
+n
+
+i ∈ [N ] : ( cj )j∈Bi̸ = ( c′ 
+
+> j
+
+)j∈Bi
+
+o
+
+|
+
+for c, c ′ ∈ C(m). We define the dual of the folded code C(m) to be the fold of the dual code,  C⊥(m).It is worth noting that if C happens to be Fqm -linear so that C(m) is Fqm -linear after making the identification F mq ∼= Fqm via a trace-dual basis, then  C⊥(m) =  C(m)⊥.The new code constructions defined in this manuscript rely on families of algebraic-geometry (AG) codes. We start with the definition of general evaluation codes. For a subset S ⊆ Z≥0, let 
+
+Fq[X]S =
+
+(X
+
+> i∈S
+
+aiXi : ai ∈ Fq
+
+)
+
+denote the space of polynomials for which only monomials Xi with i ∈ S may have non-zero coefficients. Let T ⊆ Fq and ev T : Fq[X]S −→ F |T |
+
+> q
+
+denote the evaluation map on T defined by ev( f ) =  f (x) 
+
+> x∈T
+
+. The subscript T is omitted if the set of evaluation points is clear from the context. The most popular family of evaluation codes consists of Reed-Solomon codes, meaning those in which T = {α1, . . . , α n} is a set of distinct elements of 
+
+Fq and S = [ k]0. More formally, let Pk−1 = {f ∈ Fq[x] : deg( f ) < k }. Then the Reed–Solomon code of length n and dimension k is the evaluation code RS k(α1, . . . , α n) = ev( Pk−1) =   f (α1), . . . , f (αn) : f ∈ Fq[x], deg( f ) < k ,
+
+which is an [ n, k, n − k + 1] q MDS code. Algebraic-geometry codes (sometimes called AG codes), detailed below, extend the Reed-Solomon framework. Reed–Solomon codes take as evaluation points a collection of affine points on the projective line and use polynomials of bounded degree to define codewords. More general algebraic-geometry codes instead use rational points on a projective curve together with rational functions from a Riemann–Roch space. Let X/ Fq be a smooth projective curve of genus g. Let D = P1 + · · · + Pn and G be divisors on X such that P1, . . . , P n are pairwise distinct Fq-rational points of X, none of which appear in the support of G. The Riemann–Roch space of G is defined as 
+
+L(G) = {f ∈ Fq(X) : ( f ) + G ≥ 0} ∪ { 0},
+
+5i.e., for G ≥ 0, the set of functions whose poles are bounded by G. Let ℓ(G) := dim Fq L(G). The associated algebraic-geometry code is defined as 
+
+C(D, G ) = {(f (P1), . . . , f (Pn)) : f ∈ L (G)}.
+
+If 2 g − 2 < deg( G) < n , then C(D, G ) is an [ n, k, d ] code with k = ℓ(G), and d ≥ n − deg( G). If G = αP for some positive integer α and P ∈ X(Fq), then C(D, G ) is called a one-point code. Furthermore, if X is the projective line over Fq, then C is a Reed–Solomon code; if X is the Hermitian curve defined by yq + y = xq+1 over Fq2 , then C is a Hermitian code; and if X is the Suzuki curve defined by yq − y = xq0 (xq − x) over Fq where q0 = 2 t and q = 2 q20 = 2 2t+1 for some positive integer t, then C is a Suzuki code. These will all be used in Section 5 to design EAQLRCs with multiple, disjoint recovery sets for each symbol. 
+
+2.1.2 Quantum codes 
+
+We now turn our attention to the quantum setting, which is the focus of this paper. We review the definitions of CSS codes and entanglement-assisted codes relevant to the results in this paper. For 
+
+x = ( x1, . . . , x n) ∈ Fnq , we write |x⟩ for the corresponding computational basis state 
+
+|x⟩ = |x1⟩ ⊗ · · · ⊗ | xn⟩ ∈ (Cq)⊗n,
+
+where the computational basis of Cq is indexed by the elements of Fq. Thus, for x, y ∈ Fnq , the ket 
+
+|x + y⟩ denotes the basis state labeled by the vector sum x + y in Fnq .We now recall the definition of a CSS code (see [11, 42]). 
+
+Definition 2.1. Let C′, C ⊆ Fnq be linear codes with parameters [n, k ′, d ′] and [n, k, d ], respectively, such that C⊥ ⊆ C′. The associated quantum CSS code is the subspace 
+
+CSS( C′, C ) := Span C
+
+
+
+1
+
+p|C⊥|
+
+X
+
+> y∈C⊥
+
+|x + y⟩ : x ∈ C′
+
+ .
+
+Remark 2.2. It is well known that CSS( C′, C ) is a [[ n, k ′ + k − n, min {wt( C′ \ C⊥), wt( C \ C′⊥ )}]] quantum code; see, for example, [11, 20, 42]. The CSS construction provides a large and important class of quantum codes when the un-derlying classical codes satisfy the dual-containment condition C⊥ ⊆ C′. Because the dual-containment condition can be too restrictive for many code families of interest, it is natural to use the entanglement-assisted framework, where pre-shared entanglement compensates for the failure of dual containment. Unlike standard stabilizer codes and the CSS codes in Definition 2.1, EAQECCs do not require the dual-containment condition on the underlying classical codes, providing greater flexibility in code constructions. In general, an EAQECC with parameters [[ n, k, d ; c]] q encodes k
+
+logical q-ary qudits into n physical qudits, has minimum distance d, and uses c shared maximally entangled pairs (ebits) between sender and receiver. We next review the EAQECC construction from [17] as it applies to CSS codes. The construction uses a pair of Fq linear codes of equal length, yielding a CSS-like family of EAQECCs. Recall that for two linear codes A, B ⊆ Fnq , we write Hull A(B) := B ∩ A⊥
+
+to mean the relative hull of B with respect to A.6An entanglement-assisted code can be constructed using two classical codes as follows. Let 
+
+C′, C ⊆ Fnq be linear codes with parameters [ n, k ′, d ′] and [ n, k, d ], respectively. Set 
+
+c = dim( C′⊥ ) − dim (Hull C′ (C)) = dim( C⊥) − dim  Hull C (C′) .
+
+Choose augmented codes eC′, eC ⊆ F n+cq such that dim( eC) = k + c and dim( eC′) = k′ + c and 
+
+eC⊥ ⊆ eC′.
+
+The entanglement-assisted quantum code associated to C′ and C is EAQ( C′, C ) := Span C
+
+
+
+1
+
+q
+
+| eC⊥|
+
+X 
+
+> y∈eC⊥
+
+|x + y⟩ : x ∈ eC′
+
+ .
+
+It can be checked that EAQ( C′, C ) is an [[ n, k′ + k − n + c, d; c]] entanglement-assisted quantum code, that is, a code encoding k′ + k − n + c logical qudits into n transmitted qudits with the assistance of c pre-shared maximally entangled pairs (ebits) between sender and receiver. Equivalently, the underlying stabilizer acts on n + c qudits, where the first n qudits are transmitted through the channel and the remaining c qudits are the ebits pre-shared by the sender and the receiver. Here, 
+
+d ≥
+
+
+
+min {wt( C′⊥ ), wt( C⊥)} if C′⊥ ⊆ C
+
+min wt  C′⊥ \ Hull C′ (C), wt  C⊥ \ Hull C (C′) otherwise. See, for example, [16, 17] for the EAQ construction over arbitrary finite fields, and [2] for the relative-hull formulation. Considering the EAQ (C′, C ) constructed above, when C⊥ ⊆ C′, we have that C′⊥ ⊆ C.Therefore 
+
+C ∩ C′⊥ = C′⊥ ,
+
+and hence 
+
+c = dim( C′⊥ ) − dim( C ∩ C′⊥ ) = 0 .
+
+Thus, the entanglement-assisted construction recovers the usual CSS setting. Hence, this definition reflects the connection between CSS codes and their entanglement-assisted counterparts. Up to this point, we have used C′ and C denote the two classical codes used in the CSS construction; later, we may use CX and CZ when emphasizing check spaces. At times, it is convenient to consider a parity-check perspective instead, as captured in the next definition. For the remainder of the paper, we will refer to the following family of codes as EACSS codes. 
+
+Definition 2.3. Let CX , C Z ⊆ Fnq be linear codes with parameters [n, k X , d X ] and [n, k Z , d Z ],respectively. Regard CX and CZ as check spaces so that elements of CX define X-type checks, and elements of CZ define Z-type checks. Set 
+
+c = kZ − dim (Hull CX (CZ )) = kX − dim (Hull CZ (CX )) .
+
+Choose augmented check spaces eCZ , eCX ⊆ Fn+cq such that dim( eCZ ) = kZ , dim( eCX ) = kX , and 
+
+eCX ⊆ eC⊥ 
+
+> Z
+
+.
+
+7The associated augmented CSS code is 
+
+eQ := Span C
+
+
+
+1
+
+q
+
+| eCX |
+
+X 
+
+> y∈eCX
+
+|x + y⟩ : x ∈ eC⊥
+
+> Z
+
+ ⊆ (Cq)⊗(n+c).
+
+The corresponding entanglement-assisted CSS code, denoted EACSS (CX , C Z ), is obtained by inter-preting the first n coordinates as the transmitted qudits and the final c coordinates as the receiver’s halves of the shared ebits. 
+
+Remark 2.4. It can be verified that EACSS (CX , C Z ) has parameters [[ n, n − kX − kZ + c, d ; c ]] where 
+
+d ≥ min 
+
+n
+
+wt  C⊥ 
+
+> X
+
+\ Hull CX (CZ ), wt  C⊥ 
+
+> Z
+
+\ Hull CZ (CX )o
+
+.
+
+At times, we are interested in the case in which C = CX = CZ . Then we see that EACSS (C, C )is a [[ n, n − 2k + c, d ; c]] code where 
+
+d ≥ min 
+
+n
+
+wt  C⊥ \ Hull C (C), wt  C⊥ \ Hull C (C)o
+
+and k = kX = kZ . In the standard model for EAQECCs, the c shared ebits are treated as noiseless pre-shared entanglement and are used only as a resource for decoding. Variants in which the receiver’s halves of the ebits are also subject to noise have been studied in the literature; see, for example, [1, 34, 41]. In this work, however, we restrict attention to the standard noiseless-ebit setting, which is the framework relevant for the constructions and bounds developed below. In [23], the authors provide a Singleton bound for entanglement-assisted codes which in the case d − 1 < n/ 2 is 
+
+k ≤ n − 2( d − 1) + c, 
+
+meaning the entanglement-assisted quantum Singleton bound differs from the quantum Singleton bound by the amount of shared entanglement c. In this work, we consider the setting in which 
+
+d − 1 < n/ 2, since otherwise 3 d − 3 − n grows faster than n − d + 1, yielding a much smaller upper bound on k. In Section 3, we will extend this bound to the case of entanglement-assisted LRCs. 
+
+2.2 Local recovery 
+
+2.2.1 Classical locally recoverable codes 
+
+We begin in the classical setting because the quantum codes in this paper are built from pairs of classical LRCs. The key idea behind locality is that each coordinate of a codeword should be recoverable from a small subset of other coordinates, while availability requires the existence of several such recovery sets. In algebraic-geometry constructions, these recovery sets often arise from the geometry of the evaluation set, especially from fibers of suitable morphisms to auxiliary curves. We therefore review both the coding-theoretic definition of locality and the geometric setup that will later allow us to construct explicit families of EAQLRCs with availability. We begin with the standard notions of locality, ( r, δ ) locality, and availability for linear codes; see, for example, [19, 32, 39]. A linear code C ⊆ Fnq is a locally recoverable code (LRC) with locality 
+
+r if for all i ∈ [n] there exists a set of coordinates I(i) ⊆ [n] containing i with size bounded as 
+
+|I(i)| ≤ r + 1 , such that ci is determined by {cj : j ∈ I(i) \ { i}} for all c ∈ C. Such a code recovers exactly one erasure per recovery set (that is, δ = 2). 8We say that C is an ( r, δ ) LRC with availability t if, for every coordinate i ∈ [n], there exists a set Ji = {i1, . . . , i δ−1} ⊆ [n] with i ∈ Ji, and there exist t recovery sets I1(i), . . . , I t(i) ⊆ [n] such that, for all j̸ = j′,
+
+Ij (i) ∩ Ij′ (i) = Ji,
+
+and, for each j ∈ [t], 
+
+|Ij (i)| ≤ r + δ − 1, d(C|Ij (i)) ≥ δ, dim( C|Ij (i)) ≤ r. 
+
+Unlike the classical definition, we allow recovery sets to intersect on the δ − 1 coordinates that the local code is capable of correcting. We emphasize that we use the following set-erasure notion of availability, generalizing the more common single erasure setting. Let J ⊆ [n] with |J| ≤ δ − 1. We say that C has ( r, δ ) locality with availability t for such erasure sets if there exist sets 
+
+I1(J), . . . , I t(J) ⊆ [n]such that J ⊆ Ia(J), |Ia(J)| ≤ r + δ − 1, and 
+
+Ia(J) ∩ Ib(J) = J for all a̸ = b. 
+
+Moreover, for each a, the punctured code C|Ia(J) has minimum distance at least δ and dimension at most r.For comparison, we recall the Singleton-type bound for the standard coordinate-availability setting [31]. Let C be an [ n, k, d ] linear code over Fq with locality parameters ( r, δ ) and availability 
+
+t. Then 
+
+d ≤ n − k + 1 −
+
+ t(k − 1) + 1 
+
+t(r − 1) + 1 
+
+
+
+− 1
+
+
+
+(δ − 1) .
+
+Setting t = 1 recovers the Singleton bound presented in [38]. We will apply this bound only in situations where the hypotheses agree with the standard coordinate-availability setting. An LRC is called optimal when the minimum distance of the code achieves the Singleton bound. Optimal classical ( r, δ ) LRCs were defined by Tamo and Barg in [5] for δ = 2 and generalized to any integer 
+
+δ ≥ 2 in [4]. Next, we discuss quantum local recovery. We use Tr to denote the usual trace, and for B ⊆ A,Tr A\B denotes the partial trace over the tensor factors indexed by A \ B. Let M (A) denote the set of density matrices on a set A of qudits, that is, 
+
+M (A) := ρ : ( Cq)⊗A → (Cq)⊗A ρ ≥ 0, Tr( ρ) = 1 .
+
+For a pure state |ψ⟩ ∈ (Cq)⊗A, we write ψ = |ψ⟩ ⟨ ψ| ∈ M (A). For ρ ∈ M (A) and B ⊆ A, the reduced density matrix is denoted by 
+
+ρB := Tr A\B (ρ) ∈ M (B).
+
+A quantum channel K from qudits A to qudits B is a completely positive, trace-preserving map 
+
+K : M (A) → M (B).
+
+Since all Hilbert spaces considered here are finite-dimensional, every quantum channel admits a Kraus representation 
+
+K(ρ) = X
+
+> ν
+
+Kν ρK † 
+
+> ν
+
+, with X
+
+> ν
+
+K† 
+
+> ν
+
+Kν = I. 
+
+92.2.2 Quantum locally recoverable codes 
+
+Quantum local recovery was introduced in [18] in the setting of a single erased qudit. In that formulation, each coordinate i admits a local recovery channel acting on a small neighborhood of 
+
+i and reconstructing the erased qudit from the remaining qudits in that neighborhood. Following the convention adopted throughout this paper, we write the locality parameter as r when the corresponding recovery set has size at most r + 1, in agreement with the classical literature. The same work also generalizes the definition to recovery sets capable of correcting multiple erasures. Given ∅̸ = I ⊊ J ⊆ [n], a quantum code Q ⊆ (Cq)⊗n is said to be an ( I, J ) QLRC if there exists a trace-preserving quantum operation 
+
+RJQ,I ,
+
+which acts only on the qudits corresponding to J and leaves all other qudits unchanged, such that 
+
+RJQ,I ◦ τI
+
+ |φ⟩⟨ φ| = |φ⟩⟨ φ| ,
+
+for all |φ⟩ ∈ Q. Furthermore, let r, δ ∈ Z>0 with δ ≥ 2. A quantum error-correcting code 
+
+Q ⊆ (Cq)⊗n is called an ( r, δ ) QLRC if for each coordinate i ∈ [n], there exists a subset J ⊆ [n]containing i such that 
+
+|J| ≤ r + δ − 1,
+
+and for all subsets I ⊆ J with |I| ≤ δ − 1, the code Q is an ( I, J ) QLRC. Given two copies of classical LRCs, we can construct a QLRC. To do so, we make use of the parity-check spaces, a choice made out of convenience that does not inhibit the generality of the approach. This was first shown for the single erasure recovery case in [18, Corollary 34] and generalized to the multiple erasure recovery setting in [14, Proposition 28]. In particular, the quantum code CSS( CX , C Z ) is an ( r, δ ) QLRC if, for every coordinate i ∈ [n], there exist δ − 1pairs of parity checks ( cx,j , c z,j ) ∈ C⊥ 
+
+> X
+
+× C⊥ 
+
+> Z
+
+, j ∈ [δ − 1] such that i ∈ supp( cx,j ) ∩ supp( cz,j ) and 
+
+|supp( cx,j ) ∪ supp( cz,j )| ≤ r + δ − 1 for each j ∈ [δ − 1]. In the next section, we extend quantum local recovery to the entanglement-assisted setting. 
+
+# 3 Entanglement-assisted codes with local recovery 
+
+In this section, we introduce EAQLRCs with availability by extending the notion of quantum local recovery to the entanglement-assisted setting. In contrast to the CSS framework, this approach does not require a dual-containing pair of classical codes, and therefore allows greater flexibility in constructing QLRCs from pairs of classical LRCs. 
+
+Definition 3.1. Let EB denote the receiver’s set of ebits so that |EB | = c. The entanglement-assisted quantum code Q = EACSS( C1, C 2) ⊆ (Cq)⊗n is an entanglement-assisted quantum locally recoverable code (EAQLRC) with locality r provided that it is constructed from two classical linear codes C1, C 2 ⊆ Fnq together with a set of recovery channels Rec i satisfying the following properties: 1. For each coordinate i ∈ [n], there exists a set Ri ⊆ [n] with i ∈ Ri and |Ri| ≤ r + 1 such that 
+
+Rec i : M (( Ri \ { i}) ∪ EB ) −→ M (Ri)
+
+with input qudits Ri \ { i} and output qudits Ri.
+
+10 2. For every code state ρ ∈ Q, let eρ denote the corresponding joint state of the transmitted qudits together with the receiver’s ebits. Then 
+
+(Rec i ⊗ id [n]\Ri )  eρ[n]\{ i}, E B
+
+ = eρ[n].
+
+Remark 3.2. The EAQLRC has parameters [[ n, k, d ; c]], where k = n−(k1 +k2)+ c, c = dim( C1)−
+
+dim(Hull C2 (C1)) , and ki = dim( Ci) for i = 1 , 2 and has locality r. When EB = ∅, Definition 3.1 recovers the definition of QLRC given in [18]. It is worth noting that the transmitted subsystem of the entanglement-assisted quantum code Q = EACSS (C1, C 2) lies in ( Cq)⊗n, while recovery maps may also access the noiseless subsystem EB . In particular, EB is used as a noiseless auxiliary system during recovery and is not part of the transmitted output subsystem. Next, we generalize the definition of ( r, δ ) QLRC introduced in [14] to the availability setting using EAQECCs. 
+
+Definition 3.3. Let r, δ ∈ Z>0 with δ ≥ 2. An entanglement-assisted quantum error-correcting code Q ⊆ (Cq)⊗n is called an (r, δ ) EAQLRC if for each coordinate i ∈ [n], there exists a subset 
+
+∆ ⊆ [n] containing i such that 
+
+|∆| ≤ r + δ − 1,
+
+and for all subsets R ⊆ ∆ with |R| ≤ δ − 1, the code Q is an (R, ∆) QLRC. We say that Q has availability t if, for every i ∈ [n], there exists a set Ji = {i1, . . . , i δ−1} ⊆ [n]
+
+with i ∈ Ji, and there exist t recovery sets ∆1, . . . , ∆t ⊆ [n] such that for all a̸ = b,
+
+∆a ∩ ∆b = Ji
+
+and for all ℓ ∈ [t],
+
+|∆ℓ| ≤ r + δ − 1.
+
+Moreover, for every subset Rℓ ⊆ ∆ℓ with |Rℓ| ≤ δ − 1, the code Q is an (Rℓ, ∆ℓ) QLRC. 
+
+The following result provides a sufficient condition for an EAQECC to be an ( r, δ ) EAQLRC with availability t.
+
+Proposition 3.4 (( r, δ ) EAQLRC with availability) . Let C1, C 2 be two classical (r, δ ) LRCs, and let Q = EACSS( C1, C 2). Assume that for every i ∈ [n] there exists a set Ri ⊆ [n] with i ∈ Ri and 
+
+|Ri| ≤ r + δ − 1 such that there are δ − 1 pairs of parity checks (c′ 
+
+> 1j
+
+, c ′ 
+
+> 2j
+
+) ∈ C1 × C2, j ∈ [δ − 1] 
+
+satisfying 
+
+i ∈ supp( c′ 
+
+> 1j
+
+) ∩ supp( c′ 
+
+> 2j
+
+) and supp( c′ 
+
+> 1j
+
+) ∪ supp( c′ 
+
+> 2j
+
+) ⊆ Ri
+
+for all j = 1 , . . . , δ − 1. If the code EACSS( C1|Ri , C 2|Ri ) has minimum distance at least δ, then Q
+
+is an (r, δ ) EAQLRC. If C1 and C2 have availability t, then Q also has availability t. In particular, 
+
+Q is an (r, δ ) EAQLRC with availability t if the underlying classical codes are (r, δ ) LRCs with availability t.Proof. Fix i ∈ [n]. Vectors in C1 define X-type generators and vectors in C2 define Z-type gen-erators. Thus, the pairs ( c′ 
+
+> 1j
+
+, c ′ 
+
+> 2j
+
+), j = 1 , . . . , δ − 1, determine an entanglement-assisted stabilizer system supported on the coordinates indexed by Ri, with any anticommutation resolved by the shared entanglement. Set Qi := EACSS( C1|Ri , C 2|Ri ) for this local entanglement-assisted code on 
+
+Ri.11 By construction, each pair ( c′ 
+
+> 1j
+
+, c ′ 
+
+> 2j
+
+) yields local Z-type and X-type stabilizers supported on 
+
+Ri and acting nontrivially on coordinate i. As in the proof of [18, Proposition 33], these local generators allow one to detect and correct a single-qudit Pauli error at coordinate i using the remaining qudits in Ri. Since there are δ − 1 such independent pairs of parity checks and Qi has minimum distance at least δ, the code Qi can correct any pattern of up to δ − 1 erasures within 
+
+Ri. In particular, coordinate i can be recovered from the qudits indexed by Ri. Because this holds for every i ∈ [n], the code Q is an ( r, δ ) EAQLRC. Now suppose C1 and C2 have availability t, witnessed for each i ∈ [n] by recovery sets 
+
+Ri, 1, . . . , R i,t ⊆ [n] together with a fixed set 
+
+Ji = {i1, . . . , i δ−1} ⊆ [n], i ∈ Ji,
+
+such that 
+
+Ri,ℓ ∩ Ri,ℓ ′ = Ji for all ℓ̸ = ℓ′.
+
+Notice that the recovery sets Ri, 1, . . . , R i,t are not assumed to be pairwise disjoint outside i; their common intersection is exactly the set Ji of size δ − 1. Since each local code Qi,ℓ has minimum distance at least δ, erasures on the common overlap Ji are within the local erasure capability. Thus the recovery sets Ri, 1, . . . , R i,t give t distinct local recovery procedures whose overlaps occur only on the δ − 1 coordinates tolerated by the local distance condition. Hence Q has availability t.
+
+■
+
+We now provide a Singleton-like bound on EAQLRCs. In particular, the next theorem extends existing Singleton-like bounds for QLRCs to the entanglement-assisted setting for those defined using a CSS-like construction, where the entanglement parameter c also plays a role in the tradeoff among length, dimension, and local recoverability. 
+
+Theorem 3.5 (Singleton-like bound for EAQLRCs with availability) . Let Q be an EAQLRC of block length n, dimension k > 0, distance d, and locality parameters (r, δ ) with availability t. Define 
+
+s1 := 
+
+ n − (d − 1) 
+
+t(r + δ − 1) 
+
+
+
+and 
+
+s2 := 
+
+ n − 2( d − 1) − s1
+
+t(r + δ − 1) 
+
+
+
+.
+
+Then 
+
+k ≤ n − 2( d − 1) − s1 − s2 + c. 
+
+Proof. We follow the same general strategy as in the QLRC case, though in this setting we must keep track of the entropy contribution coming from the shared entanglement. We construct two disjoint families of locally recoverable coordinates, together with two sets of size d − 1 that play the role of globally correctable erasures, and then apply an entropy argument to the resulting partition of the physical qudits. Let E denote the c qudits corresponding to the halves of the shared maximally entangled pairs held by the decoder. Let A be a k-qudit reference system maximally entangled with the logical space. The encoding map acts on one half of the entangled logical state together with the encoder’s halves of the c ebits, and the resulting global state on AQE is pure. 12 We partition the code coordinates as 
+
+Q = S1 ⊔ V1 ⊔ S2 ⊔ V2 ⊔ W. 
+
+For notational convenience, we denote A ⊔ B by AB . We first construct S1 and V1, and then repeat the argument on the remaining coordinates to obtain S2 and V2. To construct this partition, we first construct S1, V 1 as follows: 1. Initialize sets S1 = ∅ and T1 = ∅.2. Repeat the following step 
+
+s1 =
+
+ n − (d − 1) 
+
+t(r + δ − 1) 
+
+
+
+times. Choose some 
+
+i ∈ Q \ S1T1,
+
+add i to S1, and let 
+
+Ii, 1, . . . , I i,t 
+
+be the t available recovery sets for i. Add to T1 all coordinates in the union of these recovery sets, excluding i and any coordinates already placed in S1:
+
+T1 ← T1 ∪
+
+> t
+
+[
+
+> ℓ=1
+
+Ii,ℓ \ ({i} ∪ S1)
+
+!
+
+.
+
+3. Set V1 to be any ( d − 1)-element subset of Q \ S1T1.The above procedure is guaranteed to successfully output S1, V 1 with | S1 |= s1 and | V1 |= d − 1. Indeed, each iteration in Step 2 adds one element to S1 and adds at most t(r + δ − 1) coordinates to S1T1. Therefore, after all s1 iterations, 
+
+| Q \ (S1T1) |≥ n − t(r + δ − 1) s1 ≥ d − 1.
+
+Thus there are enough remaining coordinates to choose V1 ⊆ Q \ S1T1 with | V1 |= d − 1. Let Q1 = Q \ S1V1. For a code state ρ ∈ Q, given access to the restriction ρQ1 = Tr Q\Q1 ρ to components in Q1, we may by construction pass through all i ∈ S1 one-by-one in the same order 
+
+S1 was constructed, and apply Rec i at each step, to recover ρQ1S1 . Then as Q \ Q1S1 = V1, which has size d − 1, a global decoding algorithm for the EAQLRC recovers ρ from ρQ1S1 . Thus the code components in Q1 can be used to completely recover the entire codeword. It follows that the reduced density matrix ρQ\Q1 = ρS1V1 is the same for all code states ρ ∈ Q.Now if | Q1 |< d − 1, then the global decoding algorithm for the EAQLRC can recover a code state from components in Q \ Q1 = S1V1. But as we showed above that a code state can also be recovered from components in Q1, the code must have dimension k = 0, as otherwise we would be able to clone a code state by breaking it into the parts S1V1 and Q1, and recovering the entire state from each part. But we assumed k > 0, a contradiction, so it must be that | Q1 |≥ d − 1. We then construct S2, V 2 using a similar procedure as above, but on the restriction to compo-nents in Q1:1. Initialize sets S2 = ∅ and T2 = ∅.13 2. Repeat the following step 
+
+s2 =
+
+ | Q1 | − (d − 1) 
+
+t(r + δ − 1) 
+
+
+
+=
+
+ n − 2( d − 1) − s1t(r + δ − 1) 
+
+t(r + δ − 1) 
+
+
+
+times. Choose some 
+
+i ∈ Q1 \ S2T2,
+
+add i to S2, and let 
+
+Ii, 1, . . . , I i,t 
+
+be the t available recovery sets for i. Add to T2 all coordinates in the union of these recovery sets, excluding i and any coordinates already placed in S2:
+
+T2 ← T2 ∪
+
+> t
+
+[
+
+> ℓ=1
+
+Ii,ℓ \ ({i} ∪ S2)
+
+!
+
+.
+
+3. Set V2 to be any ( d − 1)-element subset of Q1 \ S2T2.The procedure above is guaranteed to successfully output S2, V2 with | S2 |= s2 and | V2 |= d − 1. Indeed, each iteration of Step (2) adds one element to S2 and adds at most t(r + δ − 1) coordinates to S2T2. Hence, after all s2 iterations, 
+
+| Q1 \ S2T2 |≥| Q1 | − t(r + δ − 1) s2 ≥ d − 1.
+
+Thus we may choose V2 ⊆ Q1 \ (S2 T2) with | V2 |= d − 1. Letting Q2 = Q \ S2V2, then by similar reasoning as above for Q1, the code components in S2V2 can be recovered from components in Q2,so all code states ρ ∈ Q have the same reduced density matrix ρQ\Q2 = ρS2V2 .Now let W = Q \ S1V1S2V2, so that we have our desired partition Q = S1V1S2V2W . Let q be the local dimension of C, and let A be a set of k additional qudits of local dimension q. Define 
+
+|ψ⟩AQE = 1
+
+pqk
+
+X
+
+> x∈[q]k
+> 0
+
+|x⟩A ⊗ (Enc |x⟩)QE (1) to be the state obtained by applying the encoding map Enc of C to one register from a maximally entangled pair of message states P 
+
+> x∈[q]k
+
+|x⟩ ⊗ | x⟩. Let ψ = |ψ⟩ ⟨ ψ| be the associated density matrix. By ( r, δ ) locality, for each recovery set Iij , the punctured code C|Iij has minimum distance at least δ. Hence any δ − 1 erasures within Iij can be recovered from the remaining coordinates in 
+
+Iij . By construction, for each i ∈ Sb, all coordinates of Iij \ { i} are contained in Q \ (Sb ∪ Vb), except for at most δ − 1 coordinates. Therefore i can be recovered. Thus, for b = 1 , 2, the systems in Q \ (Sb ∪ Vb) determine the full code state. Since |Vb| = d − 1, the distance condition implies the reduced density matrices on Sb ∪ Vb are independent of the encoded state. Now incorporate entanglement assistance. For any B ⊆ AQE , let S(B) denote the von Neumann entropy (base q). Using the same entropy identities as in the unassisted case in the proof of [18, Theorem 35] but now applied to the pure state on AQE , we obtain 
+
+S(A) + S(S1 ∪ V1) = S(A ∪ S1 ∪ V1) = S(S2 ∪ V2 ∪ W ∪ E) ≤ S(S2 ∪ V2) + S(W ) + S(E),
+
+and symmetrically, 
+
+S(A) + S(S2 ∪ V2) = S(A ∪ S2 ∪ V2) = S(S1 ∪ V1 ∪ W ∪ E) ≤ S(S1 ∪ V1) + S(W ) + S(E).
+
+14 Here, the inequalities follow from subadditivity of entropy. Adding the two inequalities, we obtain 
+
+S(A) ≤ S(W ) + S(E).
+
+Since A is maximally entangled with the logical space, S(A) = k. Moreover, S(E) = c, because 
+
+E consists of c maximally mixed qudits arising from c ebits. Finally, as in the unassisted case, 
+
+S(W ) ≤ | W |. Therefore, we obtain 
+
+k ≤ | W | + c. 
+
+Meanwhile, S(W ) ≤ | W | = n − | S1 ∪ V1 ∪ S2 ∪ V2| = n − 2( d − 1) − s1 − s2. Thus 
+
+k = S(A) ≤ S(W ) + S(E) ≤ n − 2( d − 1) −
+
+ n − (d − 1) 
+
+t(r + δ − 1) 
+
+
+
+−
+
+ n − 2( d − 1) −
+
+j n−(d−1) 
+
+> t(r+δ−1)
+
+k
+
+t(r + δ − 1) 
+
+ + c, 
+
+as desired. ■
+
+Remark 3.6. Omitting the last term in the bound, we obtain 
+
+k ≤ n − 2( d − 1) − n − (d − 1) 
+
+t(r + δ − 1) + 1 + c. 
+
+Equivalently, 
+
+d − 1 ≤
+
+
+
+1 − 1
+
+> t(r+δ−1)
+
+
+
+n − k + c + 1 2 − 1
+
+> t(r+δ−1)
+
+.
+
+Thus, for fixed locality parameters r, δ and fixed availability t, even as the rate k/n → 0, the relative distance of an EAQLRC satisfies 
+
+dn ≤ 12 − Ω
+
+ 1
+
+t(r + δ − 1) 
+
+
+
++ O
+
+ cn
+
+
+
+.
+
+Under a stronger disjointness assumption on the local recovery sets, the Singleton-like bound in Theorem 3.5 can be sharpened. The following result follows from the definition of EAQLRCs and [14, Theorem 31]. It also applies to QLRCs with availability one. 
+
+Corollary 3.7. Let Q be an EAQLRC of block length n, dimension k, and distance d, with locality parameters ( r, δ ). Assume that for each coordinate i ∈ [n], there exists a recovery set 
+
+J(i) containing i such that |J(i)| = r + δ − 1. Furthermore, assume that for all i, j ∈ [n], either 
+
+J(i) = J(j) or J(i) ∩ J(j) = ∅. Then 
+
+k ≤ n − 2( d − 1) −
+
+ n − (d − 1) (r + δ − 1) 
+
+
+
+−
+
+ n − 2( d − 1) −
+
+j n−(d−1) (r+δ−1) 
+
+k
+
+(r + δ − 1) 
+
+ + c. 
+
+From the previous result, one can bound ( r, δ ) EAQLRCs with stronger assumptions. 15 4 Random constructions of EAQLRCs 
+
+In this section, we provide EAQLRC constructions using a Vandermonde matrix similar to one constructed in [25, Construction 1]. 
+
+Construction 1. Fix a block length n, a locality parameter r, a distance parameter δ ≤ r and a finite field Fq with q ≥ n. Assume that m := n/ (r + δ − 1) ∈ Z. We will define a random EAQLRC by using the entanglement-assisted construction giving rise to Q = EACSS( CX , C Z ),which is sampled as follows. Initialize the matrix Gi ∈ F(δ−1) ×(r+δ−1)  
+
+> q
+
+as the Vandermonde matrix 
+
+Gi =
+
+
+
+1 1 . . . 1
+
+αi, 1 αi, 2 . . . αi,r +δ−1
+
+... ... . . . ...
+
+αδ−2 
+
+> i, 1
+
+αδ−2 
+
+> i, 2
+
+. . . αδ−2
+
+> i,r +δ−1
+
+
+
+where for each i = 1 , . . . m , every αi,j ∈ Fq is distinct for each j = 1 , . . . , r + δ − 1. Define HX as 
+
+HX =
+
+
+
+G1
+
+G2
+
+. . .
+
+Gm
+
+ .
+
+Let βi,l = Q   
+
+> j̸=l1
+> αi,l −αi,j
+
+for l = 1 , . . . , r + δ − 1. Define Hi as the matrix 
+
+Hi =
+
+
+
+1 1 . . . 1
+
+αi, 1 αi, 2 . . . αi,r +δ−1
+
+... ... . . . ...
+
+αr−1 
+
+> i, 1
+
+αr−1 
+
+> i, 2
+
+. . . αr−1
+
+> i,r +δ−1
+
+
+
+βi, 1
+
+βi, 2
+
+. . .
+
+βi,r +δ−1
+
+
+
+and define HZ as 
+
+HZ =
+
+
+
+(H1)δ−1
+
+(H2)δ−1
+
+. . .
+
+(Hm)δ−1
+
+ ,
+
+where (Hi)δ−1 represents the first δ − 1 rows of Hi. We then add ℓ random rows to HX and HZ ,as follows: 1. for i = 1 , . . . , ℓ :(a) let v be a uniformly random vector sampled from Fnq such that v̸ ∈ rowspan( HX ).(b) append v to HX and rename the resulting matrix as HX i.e. HX =
+
+HX
+
+v
+
+
+
+.2. for i = 1 , . . . , ℓ :(a) let v be a uniformly random vector sampled from Fnq such that v̸ ∈ rowspan( HZ ).(b) append v to HZ and rename the resulting matrix as HZ i.e. HZ =
+
+HZ
+
+v
+
+
+
+.
+
+16 We have sampled matrices HX , H Z ∈ F(m(δ−1)+ ℓ)×Nq . Let CX = ker( HX ) and CZ = ker( HZ ) and 
+
+Q = EACSS( CX , C Z ).
+
+The following result describes the properties of the quantum code Q.
+
+Proposition 4.1 (Random ( r, δ ) EAQLRC) . Fix positive integers n and r along with a finite field 
+
+Fq such that q ≥ n and an integer δ ≤ r such that m := n/ (r + δ − 1) ∈ Z. Then the code Q
+
+presented in Construction 1 is an EAQLRC with locality r and dimension n − 2( m(δ − 1) + ℓ) + c,where c is as in Definition 2.3 and other parameters given by Remark 2.4. Each coordinate i ∈ [n]
+
+has recovery set Ji = {a(r + δ − 1) + 1 , . . . , a (r + δ − 1) + r + δ − 1}, where a =
+
+l ir+δ−1
+
+m
+
+− 1.
+
+Proof. For each coordinate i ∈ [n], let a be as defined in the theorem statement. The proof follows directly from [25, Lemma 3.3] as the construction of Ga+1 and ( Ha+1 )δ−1 have δ − 1 rows and the columns that correspond to coordinates in Ji satisfying the ( r, δ ) locality. The dimension compu-tation is straightforward. Our construction does not need last l rows added in [25, Construction 1] via random sampling to ensure the dual containment requirement of CSS codes. The additional factor of c comes from the EAQECC construction. 
+
+■
+
+Remark 4.2. For fixed r and δ, the first m rows of the matrices HX and HZ in Construction 1 are sparse. We add randomly sampled ℓ rows which may not necessarily be sparse. These rows are added to boost the code distance. However, the sparsity of matrices HX and HZ (up to a threshold) can be controlled by controlling the weight of the additional ℓ rows. Sparsity is a feature that is useful in interpreting this family as an asymptotic entanglement-assisted quantum LDPC-type family. Hence, Proposition 4.1 is significant not only because it proves that Construction 1 indeed produces EAQLRCs, but also because it is a step towards building an asymptotic family of entanglement-assisted quantum LDPC-type codes. Indeed, for fixed r and δ, the local rows of 
+
+HX and HZ in Construction 1 have row weight at most r + δ − 1, and each coordinate appears in at most δ − 1 local checks. The additional ℓ rows may be dense unless one explicitly imposes a sparsity constraint when sampling them. When the additional ℓ rows are sampled subject to a bounded-weight constraint, the resulting family has bounded stabilizer weights and bounded qudit degree. Consequently, as 
+
+n = m(r + δ − 1) → ∞ ,
+
+the resulting family has bounded stabilizer weights and bounded qudit degree. In particular, Proposition 4.1 shows that one can obtain an infinite family of EAQLRCs with explicit local recovery sets and sparse stabilizer structure, which is attractive both from the coding-theoretic perspective and for possible quantum implementations. We conclude this section with a toy example demonstrating Proposition 4.1. 
+
+Example 4.3. Set n = 12 , r = 2 , δ = 2 , and let q ≥ 12 . Then 
+
+r + δ − 1 = 3 , m = nr + δ − 1 = 12 3 = 4 .
+
+By Proposition 4.1, Construction 1 yields an EAQLRC of dimension 
+
+k = n − 2m(δ − 1) + 2 ℓ + c = 12 − 2 · 4 · 1 + 2 ℓ + c = 4 + 2 ℓ + c. 
+
+17 Moreover, the coordinates are partitioned into the four recovery blocks 
+
+{1, 2, 3}, {4, 5, 6}, {7, 8, 9}, {10 , 11 , 12 }.
+
+Thus each coordinate is recovered from the block containing it. For instance, coordinates 1, 2, 3
+
+all have recovery set {1, 2, 3}, coordinates 4, 5, 6 all have recovery set {4, 5, 6}, and so on. This illustrates that the local recovery structure is completely explicit: the code consists of small local groups of size r + δ − 1, each of which supports local recovery. 
+
+# 5 Constructions of EAQLRCs from curves 
+
+In this section, we construct EAQLRCs from several families of algebraic-geometry codes over finite fields. We begin with Tamo–Barg codes on the projective line, which provide a concrete source of classical ( r, δ ) LRCs, and then apply the entanglement-assisted framework developed in Section 3 to obtain quantum codes with the same local recovery structure. We next present a more general fiber product construction, in which locality and availability arise from compatible morphisms between curves, and show how this framework yields both unfolded and folded EAQLRCs. Finally, we specialize this construction to Hermitian and Suzuki families, thereby obtaining additional explicit examples of EAQLRCs with availability. For each EAQLRC, the locality will be given, and the other code parameters follow from Remark 2.4. 
+
+5.1 Tamo–Barg constructions on the projective line 
+
+We first consider Tamo–Barg codes on the projective line, which provide a concrete source of classical ( r, δ ) LRCs for the entanglement-assisted constructions developed below. 
+
+5.1.1 Classical Tamo–Barg (r, δ ) LRCs 
+
+We begin by recalling the classical Tamo–Barg construction and the corresponding dimension and distance formulas, which will serve as the input for the quantum constructions in the remainder of this subsection. 
+
+Construction 2. Let q be a prime power. Choose positive integers r, δ ≥ 2 such that (r + δ − 1) |
+
+(q − 1) . Let ℓ ∈ [q]0. Define the sets 
+
+S = {i ∈ [ℓ] : i̸ ≡ r, r + 1 , . . . , r + δ − 2 (mod r + δ − 1) } ,T = F∗ 
+
+> q
+
+.
+
+The (r, δ ) Tamo–Barg code is defined as CTB = ev T
+
+ Fq[X]S
+
+ is an (r, δ ) LRC of length n, dimension 
+
+k = |S| = r
+
+j ℓr+δ−1
+
+k
+
++ min( ℓ mod ( r + δ − 1) , r ), and minimum distance 
+
+d = ( q − 1) − k + 1 −
+
+ kr
+
+
+
+− 1
+
+
+
+(δ − 1) .
+
+Note that the evaluation map is injective on Fq[X]S , and we can determine |S| by partitioning the set of exponents into blocks of length r+δ−1. Each complete block contains exactly r admissible exponents, while the remaining partial block contributes min {ℓ mod ( r + δ − 1) , r }
+
+additional exponents. 18 5.1.2 EAQLRCs from Tamo–Barg codes 
+
+Having introduced the classical Tamo–Barg family, we now apply the entanglement-assisted con-struction from Section 3 to obtain EAQLRCs with the same locality parameters. 
+
+Theorem 5.1 (( r, δ ) EAQLRCs from Tamo–Barg classical LRCs) . Let C ⊆ Fnq be a classical Tamo– Barg (r, δ ) LRC, with n = q −1 = m(r +δ −1) , k = dim( C), d(C) = n−k +1 −
+
+l kr
+
+m
+
+−1
+
+
+
+(δ −1) and locality r. Then the resulting EACSS( C, C ) is an (r, δ ) EAQLRC with parameters as in Remark 2.4. Proof. By Tamo–Barg construction, C is a classical LRC of dimension k, distance d(C), and locality 
+
+r. Applying Proposition 3.4, an EAQECC with the above parameters can be constructed. The EAQECC is locally recoverable with locality r by Proposition 3.4. ■
+
+Next, we illustrate Theorem 5.1 with a small example. 
+
+Example 5.2. Let q = 13 , r = 2 , and δ = 2 . Then r + δ − 1 = 3 | (q − 1) = 12 , so the Tamo–Barg construction applies. Take the code C obtained by evaluating on F∗
+
+> 13
+
+, so that n = q −1 = 12 . Choose 
+
+ℓ = 5 , and let 
+
+S = { i ∈ [5] 0 : i̸ ≡ 2 (mod 3) } = {0, 1, 3, 4}.
+
+Hence k = |S| = 4 . By Construction 2, the classical Tamo–Barg code C is an (r, δ ) = (2 , 2) LRC of length 12 and dimension 4. Its minimum distance is 
+
+d(C) = n − k + 1 −
+
+ kr
+
+
+
+− 1
+
+
+
+(δ − 1) = 12 − 4 + 1 − (2 − 1)(1) = 8 .
+
+Therefore, by Theorem 5.1, the entanglement-assisted code Q = EACSS( C, C ) is a (2 , 2) EAQLRC. Since Q is constructed from the pair of codes (C, C ), the entanglement parameter is c = dim( C) −
+
+dim(Hull( C)) . A direct computation gives dim(Hull( C)) = 3 , so c = 4 − 3 = 1 .
+
+One can also compute the distance bound explicitly as follows using software such as [3, 6, 24]. Since 
+
+dim( C⊥) = 12 − 4 = 8 > dim( C) = 4 ,
+
+we have C⊥̸ ⊆ C, so the relevant case is dEA ≥ wt  C⊥ \ Hull( C). A direct computation shows that wt( C⊥) = 3 ; in fact, there is a weight-3 codeword of C⊥ supported on the coordinates 
+
+{1, 3, 9}
+
+(for example, with nonzero entries 3, 9, 1 on those positions) which does not belong to Hull( C).Hence wt  C⊥ \ Hull( C) = 3 , and therefore dEA ≥ 3.
+
+To make the locality explicit, index the coordinates of C by the evaluation points in F∗ 
+
+> 13
+
+=
+
+{1, 2, . . . , 12 }. Since r + δ − 1 = 3 , the relevant recovery sets are the cosets of the subgroup H =
+
+{1, 3, 9} ⊆ F∗
+
+> 13
+
+. These cosets are {1, 3, 9}, {2, 5, 6}, {4, 10 , 12 }, {7, 8, 11 }. Hence, recovery sets for each coordinate are: 
+
+R1 = R3 = R9 = {1, 3, 9},R2 = R5 = R6 = {2, 5, 6},R4 = R10 = R12 = {4, 10 , 12 },
+
+and 
+
+R7 = R8 = R11 = {7, 8, 11 }.
+
+19 Thus, every coordinate belongs to a local group of size 3. Since (r, δ ) = (2 , 2) , any single erased qudit can be recovered by accessing the other two qudits in its recovery set. In particular, the EAQLRC 
+
+Q = EACSS( C, C ) has locality r = 2 and local erasure tolerance δ − 1 = 1 , inherited from the underlying classical Tamo–Barg code via Theorem 5.1. Thus this example gives an explicit (2 , 2) 
+
+EAQLRC with parameters [[12 , 5, ≥ 3; 1]] .
+
+5.1.3 Folded Tamo–Barg EAQLRCs 
+
+We next consider folds of these codes, which preserve the local recovery structure while producing additional EAQLRC families over larger alphabets. 
+
+Theorem 5.3 (( r, δ ) entanglement-assisted folded quantum Tamo–Barg codes) . Consider C =ev( Fq[X]S ) ⊆ Fq−1 
+
+> q
+
+, the classical (r, δ ) Tamo–Barg code evaluated over F∗ 
+
+> q
+
+. Let s | q−1 
+
+> r+δ−1
+
+and let C(s) denote the s-fold of C, so that C(s) ⊆ (Fsq)(q−1) /s . Then there exists an EACSS code 
+
+eQ = EACSS  C(s), C (s) whose parameters follow from Remark 2.4. Moreover, eQ is an EAQLRC with (r, δ ) locality. Proof. It is well known that the classical Tamo–Barg code C is a classical LRC with locality r.Furthermore, as shown in [18, Lemma 57 and Lemma 58], the folded code C(s) ⊆ (Fsq)(q−1) /s is an LRC and inherits the locality r from C. Now consider the entanglement-assisted quantum code eQ = EACSS( C(s), C (s)). The parameters of ˜Q follow directly from the entanglement-assisted construction. Finally, by Proposition 3.4 the resulting entanglement-assisted quantum code ˜Q
+
+inherits the locality r of C(s). ■
+
+Remark 5.4. By using the entanglement-assisted construction, one can avoid having C⊥ ⊆ C, 
+
+eliminating the need to verify the dual-containment condition required in the CSS setting. In addition, first folding and then applying the entanglement-assisted construction yields the same result as first forming the entanglement-assisted code and then folding. We close this subsection with an example demonstrating Theorem 5.3. 
+
+Example 5.5. Let q = 43 , r = 6 , and δ = 2 . Then q−1 
+
+> r+δ−1
+
+= 42 7 = 6 . Hence, we may choose the folding parameter s = 2 , since 2 | 6. Let C be the (6 , 2) Tamo–Barg code over F43 obtained by evaluating on F∗
+
+> 43
+
+, so that n = q − 1 = 42 . We order the evaluation points as 
+
+h1, αh 1, h 2, αh 2, . . . , h 7, αh 7,α2h1, α 3h1, α 2h2, α 3h2, . . . , α 2h7, α 3h7,α4h1, α 5h1, α 4h2, α 5h2, . . . , α 4h7, α 5h7,
+
+where 
+
+H = {h1, . . . , h 7} = {1, 41 , 4, 35 , 16 , 11 , 21 }.
+
+Choose ℓ = 13 , and let 
+
+S = { i ∈ [13] 0 : i̸ ≡ 6 (mod 7) } = {0, 1, 2, 3, 4, 5, 7, 8, 9, 10 , 11 , 12 }.
+
+Define 
+
+C = ev F∗ 
+
+> 43
+
+(F43 [X]S ) ⊆ F42 43 .
+
+20 By Construction 2, the code C is a (6 , 2) LRC of length 42 , dimension k = dim( C) = |S| = 12 ,and minimum distance 
+
+d(C) = n − k + 1 −
+
+ kr
+
+
+
+− 1
+
+
+
+(δ − 1) = 42 − 12 + 1 − (2 − 1)(1) = 30 .
+
+With our folded-dimension convention, the 2-fold code 
+
+C(2) =   (c1, c 2), (c3, c 4), . . . , (c41 , c 42 ) : ( c1, . . . , c 42 ) ∈ C ⊆ (F243 )21 
+
+of C has parameters [21 , 6, ≥ 15] , since its length is 42 /2 = 21 , its folded dimension is 12 /2 = 6 ,and its folded distance is at least ⌈30 /2⌉ = 15 . Applying Theorem 5.3 to C(2) , we obtain the (6 , 2) 
+
+EAQLRC eQ = EACSS( C(2) , C (2) ) of length 21 . A direct computation shows that dim( C(2) ⊥) = 21 − 6 = 15 > dim( C(2) ) = 6 where the latter dimension is taken as a code over F43 2 ; we note that as a linear code over F43 
+
+dim F43 (C(2) ) = 12 whereas, assuming that C(2) is F43 2 -linear, dim F43 2 (C(2) ) = 6 .
+
+Moreover, 
+
+dim F43 (Hull( C(2) )) = 11 
+
+so that c = dim( C(2) ) − dim(Hull( C(2) )) = 12 − 11 = 1 . Therefore, we have 
+
+kEA = 21 − 2 · 6 + 1 = 10 .
+
+To compute the distance bound, notice that C(2) ⊥̸ ⊆ C(2) . One may confirm that there is a codeword of C(2) ⊥ supported on the folded coordinates 2, 3, 4, 5, 7, 11 meaning 
+
+ (0 , 0) , (5 , 32) , (34 , 42) , (29 , 32) , (14 , 36) , (0 , 0) , (3 , 32) , (0 , 0) , (0 , 0) , (0 , 0) , (41 , 1) , (0 , 0) , . . . , (0 , 0) 
+
+and this codeword does not belong to Hull( C(2) ). Hence, 
+
+dEA ≥ wt  C(2) ⊥ \ Hull( C(2) ) = 6 .
+
+We now make the locality explicit. Let α be a primitive element of F∗
+
+> 43
+
+, and let 
+
+H = ⟨α6⟩
+
+be the subgroup of F∗ 
+
+> 43
+
+of size 7. The six cosets 
+
+H, αH, α2H, α3H, α4H, α5H
+
+are the recovery groups of the underlying classical Tamo–Barg code C, each of size r + δ − 1 = 7 .Choose an ordering H = {h1, . . . , h 7} and order the evaluation points of C as 
+
+h1, αh 1, h 2, αh 2, . . . , h 7, αh 7,α2h1, α 3h1, α 2h2, α 3h2, . . . , α 2h7, α 3h7,α4h1, α 5h1, α 4h2, α 5h2, . . . , α 4h7, α 5h7.
+
+Folding consecutive pairs then produces 21 folded coordinates, which we index as 1, 2, . . . , 21 . With this ordering, the folded recovery sets are the three blocks 
+
+R1 = {1, 2, 3, 4, 5, 6, 7},
+
+21 R2 = {8, 9, 10 , 11 , 12 , 13 , 14 },
+
+and 
+
+R3 = {15 , 16 , 17 , 18 , 19 , 20 , 21 }.
+
+Each folded coordinate in R1 consists of one symbol from the coset H and one symbol from the coset 
+
+αH ; similarly, each folded coordinate in R2 consists of one symbol from α2H and one from α3H,and each folded coordinate in R3 consists of one symbol from α4H and one from α5H. Since the classical code C has locality r = 6 on each coset, a single erased symbol in one of these cosets can be recovered from the other six symbols in that coset. Therefore, if one folded coordinate is erased, its first component can be recovered from the other six first components in the same block, and its second component can be recovered from the other six second components in the same block. Hence the entire folded coordinate is recovered from the other six folded coordinates in its block. Thus, every folded coordinate has a recovery set of size 
+
+r + δ − 1 = 7 ,
+
+and because δ = 2 , any single erased folded symbol can be recovered by accessing at most 
+
+r = 6 
+
+other folded symbols. Now consider the entanglement-assisted quantum code eQ = EACSS  C(s), C (s). The parame-ters of eQ follow directly from the entanglement-assisted construction. Finally, by Proposition 3.4, the resulting entanglement-assisted quantum code eQ inherits the locality r of C(s). Hence, eQ has locality 6, with recovery sets 
+
+R1, R2, R3.
+
+A direct computation in the underlying F43 -linear representation gives dim F43 Hull  C(2)  = 11 .Since dim F43 C(2) = 12 , the entanglement parameter is c = 12 − 11 = 1 . On the other hand, by our folded-dimension convention, C(2) has folded dimension 12 /2 = 6 . Therefore, kEA = 21 − 2 · 6 + 1 = 10 . We conclude that eQ is an (6 , 2) EAQLRC with parameters [[21 , 10 , ≥ 6; 1]] over F43 2 , together with explicit recovery sets as described above. 
+
+5.2 A general fiber product framework with availability 
+
+While the Tamo–Barg family provides a concrete first example, a broader geometric source of locality and availability is furnished by fiber products of curves. In this more general algebraic-geometric framework, locality and availability arise from the geometry of fiber products and the associated projection maps, which we now describe. 
+
+5.2.1 Classical fiber product codes 
+
+We begin by recalling the general fiber product setup and the hypotheses under which the fibers of the projection maps give rise to recovery sets with availability. 
+
+Construction 3. Let X,Y ,Y1, . . . , Y t be smooth projective absolutely irreducible algebraic curves over Fq, defined together with regular surjective separable maps arranged in the commutative dia-
+
+22 gram 
+
+XY1 · · · Yt
+
+Y 
+
+> g1
+> ggt
+> h1ht
+
+where g : X → Y is a map of degree dg and for each j ∈ [t], there exist separable morphisms 
+
+gj : X → Yj , hj : Yj → Y, j ∈ [t],
+
+such that the diagram is commutative, that is, 
+
+h1 ◦ g1 = h2 ◦ g2 = · · · = ht ◦ gt,
+
+where deg( gj ) = r + δ − 1. This implies that deg( g) = dg = deg( hj )( r + δ − 1) for all j ∈ [t].Moreover, this construction identifies X with the fiber product 
+
+X ∼= Y1 ×Y · · · × Y Yt,
+
+which means that 
+
+g∗(Fq(Y )) = 
+
+> t
+
+\
+
+> j=1
+
+g∗ 
+
+> j
+
+(Fq(Yj )) ⊆ Fq(X).
+
+Here, g∗ denotes the pullback of rational functions induced by the morphism g, given by g∗(f ) = f ◦g,identifying Fq(Y ) with a subfield of Fq(X). We assume that the maps g, g 1, . . . , g t satisfy the following hypotheses, which ensure that the fibers of the maps gj yield t recovery sets and that interpolation on each fiber is possible: (i) Suppose that for each j ∈ [t], Fq(X) = g∗ 
+
+> j
+
+(Fq(Yj ))( xj ), and Fq(X) = g∗(Fq(Y ))( x1, . . . , x t),
+
+where xj is a primitive element of the corresponding separable extension. We may also write 
+
+Fq(X) = Fq(Y )( x), where x is a primitive element, and denote its degree by h.(ii) Let B ⊆ A ⊆ X(Fq), where A is a set of the form 
+
+A = g−1(S)
+
+for some set S ⊆ Y (Fq). Assume that the subset B can be partitioned into pairwise disjoint subsets in t different ways: 
+
+B = [
+
+> y1∈g1(B)
+
+g−11 (y1) = [
+
+> y2∈g2(B)
+
+g−12 (y2) = · · · = [
+
+> yt∈gt(B)
+
+g−1 
+
+> t
+
+(yt)
+
+Therefore for each fixed j ∈ [t],
+
+B = G  
+
+> yj∈gj(B)
+
+g−1 
+
+> j
+
+(yj )
+
+so that all fibers of gj over gj (B) ⊆ Yj (Fq) consist of Fq-rational points of X.(iii) For every j ∈ [t] and every yj ∈ gj (B),
+
+|g−1 
+
+> j
+
+(yj )| = r + δ − 1.
+
+23 (iv) Finally, assume that the fibers (y1, . . . , y t) ∈ g1(B) × · · · × gt(B) satisfy the following: 
+
+> t
+
+\
+
+> j=1
+
+g−1 
+
+> j
+
+(yj ) ≤ δ − 1.
+
+(v) For each j ∈ [t], let xj ∈ Fq(X) satisfy the following conditions: (a) for every j ∈ [t] and every fiber Rj = g−1 
+
+> j
+
+(yj ), the restriction of xi to Rj is constant for all i̸ = j;(b) for every j ∈ [t] and every fiber Rj = g−1 
+
+> j
+
+(yj ), the values of xj are pairwise distinct on 
+
+Rj ;(c) there exists a rational point P∞ ∈ X(Fq) and an integer h ≥ 0 such that 
+
+(xj )∞ ≤ hP ∞, j ∈ [t].
+
+Let D be a positive divisor on Y of degree ℓ such that D = ℓQ ∞, Q ∞ ∈ Y (Fq), Q∞ /∈ g(B) and let {f1, . . . , f m} be a basis of the linear space 
+
+L(D) ⊆ Fq(Y ),
+
+that is, the functions fi, i = 1 , . . . , m are contained in Fq(Y ) and thus fi ◦ g is constant on fibers of g. By the Riemann-Roch theorem, m ≥ ℓ − gY + 1 where gY is the genus of Y . Consider the following polynomial space 
+
+V := Span Fq
+
+n
+
+xi1 
+
+> 1
+
+· · · xit 
+
+> t
+
+fk : ij ∈ [r]0, k ∈ [m]
+
+o
+
+⊆ Fq(X).
+
+By primitive element assumptions and separability of extensions, the set of functions {xi1 
+
+> 1
+
+· · · xit 
+
+> t
+
+fk}
+
+are linearly independent and form a basis of V , thus dim( V ) = rtm. The fiber product Tamo–Barg-like code of length n = |B| is constructed as the image of the evaluation map 
+
+ev B : V −→ F|B| 
+
+> q
+
+, F 7 −→ (F (P )) P ∈B .
+
+The role of the fiber product hypotheses is to ensure that each recovery set is controlled by one projection while remaining largely independent of the others. Condition (a) guarantees that, along a fiber associated with one recovery map, the functions coming from the other maps restrict to constants on the fiber, while condition (b) ensures that enough variation remains within the chosen fiber to support local interpolation and recovery. In this way, the geometry of the fiber product translates into the combinatorial structure required for locality and availability. 
+
+Under these hypotheses, the corresponding evaluation code on the fiber product yields a classical LRC with availability, as stated in the following theorem. The following proposition follows directly from [5, Theorem 3.2] and the discussion preceding it, and can be regarded as an extension of [5, Theorem 5.1]. 
+
+Theorem 5.6 (( r, δ ) fiber product code with availability t). The subspace C(D, g 1, . . . , g t) ⊆ F|B|
+
+> q
+
+forms an (n, k, (r, δ ), t ) linear LRC with availability t and parameters 
+
+n = |B|,
+
+24 k = rtm ≥ rt(ℓ − gY + 1) ,d ≥ n − ℓ deg( g) − t(r − 1) h, 
+
+provided that the right-hand side of the inequality for d is a positive integer and that the evaluation map is injective. 
+
+As in the case of Tamo–Barg codes, the fiber product construction also admits a folded version, which we now record for later use in the entanglement-assisted setting. 
+
+Definition 5.7. Given a folding parameter s | |B| 
+
+> r+δ−1
+
+, we define the folded fiber product code 
+
+C(s)(D, g 1, . . . , g t) over alphabet Fsq by grouping s consecutive coordinates. Assume that 
+
+B = G 
+
+> y∈gj(B)
+
+g−1 
+
+> j
+
+(y)
+
+for some fixed j ∈ [t], and that each fiber g−1 
+
+> j
+
+(y) has size r + δ − 1. Let 
+
+P1, . . . , P |B|
+
+be an ordering of B that is compatible with the partition into fibers of gj , in the sense that each block of r + δ − 1 consecutive points P corresponds to one fiber. For each i ∈
+
+h |B|
+
+> s
+
+i
+
+, define 
+
+eBi := {P(i−1) s+1 , . . . , P is }.
+
+Now for F ∈ V , define the folded evaluation map 
+
+ev (s) 
+
+> B
+
+(F ) = 
+
+
+
+(F (P )) P ∈ eB1 , . . . , (F (P )) P ∈ eB|B|/s 
+
+
+
+∈ (Fsq)|B|/s .
+
+The image of V under this map is called the folded fiber product code 
+
+C(s)(D, g 1, . . . , g t).
+
+Proposition 5.8. The code C(s)(D, g 1, . . . , g t) in Definition 5.7 has parameters 
+
+n = |B|
+
+s , k = rtm/s, 
+
+and distance d ≥ ⌈ (|B| − ℓ deg( g) − t(r − 1) h)/s ⌉ obtained by grouping s consecutive coordinates at a time in an ordering compatible with the fibers of gj .Proof. The length and dimension follow directly from Theorem 5.6 and the definition of folding, while the stated distance estimate is a lower bound inherited from the corresponding unfolded code: grouping coordinates into blocks of size s can only decrease the Hamming weight by a factor of at most s, so the minimum distance of the folded code is at least the minimum distance of the original code divided by s. ■
+
+25 5.2.2 EAQLRCs from fiber product codes 
+
+We now apply the entanglement-assisted framework of Section 3 to the fiber product codes con-structed above, thereby obtaining EAQLRCs with availability. 
+
+Proposition 5.9 (fiber product EAQLRCs) . Let C be the fiber product code in Theorem 5.6. Then 
+
+EACSS( C, C ) is an (r, δ ) EAQLRC with availability t.Proof. The parameters of the code follow directly from the entanglement-assisted construction. The ( r, δ ) locality and availability t follow from Proposition 3.4. ■
+
+Next, we provide an example to illustrate Proposition 5.9. 
+
+Example 5.10. Let q = 29 , Y = P1
+
+> x
+
+, Y1 = P1
+
+> u
+
+, and Y2 = P1
+
+> v
+
+. Consider the morphisms 
+
+h1 : Y1 → Y x = u4,h2 : Y2 → Y x = 1 − v4
+
+whose fiber product is the smooth projective curve X : u4 + v4 = 1 . Take the following maps: 
+
+g1 : X → Y1 (u, v ) 7 → u, g2 : X → Y2 (u, v ) 7 → v, g : X → Y (u, v ) 7 → x = u4 = 1 − v4.
+
+Then 
+
+deg( g1) = deg( g2) = 4 = r + δ − 1,
+
+which gives rise to locality r = 3 , δ = 2 . To define the evaluation set, note that in F29 , the nonzero fourth powers are 
+
+{1, 7, 16 , 20 , 23 , 24 , 25 }.
+
+Among these, the values 
+
+x = 7 , x = 23 
+
+have the property that both x and 1 − x are nonzero fourth powers. Set 
+
+S = {7, 23 } ⊆ Y (F29 ), B = g−1(S) ⊆ X(F29 ).
+
+For each x ∈ S, the equation u4 = x has 4 solutions and the equation v4 = 1 − x has 4 solutions, so each fiber of g above x contributes 4 · 4 = 16 points. Hence, 
+
+n = |B| = 32 .
+
+Now, take the divisor 
+
+D = 0 
+
+on Y = P1
+
+> x
+
+, so that L(D) = Span F29 {1}, and m = ℓ(D) = 1 . With x1 = u and x2 = v, the classical fiber product code in Theorem 5.6 is obtained from 
+
+V = Span F29 {ue1 ve2 : 0 ≤ e1, e 2 ≤ 2}.
+
+Therefore, k = dim( C) = rtm = 3 2 · 1 = 9 . Since Y = P1 has genus 0, deg( g) = 16 , and because u
+
+and v each have pole order 1 at infinity, we may take h = 1 . Hence Theorem 5.6 gives the classical distance bound 
+
+d(C) ≥ n − ℓ deg( g) − t(r − 1) h = 32 − 1 · 16 − 2 · 2 · 1 = 12 .
+
+26 Applying Proposition 5.9, the entanglement-assisted quantum code Q = EACSS( C, C ) is an (r, δ ) = (3 , 2) EAQLRC with availability t = 2 .One may check that dim(Hull( C)) = 5 , so c = dim( C) − dim(Hull( C)) = 9 − 5 = 4 . Therefore, the quantum dimension is 
+
+kQ = n − 2k + c = 32 − 2 · 9 + 4 = 18 .
+
+We can also compute the entanglement-assisted distance bound explicitly. Since 
+
+dim( C⊥) = 32 − 9 = 23 > dim( C) = 9 ,
+
+we have C⊥̸ ⊆ C. According to Remark 2.4, dEA ≥ wt  C⊥ \ Hull( C). A direct computation shows that wt  C⊥ \ Hull( C) = 4 , since there is a codeword of C⊥ supported on the first four coordinates with nonzero entries 28 , 17 , 12 , 1, and this codeword does not belong to Hull( C). As a result, dEA ≥ 4.To make the locality and availability explicit, fix a coordinate corresponding to a point P =(u, v ) ∈ B. The two recovery sets come from the fibers of g1 and g2:
+
+R1(P ) = {(u, z ) ∈ B : z4 = 1 − u4},R2(P ) = {(z, v ) ∈ B : z4 = 1 − v4}.
+
+Since u4 ∈ S and 1 − u4 is a fourth power, each of these sets has size 
+
+|R1(P )| = |R2(P )| = 4 = r + δ − 1.
+
+Moreover, 
+
+R1(P ) ∩ R2(P ) = {P },
+
+so the two recovery sets are disjoint outside of P . Because δ = 2 , any single erased coordinate can be recovered from the other r = 3 coordinates in either recovery set. Thus, the code Q is an 
+
+[[32 , 18 , ≥ 4; 4]] EAQLRC with locality r = 3 and availability t = 2 .
+
+5.2.3 Folded fiber product EAQLRCs 
+
+The same argument applies to the folded family, giving folded EAQLRCs derived from the fiber product construction. 
+
+Proposition 5.11 (Folded fiber product ( r, δ ) EAQLRC with availability t). Let C(s) be the code in Definition 5.7. Then Q = EACSS( C(s), C (s)) over the alphabet Fsq is an (r, δ ) EAQLRC with availability t with parameters 
+
+n = |B|/s and k = |B|/s − 2( rtm)/s + c. 
+
+The distance and entanglement parameter follow from the computation of the hull and Remark 2.4. We end this subsection with an example demonstrating Proposition 5.11. 
+
+Example 5.12. Consider the fiber product X : u4 + v4 = 1 over F29 as in Example 5.10, with the same evaluation set B = g−1({7, 23 }) ⊆ X(F29 ) so that |B| = 32 . Recall from the previous example that the underlying classical code C has parameters [n, k, d ] = [32 , 9, ≥ 12] , and the corresponding EAQLRC from Proposition 5.9 has r = 3 , δ = 2 , and t = 2 . Observe that r + δ − 1 = 4 and  
+
+> |B|
+> r+δ−1
+
+= 32 4 = 8 is even. As a result, we may take s := 2 .
+
+27 To define the fold explicitly, order the points of B as follows. For each fixed x ∈ { 7, 23 } and each fixed solution u of u4 = x, the four solutions of v4 = 1 − x form one g1-fiber. We pair these four points into two consecutive blocks of size 2. For example, for x = 7 and u = 8 , we take the two folded coordinates 
+
+((7 , 8, 3) , (7 , 8, 7)) and ((7 , 8, 22) , (7 , 8, 26)) .
+
+Doing this for all choices of x and u produces the 2-folded code C(2) ⊆ (F229 )16 of length n = |B| 
+
+> 2
+
+= 16 .Applying Proposition 5.11, the entanglement-assisted quantum code eQ = EACSS( C(2) , C (2) )
+
+is a folded EAQLRC. The F29 -dimension of the underlying folded code remains 9. However, ac-cording to our folded-dimension convention, C(2) has folded dimension 92 . A direct computation in the underlying F29 -linear representation gives dim F29 Hull  C(2)  = 5 . Since dim F29 C(2) = 9 , the entanglement parameter is c = 9 − 5 = 4 . Under our folded-dimension convention, the dimension of C(2) is 9/2, so 
+
+kEA = 16 − 2 · 92 + 4 = 11 .
+
+To compute the distance bound explicitly, observe that in the underlying F29 -linear representation, the ambient dimension is 32 , and dim F29 
+
+ (C(2) )⊥ = 32 − 9 = 23 > 9 = dim F29 C(2) . Hence 
+
+(C(2) )⊥̸ ⊆ C(2) . According to Proposition 5.11 and computation, 
+
+dEA ≥ wt  (C(2) )⊥ \ Hull( C(2) ) = 2 .
+
+Indeed, there is a codeword of (C(2) )⊥ supported on the first two folded coordinates, namely 
+
+ (28 , 17) , (12 , 1) , (0 , 0) , . . . , (0 , 0) ,
+
+and this codeword does not belong to Hull( C(2) ). Thus, dEA ≥ 2.
+
+We now make the folded locality explicit. A folded coordinate is of the form 
+
+(( x, u, v 1), (x, u, v 2)) ,
+
+where (x, u, v 1) and (x, u, v 2) lie in the same g1-fiber. One explicit family of folded recovery sets is obtained by varying u while keeping the pair {v1, v 2} fixed. For example, for the folded coordinate 
+
+P1 = ((7 , 8, 3) , (7 , 8, 7)) , the folded recovery set is 
+
+eR(P1) = {((7 , 8, 3) , (7 , 8, 7)) , ((7 , 9, 3) , (7 , 9, 7)) , ((7 , 20 , 3) , (7 , 20 , 7)) , ((7 , 21 , 3) , (7 , 21 , 7)) }.
+
+Similarly, for P2 = ((7 , 8, 22) , (7 , 8, 26)) , the folded recovery set is 
+
+eR(P2) = {((7 , 8, 22) , (7 , 8, 26)) , ((7 , 9, 22) , (7 , 9, 26)) , ((7 , 20 , 22) , (7 , 20 , 26)) , ((7 , 21 , 22) , (7 , 21 , 26)) }.
+
+There are analogous folded recovery sets for the coordinates lying above x = 23 . Each such folded recovery set has size | eR(P )| = 4 = r + δ − 1. Since δ = 2 , any single erased folded coordinate can be recovered from the other r = 3 folded coordinates in its recovery set. Furthermore, a second folded recovery family is obtained analogously from the fibers of g2, so Proposition 5.11 gives availability 
+
+t = 2 . Thus, eQ is a [[16 , 11 , ≥ 2; 4]] folded EAQLRC with locality r = 3 and availability t = 2 .
+
+5.3 Hermitian and Suzuki specializations 
+
+We next specialize the general algebraic-geometric framework to two important families of curves with many rational points, namely Hermitian and Suzuki curves. 28 5.3.1 Hermitian-based EAQLRCs 
+
+We first consider the Hermitian family, whose associated classical LRCs with availability give rise to entanglement-assisted quantum codes by the general construction. The Hermitian family considered here may also be viewed as arising from the Artin–Schreier fiber product construction in [28, Theorem 7.1], and thus provides an explicit source of EAQLRCs with availability. 
+
+Proposition 5.13. Let C be a code on the Hermitian curve defined above and in [29, Theorem 7.1], where C has locality p−1 (each recovery set has size p) and availability t. Then, EACSS( C, C ) is an EAQLRC with availability t and locality p − 1 (meaning t recovery sets of size p), with parameters 
+
+[[ n, p tq − 2ptq − 2(( q − tp t + 1)( p − 1) t) + 2 c, d ; c]] .Proof. This follows from the parameters of the code in [29, Theorem 7.1] and the fact that the entanglement-assisted procedure does not change the locality as shown in Proposition 3.4. The distance and the entanglement parameter c follow from Remark 2.4. 
+
+■
+
+5.3.2 Suzuki-based EAQLRCs 
+
+We next investigate the family of Suzuki codes, which provides explicit examples in which the recovery sets need not all have the same size. We can now construct an ( r, 2) EAQLRC with availability 2 from the Suzuki curve. Recall that the Suzuki curve Sq for q0 = 2 m, q = 2 2m+1 , m ≥ 1 is defined as ( xq + x)xq0 = yq + y. In [29, Theorem 6.1], the authors show that there exists LRCs C(D, B ) with availability 2 and locality (q − 1, q − 2) on the Suzuki curve Sq, with the following parameters: 1. over Fq, with length n = q(q − 1) and dimension k = ( q − 1)( q − 2); 2. over Fq4 , with length n = q(q − 1)  q2 + 2 qq 0 + q + 1  and dimension k = ( q − 1)( q − 2)  q2 +2qq 0 + q + 1 .
+
+In both cases, B is obtained by removing the point at infinity together with an additional set of q rational points from Sq(F) and |B| = |Sq(F)| − (q + 1) , where F = Fq in this first case and 
+
+F = Fq4 .We can now construct an ( r, 2) EAQLRC with availability 2 where the two recovery sets have sizes q − 1 and q − 2, respectively. We have the following proposition. 
+
+Proposition 5.14. Let C = C(D, B ) be the code on the Suzuki curve Sq above with availability 
+
+2 and with two recovery sets of sizes q − 1 and q − 2, equivalently with helper localities q − 2
+
+and q − 3 in the convention where locality counts the number of other coordinates accessed. Set 
+
+c = dim( C) − dim(Hull( C)) . Then Q := EACSS( C, C ) is an (r, 2) EAQLRC with availability 2,recovery sets of sizes q − 1 and q − 2, and the following parameters: 1. over Fq, Q has length n = q(q − 1) and dimension k = q(q − 1) − 2( q − 1)( q − 2) + c.2. over Fq4 , Q has length n = q(q − 1)  q2 + 2 qq 0 + q + 1  and dimension k = q(q − 1)  q2 + 2 qq 0 +
+
+q + 1  − 2(( q − 1)( q − 2)  q2 + 2 qq 0 + q + 1 ) + c.
+
+The distance and the entanglement parameter c follow from the computation of the hull and Remark 2.4. According to [29], computing the distances of the codes above depends on the degrees 29 Classical Code C1 Length Dimension Locality Availability                                                                                                     
+
+> Tamo–Barg code C
+> (Theorem 5.1) q−1(q−1) −2k+c(r, δ )1folded Tamo–Barg code C(s)
+> (Theorem 5.3)
+> q−1
+> sq−1
+> s−2ks+c(r, δ )1fiber product code (Proposition 5.9) |B||B| − 2rtm+c(r, δ )t
+> folded fiber product code C(s)
+> (Proposition 5.11)
+> |B|
+> s
+> |B|
+> s−2rtms+c(r, δ )t
+> Hermitian code (Proposition 5.13) ptqptq−2( q−tp t+ 1)( p−1) t+cp−1t
+> Suzuki code over Fq
+> (Proposition 5.14) q(q−1) q(q−1) −2( q−1)( q−2) + cq−1, q −22Suzuki code over Fq4
+> (Proposition 5.14) q(q−1)( q2+2qq 0+q+ 1)
+> q(q−1)( q2+ 2 qq 0+q+ 1)
+> −2( q−1)( q−2) (q2+ 2 qq 0+q+ 1) +cq−1, q −22
+
+Table 2: Summary of the explicit EAQLRC families EACSS( C1, C 1) obtained in Section 5 from classical codes C1, including their length, dimension, locality, and availability. For the Tamo– Barg families, k denotes the dimension of the underlying classical code. The minimum distance is bounded below as in Remark 2.4. For the folded families, the displayed dimensions assume that the folded classical codes are linear over a field extension of degree s and have the indicated divided dimensions. of the generators xi of the corresponding function field extension and explicit generators are not available. Therefore, the degrees cannot be computed and the bound cannot be evaluated directly. Computing the distance in the EAQECC case also requires one to compute the hulls of these codes. Thus, we write the general distance formula given by the EAQECC construction. 
+
+5.4 Summary of explicit EAQLRC families 
+
+We conclude the section by summarizing the explicit EAQLRC families obtained above and their basic parameters in Table 2. 
+
+# 6 Conclusions and Discussion 
+
+Erasure recovery plays an important role in classical distributed storage. In both the classical and quantum settings, erasure recovery is often easier than general error correction because the error locations are known. Furthermore, on hardware platforms such as superconducting as well as neutral-atom devices, various types of errors can be converted to erasures (errors whose locations are known). Entanglement-assisted codes were developed as a way to relax the orthogonality requirements for quantum CSS codes. These codes are known to improve tradeoffs involving the number of encoded logical qubits as well as the number of recoverable erasures. In this work, we presented EAQLRCs with availability . Classically, if an erasure can be re-covered by more than one set of coordinates that are pairwise disjoint, the code is said to be 
+
+locally recoverable with availability . While it has been demonstrated in [18] that disjoint recov-ery sets and hence the notion of availability cannot be defined for quantum CSS codes, we define availability in the entanglement-assisted setting. Here, we show that given two classical LRCs, we 30 can construct an EAQLRC. We compute code parameters – including dimension and distance – which require determining the hull of the classical LRC. We also determine a Singleton-like tradeoff among length, dimension, distance, locality, availability, and entanglement consumption for EAQL-RCs. With respect to code constructions, we present both random and explicit constructions. Our explicit constructions rely on variants of algebraic-geometry codes such as Tamo–Barg codes, folded Tamo–Barg codes, Hermitian codes, Suzuki codes, and fiber product codes. It remains to determine whether the explicit codes presented here are optimal with respect to the Singleton bound presented. This depends on computing the dimensions of the relevant hulls and the minimum weights of the complements appearing in the entanglement-assisted distance formula. Determining these parameters will also allow a more precise comparison with the parameters of quantum CSS LRCs. Another interesting question is the nature of quantum hierarchical local recovery in the entanglement-assisted setting, which is a work in progress. 
+
+# References 
+
+[1] B. Ahn, J. Shin, and J. Heo. Entanglement-assisted codeword-stabilized quantum codes with imperfect ebits. ICT Express , 2(2):47–52, 2016. [2] S. E. Anderson, E. Camps-Moreno, H. H. L´ opez, G. L. Matthews, D. Ruano, and I. Soprunov. Relative hulls and quantum codes. IEEE Trans. Inf. Theor. , 70(5):3190–3201, May 2024. [3] T. Ball, E. Camps, H. Chimal-Dzul, D. Jaramillo-Velez, H. H. L´ opez, N. Nichols, M. Perkins, I. Soprunov, G. Vera-Mart´ ınez, and G. Whieldon. Coding theory package for Macaulay2. 
+
+Journal of Software for Algebra and Geometry , 11(1):113–122, 2021. [4] S. Ballentine, A. Barg, and S. Vl˘ adut ¸. Codes with hierarchical locality from covering maps of curves. IEEE Transactions on Information Theory , 65(10):6056–6071, 2019. [5] A. Barg, I. Tamo, and S. Vl˘ adut ¸. Locally recoverable codes on algebraic curves. In 2015 IEEE International Symposium on Information Theory (ISIT) , page 1252–1256. IEEE, June 2015. [6] W. Bosma, J. Cannon, and C. Playoust. The Magma algebra system. I. the user language. 
+
+Journal of Symbolic Computation , 24(3–4):235–265, 1997. [7] S. B. Bravyi and A. Y. Kitaev. Quantum codes on a lattice with boundary, 1998. [8] N. P. Breuckmann and J. N. Eberhardt. Quantum low-density parity-check codes. PRX Quantum , 2(4):040101, 2021. [9] T. Brun, I. Devetak, and M.-H. Hsieh. Correcting quantum errors with entanglement. Science ,314(5798):436–439, 2006. [10] K. Bu, W. Gu, and X. Li. Quantum locally recoverable code with intersecting recovery sets, 2025. [11] A. R. Calderbank and P. W. Shor. Good quantum error-correcting codes exist. Physical Review A, 54(2):1098–1105, Aug. 1996. [12] T. M. Cover and J. A. Thomas. Elements of Information Theory 2nd Edition (Wiley Series in Telecommunications and Signal Processing) . Wiley-Interscience, July 2006. 31 [13] Error Correction Zoo. Kitaev surface code. https://errorcorrectionzoo.org/c/surface ,2026. Accessed 2026-06-14. [14] C. Galindo, F. Hernando, H. Mart´ ın-Cruz, and R. Matsumoto. Quantum ( r, δ )-locally recov-erable codes, 2024. [15] C. Galindo, F. Hernando, and R. Matsumoto. Quantum ( r, δ )-locally recoverable BCH and homothetic-BCH codes, 2026. [16] C. Galindo, F. Hernando, R. Matsumoto, and D. Ruano. Entanglement-assisted quantum error-correcting codes over arbitrary finite fields. Quantum Information Processing , 18:116, 2019. [17] C. Galindo, F. Hernando, R. Matsumoto, and D. Ruano. Correction to: Entanglement-assisted quantum error-correcting codes over arbitrary finite fields. Quantum Information Processing ,20, 2021. [18] L. Golowich and V. Guruswami. Quantum locally recoverable codes, 2023. [19] P. Gopalan, C. Huang, H. Simitci, and S. Yekhanin. On the locality of codeword symbols. 
+
+IEEE Trans. on Inf. Theory , 58(11):6925–6934, 2012. [20] D. Gottesman. Stabilizer Codes and Quantum Error Correction . PhD thesis, California Insti-tute of Technology, 1997. arXiv:quant-ph/9705052. [21] M. Grassl. Entanglement-assisted quantum communication beating the quantum singleton bound. Physical Review A , 103(2):L020601, 2021. [22] M. Grassl, T. Beth, and T. Pellizzari. Codes for the quantum erasure channel. Physical Review A, 56(1):33–38, July 1997. [23] M. Grassl, F. Huber, and A. Winter. Entropic proofs of singleton bounds for quantum error-correcting codes. IEEE Transactions on Information Theory , 68(6):3942–3950, June 2022. [24] D. R. Grayson and M. E. Stillman. Macaulay2, a software system for research in algebraic geometry. Available at https://macaulay2.com/ .[25] V. Guruswami, R. Kshirsagar, and P. Trivedi. Quantum hierarchical locally recoverable codes, 2026. [26] V. Guruswami and A. Rudra. Explicit codes achieving list decoding capacity: Error-correction with optimal redundancy. IEEE Transactions on Information Theory , 54(1), 2008. Published version of the STOC 2006 paper introducing folded Reed–Solomon codes. [27] V. Guruswami and C. Xing. Folded codes from function field towers and improved optimal rate list decoding. In H. J. Karloff and T. Pitassi, editors, Proceedings of the 44th Annual ACM Symposium on Theory of Computing (STOC 2012) , pages 339–350. ACM, 2012. [28] K. Haymaker, B. Malmskog, and G. Matthews. Algebraic hierarchical locally recoverable codes with nested affine subspace recovery: Algebraic H-LRCs with nested affine subspace recovery. 
+
+Des. Codes Cryptography , 93(1):111–132, Oct. 2024. [29] K. Haymaker, B. Malmskog, and G. L. Matthews. Locally recoverable codes with availability 
+
+t≥2 from fiber products of curves. Adv. Math. Commun. , 12(2):317–336, 2018. 32 [30] M.-H. Hsieh, I. Devetak, and T. Brun. General entanglement-assisted quantum error-correcting codes. Phys. Rev. A , 76:062313, Dec 2007. [31] U. D. Kadiyam and S. Das. Codes with availability and different localities. In 2020 Interna-tional Conference on Signal Processing and Communications (SPCOM) , pages 1–5, 2020. [32] G. M. Kamath, N. Prakash, V. Lalitha, and P. V. Kumar. Codes with local regeneration and erasure correction. IEEE Trans. on Inf. Theory , 60(8):4637–4660, 2014. [33] A. Y. Kitaev. Fault-tolerant quantum computation by anyons. Annals of Physics , 303(1):2–30, 2003. [34] C.-Y. Lai and T. A. Brun. Entanglement-assisted quantum error-correcting codes with imper-fect ebits. Phys. Rev. A , 86:032319, Sep 2012. [35] Y. Li, S. Li, H. Lao, G. Luo, and S. Ling. On optimal quantum LRCs from the hermitian construction and t-designs, 2025. [36] Y. Li, S. Li, G. Luo, and S. Ling. Improved bounds and optimal constructions of pure quantum locally recoverable codes, 2025. [37] G. Luo, B. Chen, M. F. Ezerman, and S. Ling. Bounds and constructions of quantum lo-cally recoverable codes from quantum CSS codes. IEEE Transactions on Information Theory ,71(3):1794–1802, 2025. [38] N. Prakash, G. M. Kamath, V. Lalitha, and P. V. Kumar. Optimal linear codes with a local-error-correction property, 2012. [39] A. S. Rawat, D. S. Papailiopoulos, A. G. Dimakis, and S. Vishwanath. Locality and availability in distributed storage. IEEE Transactions on Information Theory , 62(8):4481–4493, 2016. [40] S. Sharma, V. Ramkumar, and I. Tamo. Quantum locally recoverable codes via good polyno-mials, 2024. [41] B. Shaw, M. M. Wilde, O. Oreshkov, I. Kremsky, and D. A. Lidar. Encoding one logical qubit into six physical qubits. Phys. Rev. A , 78:012337, Jul 2008. [42] A. Steane. Multiple-particle interference and quantum error correction. Proceedings of the Royal Society of London. Series A: Mathematical, Physical and Engineering Sciences ,452(1954):2551–2577, Nov. 1996. [43] I. Tamo and A. Barg. A family of optimal locally recoverable codes. IEEE Transactions on Information Theory , 60(8):4661–4676, 2014. [44] J. D. Teoh, P. Winkel, H. K. Babla, B. J. Chapman, J. Claes, S. J. de Graaf, J. W. O. Garmon, W. D. Kalfus, Y. Lu, A. Maiti, K. Sahay, N. Thakur, T. Tsunoda, S. H. Xue, L. Frunzio, S. M. Girvin, S. Puri, and R. J. Schoelkopf. Dual-rail encoding with superconducting cavities. 
+
+Proceedings of the National Academy of Sciences , 120(41), Oct. 2023. [45] Y. Wu, S. Kolkowitz, S. Puri, and J. D. Thompson. Erasure conversion for fault-tolerant quantum computing in alkaline earth rydberg atom arrays. Nature Communications , 13(1), Aug. 2022. [46] K. Zhou and M. Cao. Optimal quantum ( r, δ )-locally repairable codes via classical ones, 2025. 33

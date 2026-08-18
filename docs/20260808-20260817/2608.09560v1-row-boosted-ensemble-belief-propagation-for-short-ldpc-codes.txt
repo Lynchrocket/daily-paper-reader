@@ -1,0 +1,410 @@
+Title: Row-Boosted Ensemble Belief Propagation for Short LDPC Codes
+
+URL Source: https://arxiv.org/pdf/2608.09560v1
+
+Published Time: Tue, 11 Aug 2026 02:18:38 GMT
+
+Number of Pages: 6
+
+Markdown Content:
+# Row-Boosted Ensemble Belief Propagation for Short LDPC Codes 
+
+Paul Bezner †, Felix Krieg †, and Stephan ten Brink 
+
+Institute of Telecommunications, University of Stuttgart, Germany 
+
+{bezner, krieg, tenbrink }@inue.uni-stuttgart.de 
+
+Abstract —Belief-propagation (BP) decoding of short and moderate-length low-density parity-check (LDPC) codes is lim-ited by finite-length graph effects: a single decoder trajectory can become trapped or oscillatory even when an alternative trajectory would decode the received word. Existing ensemble-BP decoders create the required diversity through multiple parity-check matrices, automorphisms, modified schedules, subcodes, or altered update rules. We introduce row-boosted ensemble (RBE) decoding as a minimal decoder-side diversity mechanism: all ensemble members share the same parity-check matrix and the same BP kernel, and differ only in a small set of parity-check rows whose outgoing messages are boosted. On the 5G NR BG1 (144 , 96) code, RBE with 32 members lowers the frame-error rate of BP with 20 iterations (BP-20) from 1.6 × 10 −2
+
+to 1.6 × 10 −3 at Eb/N 0 = 4 .0 dB , outperforming saturated-min-sum and affine subcode ensembles of equal size. Increasing the ensemble size yields additional gains, indicating that RBE provides a scalable performance–complexity tradeoff. The gains transfer across 5G NR block lengths and rates, to non-5G short LDPC codes, and across flooding and layered schedules. 
+
+Index Terms —LDPC codes, belief propagation, ensemble de-coding, row boosting, short block codes 
+
+I. I NTRODUCTION 
+
+Low-density parity-check (LDPC) codes are decoded effi-ciently by sparse-graph message passing and are part of mod-ern communication standards. At short and moderate block lengths, however, a single belief propagation (BP) decoder remains far from maximum likelihood (ML) performance. Failures are dominated by the interaction between the received word and finite-length graph structures: short cycles, trapping and absorbing sets, and oscillatory message trajectories [1], [2]. Raising the iteration limit helps only when the underlying trajectory eventually escapes on its own; a single decoder has no way to handle error patterns to which it is inherently unsuited – it lacks decoder diversity .Ensemble-BP decoding removes this limitation by running several related decoders in parallel and selecting a valid candidate according to the channel metric. Diversity can be obtained from multiple parity-check bases (multiple-bases belief propagation (MBBP)) [3], [4], code automorphisms or broken-graph transforms [5], [6], affine subcodes [7],  
+
+> †
+
+P. Bezner and F. Krieg contributed equally to this work. This work is supported by the German Federal Ministry of Research, Technology and Space (BMFTR) within the project Open6GHub+ (grant no. 16KIS2406). LLM agents from Anthropic and OpenAI were used to write source code for this work and to assist with language editing.          
+
+> Lch
+> BP (Lch ;H,B1, β 1)
+> BP (Lch ;H,B2, β 2)
+> ...
+> BP (Lch ;H,BM, β M)
+> candidate processing ML in the list
+> ˆc∈ C
+> ˆx1
+> ˆx2
+> ˆxM
+> L
+
+Fig. 1. Row-boosted ensemble decoder. Every member uses the original matrix H and the same BP kernel; only the row-boost configuration θe =(Be, β e) differs. The ML selection step selects the codeword estimate with the highest likelihood from the list L.
+
+message saturation [8], or schedule variation [9], [10], to name a few. These mechanisms are effective, but each requires an additional ingredient – such as a second parity-check representation or a non-absorbed code symmetry – that is not always available [10]. This paper introduces row-boosted ensemble (RBE)-BP de-coding as a code-agnostic ensemble method (Fig. 1). Each en-semble member uses the original parity-check matrix (PCM) and the same BP kernel, but boosts the outgoing messages of a different small subset of parity-check rows. RBE decoding thereby alters the iterative trajectory while preserving the code and the Tanner-graph storage, and can be added to any sum-product algorithm (SPA), min-sum algorithm (MSA), normalized min-sum algorithm (NMSA), flooding, or layered implementation. RBE is related to weighted and neural BP, which generalize the message-passing update with trainable edge or iteration weights [11]. However, such approaches typically optimize a single weighted decoder and store fine-grained weights across many edges and iterations, whereas RBE forms an ensemble from simple row-wise boosts of the original PCM. The contributions are:  
+
+> •
+
+We define RBE as per-row check-message boosting ap-arXiv:2608.09560v1 [cs.IT] 10 Aug 2026 plied independently to each ensemble member.  
+
+> •
+
+We give a low-effort offline design procedure based on a boost-factor sweep and rescue-rate-based boosted-row selection over a corpus of plain-BP failures, and show that the useful boost factor spans a broad range.  
+
+> •
+
+We analyze which boosted rows lead to favorable ampli-fication and find that a boost is most effective when the support of the row contains no channel errors, i.e., the boosted check acts as a reliable anchor.  
+
+> •
+
+We report frame error rate (FER), ensemble-size scal-ing, decoder-architecture generality (flooding and layered NMSA), and cross-code transfer across 5G NR and other LDPC benchmarks, and compare against MBBP, broken-graph automorphism ensemble decoding (AED), satu-rated min-sum, subcode, and layered schedule-diversity ensembles of equal size. II. P RELIMINARIES 
+
+A. Code and Channel Model 
+
+An LDPC code is defined by a sparse parity-check matrix 
+
+H ∈ Fm×n 
+
+> 2
+
+,
+
+C = {c ∈ Fn 
+
+> 2
+
+: Hc T = 0}. (1) The code C is thus the set of all length-n binary vectors that satisfy the m parity checks given by the rows of H,and has dimension k = n − rank( H). Each row of H
+
+defines one parity check, represented by a check node (CN) in the Tanner graph; we therefore use the terms row and 
+
+check interchangeably. A code of blocklength n, dimension 
+
+k, and rate R = k/n is denoted by (n, k ). We use binary phase-shift keying (BPSK) over the additive white Gaussian noise (AWGN) channel. A bit cj ∈ {0, 1} is mapped to 
+
+xj = 1 − 2cj , and the received value is yj = xj + zj with 
+
+zj ∼ N (0 , σ 2). The channel log-likelihood ratio (LLR) is 
+
+Lch ,j = log P (yj |cj =0)     
+
+> P(yj|cj=1)
+
+= 2 yj /σ 2, collected in the vector Lch .All simulations use the all-zero codeword, which is valid for the symmetric channel and the symmetric message-passing decoders considered here. For the rate-matched 5G NR codes, punctured variables are initialized with zero LLR, shortened variables with a known saturated value. 
+
+B. BP Kernels and Schedules 
+
+For flooding SPA, the variable node (VN)-to-CN and CN-to-VN messages are 
+
+q(t) 
+
+> j→i
+
+= Lch ,j + X 
+
+> i′∈N (j)\{ i}
+
+r(t−1)  
+
+> i′→j
+
+, and (2) 
+
+r(t) 
+
+> i→j
+
+= 2 tanh −1
+
+ Y 
+
+> j′∈N (i)\{ j}
+
+tanh 
+
+ q(t)
+
+> j′→i
+> 2
+
+ , (3) respectively, where N (j) and N (i) denote the neighborhoods of VN j and CN i in the Tanner graph. The MSA approxi-mates (3) by 
+
+rMS ,(t) 
+
+> i→j
+
+= min   
+
+> j′∈N (i)\{ j}
+
+q(t)
+
+> j′→i
+
+Y 
+
+> j′∈N (i)\{ j}
+
+sgn q(t)
+
+> j′→i
+
+, (4)                       
+
+> 020 40 60 80 100 010 20 30 40 Imax = 20
+> Iteration i
+> Syndrome weight  w(i)s
+> BP-100 RBE, not conv. RBE, conv.
+> Fig. 2. Syndrome-weight trajectories on aBP-20-failure frame for
+> C5G ,BG1 (144 ,96) at Eb/N 0= 4 .5 dB . Plain BP-100 does not converge, while two of ten boosted BP-20 members reach zero syndrome.
+
+and NMSA applies the normalization rNMS ,(t) 
+
+> i→j
+
+= α r MS ,(t) 
+
+> i→j
+
+,with α ∈ R+. We consider both flooding and layered [12] schedules with syndrome-based early termination and default to α = 0 .75 . An RBE scales the CN output and is thus independent of these choices. 
+
+C. Ensemble Decoding 
+
+An ensemble decoder runs E related BP decoders 
+
+D1, . . . , D E on the same channel observation Lch . If the trajectory of one decoder fails, a related decoder may still converge on the same channel observation; Fig. 2 shows such an example. Member e ∈ { 1, . . . , E } is specified by a configuration 
+
+θe – an alternative parity-check representation, a graph auto-morphism, a perturbed update rule, or a different schedule – and returns an estimate ˆce = De(Lch ; θe) after at most Imax 
+
+iterations. A member estimate is valid if it satisfies all parity checks, i.e., if the syndrome s := HˆcT 
+
+> e
+
+equals 0, making ˆce acodeword estimate. The ensemble collects the valid decoder outputs in a candidate list 
+
+L = ˆce : e ∈ { 1, . . . , E }, HˆcT 
+
+> e
+
+= 0 . (5) If L = ∅, the ensemble declares a frame error (or outputs a random codeword); otherwise it applies ML selection within the list, choosing the candidate that minimizes the frame error probability. As BP decoders do not always converge to a valid codeword, post-processing (e.g., ordered-statistics decoding (OSD) [13] or systematic re-encoding) can ensure that all ensemble members produce valid codewords. This optional post-processing leads to non-empty lists L and typically increases the decoding performance of the ensemble. Throughout, BP-I denotes a plain BP decoder with Imax =
+
+I; ensembles are labeled by their type and size, e.g., RBE-E32 for an RBE with E = 32 members. Concretely, MBBP builds an ensemble of algebraically equivalent parity-check matrices, so that cycles and trapping sets tied to one representation are not present in another [3], [4]. Automorphism ensemble decoding instead uses code au-tomorphisms to build an ensemble. For codes with a known symmetry (e.g., the cyclic shifts of a cyclic code), each mem-ber decodes a permuted copy of Lch and maps the result back through the inverse permutation, also leading to a potentially favorable noise representation in some ensemble members [5], [14]. In case BP is invariant to known automorphisms, the Tanner-graph symmetry can be broken in order to benefit from those automorphisms [6]. Affine-subcode ensembles add a small set of additional linear constraints to each member’s parity-check matrix. Each member decodes a subcode Ce whose graph may be better conditioned than that of C itself [7]. Saturated min-sum clips the magnitude of the least reliable message bits and enumerates all possible bit combinations in those positions. Each ensemble member corresponds to one possible bit sequence [15]. Schedule-diversity ensembles vary only the check-to-variable update order – i.e., the order in which the decoder schedules the layered updates [10]. III. R OW -B OOSTED ENSEMBLE DECODING 
+
+A. Row-Boosting Rule 
+
+In an RBE, decoder De is specified by a boosted-row set 
+
+Be ⊆ { 1, . . . , m } and a boost factor βe ≥ 0. After the standard CN update, RBE-BP scales the contribution of each boosted row to the VN posterior, 
+
+˜r(t,e ) 
+
+> i→j
+
+=
+
+(
+
+βe r(t,e ) 
+
+> i→j
+
+, i ∈ B e,r(t,e ) 
+
+> i→j
+
+, i / ∈ B e. (6) All members decode the same LLR vector using the same matrix, H; the decoding graph remains unchanged, with only the decoding trajectory differing. With an integer boost factor, (6) is exactly equivalent to replicating each boosted row βe
+
+times in the Tanner graph; the posterior counts the row βe
+
+times. Therefore, boosting requires neither additional matrix storage nor floating-point multipliers for this special case, leading to a hardware-friendly implementation. 
+
+B. Decoding Complexity 
+
+To reduce the decoding complexity of the ensemble, a gate decoder can check whether the full ensemble is required [15]. A plain BP decoder runs on the unmodified Tanner graph, and the boosted members are only evaluated when the gate produces no valid codeword. The final output is the ML-in-list candidate among the ensemble members. This keeps the average decoding complexity close to that of one BP decode, since most frames terminate in the gate. In rare cases where the gate converges on a wrong codeword, the ensemble loses the opportunity to “rescue” the frame. Therefore, the average complexity of a gated ensemble version is lower, but the FER is slightly increased. RBE adds only a row-boost table to an existing BP decoder, thus the average decoding complexity per member is approximately equal to that of a plain BP decoder, especially if NMSA is used. 
+
+C. Offline Boost-Factor Selection 
+
+For a fixed set of boosted rows {B e : e ∈ { 1, . . . , E }} ,the boost factor βe controls how strongly the corresponding parity checks perturb the BP trajectory and thus directly                 
+
+> 0246810 12 020 40 60 80 100
+> β
+> Rescue coverage  ρ(M) in %
+> E= 32
+> E= 8 0123456
+> |B e|
+> Fig. 3. Sensitivity of the offline design to the ensemble design parameters for
+> C5G ,BG1 (144 ,96) . Left: rescue coverage as a function of the boost factor
+> β. Right: coverage versus number of boosted rows |B e|.
+
+influences the ensemble performance. We therefore optimize 
+
+βe for a fixed ensemble construction. To reduce the search space and the implementation overhead, we further constrain the boost factor to be ensemble-wide, i.e., βe = β for all 
+
+e; empirically, this constraint has a negligible impact on performance. Specifically, we first construct ensembles of single-row members, i.e., |B e| = 1 , and then sweep β starting from β = 0 . The case β = 0 removes the contribution of the selected row entirely and can be interpreted as a row-level graph perturbation related to the broken-graph decoder of [6], whereas β = 1 corresponds to the unmodified BP update and therefore provides no decoder diversity. The resulting rescue coverage as a function of β is shown in Fig. 3 (left). For both ensemble sizes E = 8 and E = 32 , the coverage saturates for 
+
+β ≳ 4 and collapses only at the singular point β = 1 , where all members coincide. Attenuation ( β < 1) recovers part of the coverage but remains below the maximum attained by strong boosting. Based on this observation, we set β = 8 as the default for the row selection procedure. 
+
+D. Offline Row Selection 
+
+Each ensemble member e is defined by its set of boosted rows Be. While the performance of an individual decoder depends only on Be, the ensemble performance depends on the entire collection of boosted-row sets {B i : i ∈ { 1, . . . , E }} .For a given matrix H, the best individual member is therefore not necessarily part of the best possible ensemble. Since a joint optimization of the boosted rows over the complete ensemble is computationally demanding, we resort to a sub-optimal selection and build ensembles from the individual candidates with the highest rescue rate relative to the non-boosted BP decoder. For gated RBE ensembles, the rescue rate is evaluated on frame samples failed by the plain BP gate, 
+
+F = {Lch : ˆ cBP (Lch )̸ = c}. (7) Ensemble member e with parameters (Be, β e) rescues the set 
+
+Re = {Lch ∈ F : De(Lch ) = c}, (8) with rescue rate |R e|/|F| , and the empirical coverage of an ensemble M ⊆ { 1, . . . , E } is 
+
+ρ(M) = 1
+
+> |F|
+
+S 
+
+> e∈M
+
+Re . (9) 0 1 2 ≥ 3010 20 30 40      
+
+> Number of channel errors in boosted check support qm
+> Cond. rescue cov.
+> ˜ρMi (q) in %
+> M1: optimized rows M2: random rows
+> Fig. 4. Rescue coverage versus channel errors in the boosted row on BP-20-failure frames for C5G ,BG1 (144 ,96) . A single boosted row is most effective when its support is error-free.
+
+In order to reduce the search space, we identify the relevant cardinalities of the set of boosted rows, Be. For this purpose, we fix βe = 8 and vary the cardinality, constructing ensembles whose members all use the same number of boosted rows 
+
+|B e| = const . The resulting rescue coverage as a function of 
+
+|B e| is shown in Fig. 3 (right). The case |B e| = 0 corresponds to the unmodified BP decoder and therefore provides no additional ensemble gain. The coverage reaches its maximum at |B e| = 2 and decreases for larger sets of boosted rows, indicating that overly broad perturbations are less effective for this (short) code. Based on this observation, we restrict the default search to |B e| ≤ 3.
+
+E. Boosted Rows as Reliable Anchors and Diversity Enablers 
+
+Next, we investigate if and when row boosts rescue a given BP failure. Fig. 2 shows the decoding trajectories of a single BP decoder and of all component decoders of an RBE. As a low-complexity indicator of the decoder state and convergence behavior, we use the syndrome weight w(t) 
+
+> s
+
+= P 
+
+> i
+
+si at decoder iteration t [2]. Iteration zero corresponds to the syndrome of the hard decision on the channel observation before decoding starts. Plain BP-20 and even BP-100 do not reach zero syndrome, whereas two out of ten RBE members converge within the iteration limit for this noise sample. No-tably, the set of converging members depends on the channel output, which motivates a closer look at the circumstances under which a row boost rescues a frame. To determine which perturbations are helpful, we conducted the following investigation: For a single-row boost Be = {i},let qi = |N (i) ∩ E ch | count the channel hard-decision errors 
+
+Ech = {j : 1[Lch ,j < 0] ̸ = cj } that lie in the support of row i. Grouping all single-row boosts by qi, we compute the conditional rescue coverage ˜ρ(q) as the fraction of boosts 
+
+Be = {i} with qi = q that recover c. Fig. 4 plots ˜ρ(q) over q,i.e., how often a boosted row rescues a frame as a function of the number of errors in its support, for ensembles built from randomly chosen and optimized rows. Fig. 4 shows that rescue is by far most likely for qi = 0 :an error-free boosted row acts as a reliable anchor that increases the influence of a locally correct neighborhood. Notably, boosting a row that is directly connected to erroneous                      
+
+> 22.533.544.5510 −5
+> 10 −4
+> 10 −3
+> 10 −2
+> 10 −1
+> 10 0
+> Eb/N 0(dB) FER
+> BP-20 BP-640 AED-E5 aSCED-E32 SMS-E32 MBBP-LW-E32 RBE-E32 [proposed] OSD-3
+> Fig. 5. FER versus Eb/N 0for C5G ,BG1 (144 ,96) . RBE-E32 (with I= 20
+> per member) is compared against BP-20, BP-640, affine subcode, saturated-min-sum, and MBBP-LW ensembles of equal size, broken-graph AED (with
+> 5ensemble members), and the ML reference.
+
+VNs yields a lower but nonetheless non-zero coverage. The optimized rows selected by the offline procedure of Sec. III-D exhibit the same qualitative profile. Low- and medium-degree rows occur frequently, consistent with the fact that their supports are more likely to be error-free at the channel hard-decision level. However, the selected ensemble also contains several high-degree rows. These rows are less likely to be error-free, but when they are reliable they influence a larger neighborhood and can rescue failure patterns not covered by smaller checks. Thus, the gain comes from empirical rescue coverage and complementarity across boosted rows. IV. N UMERICAL RESULTS 
+
+A. Comparison to Other Ensemble Methods 
+
+Fig. 5 shows the FER on the 5G NR BG1 (144 , 96) code. Over the entire simulated signal-to-noise ratio (SNR) range, RBE-E32 clearly improves on plain BP-20 by roughly an order of magnitude at moderate-to-high SNR, and also out-performs long-iteration BP-640: additional diverse trajectories are more valuable than a longer single one. At the same ensemble size E = 32 , RBE achieves the lowest FER among all considered ensembles, outperforming the affine subcode ensemble [7], the saturated-min-sum en-semble [15], and the MBBP ensemble [3], [4] with 5 low weight checks appended to the original PCM. Broken-graph AED is limited to E = 5 members by the lifting structure of the code and, accordingly, provides only a small gain over plain BP-20. The residual gap to the ML reference is dominated by frames whose correct codeword is absent from the candidate list; mis-selections among valid candidates, including the rare event that the gate converges to a wrong codeword, account for only a small fraction of the errors. 
+
+B. Ensemble-Size Scaling and Schedule Generality 
+
+Fig. 7 compares RBE with a single BP decoder using the same total iteration budget of 20 E iterations, i.e., the same 100 200 400 800                       
+
+> 2.533.544.555.566.5
+> Blocklength nEb/N 0 at FER  10 −3 in dB
+> R≈0.5
+> BP-20 RBE-E32 OSD-3 BP to RBE gain 100 200 400 800
+> Blocklength nR≈2/3
+> 100 200 400 800
+> Blocklength nR= 3 /4
+> Fig. 6. Decoding threshold versus block length for C5G ,BG1 (n, R ·n)codes at three rates. RBE uses β= 4 and consistently lowers the BP threshold; the shaded region marks the gain. ML references shown where available.
+
+budget spent on a single trajectory. All ensembles are gated: the ensemble members are only invoked if a plain BP-20 gate does not converge to a valid codeword. The gate thereby acts as an additional member, i.e., the effective ensemble size is increased by one. RBE consistently outperforms both the matched-budget single decoder and the affine subcode ensemble of equal size. This confirms that, for a fixed iteration budget, decoder diversity is more valuable than extending a single trajectory. Notably, RBE continues to scale with the ensemble size: the FER improves steadily up to E = 256 
+
+without showing a performance saturation. Since RBE only acts at the CN output, it is agnostic to the underlying kernel and schedule. This is verified in Fig. 8: under both flooding and layered NMSA, RBE-E32 yields nearly identical gains over the respective plain BP-20 decoder. On the layered schedule, RBE also outperforms a schedule-diversity ensemble [10] of equal size without altering the update order. Note that, unlike this baseline, RBE composes with any schedule, including the layered one considered here. 
+
+C. Length and Rate Generality 
+
+Fig. 6 reports the decoding threshold at FER 10 −3 versus block length for three 5G NR rate families. RBE-E32 lowers                                       
+
+> 0124816 32 64 128 256
+> 10 −2
+> 10 −3
+> 10 −4
+> E−1
+> FER at  Eb/N 0 = 4 .5 dB
+> BP-(20 E)AED aSCED SMS RBE [proposed] OSD-3
+> Fig. 7. Scaling on C5G ,BG1 (144 ,96) .FER vs. ensemble size Eat
+> Eb/N 0= 4 .5 dB : RBE vs. decoder (ensembles) of equal complexity. Flooding NMSA Flooding SPA Layered NMSA Layered SPA
+> 10 −1
+> 10 −2
+> 10 −3
+> 10 −4
+> ×11 .2×12 .1×11 .3×15 .1
+> FER at  Eb/N 0 = 4 .0 dB  BP-20 RBE-E32 [proposed] schedule E32 Fig. 8. Schedule and decoder generality on C5G ,BG1 (144 ,96) . RBE-E32 versus BP-20 under flooding and layered NMSA at Eb/N 0= 4 .0 dB , with a layered schedule-diversity ensemble for reference.
+
+the BP-20 threshold across all considered lengths and rates. The gains are largest at short block lengths, where finite-length graph effects dominate, and gradually diminish with increasing n, yet remain visible up to n = 1000 . Note that the same row-boost construction rule (identical β, member cardinality, and selection procedure) is applied to every code in the family; only the selected row indices adapt to each PCM, without any per-code tuning. Larger ensemble sizes typically close the remaining gap to the ML threshold further; for the shortest codes, RBE-E64 approaches ML performance. 
+
+D. Cross-Code Transfer 
+
+Fig. 9 extends the comparison to five further short LDPC codes: MET (100 , 50) [16], Tanner (155 , 64) [17], WiMAX (576 , 480) [18], WRAN (384 , 256) [19], and CCSDS (128 , 64) [20]. Plain gated RBE, selected by the channel metric without any post-processing, improves over BP-20 on every code and also outperforms the matched-budget BP-(20 E) throughout. Note that the gain is consistent across the structurally distinct parity-check matrices shown beneath the bars, none of which received per-code tuning. V. D ISCUSSION AND CONCLUSION 
+
+We introduced RBE-BP decoding for short LDPC codes. RBE preserves the parity-check matrix, the Tanner-graph storage, the decoder kernel, the syndrome validation, and the candidate metric, and creates diversity solely by boosting selected rows in different ensemble members. On the 5G NR BG1 (144 , 96) code, RBE reduces the BP-20 FER by roughly an order of magnitude and outperforms affine subcode and MET     
+
+> N= 100 , K = 50
+> γ= 5 dB , E = 64
+
+Tanner     
+
+> N= 155 , K = 64
+> γ= 3 .5 dB , E = 64
+
+WiMAX     
+
+> N= 576 , K = 480
+> γ= 4 .5 dB , E = 256
+
+WRAN     
+
+> N= 384 , K = 256
+> γ= 3 dB , E = 128
+
+5G NR     
+
+> N= 144 , K = 96
+> γ= 4 .5 dB , E = 32
+
+CCSDS     
+
+> N= 128 , K = 64
+> γ= 4 .5 dB , E = 32
+
+10 −2
+
+10 −3
+
+10 −4
+
+10 −5 
+
+> ×5.6×5.9
+> ×7.5
+> ×4.1
+> ×11 .5
+> ×8.0
+> FER
+
+BP-20 BP-( 20 E) gated SMS gated RBE [proposed] ML [21] OSD-3 Fig. 9. Performance gains for different channel codes evaluated at γ = Eb/N 0 using an ensemble of size E. RBE (gated) is compared with plain BP-20, the matched-budget BP-( 20 E), SMS (gated) and the ML or OSD-3 reference where available. Corresponding H matrices are shown beneath each code. 
+
+saturated-min-sum ensembles of equal size; larger ensembles further approach the ML threshold for the shortest codes. The gains transfer across 5G NR block lengths and rates as well as to other code families with the greedy row search. We found that boosted rows reliably anchor failed BP trajectories, especially if their support is error-free. Notably, RBE does not rely on a highly tuned boost design. Even random row-boost configurations provide measurable gains and transfer across different scenarios. RBE is a low-overhead mechanism for decoder-side di-versity, not an ML decoder. It helps when changing the relative strength of selected parity checks redirects a failed BP trajectory toward the transmitted codeword; it is least effective when all boosted trajectories fail or when the received word is closer to a wrong valid codeword. The residual gap to ML is therefore a list-completeness limit: at high SNR, the correct codeword is predominantly absent from L. Since the selected rows transfer across the rate family without re-tuning and the useful boost factor spans a broad range, the design effort remains small. Candidate re-encoding, OSD-0, soft-information fusion, the energy–latency optimization of the execution policy, and adaptive online row selection are deferred to future work. REFERENCES [1] T. Richardson, “Error floors of LDPC codes,” in Proceedings of the 41st Annual Conference on Communication, Control and Computing , 2003. [2] D. Shin, K. Heo, S. Oh, and J. Ha, “A stopping criterion for low-density parity-check codes,” in 2007 IEEE 65th Vehicular Technology Conference - VTC2007-Spring , 2007, pp. 1529–1533. [3] T. Hehn, J. B. Huber, S. Laendner, and O. Milenkovic, “Multiple-bases belief-propagation for decoding of short block codes,” in IEEE Inter. Symp. Inf. Theory (ISIT) , Jun. 2007, pp. 311–315. [4] T. Hehn, J. B. Huber, O. Milenkovic, and S. Laendner, “Multiple-bases belief-propagation decoding of high-density cyclic codes,” IEEE Transactions on Communications , vol. 58, no. 1, pp. 1–8, 2010. [5] C. Chen, B. Bai, X. Yang, L. Li, and Y. Yang, “Enhancing iterative decoding of cyclic LDPC codes using their automorphism groups,” 
+
+IEEE Transactions on Communications , vol. 61, no. 6, 2013. [6] M. Geiselhart, M. Ebada, A. Elkelesh, J. Clausius, and S. ten Brink, “Automorphism ensemble decoding of quasi-cyclic LDPC codes by breaking graph symmetries,” IEEE Communications Letters , vol. 26, no. 8, pp. 1705–1709, 2022. [7] J. Mandelbaum, P. Bezner, H. J¨ akel, S. ten Brink, and L. Schmalen, “Affine subcode ensemble decoding of linear block codes,” 2026. [Online]. Available: https://arxiv.org/abs/2604.06889 [8] S. Kudekar, T. Richardson, and A. Iyengar, “The effect of saturation on belief propagation decoding of LDPC codes,” in IEEE International Symposium on Information Theory , June 2014, pp. 2604–2608. [9] M. Geiselhart, A. Elkelesh, M. Ebada, S. Cammerer, and S. ten Brink, “CRC-aided belief propagation list decoding of polar codes,” in IEEE Inter. Symp. Inf. Theory (ISIT) , Jun. 2020. [10] F. Krieg, J. Clausius, M. R¨ ubenacke, and S. ten Brink, “A comparative study of ensemble decoding methods for short length LDPC codes,” in 
+
+2025 14th International ITG Conference on Systems, Communications and Coding (SCC) , 2025, pp. 1–6. [11] E. Nachmani, E. Marciano, L. Lugosch, W. J. Gross, D. Burshtein, and Y. Be’ery, “Deep learning methods for improved decoding of linear codes,” IEEE Journal of Selected Topics in Signal Processing , vol. 12, no. 1, pp. 119–131, 2018. [12] D. Hocevar, “A reduced complexity decoder architecture via layered decoding of LDPC codes,” in IEEE Workshop on Signal Processing Systems, 2004. SIPS 2004. , 2004, pp. 107–112. [13] M. P. Fossorier and S. Lin, “Soft-decision decoding of linear block codes based on ordered statistics,” IEEE Transactions on information Theory , vol. 41, no. 5, pp. 1379–1396, 1995. [14] M. Geiselhart, A. Elkelesh, M. Ebada, S. Cammerer, and S. ten Brink, “On the automorphism group of polar codes,” in IEEE Inter. Symp. Inf. Theory (ISIT) , 2021, pp. 1230–1235. [15] S. Scholl, P. Schl¨ afer, and N. Wehn, “Saturated min-sum decoding: An “afterburner” for LDPC decoder hardware,” in 2016 Design, Automation & Test in Europe Conference & Exhibition (DATE) , 2016. [16] T. Richardson and R. Urbanke, “Multi-edge type LDPC codes,” in 
+
+Workshop honoring Prof. Bob McEliece on his 60th birthday , California Institute of Technology, Pasadena, CA, USA, May 2002. [17] R. M. Tanner, D. Sridhara, A. Sridharan, T. E. Fuja, and D. J. Costello, “LDPC block and convolutional codes based on circulant matrices,” 
+
+IEEE Transactions on Information Theory , vol. 50, no. 12, pp. 2966– 2984, Dec. 2004. [18] IEEE, IEEE Standard for Local and Metropolitan Area Networks Part 16: Air Interface for Fixed and Mobile Broadband Wireless Access Systems , IEEE Standard IEEE Std 802.16e-2005, 2006. [19] ——, IEEE Standard for Information Technology—Local and Metropolitan Area Networks—Part 22: Cognitive Wireless RAN Medium Access Control (MAC) and Physical Layer (PHY) Specifications , IEEE Standard IEEE Std 802.22-2011, 2011. [20] CCSDS, TC Synchronization and Channel Coding , Consultative Com-mittee for Space Data Systems Recommended Standard (Blue Book) CCSDS 231.0-B-4, July 2021. [21] M. Helmling, S. Scholl, F. Gensheimer et al. , “Database of Channel Codes and ML Simulation Results,” www.rptu.de/channel-codes, 2025.

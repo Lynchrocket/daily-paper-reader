@@ -1,0 +1,384 @@
+Title: Kinetics of sliding-window quantum error correction
+
+URL Source: https://arxiv.org/pdf/2608.10081v1
+
+Published Time: Wed, 12 Aug 2026 00:06:34 GMT
+
+Number of Pages: 11
+
+Markdown Content:
+# Kinetics of sliding-window quantum error correction 
+
+Adithya Sriram, 1 Charles Stahl, 1 Aleksander Kubica, 2 and Yaodong Li 1, 3 
+
+> 1
+
+Department of Physics, Stanford University, Stanford, CA 94305 
+
+> 2
+
+Yale Quantum Institute & Department of Applied Physics, Yale University, New Haven, CT 06520 
+
+> 3
+
+Department of Mechanical Engineering & Department of Physics, University of Washington, Seattle, WA 98195 
+
+(Dated: August 11, 2026) Practical implementations of quantum error correction (QEC) require rapid measurement and continuous processing of the syndrome information in order to prevent a backlog of unprocessed data. While “static” QEC is theoretically well understood via mappings to equilibrium statistical mechanics models, such an understanding of “real-time” QEC is currently lacking. Here, we study the kinetics of sliding window decoding (SWD), an implementation of real-time decoding that acts on temporally local windows of noisy syndrome information and commits to corrections irreversibly at a nonzero rate. We propose an effective description of SWD in terms of a stochastic kinetic process, where Z2-charged point particles undergo parity-conserving reaction and diffusion. This model describes dynamics at length and time scales large compared to the window size W , whereas physics at scales smaller than W leads to nontrivial W -dependent scaling of the effective parameters. We identify the rate of decoding 1/W as a relevant perturbation to the decodable phase. We also show broad applicability of our results by changing many microscopic details of SWD without affecting the effective description. 
+
+Introduction — There has been tremendous progress in bringing quantum error correction (QEC) from a ques-tion of theoretical importance to practical implementa-tion [1–11]. Protecting quantum information in com-plex logical circuits while maintaining fast logical clock speeds is vital as we transition into the fault-tolerant era. To analyze the properties of a code, one often imagines an idealized “static” setting in which the experimental-ist records (possibly faulty) syndrome information for an extensive period of time; this full history is used to infer the location of errors and make decoding decisions. Most of the theoretical understanding of QEC is based on this idealized setting. For instance, the seminal work of Den-nis et al. [12] relates such a problem to a disordered equi-librium spin model and its phase transitions, with general applicability to a large family of QEC codes [13–18]. In contrast, any practical QEC protocol will require some version of “real-time” decoding, in which one only has access to the syndrome information within a short time interval before a decoding decision must be made. For example, in a scenario in which logical opera-tions must be performed on the quantum information at a nonzero rate, decoding speed becomes the bottle-neck [19]. In a prototypical scheme of real-time QEC, known as sliding-window decoding (SWD) [12, 20–22], the decoder combines a new set of syndrome information with the previously stored one, commits to corrections, and then discards the old data. This way, the decoder only ever maintains a finite amount of syndrome infor-mation. Practical considerations behind real-time de-coding schemes have motivated many technical improve-ments [20, 21, 23], but comparatively little attention has been devoted to developing their theoretical descriptions. Two features of real-time QEC rule out the equilib-rium statistical mechanics description of the static set-ting. First, decoding decisions are sequential and irre-versible, made at a finite rate. Second, errors compound over time through a nontrivial interplay of physical noise, measurement noise, and imperfect recovery, so that the accumulated error is not captured by any local noise model. Consequently, one may wonder whether real-time QEC can be related to any effective model, and whether such a model must be intrinsically non-equilibrium. Such a connection would not only provide a physical intuition and effective description of the dynamics of QEC, but also establish fundamental bounds on the performance of real-time QEC, providing a theoretical benchmark for recent numerical results [20, 21, 23–25]. In this work, we develop such a description for SWD for topological codes with deconfined point-like defects carrying Z2 charge. Through analytical arguments and numerical experiments, we show that SWD, at time and length scales larger than the window size W , admits an effective description in terms of a stochastic kinetic model, namely a parity-conserving reaction-diffusion pro-cess, see Eq. (1). The reaction-diffusion kinetics might be anticipated on symmetry grounds, and we show in the End Matter that indeed many microscopic details of SWD can be changed without modifying this universal-ity class. On the other hand, the scaling relations be-tween parameters of the reaction-diffusion process and 
+
+W are nontrivial and are not determined by symmetry alone. We connect the microscopic SWD dynamics and the effective description by extracting such scaling rela-tions, and by describing a crossover between the real-time regime (where W = O(1) ) and the static regime (where 
+
+W exceeds the code distance) with 1/W as a relevant parameter. Our work thus yields a greater theoretical understanding of the intrinsic tradeoffs one must grapple with in real-time decoding. arXiv:2608.10081v1 [quant-ph] 10 Aug 2026 2(a) (b)                      
+
+> 10 −110 0
+> W·L−1
+> 10 −2
+> 10 −1
+> −L−1 · ln Γ W,L /Γ0
+> (c)
+> L
+> 40 80 120 160 p
+> 0.09 0.08 0.07
+> FIG. 1. (a) Illustration of the sliding-window decoder, for the first few rounds. The error and the correction together form closed loops in the bulk, with possible termination on the temporal boundary between the “buffer” and the “future” regions. Within each round, only correction operations in the “commit” region are turned into physical corrections; those in the “buffer” region serve as a look-ahead to improve decoding accuracy. (b) Worldlines of Z2charges. Fast pair nucleation and annihilation events occur within O(W)time scale (gray), whereas slow processes persist over many decoding rounds (black), and contribute to decoding failure. Nucleation events for slow charges are highlighted in red. (c) Data collapse for the memory time extracted from Pfail (t;W, L )against Eq. (5), see main text for details. Results at different values of p < p cfall onto the same universal function Φ(up to an overall rescaling of the vertical axis).
+
+Definition of SWD — We first describe SWD in de-tail for a general d-dimensional CSS code of linear size 
+
+L under phenomenological noise with physical and mea-surement errors of rate p. We will then focus on the 1D repetition code and the 2D toric code as prototyp-ical examples in our numerical studies. For simplicity, we assume the decoder used is minimum weight perfect matching (MWPM) [12], though we also explore other decoder choices in the End Matter. Errors in the code create Z2 point-like charges and we will refer to them as such. In the Discussion, we will also comment on SWD as applied to more general classes of codes. As we illustrate in Fig. 1(a), SWD proceeds via con-secutive rounds of decoding, which we label with the integer n ∈ [0 , N ]. During the n-th round, we con-sider the syndrome information within the time window 
+
+[nW, (n+2) W ], which reveals the locations of Z2 charges. The syndrome is input to the decoder, which matches the measured error chain endpoints, i.e. charges. Now, we divide this spacetime slice into a commit window and a 
+
+buffer window , each of temporal size W [26]. The decoder only applies corrections that lie in the commit window. If the decoder matches charges that span the temporal boundary between the commit and buffer windows, a truncation of the matching to the commit window leaves behind a charge on this temporal boundary [hollowed dot in Fig. 1(a)], and this charge persists into the next round. The buffer window serves as a look-ahead that improves decoding accuracy, but no final decisions are made there yet. After this round, syndrome information in the com-mit window is erased. Each round thus overlaps with its neighboring ones and corrections are made every W time steps at a rate 1/W . This process is depicted for the (1+1)D repetition code in Fig. 1, and a formal definition can be found in the Supplemental Material [27]. The combination of the errors and the proposed and committed corrections form closed loops in spacetime, except at the temporal boundary between the buffer win-dow and the future window where open loops can anchor. These loops can be interpreted as the worldlines of the charges. 
+
+Effective model for SWD — In order to arrive at an effective description of the dynamics, we must make a crucial distinction between the fast Z2 charges which are created and annihilated within a single commit window, and the slow Z2 charges which actually contribute to logical failure. The worldlines of fast charges form closed loops of small spatiotemporal extent (see Fig. 1(a)) and they contribute a nonzero background density at any in-stant. However, they do not grow or persist and therefore do not seed logical failure. On the other hand, the slow charges which do cause logical failure are those whose initial spatial distance reaches ≥ W within a single commit window. For a pair of such charges, the action of the decoder on these charges, if there does not exist a suitable matching involv-ing other neighboring charges, transports each of them a bounded distance (of order W ζ per round, see Eq. (3)) independent of L (Fig. 1(a)). The pair therefore can per-sist over many rounds of decoding, essentially perform-ing independent random walks with finite step sizes. The time at which these pairs traverse the system and cause a logical error is what we call the memory time tmem . We provide more details on their quasi-local motion in the Supplemental Material [27]. We argue that the motion of these slow charges is de-3scribed by the following reaction-diffusion process [28–30] reaction: A + A λ
+
+−⇀↽− 
+
+> τ
+
+∅, (1a) diffusion: ∅ + A D
+
+←→ A + ∅, (1b) where A refers to a Z2 charge and ∅ refers to vacuum. Eq. (1a) describes a process in which two charges annihi-late at rate λ to produce a vacuum state, as well as the reverse, in which two charges nucleate from a vacuum state at rate τ . Eq. (1b) describes the diffusion process, in which a charge can move to neighboring unoccupied sites at rate D. While pair creation is predominantly a consequence of the errors, diffusion and pair annihilation come from both the errors and the decoder. We estimate the pair nucleation rate of the slow Z2
+
+charges via a standard Peierls argument for MWPM, provided a sufficiently small p. In order for a pair to be created and persist beyond a single commit window, 
+
+O(W ) “error events” are required to create and diffuse the charges a distance ≥ O(W ) apart from each other. This leads to a pair nucleation rate τ ∝ pκW at leading order, where κ is a nonuniversal geometrical factor that is fixed by the decoder. Generalizing to include higher order effects, we obtain the pair nucleation rate 
+
+τ (W ) ∝ e−κσW , (2) where σ = σ(p) is the line tension that depends only on the error rate p but not W or L.When two charges meet, they annihilate and cease to extend in the temporal direction. We therefore take the annihilation rate λ(W ) = 1 independently of W , describ-ing annihilation upon contact with probability 1.We can also extract a diffusion constant by treating the motion of the coarse-grained charges as a random walk whose elementary moves are the worldlines within each window. These worldlines traverse a strip of temporal extent W . The microscopic processes within a window cause the worldline to acquire some spatial displacement 
+
+δr, whose statistics follow that of directed polymers in random media (DPRM), |δr| ∝ W ζ , where ζ is the wan-dering exponent [31]. The coarse-grained charge there-fore executes a random walk with step size |δr| ∝ W ζ
+
+taken every δt ∝ W time units, see Fig. 1(b). Within ∆t
+
+time, the large-scale random walk takes N = ∆ t/δt such steps, and travels a distance |∆r| ∝ | δr| · N 1/z , where 
+
+z = 2 is the dynamic exponent of diffusion. We thus have an effective diffusion constant 
+
+D(W ) ∝ | δr|z · (δt )−1 ∝ W zζ −1. (3) For SWD on the repetition code in (1+1)D we have the DPRM exponent ζ = 2 /3 [32–35]. Putting these processes together, we have a simple ef-fective description of the dynamics in terms of a reaction-diffusion process of Z2 charges. The parameters D and τ
+
+of the effective model scale with the window size W non-trivially as described in Eq. (3) and Eq. (2). We expect these to hold whenever p < p c [36]. We also expect that our discussions apply generally to codes with deconfined point-like excitations in an arbitrary spatial dimension. The scaling of τ has direct consequences on the mem-ory time of the code. With τ > 0, charges nucleate and proliferate. At times longer than trelax , the reaction-diffusion process reaches a steady state with a nonzero charge density. Similarly, at times longer than tmem ,the code enters a state where different logical sectors are maximally mixed. For the codes that we consider here, a finite density of charges leads to a nonvanishing logical error rate, so we intuitively identify the relaxation time 
+
+trelax of the process in Eq. (1) with the memory time tmem 
+
+of the code under the SWD dynamics [37]. In particular, a numerical calculation of the memory time also provides an indirect test of Eq. (2) via 
+
+tmem ∝ trelax ∝ τ −α ∝ e+ακσW , (4) where α is a universal exponent for the process in Eq. (1) [38], and we have α = 1 in one spatial dimen-sion. Below, we numerically test the exponential scaling of tmem with W without directly extracting α [39]. 
+
+Crossover to W ≫ L — Throughout the above discus-sion, we have assumed that W ≪ L. If instead W → ∞ 
+
+we see from Eq. (3) that D diverges, indicating the break-down of the kinetic description. The charges are no longer random walkers slowly diffusing across the sys-tem, as they can now make nonlocal jumps. Indeed, as 
+
+W approaches and exceeds O(L), the reaction-diffusion dynamics Eq. (1) must give way to the equilibrium statis-tical mechanics model. Here, the dominant logical error is no longer due to proliferation of Z2 charges, but in-stead a single space-like domain wall crossing the system, whose free energy cost scales linearly in L. This yields a memory time that diverges as ln tmem ∝ L.Our discussions above motivate the following scaling form describing the crossover in W ,
+
+ln tmem ∝ L · Φ( W/L ), (5) for a universal scaling function Φ. To match the scaling of tmem for W ≪ L and W ≫ L, the limiting behaviors of Φ( x) are required to be (1) for x → 0, Φ( x) ≈ ακσx ,so that ln tmem ≈ ακσW in agreement with Eq. (4), and (2) for x → ∞ , Φ( x) → σ, so that ln tmem ≈ σL , in agreement with the expectation in the static limit. 
+
+Numerical results — We now provide numerical tests of SWD for the 1D repetition code. These results also provide evidence for the effective kinetic description from above. Parameters of this problem include the system size L, the window size W , the error rate p, and the time steps t, which is taken to be up to multiples of W . We will fix p to be below the threshold pc (defined when W → ∞ )
+
+and vary the other parameters. For the repetition code, 4we have pc ≈ 0.103 . We also study the 2D toric code, with results reported in End Matter. After t time steps (i.e. t/W rounds of SWD), we de-fine the logical failure probability at this time, denoted 
+
+Pfail (t; W, L ), through a noiseless recovery channel (cho-sen to be MWPM without measurement errors) applied to the final state. For the repetition code, it is also use-ful to define ∆ρ := |ρ0 − ρ1|, i.e. the absolute value of the spin density in the physical state. We initialize the system in the all-0 state, i.e. ∆ρ = 1 . We track both 
+
+∆ρ(t; W, L ) and Pfail (t; W, L ) over time. Our choice of these observables, which track the physical and logical errors in the system, is motivated by previous studies of single-shot QEC [40–43]. The behavior of Pfail (t; W, L ) is characterized by a linear-in-t growth with slope denoted ΓW,L , up until some time scale ∝ Γ−1
+
+> W,L
+
+, at which point Pfail (t; W, L ) satu-rates [44]. We thus define tmem ≡ Γ−1
+
+> W,L
+
+. In Fig. 1(c), we numerically find that 
+
+−L−1 · ln(Γ W,L /Γ0) ∝ Φ( W/L ), (6) in agreement with Eq. (5). The limiting behaviors of the functional form at small and large values of W/L also agree with our expectations below Eq. (5). The growth rate of ∆ρ(t; W, L ) obeys a similar scaling collapse. In performing the data collapse, the only fitting param-eter is the overall multiplicative factor Γ0 of ΓW,L con-tributing to an additive constant to the RHS of Eq. (5), which we fix independently using data from the static limit ( W → ∞ ). We expect the p-dependence of the failure probability to be captured entirely by the “line tension” L−1 · ln(Γ W,L /Γ0), and Γ0 to be a geometric fac-tor independent of p. Therefore, for all three values of p
+
+in Fig. 1(c), we use the same fitting parameter Γ0.We note that the form in Eq. (5) also allows for a non-universal multiplicative constant between the LHS and the RHS. Indeed, data at different values of p can be col-lapsed onto the same function Φ, after an overall rescaling of the vertical axis, confirming our expectation that Φ is universal [45]. Closer to the critical point p = pc, the vanishing of the line tension should be universal, but the presence of multiple length scales makes a numerical cal-culation more demanding, and we leave a more thorough investigation of the critical regime for future work. Next, we establish numerical evidence for the diffusive scaling of the dynamics and extract the diffusion con-stant, see Eq. (3). We initialize the system with a single domain wall at x = L/ 2 (so that ∆ρ = 0 ), as illustrated in Fig. 2, and study its motion under SWD. For this ex-periment we take open boundary conditions. We first focus on the regime W ≪ Lζ [Fig. 2(a)]. Here, from discussions leading to Eq. (3), the isolated domain wall appears as a random walker, with directed polymers of temporal extent ∝ W as its microscopic steps. The distance of the random walker from its initial location 10 −3 10 −1                   
+
+> W1/3·t·L−2
+> 10 −1
+> 10 0
+> 〈∆ρ〉 (W1/3·t·
+> L−2)1/2
+> L
+> 120 160 240 W
+> 412 20
+> 10 −110 010 1
+> t·L−2/3
+> 10 −1
+> 10 0
+> 〈∆ρ〉
+> L= 80 , W = 60
+> L= 120 , W = 60
+> L= 160 , W = 60
+
+(a) (b) 
+
+FIG. 2. Diffusive motion of Z2 charges. (a) For W ≪ Lζ , we predict that ⟨| ∆ρ|⟩ ∝ (D · t · L−2)1/2, where D ∝ W 1/3 is the effective diffusion constant, see Eq. (3). (b) For W ≫ Lζ , the domain wall tends to take a shortest path to terminate either on the left or right boundary. Thus, ⟨∆ρ⟩ saturates at time 
+
+t ∝ Lζ , where Lζ is the height of the domain wall. At earlier times, ⟨∆ρ⟩ depends on t through the scaling variable t · L−ζ .
+
+x = L/ 2 can be related to the spin density as 
+
+⟨| ∆x|⟩ ∝ L · ⟨ ∆ρ⟩, (7) where ⟨·⟩ is the expectation over all possible error config-urations weighted by the phenomenological noise model. This observable has the advantage that fast pair creation-annihilation processes (i.e. bubbles whose size distribu-tion is independent of W ) do not contribute. For diffusive scaling ⟨| ∆x|⟩ ∝ (D(W ) · ∆t)1/z , we expect that 
+
+⟨∆ρ⟩ ∝ L−1⟨| ∆x|⟩ ∝ L−1(W zζ −1 · ∆t)1/z , (8) where we have used D ∝ W zζ −1 (3). Our data is in excellent agreement with this expectation (see Fig. 2(a)). In the opposite regime W ≫ Lζ (see Fig. 2(b)), the dominant contributions come from DPRMs directed in the spatial direction. Its temporal extent scales as Lζ [27] and for t ≫ Lζ the random walker has a high probability of having terminated on either the left or right bound-aries, with ⟨∆ρ⟩ saturating at its steady state value. Be-fore saturation, the growth of ⟨∆ρ⟩ is described by a scal-ing function with a single scaling variable t · L−ζ .These two experiments both support the theoreti-cal picture we outlined, including the reaction-diffusion Eq. (1) as well as the scaling of the pair nucleation rate Eq. (2), the diffusion constant Eq. (3), and the mem-ory time Eq. (5). 
+
+Discussion — In this work, we have studied the dy-namics of SWD, which is one type of real-time QEC, 5focusing on topological codes with deconfined point-like defects. We have argued that the long-time, large-scale behavior admits a simple effective description, namely a parity-conserving reaction-diffusion process. The mem-ory time of the code is the relaxation time of this effective process, and its dependence on W and L is captured by a single-variable crossover scaling that interpolates be-tween the reaction-diffusion regime at W ≪ L and the static regime at W ≫ L. We argued for this general de-scription, and provided extensive numerical evidence for its validity, using the 1D repetition code and the 2D toric code (End Matter) as numerical examples. Our results provide concrete theoretical guarantees for the design and evaluation of SWD-style real-time de-coders. First, the crossover scaling identifies W/L as the natural figure of merit for speed-accuracy tradeoff, which can be used to inform error-budgeting with a given throughput constraint. Second, the reaction-diffusion picture is general and applies to a broad range of noise models and decoders, including those with explicit quasi-locality in both space and time or those with lower al-gorithmic complexity. We explore these possibilities in the End Matter and Supplemental Material [27], finding agreements with the reaction-diffusion process. The dynamics of SWD is sensitive to the sizes of the commit and buffer windows, which control the creation of the slow Z2 charges whose subsequent diffusion across the system leads to logical failure. Previous numerical studies of SWD [20, 21, 23] found that logical error sup-pression is exponential in the code distance d and per-formance close to the static setting can be recovered for windows scaling linearly with d. Our analysis of SWD provides a dynamical explanation for this dependence; varying the window sizes allows to probe sensitivity to timelike measurement errors, closely connecting to stabil-ity experiments [46] and lattice-surgery simulations [47]. Our effective model provides a new perspective on the fact that SWD is not a single-shot decoder for codes with point-like excitations. For any finite W , the memory time saturates and does not diverge as a function of L. Indeed, from Eq. (5), the rate of decoding 1/W acts as a relevant perturbation to the decodable (ordered) phase, and simi-larities can be drawn with dimensional crossover [48], see also [49, 50]. Single-shot decoders, on the other hand, have diverging memory times even when the decoder only has access to syndrome information from a single time step [40–42, 51, 52]. Even though allowing for W = O(1) 
+
+time steps may improve the threshold [25], it does not qualitatively change the behavior of the decoder. An ef-fective description of single-shot decoding would provide a universal understanding of this behavior. In particular, it would allow for the more general definition of single-shot memories as those for which 1/W is an irrelevant perturbation to the memory, unlike SWD where 1/W is relevant. Looking forward, real-time QEC may be viewed as perhaps the simplest non-trivial example of many-body dynamics driven by local operations and classical com-munication (LOCC). The resulting dynamics is neither unitary nor described by a fixed local quantum chan-nel. What other kinds of many-body dynamics can be realized under LOCC, when the figure of merit are com-munication bandwidth, range, latency, in addition to the relaxation time? Which non-equilibrium universal-ity classes, if any, are accessible to LOCC but not to local rules? While examples in this work belong to a known dynamical universality class, excitations carrying charge in a more general group than Z2 (either abelian or non-abelian), or excitations that obey kinetic constraints (instead of being deconfined) [53, 54], could lead to qual-itatively new behavior. 
+
+Acknowledgments — We thank Arpit Dua, Hyunsoo Ha, Jacob Hauser, Vedika Khemani, Ethan Lake, Aditya Mahadevan, Nicholas O’Dea, and Shengqi Sang for help-ful discussions. A.S. was supported in part by the Office of Naval Research Young Investigator Program (ONR YIP) under Award Number N00014-24-1-2098 and in part by a Packard Fellowship in Science and Engineer-ing (PI: Vedika Khemani). A.S. also acknowledges sup-port from the NSF graduate research fellowship and the ARCS Scholar award. C.S. was supported by the US Department of Energy, Office of Science under Award No DE-SC0025934. A.K. acknowledges support from the NSF (QLCI, Award No. OMA-2120757), IARPA and the Army Research Office (ELQ Program, Coop-erative Agreement No. W911NF-23-2-0219). Y.L. was supported in part by the Gordon and Betty Moore Foun-dation’s EPiQS Initiative through Grant GBMF8686, in part by the US Department of Energy, Office of Sci-ence under Award No DE-SC0019380, and in part by a Q-FARM Bloch Postdoctoral Fellowship at Stanford University. We acknowledge the hospitality of the Kavli Institute for Theoretical Physics (KITP), which is sup-ported in part by grant NSF PHY-2309135.                              
+
+> [1] C. Ryan-Anderson et al. , Science 385 , 1327–1331 (2024). [2] R. Acharya et al. , Nature 638 , 920–926 (2025). [3] I. Pogorelov, F. Butt, L. Postler, C. D. Marciniak, P. Schindler, M. Müller, and T. Monz, Nature Physics
+> 21 , 298–303 (2025). [4] H. Putterman et al. , Nature 638 , 927–934 (2025). [5] N. Lacroix et al. , Nature 645 , 614–619 (2025). [6] P. Sales Rodriguez et al. , Nature 645 , 620–625 (2025). [7] B. L. Brock, S. Singh, A. Eickbusch, V. V. Sivak, A. Z. Ding, L. Frunzio, S. M. Girvin, and M. H. Devoret, Na-ture 641 , 612–618 (2025). [8] L. Daguerre, R. Blume-Kohout, N. C. Brown, D. Hayes, and I. H. Kim, Physical Review X 15 , 041008 (2025). [9] A. Eickbusch et al. ,Nature Physics 21 ,1994–2001 (2025). [10] D. Bluvstein et al. , Nature 649 , 39–46 (2025).
+
+6
+
+[11] B. Zhang, G. Liu, G. Bornet, S. P. Horvath, P. Peng, S. Ma, S. Huang, S. Puri, and J. D. Thompson, Nature Physics 22 , 910–916 (2026). [12] E. Dennis, A. Kitaev, A. Landahl, and J. Preskill, Jour-nal of Mathematical Physics 43 , 4452 (2002). [13] H. G. Katzgraber, H. Bombin, and M. A. Martin-Delgado, Physical Review Letters 103 , 090501 (2009). [14] H. Bombin, R. S. Andrist, M. Ohzeki, H. G. Katzgraber, and M. A. Martin-Delgado, Physical Review X 2, 021004 (2012). [15] I. Dumer, A. A. Kovalev, and L. P. Pryadko, Phys. Rev. Lett. 115 , 050502 (2015). [16] A. Kubica, M. E. Beverland, F. Brandão, J. Preskill, and K. M. Svore, Phys. Rev. Lett. 120 , 180501 (2018). [17] C. T. Chubb and S. T. Flammia, Annales de l’Institut Henri Poincaré D, Combinatorics, Physics and their In-teractions 8, 269–321 (2021). [18] Y. Li, N. O’Dea, and V. Khemani, Perturbative stability and error correction thresholds of quantum codes (2024), arXiv:2406.15757 [quant-ph]. [19] B. M. Terhal, Rev. Mod. Phys. 87 , 307 (2015). [20] L. Skoric, D. E. Browne, K. M. Barnes, N. I. Gillespie, and E. T. Campbell, Nature Communications 14 , 7040 (2023). [21] X. Tan, F. Zhang, R. Chao, Y. Shi, and J. Chen, PRX Quantum 4, 040344 (2023). [22] F. Battistel, C. Chamberland, K. Johar, R. W. J. Over-water, F. Sebastiano, L. Skoric, Y. Ueno, and M. Usman, Nano Futures 7, 032003 (2023). [23] H. Bombín, C. Dawson, Y.-H. Liu, N. Nickerson, F. Pastawski, and S. Roberts, Modular decoding: par-allelizable real-time decoding for quantum computers (2023), arXiv:2303.04846 [quant-ph]. [24] T. Oberoi, J. Viszlai, and F. T. Chong, Adapt: Adaptive-window decoding for practical fault-tolerance (2026), arXiv:2605.01149 [quant-ph]. [25] S. Huang and S. Puri, Phys. Rev. A 110 , 012453 (2024). [26] In principle, the relative size of the buffer window and commit window may be tuned, but for simplicity, we make them equal. [27] See Supplemental Material for further discussions of (i) formal definition and effective description of the slid-ing window decoder (SWD), and (ii) an absorbing state phase transition of the SWD under SWAP noises. [28] J. L. Cardy and U. C. Täuber, Journal of Statistical Physics 90 , 1 (1998), arXiv:cond-mat/9704160 [cond-mat.stat-mech]. [29] M. Henkel, H. Hinrichsen, and S. Lübeck, Non-equilibrium Phase Transitions: Volume I: Absorbing Phase Transitions (Springer, 2008). [30] P. L. Krapivsky, S. Redner, and E. Ben-Naim, A Kinetic View of Statistical Physics (Cambridge University Press, 2010). [31] In (1+1)D and for a large enough W , the worldlines here are domain walls within a 2D random-bond Ising model, and they have DPRM exponents [32–35]. [32] D. A. Huse and C. L. Henley, Phys. Rev. Lett. 54 , 2708 (1985). [33] M. Kardar, Phys. Rev. Lett. 55 , 2923 (1985). [34] D. A. Huse, C. L. Henley, and D. S. Fisher, Phys. Rev. Lett. 55 , 2924 (1985). [35] M. Kardar, G. Parisi, and Y.-C. Zhang, Phys. Rev. Lett. 
+
+56 , 889 (1986). [36] Here, pc is the threshold defined in the static limit (W → ∞ ), as our arguments really only depend on the assumption of a nonzero domain wall line tension. [37] However, in single-shot codes, self-correcting codes, or other code families this identification may not hold. [38] Z. Rácz, Phys. Rev. Lett. 55 , 1707 (1985). [39] In our numerical experiments, slow charges are always clouded by a background of fast charges, and are not easily distinguishable. [40] H. Bombín, Phys. Rev. X 5, 031043 (2015). [41] A. Kubica and M. Vasmer, Nature Communications 13 ,6272 (2022). [42] B. J. Brown, N. H. Nickerson, and D. E. Browne, Nature Communications 7, 12302 (2016). [43] S. Gu, E. Tang, L. Caha, S. H. Choe, Z. He, and A. Ku-bica, Communications in Mathematical Physics 405 , 85 (2024). [44] The steady state value of Pfail (t; W, L ) is simply 1 −
+
+2−(# logicals ), which for the repetition code equals 1/2.[45] We note that a rescaling of the horizontal axis is not required to collapse data at different p in Fig. 1, as long as the decoder is fixed. Comparing the asymptotics of the scaling function Φ( x) [see discussions below Eq. (5)], namely Φ( x → ∞ ) = σ(p) and Φ′(x = 0) = ακσ (p),we see that the dependence on p comes entirely from the line tension, and can thus be eliminated by rescaling the vertical axis only. In particular, the “bend” of Φ is near 
+
+x∗ ≈ 1/(ακ ), independent of p.[46] C. Gidney, Quantum 6, 786 (2022). [47] C. Chamberland and E. T. Campbell, PRX Quantum 3,010331 (2022). [48] J. Cardy, Scaling and Renormalization in Statistical Physics , Cambridge Lecture Notes in Physics (Cam-bridge University Press, 1996). [49] S. J. S. Tan, C. A. Pattison, M. McEwen, and J. Preskill, Phys. Rev. A 113 , 022450 (2026). [50] A. Sriram, N. O’Dea, Y. Li, T. Rakovszky, and V. Khe-mani, Phys. Rev. B 111 , 224208 (2025). [51] Y. Li, C. W. von Keyserlingk, G. Zhu, and T. Jochym-O’Connor, Phys. Rev. Research 6, 043007 (2024). [52] C. Stahl, Phys. Rev. B 110 , 075143 (2024). [53] M. E. J. Newman and C. Moore, Phys. Rev. E 60 , 5068 (1999). [54] J. Haah, Phys. Rev. A 83 , 042330 (2011). [55] N. Delfosse and N. H. Nickerson, Quantum 5, 595 (2021). [56] G. Duclos-Cianci and D. Poulin, Phys. Rev. Lett. 104 ,050504 (2010), arXiv:0911.0581 [quant-ph]. [57] S. Bravyi and J. Haah, Phys. Rev. Lett. 111 , 200501 (2013). [58] C. Wang, J. Harrington, and J. Preskill, Annals of Physics 303 , 31 (2003). [59] H. Hinrichsen, Advances in Physics 49 , 815 (2000), arXiv:cond-mat/0001070. [60] D. Zhong and D. ben Avraham, Physics Letters A 209 ,333 (1995). 7
+
+END MATTER 
+
+Here, we explore a number of different scenarios for SWD beyond the repetition code and MWPM, with the aim of extending the validity of our effective description to a greater range of codes and decoders. 
+
+Explicitly quasi-local dynamics 
+
+The quasi-local effective description, particularly that point defects have a “range of interaction” of O(W ), sug-gests that it might be possible to capture large scale properties of SWD (which is nonlocal in space) by a mi-croscopic model with quasi-locality of range O(W ). We examine a few such realizations and confirm these ex-pectations. These numerical experiments serve as ad-ditional nontrivial tests of our general reaction-diffusion description. They also provide theoretical guarantees to these decoders (which are desirable from the practical standpoint due to their quasi-locality and numerical ef-ficiency). In all cases, we focus on Pfail (t; W, L ) as de-scribed in the main text. 
+
+Modular SWD 
+
+We first consider the modular SWD, defined in Fig. 3(a,b). We divide the spacetime lattice into square blocks of size W × W . Within each round, we first com-mit to even-numbered blocks, with their 3W × 2W sur-10 −3 10 −1
+
+W 1/3 · t · L−2
+
+10 −1
+
+10 0
+
+> 〈| ∆ρ|〉
+
+(c)     
+
+> (W1/3·t·
+> L−2)1/2
+> L
+> 120 180 240 360 W
+> 20 30 40
+
+10 −1
+
+W · L−1
+
+10 −2
+
+> −L−1 · ln Γ W,L /Γ0
+
+(d)       
+
+> L= 240
+> L= 120
+> L= 60
+> ∝W·L−1
+
+FIG. 3. (a, b) Layout of modular SWD. (c) Results for dif-fusive motion under modular SWD, compare with Fig. 2(a). (d) Results for the crossover scaling of the memory time un-der modular SWD, compare Fig. 1(c). 
+
+rounding as a buffer (Fig. 3(a)); and then commit to odd-numbered blocks, with their W × 2W surrounding as a buffer (Fig. 3(b)). Because the even blocks have al-ready been committed, the odd blocks require a smaller buffer. Attention must be paid to the boundaries of the decoding windows: dashed lines between buffer and fu-ture indicates that the correction chain E′ is allowed to cross that boundary, whereas solid lines between commit 
+
+and past indicates that the correction chain E′ is con-strained not to cross that boundary. Similarities can be found between modular SWD and the modular decoder proposed in Ref. [23]. Our results are shown in Fig. 3(c,d). In Fig. 3(c), we find similar scaling of the diffusion constant D as in Eq. (3) and Fig. 2(a). Due to the lower computational cost, we can access larger system sizes while maintaining 
+
+W ≪ Lζ , so that the diffusive scaling can be verified for a larger range of W . In Fig. 3(d), we find similar crossover scaling of tmem as in Eq. (5) and Fig. 1(c). By design, we are limited to regimes W/L ≪ 1, as the blocks have spa-tial extent limited by the system size; this explains why we do not see the full range of the scaling function Φ.We thus conclude that modular SWD correctly cap-tures universal aspects of SWD, while requiring a smaller numerical overhead, as it operates on an O(W ) × O(W )
+
+decoding window, rather than an O(L)×O(W ) one. Due to its modularity, modular SWD should be the preferred choice over SWD for real-time decoding. 
+
+Union-Find and Clustering decoders 
+
+Next, we consider the 1D repetition code and SWD, but with MWPM replaced by either the union-find (UF) [55] or clustering [56, 57] decoders. Both algorithms proceed by growing clusters isotropically from seeds of point-like defects. Clusters stop growing whenever they become resolvable by an error chain, which in our con-vention are allowed to terminate on the boundary of a window. Comparing the two, the clustering decoder re-moves a resolvable cluster by finding and applying an error chain immediately after one is found, whereas the UF decoder performs global removal at the very end. 10 −1 10 0
+
+W · L−1
+
+10 −2
+
+> −L−1 · ln ΓW,L
+> Γ0
+
+(a) UF           
+
+> p= 0 .06
+> L= 40
+> L= 80
+> L= 120
+> L= 160
+> L= 200
+> L= 240
+> ∝W·L−1
+
+10 −1 10 0
+
+W · L−1
+
+10 −2
+
+> −L−1 · ln ΓW,L
+> Γ0
+
+(b) Cluster           
+
+> p= 0 .06
+> L= 40
+> L= 80
+> L= 120
+> L= 160
+> L= 200
+> L= 240
+> ∝W·L−1
+
+FIG. 4. Results from Pfail of SWD with the UF and clustering decoders. The data is in agreement with Eq. (5) and Fig. 1(c). 8Under the UF or clustering decoders, pairs of Z2
+
+charges separated by a distance greater than O(W ) are essentially invisible to each other. Therefore, similarly to SWD with MWPM, SWD with the UF or clustering decoders is also expected to undergo quasi-local motion as described by Eq. (1). Indeed, with numerical results in Fig. 4 we find agreements with the crossover scaling in Eq. (5) and Fig. 1(c). Note that the error rate is adjusted accordingly, as the UF and clustering decoders have a lower threshold. 
+
+> Crossover scaling for the 2D toric code
+
+We now examine whether the reaction-diffusion de-scription established for the 1D repetition code in the main text extends to the 2D toric code. The code is defined on an L × L square lattice with periodic bound-ary conditions, and is subject to phenomenological noise: independent bit-flip (Pauli Z) errors on data qubits at rate p and independent measurement errors on syndrome bits at rate p. We decode using SWD with MWPM acting within each window, following the same com-mit/buffer/projection prescription as in Fig. 1(a). The microscopic degrees of freedom differ from those of the 1D repetition code in a few ways. On each time slice, the syndrome is a collection of violated plaquette operators, i.e. point-like Z2 anyons. Therefore, E ⊕ E′ is a collection of closed loops in (2+1) -dimensional space-time. (A similar picture holds for the phase-flip (Pauli X) errors.) The coarse-graining arguments nevertheless go through: syndrome pairs separated by more than 
+
+W in spacetime are not resolved within a single decod-ing window, so the screening cutoff is still of order W ,and the slow degrees of freedom of the effective theory are coarse-grained anyons undergoing parity-conserving reaction-diffusion process. The main differences from the 1D case are that the anyons now diffuse in two spatial dimensions. Therefore, the scaling of the diffusion constant D(W ) ∝ W zζ −1 will have a different value of ζ, given by a directed polymer 10 1 10 2 10 3                       
+
+> t
+> 10 −4
+> 10 −3
+> 10 −2
+> 10 −1
+> Pfail
+> (a)
+> L= 24 , p = 0 .02
+> W
+> 46816
+> 10 −110 0
+> W·L−1
+> 10 −1
+> 2×10 −1
+> 3×10 −1
+> 4×10 −1
+> −L−1 · ln ΓW,L
+> Γ0
+> (b)
+> p= 0 .02
+> L= 16
+> L= 24
+> L= 32
+> L= 40
+> ∝W·L−1
+> FIG. 5. Crossover scaling of the 2D toric code (compare with Fig. 1 for the 1D repetition code). For early times, we did not observe any logical failures in 10 4realizations.
+
+in three spatial dimensions. However, we have not been able to directly test this. The (1+1)D domain-wall order parameter ∆ρ used to track a coarse-grained charge in Fig. 2 has no direct (2+1)D analogue, and the position of an isolated coarse-grained charge cannot be read off from a local observable in the same way. For this reason, we do not present a test of the diffusion scaling for the toric code analogous to Fig. 2, and instead focus on the crossover scaling of the memory time. Initializing the system in a logical codeword state we run SWD at fixed error rate p < p c for long enough to extract the logical failure rate ΓW,L from the linear growth of Pfail (t; W, L ), as in the main text. We find that the same scaling form applies, 
+
+−L−1 · ln ΓW,L 
+
+Γ0
+
+= Φ 2D (W/L ), (9) where Φ2D has the same asymptotic behavior as the 1D scaling function in Eq. (5), i.e. linear at small argument and saturating at large argument, see Fig. 5(b). We note that the static threshold for the 2D toric code under phe-nomenological noise is pc ≈ 2.9% [12, 58], lower than that of the 1D repetition code at the same abstract level of description; this limits the range of error rates over which the scaling can be tested deep in the decodable phase. 1
+
+# Supplemental Material for “Kinetics of sliding-window quantum error correction” 
+
+Adithya Sriram, 1 Charles Stahl, 1 Aleksander Kubica, 2 and Yaodong Li 1, 3 1Department of Physics, Stanford University, Stanford, CA 94305  
+
+> 2Yale Quantum Institute & Department of Applied Physics, Yale University, New Haven, CT 06520
+> 3Department of Mechanical Engineering & Department of Physics, University of Washington, Seattle, WA 98195
+> (Dated: August 11, 2026)
+> S1. FORMAL DEFINITION AND EFFECTIVE DESCRIPTION OF THE SLIDING WINDOW DECODER (SWD)
+
+In this section we describe the SWD in some more detail, and provide motivations for the effective description in Eq. (1).  
+
+> A. Formal definition of the SWD
+
+Our discussion is focused on d-dimensional topological CSS codes with deconfined point-like defects; see Ref. [12] for more details. In this setting, the decoding problem can be associated with a (d + 1) -dimensional spacetime lattice. The spacetime locations of physical errors and measurement errors are captured by the error chain ; the correction chain captures the output of the local decoder R, i.e., the locations of estimated errors. The detectors, which, in the absence of errors, are deterministic products of stabilizers, can be associated with the vertices of the spacetime lattice. The syndrome information corresponds to the triggered detectors (note that a detector is triggered only if the number of errors incident to it is odd). For the error chain E, we denote the corresponding syndrome as ∂E . For the specific cases of the repetition code and the d-dimensional toric code (with point-like defects), each individual error triggers at most two detectors, and therefore we can talk about Z2 charges at the endpoints of the error chain. The task of the decoder is to output a correction consistent with the observed syndrome (or, in other words, a correction that annihilates the defects), while trying to minimize the probability of causing a logical error. This correction E′ = R(∂E ) will naturally have common endpoints with E, namely ∂E = ∂E ′; these endpoints ∂E 
+
+correspond to “detection cells” (also known as frustrated plaquettes in an associated stat-mech model), which serve as inputs to R. Their combination E ⊕ E′ forms closed loops on the spacetime lattice, which for (1+1)D can be interpreted as domain walls of an effective Ising spin configuration. The closed loops in E ⊕ E′ can also be viewed as worldlines of Z2 charges. Generally speaking, while the error chain E can be defined unambiguously and independently of any decoder, the correction chain E′ must be defined with respect to a decoder. The sliding window decoder (SWD) operates in rounds, labeled by a non-negative integer n ∈ [0 , N ]. Define the cumulative correction chain before round n to be 
+
+(E′C )<n := M
+
+> n′<n
+
+E′C (n′). (S1) Here, E′C (n) is the committed correction chain in round n, to be defined inductively below. By convention, (E′C )(<0) = ∅
+
+and E′C (n) = ∅ for all n < 0.During the n-th round, the decoder inputs syndromes within the thin strip in spacetime (see Fig. 1). 
+
+B(n) := [ nW, (n + 2) W ] × [0 , L ] (S2) Within B(n), the decoder performs decoding based on the observed detection cells as follows 
+
+E′(n) := R ∂   E ⊕ (E′C )<n  ∩ B(n) . (S3) Notice that the syndrome is a result of both physical error E and past corrections (E′C )<n . Define the commit window 
+
+BC (n) := [ nW, (n + 1) W ] × [0 , L ] (S4) and the buffer window ,
+
+BB(n) := [( n + 1) W, (n + 2) W ] × [0 , L ]. (S5) 2The decoder only commits to corrections in BC (n),
+
+E′C (n) := E′(n) ∩ BC (n), (S6) whereas BB(n) serves as a look-ahead that improves decoding accuracy, but no final decisions are made there yet. As the commitment involves a change of basis on the physical space, the syndrome data will need to be transformed covariantly. After committing to E′C (n), the decoder discards the syndrome data from BC (n), and BB(n) slides forward to become BC (n + 1) . Each round thus overlaps with its neighboring ones, and corrections are made every W time steps at a rate R ∝ 1/W .Special attention to boundary condition is necessary when performing R within B(n). The correction chain E′(n)
+
+might span both BC (n) and BB(n) = BC (n + 1) , but the decoder will need to erase everything within BB(n) in the next round. Therefore, we must allow the possibility of projecting detection cells in BC (n) onto the temporal boundary between BC (n) and BB(n) = BC (n + 1) , see Eq. (S6), where E′C (n) effectively implements this projection. In this way, the projected detection cells can be picked up in the next round, see Eq. (S3), where R receives input from (E′C )<n ,including any such projection. This ensures that E ⊕ E′ form a closed loop, from which a consistent error history can be reconstructed.    
+
+> B. Quasi-local motion of coarse-grained Z2charges
+
+Viewing the closed loops in E ⊕ E′ as worldlines of Z2-charged point defects, we now argue that their motion admits a quasi-local description, as long as we look at length scales and time scales long compared to W .A quasi-local description is not obvious a priori , as the decoder R performs a global matching of point-like detection cells, and E′(n) := R[∂E ∩ B(n)] can in principle be long-ranged. One might therefore expect that any effective description of the evolution of E ⊕ E′ will necessarily be nonlocal as well. However, because the detection cells are allowed to be paired with temporal boundary (see Fig. 1(a)), the window width W introduces a cutoff on the length of E′(n). Indeed, consider a defect pair separated by ∆x ≫ W in space. Within a single window, R can either match the two endpoints with each other (at cost O(∆ x)) or match each endpoint locally with the temporal boundary (at cost O(W )). When ∆x ≫ W , the latter is always favorable, and the two endpoints are effectively “screened”. More generally, any connected component of length ≫ W in E′(n) will be suppressed exponentially. Therefore, we have argued that E′(n) := R[∂E ∩ B(n)] will typically have connected components of lengths at most 
+
+O(W ). Therefore, E′C (n) ⊆ E′(n) also typically has connected components of lengths at most O(W ). Writing 
+
+γtot := E ⊕ E′ = M
+
+> n
+
+[E ∩ BC (n)] ⊕ E′C (n)
+
+| {z }
+
+> =: γ(n)
+
+(S7) and interpreting them as worldlines of Z2 charges, our argument implies that the Z2 charges also move in a quasi-local manner. In particular, the time evolution within the round n is determined by γ(n), which contains local moves of size at most O(W ).Nevertheless, the charges can still travel a long distance, if they survive over many rounds, see Fig. 1(b).  
+
+> S2. BRANCHING-ANNIHILATING RANDOM WALKERS (BARW) UNDER SWAP NOISE CHANNEL
+
+The reaction-diffusion description developed in the main text does not have an absorbing-state phase transition, because the noise in the standard SWD setting is always present and the empty configuration is never a strict fixed point of the dynamics. Here we describe a modified error model in which the absorbing state is indeed stable, allowing access to an absorbing state phase transition. This provides another check of our effective description. We consider the 1D repetition code under a noise model in which bit-flip errors are turned off, and the only physical noise is a random SWAP channel acting on neighboring bits. A SWAP acts trivially on uniform configurations of all 0
+
+or all 1, therefore preserve the absorbing states. In the language of Eq. (1), pair creation is forbidden ( τ = 0 ). When there is an isolated domain wall, a SWAP acting across the domain wall can move a 0 into the region of 1s (or vice versa), creating an isolated bit surrounded by its opposite and hence two new domain walls, 
+
+00001111 → 00010111 . (S8) 3             
+
+> FIG. S1. Numerical results for the SWD under a SWAP noise channel, which we compare with a branching-annihilating process, see Eq. (S9). (a) When we increase the SWAP rate σ, the system goes from an absorbing phase where the domain wall density decays as ρDW ∝t−1/2at long times, to an active phase where ρDW saturates at a nonzero constant. (b, c) The critical data for ρDW can be fitted to Eq. (S10), and agreements with DP2 exponents are found.
+
+Under the joint action of the SWAP channel (which supplies the 1-to-3 branching of domain walls) and the SWD feedback (which matches syndromes and contributes to annihilation on contact, as well as to diffusion), the domain walls evolve as a parity-conserving branching-annihilating random walk (BARW) [28, 59], 
+
+∅A D
+
+←→ A∅, (S9a) 
+
+AA λ
+
+−→ ∅ , (S9b) 
+
+A σ
+
+−→ AAA. (S9c) which is known to undergo an absorbing-state phase transition in the DP2 (parity-conserving) universality class as σ
+
+is tuned. Note that in the present setting D cannot be varied independently of σ.We simulate this model and tune through an absorbing-state transition. We fix W = 4 , take the SWD with MWPM as its inner decoder, and start with an initial state with domain wall density ρDW = 0 .2. For σ < σ c, the system is in the absorbing phase and we find the diffusion-limited asymptotic decay ρDW ∝ t−1/2, see Fig. S1(a). Near the critical point ρDW obeys the following standard scaling relation, 
+
+ρDW (σ; t, L ) = t−δ Υ( t · L−z , (σ − σc) · L1/ν ⊥ ) = L−zδ eΥ( t · L−z , (σ − σc) · L1/ν ⊥ ), (S10) where δ ≈ 0.285 , ν ⊥ ≈ 1.83 , z ≈ 1.74 are exponents of the DP2 universality class [60]. The scaling ansatz as well as the DP2 exponents are consistent with our findings in Fig. S1(b,c). We view this as a further nontrivial test of our effective description, where the reaction-diffusion process is tuned across a critical point. Our results should be generally applicable for any W = O(1) . The crossover to large W is an interesting question we leave for the future.

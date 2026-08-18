@@ -1,0 +1,2589 @@
+Title: Decoupling 2D translation-invariant topological CSS codes
+
+URL Source: https://arxiv.org/pdf/2608.09915v1
+
+Published Time: Tue, 11 Aug 2026 02:44:06 GMT
+
+Number of Pages: 33
+
+Markdown Content:
+## Decoupling 2D translation-invariant topological CSS codes 
+
+Yifei Wang, 1, 2 Zhongyi Ni, 3 Mingxin He, 1, 2 Jinguo Liu, 3 and Yingfei Gu 1, 2, ∗
+
+> 1
+
+Institute for Advanced Study, Tsinghua University, Beijing, 100084, China 
+
+> 2
+
+Beijing Key Laboratory of Cold Atom Quantum Computation, Tsinghua University, Beijing, 100084, China 
+
+> 3
+
+Hong Kong University of Science and Technology (Guangzhou), Guangzhou, 511453, China 
+
+(Dated: August 8, 2026) Two-dimensional translation-invariant topological CSS codes on qubits are known to be locally equivalent, after coarse-graining, to stacks of toric codes. However, existing constructions generally break more translation symmetry than is required to remove anyon-permuting translations, leaving open whether any further obstruction exists. We prove that no such obstruction occurs: after passing to the maximal anyon-preserving superlattice, every such code admits a local unitary decoupling into toric codes and product states. We further provide an efficient algorithm for explicitly constructing the decoupling map, together with bounds on the required supercell size and operator spreading. The decoupling requires no additional ancillas in generic cases and extends to finite systems with suitable boundary conditions. 
+
+Introduction.– Two-dimensional (2D) topological Calderbank-Shor-Steane (CSS) codes, exemplified by the toric code [1], are central to fault-tolerant quantum computation and the study of topological phases of matter. Since its introduction, the toric code has become one of the best-understood quantum codes, with major theoretical and experimental advances, including the characterization of its error-correction threshold and the development of efficient decoders [2], fault-tolerant logical gate protocols based on braiding and lattice surgery [3, 4], and the experimental realization of quantum error correction below threshold [5]. More recently, bivariate bicycle (BB) codes have emerged as a promising family of quantum LDPC codes with a 2D translation structure [6]. Their relatively high code rates make them attractive candidates for low-overhead quantum memories. However, important ques-tions concerning logical gates and efficient decoding re-main active areas of research. A deeper understanding of BB codes, and more broadly of 2D translation-invariant topological CSS codes, is therefore important both fun-damentally and for fault-tolerant quantum computation. A natural strategy is to relate these codes to well-understood models such as the toric code. Such con-nections allow structural properties and computational tools to be transferred from familiar codes to less under-stood ones. This approach has been particularly fruitful for color codes, which can be mapped by local unitaries with ancillas to decoupled copies of the toric code [7]. Our goal is to construct such a decoupling map for a generic 2D translation-invariant topological CSS code. Existing classification and constructive results estab-lish that these codes are locally equivalent, after suit-able coarse-graining, to stacks of toric codes and prod-uct states [8–11]. However, these constructions gener-ally coarse-grain beyond what is required to eliminate  
+
+> ∗E-mail: guyingfei@tsinghua.edu.cn
+
+anyon-permuting translations, leaving open whether an additional fundamental obstruction exists to decoupling at the maximal residual translation symmetry. We show that no such obstruction exists: anyon permutation is the sole obstruction [12]. Thus, every 2D translation-invariant topological CSS code admits a decoupling uni-tary preserving the maximal anyon-preserving translation symmetry. In addition, we explicitly construct an effi-cient algorithm computing the decoupling unitary with controlled operator spreading. 
+
+Definitions and notation.– We consider 2D translation-invariant topological CSS codes defined as the ground-state spaces of commuting Pauli Hamiltonians 
+
+H = − X
+
+> (a,b )∈Z2
+> s
+
+X
+
+> i=1
+
+SXi (a, b ) + 
+
+> r
+
+X
+
+> i=1
+
+SZi (a, b )
+
+!
+
+, (1) subject to the following conditions: 1. Local CSS stabilizer generators: Each SX/Z i (a, b )is a finite-support product consisting exclusively of Pauli X or Z operators. All generators commute and together generate the stabilizer group. 2. Translation invariance: Each SX/Z i (a, b ) is obtained by translating SX/Z i (0 , 0) by lattice vector ( a, b ). 3. Topological order: There are no finite-support log-ical Pauli operators. Equivalently, on the infinite plane, every finite-support Pauli operator commut-ing with the stabilizer group belongs to the sta-bilizer group, up to phase (cf. TQO-1 of Bravyi, Hastings, and Michalakis [13]). We now formulate these conditions using the module-theoretic framework [14] and the chain-complex repre-sentation of CSS codes [1, 15, 16]. Let R = F2[x±1, y ±1]be the Laurent polynomial ring, where multiplication by 
+
+x and y represents translation by one lattice spacing in arXiv:2608.09915v1 [quant-ph] 10 Aug 2026 2the two coordinate directions. The code is customarily represented by the chain complex 
+
+Rr H†
+
+> Z
+
+−−−→ Rq HX
+
+−−−→ Rs. (2) where † denotes transposing a matrix and taking element-wise antipodes, i.e., replacing variables x, y by x =
+
+x−1, y = y−1. Pauli operators are represented modulo overall phases, so their multiplication corresponds to ad-dition in the associated R-modules. The middle mod-ule Rq represents Pauli Z operators on a lattice with 
+
+q qubits per unit cell: the element xaybei ∈ Rq corre-sponds to the operator Zi(a, b ) acting on qubit i in the unit cell at ( a, b ). The module Rr labels the r transla-tion classes of Z-type stabilizer generators. In particular, 
+
+xaybei ∈ Rr is mapped by H† 
+
+> Z
+
+to the stabilizer SZi (a, b ). Similarly, Rs records the syndromes associated with the 
+
+s translation classes of X-type stabilizer generators, and 
+
+HX maps a Pauli Z operator to the X-check syndrome that it creates. The commutativity of the stabilizer gen-erators is equivalent to HX H† 
+
+> Z
+
+= 0. The topological-order condition further implies exactness at the qubit module, ker HX = im H† 
+
+> Z
+
+. The superselection sectors of 
+
+X-check excitations, which we refer to as e-anyons, are therefore classified by coker HX := Rs/ im HX . Exchang-ing the roles of X and Z gives the dual chain complex 
+
+Rs H†
+
+> X
+
+−−→ Rq HZ
+
+−−→ Rr whose cokernel coker HZ classifies the m-anyons. Without loss of generality, we assume that the chosen translation classes of stabilizer generators are indepen-dent, so that both H† 
+
+> Z
+
+and H† 
+
+> X
+
+are injective. Such a choice can always be made for two-dimensional topologi-cal stabilizer codes [9, 14]. Together with the topological order condition, this implies (1) q = r+s, i.e., the density of qubits equals the density of independent checks; and (2) t := dim F2 coker HX = dim F2 coker HZ < ∞, i.e., we have equal numbers of e anyons and m anyons. As a basic example, the toric codes have r = s = 1 and 
+
+q = 2, with 
+
+HX = ( x − 1, y − 1) , HZ = (1 − y, x − 1) . (3) Let J := ( x − 1, y − 1). Then the e- and m-anyons are both R/J = F2, so we have t = 1 for toric codes. 
+
+Translation-symmetry and the decoupling unitary.– As briefly discussed in the introduction, the central question is whether the decoupling map can preserve the maximal residual translation symmetry allowed by the code struc-ture. A certain amount of translation-symmetry breaking is unavoidable because of a phenomenon referred to by Ki-taev as weak symmetry breaking [17]. In modern ter-minology, this is also called an anyon-permuting trans-lation symmetry [18]: although the Hamiltonian and ground-state space are translation-invariant, the induced action on superselection sectors can be nontrivial. Famil-iar examples include the Wen plaquette model [19, 20], equivalently the rotated surface code [21], and color codes [22, 23]. By contrast, translations act trivially on the anyon types of the standard toric code. Therefore, the anyons of a generic input code cannot be aligned with those of the target toric codes while pre-serving the full translation symmetry. One must pass to a superlattice whose translations preserve every anyon, or equivalently coarse-grain the lattice. After this necessary coarse-graining, the code satisfies ann coker HX = ann coker HZ = ( x − 1, y − 1) , (4) where ann M = {f ∈ R : f M = 0 } denotes the annihila-tor of an R-module M . Physically, this condition means that every anyon type can be translated by one coarse-grained lattice vector using a finite-support Pauli opera-tor, also referred to as a hopping operator in Ref. [8]. Previous constructions [8–11] require further coarse-graining beyond this anyon-preserving superlattice. Is it a genuine obstruction? We show by the following main theorem that it is not: once the anyon-permuting trans-lations are removed, no further obstruction appears. 
+
+Theorem (Symmetry-preserving unitary decoupling) .
+
+Given a code whose chain complex and dual complex 
+
+Rr H†
+
+> Z
+
+−−→ Rq HX
+
+−−→ Rs, Rs H†
+
+> X
+
+−−→ Rq HZ
+
+−−→ Rr (5) 
+
+have the following properties: 1. both complexes are exact; 2. H† 
+
+> Z
+
+, H † 
+
+> X
+
+are injective; 3. dim F2 coker HX = dim F2 coker HZ = t < ∞, and 
+
+ann coker HZ = ann coker HX = ( x − 1, y − 1) ,then there exists a chain isomorphism between the first chain complex and a (t, r, s )-standard chain complex rep-resenting t copies of toric codes, together with pZ = r − t
+
+copies of Z-basis product states, and pX = s − t copies of 
+
+X-basis product states with check matrices 
+
+eHX =
+
+ IpX 0pX ×pZ 0pX ×t 0pX ×t
+
+0t×pX 0t×pZ (x − 1) It (y − 1) It
+
+
+
+,
+
+eH† 
+
+> Z
+
+=
+
+
+
+0pX ×pZ 0pX ×t
+
+IpZ 0pZ ×t
+
+0t×pZ (1 − y)It
+
+0t×pZ (x − 1) It
+
+ .
+
+(6) 
+
+That is, there exist R-isomorphisms (ψ2, ψ 1, ψ 0) such that the following diagram commutes: 
+
+input: Rr Rq Rs
+
+standard: Rr Rq RsH†  
+
+> ZHX
+> ψ2
+> eH†
+> Z
+> ψ1
+> eHX
+> ψ0
+
+(7) 3
+
+The following diagram then automatically commutes for the dual chain: 
+
+Rs Rq Rr
+
+Rs Rq RrH†     
+
+> X
+> (ψ†
+> 0)−1
+> HZ
+> (ψ†
+> 1)−1(ψ†
+> 2)−1
+> eH†
+> XeHZ
+
+(8) 
+
+Furthermore, the following algorithm computes the iso-morphisms in time polynomial in q and the degrees of the input check matrices HZ , H X .
+
+Algorithm: Solving for the decoupling unitary a
+
+Input: check matrices HZ , H X
+
+Output: invertible maps ( ψ−12 , ψ −11 , ψ −10 ) 
+
+> 1
+
+Find ξ2 ∈ GL( r, F2), ξ1 ∈ GL( q, F2), and 
+
+ξ0 ∈ GL( s, F2) such that H† 
+
+> Z
+
+ξ2 = ξ1 eH† 
+
+> Z
+
+(mod J) and 
+
+HX ξ1 = ξ0 eHX (mod J) using standard linear algebra over F2; 
+
+> 2
+
+HX ← ξ−10 HX ξ1, H† 
+
+> Z
+
+← ξ−11 H† 
+
+> Z
+
+ξ2; 
+
+> 3
+
+Solve eHX = HX ϕ1 for ( ϕ1)q×q , with the columns [pX + 1 : pX + pZ ] of ϕ1 taken from the first pZ
+
+columns of H† 
+
+> Z
+
+; 
+
+> 4
+
+Solve H† 
+
+> Z
+
+ϕ2 = ϕ1 eH† 
+
+> Z
+
+for ( ϕ2)r×r ; 
+
+> 5
+
+Replace the lower-right t × t corner B of ϕ2 by 
+
+B mod J to obtain ϕ′
+
+> 2
+
+; 
+
+> 6
+
+Solve η eH† 
+
+> Z
+
+= ϕ′ 
+
+> 2
+
+− ϕ2 for ηr×q ; 
+
+> 7
+
+ϕ′ 
+
+> 1
+
+← ϕ1 + H† 
+
+> Z
+
+η; 
+
+> 8
+
+return (ξ2ϕ′
+
+> 2
+
+, ξ 1ϕ′
+
+> 1
+
+, ξ 0);  
+
+> aFor technical reasons, the inverses of the isomorphisms (ψ2, ψ 1, ψ 0) are the natural outputs of our construction. We do not include a final inversion step in our algorithm, since matrix inversion is standard in computer algebra and only adds polynomial terms to the time complexity and matrix degree [24, 25].
+
+Physically, the isomorphism ψ1 specifies the action of the decoupling unitary on Pauli Z operators, while (ψ†
+
+> 1
+
+)−1 specifies its action on Pauli X operators. The maps ψ2 and ψ0 correspond to changes of basis among the Z- and X-type stabilizer generators, respectively. Before sketching the proof and construction, we remark why the problem is nontrivial despite its resemblance to a matrix normal-form problem: First, the coefficient ring R = F2[x±1, y ±1] is not a field, and Gaussian-style elimination over polynomial rings can suffer from severe intermediate expression swell and therefore exponential running time. Previous constructive classifications [10, 11] control this growth through iterative coarse-graining, thereby breaking more translation symmetry than is necessary. Second, solving the chain-map equations alone does not generally produce invertible maps. The obstruction is that ker HX = im H† 
+
+> Z
+
+is nonzero and in general not a direct summand of the ambient free module Rq . Conse-quently, the standard linear algebra techniques available over fields do not apply. Our construction overcomes these two difficulties by combining an initial reduction modulo J with a subsequent correction that restores in-vertibility. 
+
+Sketch of the proof and construction.– The proof pro-ceeds in three steps. First, we reduce the complexes mod-ulo J = ( x − 1, y − 1) to align them with the standard complex, and rewrite them as short exact sequences by removing the cokernels. Second, we interpret these se-quences as extensions and compare their extension classes to establish the existence of a chain isomorphism. Third, we correct an explicitly constructed chain map so that each component is invertible. We begin by reducing the input and standard com-plexes modulo J. Their homology groups are isomorphic; physically, imposing periodic boundary conditions on a single coarse-grained unit cell produces equivalent finite codes. Standard linear algebra over F2 therefore yields invertible matrices ( ξ2, ξ 1, ξ 0) satisfying 
+
+H† 
+
+> Z
+
+ξ2 ≡ ξ1 eH† 
+
+> Z
+
+, HX ξ1 ≡ ξ0 eHX (mod J), (9) whose role is to identify and separate the product-state sectors RpX from the toric-code sectors JR t.This transforms our problem to finding isomorphisms (ϕ2, ϕ 1) for the following commuting diagram 0 Rr Rq RpX ⊕ JR t 00 Rr Rq RpX ⊕ JR t 0 
+
+> H†
+> ZHX
+> ϕ2
+> eH†
+> Z
+> ϕ1
+> eHX
+> id
+
+(10) with HZ = eHZ (mod J) and HX = eHX (mod J), and id is the isomorphism induced by the chosen generators of the modules. Now, each row of Eq. (10) defines an extension of RpX ⊕ JR t by Rr . These extensions are classified by Ext 1
+
+> R
+
+ RpX ⊕ JR t, R r  ∼= Hom F2
+
+ Ft
+
+> 2
+
+, Fr
+
+> 2
+
+ . (11) The existence of the maps ( ϕ2, ϕ 1) is therefore equivalent to the existence of an automorphism ϕ2 of Rr such that the pushout extension 0 −→ Rr H† 
+
+> Z◦ϕ2
+
+−−−−−→ Rq HX
+
+−−−→ RpX ⊕ JR t −→ 0 (12) is equivalent to the standard extension. Under the above identification of the extension group, both the input and standard extensions are represented by full-rank r × t matrices over F2. The pushout by ϕ2
+
+acts on these representatives by left multiplication with the invertible matrix ϕ−12 mod J. Since r ⩾ t, the group GL( r, F2) acts transitively on the set of full-rank r × t
+
+matrices. Hence one can choose ϕ2 so that the input extension is mapped to the standard one. The equiva-lence of the two extensions then supplies the middle iso-morphism ϕ1, proving the existence of the desired chain isomorphism. 4Finally, we turn to the explicit construction. By the comparison theorem for projective resolutions, the chain maps ( ϕ2, ϕ 1) are unique up to chain homotopy. In par-ticular, the last t columns of ϕ2 are determined modulo 
+
+J and satisfy (ϕ2)[: ,p Z +1: r] ≡
+
+ 0
+
+B
+
+
+
+(mod J), (13) with B ∈ GL( t, F2). Construct an ansatz ϕ1 from solving 
+
+HX ϕ1 = eHX , with the columns [ pX + 1 : pX + pZ ] in ϕ1
+
+taken from the first pZ columns in H† 
+
+> Z
+
+. This is possible because the corresponding columns in eHX are zero (see Eq. (6)), so that the corresponding columns in ϕ1 are free to be taken from im H† 
+
+> Z
+
+. Solving subsequently H† 
+
+> Z
+
+ϕ2 =
+
+ϕ1 eH† 
+
+> Z
+
+yields a map of the block form 
+
+ϕ2 =
+
+IpZ C
+
+0 B + D
+
+
+
+, (14) where every entry of C and D lies in J = ( x − 1, y − 1). We then construct a map η : Rq → Rr satisfying 
+
+η eH† 
+
+> Z
+
+= diag(0 , −D). (15) The existence of such an η follows from a direct block-matrix calculation. The chain-homotopy transformation (ϕ2, ϕ 1) 7 −→  ϕ2 + η eH† 
+
+> Z
+
+, ϕ 1 + H† 
+
+> Z
+
+η (16) preserves the commutativity of diagram (10). After this correction, the lower-right block of ϕ2 is B, so the cor-rected ϕ2 is invertible. The Five Lemma then implies that the corrected ϕ1 is also invertible [26]. The algo-rithm above summarizes this construction; a complete proof is given in Supplemental Sec. IV. We conclude this section with three remarks concern-ing complexity and locality, ancilla removal, and periodic boundary conditions. 1. Complexity and locality.– Our construction avoids the Quillen–Suslin subroutine [27–29] by exploiting the structure of H† 
+
+> Z
+
+when choosing the ansatz for 
+
+ϕ1, yielding an algorithm that only requires solv-ing matrix equations. This enables us to derive the polynomial behavior of time complexity and oper-ator spreading from results on Gr¨ obner basis algo-rithms [25]. Recall that q denotes the number of qubits in the coarse-grained supercell. The locality of the decoupling unitary is controlled by the Laurent-polynomial degrees of ψ1 and ψ−11 , which deter-mine the spreading of local Pauli Z and Pauli X
+
+operators, respectively. We prove in Supplemental Sec. VII that both the time complexity and the lo-cality are bounded by a polynomial in q and the de-grees of the input matrices. Furthermore, we prove in Supplemental Sec. III.B that q < q 02q30 l2
+
+, where 
+
+q0 is the qubit number per unit cell before coarse-graining, and l is the interaction range. The locality of the decoupling map can thus be bounded by the initial parameters of the code Hamiltonian. We test our algorithm on the BB codes taken from Refs. [6, 30–33], and obtain the empirical scalings 
+
+T ∝ q1.86 and deg( ψ−11 ) ∝ q0.65 on these samples. See Supplemental Sec. V.C for the detailed numer-ical results. 2. On ancilla removal.– The decoupling unitary guar-anteed by our main theorem can be compiled to a constant-depth circuit consisting only of CNOT gates. To see this, we decompose the isomorphic Pauli map as ψ1 = diag(det ψ1, 1, . . . , 1) ψ′ 
+
+> 1
+
+with the matrix ψ′ 
+
+> 1
+
+satisfying det ψ′ 
+
+> 1
+
+= 1. For q ⩾ 3, the Suslin stability theorem [34, 35] implies that ψ′
+
+> 1
+
+can be decomposed into elementary matrices over 
+
+R, each corresponding to translation-invariant lay-ers of CNOT gates. The remaining diagonal factor represents a shift (on one qubit per supercell), since det ψ1 is a monomial. On a product-state sector, this shift acts trivially, while on a toric-code sec-tor it can also be implemented by a CNOT-only circuit; see Supplemental Sec. VI.A. This conclusion is consistent with the classifica-tion of Clifford quantum cellular automata [36]. A nontrivial QCA index characterizes the transport of local quantum information, whereas information encoded in a topological code is necessarily non-local. Consequently, a shift may become circuit-trivial when restricted to the code space. Finally, the product-state sectors in the standard form need not be regarded as indispensable ancil-las. These sectors can be absorbed into the toric-code sectors through the inverse of the decoupling procedure on toric codes with deliberately enlarged supercell. Switching between rotated and unro-tated surface-code layouts during syndrome extrac-tion provides a related example [37]. 3. Periodic boundary conditions.– Our decoupling extends directly to finite systems with periodic boundary conditions on the coarse-grained super-lattice. For positive integers Lx and Ly , imposing the periodic boundary conditions xLx = 1 , y Ly = 1 corresponds to the base change R → RLx,L y := 
+
+R/ (xLx −1, y Ly −1). Here, x and y represent trans-lations by one coarse-grained supercell, so these boundary conditions describe tori whose periods are integer multiples of the anyon-preserving trans-lation periods. As ( ψ2, ψ 1, ψ 0) are R-module isomorphisms, tensor-ing the input and standard complexes with RLx,L y5preserves the chain isomorphism. Hence the de-coupling map descends directly to the finite torus and maps the code to t copies of the toric code to-gether with the product-state sectors. Since each toric code on a torus encodes 2 logical qubits, the original finite code encodes 2 t logical qubits. In the special case Lx = Ly = 1, the decoupling then becomes a decoding transformation that maps the code space onto 2 t designated physical qubits ten-sored with fixed product states. Alternatively, one may impose periodic bound-ary conditions directly on the original, uncoarse-grained lattice [30]. Such boundary conditions need not be compatible with the anyon-preserving super-lattice, as occurs for the J144 , 12 , 12 K gross code [6]. This raises the interesting question of how our re-sults can be generalized to such cases. 
+
+Discussions and outlooks.– One potential application is the construction of decoders for general 2D topological CSS codes. The measured syndrome can first be mapped to virtual toric-code sectors, decoded independently us-ing minimum-weight perfect matching, and then lifted back to the original code. The main computational cost is therefore that of graph matching on a fixed number of coarse-grained toric lattices. However, the decoupling map spreads a local physical fault into correlated errors across several virtual sectors. Independent decoding of these sectors neglects such correlations and may there-fore perform worse than decoders designed directly for the original code. This observation also helps explain the advantages of locality-preserving approaches such as the symmetry decoder and the cell-matching decoder [38, 39]. The explicit decoupling map also provides a system-atic framework for studying logical operators and logical gates. Logical gates implemented by constant-depth cir-cuits in 2D topological stabilizer codes are restricted to Clifford gates [40, 41]. Known examples include transver-sal Clifford gates for color codes and self-dual BB codes [22, 42], as well as fold-transversal gates for surface codes and BB codes [43, 44]. By composing these construc-tions with our decoupling maps, logical-gate protocols can be transferred between different 2D topological CSS codes with only a bounded loss of locality. Another class of fault-tolerant constructions is based on boundaries, defects, and their code deformations [3, 16]. A natu-ral direction is to generalize such constructions to BB codes [45–47] and to characterize how their boundary and defect degrees of freedom transform under explicit decoupling unitaries. From a complementary viewpoint, anyon-permuting translations may themselves act as log-ical gates requiring no physical operation beyond relabel-ing qubits, as explored recently for bivariate and gener-alized bicycle codes [48–50]. Several questions remain open. For practical applica-tions, it may be advantageous to relax the requirement of a chain isomorphism to that of a quasi-isomorphism, potentially yielding maps with smaller spreading for de-coding or logical-gate constructions. It is also unclear whether the present method can be extended to non-CSS stabilizer codes while avoiding the Quillen–Suslin subrou-tines and iterative coarse-graining required in previous works. 
+
+Acknowledgment.– We thank Yu-An Chen, Ke Liu and Hao Song for discussions and comments on the manuscript. This work is supported by the National Natural Science Foundation of China under Grant No. 12575022, SRICSPYF-ZY2025157, the Shanghai Com-mittee of Science and Technology under Grant No. 25LZ2600800, and the Tsinghua Dushi Program. 
+
+Note added.— Near the completion of this work, we be-came aware of independent work by Hao Song [51]. By introducing a classification method based on Schanuel’s lemma—rather than providing a constructive realization of the decoupling unitary—Song establishes the same ex-istence result for two-dimensional decoupling. He also presents an explicit counterexample ruling out a naive three-dimensional generalization and identifies a viable route toward higher-dimensional extensions. We coordi-nated the timing of our arXiv postings and thank Hao Song for sharing these results prior to their public release.                                       
+
+> [1] A. Y. Kitaev, Fault-tolerant quantum computation by anyons, Annals of Physics 303 , 2 (2003), arXiv:quant-ph/9707021. [2] E. Dennis, A. Kitaev, A. Landahl, and J. Preskill, Topological quantum memory, Journal of Mathematical Physics 43 , 4452 (2002), arXiv:quant-ph/0110143. [3] A. G. Fowler, M. Mariantoni, J. M. Martinis, and A. N. Cleland, Surface codes: Towards practical large-scale quantum computation, Physical Review A 86 , 032324 (2012). [4] D. Horsman, A. G. Fowler, S. Devitt, and R. V. Meter, Surface code quantum computing by lattice surgery, New Journal of Physics 14 , 123011 (2012). [5] Google Quantum AI and Collaborators, Quantum error correction below the surface code threshold, Nature 638 ,920 (2025). [6] S. Bravyi, A. W. Cross, J. M. Gambetta, D. Maslov, P. Rall, and T. J. Yoder, High-threshold and low-overhead fault-tolerant quantum memory, Nature 627 ,778 (2024), arXiv:2308.07915 [quant-ph]. [7] A. Kubica, B. Yoshida, and F. Pastawski, Unfolding the color code, New Journal of Physics 17 , 083026 (2015), arXiv:1503.02065 [quant-ph]. [8] H. Bombin, G. Duclos-Cianci, and D. Poulin, Univer-sal topological phase of two-dimensional stabilizer codes, New Journal of Physics 14 , 073048 (2012). [9] H. Bombin, Structure of 2D Topological Stabilizer Codes, Communications in Mathematical Physics 327 ,387 (2014), arXiv:1107.2707 [quant-ph]. [10] J. Haah, Algebraic Methods for Quantum Codes on Lattices, Revista Colombiana de Matem´ aticas 50 , 299
+
+6
+
+(2017), arXiv:1607.01387 [quant-ph]. [11] J. Haah, Classification of translation invariant topolog-ical Pauli stabilizer codes for prime dimensional qudits on two-dimensional lattices, Journal of Mathematical Physics 62 , 012201 (2021). [12] Our results imply that this code is in the same symmetry-enriched topological phase as the decoupled toric codes, where the relevant symmetry is the residue translation symmetry. We acknowledge Liujun Zou for pointing out this perspective. [13] S. Bravyi, M. Hastings, and S. Michalakis, Topologi-cal quantum order: Stability under local perturbations, Journal of Mathematical Physics 51 , 093512 (2010), arXiv:1001.0344 [quant-ph]. [14] J. Haah, Commuting Pauli Hamiltonians as maps be-tween free modules, Communications in Mathematical Physics 324 , 351 (2013), arXiv:1204.1063 [quant-ph]. [15] M. H. Freedman, D. A. Meyer, and F. Luo, Z2-systolic freedom and quantum codes, in Mathematics of quantum computation (Chapman and Hall/CRC, 2002) pp. 287– 320. [16] S. B. Bravyi and A. Y. Kitaev, Quantum codes on a lattice with boundary (1998), arXiv:quant-ph/9811052. [17] A. Kitaev, Anyons in an exactly solved model and be-yond, Annals of Physics 321 , 2 (2006), arXiv:cond-mat/0506438. [18] M. Barkeshli, P. Bonderson, M. Cheng, and Z. Wang, Symmetry Fractionalization, Defects, and Gauging of Topological Phases, Physical Review B 100 , 115147 (2019), arXiv:1410.4540 [cond-mat]. [19] X.-G. Wen, Quantum Orders and Symmetric Spin Liq-uids, Physical Review B 65 , 165113 (2002), arXiv:cond-mat/0107071. [20] X.-G. Wen, Quantum orders in an exact soluble model, Physical Review Letters 90 , 016803 (2003), arXiv:quant-ph/0205004. [21] H. Bombin and M. A. Martin-Delgado, Optimal Re-sources for Topological 2D Stabilizer Codes: Compar-ative Study, https://arxiv.org/abs/quant-ph/0703272v1 (2007). [22] H. Bombin and M. A. Martin-Delgado, Topological Quantum Distillation, Physical Review Letters 97 ,180501 (2006). [23] H. Bombin and M. A. Martin-Delgado, Statistical Me-chanical Models and Topological Color Codes, Physical Review A 77 , 042322 (2008), arXiv:0711.0468 [quant-ph]. [24] D. A. Cox, J. B. Little, and D. O’Shea, Using Algebraic Geometry , second edition ed., Graduate Texts in Math-ematics No. 185 (Springer Science+Business Media, Inc, New York, NY, 2005). [25] Y. Liang, Degree bounds for gr¨ obner bases of modules, Journal of Symbolic Computation 111 , 27 (2022). [26] C. A. Weibel, An Introduction to Homological Algebra ,1st ed. (Cambridge University Press, 1994). [27] D. Quillen, Projective modules over polynomial rings, In-ventiones Mathematicae 36 , 167 (1976). [28] A. A. Suslin, Projective modules over polynomial rings are free, Doklady Akademii Nauk SSSR 229 , 1063 (1976). [29] A. Logar and B. Sturmfels, Algorithms for the Quillen-Suslin theorem, Journal of Algebra 145 , 231 (1992). [30] Z. Liang, K. Liu, H. Song, and Y.-A. Chen, General-ized toric codes on twisted tori for quantum error correc-tion, PRX Quantum 6, 020357 (2025), arXiv:2503.03827 [quant-ph]. [31] R. Zhou, X. Yuan, L. Kong, F. Zhang, K. Zhang, Z. Yang, and J. Chen, Bunny codes: Broadening superconducting quantum error correction capability through advanced control engineering (2026), arXiv:2606.22853 [quant-ph]. [32] Z. Liang and Y.-A. Chen, Topological subsystem bivari-ate bicycle codes with four-qubit check operators (2026), arXiv:2605.04151 [quant-ph]. [33] B. C. B. Symons, A. Rajput, and D. E. Browne, Se-quences of bivariate bicycle codes from covering graphs (2025), arXiv:2511.13560 [quant-ph]. [34] A. A. Suslin, On the Structure of the Special Linear Group Over Polynomial Rings, Izvestiya: Mathematics 
+
+11 , 221 (1977). [35] H. Park and C. Woodburn, An Algorithmic Proof of Suslin’s Stability Theorem over Polynomial Rings (1994), arXiv:alg-geom/9405003. [36] J. Haah, Clifford Quantum Cellular Automata: Trivial group in 2D and Witt group in 3D, Journal of Mathemat-ical Physics 62 , 092202 (2021), arXiv:1907.02075 [quant-ph]. [37] M. McEwen, D. Bacon, and C. Gidney, Relaxing Hard-ware Requirements for Surface Code Circuits using Time-dynamics, Quantum 7, 1172 (2023), arXiv:2302.02192 [quant-ph]. [38] K. Sahay, D. J. Williamson, and B. J. Brown, Amatching decoder for bivariate bicycle codes (2026), arXiv:2602.22770 [quant-ph]. [39] S. J. S. Tan, I. Gill, E. Huang, P. Liu, C. Zhao, H. De-hghani, A. Kubica, H. Zhou, and A. Dua, Generalized matching decoders for 2D topological translationally-invariant codes (2026), arXiv:2603.05402 [quant-ph]. [40] S. Bravyi and R. Koenig, Classification of topologically protected gates for local stabilizer codes, Physical Review Letters 110 , 170503 (2013), arXiv:1206.1609 [quant-ph]. [41] T. Jochym-O’Connor, A. Kubica, and T. J. Yoder, Dis-jointness of Stabilizer Codes and Limitations on Fault-Tolerant Logical Gates, Physical Review X 8, 021047 (2018). [42] Z. Liang and Y.-A. Chen, Self-dual bivariate bi-cycle codes with transversal clifford gates (2025), arXiv:2510.05211 [quant-ph]. [43] J. E. Moussa, Transversal Clifford gates on folded surface codes, Physical Review A 94 , 042316 (2016). [44] J. N. Eberhardt and V. Steffan, Logical operators and fold-transversal gates of bivariate bicycle codes (2024), arXiv:2407.03973 [quant-ph]. [45] J. N. Eberhardt, F. R. F. Pereira, and V. Steffan, Pruning qLDPC codes: Towards bivariate bicycle codes with open boundary conditions (2024), arXiv:2412.04181 [quant-ph]. [46] Z. Liang, J. N. Eberhardt, and Y.-A. Chen, Planar Quan-tum Low-Density Parity-Check Codes with Open Bound-aries, PRX Quantum 6, 040330 (2025). [47] Z. Liang, B. Yang, J. T. Iosue, and Y.-A. Chen, Oper-ator algebra and algorithmic construction of boundaries and defects in (2+1)D topological Pauli stabilizer codes (2026), arXiv:2410.11942 [quant-ph]. [48] J. M. Koh, A. Gong, A. C. Diaconu, D. B. Tan, A. A. Geim, M. J. Gullans, N. Y. Yao, M. D. Lukin, and S. Ma-jidy, Entangling logical qubits without physical opera-tions (2026), arXiv:2601.20927 [quant-ph]. [49] R. Ismail, I.-C. Chen, C. Zhao, R. Weiss, F. Liu, H. Zhou, S.-T. Wang, A. Sornborger, and M. Kornjaˇ ca, Transver-sal architecture for megaquop-scale quantum simulation 7
+
+with neutral atoms, PRX Quantum 7, 020343 (2026), arXiv:2509.18294 [quant-ph]. [50] A. J. Davenport, J. Blue, and I. Chuang, Generalized Bicycle Codes as Cyclic Submodules and their Automor-phism Structure (2026), arXiv:2606.05044 [quant-ph]. [51] H. Song, From Koszul-Complex Stabilizer Models to Su-perselection Profiles: Topological Rigidity and Nonsplit Extensions (2026), arXiv:2608.XXXXX [quant-ph]. Supplemental Material: Decoupling 2D translation-invariant topological CSS codes 
+
+Yifei Wang, 1, 2 Zhongyi Ni, 3 Mingxin He, 1, 2 Jinguo Liu, 3 and Yingfei Gu 1, 2, ∗
+
+> 1Institute for Advanced Study, Tsinghua University, Beijing, 100084, China
+> 2Beijing Key Laboratory of Cold Atom Quantum Computation, Tsinghua University, Beijing, 100084, China
+> 3Hong Kong University of Science and Technology (Guangzhou), Guangzhou, 511453, China
+> (Dated: August 8, 2026)
+> CONTENTS
+
+I. Module-theoretic language for translation-invariant codes 1II. Comments on algebraic methods in this work 4III. Coarse-graining and superlattice 5A. Coarse-graining 5B. Bounding the supercell size by interaction range 6IV. The main results 8A. Main theorem 8B. Step 1: Stripping off cokernels 10 C. Step 2. Existence 11 D. Step 3. Construction and algorithm 12 V. Examples and numerical results 14 A. The 6.6.6 color code 14 B. The 4.8.8 color code 15 C. More results on Bivariate Bicycle codes 17 VI. Corollaries and refinements 19 A. Removing the shifts or ancillas 19 B. Reabsorbing product states 20 C. Periodic boundary conditions 21 VII. Locality and Time Complexity 22 VIII. Applications 22 A. A unitary-decouple-based decoder 23 B. Implication on logical gates 23 References 25  
+
+> I. MODULE-THEORETIC LANGUAGE FOR TRANSLATION-INVARIANT CODES
+
+We begin by establishing notation and reviewing the module-theoretic framework for translation-invariant topo-logical CSS codes (see [1] for lecture notes on the subject). This defines the object we study in this work and the properties we take as our starting point. This section is intended to be pedagogical. Readers familiar with this language may refer directly to Eq. (I.7) for our convention.  
+
+> ∗E-mail: guyingfei@tsinghua.edu.cn
+
+2
+
+a. Symplectic formalism. To build intuition, we first review a more commonly used construction: representing the Pauli group on a finite number of qubits as a vector space and using a symplectic form to encode the commutation relations. See Ref. [2] for a more complete discussion. The Pauli group Pq on q qubits is generated by the single-qubit Pauli operators together with the phase factors ±1, ±i. The quotient of Pq by its phase center ⟨iI⟩ is isomorphic, as an additive group, to F2q 
+
+> 2
+
+. Explicitly, fixing a canonical basis {e1, . . . , e q ; f1, . . . , f q } for this space, we define the surjective map π : Pq → F2q 
+
+> 2
+
+by π(Xi) = ei and π(Zi) = fi, extended linearly so that operator multiplication corresponds to vector addition. We then equip the space with the symplectic form ω(ei, f j ) = δij . In matrix form, we denote ω(u, v ) = u⊤ωv , with 
+
+ω =
+
+ 0 Iq
+
+−Iq 0
+
+
+
+. (I.1) This symplectic form encodes the commutation relations as P1P2 = ( −1) ω(π(P1),π (P2)) P2P1.The normalizer of the Pauli group is called the Clifford group, i.e., given the Pauli group Pq on q qubits, the Clifford group is the subgroup of unitary operators satisfying U Pq U † ⊆ P q . It can be generated by the single-qubit Hadamard and π/ 2-phase gates H, S , together with the two-qubit CNOT gate. Clifford operators can be represented as symplectic transformations in the following way: if u ∈ F2q 
+
+> 2
+
+represents a Pauli operator P and U is a Clifford unitary, then there exists a unique 2 q × 2q F2-matrix V such that U P U † is represented by V u . Since conjugating by unitary preserves commutation relations, V must be symplectic, i.e., V ⊤ωV = ω.
+
+b. Lattice system. In Ref. [3], Haah introduces the module theoretical language to generalize the symplectic formalism to lattice systems. Concretely, for 2D lattices, we begin with a unit cell containing q qubits. The lat-tice is generated by translating this unit cell along two directions x and y. The Pauli group on the full lattice is likewise generated by translates of the unit-cell Pauli group Pq ; we denote the translation of a unit-cell Pauli op-erator P by a lattice vector ( a, b ) ∈ Z2 as T (a, b ) P . To extend the representation, we enrich the standard basis 
+
+{e1, . . . , e q ; f1, . . . , f q } by introducing monomial prefactors and define the surjective map by π(T (a, b ) Xi) = xayb ei
+
+and π(T (a, b ) Zi) = xayb fi, extended by linearity. In module-theoretic terms, we have introduced a free module over the Laurent polynomial ring R = F2[x±1, y ±1], generated by {e1, . . . , e q ; f1, . . . , f q }, together with a surjective map satisfying π(T (a, b ) P ) = xayb π(P ) for every Pauli operator P on the lattice. Similarly, in this setup, we can introduce a sesquilinear symplectic form to encode the commutation relations. The form is defined in matrix notation by 
+
+R ∋ ω(u, v ) = u†ωv =  u1(x−1, y −1) . . . u 2q (x−1, y −1)  0 Iq
+
+−Iq 0
+
+ 
+
+v1(x, y )...
+
+v2q (x, y )
+
+ , ∀u, v ∈ R2q . (I.2) Here a module element u is written as a column vector, and its involution, denoted by u†, is defined by transposition 
+
+and taking the antipodes of the variables. In what follows, we will write x := x−1 and y := y−1 for notational brevity. The commutation relations of Pauli operators can be recovered from this form in the following sense: 
+
+P1P2 = ( −1) [ω(π(P1),π (P2))] 0 P2P1, where [ · ]0 denotes the constant term (i.e., the coefficient of x0y0). In fact, the full polynomial ω(π(P1), π (P2)) simultaneously encodes the commutation relations between all translates of P1 and P2:the coefficient of xa−cyb−d gives the commutation relation between T (a, b ) P1 and T (c, d ) P2.Similar to the finite-qubit case, translation-invariant Clifford unitaries can be represented by symplectic trans-formations over the R-modules for Pauli operators. That is, for a 2D lattice whose unit cell contains q qubits, translation-invariant Clifford unitaries are represented by V ∈ Hom R(R2q , R 2q ) such that V †ωV = ω. The most relevant examples in this work are those that do not mix X and Z operators: 
+
+V =
+
+Q 00 (Q†)−1
+
+
+
+, (I.3) where Q is an arbitrary invertible matrix over R, since we focus on CSS codes. They can be realized by a constant-depth circuit with only CNOT gates and ancillas. We postpone the detailed discussion of circuit realization and ancillas to Section VI A. 
+
+c. Codes on lattice. A translation-invariant topological stabilizer code on a 2D lattice is defined by an abelian subgroup S (does not contain −1) of the Pauli group, called the stabilizer group , satisfying the following conditions: 
+
+• Translation invariance : If P ∈ S , then T (a, b ) P ∈ S for all ( a, b ) ∈ Z2. Therefore, we can take some stabilizer generators such that all stabilizer generators can be obtained by translating one of them. Let the number of such generators be m.3
+
+• Commutativity : P Q = QP for all P, Q ∈ S .
+
+• Topological order : For a Pauli operator P , if ∀Q ∈ S , [ P, Q ] = 0, then P ∈ S . That is, there are no nontrivial local logical operators [4]. Codes of this kind can be written in the language of modules over R as follows. Take R2q to represent the Pauli group as discussed above, and take Rm to represent the m stabilizer generators. Then we can assign a map σ : Rm → R2q
+
+that encodes the information of these m generators. Therefore, the stabilizer group is now represented by the submodule im σ. With translation invariance holding automatically, the remaining two conditions impose the following requirements on σ:
+
+• Commutativity : The submodule is isotropic: σ†ω σ = 0. 
+
+• Topological order : The submodule is coisotropic, and hence Lagrangian: ker( σ†ω) = im σ.1
+
+These two conditions are equivalent to the following chain complex being an exact sequence, 
+
+Rm σ
+
+−−→ R2q ϵ = σ†ω
+
+−−−−−→ Rm, (I.4) as first formulated in Ref. [3]. The map ϵ is called the excitation map and describes how Pauli operators flip the stabilizer generators. Therefore, im ϵ consists of excited states that can be generated from the ground state by local Pauli operators, and coker ϵ := Rm/ im ϵ consists of classes of excited states; each class contains states that can be transformed to each other by local Pauli operators – the anyons. Fusion of anyons corresponds to addition in the cokernel. The central object in this work is CSS codes, for which the stabilizer group admits a generating set in which each generator contains exclusively X or exclusively Z operators. For such codes, the maps σ and ϵ adopt a block-diagonal form: 
+
+σ =
+
+ 0q×s H†
+
+> Z
+
+−H† 
+
+> X
+
+0q×r
+
+
+
+, ϵ =
+
+ HX 0s×q
+
+0r×q HZ
+
+
+
+, (I.5) with r + s = m. The sequence (I.4) accordingly decomposes as a direct sum of two chain complexes, 
+
+Rr H†
+
+> Z
+
+−−→ Rq HX
+
+−−→ Rs, Rs −H†
+
+> X
+
+−−−→ Rq HZ
+
+−−→ Rr . (I.6) Note that the minus sign in −H† 
+
+> X
+
+is inherited from the way we map the commutation relation to the symplectic form. Considering the structure of quantum codes, since im H† 
+
+> X
+
+= im( −H† 
+
+> X
+
+), we can safely neglect the minus sign. In what follows, we will call the second chain complex without the minus sign the “dual” of the first one. Note that our notation is now parallel to the usual chain complex notation for CSS codes, with the following subtlety in interpreting the check matrix. Over fields, one has two ways to interpret a check matrix HX : Rq → Rs: each row keeps the qubits involved in a check, and each column keeps the checks flipped by a qubit. However, here these two sets of information are related by the spatial involution, so it is inevitable to break one of them. We choose to keep the column interpretation, in accordance with the interpretation of a check matrix as a map from bits to checks. To read out the qubits involved in a check, one should now look at columns of H† 
+
+> X
+
+.We further require that the stabilizer generators, as encoded in the specific form of σ, are independent, i.e., that 
+
+H† 
+
+> X
+
+and H† 
+
+> Z
+
+are injective. It was shown in Ref. [3] that even if one starts with a non-injective σ : Rm′
+
+→ R2q , another sequence describing the same code can be found whose σ : Rm → R2q is injective. Here m can be different from m′.We sidestep this subtlety and take injectivity as an assumption from here on. To summarize, the object of interest in this work is a 2D translation-invariant topological CSS code defined by the chain complex 
+
+Rr H†
+
+> Z
+
+−−→ Rq HX
+
+−−→ Rs, (I.7) and its dual, both being exact with injective H† 
+
+> Z
+
+and H† 
+
+> X
+
+. The following properties are proven in Ref. [1, 3] and we will take them as given:      
+
+> 1Note that every element of Ris by definition a Laurent poly-nomial with finitely many terms, so in this language we always deal with finitely supported Pauli operators. This is why the topological order condition takes such a simple form.
+
+4𝑥 
+
+𝑦 
+
+1
+
+2                      
+
+> FIG. SM. 1. The toric code, with q= 2, r=s= 1. As shown in the left panel, there are two qubits per unit cell: the one on the horizontal edge (blue) is denoted by (1 ,0) ⊤, and the one on the vertical edge (red) is denoted by (0 ,1) ⊤.The only
+> X-type stabilizer generator is the star operator ( x−1, y −1) ⊤(the yellow one), and the only Z-type stabilizer generator is the plaquette operator (1 −y, x −1) ⊤(the green one).
+
+• q = s + r – The “density” of independent checks equals the “density” of qubits. 
+
+• dim coker HX = dim coker HZ = 0, i.e., dim F2 coker HX , dim F2 coker HZ < ∞ – There are finitely many anyons. 
+
+• dim F2 coker HX = dim F2 coker HZ – The numbers of e- and m-type anyons are equal. Finally, we present the example of fundamental importance in this work: the toric code. See Fig. SM. 1. The check matrices are 
+
+HX = ( x − 1, y − 1) , HZ = (1 − y, x − 1) . (I.8) For example, the Z operator on qubit (0 , 1) ⊤ violates the X-type stabilizer generators y − 1, meaning the generators on the origin and on (0 , 1). In this work, all results are explicitly written for qubit systems. Nevertheless, they can be naturally generalized to qudit systems with prime dimension p. For non-prime dimensions, new subtleties arise as explained in Ref. [5].  
+
+> II. COMMENTS ON ALGEBRAIC METHODS IN THIS WORK
+
+In this section, we review two trends of algebraic methods for studying quantum codes to position our work within the landscape of existing results and future directions of research. The starting point of the algebraic methods reviewed here is the formulation of quantum CSS codes as chain complexes [6–8]. The key observation is that commutativity of stabilizers imposes the condition HX H⊤ 
+
+> Z
+
+= 0 on check matrices, allowing one to write a quantum CSS code with n physical qubits, cZ Z-checks and cX X-checks as a chain complex 
+
+FcZ
+
+> 2
+> H⊤
+> Z
+
+−−→ Fn
+
+> 2
+> HX
+
+−−→ FcX 
+
+> 2
+
+. (II.1) Logical Pauli Z operators are represented by the homology group ker HX / im H⊤ 
+
+> Z
+
+, and logical Pauli X operators are represented by the cohomology group. Given this formulation, one can therefore study the morphisms between chain complexes to study different aspects of quantum codes. This is the first trend that forms the methodological background of our work. Some developments in this direction are listed as follows. 
+
+• Chain isomorphisms imply unitaries that map one code to another. Specifically, if the unitary satisfies some locality conditions, it implements fault-tolerant unitary code switching. 
+
+• Automorphisms imply intra-block logical Clifford gates, such as fold-transversal gates [9, 10]. 
+
+• Chain homomorphisms imply inter-block logical Clifford gates, such as the homomorphic CNOT gates [11, 12]. 
+
+• Logical measurements based on lattice surgery techniques [13, 14] can be formulated as mapping cones [15]. 5In this work, we focus on unitary equivalence between quantum codes, for which chain isomorphisms are the most relevant. To impose symmetries on codes, the action of symmetry groups should be considered in the algebraic formulation. This is the second trend that forms the methodological background of our work. Let the symmetry group be G.Then the vector spaces in Eq. (II.1) should now be viewed as F2G-modules, and the linear maps should now be 
+
+F2G-homomorphisms. If we take G = Z2, the translation symmetry of a 2D lattice, the group algebra F2G becomes the Laurent polynomial ring R = F2[x±1, y ±1]. This is exactly the formulation we reviewed in Section I. For general symmetries, this formulation leads to constructions of new codes including the balanced product codes [16] and lifted product codes [17], which lead to the construction of good quantum low-density parity-check codes [18]. In summary, our work lies in a special intersection of these two trends: we study isomorphisms between chain com-plexes over R-modules. Techniques from homological algebra and from commutative algebra are therefore necessary in our work. More intersections of these two trends, that is, to study constructions of gates, measurements or decoders with the knowledge of symmetries of the codes, can be left for future exploration. We will comment on some such topics as applications of our result in Section VIII.  
+
+> III. COARSE-GRAINING AND SUPERLATTICE
+
+In this section, we discuss the anyon-permuting properties of the translation symmetry and coarse-graining. In Subsection III A, known results relating to the anyon permutations are reviewed, with a description of how to compute the superlattice. The physics and algebra of coarse-graining is also discussed, serving as the starting point of our main results. In Subsection III B, we derive an upper bound of anyon periods, partially answering the problem raised in Ref. [19]. Throughout this section, all results are stated explicitly for CSS codes, since our main decoupling algorithm is designed for that setting. We will always discuss the exact sequence (I.7), which is related to Z operators and e
+
+anyons. Properties for X operators and m anyons follow from the duality HX ↔ HZ . These results also generalize to arbitrary Pauli stabilizer codes by directly considering the non-CSS chain complex (I.4).  
+
+> A. Coarse-graining
+
+The notion of weak symmetry breaking, or anyon-permutation symmetry, describes the phenomenon that symmetry operations that leave the Hamiltonian and ground state invariant can permute anyons [20, 21]. It is observed in various systems, including the Wen plaquette model [22, 23] (equivalently, rotated surface codes [24]), color codes [25], and non-stabilizer models like the A-phase (gapped phase) of Kitaev’s honeycomb lattice model [20]. In this paper, we are mostly interested in the weak breaking of the translation symmetry. It is straightforward to see this phenomenon through the example of 6 .6.6 color codes. In a 6 .6.6 color code, qubits are put on vertices of a hexagonal lattice, and an X-type stabilizer generator and a Z-type stabilizer generator are assigned to each hexagon. See Fig. SM. 2 for an illustration. Colors in the color code label the anyons: the e-type anyons in a color code are described by the space F22, and the three non-trivial anyons are “colored” in red, green and blue, respectively. From Fig. SM. 2 one can see that translation by a lattice vector changes the color of an anyon, and thus permutes the anyons. It also illustrates that by switching to a coarser lattice generated by x2y and x3 we can make this permutation trivial. For a detailed discussion on this example (together with its decoupling unitary), see Section V. In the general case, the anyon-permutation properties of translations are manifested by the action of the ring 
+
+R on the anyon module coker HX . Since coker HX is a t-dimensional vector space, invertible variables x, y act as invertible matrices X, Y ∈ GL( t, F2). This defines a representation ω1 : Z2 → GL( t, F2) of the translation group on the anyon space. Therefore, translations that leave the anyons invariant are those in the subgroup ker ω1 ≤ Z2.Since GL( t, F2) is finite, ker ω1 is isomorphic to Z2, which is usually referred to as the superlattice . The unit cell of the superlattice is called a supercell , whose size with respect to the old unit cell equals the index [ Z2 : ker ω1] of the subgroup. Algorithmically, the generators of the superlattice can be found by computing a monomial basis for each of coker HX and coker HZ using Gr¨ obner basis techniques [26], computing the translation representation on their direct sum, and traversing the lattice vectors to find an anyon-non-permuting pair that spans the minimal area. As is discussed in the main text, decoupling is possible only when we rewrite the chain complex of the code in the superlattice so that translations do not permute anyons. Now we discuss the consequence of such rewriting. These are the mathematical conditions in our main theorem. First, there is a change in the parameters r, q, s , each increased by a factor of Λ = [ Z2 : ker ω1]. We still write the new chain complex in the form of Eq. (I.7). For example, for the color code discussed above, the parameters are now 6𝑥 
+
+𝑦                     
+
+> 1
+> 2𝑥 2𝑦 ≡1
+> 𝑥 3≡1
+> FIG. SM. 2. The 6.6.6 color code, with q= 2, r=s= 1. As shown in the first panel, there are two qubits per unit cell: the purple one is denoted by (1 ,0) ⊤, while the green one is denoted by (0 ,1) ⊤.This code is self-dual: both X- and Z-type stabilizer generators are the weight-6 plaquette operators. The anyons are classified by their “colors”, and the anyon-preserving translation symmetry is generated by x3and x2y, as shown in the second panel.
+
+q = 6 and r = s = 3. The complexity stated in the main theorem depends on this q, which is proportional to the size of the supercell rather than the q in the original chain complex. Second, we have the annihilator condition [1, 3] ann coker HX = ann coker HZ = ( x − 1, y − 1) . (III.1) By definition, ( x − 1, y − 1) ⊆ ann coker HX means for any e ∈ Rs, there exists u, v ∈ Rq such that HX u = ( x − 1) e
+
+and HX v = ( y − 1) e. This is exactly the algebraic way of saying any local excitation e can be transported by one lattice vector by some “hopping operator” u or v, which holds in the superlattice by construction. Equality holds since ann coker HX̸ = R (there exist non-trivial anyons) and ( x − 1, y − 1) is maximal. 
+
+Remark. In Ref. [3], Lemma 7.3, Haah gave an algebraic proof of the existence of the anyon-preserving superlattice. In Haah’s proof, the annihilator ideal I = ann(coker ϵ) plays the central role. Given that dim F2 (R/I ) is finite (equivalently, R/I has Krull dimension zero), he shows that there exists an integer L such that ( xL −1, y L −1) ⊆ I. He accomplishes this by considering each maximal ideal m ⊇ I and finding a local period Lm such that ( xLm −1, y Lm −1) ⊆
+
+m, then combining these local periods into a single global period L.This algebraic proof is related to the physical picture of anyon permutation in the following sense: each maximal ideal corresponds to a subspace of anyons that is invariant under the action of translation matrices X, Y ∈ GL( t, F2). To see this, note that since dim F2 (coker ϵ) is finite, the quotient R/I is an Artin ring. By the structure theorem for Artin rings [27, Theorem 8.7] (a multivariable analogue of the Chinese Remainder Theorem), we decompose 
+
+R/I ∼= L
+
+> i
+
+(R/I )mi , where the mi are the distinct maximal ideals of R/I . This decomposition is inherited by the (R/I )-module coker ϵ:coker ϵ ∼= M
+
+> i
+
+(coker ϵ)mi . (III.2) The direct-sum structure ensures invariance under the action of both x and y, so this decomposition is precisely the simultaneous block-diagonalization of X and Y . The i-th block isolates a generalized joint eigenspace of the translation operators. Restricted to this subspace, the annihilating polynomials of the translation operators are exactly the elements of the ideal ai satisfying ( R/I )mi
+
+∼= R/ ai. 
+
+> B. Bounding the supercell size by interaction range
+
+In Ref. [19], Haah raised an open question to bound the length of a translation vector that leaves anyons invariant, or equivalently, to bound the number of qubits in the supercell. More precisely, given a family of 2D translation-invariant Hamiltonians describing topological stabilizer codes with fixed unit cell size q and interaction range l (in accordance with physical intuition, defined below), what is the largest possible supercell? Haah claimed that this 7upper bound should be no less than exp Ω( l) [3]. In this section, we give an upper bound of exp( O(q3l2)), which, as we will argue below, may not be a tight bound. We arrive at this bound in two steps. First, we bound the superlattice index by the number of anyons, which is a direct result of our discussion of matrix representations of translation operators. Second, we bound the number of anyons in terms of Hamiltonian parameters, motivated by the techniques introduced in Ref. [28]. These two individual bounds need not be saturated simultaneously, leading to a potential gap between our bound and the tight bound. To bound the superlattice index by the number of anyons, we need the following result from linear algebra, a direct corollary of the Cayley–Hamilton theorem. 
+
+Lemma 1. Let A ∈ GL( t, F2). Then the order of A, i.e., the smallest positive integer n such that An = I, is at most 
+
+2t − 1.Proof. Let p(λ) be the characteristic polynomial of A. By the Cayley–Hamilton theorem, p(A) = 0, so At is a linear combination of I, A, . . . , A t−1. Hence the subalgebra of Mat( t, F2) generated by A has dimension at most t. The set 
+
+{An : n ∈ Z} is contained in this subalgebra and cannot contain the zero matrix, so it has at most 2 t − 1 elements. The next step is to bound the number of anyons by Hamiltonian parameters. Note that here all parameters belong to the original Hamiltonian, which are the input data we use to compute the superlattice. For example, the parameter 
+
+q is the number of qubits per unit cell before coarse-graining. The interaction range l can be defined as follows. Intuitively, we say a Hamiltonian has interaction range l if each of its interaction terms is supported by qubits that lie in an l × l square. Algebraically, for the X-part of the CSS code, a term in the Hamiltonian is a column in H† 
+
+> X
+
+. To determine the “range” of the support of such a term, we plot the exponent vectors (( m, n ) for xmyn) of all monomials appearing in this column, and find a minimal square to cover them. In other words, l − 1 is the maximum of the differences of degrees in x and in y. (For example, H† 
+
+> X
+
+= ( x − 1, y − 1) † yields l = 2, with the maximum difference being 1.) Since this characterization yields the same result under taking antipodes x 7 → x, y 7 → y, we can access the interaction range from the rows of HX as well as columns of H† 
+
+> X
+
+. With the characterization of Hamiltonian parameters, the following lemma accomplishes the second step. 
+
+Lemma 2. Let R = F2[x±1, y ±1] be a Laurent polynomial ring, and let H : Rm → Rn be an R-linear map whose cokernel has Krull dimension zero. Suppose that for each row of the matrix representation of H, the exponent vectors in Z2 of all monomials appearing in that row lie within a square of side length l. Then the F2-dimension of the cokernel satisfies 
+
+dim F2 (coker H) ≤ 2n3l2. (III.3) 
+
+Proof. Let I = Fitt 0(coker H) be the zeroth Fitting ideal of coker H. Since I ⊂ ann(coker H), there is a natural surjection ( R/I )n ↠ coker H, giving dim F2 (coker H) ≤ n · dim F2 (R/I ). (III.4) It remains to bound dim F2 (R/I ). Each n × n minor determinant is a sum of products containing exactly one entry per row, so its Newton polygon lies in the Minkowski sum of n copies of a square of side length l — that is, a square S of side length nl . Passing to the algebraic closure K = F2, the extended ideal IK = I ⊗F2 K remains zero-dimensional, and a generic pair of elements f, g ∈ IK forms a regular sequence whose Newton polygons are contained in S. By Bernstein’s theorem [29], dim K
+
+ K[x±1, y ±1]/(f, g ) ≤ M (S, S ) = 2 Area( S) = 2( nl )2. (III.5) Since dim F2 (R/I ) ≤ dim K
+
+ K[x±1, y ±1]/(f, g ), substituting into the first inequality yields the claimed bound. Applying the lemmas to CSS codes, we have the following theorem. 
+
+Theorem 3. Consider a translation-invariant topological CSS code with q qubits, r types of independent Z-type stabilizer generators, and s types of independent X-type stabilizer generators per unit cell (with q = r + s). Suppose each X-type stabilizer generator is supported within an (lX + 1) × (lX + 1) square on the lattice, and each Z-type stabilizer generator within an (lZ + 1) × (lZ + 1) square. Then the anyon space has F2-dimension 
+
+a ≤ 4 min r3l2 
+
+> Z
+
+, s 3l2 
+
+> X
+
+, (III.6) 
+
+If q′ denotes the number of qubits in a supercell of the anyon-preserving superlattice, then 
+
+q′ ≤ q(2 a − 1) 2. (III.7) 8
+
+Proof. By the discussion before Lemma 2, we can apply Lemma 2 to HX to obtain dim F2 (coker HX ) ≤ 2s3l2 
+
+> X
+
+.Similarly we have dim F2 (coker HZ ) ≤ 2r3l2 
+
+> Z
+
+. Since the e- and m-type sector counts coincide, each is bounded by min {2s3l2 
+
+> X
+
+, 2r3l2 
+
+> Z
+
+}, so the total satisfies a ≤ 4 min {r3l2 
+
+> Z
+
+, s 3l2 
+
+> X
+
+}. By Lemma 1, the size of a supercell relative to the original unit cell is bounded by the index of the superlattice {(m, n ) : Xm = I, Y n = I}, which is the product of the orders of X and Y and hence is at most (2 a − 1) 2. Multiplying this relative size by the original number q of qubits per unit cell gives the stated bound on q′.
+
+Remark. Let q = r + s be the number of qubits per unit cell before coarse-graining, and set l = max {lX , l Z }. Since min {r, s } ≤ q/ 2, Theorem 3 gives 
+
+a ≤ 4 min {r3, s 3}l2 ≤ q3l2
+
+2 . (III.8) Consequently, the number of qubits in an anyon-preserving supercell satisfies 
+
+q′ ≤ q(2 a − 1) 2 < q 22a ≤ q2q3l2
+
+, (III.9) which is the bound quoted in the main text.  
+
+> IV. THE MAIN RESULTS
+
+In this section, we establish the main theorem of this work. We prove the existence of an explicit decoupling map specifying the Clifford unitary that transforms any translation-invariant topological CSS code into stacks of toric codes and product states while respecting the maximal residual translation symmetry, and present the construction of the polynomial-time algorithm that produces this map. The map can be compiled to a constant-depth Clifford circuit via the Suslin stability theorem; see Sec. VI A for a detailed discussion. We begin by presenting in full detail our main theorem and algorithm, with a discussion on the difficulties. The remaining three subsections follow the strategy introduced in the main text: stripping off cokernels, proving the existence and finishing the construction.  
+
+> A. Main theorem
+
+Our main theorem is stated as follows. 
+
+Theorem 4 (Symmetry-preserving unitary decoupling) . Given a code whose chain complex and its dual 
+
+Rr H†
+
+> Z
+
+−−→ Rq HX
+
+−−→ Rs, Rs H†
+
+> X
+
+−−→ Rq HZ
+
+−−→ Rr (IV.1) 
+
+have the following properties: 1. both complexes are exact; 2. H† 
+
+> Z
+
+, H † 
+
+> X
+
+are injective; 3. dim F2 coker HX = dim F2 coker HZ = t < ∞, and ann coker HZ = ann coker HX = ( x − 1, y − 1) ,then there exists a chain isomorphism between the first chain complex and a (t, r, s )-standard chain complex repre-senting t copies of toric codes, together with pZ = r − t copies of Z-basis product states, and pX = s − t copies of 
+
+X-basis product states with check matrices 
+
+eHX =
+
+ IpX 0pX ×pZ 0pX ×t 0pX ×t
+
+0t×pX 0t×pZ (x − 1) It (y − 1) It
+
+
+
+,
+
+eH† 
+
+> Z
+
+=
+
+
+
+0pX ×pZ 0pX ×t
+
+IpZ 0pZ ×t
+
+0t×pZ (1 − y)It
+
+0t×pZ (x − 1) It
+
+ .
+
+(IV.2) 9
+
+That is, there exist R-isomorphisms (ψ2, ψ 1, ψ 0) such that the following diagram commutes: 
+
+input: Rr Rq Rs
+
+standard: Rr Rq RsH†  
+
+> ZHX
+> ψ2
+> eH†
+> Z
+> ψ1
+> eHX
+> ψ0
+
+(IV.3) 
+
+The following diagram then automatically commutes for the dual chain: 
+
+Rs Rq Rr
+
+Rs Rq RrH†     
+
+> X
+> (ψ†
+> 0)−1
+> HZ
+> (ψ†
+> 1)−1(ψ†
+> 2)−1
+> eH†
+> XeHZ
+
+(IV.4) 
+
+Furthermore, Algorithm SM. 1 computes these isomorphisms in time polynomial in q and the degrees of the input check matrices HZ , H X .
+
+Algorithm SM. 1: Solving for the decoupling unitary 
+
+Input: check matrices HZ , H X
+
+Output: invertible maps ( ψ−12 , ψ −11 , ψ −10 ) 
+
+> 1
+
+Find ξ2 ∈ GL( r, F2), ξ1 ∈ GL( q, F2), and ξ0 ∈ GL( s, F2) such that H† 
+
+> Z
+
+ξ2 = ξ1 eH† 
+
+> Z
+
+(mod J) and HX ξ1 = ξ0 eHX (mod J)using standard linear algebra over F2; 
+
+> 2
+
+HX ← ξ−10 HX ξ1, H† 
+
+> Z
+
+← ξ−11 H† 
+
+> Z
+
+ξ2; 
+
+> 3
+
+Solve eHX = HX ϕ1 for ( ϕ1)q×q , with the columns [ pX + 1 : pX + pZ ] of ϕ1 taken from the first pZ columns of H† 
+
+> Z
+
+; 
+
+> 4
+
+Solve H† 
+
+> Z
+
+ϕ2 = ϕ1 eH† 
+
+> Z
+
+for ( ϕ2)r×r ; 
+
+> 5
+
+Replace the lower-right t × t corner B of ϕ2 by B mod J to obtain ϕ′
+
+> 2
+
+; 
+
+> 6
+
+Solve η eH† 
+
+> Z
+
+= ϕ′ 
+
+> 2
+
+− ϕ2 for ηr×q ; 
+
+> 7
+
+ϕ′ 
+
+> 1
+
+← ϕ1 + H† 
+
+> Z
+
+η; 
+
+> 8
+
+return (ξ2ϕ′
+
+> 2
+
+, ξ 1ϕ′
+
+> 1
+
+, ξ 0); 
+
+Here we comment on the physical meaning of the isomorphisms ( ψ2, ψ 1, ψ 0). The related equations are 
+
+eHX ψ1 = ψ0HX , eH† 
+
+> Z
+
+ψ2 = ψ1H† 
+
+> Z
+
+. (IV.5) Let U be the Clifford decoupling unitary. For any u ∈ Rq representing a Pauli Z string PZ on the input code, U P Z U †
+
+is represented by ψ1u. As for the dual maps, for any v ∈ Rq representing a Pauli X string PX on the input code, 
+
+U P X U † is represented by ( ψ−11 )†v. The invertible maps ψ2 and ψ0 describe how stabilizer generators and excitations are mapped. Once ψ1 is obtained, the corresponding CNOT circuit with lattice shifts can be compiled by decomposing 
+
+ψ1 into elementary matrices using Suslin stability [30, 31], which we will discuss in more detail in Sec. VI A. We are not aware of a compact bound on the time complexity of the algorithm for Suslin stability [31]; the polynomial-time claim in Theorem 4 therefore only refers to constructing the maps ( ψ2, ψ 1, ψ 0), hence to the unitary for decoupling, but not to compiling the explicit CNOT circuit. Before giving a complete proof and construction, we also comment here on the technical difficulties underlying this problem. At first glance, the decoupling problem appears to reduce to transforming matrices into a standard form, solvable by Gaussian elimination or linear algebra over R. However, naive approaches face intrinsic difficulties. First, Gaussian-type elimination algorithms suffer from severe intermediate expression swell. When clearing a column, one may multiply a row by a monomial taken from another row, roughly doubling the degree. In the worst case, the maximal degree of the matrix entries can therefore grow exponentially. In Haah’s algorithmic proof [1], an inductive method is used to control the intermediate swell: toric-code sectors are brought into standard form one at a time, with only multiplication by polynomials of uniformly bounded degree allowed at each step. This method requires iterative coarse-graining, so the breaking of translation symmetry is not tracked [19]. A natural workaround is to solve for the transformation directly using computer algebra techniques such as Gr¨ obner bases for submodules [26]. However, for linear systems with non-trivial kernels, an invertible (isomorphic) solution is not guaranteed by default. In ordinary linear algebra over a field, one would fix this by decomposing the ambient space as a direct sum of the kernel and a complementary subspace, then finding invertible solutions for both spaces 10 and taking a direct sum. Over R, however, this strategy also fails: the kernel of a generic R-homomorphism may not be a direct summand of some free modules. We can see this from the following minimal example. For HX = ( x−1, y −1), the standard toric code (see Eq. (I.8)), we have 
+
+ x − 1 y − 1 =  x − 1 y − 1 1 x − xy 
+
+0 1 − x + x2
+
+
+
+. (IV.6) Even though the identity matrix is an invertible solution, a generic solver can still output a result of this type for more complicated cases. The reason is that ker HX = im HZ ⊂ R2. One can always add an element from the kernel to a column of the solution, and there is no submodule M of R2 such that R2 = ker HX ⊕ M .A celebrated approach to “decoupling” the kernel of a map between free modules is the Quillen–Suslin theorem [32, 33]. Although it is not applicable to the full problem because im HX is generally not projective, Haah suggested using it for the product-state part of the decoupling problem [1]. Furthermore, we are not aware of any polynomial time-complexity result for such algorithms, and if the coefficient field is infinite, such algorithms can lead to complexity exponential in the matrix size q [34]. We now present our proof in three steps corresponding to the sketch in the main text. For technical reasons, the natural outputs of our construction are the inverses of the isomorphisms ( ψ2, ψ 1, ψ 0). Inverting matrices over polynomial or Laurent rings with a fixed number of variables is standard in computer algebra and can be implemented with time complexity polynomial in the matrix size and the original degree; the degree of the inverted matrix is also polynomial in the matrix size and the original degree [26, 35]. Therefore, we omit the matrix-inversion step in our proof and in Algorithm SM. 1.  
+
+> B. Step 1: Stripping off cokernels
+
+First, we strip off the cokernels to write the sequences to be transformed into short exact sequences. Intuitively, it is equivalent to putting the code on a torus by imposing periodic boundary conditions on a supercell and extracting the 2 t logical qubits to 2 t physical ones. Putting this decoupling unitary back on the infinite plane, it pins down the positions of qubits that will become Z- and X-basis product states after the full decoupling. However, we will give a more elementary proof here, and delay the full discussion of periodic boundary conditions to Section VI C. 
+
+Lemma 5. Given an exact sequence of a code, 
+
+Rr H†
+
+> Z
+
+−−→ Rq HX
+
+−−→ Rs, (IV.7) 
+
+with injective H† 
+
+> Z
+
+, H † 
+
+> X
+
+, dim F2 coker HX = t, and ann coker HZ = ann coker HX = ( x − 1, y − 1) , there exist invertible 
+
+F2 matrices (ξ2)r×r, (ξ0)s×s, and (ξ1)q×q such that 
+
+H† 
+
+> Z
+
+ξ2 = ξ1 eH† 
+
+> Z
+
+(mod J), HX ξ1 = ξ0 eHX (mod J), (IV.8) 
+
+and such that the sequence 
+
+0 → Rr ξ−11 H† 
+
+> Zξ2
+
+−−−−−−→ Rq ξ−10 HX ξ1
+
+−−−−−−→ RpX ⊕ JR t → 0 (IV.9) 
+
+is well-defined and exact. Proof. The lemma is equivalent to the following statement: tensoring the rows of (IV.3) in Theorem 4 with R/J = F2,i.e., reducing modulo J, there exist invertible ( ξ2, ξ 1, ξ 0) as stated such that the following diagram commutes: 0 Fr 
+
+> 2
+
+Fq 
+
+> 2
+
+Fs
+
+> 2
+
+0 Fr 
+
+> 2
+
+Fq 
+
+> 2
+
+Fs        
+
+> 2(H†
+> Z)∗(HX)∗
+> ξ2
+> (eH†
+> Z)∗
+> ξ1
+> (eHX)∗
+> ξ0
+
+(IV.10) This is because any isomorphism between F2-vector spaces can be lifted to an R-isomorphism between free R-modules, with the same matrix representation (we will comment on this point further after the proof). To show the existence of these maps, it suffices to show that the two rows have the same dimension for corresponding homology vector spaces. 11 For the second row, we can read from matrices that (dim refers to dimension of vector spaces in this proof) dim coker( eHX )∗ = t, dim(ker( eHX )∗/ im( eH† 
+
+> Z
+
+)∗) = 2 t, and dim ker( eH† 
+
+> Z
+
+)∗ = t. For the first row, ann coker HX = J
+
+implies JR s ⊆ im HX ⊆ Rs. Therefore coker( HX )∗ = ( Rs/JR s)/(im HX /JR s) ∼= Rs/ im HX = coker HX , leading to dim coker( HX )∗ = t. Similarly we have for linear map ( H† 
+
+> Z
+
+)∗, dim ker( H† 
+
+> Z
+
+)∗ = dim coker( HZ )∗ = t. Finally, dim(ker( HX )∗/ im( H† 
+
+> Z
+
+)∗) = dim ker( HX )∗ − dim im( H† 
+
+> Z
+
+)∗ = ( q − (s − t)) − (r − t) = 2 t. This proves the existence. 
+
+Remark. We make three remarks on this step. First, on algorithmic implementation. Once the existence of ( ξ2, ξ 1, ξ 0) is established, they can be found by standard linear algebraic techniques, with time complexity polynomial in q.Second, on necessity of the annihilator condition (III.1). We cannot lift F2-linear transformations in coker HX
+
+when the annihilator condition is not satisfied. In this case, the ring R then acts on the anyon module coker HX in a non-trivial way. Therefore, an F2 basis for coker HX cannot be extended to a minimal generating set for free module 
+
+Rs. For example, for 6.6.6 color code, an F2 basis for coker HX can be {1, x }, but s = 1 so only one element (e.g., 
+
+{1}) is enough for a minimal generating set for Rs.Third, on the lift of F2-linear maps. In the proof, we have used the fact that an F2-isomorphism can be lifted to an 
+
+R-isomorphism. This does not hold for a general residue field R/I with maximal ideal I. Consider an invertible m×m
+
+matrix A over the field R/I . Write the elements of A using their representatives in R. The necessary and sufficient condition for such an A to be invertible over R is that det A is a unit in R. In our case, R/J is the coefficient field, so the condition always holds. A non-example is when one takes I = ( x + y, 1 + x + x2 + x3 + x4) such that R/I = F16 .In this case A = diag(1 , 1 + x2) is not liftable, while A = diag(1 , 1 + x + x3 + x4) is liftable to diag(1 , x 2). This also demonstrates the necessity of the annihilator condition from another viewpoint: it can be tricky if we transform the anyon basis based on more complex field structures rather than treating the anyons one by one. By Lemma 5, we may assume without loss of generality that H† 
+
+> Z
+
+≡ eH† 
+
+> Z
+
+(mod J) and HX ≡ eHX (mod J): any isomorphism found under this assumption can be composed with ( ξ2, ξ 1, ξ 0) to yield the maps of Theorem 4. Under this assumption, both sequences become short exact with the common right-hand term RpX ⊕ JR t with aligned generating elements ( X-checks), and our problem reduces to finding R-isomorphisms ( ϕ2, ϕ 1) such that the following diagram commutes: 0 Rr Rq RpX ⊕ JR t 00 Rr Rq RpX ⊕ JR t 0  
+
+> H†
+> ZHX
+> ϕ2
+> eH†
+> Z
+> ϕ1
+> eHX
+> id
+
+(IV.11)  
+
+> C. Step 2. Existence
+
+In this subsection, we explore the algebraic structure of our problem through the lens of short exact sequences and the classification of module extensions. This establishes the existence of the decoupling map in Theorem 4 and serves as a first step towards the algorithm that computes it. First, recall some standard results from homological algebra (see e.g. Chapter XIV in Ref. [36]). An extension of an R-module A by an R-module C is a short exact sequence 0 → C ψ
+
+−→ X ϕ
+
+−→ A → 0. Two extensions X, X ′ are equivalent if there exists an R-isomorphism k : X → X′ making the following diagram commute: 
+
+XC AX′ 
+
+> ϕkψψ′ϕ′
+
+(IV.12) Furthermore, classification of extensions under this equivalence is captured by the Ext functor. Let E(A, C ) denote the set of equivalence classes of extensions of A by C. There is a bijection Θ : E(A, C ) → Ext 1(A, C ) defined by Θ( E) = δE (id), where δE : Hom R(C, C ) → Ext 1(A, C ) is the connecting homomorphism obtained by applying Hom R(−, C ) to the extension E, and id ∈ Hom R(C, C ) is the identity map. 12 The existence of isomorphisms ( ϕ2, ϕ 1) can be reduced to a problem of equivalence of extensions by absorbing (the unfixed) ϕ2 into the input chain. Consider the chain complex 0 → Rr H† 
+
+> Z◦ϕ2
+
+−−−−→ Rq HX
+
+−−→ RpX ⊕ JR t → 0. (IV.13) If there exists some ϕ2 such that this chain complex is equivalent to the standard chain complex (second row in Eq. (IV.11)), i.e., if it has the same representative in Ext 1(RpX ⊕ JR t, R r ) ∼= Hom F2 (Ft
+
+> 2
+
+, Fr
+
+> 2
+
+) as the standard one, then the required ( ϕ2, ϕ 1) exists. Therefore, we can establish the following existence result by proving that the orbit of the representatives of (IV.13) under all possible invertible ϕ2 (called “pushout”) contains the representative of the standard chain. 
+
+Lemma 6. There exist R-isomorphisms (ϕ2, ϕ 1) such that the diagram (IV.11) commutes. Proof. From standard homological algebra we have Ext 1(RpX ⊕ JR t, R r ) ∼= Hom F2 (Ft
+
+> 2
+
+, Fr
+
+> 2
+
+), so that we can write the representatives as r × t F2-matrices. Furthermore, let the representative of the first row in (IV.11) be θ, then the representative of the pushed out chain (IV.13) is ( ϕ−12 mod J)θ. Also denote the representative of the standard chain as eθ. We will prove that both θ and eθ have rank (as F2-matrices) t. Therefore, there exists an invertible r×r F2-matrix 
+
+α such that αθ = eθ (note that r ≥ t). Then taking ϕ2 = α−1 finishes the proof. That both θ and eθ have full rank t is a consequence of the shape of the middle module Rq . Consider the following building blocks: 
+
+• The trivial extensions E(0 , R ) and E(R, 0), each with middle module R.
+
+• The extensions in E(J, R ), classified by Ext 1(J, R ) ∼= Hom F2 (F2, F2) ∼= F2. There are exactly two classes: the split extension with middle module R ⊕ J, and the non-split extension with middle module R2; the latter is the toric code sequence (see Eq. (I.8)). Taking the direct sum of pX copies of E(0 , R ), pZ copies of E(R, 0), ∆ split copies of E(J, R ), and t − ∆ non-split (toric code) copies yields the reference extension 
+
+E∆ : 0 → Rr → Rq−∆ ⊕ JR ∆ → RpX ⊕ JR t → 0, (IV.14) where q = pX + pZ + 2 t. By additivity of Ext 1, the representative Θ( E∆) ∈ Hom F2 (Ft
+
+> 2
+
+, Fr
+
+> 2
+
+) has rank t − ∆, contributed entirely by the non-split (toric code) summands. Based on these reference extensions, pushing out in Rr and pulling back in the direct summand JR t by invertible F2-matrices (intuitively, changes of “basis” in Rr and JR t) act on the representatives by left and right multiplication by some F2-invertible matrices (intuitively, change of basis in Fr 
+
+> 2
+
+and 
+
+Ft
+
+> 2
+
+), which traverses all r × t matrices of the same rank. Therefore, every extension is equivalent to some reference extension up to pushouts and pullbacks, and that the middle module is Rq−∆ ⊕ JR ∆ if and only if the representative has rank t − ∆. This proves that both θ and eθ have rank t.
+
+Remark. For full rank t, pushouts alone (without pullbacks) suffice to traverse the representatives. This is why we can fix the zero-level map to id.  
+
+> D. Step 3. Construction and algorithm
+
+In this subsection, we proceed from existence to construction. Our approach follows the “directly solve the matrix” route. There we noted that this strategy does not work naively: the maps have nontrivial kernels, and these kernels are not direct summands. However, we can take a good ansatz of ϕ1 and then correct it to an isomorphism by exploiting more algebraic properties of our problem. The first step is to apply the comparison theorem for projective resolutions (see Ref. [37], Comparison Theorem 2.2.6) to our setting to reveal more constraints on ϕ2.
+
+Lemma 7. Let 
+
+0 → Rr H†
+
+> Z
+
+−−→ Rq HX
+
+−−→ RpX ⊕ JR t → 0 (IV.15) 
+
+be a short exact sequence with HX ≡ eHX (mod J) and H† 
+
+> Z
+
+≡ eH† 
+
+> Z
+
+(mod J), and let (ϕ2, ϕ 1) be an isomorphism between this sequence and the standard sequence, as guaranteed by Lemma 6. Then the reduction mod J of the last t
+
+columns of ϕ2 is independent of the choice of isomorphism and has the form 
+
+(ϕ2)[: ,p Z +1: r] ≡
+
+0pZ ×t
+
+Bt
+
+
+
+(mod J), (IV.16) 13 
+
+where B is a fixed t × t invertible matrix over F2.Proof. Since ϕ2 acts on the representative in E(RpX ⊕ JR t, R r ) by left multiplication by ϕ−12 mod J, there exists an F2-matrix ( ϕ2)0 that is an R-isomorphism and makes the diagram (IV.11) commute with some isomorphism ϕ1,according to Lemma 6. We first prove that such a ( ϕ2)0 can have the following block diagonal form: (ϕ2)0 =
+
+ ApZ 0pZ ×t
+
+Ct×pZ Bt
+
+
+
+, (IV.17) with ApZ , B t being invertible F2-matrices. In fact, for such ( ϕ2)0, reducing diagram (IV.11) modulo J gives (H† 
+
+> Z
+
+)∗(ϕ2)0 = ( ϕ1)∗( eH† 
+
+> Z
+
+)∗. By assumption ( H† 
+
+> Z
+
+)∗ = ( eH† 
+
+> Z
+
+)∗, and the standard form (IV.2) gives ker( eH† 
+
+> Z
+
+)∗ =
+
+π[pZ +1: r]Fr
+
+> 2
+
+. For any v ∈ π[pZ +1: r]Fr
+
+> 2
+
+, we have ( eH† 
+
+> Z
+
+)∗v = 0, so ( H† 
+
+> Z
+
+)∗(ϕ2)0v = ( ϕ1)∗( eH† 
+
+> Z
+
+)∗v = 0, i.e., ( ϕ2)0v ∈
+
+ker( H† 
+
+> Z
+
+)∗ = π[pZ +1: r]Fr
+
+> 2
+
+. Hence π[pZ +1: r]Fr 
+
+> 2
+
+is invariant under ( ϕ2)0. This proves the diagonal form in Eq. (IV.17). Invertibility of ( ϕ2)0 thus implies invertibility of A and B.We then prove that the last t columns for any ϕ2 are the same as ( ϕ2)0 modulo J. Since Rr and Rq are free (hence projective) R-modules, each row in the diagram below is a projective resolution of RpX ⊕ JR t, and ( ϕ2, ϕ 1) is a chain map lifting id on the cokernel: 0 Rr Rq RpX ⊕ JR t 00 Rr Rq RpX ⊕ JR t 0  
+
+> H†
+> ZHX
+> ϕ2
+> eH†
+> Z
+> ϕ1
+> η
+> eHX
+> id
+
+(IV.18) By the comparison theorem, such lifts are unique up to chain homotopy: any choice of ϕ2 satisfies ϕ2 = ( ϕ2)0 + η eH†
+
+> Z
+
+for some R-map η : Rq → Rr . By the block form of eH† 
+
+> Z
+
+(IV.2), its last t columns lie in JR q , so η ( eH† 
+
+> Z
+
+)[: , p Z +1: r] ⊆ JR r
+
+for any η. Hence the last t columns of ϕ2 are uniquely determined modulo J independently of the choice of lift. This proves the lemma. The preceding lemma suggests a strategy: if we start with a sufficiently structured initial ansatz for ϕ1, the corresponding ϕ2 will be close to the block-diagonal form of Eq. (IV.17) and can then be corrected to an isomorphism via the homotopy map η.
+
+Lemma 8. Let 
+
+0 → Rr H†
+
+> Z
+
+−−→ Rq HX
+
+−−→ RpX ⊕ JR t → 0 (IV.19) 
+
+be a short exact sequence with HX ≡ eHX (mod J) and H† 
+
+> Z
+
+≡ eH† 
+
+> Z
+
+(mod J). Then there exists a pair of homomor-phisms (ϕ2, ϕ 1) such that the diagram (IV.18) commutes (ignoring the dashed arrow), with the following properties: 
+
+• The pX + 1 to pX + pZ columns of ϕ1 coincide with the first pZ columns of H† 
+
+> Z
+
+.
+
+• The matrix ϕ2 has the block form 
+
+ϕ2 =
+
+ IpZ CpZ ×t
+
+0t×pZ Bt + Dt
+
+
+
+, (IV.20) 
+
+where Bt is an invertible F2-matrix and all entries of C and D lie in J.Furthermore, there exists η ∈ Hom( Rq , R r ) such that ϕ2 + η eH† 
+
+> Z
+
+is an R-isomorphism. Proof. For the form of ϕ1, the right square of diagram (IV.18) requires HX ϕ1 = eHX . Columns pX + 1 through 
+
+pX + pZ of eHX vanish; setting the corresponding columns of ϕ1 equal to the first pZ columns of H† 
+
+> Z
+
+satisfies this, since 
+
+HX H† 
+
+> Z
+
+= 0. Each remaining column qi must satisfy HX qi = ( eHX )[: ,i ], which is solvable because im HX = im eHX ,and can be computed efficiently via Gr¨ obner bases for submodules. For the form of ϕ2, the left square requires H† 
+
+> Z
+
+ϕ2 = ϕ1 eH† 
+
+> Z
+
+. Our choice of the pZ columns [ pX + 1 : pX + pZ ] of ϕ1,together with the injectivity of H† 
+
+> Z
+
+, forces the first pZ columns of ϕ2 to be as in Eq. (IV.20). The form of the last t
+
+columns of ϕ2 is ensured by Lemma 7. 14 For the existence of η, since every entry of Dt lies in J = ( x − 1, y − 1), the equation 
+
+0pZ
+
+−Dt
+
+
+
+=
+
+0pZ ×pZ 0pZ ×pX 0pZ ×2t
+
+0t×pZ 0t×pX Et×2t
+
+ 
+
+0pX ×pZ 0pX ×t
+
+IpZ 0pZ ×t
+
+0t×pZ (1 − y)It
+
+0t×pZ (x − 1) It
+
+ (IV.21) has a solution E: it reduces to expressing each entry of Dt as an R-linear combination of x − 1 and y − 1. Taking η
+
+to be the left factor, we obtain 
+
+ϕ2 + η eH† 
+
+> Z
+
+=
+
+IpZ C
+
+0 Bt
+
+
+
+, (IV.22) which is upper block-triangular with invertible diagonal blocks, hence an R-isomorphism. We are now fully prepared to prove the main theorem. 
+
+Proof of Theorem 4. The number of toric-code sectors is t = dim F2 coker HX , giving pZ = r − t and pX = s − t.Lemma 5 reduces the problem to the case H† 
+
+> Z
+
+≡ eH† 
+
+> Z
+
+(mod J) and HX ≡ eHX (mod J), where both chain complexes become short exact sequences with the common right-hand term RpX ⊕ JR t. Lemma 6 guarantees the existence of 
+
+R-isomorphisms ( ϕ2, ϕ 1) making diagram (IV.11) commute, and Lemma 8 shows how to construct them: one solves for an initial pair and corrects ϕ2 to an isomorphism via a chain homotopy, after which the five lemma forces ϕ1
+
+to be an isomorphism as well. Algorithm SM. 1 implements the procedure proposed in Lemma 8. It works in time polynomial in q since every step is either Gaussian elimination over F2 or a module Gr¨ obner basis computation in the four-variable polynomial lift of the Laurent ring. See Eq. (VII.4) for the resulting time-complexity and locality bound.  
+
+> V. EXAMPLES AND NUMERICAL RESULTS
+
+In this section, we present examples and numerical results of our decoupling algorithm. We detail the com-putation of the supercell and the decoupling map for the 6.6.6 and 4.8.8 color codes, providing a pedagogical demonstration of the main results. For convenience, we ignore the difference between ±1 in F2 in this sec-tion. We also present numerical results for a large number of bivariate bicycle codes, demonstrating the va-lidity of the algorithm. The source code and data used to reproduce the numerical results are available at 
+
+https://github.com/nzy1997/topological-css-code-decoupling . 
+
+> A. The 6.6.6 color code
+
+The 6.6.6 color code is defined on a hexagonal lattice. In the basis shown in Fig. SM. 3, the check matrix is given by: 
+
+HX =  1 + x + xy 1 + y + xy  . (V.1) Following the procedure described in Section III A and Algorithm SM. 1, we have: 1. The Gr¨ obner basis for ideal (1 + x + xy, 1 + y + xy ) is {1 + x + x2, x + y, 1 + x + u, 1 + y + v} (we lift the ideal (1 + x + xy, 1 + y + xy ) in R = F2[x±1, y ±1] to the ideal (1 + x + xy, 1 + y + xy, 1 + xu, 1 + yv ) in P = F2[x, u, y, v ]). 2. The monomial basis for the quotient P/ (1 + x + xy, 1 + y + xy, 1 + xu, 1 + yv ) is {1, x }.3. To compute the representation matrix, we have: 
+
+bTx(1) = x, 
+
+bTx(x) = x2 = 1 + x + (1 + x + x2) ≡ 1 + x, 
+
+bTy (1) = y = x + ( x + y) ≡ x, 
+
+bTy (x) = xy = x2 + x(x + y) = 1 + x + (1 + x + x2) + x(x + y) ≡ 1 + x. 
+
+Therefore, 
+
+Tx =
+
+0 1 1 1 
+
+
+
+, Ty =
+
+0 1 1 1 
+
+
+
+. (V.2) 15 𝑥 
+
+𝑦 
+
+> 1
+> 2
+
+𝑥 𝑦 
+
+𝑦 
+
+𝑥 
+
+𝑥 𝑦 
+
+(1+𝑥 +𝑥 𝑦 
+
+> 1+𝑦 +𝑥 𝑦
+
+)𝑥 2𝑦  ≡ 1  
+
+> 𝑥 3≡1
+
+FIG. SM. 3. The 6.6.6 color code, with q = 2, r = s = 1. As shown in the first panel, there are two qubits per unit cell: the purple one is denoted by (1 , 0) ⊤, while the green one is denoted by (0 , 1) ⊤. The only X-type stabilizer generator is the face operator (1 + x + xy, 1 + y + xy )⊤, and similarly for the Z-type stabilizer. For the 6.6.6 color code, the anyons respect the translation symmetry generated by x3 and x2y, as shown in the last panel. 
+
+4. It is easy to check that Tx = Ty and T 3 
+
+> x
+
+= 1. Thus the superlattice is generated by x3, x 2y.5. The coarse-grained check matrices are: 
+
+HX =
+
+ 1 1 x 1 1 yy 1 1 x 1 1
+
+xy y 1 xy x 1
+
+ , HZ =
+
+1 x xy 1 y xy 
+
+1 1 x 1 1 yy 1 1 x 1 1
+
+ . (V.3) The corresponding standard forms are: 
+
+eHX =
+
+1 0 0 0 0 00 0 x + 1 y + 1 0 00 0 0 0 x + 1 y + 1 
+
+ , eHZ =
+
+0 1 0 0 0 00 0 1 + y 1 + x 0 00 0 0 0 1 + y 1 + x
+
+ . (V.4) Running Algorithm SM. 1 gives the transformation matrices ( ψ−12 , ψ −11 , ψ −10 ) in Theorem 4: 
+
+ψ−10 =
+
+1 0 01 1 01 0 1
+
+ , ψ −11 =
+
+
+
+1 + y 1 1 0 1 + y 1 + yxy + 1 + y x 1 1 xy + 1 + y xy + yxy xy 0 0 xy xy 
+
+1 1 1 0 1 11 + y y 0 0 y 1 + yx + y xy y y x + y x + y
+
+
+
+, ψ −12 =
+
+1 1 1 + xy 
+
+0 y x + xy + y
+
+0 0 x
+
+ . (V.5) 
+
+B. The 4.8.8 color code 
+
+The 4.8.8 color code is defined on a square-octagon lattice. In the basis shown in Fig. SM. 4, the check matrix is given by: 
+
+HX =
+
+1 + y 1 + y 1 + x 1 + xxy y xy x
+
+
+
+(V.6) Following the same procedure, we have: 1. The Gr¨ obner basis for submodule im HX is given by: 
+
+ 1 + x
+
+1
+
+
+
+,
+
+ 01 + x
+
+
+
+,
+
+1 + y
+
+1
+
+
+
+,
+
+ 01 + y
+
+
+
+,
+
+1 + u
+
+1
+
+
+
+,
+
+ 01 + u
+
+
+
+,
+
+1 + v
+
+1
+
+
+
+,
+
+ 01 + v
+
+ 16 𝑥 
+
+𝑦 
+
+> 12
+> 3
+> 4
+
+𝑦 𝑦 
+
+𝑥 
+
+𝑥 
+
+𝑥 𝑦 
+
+𝑥 𝑦 
+
+(1+𝑦 
+
+> 1+𝑦
+> 1+𝑥
+> 1+𝑥
+
+)
+
+(𝑥 𝑦  
+
+> 𝑦
+> 𝑥 𝑦
+> 𝑥
+
+)𝑥 2 ≡ 1  
+
+> 𝑥 𝑦 ≡1
+
+FIG. SM. 4. The 4.8.8 color code, with q = 4, r = s = 2. As shown in the first panel, there are four qubits per unit cell, denoted by ei, the vector with a 1 in the i-th position and 0s elsewhere. There are two different X-type stabilizer generators, denoted by (1 + y, 1 + y, 1 + x, 1 + x)⊤ and ( xy, y, xy, x )⊤, respectively (see the second panel), and similarly for the Z-type stabilizer. For the 4.8.8 color code, the anyons respect the translation symmetry generated by x2 and xy , as shown in the last panel. 
+
+2. The monomial basis for the quotient ( P/I )2/ im HX is: 
+
+ 10
+
+
+
+,
+
+01
+
+ 
+
+3. To compute the representation matrix, we have: 
+
+bTx
+
+10
+
+
+
+=
+
+x
+
+0
+
+
+
+=
+
+10
+
+
+
++
+
+01
+
+
+
++
+
+1 + x
+
+1
+
+
+
+≡
+
+10
+
+
+
++
+
+01
+
+
+
+,
+
+bTx
+
+01
+
+
+
+=
+
+0
+
+x
+
+
+
+=
+
+01
+
+
+
++
+
+ 01 + x
+
+
+
+≡
+
+01
+
+
+
+,
+
+bTy
+
+10
+
+
+
+=
+
+y
+
+0
+
+
+
+=
+
+10
+
+
+
++
+
+01
+
+
+
++
+
+1 + y
+
+1
+
+
+
+≡
+
+10
+
+
+
++
+
+01
+
+
+
+,
+
+bTy
+
+01
+
+
+
+=
+
+0
+
+y
+
+
+
+=
+
+01
+
+
+
++
+
+ 01 + y
+
+
+
+≡
+
+01
+
+
+
+.
+
+4. Therefore, 
+
+Tx =
+
+1 0 1 1 
+
+
+
+, Ty =
+
+1 0 1 1 
+
+
+
+. (V.7) It is easy to check that Tx = Ty and T 2 
+
+> x
+
+= 1. Therefore the superlattice is generated by x2, xy .5. The coarse-grained check matrices are: 
+
+HX =
+
+
+
+1 1 1 1 1 xy 1 xy x 1 x 1 y 1 y 1
+
+y 0 0 1 y 0 0 xy 
+
+0 y x 0 0 y y 0
+
+ , HZ =
+
+
+
+1 1 1 1 1 xy 1 xy x 1 x 1 y 1 y 1
+
+y 0 0 1 y 0 0 xy 
+
+0 y x 0 0 y y 0
+
+ . (V.8) The corresponding standard forms are given by: 
+
+eHX =
+
+
+
+1 0 0 0 0 0 0 00 1 0 0 0 0 0 00 0 0 0 x + 1 y + 1 0 00 0 0 0 0 0 x + 1 y + 1 
+
+ , eHZ =
+
+
+
+0 0 1 0 0 0 0 00 0 0 1 0 0 0 00 0 0 0 1 + y 1 + x 0 00 0 0 0 0 0 1 + y 1 + x
+
+ . (V.9) 17 Running Algorithm SM. 1 gives the transformation matrices ( ψ−12 , ψ −11 , ψ −10 ) in Theorem 4: 
+
+ψ−10 =
+
+
+
+1 0 0 01 0 1 01 1 0 00 1 0 1
+
+ , ψ−12 =
+
+
+
+1 0 y y
+
+0 0 0 x
+
+0 1 y 00 0 xy 0
+
+ ,ψ−11 =
+
+
+
+0 0 1 y 1 0 1 00 0 1 0 1 1 1 10 0 1 0 0 0 1 01 0 1 1 0 0 1 10 y 1 y 1 0 1 + y y
+
+0 0 xy 0 0 0 0 00 y 1 0 1 1 1 + y y
+
+0 0 xy xy 0 0 0 0
+
+
+
+.
+
+(V.10) 
+
+C. More results on Bivariate Bicycle codes 
+
+We benchmark Algorithm SM. 1 on two collections of bivariate bicycle (BB) codes. For each instance, we choose a coarse-graining superlattice and compute the decoupling map to the standard form. The tables report the resulting standard-form data, running time, and maximal Laurent degree deg( ψ−11 ) of the qubit map. We use deg( ψ−11 ) as a proxy for locality, since it bounds the range over which the decoupling map can spread a local X operator. 
+
+a(x, y ) b(x, y ) L superlattice generator q pX (= pZ ) t Time(s) deg( ψ−11 )
+
+x · y x · y 3 (x2y, xy 2) 6 1 2 0.014 6
+
+x−1 · y x · y 7 (x3y, x 2y3) 14 4 3 0.143 9
+
+x2 x2 3 (x2y, xy 2) 6 1 2 0.013 6
+
+x−1 y−1 3 (x3, y 3) 18 5 4 0.054 3
+
+x · y x · y−1 7 (x3y2, xy 3) 14 4 3 0.03 9
+
+x−1 x3 · y2 3 (x3, y 3) 18 5 4 0.027 12 
+
+y−2 x−2 21 (x5y2, x 2y5) 42 16 5 0.184 14 
+
+y−2 x2 15 (x3y3, y 5) 30 11 4 0.109 13 
+
+x−1 · y x−1 · y−1 31 (x5y3, x 3y8) 62 26 5 0.514 11 
+
+x−2 · y−1 x2 · y 3 (xy, y 3) 6 1 2 0.014 6
+
+x−1 · y3 x3 · y−1 12 (x12 , y 12 ) 288 136 8 9.29 36 
+
+x−2 x−2 · y2 7 (x7, y 7) 98 43 6 0.785 21 
+
+x−2 · y x · y−2 63 (x15 y6, x 6y15 ) 378 181 8 26.518 63 
+
+x−1 · y2 x−2 · y−1 217 (x19 y10 , x 3y13 ) 434 209 8 40.519 90 
+
+x−3 · y x3 · y2 63 (x21 , y 63 ) 2646 1312 11 17056.737 210 
+
+x−3 · y x−5 21 (xy, y 21 ) 42 16 5 0.307 37 
+
+x−2 · y x · y2 105 (x9y, x 3y12 ) 210 98 7 5.353 35 
+
+x−1 · y−2 x · y−1 63 (x7y3, y 9) 126 57 6 1.311 13 
+
+y2 x−4 · y 73 (x14 y5, x 5y7) 146 64 9 3.254 45 
+
+x−1 · y2 y−4 105 (x35 y7, y 21 ) 1470 725 10 979.291 147 
+
+y−4 x4 255 (x15 y13 , y 17 ) 510 239 16 79.217 95 
+
+x−4 x−3 · y2 21 (x21 , y 21 ) 882 431 10 110.643 105 
+
+x−2 · y−5 x−1 · y−3 42 (x6y6, x 2y16 ) 168 77 7 3.115 42 
+
+x−8 · y−1 x5 · y 21 (x4y, x 3y6) 42 16 5 0.228 30 
+
+x · y−5 x · y4 186 (x18 y42 , x 10 y44 ) 744 363 9 119.246 174 
+
+x−1 · y−1 x5 105 (x15 y6, x 10 y11 ) 210 98 7 6.276 63 
+
+x · y3 x2 · y−2 63 (x35 y7, x 7y14 ) 882 432 9 167.668 126 
+
+x−1 · y−2 x2 · y−1 217 (x13 y3, x 10 y19 ) 434 209 8 29.811 58 
+
+x−1 · y3 x · y3 186 (x16 y10 , x 14 y32 ) 744 363 9 147.209 138 
+
+x2 · y2 x−4 · y 889 (x101 y5, x 4y9) 1778 879 10 1459.305 225 
+
+x−1 · y3 x3 217 (x17 y9, x 8y17 ) 434 209 8 128.724 78 
+
+TABLE SM. 1. Numerical results on the BB codes with the form f = 1 + x + a(x, y ) and g = 1 + y + b(x, y ) taken from Ref. [38]. Here L is the minimal translation period such that ( xL − 1, y L − 1) ⊆ I, the superlattice generator column lists the two generators of the coarse-grained translation superlattice, q is the number of qubits per supercell, pX (= pZ ) is the common number of product-state sectors of each type in the standard form, t is the number of toric-code sectors, and deg( ψ−11 ) is the maximal Laurent degree among the entries of the decoupling matrix ψ−11 . Only runs with a computed decoupling map ψ−11 are listed. 
+
+Table SM. 1 gives results for the benchmark family of Ref. [38], defined by f = 1 + x + a(x, y ) and g = 1 + y + b(x, y ). Table SM. 2 gives results for additional BB codes taken from Refs. [39–42]. In both tables, we list only instances 18 corresponding to topological codes on the infinite plane whose supercell size q is not too large so that the result can be obtained within a reasonable time. 
+
+f g L superlattice generator q pX (= pZ ) t Time(s) deg( ψ−11 )
+
+x + 1 x + y 1 (x, y ) 2 0 1 0.012 0
+
+x + y2 y2 + y 1 (x, y ) 2 0 1 0.106 2
+
+x2 · y + x · y + x x · y + y2 3 (x2y, xy 2) 6 1 2 0.047 9
+
+x2 + x + 1 x + y 3 (x2y, xy 2) 6 1 2 0.017 6
+
+x2 · y + x · y + 1 x · y + x 3 (x3, y ) 6 1 2 0.015 4
+
+x2 · y2 + x + 1 x · y2 + x · y 3 (x3, y ) 6 1 2 0.015 5
+
+x3 · y + x3 + x2 · y + x · y x3 · y + y2 4 (xy, y 4) 8 1 3 0.055 6
+
+x2 · y3 + x + 1 x · y3 + x · y2 + x · y 3 (x3, y 3) 18 5 4 0.059 9
+
+x + y y4 + y3 + y2 + y 4 (x2y2, xy 3) 8 1 3 0.022 8
+
+y + x−1 · y2 + x−2 · y2 + x−2 · y x · y + y2 + 1 + x−2 3 (xy, y 3) 6 0 3 0.032 6
+
+x · y2 + x + x−1 · y3 + x−2 · y4 x · y3 + x · y + y2 + 1 40 (x2y2, y 40 ) 160 71 9 5.215 48 
+
+x3 · y−2 + x2 · y−1 + y2 + 1 x2 · y + x2 · y−1 + x + x · y−2 40 (x2y2, y 40 ) 160 71 9 7.337 120 
+
+x3 · y + 1 + x−1 · y3 + x−2 · y4 x3 · y3 + x · y + y2 + x−2 24 (x4y4, y 24 ) 192 76 20 9.685 56 
+
+x3 + x + x−1 · y3 + x−2 · y4 x3 · y + x2 + x · y + 1 56 (x2y2, y 56 ) 224 101 11 13.287 120 
+
+x3 + y2 + y x2 + x + y3 12 (x12 , y 12 ) 288 136 8 7.019 24 
+
+x27 + x6 + y x24 + x15 + 1 93 (x93 , y ) 186 78 15 4.034 280 
+
+x9 + y2 + y x8 + x + 1 63 (x36 y27 , x 27 y36 ) 1134 551 16 1085.181 252 
+
+x3 + y2 + y x2 + x + 1 3 (x3, y 3) 18 5 4 0.026 3
+
+x3 · y + x2 · y2 + 1 x3 · y2 + x2 + 1 105 (x21 y3, y 5) 210 98 7 5.337 53 
+
+x3 · y2 + x2 · y3 + 1 x3 · y + x2 + 1 217 (x14 y23 , x 7y27 ) 434 209 8 27.003 74 
+
+x3 · y2 + x2 + 1 x3 + x2 · y + 1 7 (x7, y ) 14 4 3 0.045 17 
+
+x3 · y + x2 + 1 x3 · y2 + x2 + 1 7 (x7, y ) 14 4 3 0.028 16 
+
+x3 + x2 + y x3 + x2 + 1 7 (x7, y ) 14 4 3 0.022 7
+
+x6 · y2 + x3 + x · y3 + 1 x6 · y + x5 · y + x4 · y + x3 · y2 120 (x8y6, y 30 ) 480 230 10 94.622 104 
+
+x6 + x3 + x · y + 1 x6 · y + x5 · y + x4 · y + x3 8 (x8, y 4) 64 25 7 0.303 20 
+
+x5 · y + x5 + x3 + 1 x5 · y + x3 + x2 · y + y 186 (x18 y2, x 12 y22 ) 744 362 10 92.757 74 
+
+x5 · y3 + x4 · y4 + x3 · y5 + y5 x5 · y + x4 · y3 + x3 · y3 + y2 56 (x28 y2, y 4) 224 103 9 11.048 120 
+
+x5 · y + x4 + x3 · y + y x5 · y + x4 · y + x3 · y + 1 56 (x28 y2, y 4) 224 103 9 5.941 64 
+
+x3 + y7 + y2 x2 + x + y3 126 (x12 y6, x 6y66 ) 1512 744 12 865.028 234 
+
+TABLE SM. 2. Results for more BB codes in Refs. [39–42]. The first two columns give the defining BB polynomial pair ( f, g ). The remaining columns have the same meanings as in Table SM. 1; in particular, q is the number of qubits per supercell. q
+
+10 100 1000 
+
+> T (s)
+
+0.1 10 1000 
+
+(a) Running time T vs q
+
+# (a) 
+
+q
+
+10 100 1000 
+
+> deg( 𝜓 1
+> − 1)
+
+10 100 
+
+(b) Locality deg( 𝜓 1 
+
+> −1
+
+) vs q
+
+# (b) Data Fit : T ∝ q1.86 Data Fit : deg( 𝜓 1 
+
+> −1
+
+) ∝ q0.65 
+
+FIG. SM. 5. Empirical scaling of computation time and deg( ψ−11 ) versus qubit number per supercell q for data from tables SM. 1 and SM. 2. The time fit uses all 60 entries, while the deg( ψ−11 ) fit uses the 59 non-zero entries. This scaling is much smaller than the pessimistic uniform module-theoretic worst-case bound in Eq. (VII.4). 
+
+Combining data from tables SM. 1 and SM. 2 gives the empirical scaling shown in Fig. SM. 5. A power-law fit over the combined data set gives 
+
+Tcompute ∝ q1.86 , deg( ψ−11 ) ∝ q0.65 . (V.11) This growth is far milder than the conservative worst-case estimate in Eq. (VII.4). Thus, while the uniform module-theoretic bound guarantees polynomial time in complete generality, the sparse structured BB code instances studied here appear much easier in practice. The locality estimate is also relevant for the unitary-decouple-based decoder in Sec. VIII A, where deg( ψ−11 ) controls the possible spreading of a local physical fault across the virtual toric-code sectors. 19 The wall-clock timings reported in this section were measured on a Mac mini with an Apple M4 chip (10 CPU cores: 4 performance and 6 efficiency cores) and 32 GB of memory, running macOS 26.5.1 and Julia 1.12.5.  
+
+> VI. COROLLARIES AND REFINEMENTS
+
+In this section, we derive several consequences of the decoupling algorithm developed above. First, we show that the decoupling circuit can always be made free of both ancillas and lattice shifts, and comment on this result from the perspective of classification of quantum cellular automata. Second, we show that the product states produced by the decoupling can be reabsorbed into additional toric-code sectors, resulting in a denser output. In the literature, the product states in the output are sometimes also called ancillas. Therefore, our discussion shows that we can achieve a clean decoupling that is ancilla-free on both the input and output sides. Finally, we show that the maps constructed for the infinite plane extend to codes with suitable periodic boundary conditions, yielding a decoupling on the torus that preserves the logical algebra.  
+
+> A. Removing the shifts or ancillas
+
+In this subsection, we show that ancillas and lattice shifts are unnecessary for the decoupling. A detailed discussion of the compilation problem is therefore necessary here. By definition, the decomposition represented by the symplectic matrix diag( ψ1, (ψ†
+
+> 1
+
+)−1) is a 2D Clifford quantum cellular automaton (QCA). Since this matrix is block diagonal, the QCA can be realized by lattice shifts (translations of superlattices) and a circuit containing only CNOT gates [43]. Such a lattice shift can be realized by local gates with the help of ancillas [44], which seems to indicate that ancillas are generally required to complete the decomposition without shifting the lattice. However, we show that this is not the case via the following argument. Given a circuit consisting of local Clifford gates and superlattice translations that decouples a 2D translation-invariant topological code, we can always defer the translations to the last step. Therefore, if we can construct a local unitary realization of translation on toric codes, we succeed in showing that the circuit can be made free of both ancillas and shifts. For a formal treatment, recall that for a pair of check matrices ( HZ )r×q and ( HX )s×q , the following matrix operations have direct physical interpretations. 
+
+• Left-multiplying HX by an invertible s × s matrix ψ0 to obtain ψ0HX amounts to a redefinition of stabilizer generators, as does left-multiplying HZ by an invertible r × r matrix ( ψ†
+
+> 2
+
+)−1.
+
+• Right-multiplying HX by a q × q elementary matrix Ei,j (f (x, y )) while simultaneously right-multiplying HZ
+
+by ( E† 
+
+> i,j
+
+(f )) −1 = Ej,i (−f (x, y )) corresponds to a translation-invariant circuit of CNOT gates. Here f is a polynomial, and Ei,j (f ) = I + ei,j f (x, y ) where ei,j is the q × q matrix whose ( i, j ) component is 1 and all other components are 0. If f (x, y ) = m(x, y ) is a monomial, the corresponding circuit is a translation-invariant layer of CNOT gates, 
+
+Y
+
+> xayb:( a,b )∈Z2
+
+CNOT (xayb,i ),(m−1xayb,j ). (VI.1) 
+
+• Right-multiplying both HX and HZ by the q × q matrix Ei(m(x, y )), where m is a monomial and Ei(m) is the diagonal matrix whose i’th diagonal component is m and all others are 1. This corresponds to a lattice shift that shifts the i-th qubit in each unit cell by m.Given an isomorphism ψ1 from Algorithm SM. 1, we can decompose ψ1 = E1(det ψ1)ψ′ 
+
+> 1
+
+such that det ψ′ 
+
+> 1
+
+= 1. Note that det ψ1 is a monomial due to invertibility of ψ1. According to the Suslin stability theorem [30, 31], the unimodular matrix ψ′ 
+
+> 1
+
+can be decomposed into a product of elementary matrices (matrices of the form Ei,j (f (x, y )) with i̸ = j)whenever q ≥ 3. Therefore, if the basis qubit with label 1 supports the product state in the standard code, the lattice shift by det ψ1 can be simply omitted. This leads to the conclusion that if q ≥ 3 and there exist product states in the output standard code, no lattice shift is needed for the decoupling. The first requirement that q ≥ 3 does not impair the conclusion that decoupling can be made free of lattice shifts. Recall that q is the number of qubits per unit cell after coarse-graining. For a coarse-grained code with q < 3, either 
+
+q = 2 so that it is already a toric code or a stack of product states, or q = 1 so that the code simply consists of product states. In both cases the decoupling problem is trivial. The second requirement that there exist product states in the output standard code can be removed, for even if the lattice shifts fall on qubits that support the toric codes, we can still find a constant-depth circuit to produce the 20            
+
+> FIG. SM. 6. Illustration of simulating lattice shifts using a constant-depth circuit. The process shown here corresponds to Eq. (VI.3) with c=−1, a=b=d= 0.
+
+same effect. To see this, we only need to show that the effect of any lattice shift on the toric-code stabilizer code can be reproduced by a constant-depth circuit. In fact, recall that for toric codes, 
+
+eHX = ( x − 1, y − 1) , eH† 
+
+> Z
+
+=
+
+1 − yx − 1
+
+
+
+. (VI.2) By direct computation we have 
+
+eHX E1(xayb)E2(xcyd) = xayd eHX E1,2
+
+
+
+(y − 1) xc−a − 1
+
+x − 1
+
+
+
+E2,1
+
+
+
+xa−c(x − 1) yb−d − 1
+
+y − 1
+
+
+
+,
+
+eHZ E1(xayb)E2(xcyd) = xcyb eHZ E2,1
+
+
+
+−(y − 1) xc−a − 1
+
+x − 1
+
+
+
+E1,2
+
+
+
+−xa−c(x − 1) yb−d − 1
+
+y − 1
+
+
+
+.
+
+(VI.3) Here ( yk −1) /(y−1) denotes the Laurent polynomial 1+ y+· · · +yk−1 for k > 0, the polynomial −yk(1+ y+· · · +y−k−1)for k < 0, and 0 for k = 0; the expression ( xk − 1) /(x − 1) is defined analogously. For example, consider the vertical-edge-shifted code demonstrated in Fig. SM. 6 (c), with 
+
+HX = ( x − 1, x (y − 1)) , H Z = (1 − y, x (x − 1)) . (VI.4) We have HX = eHX E2(x) = eHX E1,2(y − 1) and HZ = eHZ E2,1(1 − y), or equivalently 
+
+HX = eHX E1,2(y − 1) , HZ = eHZ E2,1(−(y − 1)) . (VI.5) According to our discussion above, this means that we can apply the translation-invariant CNOT circuit demonstrated in Fig. SM. 6 (b) to transform a standard toric code (Fig. SM. 6 (c)) to this vertical-edge-shifted one. It is known that a shift serves as an index for a 2D Clifford QCA, which cannot be replaced by any circuit without changing the QCA’s behaviour. Our construction does remove all shifts and ancillas from the decoupling procedure, seemingly a contradiction. The resolution is that our map merely leaves the stabilizer code state invariant, rather than preserving the QCA itself. Our result therefore does not violate the standard properties of QCA, but rather reinforces the intuition that the shift index measures the transfer of local information: since a topological code carries no local information, no shift is needed.  
+
+> B. Reabsorbing product states
+
+In many applications, it is preferable not to leave behind many product states. For example, the celebrated unfolding of color codes produces two toric-code sectors on triangular lattices, rather than two toric codes on square lattices with several product states [45]. A direct consequence of our algorithm is the ability to reabsorb these product states into toric codes. Reabsorption is the reverse of decoupling product states from a single toric-code sector. Starting from a standard toric code on the square lattice, we can choose a supercell containing any even number 2Λ ≥ 4 of qubits. Applying the decoupling algorithm to this coarse-grained code yields one standard toric-code sector and 2Λ − 2 product-state sectors, counted with respect to the coarse-grained lattice. Alternatively, we can start from a toric code on the 21 triangular lattice, choose a supercell containing any multiple 3Λ ≥ 3 of qubits, and apply the decoupling algorithm. This yields one standard toric-code sector and 3Λ − 2 product-state sectors. Note that in both cases the number of qubits in the supercell is at least 3, so the decoupling or reabsorption process is circuit-like. We use the reverse of these two kinds of decoupling to achieve reabsorption. A meaningful reabsorption problem involves at least 2 toric-code sectors and 1 product-state sector. Let p be the total number of product-state sectors. For p̸ = 2, there exist positive integers Λ 2 and Λ 3 such that 2Λ 2 + 3Λ 3 = p + 4. We can therefore reverse the corresponding decoupling processes for square- and triangular-lattice toric codes with 2Λ 2 and 3Λ 3 qubits per supercell, respectively, to reabsorb all product states into two of the toric-code sectors while leaving the others unchanged. For p = 2, we instead reverse the square-lattice decoupling with four qubits per supercell for one toric-code sector and leave the other unchanged. 
+
+Example 9. Consider a single toric-code sector, coarse-grained with respect to x2 and y. Applying the decoupling algorithm yields one toric-code sector together with two product-state sectors: 
+
+HX =  x + 1 y + 1  , H Z =  y + 1 x + 1  coarse-graining 
+
+−−−−−−−−−→ eHX =
+
+1 1 y + 1 0
+
+x 1 0 y + 1 
+
+
+
+, eHZ =
+
+1 + y 0 1 x
+
+0 1 + y 1 1
+
+
+
+> Decouple by Algorithm SM. 1
+
+−−−−−−−−−−−−−−−−−−−−−⇀↽−−−−−−−−−−−−−−−−−−−−−
+
+> Reabsorb product states into a toric code
+
+eHX =
+
+1 0 0 00 0 x + 1 y + 1 
+
+
+
+, eHZ =
+
+0 1 0 00 0 y + 1 x + 1 
+
+
+
+(VI.6)  
+
+> C. Periodic boundary conditions
+
+The maps obtained for the infinite plane can be extended to codes with periodic boundary conditions (PBC). Here we discuss the simplest case, in which the PBC is imposed after coarse-graining—that is, the translation vectors defining the torus correspond to translations that strictly preserve the anyons. To impose periodic boundary conditions xa = 1, yb = 1, we tensor the exact sequence 0 → Rr H†
+
+> Z
+
+−−→ Rq HX
+
+−−→ Rs → Ft 
+
+> 2
+
+→ 0, (VI.7) with R/I , where I = ( xa − 1, y b − 1). Here Ft 
+
+> 2
+
+= Rs/ im HX , and (VI.7) is a free (hence projective) resolution of Ft
+
+> 2
+
+.The result is (R/I )r (H† 
+
+> Z)∗
+
+−−−−→ (R/I )q (HX )∗
+
+−−−−→ (R/I )s → Ft 
+
+> 2
+
+→ 0, (VI.8) and the logical space is given by the Tor functor: ker( HX )∗/ im( H† 
+
+> Z
+
+)∗ = Tor R 
+
+> 1
+
+(Ft
+
+> 2
+
+, R/I ) = 
+
+ (x − 1, y − 1) ∩ I
+
+(x − 1, y − 1) I
+
+⊕t
+
+∼= F2t 
+
+> 2
+
+. (VI.9) The quotient ( x − 1, y − 1) ∩ I/ (x − 1, y − 1) I can be identified with the F2-vector space with basis {xa − 1, y b − 1}.As expected, the number of logical qubits matches that of t toric-code sectors. Together with the full characterization of unbroken translation symmetry for anyons, this generalizes the twisted-boundary-condition results for bivariate bicycle codes in Ref. [38] to arbitrary 2D translation-invariant topological CSS codes. To construct decoupling maps for codes with PBC, observe that tensoring preserves chain isomorphisms. The chain isomorphism (IV.3) from Theorem 4 therefore remains a valid decoupling map after tensoring with R/I . Moreover, a chain isomorphism between projective resolutions induces a canonical isomorphism between the corresponding left derived functors, ensuring that the logical operators of the two codes are identified correctly. Concretely, tensoring (IV.3) with R/I yields the following commutative diagram. (R/I )r (R/I )q (R/I )s Ft 
+
+> 2
+
+0(R/I )r (R/I )q (R/I )s Ft 
+
+> 2
+
+0        
+
+> (H†
+> Z)∗(HX)∗
+> ψ2⊗Rid (eH†
+> Z)∗
+> ψ1⊗Rid (eHX)∗
+> ψ0⊗Rid
+
+(VI.10) As maps on codes, ψ1 ⊗R id, ψ2 ⊗R id, and ψ0 ⊗R id act locally in the same way as ψ1, ψ2, and ψ0 on the infinite plane. It is interesting to consider the special case a = b = 1. Now R/I = F2, and tensoring with R/I amounts to evaluating at x = y = 1. In this case ϕ1 represents a decoding circuit After applying the circuit represented by ϕ1,the code is decoupled into product states and 2 t physical qubits, each carrying one logical qubit of the code. 22 
+
+VII. LOCALITY AND TIME COMPLEXITY 
+
+We now estimate the time complexity of Algorithm SM. 1 and the locality of the resulting decoupling map. To quantify locality, we use Laurent degree as a coarse measure of support size. For a Laurent monomial xayb, define deg( xayb) = |a| + |b|, and extend deg to polynomials, vectors, matrices, and finite sets by taking the maximum degree of a nonzero entry or element. An entry of Laurent degree at most D only couples unit cells within ℓ1 distance D
+
+on the plane. Thus the degree bounds below also bound the locality radius of the corresponding translation-invariant map. The expensive part of Algorithm SM. 1 is solving three Laurent-polynomial linear systems: 
+
+HX ϕ1 = eHX , H† 
+
+> Z
+
+ϕ2 = ϕ1 eH† 
+
+> Z
+
+, ( eH† 
+
+> Z
+
+)⊤c⊤ = ( ϕ′ 
+
+> 2
+
+− ϕ2)⊤. (VII.1) The initial F2-linear change of basis costs only O(q3) operations and does not affect Laurent degrees. We therefore analyze a general solvable system AX = Y over R = F2[x±1, y ±1], with A ∈ Rm×n and Y ∈ Rm×k.The method is Gr¨ obner-basis reduction after lifting to the ordinary polynomial ring P = F2[x, u, y, v ], where R ∼=
+
+P/ (xu −1, yv −1). This lift is necessary because standard Buchberger-style Gr¨ obner-basis algorithms use a well-ordered monomial set, while Laurent monomials allow arbitrarily negative exponents. Concretely, we lift the columns of A to 
+
+P m and add the quotient-relation generators ( xu − 1) ei and ( yv − 1) ei for 1 ≤ i ≤ m. The lift and the final descent modulo ( xu − 1, yv − 1) are lower-order preprocessing and postprocessing steps compared with the Gr¨ obner-basis computation; moreover, the descent does not increase Laurent degree. Let δA = max {deg( A), 2} and δY = deg( Y ), where the constant 2 accounts for the generators xu − 1 and yv − 1. After lifting, the module in P m is generated by the n lifted columns of A together with the 2 m quotient-relation generators, so the number of generators is n + 2 m and their degrees are bounded by δA. Liang’s non-graded module Gr¨ obner-basis bound [35], specialized to four polynomial variables and a free module of rank m, gives the degree cutoff 
+
+LGB = 2( δAm)16 for a reduced Gr¨ obner basis. A degree-by-degree Macaulay-matrix computation [46, 47] therefore only needs module monomials up to degree LGB . Since there are O(( n + 2 m)L4GB ) such lifted rows and columns, cubic elimination gives the Gr¨ obner-basis cost O(( n + 2 m)3L12 GB ) = O(( n + 2 m)3(δAm)192 ). We also track the row reductions. Let fi be the original lifted generators, namely the lifted columns of A and the quotient-relation generators, and let gj be the reduced Gr¨ obner-basis elements. Tracking records gj = P 
+
+> i
+
+vj,i fi
+
+with deg vj,i ≤ LGB . For one lifted right-hand side column y, solvability of AX = Y means that reduction by this basis has zero remainder, so y = P 
+
+> j
+
+uj gj . Degree-compatible reduction gives deg uj ≤ δY . The tracked expression then recovers the solution coefficients from the components attached to the first n lifted columns of A; the remaining 2m components multiply the quotient-relation generators and vanish after descending to R. Thus each recovered coefficient is a sum of terms uj vj,i with deg( uj vj,i ) ≤ δY + LGB , so deg( X) ≤ δY + LGB = δY + 2( δAm)16 . For fixed or small k, the cost of reducing the right-hand sides and reading off the tracked coefficients is lower order than the Gr¨ obner-basis computation, so we keep only the dominant term in the displayed time estimate: 
+
+T = O (n + 2 m)3(δAm)192  , deg( X) ≤ δY + 2( δAm)16 . (VII.2) Now set d0 = max {2, deg( HX ), deg( H† 
+
+> Z
+
+)} and apply Eq. (VII.2) to the three systems in Eq. (VII.1). The relevant parameters and resulting bounds are:                                                  
+
+> system unknown (m, n, k )δAδYbound
+> HXϕ1=eHXϕ1(s, q, q )d01deg( ϕ1) = O(d16 0q16 ), T =O(d192 0q195 )
+> H†
+> Zϕ2=ϕ1eH†
+> Zϕ2(q, r, r )d0O(d16 0q16 )deg( ϕ2) = O(d16 0q16 ), T =O(d192 0q195 )(eH†
+> Z)⊤c⊤= ( ϕ′
+> 2−ϕ2)⊤c(r, q, r )2O(d16 0q16 )deg( c) = O(d16 0q16 ), T =O(d192 0q195 )(VII.3)
+
+The matrices ξ2, ξ1, and ξ0 are degree-zero F2-matrices, so passing from ( ϕ′
+
+> 2
+
+, ϕ ′
+
+> 1
+
+) to ( ξ2ϕ′
+
+> 2
+
+, ξ 1ϕ′
+
+> 1
+
+, ξ 0) does not change the degree bounds. Thus Algorithm SM. 1 returns the chain maps ( ξ2ϕ′
+
+> 2
+
+, ξ 1ϕ′
+
+> 1
+
+, ξ 0) with 
+
+Talg = O d192 0 q195  , deg( ϕ′
+
+> 2
+
+) = O d16 0 q16  , deg( ϕ′
+
+> 1
+
+) = O d16 0 q16  . (VII.4) A similar analysis gives polynomial time and degree bounds for the inverses of these chain isomorphisms. The worst-case exponents in Eq. (VII.4) are intentionally conservative. As reported in Sec. V C, the sam-pled benchmark and additional BB-code instances exhibit substantially milder scaling, with Tcompute ∝ q1.86 and deg( ψ−11 ) ∝ q0.65 for q = 2Λ. 
+
+VIII. APPLICATIONS 
+
+We close by describing two applications of the decoupling map: decoding by transporting syndromes and corrections through the map, and studying logical gates through the induced identification with the toric-code sectors. 23 
+
+A. A unitary-decouple-based decoder 
+
+In this section, we introduce the unitary-decouple-based decoder . Based on Theorem 4 and Algorithm SM. 1, we find the explicit decoupling that maps a coarse-grained 2D translation-invariant topological code to stacks of toric codes and product states. Decoding then proceeds in three steps: 1. Map the measured syndrome of the original code to the TC sectors; 2. Decode each TC sector independently using a graph-matching routine such as MWPM; 3. Lift the direct sum of the sector corrections back to a Pauli operator on the original code. However, the performance of this decoder is not entirely satisfactory. Because the decoupling is implemented by a constant-depth circuit, a single local physical error in the original code can spread to several correlated qubits across multiple TC sectors. The independent matching subroutines ignore these inter-sector correlations, leading to a suboptimal global correction. We demonstrate this behavior in the numerical example below. In Fig. SM. 7, we compare the performance of the unitary-decouple-based decoder with BP-OSD [48] on BB codes defined by the check matrices: 
+
+HX =  1 + x + xy 1 + y + xy  , HZ =  1 + y + xy 1 + x + xy  . (VIII.1) For the numerical simulations, we use depolarizing errors under the code-capacity noise model. Physical error rate 10 −4 10 −3 10 −2 10 −1Logical error rate 10 −610 −510 −410 −310 −210 −110 0Physical error rate 10 −2.0 10 −1.5 10 −1.0 Decoding time per sample(s) 10 −410 −210 0Unitary-decouple-based decoder BP-OSD 
+
+> dTC = 4
+> dTC = 6
+> dTC = 8
+> dTC = 10
+
+FIG. SM. 7. Numerical results for the unitary-decouple-based decoder on the BB code family defined by HX = (1 + x + xy, 1 + 
+
+y + xy ) and HZ = (1 + y + xy, 1 + x + xy ). Each instance is obtained by placing the superlattice on a torus with dTC × dTC 
+
+squares. The left panel shows logical error rate versus physical error rate, while the right panel shows decoding time per sample. 
+
+As illustrated in Figure SM. 7, the unitary-decouple-based decoder exhibits a higher logical error rate compared to BP-OSD, yet it achieves a significantly faster decoding time. This empirical observation illustrates the speed-accuracy tradeoff inherited from the independent MWPM approximations. Recently, several matching-based decoders have been proposed for BB codes, most notably the cell-matching de-coder [49] and the symmetry-based decoder ( symatch ) [50]. Closely related to our decoupling approach is the cell-matching decoder. It exploits the effective toric code decomposition by flushing : projecting the syndrome onto coker HX/Z . In contrast, the symatch decoder takes a more global route. It relies on code symmetries and the 
+
+cylinder trick to extract the commutation data of logical operators. 
+
+B. Implication on logical gates 
+
+In the main text, we have discussed some potential applications of our results to constructing logical gates for topological codes. Here we review the example of the color codes, which establishes the macroscopic picture of the relationship between logical gates and the action on anyon strings from different toric-code sectors. We then present the results of a numerical search on transporting transversal CNOT gates from toric codes to general topological CSS codes. We focus on the operator spreading behavior for such constructions. 24 
+
+FIG. SM. 8. Realization of the transported CNOT 1 → 2 for the BB code HX = (1 + x + x, 1 + y + y). The pattern contains eight CNOT couplings per coarse-grained unit cell and has column-support spreading s(Q1→2) = 3. 
+
+a. Color-code example. Consider a two-dimensional color code on a torus, which is locally Clifford equivalent to two toric-code sectors and therefore encodes four logical qubits [45]. Let h and v denote two noncontractible cycles intersecting once, and let A and B denote two independent color-code string colors. Here Xc,γ and Zc,γ denote color-c
+
+string operators supported along γ. Strings of different colors on the two intersecting cycles provide canonical logical Pauli pairs [25]. Let SCC denote the transversal phase operation. For the 6.6.6 color code, this operation applies S
+
+and S† on the two vertex superlattices; up to Pauli phases, X 7 → XZ and Z 7 → Z. Choosing the logical basis shown below, its complete action is given by the following array, where a prime denotes conjugation by SCC :
+
+Xi Xc,γ X′ 
+
+> c,γ
+
+X′ 
+
+> i
+
+Zi Zc,γ Z′ 
+
+> c,γ
+
+Z′
+
+> i
+
+X1 XA,v XA,v ZA,v X1Z4 Z1 ZB,h ZB,h Z1
+
+X2 XB,v XB,v ZB,v X2Z3 Z2 ZA,h ZA,h Z2
+
+X3 XA,h XA,h ZA,h X3Z2 Z3 ZB,v ZB,v Z3
+
+X4 XB,h XB,h ZB,h X4Z1 Z4 ZA,v ZA,v Z4
+
+For instance, X1 = XA,v acquires the same-color, same-support string ZA,v = Z4. The table therefore gives SCC =CZ 1,4CZ 2,3. Under unfolding, logical qubits {1, 3} and {2, 4} form the two toric-code sectors, respectively, so both controlled-Z gates couple the two toric-code sectors. 
+
+b. Transporting inter-copy CNOTs. The decoupling map can also be used in the constructive direction. Let Ej→i
+
+denote the qubit-wise CNOT from toric-code sector j to sector i in the standard complex. In the convention used in our numerical calculation, its action pulled back to the original code is 
+
+Qj→i = ϕ1Ej→iϕ−11 . (VIII.2) As an invertible translation-invariant CSS map, Qj→i can be compiled using the procedure in Sec. VI A. Here we compute its operator spreading. We quantify the support spreading of this map by s(Q) = max k
+
+P 
+
+> l
+
+| supp Qlk |, the largest number of Laurent monomials in any column. Thus s(Q) measures the largest support of the image of a basis Pauli in this CSS sector, rather than the number of CNOT gates in a circuit decomposition. Table SM. 3 lists all ordered pairs of toric-code sectors for six representative BB codes. The construction exists for every pair, but its spreading depends strongly on both the code and the direction of the CNOT. 
+
+Example 10. Consider the BB code HX = (1 + x + x, 1 + y + y). For the pair 1 → 2, the transported map has s(Q1→2) = 3. Figure SM. 8 shows a periodic realization using eight CNOT couplings per coarse-grained unit 25                                                                                                                                                            
+
+> fgControl jTarget is(Qj→i)fgControl jTarget is(Qj→i)1 + x+xy 1 + y+xy 2125 1 + x+x21 + y+x22191271291 + x+x−1y1 + y+xy
+> 2115 1 + x+x−11 + y+y−1
+> 2173115 3121 1215 4117 3221 1231311 3211 2311 4211 1 + x+x−11 + y+x3y2
+> 2115 1373117 2374121 4323 1239 1473217 2474221 3421 1361 1 + x+xy 1 + y+xy −1
+> 2115 2317 3117 4329 1239 1457 3239 2421 1343 3423 2339
+
+TABLE SM. 3. Support spreading of transported inter-copy CNOTs. For each BB code, all t(t − 1) ordered pairs of its toric-code sectors are shown. 
+
+cell. Qubit-wise CNOT between the two toric-code sectors implements CNOTs between their corresponding encoded qubits [51]. 
+
+[1] J. Haah, Algebraic Methods for Quantum Codes on Lattices, Revista Colombiana de Matem´ aticas 50 , 299 (2017), arXiv:1607.01387 [quant-ph]. [2] A. Kitaev, A. Shen, and M. Vyalyi, Classical and Quantum Computation , Graduate Studies in Mathematics (American Mathematical Society, 2002). [3] J. Haah, Commuting Pauli Hamiltonians as maps between free modules, Communications in Mathematical Physics 324 ,351 (2013), arXiv:1204.1063 [quant-ph]. [4] S. Bravyi, M. Hastings, and S. Michalakis, Topological quantum order: Stability under local perturbations, Journal of Mathematical Physics 51 , 093512 (2010), arXiv:1001.0344 [quant-ph]. [5] H. Song, From Koszul-Complex Stabilizer Models to Superselection Profiles: Topological Rigidity and Nonsplit Extensions (2026), arXiv:2608.XXXXX [quant-ph]. [6] M. H. Freedman, D. A. Meyer, and F. Luo, Z2-systolic freedom and quantum codes, in Mathematics of quantum computation 
+
+(Chapman and Hall/CRC, 2002) pp. 287–320. [7] A. Y. Kitaev, Fault-tolerant quantum computation by anyons, Annals of Physics 303 , 2 (2003), arXiv:quant-ph/9707021. [8] S. B. Bravyi and A. Y. Kitaev, Quantum codes on a lattice with boundary (1998), arXiv:quant-ph/9811052. [9] N. P. Breuckmann and S. Burton, Fold-Transversal Clifford Gates for Quantum Codes, Quantum 8, 1372 (2024), arXiv:2202.06647 [quant-ph]. [10] J. N. Eberhardt and V. Steffan, Logical operators and fold-transversal gates of bivariate bicycle codes (2024), arXiv:2407.03973 [quant-ph]. [11] S. Huang, T. Jochym-O’Connor, and T. J. Yoder, Homomorphic Logical Measurements (2022), arXiv:2211.03625 [quant-ph]. [12] Q. Xu, H. Zhou, G. Zheng, D. Bluvstein, J. P. B. Ataides, M. D. Lukin, and L. Jiang, Fast and Parallelizable Logical Computation with Homological Product Codes, https://arxiv.org/abs/2407.18490v1 (2024). [13] D. Horsman, A. G. Fowler, S. Devitt, and R. V. Meter, Surface code quantum computing by lattice surgery, New Journal of Physics 14 , 123011 (2012). [14] L. Z. Cohen, I. H. Kim, S. D. Bartlett, and B. J. Brown, Low-overhead fault-tolerant quantum computing using long-range connectivity, Science Advances 8, eabn1717 (2022), arXiv:2110.10794 [quant-ph]. [15] B. Ide, M. G. Gowda, P. J. Nadkarni, and G. Dauphinais, Fault-tolerant logical measurements via homological measurement, Physical Review X 15 , 021088 (2025), arXiv:2410.02753. [16] N. P. Breuckmann and J. N. Eberhardt, Balanced Product Quantum Codes, IEEE Transactions on Information Theory 
+
+67 , 6653 (2021), arXiv:2012.09271 [quant-ph]. [17] P. Panteleev and G. Kalachev, Quantum LDPC Codes with Almost Linear Minimum Distance, IEEE Transactions on Information Theory 68 , 213 (2022), arXiv:2012.04068 [cs.IT]. [18] P. Panteleev and G. Kalachev, Asymptotically Good Quantum and Locally Testable Classical LDPC Codes (2022), arXiv:2111.03654 [cs]. [19] J. Haah, Classification of translation invariant topological Pauli stabilizer codes for prime dimensional qudits on two-26 
+
+dimensional lattices, Journal of Mathematical Physics 62 , 012201 (2021). [20] A. Kitaev, Anyons in an exactly solved model and beyond, Annals of Physics 321 , 2 (2006), arXiv:cond-mat/0506438. [21] M. Barkeshli, P. Bonderson, M. Cheng, and Z. Wang, Symmetry Fractionalization, Defects, and Gauging of Topological Phases, Physical Review B 100 , 115147 (2019), arXiv:1410.4540 [cond-mat]. [22] X.-G. Wen, Quantum Orders and Symmetric Spin Liquids, Physical Review B 65 , 165113 (2002), arXiv:cond-mat/0107071. [23] X.-G. Wen, Quantum orders in an exact soluble model, Physical Review Letters 90 , 016803 (2003), arXiv:quant-ph/0205004. [24] H. Bombin and M. A. Martin-Delgado, Optimal Resources for Topological 2D Stabilizer Codes: Comparative Study, https://arxiv.org/abs/quant-ph/0703272v1 (2007). [25] H. Bombin and M. A. Martin-Delgado, Statistical Mechanical Models and Topological Color Codes, Physical Review A 
+
+77 , 042322 (2008), arXiv:0711.0468 [quant-ph]. [26] D. A. Cox, J. B. Little, and D. O’Shea, Using Algebraic Geometry , second edition ed., Graduate Texts in Mathematics No. 185 (Springer Science+Business Media, Inc, New York, NY, 2005). [27] M. Atiyah and I. MacDonald, Introduction to Commutative Algebra , Addison-Wesley Series in Mathematics (Avalon Pub-lishing, 1994). [28] K. Chen, Y. Liu, Y. Zhang, Z. Liang, Y.-A. Chen, K. Liu, and H. Song, Anyon Theory and Topological Frustration of High-Efficiency Quantum Low-Density Parity-Check Codes, Physical Review Letters 135 , 076603 (2025). [29] D. N. Bernshtein, The number of roots of a system of equations, Functional Analysis and Its Applications 9, 183 (1975). [30] A. A. Suslin, On the Structure of the Special Linear Group Over Polynomial Rings, Izvestiya: Mathematics 11 , 221 (1977). [31] H. Park and C. Woodburn, An Algorithmic Proof of Suslin’s Stability Theorem over Polynomial Rings (1994), arXiv:alg-geom/9405003. [32] D. Quillen, Projective modules over polynomial rings, Inventiones Mathematicae 36 , 167 (1976). [33] A. A. Suslin, Projective modules over polynomial rings are free, Doklady Akademii Nauk SSSR 229 , 1063 (1976). [34] L. Caniglia, G. Corti˜ nas, S. Dan´ on, J. Heintz, T. Krick, and P. Solern´ o, Algorithmic aspects of Suslin’s proof of Serre’s conjecture, computational complexity 3, 31 (1993). [35] Y. Liang, Degree bounds for gr¨ obner bases of modules, Journal of Symbolic Computation 111 , 27 (2022). [36] H. Cartan and S. Eilenberg, Homological Algebra , Princeton Landmarks in Mathematics and Physics (Princeton University Press, 1999). [37] C. A. Weibel, An Introduction to Homological Algebra , 1st ed. (Cambridge University Press, 1994). [38] Z. Liang, K. Liu, H. Song, and Y.-A. Chen, Generalized toric codes on twisted tori for quantum error correction, PRX Quantum 6, 020357 (2025), arXiv:2503.03827 [quant-ph]. [39] R. Zhou, X. Yuan, L. Kong, F. Zhang, K. Zhang, Z. Yang, and J. Chen, Bunny codes: Broadening superconducting quantum error correction capability through advanced control engineering (2026), arXiv:2606.22853 [quant-ph]. [40] Z. Liang and Y.-A. Chen, Topological subsystem bivariate bicycle codes with four-qubit check operators (2026), arXiv:2605.04151 [quant-ph]. [41] B. C. B. Symons, A. Rajput, and D. E. Browne, Sequences of bivariate bicycle codes from covering graphs (2025), arXiv:2511.13560 [quant-ph]. [42] S. Bravyi, A. W. Cross, J. M. Gambetta, D. Maslov, P. Rall, and T. J. Yoder, High-threshold and low-overhead fault-tolerant quantum memory, Nature 627 , 778 (2024), arXiv:2308.07915 [quant-ph]. [43] J. Haah, Clifford Quantum Cellular Automata: Trivial group in 2D and Witt group in 3D, Journal of Mathematical Physics 
+
+62 , 092202 (2021), arXiv:1907.02075 [quant-ph]. [44] D. Gross, V. Nesme, H. Vogts, and R. F. Werner, Index theory of one dimensional quantum walks and cellular automata, Communications in Mathematical Physics 310 , 419 (2012), arXiv:0910.3675 [quant-ph]. [45] A. Kubica, B. Yoshida, and F. Pastawski, Unfolding the color code, New Journal of Physics 17 , 083026 (2015), arXiv:1503.02065 [quant-ph]. [46] J.-C. Faug` ere, A new efficient algorithm for computing Gr¨ obner bases (F4), Journal of Pure and Applied Algebra 139 , 61 (1999). [47] M. Bardet, J.-C. Faug` ere, and B. Salvy, On the complexity of the f5 gr¨ obner basis algorithm, Journal of Symbolic Com-putation 70 , 49 (2015). [48] J. Roffe, D. R. White, S. Burton, and E. Campbell, Decoding across the quantum low-density parity-check code landscape, Physical Review Research 2, 10.1103/physrevresearch.2.043423 (2020). [49] S. J. S. Tan, I. Gill, E. Huang, P. Liu, C. Zhao, H. Dehghani, A. Kubica, H. Zhou, and A. Dua, Generalized matching decoders for 2D topological translationally-invariant codes (2026), arXiv:2603.05402 [quant-ph]. [50] K. Sahay, D. J. Williamson, and B. J. Brown, A matching decoder for bivariate bicycle codes (2026), arXiv:2602.22770 [quant-ph]. [51] D. Gottesman, Stabilizer codes and quantum error correction (1997), caltech Ph.D. thesis, arXiv:quant-ph/9705052.

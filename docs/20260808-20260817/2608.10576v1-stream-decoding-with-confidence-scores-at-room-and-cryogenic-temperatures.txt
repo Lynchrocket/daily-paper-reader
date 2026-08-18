@@ -1,0 +1,641 @@
+Title: Stream Decoding with Confidence Scores at Room and Cryogenic Temperatures
+
+URL Source: https://arxiv.org/pdf/2608.10576v1
+
+Published Time: Wed, 12 Aug 2026 00:42:32 GMT
+
+Number of Pages: 17
+
+Markdown Content:
+# Stream Decoding with Confidence Scores at Room and Cryogenic Temperatures 
+
+## Maries Tahaab 1, Tim Chan 2,3 , James Kirkman 1, and Simon C. Benjamin 2,1 
+
+> 1Quantum Motion, 9 Sterling Way, London N7 9HJ, United Kingdom
+> 2Department of Materials, University of Oxford, Parks Road, Oxford OX1 3PH, United Kingdom
+> 3Center for Quantum Information and Quantum Biology, The University of Osaka, 1-2 Machikaneyama, Toyonaka 560-0043, Japan
+
+In fault-tolerant quantum computing, fast and accurate decoding is crucial. Snowflake [1] is a decoder for the surface code that runs in a streaming fashion. In this paper, we im-plement Snowflake on commercial FPGAs and validate them at room and cryogenic temper-atures. Our results demonstrate high decod-ing throughput for small code distances that, when extrapolated, remains within acceptable limits for larger distances. Further, we incor-porate the calculation of certain decoder con-fidence scores with negligible overhead both in terms of latency and physical resource utilisa-tion. We note that implementing a large-scale system would require either a large FPGA beyond today’s technology or clusters of FP-GAs connected via a high-speed bus. Thus, we discuss an alternative architecture that ex-ploits the locality of Snowflake by processing 2D slices of the 3D decoding window and of-floading segments of the 3D structure to ahigh-speed memory. 
+
+# 1 Introduction 
+
+Fault-tolerant quantum computing involves represent-ing quantum information robustly as logical qubits using a larger number of physical qubits [2, 3]. The relationship between the physical and the logical lev-els is defined by the chosen quantum error-correcting code (QECC). The physical qubits associated with a logical block have certain properties (generally, sta-bilisers i.e. parities of subsets of the physical qubits) that change only when errors occur. These stabilis-ers should therefore be measured frequently, and the classical information from each complete set of moni-toring measurements is called the syndrome [4]. This paper is relevant to the much-studied surface code: a fast and hardware-friendly code that however requires many physical qubits to realise its logical qubits [5–7]. A key task of the classical control hierarchy is to 
+
+> Maries Tahaab: maries@quantummotion.tech Tim Chan: timothy.chan@materials.ox.ac.uk James Kirkman: james.kirkman@quantummotion.tech
+
+process these syndromes over the course of the quan-tum computation, and infer the likely nature of the errors that gave rise to them. The system responsi-ble for this is the decoder; typically multiple decoders will be employed to monitor the many logical blocks in a utility-scale quantum computer [8]. The rate at which a decoder can process syndrome information is crucial – it must keep up with the rate at which syndromes are generated [9]; this is called the inverse throughput . For fast solid state technologies such as superconducting, spin qubit, or photonic devices: in-verse throughput at or below 1 μs per stabiliser mea-surement round is required [10, Figure 1] [11, p 924]. For relatively slower atomic systems, the millisecond timescale may suffice [12]. Every logical qubit will ultimately be measured, ei-ther at the end of a computation to know the out-put or (more commonly) as a part of an internal step of the quantum algorithm such as gate teleporta-tion [4, 13]. Such a measurement involves measuring each physical qubit in a suitable basis, and presenting this data to the decoder which (from the monitoring of syndrome data to this point) is capable of inter-preting the physical measurements as a given logical outcome: 0 or 1. The time needed to reach this deci-sion generally differs from the inverse throughput and is longer; it is referred to as the measurement time or the reaction time [14, Appendix B.1]. The timescale is important since typically a computation cannot pro-ceed (at least, not far) until this logical outcome is known. Failure to assign the correct outcome is a log-ical error in the computation; the decoder’s capability to do this correctly is its accuracy . The performance of a given decoder in this crucial task will depend on its sophistication and different decoders lead to logi-cal error rates that vary by orders of magnitude even for relatively small codes [15, Figure 4]. A decoder therefore has at least three core fig-ures of merit: its inverse throughput (ideally sub-microsecond), its reaction time (preferably a few mi-croseconds [14, 16]), and its accuracy; to this one can add practical considerations such as size and dol-lar cost. Unsurprisingly, these merits are in tension: faster timescales generally lead to lower accuracies. While impressive progress has been made to achieve 
+
+1arXiv:2608.10576v1 [quant-ph] 11 Aug 2026 decoders that perform well by all metrics [15, 17], ideas have emerged to resolve the tension by having a two-tier decoder mechanism and employing decoder switching [18]. The first tier would be fast but not optimally accurate, while the second would be slower but more accurate. For this to work, we would require a further feature for the tier-1 decoder: a ‘soft out-put’ that we call the decoder confidence score (DCS). This number should indicate how likely it is that no logical error would result if the tier-1 decoder were to process its present syndrome without recourse to the superior capabilities of tier-2. When this confi-dence is high, there is no need for the tier-1 decoder to call for help. This then introduces another figure of merit: the reliability of the DCS. There are mul-tiple possible ways by which a decoder can arrive at such a score, with more reliable scores taking longer to compute. The DCS is a feature that has recently been extensively researched [19–30]. In this work we implement and evaluate three DCSs with extremely low computational overhead. The majority of decoders that have been described in the literature are overlapping-window-based [6, 
+
+§VI.B]: they take in a block comprising multiple rounds of syndrome data (typically d rounds where 
+
+d is the code distance) and process them collectively, during which time new rounds of syndrome data emerge from the QC and are stored until they con-stitute another block. This process imposes a coarse granularity to the computation, such that (for exam-ple) a logical measurement cannot be completed un-til relevant blocks are reconciled. An alternative and arguably superior mode of operation for a decoder is round-wise streaming , i.e. taking in each round of syndrome data as it occurs and immediately adding it to a perpetually ongoing continuous decoding pro-cess. The decoder implemented and developed upon in this work, Snowflake [1], is a round-wise streaming decoder. A final desirable feature of a decoder relates to its operating temperature. Many forms of quantum pro-cessing units need to be operated at mK temperatures inside dilution refrigerators [31–33]. The need to con-vey measurement data out of the cryogenic system to room-temperature classical processors is a drawback in such systems. The required cabling introduces sig-nificant heat loads, and serialisation and deserialisa-tion add latency; therefore, mature quantum comput-ers would ideally process syndrome data within the cryogenic system [9, 33]. In this case, far less informa-tion, such as the final result of logical measurement, needs to be taken to room temperature. Operating in a cryogenic environment places severe restrictions on the heat generation of decoders – at least the tier-1 decoders in the two-tier paradigm – as we explore presently in this work. Cryogenic QECC decoding has been previously studied in [34–36]. These decoders primarily utilise application-specific integrated circuits (ASICs) based on single flux quantum and cryo-CMOS technolo-gies. Pinball [37] takes a different approach by in-tegrating a cryo-CMOS-based predecoder at the 4 K 
+
+stage of the cryostat to resolve sparse errors locally. Its successor, Arqade [38], generates custom prede-coders for quantum low-density parity-check codes. Both significantly reduce the syndrome data band-width to the primary decoder. While Arqade offers a field-programmable gate array (FPGA) implemen-tation primarily for room-temperature operation, its cryogenic implementation remains ASIC-based. Although ASICs offer exceptional power efficiency, they lack post-fabrication flexibility. In contrast, FP-GAs allow for rapid modifications to the decoder, avoiding the long fabrication cycles associated with custom ASIC designs. These fabrication cycles can become a significant bottleneck given the rapid ad-vancements in the field and the frequent need to up-date decoder logic. Given the recent surge in re-search focused on FPGA-based decoders [39–46] and the need for rapid iteration, developing a fast and re-liable method to evaluate FPGA designs directly at cryogenic temperatures is highly beneficial. In Section 2 we provide minimal preliminaries and review Snowflake, then describe our hardware imple-mentation in Section 3. We show FPGA utilisation and decoding throughput results in Section 4, pro-vided both by experiments and simulation. Section 5 discusses the alternative 2D architecture of Snowflake and its motivations. Section 6 concludes. 
+
+# 2 Background 
+
+Decoding the surface code (and many other QECCs) can be treated as a graph problem, in which a sub-set of nodes, termed defects , must be paired either to each other or to one of the so-called boundary nodes 
+
+of the decoding graph . The accuracy of the decoder is entirely dependent upon these pairings, and a reason-ably accurate heuristic is to pair together defects that are close to one another in the graph. The Union– Find decoder (UF) [47, 48] approximates this heuristic by growing exploratory regions, called active clusters ,around each defect and merging clusters that touch each other, until they reach a stopping condition ( in-activation ), at which point the pairings are resolved within each cluster individually. Snowflake [1] is based on UF, but adapts this cluster-growing idea to the streaming case, where the decoding graph is arbitrarily tall. Snowflake consid-ers a small connected subgraph of fixed size, called the decoding window , of the decoding graph at any given time. On the unrotated surface code, the de-coding window is a graph of d2(d + 1) nodes that is local when embedded in 3D, as Figure 1a illustrates. Snowflake simultaneously slides this decoding window along the decoding graph, grows clusters gradually, 
+
+2(a) The decoding window W used in Snowflake which is a sub-graph of the full decoding graph that extends above and below         
+
+> W.Boundary nodes are coloured blue; otherwise, green. Nodes higher up in Wcorrespond to more recent stabiliser measurement data.
+> (b) The distributed hardware implementation of Snowflake. Each cube represents a processing element corresponding to one node in
+> W, and each tube represents a communication link corresponding to one edge. The centralised controller is not shown. This con-trasts the 2D implementation proposed later in this work; cf. Fig-ure 8.
+
+Figure 1: Schematics relating to Snowflake configured for the distance-4 unrotated surface code. 
+
+and pairs defects within clusters. A drop is the pro-cess in which the window slides up the decoding graph by one layer (equivalent to a stabiliser measurement round), so called because data appears to ‘drop’ by one layer from the perspective of the decoding win-dow. There are two versions of Snowflake, defined by their so-called cluster growth schedule : the 1:1 and the 2:1 schedule. The 2:1 schedule is more accurate, but in this first work we implement the 1:1 schedule for its simplicity, leaving the 2:1 schedule for future work. Snowflake with the 1:1 schedule operates by continuously repeating a drop-grow-merge cycle (see Figure 2), once per measurement round. For inter-ested readers, a more detailed overview of Snowflake can be obtained by reading [1] up to and including §4. 
+
+# 3 Design and Implementation 
+
+Since the decoder must have a sub-microsecond in-verse throughput for superconducting quantum de-DROP  GROW 
+
+> FLOOD SYNC
+> MERGE
+
+Figure 2: Simplified state transition diagram for Snowflake with the 1:1 cluster growth schedule. The analogous state diagram for the 2:1 schedule is shown in Figure 12. 
+
+vices, the metres-long cabling running from room-temperature electronics to the dilution refrigerator introduces a significant propagation delay. Further-more, serialisation of the syndrome bitstream be-comes inevitable, as routing a dedicated cable for each syndrome bit would conduct excessive heat, over-whelming the refrigerator’s limited cooling capacity and degrading qubit coherence. Combined, the phys-ical propagation delay and the overhead of serialising and deserialising the syndrome bitstream risk creating an error backlog [4]. Minimising latency between the readout electronics and the decoder is highly benefi-cial for overall system performance. To achieve this, we explored operating the decoder at cryogenic tem-peratures. This not only reduces communication la-tency but also lowers the power consumption of the digital transceivers feeding the syndrome bitstream to the decoder, due to reduced transmitter drive power. This section describes the hardware implementa-tion of the Snowflake decoder, along with the exper-imental setup developed to evaluate it at both room and cryogenic temperatures. First, Section 3.1 pro-vides a high-level architectural overview of the hard-ware decoder, and Section 3.2 explains the additional logic implemented to determine three decoder confi-dence scores. Next, Section 3.3 details the specific FPGAs selected for this application and the custom power delivery circuitry required to enable operation at cryogenic temperatures. Section 3.4 then describes the physical measurement setup and instrumentation used to characterise the decoder across both thermal environments. Finally, Section 3.5 provides a system-level overview and discusses key design choices for op-erating the decoder. 
+
+## 3.1 Architecture Overview 
+
+Our architecture of Snowflake consists of a network of processing elements (PEs) and a centralised con-troller. Each PE corresponds to a node and each com-munication link corresponds to an edge in the decod-ing window, as Figure 1b shows. The controller syn-chronises the decoding process by issuing command signals to the PEs within the network. 
+
+3The node is implemented as a finite state machine (FSM) in Verilog. A simplified state diagram of this FSM is shown in Figure 2. Each node tracks its own state, and in turn the overall decoding process, by maintaining a record of its variables within the FSM. The variables belonging to each edge, however, are stored in a global register array implemented using the FPGA flip-flops, where each index uniquely maps to a specific edge within the network. Together, the PEs and the edge lookup table constitute the com-plete decoding graph. For the clusters to grow—leading to defect annihila-tion and subsequently, the generation of corrections— each node shares its variables with its immediate neighbours. Consequently, it receives the variables being shared by those neighbours. By evaluating this shared data, the node FSM’s logic governs the state transitions, thereby enabling a fully parallel decoding process. 
+
+## 3.2 Decoder Confidence Scores 
+
+In addition to the core decoding logic, we implement three hardware-efficient DCSs with minimal impact on the resource utilisation of the FPGA, as well as no time overhead (achieved by computing the DCS between consecutive drop cycles of the decoder). The most accurate DCS we implement is called the Clus-ter Size 1-Norm Fraction . This metric (calculated by summing a variable called growth in the edge lookup table) quantifies the total volume of the decoding win-dow occupied by any cluster. Its utility has been ex-plored in [23]: for a distance-13 rotated surface code under physical error rate 5 × 10 −3, aborting the worst 30% of shots according to this DCS reduces the logical error rate by over an order of magnitude. In Appendix A we discuss our hardware implemen-tation of the two other lightweight DCSs, although we observe them to be less accurate than the cluster size 1-norm fraction. 
+
+## 3.3 FPGA Selection and Power Delivery 
+
+The operation of commercial FPGAs in cryogenic en-vironments has been previously demonstrated in [49– 52]. For our implementation, we chose the AMD Kin-tex UltraScale+ XCKU5P FPGA, fabricated on the 
+
+16 nm FinFET+ process node for its ample logic re-sources and strong potential for cryogenic operation. Jin et al. [50] evaluated the AMD Kintex UltraScale+ XCKU3P FPGA, which has fewer logic resources but is also a member of the Kintex UltraScale+ family and is manufactured using the same process node. In their evaluation, the XCKU3P demonstrated an 
+
+∼88% reduction in static core current draw and a 30% reduction in lookup table (LUT) delay compared to room-temperature operation. We also evaluated the AMD Artix-7 XC7A35T 
+
+FPGA, fabricated on the 28 nm high performance-low power process node, due to prior successful demon-strations of AMD 7-series FPGAs operating at cryo-genic temperatures [49, 51, 52]. We selected this de-vice for its reduced logic footprint, which results in lower power consumption in cryogenic environments compared to the much larger XCKU5P. Delivering power to an FPGA inside a cryostat presents a challenge due to the unavoidable long in-terconnects and the step current load that occurs dur-ing device configuration. To negate the effects of line impedance from room-temperature power sup-plies and prevent brownouts, it was essential to place localised voltage regulators in close physical proximity to the FPGA. We therefore adapted a cryogenic low-dropout regulator based on the design in [53], which ensured stable power delivery despite the long cabling. Custom printed circuit boards shown in Figure 3 were designed for both the Artix-7 and Kintex Ul-traScale+ FPGAs with onboard voltage regulation to test the decoder at cryogenic temperatures.  
+
+> (a) Artix-7 (XC7A35T-2FTG256I).
+> (b) Kintex UltraScale+ (XCKU5P-2FFVP676I).
+> Figure 3: Custom printed circuit boards featuring onboard cryogenic voltage regulation for two FPGAs.
+
+## 3.4 Measurement Setup 
+
+The room-temperature and cryogenic measurements for the FPGA modules were conducted in a front-loading cryostat equipped with a Sumitomo Heavy 
+
+4Industries RP-082B2 pulse tube cryocooler, which provides a cooling power of 1 W at 4 K . Room-temperature measurements were conducted with the cryocooler turned off. Figure 4 shows both the Kintex and Artix FPGA modules from Section 3.3 mounted inside the cryostat for testing. 
+
+Figure 4: Measurement setup featuring both FPGA modules mounted to the cold plate of the front-loading cryostat. 
+
+Room-temperature instruments were used to drive and monitor the test setup. A Rigol DP811 linear DC power supply and a Yokogawa GS200 source measure unit (SMU) supplied power to the FPGAs. Addi-tionally, a Rigol DG1032Z arbitrary waveform gen-erator provided a 20 MHz external reference clock. This clock was subsequently multiplied to the required 
+
+200 MHz operating frequency for the decoder using the FPGA’s internal Mixed-Mode Clock Manager. To accurately determine the active die temperature during decoder operation, the internal temperature diodes of each FPGA were first calibrated against a Lake Shore Cryotronics Cernox CX-1030-HT sensor with the FPGAs turned off. A Keithley 2450 SMU was used to provide a constant 10 μA bias current to the diode while simultaneously measuring the for-ward voltage. A calibration curve from 4 K –300 K was thus obtained, mapping the diode voltage to the tem-perature recorded by the Cernox sensor. This curve was then used to determine the active die tempera-ture from the diode voltage while the decoder was in operation. 
+
+## 3.5 System-Level Overview 
+
+For testing and validation at cryogenic temperatures, the syndrome bitstream was transmitted to the cryo-genic decoder from a host device at room temperature via a serial communication link. This same host was subsequently used to receive and validate the gener-ated corrections. A system-level block diagram of the complete setup is presented in Figure 5. HOST  CLOCK 
+
+> DG1032Z
+> POWER
+> DP811
+> GS200
+> Snowflake
+> Decoder
+> Syndrome Buffer
+> (BRAM)
+> Communication
+> Interface
+> Confidence
+> Score
+> Generator
+> 4K
+> 300K
+> FPGA
+> MMCM
+
+Figure 5: System-level block diagram for the decoder oper-ating inside the cryostat. 
+
+To prevent the serial transmission protocol and the long cabling required by the cryostat from acting as a bottleneck to the decoder’s operation, a syndrome buffer was implemented on the FPGA using its on-chip Block RAM (BRAM). The room-temperature host pre-loaded all generated syndromes into this buffer. Since the BRAM read latency is only a few clock cycles, it effectively eliminates the data trans-fer bottleneck. During operation, the BRAM loaded syndrome bitstreams into the decoder at every drop cycle, accurately simulating data reception from the local cryogenic electronics of a quantum device. Con-versely, attempting to stream syndrome data from outside the cryostat during active decoding would in-troduce significant delays, making it difficult to accu-rately evaluate the decoder’s true performance. 
+
+54 Results 
+
+This section presents the results obtained from eval-uating the decoder across a range of code distances. The design was simulated for code distances d = 3 to 
+
+21 at a target clock frequency of 200 MHz . To vali-date the simulated results, we present the results of physical hardware tests for distances d = 3 to 9, util-ising the experimental setup previously described in Section 3.4. 
+
+## 4.1 FPGA Resource Utilisation 
+
+Table 1 presents the resource utilisation of Snowflake configured for circuit-level noise, across various code distances. The data indicates a pronounced increase in FPGA resource utilisation as the code distance in-creases. This scaling is a result of the number d2(d+1) 
+
+of syndrome graph nodes, and because the hardware architecture instantiates each node as an independent PE. 
+
+Table 1: Resource utilisation for Snowflake across varying code distances. LUT = lookup table, FF = flip-flop, LU-TRAM = lookup-table memory. ∗Area-optimised design with reduced parallelism. 
+
+Distance ( d) LUTs FFs LUTRAM 
+
+3 4 553 6 631 59 5 31 203 40 058 202 7 110 036 125 989 441 9 237 929 296 749 826 9∗ 198 313 116 608 –
+
+For the d = 9 implementation, the design exceeded the available LUT capacity of the target XCKU5P FPGA. To successfully fit the design onto the device, it was necessary to implement an area-optimised ver-sion of the decoder, which was achieved by reducing parallelisation and minimising pipeline stages within the PE logic. While these modifications allowed the decoder to fit within the hardware resources, the re-sulting increase in critical path length lowered the maximum operating clock frequency to 60 MHz .Additionally, this area-optimised approach resulted in a significant reduction in overall power consump-tion. Operating a highly utilised FPGA at high clock frequencies draws substantial current, which poses a physical risk of overloading the sensitive cryostat ca-bling. Consequently, even if the architecture could sustain a higher operating frequency, the clock rate would have required throttling to remain within the safe current-carrying limits of the experimental setup. A detailed analysis of the decoder’s power consump-tion and thermal characteristics is presented in Sec-tion 4.3. 
+
+## 4.2 Decoder Throughput 
+
+In this section, we discuss the timing performance of Snowflake in terms of the average decoding time across varying code distances. The decoder was eval-uated on hardware for d = 3 to 9 and in simulation for distances up to d = 21 at a target clock frequency of 200 MHz . Syndromes were generated by simulating 1024 stabiliser measurement rounds under a circuit-level noise model (the same model as in [54, §B]) of physical error rate p = 10 −3: roughly seven times below threshold. Decoding time was computed by multiplying the clock period by the number of clock cycles. Figure 6 reports the mean decoding time for 
+
+d = 3 to 21 .3 5 7 9 11 13 15 17 19 21 Code Distance ( d)0.01 0.1 110 Average Decoding Time (  s)
+
+> AlphaQubit 2 AlphaQubit 2 RT QUEKUF (Extrapolated) QUEKUF (Hardware) Snowflake (Simulation) Snowflake (Hardware) Snowflake (Area Optimized) Helios
+
+Figure 6: Mean duration to decode per stabiliser measure-ment round, plotted against code distance. The curve for Snowflake (simulation) agrees well with its software analogue [1, Figure 9d green curve]. 
+
+Snowflake achieves a sub-microsecond average de-coding time for code distances up to d = 21 . This satisfies the 1 μs time budget typical of superconduct-ing quantum devices, making it a viable candidate for real-time decoding in superconducting platforms, as well as in platforms with more relaxed timing constraints, such as electron spin and neutral atom qubits. The deviation from the simulated data ob-served at d = 9 is a result of the area-optimised im-plementation running at a reduced clock frequency. Furthermore, the architecture leaves ample room for further timing optimisation. Increasing the clock fre-quency beyond 200 MHz would result in a consider-able reduction in decoding time, albeit at the cost of increased power consumption. We first compare our implementation with Al-phaQubit 2 (AQ2) and its compact, real-time vari-ant, AQ2-RT [15]. These are machine learning-based decoders evaluated on the rotated surface code and colour code. As shown in Figure 6, the average de-coding time of AQ2 remains well above 1 μs across all 
+
+6Table 2: Summary of hardware decoder implementations. UF = Union–Find, TPU = tensor processing unit, ML = machine learning, SC = surface code, CC = colour code. 
+
+Decoder Hardware Device Algorithm/Approach Targeted Code Max Distance ( d)
+
+Helios AMD VCU129 UF Rotated SC 51 Snowflake AMD XCKU5P UF Unrotated SC 9QUEKUF AMD U55C UF Toric Code 10 AQ2 Google Trillium TPU ML Rotated SC & CC 23 (SC), 27 (CC) AQ2-RT Google Trillium TPU ML Rotated SC & CC 23 (SC), 27 (CC) 
+
+evaluated code distances. On the other hand, AQ2-RT achieves sub-microsecond decoding times up to 
+
+d = 11 , though this comes at the cost of a slight in-crease in logical error rate compared to AQ2. The decoding time of Snowflake is, on average, approxi-mately 350 ns lower than that of AQ2-RT. It is im-portant to note that both AQ2 and AQ2-RT were evaluated at a physical error rate of p = 1 .5 × 10 −3,which is higher than the error rate of 10 −3 used in our evaluation. As a result, the difference in throughput would likely be reduced if AQ2-RT were evaluated at an error rate similar to ours. We then consider QUEKUF [45], another UF-based hardware decoder evaluated on the toric code. Since real-time hardware data for QUEKUF is only avail-able up to d = 10 , we estimate its decoding speed for larger distances using the extrapolated clock-cycle counts provided in their study. For this comparison, we use the clock cycle count data at an error rate of p = 10 −3 under a code-capacity noise model. We optimistically assume a constant clock frequency of 
+
+247 .5 MHz , which corresponds to their reported max-imum operating frequency at d = 10 . Based on these figures, QUEKUF’s average decoding time remains under 1 μs for distances ranging from d = 3 to 9. How-ever, it crosses the 1 μs threshold for d ≥ 11 , making it suitable for real-time decoding in superconducting based quantum devices only up to d = 9 .Finally, we compare our implementation with He-lios [43], another UF-based hardware decoder that uses the overlapping-window approach to stream de-coding. Helios was evaluated on the rotated surface code under a circuit-level noise model at p = 10 −3.As shown in Figure 6, its average decoding time per stabiliser measurement round decreases with increas-ing code distance d. As a result, it achieves sub-microsecond decoding times for large code distances, demonstrating the lowest decoding time of any hard-ware decoder reported in the literature to date. Table 2 provides a summary of the hardware plat-forms, algorithms, targeted QECC, and maximum evaluated code distances for each decoder discussed in this section. 
+
+## 4.3 Performance at Cryogenic Temperatures 
+
+The power consumption and thermal characteristics of the decoder implemented on the XCKU5P FPGA across various code distances are depicted in Figure 7. Power consumption is evaluated at both room ( Prt )and cryogenic temperatures ( Pcryo ), along with the corresponding FPGA die ( Tdie ) and cryostat ( Trail )temperatures. 3 4 5 6 7 8 9Code Distance ( d)1.0 1.5 2.0 2.5 3.0 3.5 Power ( W)
+
+> Prt
+> Pcryo
+> Trail
+> Tdie
+> 10 20 30 40 50 60 70 Temperature ( K)
+
+Figure 7: Impact of code distance ( d) on decoder power con-sumption at room ( Prt ) and cryogenic ( Pcryo ) temperatures, along with the corresponding XCKU5P FPGA die ( Tdie ) and cryostat ( Trail ) temperatures. 
+
+The findings indicate that operating the FPGA in a cryogenic environment consistently results in lower power consumption compared to room temperature. While this difference reaches a maximum of ∼0.8 W 
+
+for d = 7 , the overall reduction was not as substantial as demonstrated in [50]. For smaller code distances ( d = 3 , 5), the cryostat rail temperature remains between 7 K and 8 K de-spite the increasing power draw. On the contrary, the highly utilised d = 7 implementation causes a sharp increase, drawing 2.65 W under cryogenic conditions and driving Trail up to 13 .62 K . To mitigate extreme power dissipation for the d = 9 implementation, the reduced clock speed of the area-optimised architec-ture successfully lowered the power draw (denoted by the dotted lines) to 1.39 W and Trail to 8.13 K , albeit with an increase in the average decoding time from 
+
+0.32 to 1.06 μs per measurement round. Due to its limited resource capacity compared to 
+
+7the XCKU5P, the XC7A35T FPGA could only ac-commodate the d = 3 decoder operated at 200 MHz .Decoder implementations for d > 3 exceeded the available resources on this device. During cryogenic operation of the d = 3 decoder on the XC7A35T FPGA, Tdie (Trail ) was measured to be 38 .2 K (5.5 K ), with a power draw Pcryo (Prt ) of 0.448 W (0.351 W ). This amounts to a ∼47% reduction in power draw at cryogenic temperatures compared to the XCKU5P FPGA. Furthermore, the cryostat temperature consistently exceeded 4 K throughout the active operation of the decoders. While this continuous heat dissipation did not cause operational disruptions in our front-loading cryostat, deploying such a system near the lower stages of a dilution refrigerator would introduce a sub-stantial heat load. This thermal load risks raising the base temperature of the cryostat, which would severely affect overall system performance. 
+
+# 5 An Alternative 2D Architecture 
+
+In this section we propose an alternative architecture for Snowflake: instead of processing all nodes in the decoding window simultaneously, process them one sheet at a time from top to bottom, as Figure 8 shows.       
+
+> Figure 8: (a) A flattened implementation of Snowflake in which each processing element corresponds to a vertical col-umn of nodes in W. (b) The 2D grid of processing elements in this implementation processes the decoding window one horizontal sheet at a time. This approach contrasts with the idea of implementing all d2(d+ 1) nodes, as in the earlier Figure 1b.
+
+Section 5.1 motivates this architecture with the ob-servation that most of the PEs in our existing ar-chitecture are underutilised. Section 5.2 discusses the hardware setup of such an architecture, and Sec-tion 5.3 proposes an early-stop criterion to achieve even higher decoding throughput. 
+
+## 5.1 Motivating Observation: Active Depth 
+
+To evaluate the extent to which the 3D decoding net-work of Section 3 is utilised, we first define a node as 
+
+active iff it is part of an active cluster. We also asso-ciate each node in the decoding window with a depth ;nodes at the top (bottom) of the window have depth 1 ( h), where h is the height of the window. We then analyse the following. 
+
+Definition 1. The active depth is the depth of the deepest active node in the decoding window. If no node is active, the active depth is zero. 
+
+This determines the deepest sheet at which nontriv-ial merging (the stage that dominates the runtime of Snowflake) occurs. A small active depth indicates that most of the decoding window contains no active clusters and is thus idle. A large active depth indi-cates there is an active node near the bottom of the window, and hence near-complete utilisation of the decoding network. Figure 9 shows the distribution of active depth for code distances ranging from d = 3 to 25 under the same noise model used in Section 4.2. It is clear that the decoding activity is predominantly confined to the upper sheets of the decoding network: most of the PEs (corresponding to nodes in the lower re-gion of the decoding window) are underutilised, as they hardly ever participate in non-trivial merging. This motivates the alternative architecture proposed in this section. 30510 15 20 25 active depth 5 7 9 11 13 15 17 19 21 23 25 code distance d        
+
+> Figure 9: The distribution of active depth (Definition 1) in Snowflake with the 2:1 cluster growth schedule, under
+> p= 10 −3circuit-level noise. Within each histogram, the red horizontal line shows the mean across 10 2dstabiliser mea-surement rounds. Appendix B shows that this mean scales logarithmically with code distance. Data obtained from em-ulation using a custom Python package [55].
+
+## 5.2 Hardware Setup 
+
+The alternative architecture would require only a 2D grid of processors (that does not scale with the height 
+
+8of the decoding window), along with high-speed mem-ory, as shown in Figure 10. The grid represents a hor-izontal 2D slice of the 3D decoding network, while the node variables, stored in the memory, are fed to the 2D grid. In this way, the hardware preserves the lo-cal nature of, and exactly implements, the Snowflake algorithm. CONTROLLER 
+
+> MEMORY
+
+TOP LAYER 
+
+BOTTOM LAYER  
+
+> Figure 10: An architecture for the flattened implementation of Snowflake. A processing layer operates on the data con-tained within it, referencing the top and bottom layers held in local registers to advance the algorithm. The controller manages the data flow, loading distant layers of the 3D de-coding network from memory into these reference registers as the algorithm progresses.
+
+Storing decoder variables in an external memory allows parallel logical blocks to access this data si-multaneously. This accessibility enables parallelised implementations of various DCS generators (such as for swim distance [25, 56]), and decoder switching to stronger CPU/GPU-based decoders [18] if the same memory is shared between the strong and weak de-coders. These features could be implemented with minimal time overhead, albeit with a slight increase in overall resource utilisation. Pseudocode for this alternative architecture is given in Appendix C. We note similar time-multiplexing strategies to address hardware scalability have also been discussed in [56]. This modification would use substantially less FPGA logic (by a factor of d), though the clock frequency would need to be increased to prevent backlog. 
+
+## 5.3 Early-Stop Logic 
+
+Our analysis in Section 5.1 indicates that decoder ac-tivity rarely reaches deep into the decoding window, with corrections predominantly completed in the top region. The pseudocode in Appendix C exploits this tendency by skipping computation for sheets deeper than the active depth; all the nodes in these sheets are inactive, so we are guaranteed that such computa-tion will not change their variables. Snowflake is thus exactly implemented even with this early-stop logic, while a measurable speed-up in decoding throughput is achieved. 
+
+# 6 Conclusion 
+
+We have presented a cryogenic implementation of Snowflake, equipped with confidence scores that in-troduce no timing overhead. Our results indicate that operating the decoder in a cryogenic environment gen-erates a substantial amount of heat due to its high FPGA resource utilisation. Consequently, deploying this implementation at the 4 K stage in a large-scale system is impractical, as the dissipated heat would elevate the temperatures of the lower stages of the dilution refrigerator and degrade qubit fidelities. Apotential approach for practical cryogenic decoding would involve deploying clusters of small FPGA-based decoders, connected via a high-speed bus [57, 58], into the higher-temperature stages ( 50 K ) of the dilution refrigerator, where the available cooling power is sig-nificantly greater. Alternatively, to mitigate these hardware con-straints from an architectural perspective, we have proposed a 2D architecture for Snowflake. This design would drastically reduce the decoder’s logic footprint and subsequent power consumption with negligible impact on throughput. The reduction in power con-sumption would enable the hardware to operate safely within the strict thermal limits of the 4 K stage, while serving as a foundation for a custom cryo-CMOS ASIC optimised for low-temperature operation. We believe this is a highly promising direction left for fu-ture investigation. 
+
+# Acknowledgments 
+
+MT thanks Jonathan Warren and Alexander Water-worth for cryogenic technical support and Holly Far-ler for useful discussions. TC acknowledges support from an EPSRC DTP studentship and JST ASPIRE Japan Grant Number JPMJAP2319. We acknowl-edge the use of the University of Oxford Advanced Research Computing (ARC) facility [59], and three EPSRC projects: QCS Hub (EP/T001062/1), RoaRQ (EP/W032635/1), and SEEQA (EP/Y004655/1). 
+
+# Competing Interests 
+
+Two relevant patent applications exist: WO2025238191A1 and EP26195274.1. 
+
+# References 
+
+[1] Tim Chan. “Snowflake: A distributed streaming decoder”. Quantum 10 , 2033 (2026). [2] Peter W. Shor. “Scheme for reducing decoher-ence in quantum computer memory”. Physical Review A 52 , R2493–R2496 (1995). 
+
+9[3] John Preskill. “Fault-tolerant quantum compu-tation”. Introduction to quantum computation and information 213 (1998). [4] Barbara M. Terhal. “Quantum error correction for quantum memories”. Rev. Mod. Phys. 87 ,307–346 (2015). [5] Austin G. Fowler, Matteo Mariantoni, John M. Martinis, and Andrew N. Cleland. “Sur-face codes: Towards practical large-scale quan-tum computation”. Physical Review A 86 ,032324 (2012). [6] Eric Dennis, Alexei Kitaev, Andrew Landahl, and John Preskill. “Topological quantum mem-ory”. Journal of Mathematical Physics 43 , 4452– 4505 (2002). [7] Daniel Litinski. “A game of surface codes: Large-scale quantum computing with lattice surgery”. Quantum 3, 128 (2019). [8] Satvik Maurya, Abtin Molavi, Aws Albargh-outhi, and Swamit Tannu. “A case for elastic quantum error correction decoders”. In Pro-ceedings of the 21st European Conference on Computer Systems. Pages 514–531. EUROSYS ’26New York, NY, USA (2026). Association for Computing Machinery. [9] Francesco Battistel, Christopher Chamberland, Kauser Johar, Ramon W. J. Overwater, Fabio Sebastiano, Luka Skoric, Yosuke Ueno, and Muhammad Usman. “Real-time decoding for fault-tolerant quantum computing: progress, challenges and outlook”. Nano Futures 7,032003 (2023). [10] Google Quantum AI. “Suppressing quantum er-rors by scaling a surface code logical qubit”. Na-ture 614 , 676–681 (2023). [11] Google Quantum AI and collaborators. “Quan-tum error correction below the surface code threshold”. Nature 638 , 920–926 (2025). [12] Dolev Bluvstein, Alexandra A. Geim, Sophie H. Li, Simon J. Evered, J. Pablo Bonilla Ataides, Gefen Baranes, Andi Gu, Tom Manovitz, Muqing Xu, Marcin Kalinowski, Shayan Ma-jidy, Christian Kokail, Nishad Maskara, Elias C. Trapp, Luke M. Stewart, Simon Hollerith, Hengyun Zhou, Michael J. Gullans, Susanne F. Yelin, Markus Greiner, Vladan Vuleti´ c, Madelyn Cain, and Mikhail D. Lukin. “A fault-tolerant neutral-atom architecture for universal quantum computation”. Nature 649 , 39–46 (2026). [13] Austin G. Fowler. “Time-optimal quantum com-putation” (2013). arXiv:1210.4626. [14] Craig Gidney and Martin Eker˚ a. “How to factor 2048 bit rsa integers in 8 hours using 20 million noisy qubits”. Quantum 5, 433 (2021). [15] Andrew W. Senior, Thomas Edlich, Francisco J. H. Heras, Lei M. Zhang, Oscar Higgott, James S. Spencer, Taylor Applebaum, Sam Blackwell, Justin Ledford, Akvil˙ e ˇZemgulyt˙ e, Augustin ˇZ´ ıdek, Noah Shutty, Andrew Cowie, Yin Li, George Holland, Peter Brooks, Charlie Beattie, Michael Newman, Alex Davies, Cody Jones, Sergio Boixo, Hartmut Neven, Pushmeet Kohli, and Johannes Bausch. “A scalable and real-time neural decoder for topological quantum codes” (2025). arXiv:2512.07737. [16] Craig Gidney. “How to factor 2048 bit RSA inte-gers with less than a million noisy qubits” (2025). arXiv:2505.15917. [17] Dragana Grbic, Laleh Aghababaie Beni, and Noah Shutty. “Accelerating the tesseract de-coder for quantum error correction” (2026). arXiv:2602.02985. [18] Riki Toshio, Kaito Kishi, Jun Fujisaki, Hiro-taka Oshima, Shintaro Sato, and Keisuke Fu-jii. “Decoder switching: Breaking the speed-accuracy tradeoff in real-time quantum error cor-rection” (2025). arXiv:2510.25222. [19] Samuel C. Smith, Benjamin J. Brown, and Stephen D. Bartlett. “Mitigating errors in logical qubits”. Communications Physics 7, 386 (2024). [20] H´ ector Bomb´ ın, Mihir Pant, Sam Roberts, and Karthik I. Seetharam. “Fault-tolerant postselec-tion for low-overhead magic state preparation”. PRX Quantum 5, 010302 (2024). [21] Nadine Meister, Christopher A. Pattison, and John Preskill. “Efficient soft-output decoders for the surface code” (2024). arXiv:2405.07433. [22] Craig Gidney, Michael Newman, Peter Brooks, and Cody Jones. “Yoked surface codes”. Nature Communications 16 , 4498 (2025). [23] Seok-Hyung Lee, Lucas H. English, and Stephen D. Bartlett. “Efficient post-selection for general quantum LDPC codes”. npj Quantum Information 12 (2026). [24] Zeyuan Zhou, Shaun Pexton, Aleksander Ku-bica, and Yongshan Ding. “Error mitigation of fault-tolerant quantum circuits with soft infor-mation” (2025). arXiv:2512.09863. [25] Maria Dinc˘ a, Tim Chan, and Simon C. Ben-jamin. “Error mitigation for logical circuits using decoder confidence” (2026). arXiv:2512.15689. [26] Patrick Birchall, Jacob Bridgeman, Christo-pher Dawson, Terry Farrelly, Yehua Liu, Naomi Nickerson, Mihir Pant, Sam Roberts, Karthik Seetharam, and David Tuckett. “Macro-mux: scalable postselection for high-threshold fault-tolerant quantum computation” (2026). arXiv:2603.04875. [27] Hongkun Chen, Daohong Xu, Grace M. Som-mers, David A. Huse, Jeff D. Thompson, and Sarang Gopalakrishnan. “Scalable accuracy gains from postselection in quantum error cor-recting codes” (2025). arXiv:2510.05222. [28] David Dentelski. “Neural network decoder confidence as a learned proxy for the logical gap” (2026). arXiv:2606.08758. 
+
+10 [29] Moeto Mishima, Riki Toshio, Kaito Kishi, Jun Fujisaki, Hirotaka Oshima, Shintaro Sato, and Keisuke Fujii. “Adaptive window decoding based on spatiotemporal complementary gap” (2026). arXiv:2605.14637. [30] J. Wilson Staples, Winston Fu, and Jeff D. Thompson. “Scalable postselection of quantum resources” (2026). arXiv:2603.08697. [31] P. Krantz, M. Kjaergaard, F. Yan, T. P. Orlando, S. Gustavsson, and W. D. Oliver. “A quantum engineer’s guide to superconducting qubits”. Ap-plied Physics Reviews 6 (2019). [32] L. M. K. Vandersypen, H. Bluhm, J. S. Clarke, A. S. Dzurak, R. Ishihara, A. Morello, D. J. Reilly, L. R. Schreiber, and M. Veldhorst. “Interfacing spin qubits in quantum dots and donors—hot, dense, and coherent”. npj Quan-tum Information 3 (2017). [33] J.P.G. van Dijk, E. Charbon, and F. Sebastiano. “The electronic interface for quantum proces-sors”. Microprocessors and Microsystems 66 , 90– 101 (2019). [34] Yosuke Ueno, Masaaki Kondo, Masamitsu Tanaka, Yasunari Suzuki, and Yutaka Tabuchi. “QECOOL: On-line quantum error correction with a superconducting decoder for surface code”. In 2021 58th ACM/IEEE Design Automa-tion Conference (DAC). Pages 451–456. (2021). [35] Yosuke Ueno, Masaaki Kondo, Masamitsu Tanaka, Yasunari Suzuki, and Yutaka Tabuchi. “QULATIS: A quantum error correction method-ology toward lattice surgery”. In 2022 IEEE International Symposium on High-Performance Computer Architecture (HPCA). Pages 274–287. (2022). [36] Adam Holmes, Mohammad Reza Jokar, Ghasem Pasandi, Yongshan Ding, Massoud Pedram, and Frederic T. Chong. “NISQ+: boosting quan-tum computing power by approximating quan-tum error correction”. In Proceedings of the ACM/IEEE 47th Annual International Sympo-sium on Computer Architecture. Page 556–569. ISCA ’20. IEEE Press (2020). [37] Alexander Knapen, Guanchen Tao, Jacob Mack, Tomas Bruno, Mehdi Saligane, Dennis Sylvester, Qirui Zhang, and Gokul Subramanian Ravi. “Pinball: A cryogenic predecoder for quan-tum error correction decoding under circuit-level noise”. In 2026 IEEE International Sympo-sium on High Performance Computer Architec-ture (HPCA). Pages 1–17. IEEE (2026). [38] Alexander Knapen, Junyi Luo, Guanchen Tao, Yuxuan Wang, Tomas Bruno, Qirui Zhang, Den-nis Sylvester, Mehdi Saligane, and Gokul Sub-ramanian Ravi. “Mitigating classical resource costs in quantum error correction via generalized qLDPC predecoding” (2026). arXiv:2605.03180. [39] Xiaohan Yang, Xuandong Sun, Zhiyi Wu, Jiawei Zhang, Ji Jiang, Xiayu Linpeng, Yuxuan Zhou, Ji Chu, Jingjing Niu, Youpeng Zhong, Song Liu, and Dapeng Yu. “Real-time surface-code error correction using an FPGA-based neural-network decoder” (2026). arXiv:2605.04892. [40] Ge Yan, Shanchuan Li, and Yuxuan Du. “Re-think the role of neural decoders in quantum er-ror correction” (2026). arXiv:2605.12046. [41] Daniel B´ ascones, Arshpreet Singh Maan, Valentin Savin, and Francisco Garcia-Herrero. “A scalable FPGA architecture for real-time decoding of quantum LDPC codes using GARI” (2026). arXiv:2605.01035. [42] Peter Wegmann, Theofilos Augoustis, Aleksan-dra ´Swierkowska, Emmanouil Giortamis, and Pramod Bhatotia. “Zero-G: A pre-decoder-aware decoder for quantum error correction” (2026). arXiv:2608.02030. [43] Namitha Liyanage, Yue Wu, Siona Tagare, and Lin Zhong. “FPGA-based distributed union-find decoder for surface codes”. IEEE Transactions on Quantum Engineering 5, 1–18 (2024). [44] Abbas B. Ziad, Ankit Zalawadiya, Can-berk Topal, Joan Camps, Gy¨ orgy P. Geh´ er, Matthew P. Stafford, and Mark L. Turner. “Lo-cal clustering decoder as a fast and adaptive hardware decoder for the surface code”. Nature Communications 16 , 11048 (2025). [45] Federico Valentino, Beatrice Branchini, Davide Conficconi, Donatella Sciuto, and Marco D. San-tambrogio. “QUEKUF: An FPGA union find de-coder for quantum error correction on the toric code”. ACM Trans. Reconfigurable Technol. Syst. 18 (2025). [46] Yue Wu, Namitha Liyanage, and Lin Zhong. “Micro Blossom: Accelerated minimum-weight perfect matching decoding for quantum error cor-rection”. In Proceedings of the 30th ACM In-ternational Conference on Architectural Support for Programming Languages and Operating Sys-tems, Volume 2. Pages 639–654. New York, NY, USA (2025). Association for Computing Machin-ery. [47] Nicolas Delfosse and Gilles Z´ emor. “Linear-time maximum likelihood decoding of surface codes over the quantum erasure channel”. Physical Re-view Research 2, 033042 (2020). [48] Nicolas Delfosse and Naomi H. Nickerson. “Almost-linear time decoding algorithm for topo-logical codes”. Quantum 5, 595 (2021). [49] Harald Homulle and Edoardo Charbon. “Perfor-mance characterization of Altera and Xilinx 28 nm FPGAs at cryogenic temperatures”. In 2017 International Conference on Field Programmable Technology (ICFPT). Pages 25–31. (2017). [50] Zhanhong Jin, Xinzhe Wang, Futian Liang, and Cheng-Zhi Peng. “Cryogenic characterization of commercial devices for application of quantum 
+
+11 computing electronics”. In 2022 IEEE 65th In-ternational Midwest Symposium on Circuits and Systems (MWSCAS). Pages 1–5. (2022). [51] Christopher Lewis, Drew Sellers, and Michael Hamilton. “Implementation of field pro-grammable gate arrays (FPGAs) in extremely cold environments for space and cryogenic com-puting applications” (2025). arXiv:2504.13305. [52] I. D. Conway Lamb, J. I. Colless, J. M. Horni-brook, S. J. Pauka, S. J. Waddy, M. K. Frechtling, and D. J. Reilly. “An fpga-based instrumentation platform for use at deep cryo-genic temperatures”. Review of Scientific Instru-ments 87 (2016). [53] Harald Homulle and Edoardo Charbon. “Cryo-genic low-dropout voltage regulators for stable low-temperature electronics”. Cryogenics 95 , 11– 17 (2018). [54] Tim Chan and Simon C. Benjamin. “Actis: Astrictly local Union–Find decoder”. Quantum 7,1183 (2023). [55] Tim Chan (2023). url: https://github.com/ timchan0/localuf .[56] Kaito Kishi, Riki Toshio, Jun Fujisaki, Hiro-taka Oshima, Shintaro Sato, and Keisuke Fujii. “Even more efficient soft-output decoding with extra-cluster growth and early stopping” (2026). arXiv:2602.03336. [57] Namitha Liyanage, Yue Wu, Emmet Houghton, and Lin Zhong. “Multi-FPGA system for quan-tum error correction with lattice surgery”. In 2024 IEEE International Conference on Quan-tum Computing and Engineering (QCE). Vol-ume 02, pages 622–623. (2024). [58] Namitha Liyanage, Yue Wu, Emmet Houghton, and Lin Zhong. “Network-integrated decoding system for real-time quantum error correction with lattice surgery”. In 2025 IEEE International Conference on Quantum Computing and Engi-neering (QCE). Volume 01, pages 1148–1159. (2025). [59] Andrew Richards. “University of Oxford Ad-vanced Research Computing”. (2015). 
+
+# A Other Decoder Confidence Scores 
+
+In this section, we mention two other DCSs with min-imal impact on resource utilisation. These are: 1. Drop Frequency: How fast the decoder gener-ates a correction; specifically, the reciprocal of the number of clock cycles between two consecu-tive drop states. The idea behind this is that an easy decoding problem generates no large clus-ters, and only large clusters require many clock cycles between consecutive drops. 2. Minimum Defect Height: The height of the low-est (unannihilated) defect in the decoding win-dow. The idea behind this is that for easy de-coding problems, the clusters are inactivated (i.e. resolved) at the top of the decoding window. A defect that is low in the window implies an ac-tive (i.e. unresolved) cluster that has grown a lot, indicating a difficult decoding problem. We evaluated the accuracy of all three DCSs via Monte Carlo simulation, and observe the cluster size 1-norm fraction to significantly outperform the other two. 
+
+# B Additional Active Depth Plot 3 5 7 9 11 13 17 21 25 distance d           
+
+> 0.0 0.5 1.0 1.5 2.0 2.5 3.0 mean active depth  D
+> data
+> D=+lg 10 d
+> Figure 11: The same data as in Figure 9, but focusing on the mean of each distribution; the standard error is thinner than the line width. The logarithmic fit (orange) parameters are α=−1.3(1) and β= 3 .09(9) .
+
+# C Pseudocode for the 2D Architecture 
+
+In this section we provide pseudocode for the 2D ar-chitecture of Snowflake proposed in Section 5. For readers unfamiliar with the high-level idea of how Snowflake works (i.e. how cluster grow, touch, merge, and how defects are paired within them), we recom-mend reading [1] up to and including §4. This pseudocode is for the 2:1 cluster growth sched-ule rather than the 1:1 schedule [1, §4.2]. Much of this is similar to [1, Appendix D] but with some differ-ences. In Appendix C.1 we list the variables each com-ponent stores and Appendices C.2 to C.4 we explain how they are manipulated in order to effect Snowflake. 
+
+## C.1 Setup 
+
+Denote the decoding window as W , and its node and edge sets as VW and EW , respectively. We begin by associating each node v ∈ VW with a coordinate 
+
+(x, y, D ) where (x, y ) is the spatial coordinate of the stabiliser in the surface code, and D is the depth of the node within W . A sheet is a set of nodes with the 
+
+12 same depth, and a column is a set of nodes with the same spatial coordinate. As Figure 10 shows, the architecture comprises a 2D grid of PEs, a global controller, and memory, which we discuss in more detail: 
+
+• Each PE corresponds to one column of nodes (see Figure 8), and can modify the variables of three consecutive nodes within the column at any given time. 
+
+• The controller can broadcast the same boolean to, and receive booleans from, every PE. 
+
+• The memory stores all the variables introduced in Appendices C.1.1 and C.1.2. At a high level, Snowflake can be thought of as oper-ating across discretised timesteps (or generations in cellular-automata language). In any given timestep, Snowflake is in one of the five stages, following the flowchart in Figure 12. In other words, we define the following. 
+
+Definition 2. A timestep is a transition along one of the arrows in Figure 12. 
+
+As for hardware, a timestep would equate to multiple clock cycles. 
+
+Definition 3. A decoding cycle is defined as one cy-cle through all five stages i.e. the series of transitions between successive drop stages. 
+
+The decoding cycle relates to hardware in that its duration is precisely the time taken to process one stabiliser measurement round. 
+
+drop grow whole merging whole grow half merging half     
+
+> Figure 12: Flowchart for the stages of Snowflake: drop ,
+> grow whole , and grow half are of fixed duration whereas the other two last a variable duration, hence their loops.
+
+At a high level, the following processes occur in each stage. In drop , the decoding window W slides up the decoding graph by one layer. In grow whole ,a specific subset of active clusters in W grow outward by half an edge, and in grow half , the complementary set of active clusters grow. In both merging stages, newly touching clusters merge and Snowflake updates (1) whether each cluster is active or inactive, and (2) the defect pairings within each cluster. 
+
+C.1.1 Node Variables 
+
+Each node v ∈ VW is assigned a unique integer ID and possesses the following variables: 1. active is a boolean indicating whether v is in an active cluster. If v. active = true we say v is active. 2. whole is a boolean indicating whether v is in a whole cluster. If v. whole = true we say v is whole. 3. CID is an integer indicating the cluster that v
+
+belongs to. Clusters are identified by the lowest 
+
+ID of all its nodes. The node of this ID is the root. 
+
+CID can also adopt the value reset to indicate v
+
+should unroot (defined in Appendix C.4.3) in the next timestep (Definition 2). 4. defect is a boolean indicating whether v has a defect. This can be thought of as a particle which is passed between nodes. When a node receives two defects in a timestep, they annihilate. 5. pointer is the direction v should push the defect (by flipping the corresponding edge). Possible values (under circuit-level noise) are C, N, W, E, S,
+
+D, U, NU , WD , EU , SD , NWD , SEU , representing respec-tively centre, north, west, east, south, down, up, and combinations thereof. Following the point-ers starting from v should eventually lead to the root of the cluster that v is in. Only roots have 
+
+pointer = C as they do not push defects but accumulate them. 6. grown is a boolean indicating whether the cluster that v is in has grown in the first growth round of the current decoding cycle (Definition 3). 7. unrooted is a boolean indicating whether v has unrooted in the current decoding cycle. 8. busy is a boolean indicating whether v is busy. We refer to the first five variables as relative and the last three as absolute .
+
+C.1.2 Edge Variables 
+
+Each edge e ∈ EW has the following relative variables: 1. growth is its growth value (how much of that edge is contained in any cluster) which is in 
+
+{0, 12 , 1}.2. correction is a boolean indicating if the decoder (tentatively) thinks e should be flipped (but this can change later on). These edge variables are stored in a lookup table (a global register array implemented using FPGA flip-flops, as in the main text). 
+
+13 87310 2 9546 111 0(a)                   
+
+> 87310 29546111 0(b) drop
+> 87310 29546111 0(c) grow_whole
+> 87310 29546111 0(d) merging_whole
+> 87310 29546111 0(e) grow_half
+> 873429546110 0(f) merging_half
+> 473429546140(g) merging_half
+
+Figure 13: An example of a decoding cycle (Definition 3) that takes 6 timesteps (Definition 2), for a distance-3 repetition code. Ungrown edges are invisible; half-grown, dotted; fully grown, solid. Edges flipped by the decoder are in black. Active nodes are squares; inactive nodes, circles. CID is shown as a label. Pointers are shown by arrows on edges. (a) Each node is in its own cluster so has CID = ID . Two clusters are active. (b) All relative variables fall by one layer, including CID which is adjusted to refer to the node below. A new defect appears at the top. (c) Node 9 grows its incident edges by 12 as it is active and whole. (d) Node 6 recognises it is a root with a defect, so becomes active. (e) Node 10 grows its incident edges by 12
+
+as it is active and half. Nodes 10 and 11 now each see a lower CID than their own when they look at their neighbours along fully grown edges. (f) They adopt that CID and point toward that neighbour; thus the defect at node 10 is pushed along its pointer to the root, which flips an edge. Meanwhile, node 8 now sees a lower CID than its own. (g) Node 8 updates its CID 
+
+and pointer , so now the 4-node cluster is fully flooded. Throughout this stage, each non-root node was adopting the active 
+
+variable of the node it was pointing to. This activity propagation also completes in this timestep, so the 4-node cluster is fully synced. 
+
+## C.2 High-Level Procedures 
+
+The controller repeatedly runs Algorithm 1; this fol-lows the flowchart in Figure 12. 
+
+Algorithm 1 Run by controller repeatedly. 
+
+Drop 
+
+for metastage = ( whole , half ) do 
+
+Conduct (Grow [metastage ], D)
+
+repeat 
+
+D ← active depth ▷ See Definition 1. 
+
+Conduct (Merging [metastage ], D + 1) 
+
+until not any v. busy ∀v ∈ VW
+
+The Drop and Conduct procedures are defined in Algorithm 2, with one of them being called per timestep (Definition 2). Stage drop is handled en-tirely by the controller, and its effect will be described in Appendix C.3. Conduct is simply a wrapper that takes in a node procedure from Algorithm 3 and an integer D ∈ { 0, . . . , h } representing the current ac-tive depth, then performs one timestep of Snowflake. The early-stop feature is implemented here: during the growth (merging) stages, processing is skipped for nodes deeper (one deeper than) D.In the next two subsections we explain the effect of each stage. Though the pseudocode explains exactly what each component does, it is difficult to infer from this the emergent effect, so we describe the latter in the accompanying prose. 
+
+Algorithm 2 The two procedures that can be called in Algorithm 1. Proc is a procedure from Algo-rithm 3. 
+
+procedure Drop  
+
+> 2:
+
+for e ∈ bottom layer of W do if e. correction then ▷ Commit e. 
+
+> 4:
+
+add e to the correction 
+
+for v ∈ VW do  
+
+> 6:
+
+v. grown ← false 
+
+v. CID ← ID of node below current root  
+
+> 8:
+
+shift all relative variables down one layer 
+
+for v ∈ top sheet of W do  
+
+> 10:
+
+▷ Inherit the new syndrome sheet. ◁v. defect ← whether the measurement of the corresponding ancilla qubit differs from the previous round  
+
+> 12:
+
+v. active ← false  
+
+> 14:
+
+procedure Conduct (Proc , D ∈ { 0, . . . , h })
+
+for L = 1 , . . . , D do  
+
+> 16:
+
+load node sheets L−1, L, L +1 into 2D grid 
+
+for all v at depth L do  
+
+> 18:
+
+Proc (v)
+
+## C.3 Fixed-Duration Stages 
+
+As mentioned in the previous subsection, the drop 
+
+stage is handled entirely by the controller. The con-troller adds to the correction (i.e. finalises the flipped-or-not-flipped status of all edges in the lowest layer of 
+
+W ) and raises W by one layer, as in Figure 13b. The latter can be done simply by updating the memory 
+
+14 addresses of the nodes rather than physically moving the data. Each node v in the top sheet of W starts in its own cluster [1, Definition 8], thus its relative variables are set to reflect this (Algorithm 2 Lines 11 and 12). v. whole , v. CID , and v. pointer need not be explicitly reset as they never change from their correct values of true , v. ID , and C, respectively. 
+
+Algorithm 3 The four procedures that can be called in Algorithm 2. metastage can be whole or half .
+
+procedure Grow [whole ]( v) 
+
+> 2:
+
+if v. active and v. whole then 
+
+SubGrow (v) 
+
+> 4:
+
+v. grown ← true  
+
+> 6:
+
+procedure Grow [half ]( v)
+
+v. unrooted ← false  
+
+> 8:
+
+if v. active and not v. whole and not v. grown 
+
+then 
+
+SubGrow (v) 
+
+> 10:
+
+procedure Merging [metastage ]( v) 
+
+> 12:
+
+v. busy ← false 
+
+Flooding (v, metastage ) 
+
+> 14:
+
+Syncing (v)
+
+Now referring to Algorithm 3 and the subroutine 
+
+SubGrow in Algorithm 4, stage grow whole grows all edges around each active whole cluster by 12 , as in Figure 13c. Stage grow half does the same but for active half clusters that have not already grown in the current decoding cycle (Definition 3), as in Figure 13e. 
+
+## C.4 Variable-Duration Stages 
+
+Figure 13d shows a merging example that lasts just one timestep (Definition 2), and f–h shows one that needs three timesteps. The merging whole stage is the same as merging half but with one extra pro-cess, so we first explain the latter: it comprises two processes, flooding and syncing , which occur indepen-dently. We thus split Merging into two subroutines, given in Algorithm 4, effecting each process. The processes in Appendices C.4.1 to C.4.3 are common to both merging stages and references to spe-cific lines refer to those in Algorithm 4. The process in Appendix C.4.4 is unique to the merging whole 
+
+stage. 
+
+C.4.1 Flooding 
+
+In flooding, newly touching clusters adopt the lowest 
+
+CID among them. This CID propagates as a flood starting from where they touched: each node looks at its neighbours along fully grown edges. If it sees a lower CID than its own, it adopts that CID and points toward that neighbour (Lines 17 to 20). After this process, all nodes in a given cluster will have the same 6162 34650(a)                    
+
+> 61R234650(b)
+> R18234650(c)
+> 718234650(d)
+> 717234650(e)
+> 717234650(f)
+> 717234650(g)
+> Figure 14: A demonstration of unrooting on the distance-2 repetition code. Relative variables are shown as in Figure 13.
+> CID value reset is labelled ‘R’. Nodes with unrooted as true
+> are outlined in black. (a) There is a 2-node cluster comprising Nodes 7 (the green one) and 8 (the red one). Node 8 has a downward pointer (not shown). (b) Thus, Node 8 starts unrooting. (c) Node 7 sees this signal to unroot so starts unrooting. Node 8 finishes unrooting. (d) Node 7 finishes unrooting. (e–g) merging whole completes.
+
+CID , and following the pointers will always lead to the root promised by CID .
+
+Remark 1. Crucial to the algorithm is that boundary nodes are of lower ID than detectors. Each root can thus determine if its cluster touches a boundary by checking if itself is a boundary node. 
+
+C.4.2 Syncing 
+
+In syncing, all defects are pushed along pointers to-ward roots, one edge per timestep (Lines 35 to 37). Eventually, each root will know whether its cluster is active (Line 28), using the following lemma from [54, 
+
+§A.2]. 
+
+Lemma 1. A cluster is inactive iff it has an even defect count or touches a boundary. 
+
+At the same time, this activity knowledge propagates in the opposite direction from root to the rest of the cluster (Line 34). After this process, a node is in an active cluster iff it is active. 
+
+C.4.3 Unrooting 
+
+Unrooting is a process needed when a downward pointer is dropped onto a node in the bottom sheet of 
+
+W (can happen while a cluster falls out of view), and that node receives a defect. This breaks the pointer tree structure established in the previous decoding cy-cle (Definition 3), as ∃ nonempty S ⊂ VW from which following the pointers will lead past the bottom of W .To fix it, each node in S resets its CID and pointer so that the structure can be rebuilt from scratch, via fur-ther merging whole or merging half timesteps. Fig-ure 14 shows an example. 
+
+15 The breaking point is found in Line 30 whence the signal to unroot, CID = reset , propagates during 
+
+merging whole or merging half as a flood through the cluster; each node unroots itself as soon as it re-ceives this signal (Lines 12 to 16). It takes 2 timesteps for a node to unroot, after which it cannot unroot again in the same decoding cycle (Line 14). This en-sures the flood does not backpropagate. The memory of whether a node has unrooted resets after this stage finishes (Algorithm 3 Line 7). The higher up a node is in W , the lower its ID ;this is for two reasons. First, it makes unrooting less likely as pointer paths tend to lead upward rather than downward. Second, it ensures defects in active clusters are pushed to a highest point so they can annihilate with defects in newer, smaller clusters as early as possible. 
+
+C.4.4 The Process Unique to merging whole 
+
+The process unique to the merging whole stage is tracking which clusters have grown. The variable 
+
+grown floods in the same fashion as cid but with no connection to pointer (Algorithm 4 Lines 21 to 23). This ensures all nodes in a given cluster will have the same boolean for grown . The memory of whether a cluster has grown resets after each decoding cycle (Al-gorithm 3 Line 6). 
+
+16 Algorithm 4 Subroutines for Algorithm 3. 
+
+procedure SubGrow (v) 
+
+> 2:
+
+for each edge e incident to v do 
+
+e. growth ← min {1, e. growth + 12 } 
+
+> 4:
+
+flip v. whole  
+
+> 6:
+
+procedure Flooding (v, metastage ∈ { whole , half })
+
+if v. CID = reset then ▷ Finish unrooting v. 
+
+> 8:
+
+v. busy ← true 
+
+v. CID ← v. ID  
+
+> 10:
+
+v. unrooted ← true 
+
+else  
+
+> 12:
+
+for all u : uv ∈ EW ∧ uv. growth = 1 do if u. CID = reset then  
+
+> 14:
+
+if not v. unrooted then 
+
+StartUnroot (v) 
+
+> 16:
+
+break 
+
+else if u. CID < v. CID then  
+
+> 18:
+
+v. busy ← true 
+
+v. pointer ← toward u 
+
+> 20:
+
+v. CID ← u. CID 
+
+if metastage = whole and u. grown and not v. grown then  
+
+> 22:
+
+v. busy ← true 
+
+v. grown ← true  
+
+> 24:
+
+procedure Syncing (v) 
+
+> 26:
+
+x := ( v is a detector) and v. defect 
+
+if v. pointer = C then ▷ v is a root.  
+
+> 28:
+
+v. active ← x
+
+else if v ∈ bottom sheet of W and v. pointer ∈ { D, WD , SD , NWD } then  
+
+> 30:
+
+if x then 
+
+StartUnroot (v) 
+
+> 32:
+
+else 
+
+u := node toward v. pointer  
+
+> 34:
+
+v. active ← u. active 
+
+if x then  
+
+> 36:
+
+v. busy ← true 
+
+flip uv. correction to push defect to u 
+
+> 38:
+
+if v. active changed then 
+
+v. busy ← true  
+
+> 40:
+
+procedure StartUnroot (v) 
+
+> 42:
+
+v. busy ← true 
+
+v. CID ← reset  
+
+> 44:
+
+v. pointer ← C
+
+17

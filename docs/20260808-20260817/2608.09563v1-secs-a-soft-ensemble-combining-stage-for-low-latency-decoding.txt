@@ -1,0 +1,282 @@
+Title: SECS: A Soft Ensemble-Combining Stage for Low-Latency Decoding
+
+URL Source: https://arxiv.org/pdf/2608.09563v1
+
+Published Time: Tue, 11 Aug 2026 02:18:48 GMT
+
+Number of Pages: 6
+
+Markdown Content:
+# SECS: A Soft Ensemble-Combining Stage for Low-Latency Decoding 
+
+Felix Krieg †, Paul Bezner †, and Stephan ten Brink 
+
+Institute of Telecommunications, University of Stuttgart, Germany 
+
+{krieg, bezner, tenbrink }@inue.uni-stuttgart.de 
+
+Abstract —Ensemble decoding is a promising technique for ultra-reliable low-latency communication, as it trades hardware parallelism for decoding latency by running M diverse belief propagation (BP) decoders in parallel. Conventional ensembles select their output from the member candidates. Hence, decoding fails whenever no member finds the correct codeword. In this work, we show that shallow, diverse BP members are poor 
+
+correctors , but excellent sorters . Based on this observation, we propose a soft ensemble-combining stage (SECS) that com-bines extrinsic messages after only a few iterations, yielding a reliability ordering whose most reliable positions are nearly error-free. A subsequent re-encoding stage (like ordered-statistics decoding (OSD)) converts this ordering into a near-maximum likelihood (ML) candidate codeword, at a fraction of the BP latency of a fully converged ensemble. We demonstrate the proposed scheme on three short codes: a (63 , 30) Bose–Ray-Chaudhuri–Hocquenghem code, an overcomplete PG(2 , 8) code, and a search-designed (105 , 53) cyclic code. In all cases, the SECS with OSD post-processing closes most of the gap to ML decoding, while significantly reducing the number of required BP iterations. 
+
+Index Terms —URLLC, short block codes, ensemble decoding, belief propagation, ordered statistics. 
+
+I. I NTRODUCTION 
+
+Ultra-reliable low-latency communication (URLLC) targets error probabilities as low as 10 −5 within a 1 ms user-plane latency budget [1]. Such stringent latency and reliability requirements necessitate short codes that can be decoded close to maximum likelihood (ML) performance. For short, dense codes, iterative BP decoding on a single graph often saturates well before reaching ML performance. Ensemble decoding addresses this limitation by operating M
+
+decoders in parallel on diverse representations of the same code and returning the most likely valid candidate through an ML-selection rule. Diversity stems, e.g., from multiple parity-check bases in multiple-bases belief propagation (MBBP) [2] or from automorphism-induced permutations in automorphism ensemble decoding (AED) [3]. A conventional selection-only ensemble is bounded by its list error rate (LER), defined as the probability that none of its constituent decoders produces the transmitted codeword.  
+
+> †
+
+F. Krieg and P. Bezner contributed equally to this work. This work is supported by the German Federal Ministry of Research, Technology and Space (BMFTR) within the project Open6GHub+ (grant no. 16KIS2406). LLM agents from Anthropic and OpenAI were used to write source code for this work and to assist with language editing. 
+
+0 20 40 60 10 −6
+
+10 −3
+
+10 0
+
+> k=30
+
+bit reliability rank r
+
+> BER at rank  r
+
+3.0 dB 
+
+0 20 40 60 
+
+> k=30
+
+bit reliability rank r
+
+3.5 dB    
+
+> Lch BP-2( Lch )BP-32( Lch )Lcomb
+
+Fig. 1. Ordered-reliability BER on BCH(63,30). Sorted by LLR magnitude, the soft-combined LLR holds the error rate low across the whole MRB. High iteration BP distributes errors equally and increases the error rate in the high-reliability tail. For the calculation of Lcomb : M =16 members, Imax =2 .
+
+No selection rule can recover such a frame from the mem-ber candidate list. Surpassing this bound therefore requires synthesizing an additional candidate from information that is distributed across the ensemble members. This paper starts from a simple observation: shallow, di-verse BP members correct little, but they sort exceptionally well, as shown in Fig. 1. Based on this observation, we propose the soft ensemble-combining stage (SECS). After only a few iterations, SECS aggregates the clipped extrinsic messages of the ensemble members into a combined LLR vec-tor whose reliability ordering concentrates the residual errors in the least reliable positions. A re-encoding post-processing – low-order ordered-statistics decoding (OSD) [4] or a variant without Gaussian elimination (GE) – then recovers the code-word from the nearly error-free most reliable positions. In the studied configurations, deeper BP decoding generally reduces the average BER, but also flattens the ordered-reliability error profile. Consequently, its remaining errors can occur inside the most-reliable basis (MRB), making the posterior less suitable for re-encoding even when its average BER is lower. Feeding BP soft output to OSD is a classical idea [5]. Prior work improves the OSD input through temporal accumula-tion and decoder diversity. The authors of [6] accumulate LLR transitions across BP iterations. The approach of [7] learns such temporal combinations and processes comple-arXiv:2608.09563v1 [cs.IT] 10 Aug 2026 Lch              
+
+> Dec 1Dec 1
+> Dec 2Dec 2
+> Dec MDec M
+> ......
+> Dec 1Dec 1· · ·
+> Dec 2Dec 2· · ·
+> Dec MDec M· · ·
+> ......
+> ML in the list Soft-out ensemble stage Hard-out ensemble stage
+> e1
+> e2
+> eM
+> ˆx1
+> ˆx2
+> ˆxM
+> ˆc∈ C
+> combining stage post-processing hard-out decoder
+> Lcomb
+> post-processing SECS: soft ensemble-combining stage
+> ˆc∈ C
+> Fig. 2. SECS-based decoding architecture. Mdiverse BP members run for a few iterations only; the SECS (blue border) fuses their clipped extrinsics into
+> Lcomb . The dashed unit is inserted into a conventional hard-out ensemble decoder (green and gray): Lcomb either feeds a re-encoding decoder directly or re-enters the ensemble for further ensemble-decoding after some post-processing (orange).
+
+mentary reliability vectors by separate OSD instances. An earlier work [8] applies OSD separately to complementary, absorbing-set-specialized BP-RNN decoders. MBBP-X [2] combines soft output across parity-check bases, but feeds it back into the constituent decoders. In contrast, we fuse clipped extrinsic information across ensemble members at a common shallow iteration and apply a re-encoding to the resulting reliability vector. The proposed method therefore synthesizes a candidate from information distributed across several decoding trajectories, rather than ap-plying post-processing separately to member-wise or iteration-wise soft outputs. This distinction is particularly relevant for short, dense graphs, where individual BP posteriors frequently contain erroneous bits with saturated reliability. Shallow cross-member fusion suppresses such member-specific errors while preserving the steep reliability ordering required by low-order OSD. The main contributions of this paper are as follows:  
+
+> •
+
+We propose the SECS, which combines the member ex-trinsics of a BP ensemble after only a few iterations and passes the result to a re-encoding stage. The combining weight is optimized for each studied ensemble.  
+
+> •
+
+We analyze the soft-combining gain via ordered-reliability error profiles and derive a closed-form frame error rate (FER) estimate from them.  
+
+> •
+
+We compare the proposed SECS to selection-based en-semble decoding on three codes and identify the regimes in which combining is beneficial.  
+
+> •
+
+We describe a search procedure for cyclic codes with many low-weight dual codewords. Plain BP fails to decode the resulting (105 , 53) code, while OSD with SECS input operates close to ML.  
+
+> •
+
+We present an alternative post-processing decoder. It can be interpreted as an OSD whose re-encoding stage is computed by BP hardware, enabling OSD-like perfor-mance where a full OSD is not affordable. Fig. 2 shows the resulting SECS-based architecture. M par-allel BP decoders run for a few iterations only. Instead of continuing as separate decoders, the SECS (blue border) aggregates their extrinsics. The combined LLRs are then passed to a re-encoding stage (in blue). Optionally, a post-processing step (in orange) prepares the combined LLRs as input for another round of classical ensemble decoding (in gray). Alternatively, the BP ensemble itself can be used to mimic the re-encoding step of an OSD. II. P RELIMINARIES AND SYSTEM MODEL 
+
+We consider a binary linear code C of length n and dimension k, represented by a parity-check matrix (PCM) H
+
+fulfilling cH⊤ = 0 with codeword c ∈ { 0, 1}n. Codewords are modulated using binary phase-shift keying (BPSK) as 
+
+x = 1 − 2c and transmitted over the additive white Gaussian noise (AWGN) channel, i.e., y = x+n with n ∼ N (0, σ 2I).The channel LLR vector is 
+
+Lch = 2
+
+σ2 y. (1) An ensemble decoder consists of M constituent BP de-coders for C. In this work, diversity among the members stems from two sources. In multiple-bases ensembles [2], the members use structurally different sparse PCMs of the same code. For the BCH codes, we employ structured sparse parity-check matrix (ssPCM) constructions [9], [10], in which each dense dual row is decomposed into several low-weight checks, coupled through punctured auxiliary variable nodes (AVNs). For codes with redundant duals, we draw independent rank-preserving row subsets of an overcomplete PCM. In automor-phism ensembles [3], a single matrix is used under coordinate permutations from the automorphism group of the code. The finite-geometry codes considered below combine both views: their duals contain the incidence vectors of all lines of the underlying geometry [11]. These form an overcomplete PCM that can be sparsified and permuted [12]. Each ensemble member m runs flooding BP and stops after 
+
+Imax iterations. Its extrinsic message vector on the n code bits is em. For ssPCM members, the SECS combines the posteriors of the n code-bit variable nodes only; the punctured AVNs (initialized to zero, without channel LLRs) are never combined, and em is the code-bit posterior minus Lch . Single-iteration members employ one round of the normalized min– sum algorithm (NMSA), whereas members with multiple iterations use sum–product algorithm (SPA) updates [13], [14]. Both are attenuated by a factor α. NMSA uses α = 0 .75 ,SPA uses α = 0 .5. Single-iteration members use NMSA. Its suboptimal approximation cannot propagate within one iteration. Multi-iteration members, in contrast, use the exact SPA update, damped for stability on the loopy, dense graphs. As a reference post-processing, we use OSD-1 [4]: the input positions are sorted by reliability, the MRB is obtained by GE, and the decision is the highest-correlation candidate among the re-encoded words of order at most one, i.e., all single-bit flips on the MRB. The distinction between the k most reliable positions and the true MRB matters: GE needs to replace linearly dependent positions by less reliable ones. III. T HE SOFT ENSEMBLE -C OMBINING STAGE 
+
+Instead of selecting one output after all members have converged, the SECS combines the ensemble into a single soft word. The members stop after Imax ∈ { 1, 2} iterations and their clipped extrinsics are accumulated onto the channel LLR Lch , yielding the combined LLR 
+
+Lcomb = Lch + w
+
+> M
+
+X
+
+> m=1
+
+clip  em, ±δ, (2) where clip( ·) limits its input to ±δ and we set δ = 8.This hyperparameter appears very robust: varying δ over 
+
+{4, 8, 16 , 64 } changes the measured OSD-1 FER at the op-erating point of Fig. 3 by less than 2 % .We state the combiner weight in the form w · M . Then, 
+
+wM =1 corresponds to the mean of the extrinsics, and 
+
+wM =M to their sum, which is optimal for uncorrelated observations. In all studied ensembles, the optimal wM 
+
+also compensates the attenuation α of the tapped extrinsics. Members with deep AVN trees, read at an early tap, require 
+
+wM ≈M . Shallow structures require wM ≈2–4, and full-strength single-iteration members wM =1 . If the amplification is too strong, the residual member errors are pushed back into the reliable positions, and the ordering degrades. Fig. 3 shows the sweep for the BCH (63 , 30) ensemble. The hard-decision optimum lies at moderate weights, whereas the OSD input prefers smaller ones. This reflects a tradeoff: the hard decision must rescue all bits, which sometimes harms the MRB, whereas the OSD input only requires a good MRB. To quantify what the combining achieves, we sort the positions of a soft word by their reliability |Li| and measure                                   
+
+> 0.5124816 10 −4
+> 10 −3
+> 10 −2
+> 10 −1
+> 10 0
+> soft-combining weight wM
+> FER  hard dec. OSD-1
+> 3 dB 3.5 dB 4 dB
+> Fig. 3. Soft-combining weight sweep for the BCH (63 ,30) ssPCM ensemble. After Imax = 2 iterations of an M= 16 ensemble, the extrinsics are combined according to Eq. (2) and decoded by either hard decision or OSD-1.
+> 020 40 60 10 −7
+> 10 −4
+> 10 −1
+> k=45
+> bit reliability rank r
+> BER at rank  r
+> 2.5dB
+> 020 40 60
+> k=45
+> bit reliability rank r
+> 3.5dB
+> Lch BP-1( Lch )BP-10( Lch )Lcomb
+> Fig. 4. Ordered-reliability BER on PG(2,8) (73 ,45) : the combined one-iteration ensemble produces the lowest BER in the MRB. The ten-iteration full-PCM decoder distributes BER evenly and shows an overconfidence plateau at its most reliable positions. For Lcomb :M=8 ,Imax =1 .
+
+the error rate at each rank r. Averaged over many frames, this yields the ordered-reliability profile {br } of the decoder input. Fig. 1 shows these profiles for a BCH (63 , 30) ssPCM ensemble. The combined LLR holds the error rate approx. below 10 −3 across the entire MRB region, one to two orders of magnitude below the raw channel. Moreover, it preserves a steep reliability ordering of the channel observation and concentrates the residual errors in the least reliable bits. In contrast, BP primarily minimizes the average bit-error proba-bility and thereby produces a flatter ordered-reliability profile after some iterations. For a re-encoding decoder however, errors do not need to be corrected directly as long as they are reliably sorted out of the information set. Fig. 4 shows the corresponding profiles for PG(2 , 8) .In the 45 most reliable ranks, the combination of eight one-iteration members runs below the posterior of a ten-iteration decoder on the full overcomplete matrix. Since this code uses no ssPCM and, thus, no AVNs, a single iteration suffices to generate useful soft information. The deep decoder is better only in the tail, which the OSD post-processing discards. Moreover, the deep profile is non-monotonic at the top ranks: its most confident bits are wrong more often than its rank-20 bits. This is caused by occasional convergence to 10 −4 10 −2 10 0              
+
+> 10 −4
+> 10 −2
+> 10 0
+> estimate = MC
+> Monte-Carlo FER estimated FER top-k/ OSD-0
+> 10 −410 −210 0
+> Monte-Carlo FER all-n
+> Code BCH (63 ,30) PG(2 ,8)
+> SNR 1.5 dB 4.5 dB
+> input channel BP-1/2 BP-10 SECS
+> Fig. 5. Estimated versus simulated FER obtained from sorted-BER profiles. Colors distinguish the codes, color saturation represents the SNR, and markers identify the decoder input. The dashed diagonal indicates exact agreement, while the gray region marks agreement within a factor of two.
+
+a wrong codeword at saturated confidence. The one-iteration combination is free of this failure mode, since no member has converged. Iterated BP redistributes reliability from strong positions to weak ones and thereby lowers the overall BER. For a stand-alone decoder, this is the right objective. With a re-encoding stage attached, however, only the ordering matters, and the redistribution is counterproductive. The profiles also admit a simple FER estimate. For a set 
+
+R of ranks, ΣR = P 
+
+> r∈R
+
+br is the expected number of errors among those ranks. Treating error events as independent across positions yields 
+
+ˆPR = 1 − e−ΣR ≈ Pr {at least one error in R} , (3) equivalent to modeling the error count in R as Poisson with mean ΣR. For R = {1, . . . , k }, i.e., the k most reliable ranks in Figs. 1 and 4, (3) estimates the input-failure rate of re-encoding stages. At the same time, it approximates the OSD-0 error rate, since OSD-0 fails exactly when the information set contains an error. For R = {1, . . . , n }, (3) estimates the hard-decision FER. For the channel, the approximation is exact, as the noise – and therefore the error positions – are independent. For correlated decoder outputs, the approximation is a less tight upper bound. Fig. 5 compares the estimates against Monte-Carlo simula-tion for profiles like the ones shown in Figs. 1 and 4. Channel and SECS inputs are approximated with small errors. Deep-BP posteriors, in contrast, violate the independence assumption by up to an order of magnitude – their failures arrive as clusters of confident errors, the same mechanism as the overconfidence plateau in Fig. 4 – which lead to worse approximation. IV. N UMERICAL RESULTS 
+
+This section evaluates the proposed SECS on the three codes introduced above. All results use flooding BP, and all schemes share the same noise realizations at the same SNR                                   
+
+> TABLE I DECODING BUDGETS OF THE SCHEMES IN FIG . 6.
+> scheme BP dec. BP its post-processing BP-10 110 hard decision BP-10 + OSD-1 110 sort, GE, k+1 re-enc. MBBP-MBP-10 M10 Msynd., ML-in-list SECS + OSD-1 M1–2 sort, GE, k+1 re-enc. channel OSD-1 / -3 00sort, GE, k+1 /O(k3)re-enc. rebuild (Sec. IV-D) M22 sort, 2Msynd., XOR, ML-in-list
+
+point within one figure. Table I lists the per-scheme decoding budgets. Sec. IV-D removes the GE from the post-processing. 
+
+A. BCH (63 , 30) 
+
+We first consider the (63 , 30) BCH code [17], [18], decoded with an ssPCM ensemble (see Sec. II) [10]. Fig. 6a compares the ssPCM ensemble ( M =16 , tapped after Imax =2 iterations) against single-decoder and hard-out ensemble baselines (with ML selection). At this low iteration count, the hard decision on the SECS output already outperforms the ensemble with ML selection. The larger gain, however, comes from the post-processing on the ordered LLRs: OSD-1 on Lcomb gains roughly two decades over OSD-1 on a single BP posterior and approaches the ML performance of the BCH code. At this rate, OSD performance is limited by the quality of its ordering. The combined ordering is substantially better than both the posterior of a converged single BP decoder and the ML-selected output of a converged ensemble. 
+
+B. PG(2,8) 
+
+The (73 , 45) projective-geometry code admits an overcom-plete PCM of 73 lines. A rank-preserving (non-overcomplete) part of it, permuted under the automorphism group, yields eight AED ensemble members. Fig. 6b shows the resulting FER performance. We combine the eight members after a sin-gle min-sum iteration, followed by OSD-1. This outperforms the same members run to ten iterations with ML selection, at one tenth of the iteration latency. Up to 4 dB, it also tracks the channel OSD-3 reference closely. The strongest single-decoder baseline is BP-10 on the full overcomplete matrix, which, even with OSD-1 post-processing, cannot reach the performance of the SECS. 
+
+C. A Search-Designed (105 , 53) Code 
+
+The preceding results raise the question whether codes can be constructed specifically for this decoder. Its main requirement is a rich supply of low-weight parity checks. We searched cyclic codes of length 63 –105 (rate 0.40 –0.75 )for abundant low-weight dual orbits : in a cyclic code, every dual codeword of weight w contributes its full n-shift orbit of weight-w checks. Some codes offer good dual orbits, but poor distance properties. If xd −1 divides the generator polynomial, light dual orbits are plentiful, but the code inherits low-weight codewords. Hence, we verify the minimum distance of every candidate by information-set decoding. The strongest survivor is a (105 , 53) code with dmin =10 ,below the best known 18 for these parameters. This is a 2 4 610 −5           
+
+> 10 −4
+> 10 −3
+> 10 −2
+> 10 −1
+> Eb/N 0in dB FER (a) BCH(63,30) ssPCM ensemble, M=16 ,Imax =2 ,
+> wM =1 .5.
+> 246
+> Eb/N 0in dB
+
+# 2 4 6
+
+# Eb/N 0 in dB (b) PG(2,8) (73 , 45) , AED ensemble, M =8 ,                                   
+
+> Imax =1 ,wM =1 .
+> 246
+> Eb/N 0in dB (c) Designed (105 ,53) cyclic code, MBBP en-semble, M=8 ,Imax =2 ,wM =1 .
+> BP-10 ensemble-MBP-10 SECS (M, I max )
+> BP-10 + OSD-1 ensemble-MBP-Imax
+> SECS (M, I max )
+> + OSD-1 [proposed] channel: OSD-1 BCH: ML [15] PG: OSD-3 ≈ML BKLC [16]: OSD-1 OSD-3 ensemble-MBP-10 SECS (8 ,5) + OSD-1
+> Fig. 6. FER over Eb/N 0under AWGN for the three studied ensembles. In all cases, the soft-combined LLR followed by OSD-1 ( ) outperforms selection-based decoding at a fraction of the iteration latency. For the designed code, all ensembles use independent subsets of the weight-8circulant pool, completed to full rank by higher-weight checks (see Sec. IV-C for details on construction).
+
+· · ·                 
+
+> n = 105
+> orbit 1:105 cyclic shifts, w=8 , rank =45
+> H⊤
+> c
+> (105 ×7)
+> H⊤
+> 8
+> (105 ×45 )extra orbits: search space for more ensemble members
+> =H⊤=H⊤
+> cH⊤
+> 8
+> 
+> Fig. 7. Rank-colored transposed overcomplete parity-check pool of the search-designed (105 ,53) cyclic code. Black columns form a greedy inde-pendent basis; blue columns are redundant cyclic shifts. The seven completion columns of Hamming weight 15 (red) extend the pool to full rank n−k=52 .
+
+consequence of the search objective: we optimize the supply of low-weight dual codewords, i.e., SECS-decodability under the latency constraint, rather than ML potential. The two properties compete. The ten weight-8 dual orbits of the code form a 1050 -row circulant pool of rank 45 . Seven dual codewords of Hamming weight 15 complete it to the full rank n−k=52 (Fig. 7). Each member runs a single iteration of BP, and the outputs are combined with the mean rule ( wM =1 ). The generator polynomial has roots αj for all j in the 2-cyclotomic cosets of {0, 1, 3, 5, 11 , 25 , 45 } modulo 105 , where α is a primitive 
+
+105 th root of unity. Fig. 6c quantifies what the search sacrifices. As a reference, we use the (105 , 53) best known linear code (BKLC) [16] with 
+
+dmin =18 . Under equal OSD-3 decoding, the BKLC is 0.7–
+
+0.9 dB better than our designed code at FER below 10 −3. This potential, however, is not accessible to iterative decoding. An MBBP-8 ensemble of ssPCM graphs, built from the weight-
+
+19 dual codewords of the BKLC, remains above 10 −2 until past 5 dB – although the same construction succeeds on the BCH codes. Soft combining does not rescue it either. The deep ssPCM members deliver no extrinsic information within the first two iterations. Even at five iterations, the SECS improves over channel OSD-1 only marginally. The designed code trades this margin for a dual spectrum that a single-iteration ensemble can exploit. Hence, SECS operates closer to ML on the designed code and outperforms the BKLC in this complexity-limited regime. 
+
+D. OSD from BP Hardware 
+
+The pipeline of Fig. 2 can also be read as an OSD whose expensive stages are realized by BP hardware. A conventional OSD-1 implementation requires reliability sorting, a per-frame GE to determine the MRB, and k + 1 re-encodings. The data-dependent GE can impose a complexity and latency floor. This has motivated adaptive methods that reduce or omit it whenever possible [19]. For BCH codes, Yang et al. [20] avoid online GE by exploiting the Reed–Solomon parent-code structure to generate candidates from systematic generator matrices. In contrast, our GE-free variant uses the available BP decoder for candidate completion. It is not limited to algebraic constructions, but does benefit from the cyclicity of the code. The most effective follow-up stage to the SECS that we found is a rebuild of OSD-1 itself from the available BP decoder, needing neither the GE nor the re-encodings. The 
+
+k most reliable positions of Lcomb are saturated and the eight weakest positions are erased. The M =16 SECS BP decoders complete this input in two ten-iteration rounds. At 1 dec. (12 its)         
+
+> 4dec. (12 its)
+> 16 dec. (12 its) + hypothesis (22 its) + patterns (22 its, XOR)
+> 5×10 −4
+> 10 −3
+> 2×10 −3
+> 5×10 −3
+> FER
+> OSD-0 on Lcomb
+> OSD-1 on Lcomb
+> OSD-1 rebuild
+
+Fig. 8. Step-by-step FER of the GE-free OSD-1 rebuild on BCH(63,30) at 3.5 dB ( M =16 ssPCM BP-2 SECS front end, wM =1 .5. The first three stages scale the completion-ensemble size at constant latency; the hypothesis round and the pattern moves close the remaining gap to OSD-1. 
+
+first unchanged on all sixteen graphs, and then once with a weight-one sign hypothesis on each of the sixteen least reliable saturated positions. A final pattern-move stage adds, where it improves the metric, a precomputed low-weight codeword: 24 stored orbit representatives expand under the cyclic and Frobenius automorphisms to all 8055 codewords of weight ≤ 14 ; the metric change of a move is an exact sum over its support, and the stage triggers on fewer than 0.1 % 
+
+of frames. Fig. 8 shows the resulting FER step by step on BCH(63,30). The performance matches OSD-1 on the same input at a total latency of 22 BP iterations. V. D ISCUSSION AND CONCLUSION 
+
+We introduced the SECS, a combining stage for BP ensem-ble decoders that fuses the clipped extrinsics of all members after one or two iterations and passes the combined LLR to a post-processing stage. The stage exploits a simple property of unconverged BP: shallow, diverse members correct little, but sort exceptionally well. On all three studied codes, the SECS with OSD-1 operates within small factors of the ML reference and outperforms ten-iteration selection ensembles at one fifth to one tenth of the iteration latency. The gain requires genuine graph diversity; its source – automorphisms, multiple bases, or ssPCM constructions – is secondary. Optimized low-density parity-check (LDPC) codes offer little such diversity: their only light dual codewords are the designed rows, so same-graph ensembles built by per-turbation share most failure events and gain correspondingly little from combining. The ordered-reliability profile and the estimator (3) identify the favorable regime – sloped per-bit BER and no BP overconfidence plateau. The designed (105 , 53) code shows that the diversity re-quirement is constructive. Trading minimum distance 18 for 
+
+10 buys ten weight-8 dual orbits, and the resulting code decodes within 2–2.5× of its ML performance at a single iteration, while the best known code of equal parameters leaves its superior distance locked behind a complex decoding challenge. Additionally, with help of an OSD-like post-processing whose ordering and re-encoding are supplied by BP hardware, the complete pipeline requires no GE. Future work includes automorphism-based member con-struction for designed codes, design searches at longer block lengths, and a hardware elaboration of the single-iteration combining datapath. REFERENCES [1] 3GPP, “Study on scenarios and requirements for next generation access technologies,” 3rd Generation Partnership Project (3GPP), Technical Report TR 38.913, 2017. [2] T. Hehn, J. B. Huber, O. Milenkovic, and S. Laendner, “Multiple-bases belief-propagation decoding of high-density cyclic codes,” IEEE Transactions on Communications , vol. 58, no. 1, pp. 1–8, 2010. [3] M. Geiselhart, M. Ebada, A. Elkelesh, J. Clausius, and S. ten Brink, “Automorphism ensemble decoding of quasi-cyclic ldpc codes by break-ing graph symmetries,” IEEE Communications Letters , vol. 26, no. 8, pp. 1705–1709, 2022. [4] M. P. Fossorier and S. Lin, “Soft-decision decoding of linear block codes based on ordered statistics,” IEEE Transactions on Information Theory , vol. 41, no. 5, pp. 1379–1396, 1995. [5] M. P. Fossorier, “Iterative reliability-based decoding of low-density par-ity check codes,” IEEE Journal on Selected Areas in Communications ,vol. 19, no. 5, pp. 908–917, 2001. [6] M. Jiang, C. Zhao, E. Xu, and L. Zhang, “Reliability-based iterative decoding of ldpc codes using likelihood accumulation,” IEEE Commu-nications Letters , vol. 11, no. 8, pp. 677–679, 2007. [7] J. Rosseel, V. Mannoni, V. Savin, and I. Fijalkow, “Sets of complemen-tary llrs to improve osd post-processing of bp decoding,” in 2023 12th International Symposium on Topics in Coding (ISTC) , 2023, pp. 1–5. [8] J. Rosseel, V. Mannoni, I. Fijalkow, and V. Savin, “Decoding short ldpc codes via bp-rnn diversity and reliability-based post-processing,” IEEE Transactions on Communications , vol. 70, no. 12, pp. 7830–7842, 2022. [9] Y. Shen, Z. Li, Y. Ren, E. Boutillon, A. Balatsoukas-Stimming, C. Zhang, X. You, and A. Burg, “Toward Universal Belief Propagation Decoding for Short Binary Block Codes,” IEEE Journal on Selected Areas in Communications , vol. 43, 2025. [10] Y. Shen, Z. Li, E. Boutillon, W. Song, Y. Ren, C. Zhang, X. You, and A. Burg, “Belief propagation decoding for short codes on structured sparse parity-check matrices,” in 2025 IEEE International Symposium on Information Theory (ISIT) , 2025, pp. 1–6. [11] Y. Kou, S. Lin, and M. P. C. Fossorier, “Low-density parity-check codes based on finite geometries: a rediscovery and new results,” IEEE Transactions on Information Theory , vol. 47, no. 7, pp. 2711–2736, 2001. [12] Y. Shen and A. Burg, “Lifted Gabidulin Construction for LDPC Representations of Finite Geometry Codes,” arXiv:2606.11454, 2026. [13] R. G. Gallager, Low-Density Parity-Check Codes . Cambridge, MA, USA: MIT Press, 1963. [14] J. Chen and M. Fossorier, “Density evolution for two improved BP-Based decoding algorithms of LDPC codes,” IEEE Communications Letters , vol. 6, no. 5, pp. 208–210, 2002. [15] M. Helmling, S. Scholl, F. Gensheimer, T. Dietz, K. Kraft, S. Ruzika, and N. Wehn, “Database of Channel Codes and ML Simulation Results,” www.uni-kl.de/channel-codes, 2019. [16] M. Grassl, “Bounds on the minimum distance of linear codes and quantum codes,” http://www.codetables.de, accessed: July 17, 2026. [17] A. Hocquenghem, “Codes correcteurs d’erreurs,” Chiffres , vol. 2, pp. 147–156, 1959. [18] R. C. Bose and D. K. Ray-Chaudhuri, “On a class of error correcting binary group codes,” Information and Control , vol. 3, no. 1, pp. 68–79, 1960. [19] C. Yue, M. Shirvanimoghaddam, B. Vucetic, and Y. Li, “Ordered-statistics decoding with adaptive gaussian elimination reduction for short codes,” in Proc. IEEE Global Communications Conference Work-shops (GLOBECOM Workshops) , 2022, pp. 492–497. [20] L. Yang, J. Zhao, X. Li, L. Chen, H. Zhang, and J. Tong, “Efficient ordered statistics decoding of bch codes without gaussian elimination,” 
+
+IEEE Transactions on Information Theory , vol. 71, no. 11, pp. 8294– 8311, 2025.

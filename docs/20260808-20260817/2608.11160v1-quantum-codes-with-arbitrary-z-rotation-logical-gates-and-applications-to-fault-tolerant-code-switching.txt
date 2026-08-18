@@ -1,0 +1,2231 @@
+Title: Quantum Codes with Arbitrary Z-Rotation logical Gates and Applications to Fault-Tolerant Code Switching
+
+URL Source: https://arxiv.org/pdf/2608.11160v1
+
+Published Time: Wed, 12 Aug 2026 01:31:12 GMT
+
+Number of Pages: 31
+
+Markdown Content:
+# Quantum Codes with Arbitrary Z-Rotation logical Gates and Applications to Fault-Tolerant Code Switching 
+
+Reza Dastbasteh, 1, ∗ Ruben M. Otxoa, 2 Pedro M. Crespo, 1 and Josu Etxezarreta Martinez 1, †
+
+> 1
+
+Department of Basic Sciences, Tecnun - University of Navarra, San Sebastian, Spain. 
+
+> 2
+
+Hitachi Cambridge Laboratory, J. J. Thomson Avenue, Cambridge, United Kingdom. 
+
+A technique for realizing a universal set of fault-tolerant quantum operations is the code switching method, which leverages two quantum codes with complementary sets of transversal gates. To date, the application of this technique has been largely limited to families of color codes supporting a logical T gate. No analogous code switching protocols exist for many other prominent families, such as rotated surface codes, or for finer Z-rotation gates. In this work, we first utilize the doubling technique as a unified framework to construct a class of quantum color codes encoding a single logical qubit with an arbitrarily large minimum distance, enabling the transversal realization of arbitrary small logical Z-rotation gates. We investigate the structural properties of this code family, demonstrating that they improve upon the parameters of state-of-the-art triorthogonal codes, achieve lower qubit overhead compared to certain known color codes, and admit single-shot decoding of Z-syndromes via meta-checks. Furthermore, we show that this framework extends beyond color codes; specifically, it enables the generation of r-orthogonal quantum codes, r ≥ 2,that inherit the local geometry of rotated surface codes. We then provide an overhead optimization protocol alongside several candidate codes tailored for realizing logical Z-rotation gates within rotated surface codes. Finally, we extend the fault-tolerant code switching protocol based on transversal CNOT gates to incorporate fault-tolerant realization of Z-rotation gates at any level of the Clifford hierarchy for geometries compatible with rotated surface codes. We present the first demonstration of fault-tolerant magic state preparation by means of code switching within a distance-three rotated surface code using a total footprint of only 45 physical qubits, and evaluate its performance through a simulation. 
+
+Keywords: quantum codes, code switching, color codes, surface codes, transversal gates, Clifford hierarchy, self-orthogonal codes, triorthogonal codes, magic state. 
+
+I. INTRODUCTION 
+
+Quantum error correcting codes are the key in-gredient for enabling large scale quantum com-putation and exploiting the potential advantages of quantum computers by protecting quantum in-formation via lowering logical error rates. This is done by encoding the code space into a larger Hilbert space as a trade off for achieving error de-tection and correction [1, 2]. Besides the mentioned quantum error suppres-sion feature, logical operators must be enabled over quantum codes as otherwise they can only be used as quantum memories. Such quantum opera-tions must be implemented in a fault-tolerant (FT) way that is consistent with the error protection scheme of the underlying code. Among different FT protocols, transversal gates are of main inter-est as they are inherently FT, can be parallelized, and are consistent with the Steane or Knill’s type quantum error correction algorithms [3–5]. How-ever, the Eastin-Knill no-go theorem limits the re-alization of a universal set of gates in a single er-ror correcting code transversally by stating that no quantum code can have a universal set of transver-sal gates [6]. A generalization of the Eastin-Knill   
+
+> ∗rdastbasteh@unav.es
+> †jetxezarreta@unav.es
+
+no-go theorem for other types of FT gates, such as fold-transversal and automorphism-based gates, is discussed in [7]. One way to overcome this limitation is by stick-ing to the codes that realize logical Clifford gates transversally, and attaining a non-Clifford gate via an alternative FT approach. This is mainly be-cause logical Clifford operations have a relatively low cost as they can be implemented through many stabilizer codes (surface codes, color codes, LDPC codes, etc) either transversally or fold transver-sally, by simple code deformation, or by very cheap constant-depth circuits [8–12]. On the other hand, logical non-Clifford gates with transversal imple-mentations only exist in quantum codes that have a rare symmetry. Moreover, such gates usually have a relatively high cost that may exceed the one of Clifford operators by orders of magnitude. The most common technique for realizing non-Clifford gates is based on magic state distillation protocols, code switching, and magic state cultivation. In magic state distillation [13–19], noisy magic states are injected into a quantum code and pu-rified through distillation protocols. These proto-cols consume multiple auxiliary noisy magic states to produce a smaller number of magic states with significantly lower infidelity. One main challenge in magic state distillation is its considerable space-time overhead, and the fact that injection of a magic state is not fault tolerant. Thus, reducing the error rate of such a non-Clifford resource, to arXiv:2608.11160v1 [quant-ph] 11 Aug 2026 2a level comparable to the error rate of other Clif-ford logical operations, can lead to a considerable amount of extra complexity and overhead. Magic state cultivation (MSC) [20–24] has been proposed as an alternative approach in which the fidelity of a magic state is progressively improved through a sequence of fault-tolerant Clifford oper-ations and measurements. Rather than relying on large block distillation protocols, MSC gradually refines an initially noisy resource state while main-taining compatibility with the underlying quan-tum code. Although MSC drastically reduces the space-time overhead of factory-style distillation, its resource costs remain significant, and it intro-duces new architectural challenges like dynamic code growth, patch grafting, and FT decoding. Another alternative technique is the code switching, also known as dimension jump (or its special case namely gauge-fixing) [5, 25–32], in which two different quantum error-correcting codes are employed to realize a FT universal set of gates. Typically, one of the codes efficiently supports the implementation of a generator set for Clifford gates, while the other admits the transver-sal or other FT implementation of a non-Clifford gate. In this protocol, the logical information is fault-tolerantly transferred between the two codes in order to apply the non-Clifford operation. Con-sequently, non-Clifford gates can be realized with-out the need to prepare high-fidelity magic states, potentially reducing the overhead associated with magic state distillation. Almost all currently-known code switching pro-tocols are based on the color code family [33, 34], where the logical state is transferred between 2D and 3D color codes [5, 25–28, 35]. The former codes support transversal implementations of Clif-ford gates, while the latter enable transversal logi-cal T gates. Recently a similar protocol for the realization of a logical CCZ through a one-way transversal CNOT gate between 3D and 2D lifted product and hypergraph product codes has ex-tended the idea behind the family of color codes [32, 36, 37]. The primary focus of this work is also on code switching protocols. Specifically, it aims to systematically generate suitable codes and ex-pand the families of quantum codes available for this purpose. In general, the resource estimation comparison between the three mentioned methods in a fair setting seems impossible as they are distinct in the ingredient codes, noise model, decoder and post-selection, and other underlying assumptions. However, almost all the studies agree on the very low space-time overhead of code switching proto-cols [5, 28, 36, 38]. More particularly, it is reported in [38] that among the three proposals, and con-sidering the available data in the literature: • magic state distillation stands out by reach-ing the lowest overall logical output error regime, • code switching protocols achieve the lowest single-attempt cost and the smallest qubit footprint, and • MSC bridges these approaches by contribut-ing within intermediate error ranges and space-time overhead. Magic state distillation and code switching both rely on the existence of quantum codes with sup-porting a logical T gate that can be implemented transversally or in other FT manners. The char-acterization of such codes has been discussed in [39, Theorem 1]. In particular, the most gen-eral family that enables transversal logical T gate through the transversal physical T gate is the so-called triorthogonal code family [17]. Motivated by this and the triorthogonal characterization of quantum codes given in [17], new families and ex-amples of quantum triorthogonal codes have been designed [39–45]. Among such constructions, the quantum doubling construction [40, 41] paved the path for a recursive construction of triorthogo-nal codes with the aid of self-dual binary lin-ear codes. Also, existence of asymptotically good quantum (LDPC) codes with non vanishing rate and non vanishing minimum distance (or non van-ishing rate and growing minimum distance) sup-porting a non-Clifford logical gate have been de-veloped very recently [46–50]. Furthermore, a bi-directional switching protocol via quantum state teleportation circuits at the logical level for the triorthogonal codes constructed from the doubling construction is discussed in [5]. Recently, experi-mental implementations of the code switching pro-tocol have been demonstrated to prepare a high-fidelity encoded logical magic state. [51, 52]. Currently, the most commonly considered gate set for realizing universal quantum computation on quantum codes is Clifford+T. While Clif-ford+T is a universal gate set, the practical ef-ficiency of implementing complex operations de-pends heavily on the FT decomposition of such operations into Clifford+T, and also the number of qubits involved. For example, multi-controlled Toffoli gates cannot be implemented directly us-ing only the native Clifford+T operations on the same set of qubits. Instead, a FT decomposition requires additional ancilla qubits to break these gates into sequences of Clifford and T operations, which increases both the number of logical qubits and the circuit depth, and consequently reduces the achievable fidelity of the overall FT implemen-tation. An alternative proposal is to complement the T
+
+gates with RZ (θ), namely smaller rotations around the Z-axis of the Bloch sphere by an angle θ,forming a Clifford+ RZ (θ) gate set. This exten-sion allows more efficient decompositions of gen-eral gates, such as multi-controlled Toffoli gates. 3In this framework, the decomposition requires fewer elementary gates, a smaller circuit (and non-Clifford) depth and no additional ancilla qubits [53, 54]. More interestingly, recently, it has been suggested that small RZ (θ) can be substantially cheaper than previously assumed indicating that many FT quantum algorithms, those with large numbers of small Z-rotations, may require signifi-cantly fewer non-Clifford resources than standard estimates predict [55]. This promotes the need for quantum codes with small angle Z-rotation logical gates, and novel protocols for preparation of such non-Clifford resources with high fidelity. This is another main motivation of the code families and examples presented in this paper. In particular, for each desired rotation angle in the form θ = π
+
+> 2r
+
+and minimum distance d, respectively, we give a quantum code with a logical RZ (θ) gate and mini-mum distance d that can be implemented transver-sally, and be used for preparation of high fidelity magic states.  
+
+> A. Our main contributions
+
+In spite of the previously mentioned advances in the code switching protocol via transversal CNOT gate for realizing logical Z-rotation gates [5, 28], its applications are remained limited to (a) the color code family and (b) solely for realizing the 
+
+T gate. Motivated by these limitations, we re-veal new applications of the doubling method in constructing divisible and orthogonal codes which could serve as ingredients for the code switching protocol, and also for realizing arbitrary fine logi-cal Z-rotation gates transversally. We highlight a summary of our main results below. • We construct quantum codes that admit transversal logical Z-rotation gates at ar-bitrary levels of the Clifford hierarchy by employing a modification of the doubling construction. In particular, we recursively construct a family of 2r -divisible quantum (color) codes with parameters 
+
+[[ Sr (k), 1, 2k − 1]] 
+
+that realizes logical RZ ( π 
+
+> 2r−1
+
+) through the transversal action of them to the data qubits, where 
+
+Sr (k) = 
+
+> r
+
+X
+
+> i=0
+
+2i
+
+i + k − 2
+
+i
+
+
+
+.
+
+As an application, we present parameters of small instances of codes inside such fam-ily and show examples that improve the pa-rameters of previously-known triorthogonal codes in the literature. We also show that this family requires less qubit overhead com-pared to that of some other well-known code families (see Tables I and II). Finally, we show that each quantum code constructed from the doubling construction satisfies the possession of Z-type meta-checks making the above quantum families viable for single-shot decoding of Z-syndromes. • We show that our approach is not restricted to the family of color codes. In particular, we adjust our method to construct a family of quantum codes with parameters 
+
+[[ Sr (k), 1, 2k − 1]] 
+
+that are r-orthogonal and preserve the local geometry of rotated surface codes, where 
+
+Sr (k) = 2 r+2 
+
+k + r − 1
+
+r + 1 
+
+
+
++
+
+> r−1
+
+X
+
+> i=0
+
+2i
+
+k + i − 2
+
+i
+
+
+
+.
+
+As an application, we construct quantum self-orthogonal and triorthogonal codes with the local geometry of rotated surface codes (see Table III) and provide several specific examples. • We propose methods for qubit overhead re-duction of the above quantum family. This is based on carefully concatenating rotated surface codes and punctured rotated sur-face codes together. This leads to a more optimized constructions of quantum self-orthogonal and triorthogonal codes with lo-cal geometry of rotated surface codes. This includes triorthogonal codes with parame-ters [[31 , 1, 3]] and [[113 , 1, 5]] .• We extend the application of the code-switching protocol to quantum codes that have a local geometry of another desired code. In particular, one can obtain code-switching protocols for FT implementation of S, T , or any other Z-rotation gate in color codes, rotated surface codes, or extend the idea to other quantum codes of interest. • We demonstrate that the proposed code-switching protocol can be realized fault toler-antly for distance 3 with a remarkably small hardware footprint, requiring only 45 physi-cal qubits in a complete circuit-level simula-tion. In particular, we successfully prepare the S |+⟩ state in a d = 3 rotated surface code as a proxy of the T |+⟩ magic state. 
+
+Application. Immediate applications of the above results are in • presenting many quantum codes with arbi-trary minimum distances, local geometries, and Z-rotation gates for magic state distil-lation, cultivation, and code switching. 4• FT realization of Clifford+ RZ (θ) gate sets that have the potential of significantly re-ducing the cost of non-Clifford resources for universal quantum computation. This paper is organized as follows. A brief overview of quantum codes and the doubling con-struction of triorthogonal codes is provided in Sec-tion II. In Section III, we extend the application of the doubling construction to build quantum codes with transversal logical RZ (θ) gates for an arbi-trarily small θ. We give an explicit recursive con-struction for such codes and calculate their pa-rameters. Section IV broadens the applicability of this approach to the family of rotated surface codes and provides an overhead optimization method. In Section V, we show that the code switching pro-tocol can be extended to quantum codes with an arbitrary small phase rotation gate. Details on our circuit-level noise simulation is also provided in this section.   
+
+> II. PRELIMINARIES A. Quantum Stabilizer Codes
+
+The state space of a single qubit is the two-dimensional Hilbert space C2 with computational basis {| 0⟩ , |1⟩} . The state space of n qubits is given by the tensor product space (C2)⊗n. Errors acting on qubits can be decomposed as a linear combination of the Pauli operators 
+
+I =
+
+1 0 0 1 
+
+
+
+, X =
+
+0 11 0
+
+
+
+, Y =
+
+0 −ii 0
+
+
+
+,Z =
+
+1 00 −1
+
+
+
+.
+
+The n-qubit Pauli group Pn consists of all n-fold tensor products of these operators, together with the phases {± 1, ±i}.A quantum code Q encoding k logical qubits into 
+
+n data qubits is a 2k-dimensional subspace 
+
+Q ⊆ (C2)⊗n.
+
+This code protects quantum information from er-rors affecting the physical qubits. In particular, the code is designed such that a specified set of error operators, typically drawn from the n-qubit Pauli group Pn, can be detected and corrected without disturbing the encoded logical informa-tion. Such a code is denoted by [[ n, k ]] .One of the most important and widely used ap-proaches for constructing quantum codes is the stabilizer construction, which we review below. 
+
+Definition II.1 (Stabilizer Code). [1, 2] A
+
+quantum (stabilizer) code is defined by an abelian subgroup S ⊂ Pn that does not contain −I.The quantum codespace is the simultaneous +1 
+
+eigenspace of all elements of S, namely 
+
+Q = {| ψ⟩ ∈ (C2)⊗n : S |ψ⟩ = |ψ⟩ for all S ∈ S} .
+
+If S is generated by n − k independent commuting Pauli operators, then the resulting stabilizer code is an [[ n, k ]] stabilizer code. We call an n-qubit unitary matrix U a logical op-erator (gate) of Q, if U SU † ⊆ ¯S, where ¯S is the set of all Pauli and non-Pauli stabilizers of the code. Let 
+
+N (S) = {P ∈ P n | P S = SP for all S ∈ S} 
+
+denote the normalizer group of S in Pn. The min-imum distance d of the stabilizer code is defined as 
+
+d = min {wt( P ) | P ∈ N (S) \ S} ,
+
+where wt( P ) denotes the number of qubits on which the Pauli operator P acts nontrivially. Operators in N (S) preserve the codespace. In-deed, elements of N (S) \ S act nontrivially on the codespace and correspond to logical Pauli opera-tors acting on the encoded qubits. For an [[ n, k ]] 
+
+stabilizer code, one can choose k pairs of logi-cal Pauli operators Xi and Zi ∈ N (S) \ S that satisfy the same commutation relations as single-qubit Pauli operators. If the minimum distance of a quantum code is known its parameters are shown as [[ n, k, d ]] . This code can detect up to d − 1 errors and can correct up to ⌊(d − 1) /2⌋ arbitrary qubit errors. A subclass of quantum stabilizer codes is the family of Calderbank–Shor–Steane (CSS) codes [56, 57]. These are stabilizer codes whose stabi-lizer group can be generated by operators that are either tensor products of X operators or tensor products of Z operators. Equivalently, a CSS code can be described using two classical binary linear codes as stated below. 
+
+Definition II.2 (CSS Code). Let C2 ⊆ C1 ⊆
+
+Fn 
+
+> 2
+
+be binary linear codes with dim( C1) = k1 and 
+
+dim( C2) = k2. Then one can construct a quantum code with parameters [[ n, k 1 − k2, d ]] , where 
+
+d = min {dx = wt( C1 \ C2), d z = wt( C⊥ 
+
+> 2
+
+\ C⊥ 
+
+> 1
+
+)},
+
+where wt() here denotes the minimum Hamming weight. Here the X-type and Z-type stabilizers are in cor-respondence to the binary codes C2 and C⊥ 
+
+> 1
+
+, re-spectively. Moreover, one can determine the logi-cal X and Z operators as elements of C1 \ C2 and 
+
+C⊥ 
+
+> 2
+
+\ C⊥ 
+
+> 1
+
+, respective. 
+
+Remark II.3. Although C1 and C2 are binary linear codes, with a slight abuse of terminology, we frequently refer to the elements of C2 and C⊥
+
+> 1
+
+as the X- and Z-stabilizers, respectively. 5Quantum color codes form an important fam-ily of topological quantum error-correcting codes introduced by Bombín and Martin-Delgado [8, 33, 58]. They are defined on suitably colorable lattices and belong to the class of CSS stabilizer codes. One of their main advantages is that their geomet-ric structure enables the implementation of several FT logical gates. We recall a description of them below. 
+
+Definition II.4. A quantum color code is a CSS stabilizer code defined on a (D + 1) -colorable D-dimensional lattice, where qubits are placed on vertices and X- and Z-stabilizers are associated with the cells of the lattice. We have provided more details about color codes and their description from the point of view of cell complexes in Appendix A.  
+
+> B. Conditions for transversal logical phase gates
+
+In this section we briefly recall the necessary and sufficient conditions for a quantum CSS code to re-alize a logical gate transversally ( without requiring a correction operator ). Since we are only interested in codes with one logical qubit and only Z-rotation gates, we state the conditions tailored to such re-strictions. Please refer to [59, 60] for other general cases. A quantum logical operator is called transversal 
+
+if it can be implemented as a tensor product of single-qubit gates acting on the data qubits. The main feature of transversality is that a single fault occurring during the implementation process can-not propagate to more than one data qubit, and such operation can be parallelized on a circuit with depth one. A natural generalization of transversal gates is k-fold transversality , where a logical gate is implemented as a tensor product of k-qubit gates acting on disjoint subsets of the data qubits [7]. For an integer r ≥ 0, recall that a Z-rotation gate by the angle θ = π 
+
+> 2r
+
+has the form 
+
+RZ (θ) = e−i θ  
+
+> 2Z
+
+=
+
+e−iθ/ 2 00 eiθ/ 2
+
+
+
+=
+
+1 00 eiθ 
+
+
+
+.
+
+Such a gate belongs to the r+1 -th level of the Clif-ford hierarchy. Recall also that the Schur product 
+
+of two length n binary vectors u and v is defined by 
+
+u ∗ v = ( u1v1, u 2v2, . . . , u nvn).
+
+One can define the Schur product of more than two vectors analogously. 
+
+Theorem II.5. (Condition for Transversal Log-ical Phase gate [59, 60]) Let Q be a quantum CSS code with the X-stabilizers generator set HX
+
+and X-logical operator LX = {u}. Then apply-ing RZ ( π 
+
+> 2r−1
+
+)i, for some odd integer i, to all data qubits implies a logical RZ ( π 
+
+> 2r−1
+
+) if the following conditions are satisfied • wt( u) ≡ 1 (mod 2) , wt( v) ≡ 0 (mod 2 r ) for each v ∈ HX , and • Schur product of any 2 ≤ s ≤ r number of vectors in HX ∪ LX has weight divisible by 
+
+2r−s+1 .
+
+For instance, in a quantum divisible code, where each X-stabilizer has weight divisible by 2r , with the all ones as a logical operator, we have that the above conditions are satisfied. Thus such a quantum code has a transversal logical RZ ( π 
+
+> 2r−1
+
+)
+
+gate. We have included a more general type of neces-sary and sufficient conditions for realizing a logical phase gate, transversally through a transversal ap-plication of different gates, in Appendix A.  
+
+> C. Triorthogonal codes and the doubling method
+
+The doubling technique is a common, and per-haps one of the most resource-efficient currently-known methods in the literature for constructing quantum codes that enable the realization of logi-cal T gates via transversal physical gates [40–42]. The quantum triorthogonal codes constructed this way also form the main ingredients of the code switching protocol considered in [5]. The main ingredients of the doubling construc-tion are two quantum codes: a self-orthogonal (equivalently, a double-orthogonal code) code and a triorthogonal code of smaller distance. The resulting construction produces a triorthogonal quantum code with a larger distance. We next briefly recall the concepts of self-orthogonal and triorthogonal codes, as they form the fundamental objects used throughout this paper. Recall that a binary linear code C is called even ,if each codeword of C has an even (Hamming) weight. We call a quantum CSS code correspond-ing to C2 ⊆ C1 self-orthogonal , if C2 ⊆ C1 = C⊥ 
+
+> 2
+
+.Quantum self-orthogonal codes form an important class of quantum codes capable of realizing logical Clifford gates via multilevel transversal Clifford operations [61–63]. There are several important families of quantum self-orthogonal codes, such as quadratic residue codes and duadic codes, and many of the currently best-known quantum codes are constructed using such codes [64–69]. In a self-orthogonal quantum CSS code corre-sponding to C2 ⊆ C1 = C⊥ 
+
+> 2
+
+, the X-stabilizers cor-respond to the vectors in C2, all of which have even weight. If C2 has only vectors of weights divisible by four, the code will be called doubly-even and otherwise we call it singly-even .6Quantum triorthogonal codes are a subclass of quantum self-orthogonal codes, and form the most general family of quantum codes that can realize the logical T gate in a transversal manner (up to Pauli corrections) [17, 39]. 
+
+Definition II.6 (Triorthogonal Matrices [17]). 
+
+We call a binary matrix G of size m × n triorthog-onal if and only if for each pair and each triple of its rows the following are satisfied: 
+
+> n
+
+X
+
+> j=1
+
+Gaj Gbj ≡ 0 mod 2 
+
+for all pairs of rows 1 ≤ a < b ≤ m and 
+
+> n
+
+X
+
+> j=1
+
+Gaj Gbj Gcj ≡ 0 mod 2 
+
+for all triples of rows 1 ≤ a < b < c ≤ m. 
+
+The notion of triorthogonal matrices can be ex-tended to k-orthogonal via a natural extension of the above definition. 
+
+Theorem II.7 (Triorthogonal Codes [17]). 
+
+Let G = [G1, G 0]T be a triorthogonal matrix, where G1 consists of k ≥ 0 odd weight rows. Let 
+
+[[ n, k ]] be the CSS code of C2 ⊆ C1, where G0
+
+and G are generator matrices of the binary linear codes C2 and C1, respectively. Then applying transversal T to the data qubits realizes the transversal logical T (up to Pauli corrections) on the logical qubits. 
+
+The doubling technique is a method for con-structing a larger quantum triorthogonal quantum code by combining a self-orthogonal code with a smaller triorthogonal code, effectively increasing the code distance [40–42, 70]. In particular, it takes a quantum self-orthogonal code Q1 with pa-rameters [[ n1, 1, d 1]] and a quantum triorthogonal code Q2 with parameters [[ n2, 1, d 2]] and returns a new quantum triorthogonal code with parameters 
+
+[[2 n1 + n2, 1, min {d1, d 2 + 2 }]] ,
+
+where the X-stabilizers of the new triorthogonal code are in the form of 
+
+ E1 E1 0n2
+
+0n1 0n1 E2
+
+0n1 1n1 1n2
+
+ , (II.1) and E1 and E2 are generators of the X-stabilizers of Q1 and Q2, respectively. A simple representa-tion, but not of the minimum weight, for the logi-cal X-operator of the new code is (1n1 , 1n1 , 1n2 ).A natural generalization of self-orthogonal and triorthogonal codes are k-orthogonal codes , where the overlap between any k number of X-type Pauli stabilizer is even [71].     
+
+> III. QUANTUM COLOR CODES WITH TRANSVERSAL LOGICAL RZ(θ)GATES
+
+The main goal of this section is to present a family of quantum codes containing a single logi-cal qubit that realize the logical RZ (θ) transver-sally, for an arbitrary angle θ = π 
+
+> 2r
+
+. The family presented in this paper forms a subclass of color codes [8, 33, 34, 72, 73]. One of the main features that singles out color codes from the other families of quantum codes is their capability of realize logical RZ (θ) gates, as discussed in [72, 73]. However, apart from certain numerical examples and a few scalable 2D and 3D families, the parameters and the systematic con-struction of such codes have not progressed much. In particular, the main scalable subclasses of color codes that realize logical T gates transversally in-clude 1. Bravyi-Cross doubled color codes [40] 
+
+[[ d3 + 5 d2 − d − 94 , 1, d ]] 
+
+2. recursive capped color codes [74] 
+
+[[ d3 + 3 d2 + 3 d − 34 , 1, d ]] ,
+
+3. traditional 3D color codes [26] with parame-ters 
+
+[[ d3 + d
+
+2 , 1, d ]] ,
+
+4. and Stacked codes [75] with parameters 
+
+[[ 3d3 − 3d2 + d + 3 4 , 1, d ]] ,
+
+for an odd distance d. To the best of our knowl-edge, explicit closed form formulas for the param-eters of quantum color codes that realize finer Z-rotation gates while achieving increasing minimum distance have not been reported in the literature. In this section, we present a family of 2r -divisible quantum color codes with parameters 
+
+[[ Sr (k), 1, 2k − 1]] 
+
+that realizes logical π 
+
+> 2r−1
+
+-Z rotation gate transver-sally, where 
+
+Sr (k) = 
+
+> r
+
+X
+
+> i=0
+
+2i
+
+i + k − 2
+
+i
+
+
+
+.
+
+In particular, the 2D and 3D subclasses of our code family, which realize logical Clifford and T
+
+gates, respectively, require less overhead than the families 1–4 reported above. Interestingly, opti-mal self-orthogonal and triorthogonal codes with 7
+
+Family Parameters [[ n, k, d ]] Logical gate Reference Our 2D family [[ d2+2 d−12 , 1, d ]] Clifford This work Traditional 2D color codes [[ 3( d2−1) 4 + 1 , 1, d ]] Clifford [26] Capped color codes [[ 3( d2−1) 2 + 3 , 1, d ]] Clifford [74] Our 3D family [[ d3+6 d2+5 d−66 , 1, d ]] T This work Bravyi-Cross doubled color codes [[ d3+5 d2−d−94 , 1, d ]] T [40] Traditional 3D color codes [[ d3+d 
+
+> 2
+
+, 1, d ]] T [26] Recursive capped color codes [[ d3+3 d2+3 d−34 , 1, d ]] T [74] Stacked codes [[ 3d3−3d2+d+3 4 , 1, d ]] T [75] Our r-dimensional family, r, k ≥ 2 [[ Pri=0 2i i+k−2
+
+> i
+
+, 1, 2k − 1]] RZ ( π 
+
+> 2r−1
+
+) This work 
+
+Table I: Comparison of the qubit overhead of our code families with other color codes and the logical gates they enable transversally. small distances such as [[7 , 1, 3]] , [[17 , 1, 5]] , [[15 , 1, 3]] ,and [[49 , 1, 5]] appear as the first instances of color codes inside our family (see Table I for details). Our proofs employ elementary tools from linear algebra to describe these quantum codes, enabling the exact calculation of code parameters as well as their explicit stabilizers and logical operators. Another feature of our approach is that it en-ables us to extend the idea to other classes of codes with different geometries including rotated surface codes. Moreover, we take advantage of the struc-ture of stabilizer operators to identify Z meta-check operators that enable single shot decoding of Z-syndromes. We finish this part by highlighting that all the distance d = 3 codes presented for the rest of this section are optimal; in fact, they have the mini-mum length among all color codes with this prop-erty, as they coincide with the codes presented in [71]. 
+
+A. Quantum self-orthogonal codes via doubling 
+
+In this section, we first reveal an application of the doubling method in generating quantum self-orthogonal codes. Next, we show that well-known examples of self-orthogonal codes, including the 
+
+[[7 , 1, 3]] Steane and the [[17 , 1, 5]] color codes, can be constructed in this way. Then, we extend the construction to build a family of 2D quantum (color) codes that are degenerate and many of their stabilizer generators have weight four .We start by formalizing our main tool of this work, namely doubling technique as a method of combining codes and its properties. 
+
+Theorem III.1. Let Q1 and Q2 be [[ n1, 1, d 1]] and 
+
+[[ n2, 1, d 2]] quantum codes of odd lengths with the all ones vector as a logical X-operator. Then 1. There exists a quantum code Q with param-eters [[2 n1 + n2, 1, min {(d1)z , (d2)z + 2 }]] .2. The X-stabilizers of Q are in the form 
+
+G =
+
+ E1 E1 0n2
+
+0n1 0n1 E2
+
+0n1 1n1 1n2
+
+ ,
+
+where E1 and E2 are the generators of X-stabilizers of Q1 and Q2, respectively. 3. The code Q has an X-logical operator of the form (1n1 , 0n1 , 0n2 ).Furthermore, if 2r−1 and 2r divide the weight of all 
+
+X-stabilizers in Q1 and Q2, respectively, then Q
+
+realizes a transversal π 
+
+> 2r−1
+
+-Z rotation logical gate. 
+
+The proof follows the same ideas of the doubling construction of triorthogonal codes presented in [40–42], and [76, Section 5.2]. A sketch of the proof is provided in Appendix B. Through simple linear algebra arithmetic, one one can show that the matrix G of the above the-orem has an equivalent (but optimal) representa-tion of 
+
+G =
+
+ E1 E1 0n2
+
+0n1 0n1 E2
+
+0n1 1n1 v
+
+ , (III.1) where v is in correspondence to a minimum weight logical operator of the quantum code Q2, and E1
+
+and E2 have minimum weight stabilizers. As the first application, we substitute Q1 and Q2
+
+in the previous theorem with the all-even-code of size d+2 and a quantum self-orthogonal code of an odd distance d. In other words, the next theorem enables to increase the distance of a quantum self-orthogonal code from d to d+2 at a cost of 2( d+2) 
+
+extra data qubits. 
+
+Corollary III.2. Let Q be a binary self-orthogonal quantum CSS code of odd length n corresponding to C2 ⊆ C1, where 
+
+C1 = C2 ⊕ Span {1n}, and with the parameters 
+
+[[ n, 1, d ]] . Then 8
+
+1. there exists a quantum self-orthogonal code 
+
+Q′ with parameters 
+
+[[ n + 2( d + 2) , 1, d + 2]] .
+
+2. the X- (or Z-)stabilizers of this code can be chosen to • d + 1 of them have weight four, • one with weight 2d + 2 ,• and the rest have the same weight as a generator set for X-stabilizers of the code Q.Proof. The proof is an immediate application of Theorem III.1. We just note that such a new quan-tum code has X-stabilizer generators correspond-ing to the matrix G of the form (III.1) by choosing 
+
+E1 to be the generator matrix of the all-even code and E2 be the lowest weight generators of C2. The orthogonality of the rows of G and the weight of its stabilizers can be checked by inspecting G. □
+
+It should be noted that if d > 2 in Corollary III.2, then the new quantum code Q′ obtained through the above result is degenerate to four (the minimum distance of corresponding classical code is four). It is because the first d + 1 rows of G are in corresponding to stabilizers with weight four. However, the minimum distance of Q is at least five. The singly-even or doubly-even characteristic of the quantum code Q′ of Corollary III.2 depends only on the code Q. In particular, Q′ is doubly-even if and only if Q is doubly-even. This is be-cause stabilizers of Q′ are in correspondence to the matrix G presented in (III.1), and except the mid-dle block, which is in correspondence to stabilizer generators of Q, all the other blocks have weights divisible by four. Before stating our numerical examples, we would like to point out the smallest code that is conventionally k-orthogonal for each k ≥ 1. As we will see later, this code plays a significant role in the structure of many important codes including 
+
+[[7 , 1, 3]] Steane code, [[15 , 1, 1]] Reed-Muller code, and many other codes. 
+
+Remark III.3 (The totally orthogonal code). 
+
+The smallest k-ortohognal code for each k ≥ 1
+
+is the [[1 , 1, 1]] CSS code that has no X and 
+
+Z stabilizers. The corresponding CSS code is 
+
+C2 ⊆ C1, where C2 = {(0) } and C1 = {(0) , (1) }.This code will be called the totally orthogonal 
+
+code. Through the following example, we show that the [[7 , 1, 3]] Steane and the [[15 , 1, 3]] Reed-Muller codes can be constructed as an application of Corollary III.2.     
+
+> 1543762
+
+Figure 1: The regular representation of seven qubits color/Steane code (right) and the one obtained from Corollary III.2 (left). On the left figure, qubits 1,5,4 (respectively 3,7,6) form all-even code, and qubit 2 is the totally orthogonal code. Here the logical X operator is 
+
+X1X5X4 (top row of qubits). 
+
+Example III.4. (I) Let Q be the [[1 , 1, 1]] totally orthogonal code and E1 be the generator matrix of all-even code of length 3. Applying the result of Corollary III.2 gives the [[7 , 1, 3]] Steane code (see Figure 1). (II) Applying the result of Theorem III.1 to Steane code (doubly even) and the quantum totally orthogonal code implies the quantum 
+
+[[15 , 1, 3]] Reed-Muller code. (III) Repeating the same process to [[15 , 1, 3]] 
+
+and [[1 , 1, 1]] gives the [[31 , 1, 3]] quantum code which is 4-orthogonal. Consequently redoing the above process produces the smallest minimum dis-tance three quantum codes with transversal logical  
+
+> π
+> 2r−1
+
+-Z rotation gate, as discussed in [71], namely quantum simplex (or Hamming) [[2 r − 1, 1, 3]] code for each r ≥ 3.The above example showed how to build quan-tum codes with transversal logical operators be-longing to level r ≥ 2 of the Clifford hierarchy via using the result of Corollary III.2 once, and then applying Theorem III.1 to the resulting code (see Figure 2). Later we extend this process to reach any other Clifford level for each desired odd mini-mum distance. The next example shows another application in constructing a self-orthogonal code with parame-ters [[41 , 1, 9]] which is also doubly even and has less number of data qubits than the doubly even 
+
+[[45 , 1, 9]] code with distance 9 discussed in [41] or [32, Table 1]. 
+
+Example III.5. Let n = 23 and C2 be the doubly even linear cyclic code with the generator polyno-mial x12 + x10 + x7 + x4 + x3 + x2 + x + 1 . The code 
+
+C2 is self-orthogonal, i.e., C2 ⊆ C1 = C⊥ 
+
+> 2
+
+, and has parameters [23 , 11 , 8] and the corresponding quan-tum CSS code of C2 ⊆ C1 is the non-degenerate 
+
+[[23 , 1, 7]] . Let C′ 
+
+> 2
+
+be the all-even code of length 9
+
+which has parameters [9 , 8, 2] . Applying the dou-bling construction of Corollary III.2 implies the existence of a degenerate quantum code Q with 9       
+
+> d(odd)
+> C(k)
+> 135
+> C(2)
+> C(3)
+> C(4)
+> C(k)
+> Example III.4
+> (3,C(2))(3,C(3))(3,C(4))(3,C(k))
+
+Figure 2: Distance three quantum codes with logical gates from an arbitrary Clifford hierarchy through the process of Example III.4. parameters [[41 , 1, 9]] (degenerate to 4). Note also that the X (or Z) stabilizers of the latter quantum code are in correspondence to the matrix G pre-sented in (III.1), and since C2 is doubly even, one can conclude that all the rows of G have weight divisible by four. Therefore, the code generated by G is also doubly even. Another round of the doubling method based on the quantum code Q above and the triorthogonal (triply even) code [[95 , 1, 7]] implies a triorthogo-nal (triply even) code with parameters [[177 , 1, 9]] .The latter code has lower length (data qubits) than the distance 9 triorthogonal code presented in [41, Table I]. Using the resulting code and re-peating the above argument, one can improve the parameters of several other triorthogonal codes in [41, Table I]. In particular, the distance 9 –
+
+19 triorthogonal codes with the improved lengths are [[177 , 1, 9]] , [[271 , 1, 11]] , [[409 , 1, 13]] , [[567 , 1, 15]] ,
+
+[[769 , 1, 17]] , and [[975 , 1, 19]] .For now, we restrict our attention only to the all-even code, and use the result of Corollary III.2 recursively. This way one gets the following family of self-orthogonal codes (belonging to the second level of the Clifford hierarchy) that can have any desired odd distance. This family has a 2D (trian-gular) representation, and one can verify that they admit a three-valent three-colorable tiling geome-try. Thus they belong to the family of 2D color codes. The qubit connectivity can be easily viewed through a recursive pattern (see Figure 3). 
+
+Theorem III.6. Let k be a positive integer. There exists a family of self-orthogonal (2D color) codes with parameters 
+
+[[2 k2 − 1, 1, 2k − 1]] .
+
+If k ≥ 2, this quantum code is degenerate, and has a generator set of X (or Z) stabilizers, where • k2 − k − 3 of the generators have weight four, 
+
+> new all even new connecting check previous block
+
+Figure 3: Left: recursive construction of [[17 , 1, 5]] 
+
+from [[7 , 1, 3]] code of Figure 1 (appear as the previous block). Here three colored squares represent check qubits ( X and Z), white circles data qubits, and highlighted red circles a minimum weight logical operator ( X and Z). Right: recursive construction of [[31 , 1, 7]] from 
+
+[[17 , 1, 5]] code. 
+
+• and k − 2 of them that have weights 
+
+8, 12 , 16 , . . . , 4k − 4.
+
+In particular, all the codes inside this family are doubly even. This quantum code has a 2D triangular represen-tation, where all the data qubits are partitioned in • 2 layers of 2s + 1 data qubits, for each s =1, . . . , k − 1, in a descending order, and one single data qubit at the bottom, • each such two layers contain s − 1 check qubits of weight four, • the bottom layer of 2s + 1 and top layer of 
+
+2s − 1 data qubits are all connected through a check qubit, • the highest layer (containing 2k − 1 data qubits) represents the location of a minimum weight logical operator. Finally, the desired logical S gate can be realized by the physical action of S on the odd number layers of qubits, and S† on the even number layers of qubits. 
+
+A complete proof of this theorem is given in Ap-pendix B. An instance of such recursive pattern is de-picted in Figure 3, where it describes the quantum 
+
+[[17 , 1, 5]] self-orthogonal code. The 2D structure is trivial and the 3-coloring of vertices is shown in the figure. The locations of a minimum weight logical operator is shown in red. The picture also gives 10 useful information about the weight of the stabi-lizer generators. The first two example of codes inside the family of Theorem III.6 are the well-known [[7 , 1, 3]] and 
+
+[[17 , 1, 5]] 2D color codes [8, 58]. The result of this theorem allows to construct codes that realize logical transversal gates for a generating Clifford set and for any desired odd minimum distance. This result allows us to realize certain points in the 2D distance-Clifford hierar-chy lattice (see Figure 4).       
+
+> d(odd)
+> C(k)
+> 3572k +1
+> C(2)
+> C(3)
+> Theorem III.6
+
+Figure 4: The construction described in Theorem III.6 that allows to increase the distance of self-orthogonal quantum code with the aid of all-even codes. The exact transversal operator for realizing log-ical S gate for such codes can be obtained using the proof of Theorem III.1 given in Appendix B. For more general discussions regarding the realiza-tion of Clifford gates in the case of self-orthogonal codes with one or more more logical qubits, one can consult [63]. It is important to note that the codes con-structed in Theorem III.6 can be substituted with other carefully chosen codes, and this can lead to other families of quantum codes that have transversal logical Clifford gates.  
+
+> B. Reaching finer logical Z-rotations
+
+In this section, we extend the discussion pre-sented in the previous section to build quantum codes with an arbitrary odd minimum distance that contain a transversal logical Z-rotation be-longing to each Clifford hierarchy. Our proof is based on doubling the codes con-structed from Theorem III.6 to first lift them to the Clifford level C(3) . Later we extend this result to each finer Z-rotation gate. 
+
+Theorem III.7. There exists a family of quan-tum (3D color) codes with parameters 
+
+[[ 23 k(k + 1)(2 k + 1) − (2 k + 1) , 1, 2k − 1]] 
+
+that realizes the logical T gate transversally for each k ≥ 1. Moreover, all X-stabilizers have weights divisible by 8 (triply even). 
+
+The proof is provided in Appendix B. Before proceeding to our next result, which gives codes with a logical gate from each level of the Clifford hierarchy, we establish some remarks and notation that are essential for later. We will provide a single code for each Clifford level and odd distance in our proposed family be-low. In this family, the length of the code that realizes the logical Z-rotation gates of the Clifford hierarchy C(r) and has distance 2k − 1 will be de-noted by Sr (k). Moreover, as we apply the result of Theorem III.1, the length of codes within the family satisfies the identity 
+
+Sr (k) = 2   kX
+
+> i=1
+
+Sr−1(i) − 1 (III.2) with Sr (1) = 1 (the [[1 , 1, 1]] code implies this). This is because the doubling construction requires • codes of length Sr−1(k) (two of them) • and one code with the length Sr (k − 1) 
+
+to form a code of length Sr (k). Later in Appendix B, we prove that 
+
+Sr (k) = 
+
+> r
+
+X
+
+> i=0
+
+2i
+
+i + k − 2
+
+i
+
+
+
+(III.3) and also that 
+
+Sr (k − 1) + Sr−1(k) = 2 r
+
+k + r − 2
+
+r
+
+
+
+. (III.4) Using these properties one can prove the following result. We discuss the proof in Appendix B. 
+
+Theorem III.8. There exists a family of quan-tum codes with parameters 
+
+[[ Sr (k), 1, 2k − 1]] 
+
+that realizes logical π 
+
+> 2r−1
+
+-Z rotation gate through a transversal action of π 
+
+> 2r−1
+
+-Z rotation gates on the data qubits. The X-stabilizers of a [[ Sr (k), 1, 2k − 1]] code have weights divisible by 2r , for each k ≥ 1 and r ≥ 1.
+
+Table II shows the parameters of the short length codes obtained from the above construction supporting a logical Z-rotation from C(2) − C (5) of the Clifford hierarchy. Furthermore, a comparison between the code of Theorem III.8 for r = 2 , 3 with some other known families of 2D and 3D color codes (with one logical qubit) has been provided in Figure 5. We stress that, in this comparison, although our code fam-ilies require a lower number of data qubits, they also have a few high weight stabilizer generators. 11       
+
+> 510 15 20 0200 400 600
+> dn
+> 2D Families
+> Our 2D Traditional 2D Capped 2D
+> 510 15 20 02,000 4,000 6,000
+> dn
+> 3D Families
+> Our 3D Bravyi-Cross Traditional 3D Recursive capped Stacked
+
+Figure 5: Data qubit overhead n (code length) as a function of code distance d for 2D (left) and 3D (right) quantum families. 
+
+k \ r 2 3 4 52 [[7 , 1, 3]] [[15 , 1, 3]] [[31 , 1, 3]] [[63 , 1, 3]] 3 [[17 , 1, 5]] [[49 , 1, 5]] [[129 , 1, 5]] [[321 , 1, 5]] 4 [[31 , 1, 7]] [[111 , 1, 7]] [[351 , 1, 7]] [[1023 , 1, 7]] 5 [[49 , 1, 9]] [[209 , 1, 9]] [[769 , 1, 9]] [[2561 , 1, 9]] 
+
+Table II: Parameters of small length codes from Theorem III.8 supporting logical π 
+
+> 2r−1
+
+-Z rotation. These codes are 2r divisible. 
+
+C. Z Meta-checks in the doubled codes 
+
+In this section, we describe a few simple remarks about the structure of Z-checks in the quantum doubled codes that can enable single shot decoding of Z-syndromes. As we mentioned in Section II C, the X-stabilizers of a quantum code Q obtained from applying the doubling construction has a matrix form 
+
+ E1 E1 0n2
+
+0n1 0n1 E2
+
+0n1 1n1 1n2
+
+ ,
+
+where E1 and E2 are generators of the X-stabilizers of Q1 and Q2, respectively. Moreover, this code has a X-logical operator (1n1 , 1n1 , 1n2 ).A simple calculation shows that any Z-stabilizer of such a code has a binary representation as a linear combination of the following vectors: 1. (u1, 0n1 , 0n2 ), where u1 forms a Z-stabilizer of Q1.2. (w1, w 1, 0n2 ), where w1 is an arbitrary even weight vector in Fn1 
+
+> 2
+
+,3. (0n1 , 0n1 , u 2), where u2 forms a Z-stabilizer of Q2, and 4. (0n1 , 1n1 , 1n2 ).Choosing w1 belonging to a basis of the all-even code, i.e., 
+
+B = {(1 , 1, 0, . . . , 0) , (0 , 1, 1, . . . , 0) , . . . , (0 , . . . , 0, 1, 1) }
+
+produces a list of linearly independent vectors. The first takeaway of this representation is that all quantum codes with distance d ≥ 5 obtained from the doubling construction are degenerate because of the type (2) vectors above. This includes, for example, the well-known 2D and 3D color codes of distance five, namely [[17 , 1, 5]] and [[49 , 1, 5]] .Taking advantage of the above representations of Z-checks, one can apply the following simple tricks to detect and correct certain errors on the 
+
+Z-syndromes. Let C be an arbitrary binary linear code with parameters [m, n 1 −1, d ] and with parity check ma-trix H. Then one can add m−n1 +1 new Z-checks (in total m Z -checks instead of n1 − 1), following the equations implied by H, to protect the type (2) 
+
+Z-syndromes. Indeed, one can correct any ⌊ d−12 ⌋
+
+(respectively detect any d − 1) number of errors. The matrix H is called a meta-check matrix for such syndromes. Note that this approach is not necessary weight preserving as the new Z-checks can have larger weights. The following scenarios help to add new redundant Z-stabilizers of the same weight and protect the Z-syndromes. 12 • adding all elements of B (defined above) gives a new Z-check of the form (2) that en-ables detection of each single error. • adding new n1 − 1 redundant checks, ob-tained from the linear combination of each two type (2) syndromes with consecutive el-ements of B, gives new weight four checks that can “correct” a single error on the type (2) checks. • for each type (1) Z-check a = ( u1, 0n1 , 0n2 )
+
+one can choose a new Z-check in the form of 
+
+b = ( w, w, 0n2 ) with wt( w) = 2 and support of w subset of support of u1. Then the vector 
+
+a + b has the same weight as a and adding enough b and a + b vectors helps to correct any single error on type (1) syndromes. • in many cases (such as [[17 , 1, 5]] and 
+
+[[49 , 1, 5]] ) the code Q2 itself is a doubled quantum code. Thus one can find redundant 
+
+Z-checks (like the one mentioned above) for the type (3) Z-syndromes.  
+
+> IV. ROTATED SURFACE CODES AS ANOTHER INGREDIENT
+
+So far, we have focused exclusively on the dou-bling technique and color codes as its natural in-gredient to construct larger quantum codes with improved minimum distance and desired logical Z-rotation gates. The main purpose of this section is to emphasize “how to move beyond color codes” and incorporate other well-known families of codes into this framework. Recall that the primary ingredient in the pre-vious section was the all-even code, which en-abled the construction of quantum codes admit-ting transversal Clifford gates. Recursively apply-ing the same technique further allowed us to im-plement logical gates from higher levels of the Clif-ford hierarchy in a transversal manner. Although the all-even code is an optimal choice in terms of the number of data qubits, alternative candidates with other connectivity and geometry restrictions can be fed into the construction of Corollary III.2, or more generally Theorem III.1. In particular, one may apply the above construction to any odd-length quantum code whose X-stabilizers all have even weights to obtain the desired logical gates. Among these codes, the all-even code achieves the minimal length. Before presenting our results, we highlight an important remark regarding the quantum codes discussed in this section. 
+
+Remark IV.1. The quantum codes constructed in this section possess strictly more Z-stabilizers than X-stabilizers. Equivalently, they are CSS codes specified by C2 ⊆ C1 with C1 ⊊ C⊥ 
+
+> 2
+
+. Hence, only the X-stabilizers constitute a self-orthogonal code. Accordingly, we refer to these codes as quan-tum X-self-orthogonal codes, to distinguish them from fully self-orthogonal codes. We use the following definition very frequently in our discussions. 
+
+Definition IV.2. We say that a quantum code Q
+
+has a local geometry of another quantum code Q′
+
+in its geometry, if there exists a subset of data qubits A such that: • Puncturing rule : restricting X-stabilizers and X-logical operators to A (by discarding other parts) gives X-stabilizers and logical operator of Q′,• Shortening rule : the set of Z-stabilizers and Z-logical operators with all supports on 
+
+A give Z-stabilizers and logical operator of 
+
+Q′.We will restrict our attention to the quantum codes with a local geometry of rotated surface codes in their geometry. Recall that rotated surface codes are quan-tum CSS codes with parameters [[ d2, 1, d ]] . They have many interesting features including local ge-ometry with nearest neighbor interactions, high circuit-level threshold, good decoders and well-understood logical operations [77, 78]. Further-more, these codes have been experimentally im-plemented in superconducting and neutral atom platforms [79, 80]. In a rotated surface code, phys-ical qubits are positioned at the vertices of a d × d
+
+square grid for encoding one logical qubit. Its sta-bilizer generators consist of X-type and Z-type Pauli operators that are mapped to the faces (pla-quettes) of the grid. Let d ≥ 3 be a positive odd integer, and let E
+
+denote the binary matrix whose rows correspond to the generators of the X-stabilizers of the ro-tated surface code of distance d. Then E is a  
+
+> d−12
+
+× d2 binary matrix and its rows have even weights. Moreover, the vector 1d2 corresponds to the maximum-weight logical X operator. A slight modification of Corollary III.2, via dou-bling the distance d+2 surface code and a distance 
+
+d self-orthogonal code, yields the following result. We omit the proof here. 
+
+Proposition IV.3. Let Q be a binary self-orthogonal CSS code of odd length n, defined by 
+
+C2 ⊆ C1, where C1 = C2 ⊕ Span {1n}, and with parameters [[ n, 1, d ]] , where d is odd. Then one can construct a quantum X-self-orthogonal code 
+
+Q′ with parameters 
+
+[[ n + 2( d + 2) 2, 1, d + 2]] ,
+
+with a local geometry of rotated surface code. 13 We now highlight several important properties of the code Q′ appearing in the above proposition. The X-stabilizers of Q′ are generated by 
+
+G =
+
+ E E 0n
+
+0(d+2)2 0(d+2)2 G2
+
+0(d+2)2 1(d+2)2 v
+
+ ,
+
+where E and G2 are the generator of X-stabilizers of rotated surface code with distance d + 2 and the code Q, respectively, and v is a logical X-operator of Q (of the minimum weight d). A logical X-operator of Q′, not necessarily of minimum weight, can be chosen as (1(d+2)2 , 0(d+2)2 , 0n). Moreover, if u is a logical Z-operator of the distance d + 2 
+
+surface code, then the code Q′ has a logical Z-operator of the form (u, 0(d+2)2 , 0n) (of minimum weight d + 2 ). The main feature of this construction is that it allows us to preserve the local geometry of the ro-tated surface code within a larger quantum code that has the transversal implementation of the log-ical S gate. As we will see later, such a local geom-etry is essential in our FT code switching protocol for realizing logical S, T , or other finer Z-rotation gates. Next, we recursively apply the result of Proposi-tion IV.3 to construct an infinite family of X-self-orthogonal codes based on rotated surface codes. We summarize the parameters of these codes for any desired odd minimum distance in the following theorem. 
+
+Theorem IV.4. There exists a family of 3D quantum X-self-orthogonal codes with the local ge-ometry of rotated surface codes, in which the log-ical S gate is realized transversally, and with pa-rameters 
+
+[[ d(d + 1)( d + 2) 3 − 1, 1, d ]] ,
+
+for odd d ≥ 1.Moreover, when d ≥ 3, the set of all X-stabilizers can be decomposed as C = Ce ⊕ Span( {v}), where 
+
+Ce contains vectors of weights divisible by four and 
+
+wt( v) ≡ 2 (mod 4) .
+
+The proof is given in Appendix C. The 3D struc-ture and the recursive construction of such codes is depicted in Figure 6. In particular, when d = 3 
+
+and d = 5 , one obtains quantum X-self-orthogonal codes with parameters [[19 , 1, 3]] and [[69 , 1, 5]] , re-spectively, that enable the transversal realization of the logical S gate (see Figure 6). We believe that these codes are highly likely to support logi-cal T gate realizable in a fold-transversal manner. However, we postpone the careful study of such gates to future research. We would also like to remark that the codes constructed from Theorem IV.4 have a symmetric geometry consisting of different layers of rotated surface codes, starting from the distance 1 surface code ( [[1 , 1, 1]] code) at the bottom and ending with the distance d surface code at the top. Moreover, two representatives of minimum weight logical X-and Z-stabilizers can be specified by data qubits of the top layer surface code and its horizontal edge, respectively (see Figure 6).        
+
+> d= 3
+> Ancilla qubit
+> d= 3
+> Local Check
+> d= 5
+> d= 5 Local Check
+> d= 3
+> d= 3
+> Local Check
+> Ancilla qubit
+
+Figure 6: Example of codes constructed from Theorem IV.4. (Left) The geometry of [[19 , 1, 3]] 
+
+X-self-orthogonal code. The two planes represent two surface codes of distance 3, and the red dots show their X checks, where local checks are as many as the number of X-check of the surface codes. Such local checks are connected to data qubits of the two surrounding copies of surface codes. The lowest check is connected to all the data qubits of its top surface code, and the single data qubit of totally orthogonal code (named Ancilla qubit). The tick blue and red qubits (on the planes or the bottom qubit) specify the location of data qubits corresponding to minimum weight logical X and Z operators of the code, respectively. (Right) Recursive construction of [[69 , 1, 5]] .Note also that one can optimize the qubit over-head using Proposition IV.3. For instance, apply-ing this proposition to [[7 , 1, 3]] Steane code and two copies of d = 5 rotated surface code results in 
+
+[[57 , 1, 5]] quantum X-self-orthogonal code (while, Theorem IV.4 gives the [[69 , 1, 5]] code shown in Figure 6). We omit such optimization discussions in this section. This process can be continued to construct quantum codes that are r-orthogonal and possess the local geometry of rotated surface codes, for each r, k ≥ 2. Let 
+
+Sr (k) = 2 r+2 
+
+k + r − 1
+
+r + 1 
+
+
+
++
+
+> r−1
+
+X
+
+> i=0
+
+2i
+
+k + i − 2
+
+i
+
+
+
+.
+
+(IV.1) 
+
+Theorem IV.5. There exists a family of quantum 14 
+
+codes with parameters 
+
+[[ Sr (k), 1, 2k − 1]] 
+
+that are r-orthogonal and with the local geometry of rotated surface codes of minimum distance 2k −
+
+1.
+
+See Appendix C for a proof. In particular, when 
+
+r = 3 one gets triorthogonal codes than can real-ize logical T through the transversal application of physical T gates, up to Clifford correction. Indeed, fixing r = 3 simplifies (IV.1) to 
+
+S3(k) = 4k4 + 8 k3 + 2 k2 − 8k − 33 .
+
+Corollary IV.6. There exists a family of quan-tum triorthogonal codes with parameters 
+
+[[ 4k4 + 8 k3 + 2 k2 − 8k − 33 , 1, 2k − 1]] 
+
+and with the local geometry of rotated surface codes. 
+
+For instance, when k = 2 , one gets a triorthogonal code with parameters [[39 , 1, 3]] (see Figure 7). Ta-ble III summarizes the codes constructed in this section. Figure 7: Geometric representation of [[39 , 1, 3]] 
+
+triorthogonal code.  
+
+> A. A Qubit Overhead Optimization Technique
+
+In this section, we discuss a technique to reduce the qubit overhead of the codes constructed in the previous section, while preserving the local geom-etry of the rotated surface code in their represen-tation. In certain cases, this also reduces the re-quired qubit connectivity. Recall that we used two copies of rotated sur-face codes in Theorem IV.4 to obtain families of quantum X-self-orthogonal codes with the local geometry of rotated surface codes, and then we extended this approach to r-orthogonal codes for each r ≥ 3. In this section, we propose a different approach that combines one rotated surface code with a punctured rotated surface code instead of using two copies of the surface codes. We begin with a preliminary example that il-lustrates the key ideas, and subsequently present the main result. We construct a quantum X-self-orthogonal code with parameters [[15 , 1, 3]] , ob-tained by horizontally concatenating • the X-check matrix of a distance-three ro-tated surface code, and • that of an all-even code of length five (which is a punctured surface code). The distance three rotated surface code has pa-rameters [[9 , 1, 3]] consisting of 9−12 X-check gener-ators v1, v2, v3 and v4 that form an even binary code space. One can easily verify, by inspecting Figure 8 and labeling the bottom-to-top X-checks as v1–v4, that the non-zero inner products of these basis vectors occur only in the following cases: • v1 · v2 = v2 · v3 = v3 · v4 = 1 .On the other hand, the all-even code of length five has basis vectors ui each having non-zero coordi-nates in positions i and i + 1 , for each 1 ≤ i ≤ 4,and the non-zero inner products of the basis vec-tors occur only in the following cases: • u1 · u2 = u2 · u3 = u3 · u4 = 1 .Now one can define a new X-check matrix of size 
+
+9 + 5 + 1 in the form: 
+
+G =
+
+E1 E2 0
+
+09 05 0
+
+09 15 1
+
+ ,
+
+where E1 and E2 have rows v1 − v4 and u1 − u4,respectively. Using the above inner products, one can show that the rows of G are mutually orthog-onal and form a self-orthogonal binary linear code 
+
+C2. Define 
+
+C1 = C2 ⊕ Span {(19, 05, 0) }.
+
+Then the CSS code associated with C2 ⊂ C1 is an 
+
+X-self-orthogonal code with parameters [[15 , 1, 3]] .Moreover, linear combinations of the X-checks re-stricted to the first nine columns yield the X-checks of the 9-qubit rotated surface code. This process is shown in Figure 8 by counting each red data as two qubits, one for the surface code and one for the all-even code. The last step of the doubling construction is to add a new data qubit that is connected to all five qubits of all-even code through a new X check. The X-stabilizers of the [[15 , 1, 3]] self-orthogonal code along with some 15                             
+
+> Family Parameters [[ n, k, d ]]
+> X-self-orthogonal codes [[ (2 k−1)(2 k)(2 k+1) 3−1,1,2k−1]]
+> Triorthogonal codes [[ 4k4+8 k3+2 k2−8k−33,1,2k−1]]
+> r-orthogonal codes r, k ≥2[[2 r+2  k+r−1
+> r+1
+> +Pr−1
+> i=0 2i k+i−2
+> i
+> ,1,2k−1]]
+
+Table III: Parameters of families of quantum codes with the local geometry of rotated surface codes discussed in this section. other interesting features of them are presented in Appendix E. Applying another round of doubling, as in (II.1), to two copies of the [[15 , 1, 3]] code and the [[1 , 1, 1]] 
+
+totally orthogonal code produces a [[31 , 1, 3]] tri-orthogonal code with degenerate X and Z dis-tances. Such a code contains a local geometry of the rotated surface code in its geometry. 
+
+Figure 8: Tanner graph of all-even code (right). A 14 qubit X-self-orthogonal code, with the same 
+
+X checks as surface codes, but counting each red dot as two data qubits (one for surface and one for all-even). Adding an additional data qubit and connecting it through an additional X check to all five qubits of the all-even code implies the quantum X-self-orthogonal [[15 , 1, 3]] .Next we generalize the idea for any odd distance rotated surface code. 
+
+Theorem IV.7. Let Q1 be a rotated surface code with parameters [[ d2, 1, d ]] for an odd d ≥ 3 and 
+
+X-stabilizer generator E.1. Then there exists a self-orthogonal binary linear code of length 3d2+1 2 with the genera-tor matrix [E E ′], where E′ is obtained after puncturing of certain columns of E.2. If Q2 is an X-self-orthogonal code with parameters [[ n, 1, d − 2]] and X-stabilizer generator G, then there exists an X-self-orthogonal quantum code Q with parameters 
+
+[[ n + 2( d2 − d + 1) , 1, d ]] 
+
+containing a local geometry of Q1 in its ge-ometry. 
+
+Figure 9: Geometry of punctured surface codes. The data qubits of the new code are represented by the black dots and these black dots share the same X-check structure as the rotated surface code. For any two chosen red stabilizers, the inner product of their corresponding binary vectors is the same in both the punctured code and the rotated surface code. The proof is given in Appendix D. Notice that the claimed quantum code Q has X-check generator 
+
+G =
+
+ E E′′ 0n
+
+0d2 0d2−2d +2 G
+
+0d2 1d2−2d +2 1n
+
+ ,
+
+where E′′ is obtained from puncturing the 2d −
+
+2 columns of matrix E (X-generator of rotated surface code). Such removed columns correspond to data qubits that • appear only once in all weight four X-checks, • and are not part of a weight two X-check (see Figure 9). Note also that replacing the block [E E ′′ ] with 
+
+[E E ′] from part (1) may yield a different quantum 
+
+X-self-orthogonal code of smaller size; however, the corresponding claim about the distance does not necessarily hold. The codes obtained from Theorem IV.7 (2) will be called DSPS (doubled surface and punctured surface) codes. The distance three DSPS, as dis-cussed above, has parameters [[15 , 1, 3]] .16 
+
+Example IV.8. Here we construct quantum X-self-orthogonal and triorthogonal codes of distance five using rotated surface codes. The codes pre-sented in this section require less number of data qubits compared to the codes presented in the pre-vious section. First recall that, as we mentioned in the pre-vious section, there exist X-self-orthogonal codes with parameters [[69 , 1, 5]] and [[57 , 1, 5]] and local geometry of rotated surface codes. Also Corollary IV.6 implies the existence of a [[177 , 1, 5]] triorthog-onal code with a local surface code geometry. First we apply the result of Theorem IV.7 (2) to the [[25 , 1, 5]] rotated surface code and the [[7 , 1, 3]] 
+
+Steane code. This gives a [[49 , 1, 5]] quantum X-self-orthogonal code with a local geometry of ro-tated surface codes. Now applying the Quantum Doubling construc-tion to the latter code and [[15 , 1, 3]] implies a 
+
+[[113 , 1, 5]] quantum triorthogonal code with a local geometry of rotated surface codes (which requires much less qubits than the [[177 , 1, 5]] code). Using a similar process, one can obtain the list of DSPS and triorthogonal codes presented in Table IV.  
+
+> V. GENERAL TRANSVERSAL CODE SWITCHING
+
+Code switching originated as a gauge-fixing technique designed to alternate between two dis-tinct topological color codes sharing a common un-derlying subsystem code [26, 72]. By dynamically altering which gauge operators are measured, the system can be projected into either a 2D or 3D color code configuration. This framework provides a path to universal fault-tolerant quantum com-puting without magic state distillation. A non-Clifford gate can be executed transversally while the system is fixed in the 3D configuration, after which a gauge switch safely returns the state to the 2D configuration for standard Clifford processing and lower-overhead error correction. The proto-col was subsequently refined to achieve improved fidelity and has since been validated through both numerical simulations and experimental verifica-tion [5, 28, 51] for the fault-tolerant implementa-tion of the T gate. The main scheme is based on a qubit Z-teleportation considered in [81]. In this section, we restrict our attention to the code switching protocol based on the transver-sal CNOT between the two complementary sets of gates. In particular, we generalize the pro-tocol for the fault-tolerant implementation of an arbitrary fine Z-rotation gate, and encompass all quantum codes described in the previous sections into this protocol. A notable feature of the pro-posed scheme is that it is not restricted to any specific code family. More precisely, the main re-quirement for such code switching protocol is a quantum code that has the geometry of another quantum code in its overall geometry (see Defini-tion IV.2). In particular, we have the following result. 
+
+Theorem V.1. Let Q1 and Q2 be quantum codes of lengths n1 and n2, with n2 < n 1, each encod-ing a single logical qubit such that Q1 has a local geometry of Q2 in its first n2 positions. Then 1. there exists a transversal CNOT gate be-tween Q1 and Q2 in the form 
+
+CNOT = 
+
+> n2
+
+O
+
+> i=1
+
+CNOT i.
+
+2. If Q1 realizes the logical RZ (θ) gate through the physical operation O, then the outcome of the following circuit is the |RZ (θ)⟩ on Q2:         
+
+> Q1|+⟩O•MXL•
+> Q2|0⟩ZL|RZ(θ)⟩
+
+Proof. (1) Let Q1 and Q2 be two quantum codes with the given conditions. We have 1. for each X-stabilizer (or logical operator) 
+
+O = ⊗n1
+
+> i=1
+
+Oi of Q1, the operator O11 =
+
+⊗n2
+
+> i=1
+
+Oi is an X-stabilizer (or logical oper-ator) of Q2.2. for each Z stabilizer or logical operator O =
+
+⊗n2
+
+> i=1
+
+Oi of Q2, O is a Z-stabilizer (or logical operator) of Q1.3. The X- and Z-logical operators of both Q1
+
+and Q2 are based on applying transversal X
+
+and Z operators acting on the first n2 qubits, respectively. Now, consider the direct sum of the Q1 and Q2
+
+codes, which is a new quantum (CSS) code S with two logical qubits stabilized by the stabilizers of 
+
+Q1 and Q2. The set of all stabilizers of S are in the form of O1 ⊗ O2 where O1 is a stabilizer of Q1
+
+and O2 is a stabilizer of Q2.The transversal CNOT gate is defined by 
+
+CNOT = 
+
+> n2
+
+O
+
+> i=1
+
+CNOT i, (V.1) where the gate CNOT i has its control on the i-th qubit of Q1 and its target is on the i-th qubit of 
+
+Q2, for each 1 ≤ i ≤ n2.For any X-stabilizer of S, namely O1 ⊗ O2 with 
+
+O1 = O11 ⊗O12 , where O11 is restricted to the first 
+
+n2 locations of the data qubits of Q1, we have 
+
+CNOT( O1 ⊗ O2)CNOT = O1 ⊗ (O11 O2).17 
+
+Surface code [[9 , 1, 3]] [[25 , 1, 5]] [[49 , 1, 7]] [[81 , 1, 9]] 
+
+DSPS ( X-self-orthogonal) code [[15 , 1, 3]] [[49 , 1, 5]] [[103 , 1, 7]] [[169 , 1, 9]] 
+
+Triorthogonal (doubled DSPS) code [[31 , 1, 3]] [[113 , 1, 5]] [[255 , 1, 7]] [[433 , 1, 9]] 
+
+Table IV: Parameters of small length DSPS and triorthogonal quantum codes with a local geometry of surface codes. By the argument (1) above O11 O2 is an X-stabilizer of Q2. This implies that O1 ⊗ (O11 O2) is a valid X-stabilizer of S. Next, for any Z-stabilizer of S in the form O1 ⊗ O2 with O1 = O11 ⊗ O12 , we have 
+
+CNOT( O1 ⊗ O2)CNOT = ( O11 O2 ⊗ O12 ) ⊗ (O2).
+
+By argument (2) above, O11 O2 ⊗ O12 is a Z-stabilizer of Q1. Hence the conjugation by CNOT 
+
+preserves the set of all X- and Z-stabilizers of S,which implies that CNOT is a logical operator of 
+
+S. Using the property (3) above, the code S has logical operators • XLIL = ( X ⊗ I) ⊗ I (X is the transversal X
+
+operator on the first n1 qubits of Q1), • ZLIL = ( Z ⊗ I) ⊗ I,• ILXL = ( I ⊗ I) ⊗ X (X is the transversal X
+
+operator on the n2 qubits of Q2), • ILZL = ( I ⊗ I) ⊗ Z.The conjugation of logical operators of S under the action of CNOT gives • CNOT( XLIL)CNOT = XLXL,• CNOT( ILXL)CNOT = ILXL,• CNOT( ZLIL)CNOT = ZLIL,• CNOT( ILZL)CNOT = ZLZL.This implies that CNOT acts as a logical CNOT operator on S.(2) At the beginning of the circuit, the direct sum of Q1 and Q2 stabilizes two logical qubits that can be associated to the logical qubits of Q1 and 
+
+Q2. The logical state of this system at the begin-ning is |+⟩Q1 |0⟩Q2 . The logical state right before the middle CNOT is 
+
+(|0⟩Q1 + e iπ θ |1⟩Q1 ) |0⟩Q2 ,
+
+where the first state is the logical magic state 
+
+|RZ (θ)⟩Q1 . The joint state after applying the transversal CNOT is 
+
+|0⟩Q1 |0⟩Q2 + e iπ θ |1⟩Q1 |1⟩Q2 (V.2) Changing the {| 0⟩ , |1⟩} basis of Q1 to {| +⟩ , |−⟩} 
+
+exchanges (V.2) to 
+
+|+⟩Q1 (|0⟩Q2 + e iπ θ |1⟩Q2 ) + |−⟩ Q1 (|0⟩Q2 − e iπ θ |1⟩Q2 )
+
+√2 .
+
+(V.3) Applying a logical measurement on Q1 in the X-basis, presented in the circuit by MXL , projects the state of the second logical qubit of (V.3) into one of: 
+
+|0⟩Q2 +e iπ θ |1⟩Q2 = |RZ (θ)⟩Q2 (Measurement +1 ),
+
+where no correction is needed. The other potential outcome state is 
+
+|0⟩Q2 −e iπ θ |1⟩Q2 = ZL |RZ (θ)⟩Q2 (Measurement -1 ),
+
+where a correction is needed. Applying ZL, which is the logical Z operator of Q2, will correct the state into 
+
+|0⟩Q2 + e iπ θ |1⟩Q2 = |RZ (θ)⟩Q2 .
+
+□
+
+It should be stressed that our transversal code switching protocol is valid for a long range of code families including surface codes of an arbitrary minimum distance. In particular, the smallest in-stances for surface codes are based on switching between • [[15 , 1, 3]] DSPS code and [[9 , 1, 3]] code for re-alizing logical S gate, and • [[31 , 1, 3]] triorthogonal code discussed in the previous section and the [[9 , 1, 3]] rotated sur-face code for realizing T gate. One can see Appendix E for more information about the structure of these two codes. Furthermore, one can extend the application to any other Z-rotation magic state |RZ (θ)⟩. For in-stance, the conditions of the code switching pro-tocol are satisfied by • the codes generated in Theorem III.8, in-cluding the numerical examples of Table II, to implement any Z-rotation gate for color codes, 18 • the codes generated in Corollary IV.6, in-cluding the numerical examples of Table IV, to implement any Z-rotation gate for rotated surface codes. This extends the set of available logical gates for certain families of quantum codes, such as color codes and surface codes, from Clifford+ T
+
+to Clifford+ RZ (θ) gate set. Such an alternative gate set has a potential resource optimization ap-plication in FT implementation of quantum algo-rithms that rely on multi-controlled gates, includ-ing Grover’s search [82] and Shor’s factoring [83] algorithm, as well as quantum chemistry simula-tions, such as those for the FeMoCo molecule [84]. The proposed code switching scheme can be further improved by analyzing the propagation of errors through the transversal CNOT gates and by updating the logical operator based on the error-location information obtained from some syndrome extraction cycles. Such a correction pro-cedure is analogous to the scheme described in [5, Section 2.2.1], and we postpone such details for a future research. Note also that in [29], a transversal code switch-ing protocol is proposed that is different from what is described above. For instance, it relies on the existence of an initial triorthogonal code, and the code switching happens between two codes of the same length.  
+
+> A. Numerical simulation
+
+This section evaluates the application of the quantum codes introduced in the previous section for preparing non-Clifford magic states. Here, we perform an initial benchmarking simulation to il-lustrate their core properties, and we postpone a comprehensive simulation to future work. The first step to evaluate the performance of our code-switching protocol, for realizing the non-Clifford magic states, is to evaluate the state preparation performance of our newly designed quantum codes. In particular, we are interested in the smallest distance, d = 3 , quantum codes inside of our families of quantum codes with a log-ical T gate and the local geometry of rotated sur-face code. This includes the triorthogonal codes 
+
+[[31 , 1, 3]] and [[39 , 1, 3]] .First, we check the operational resilience of the logical state preparation circuits in the men-tioned codes. For this purpose, we conduct circuit-level Monte Carlo simulations utilizing the qLDPC 
+
+framework [85] backed by the Stim and Sinter 
+
+packages [86]. Our numerical pipeline assesses the intrinsic vulnerability of each designed encoding circuit Uprep by subjecting it to a circuit-level de-polarizing noise model, followed by a noiseless di-agnostic verification sequence. 
+
+Noise model. Let C denote a chosen quantum code for the experiment. A logical state prepa-ration circuit Uprep for C is a circuit that con-sists of state initializations, a structured sequence of single- and two-qubit Clifford operations, and auxiliary measurements designed to prepare a tar-geted logical state |ψL⟩ ∈ C.We model hardware imperfections via a circuit-level depolarizing noise model parameterized by a uniform physical error rate p. The noise channels are injected discretely into the execution timeline as follows: 1. State initialization: Every data qubit ini-tialized in the |0⟩ state is ssubjected to a bit-flip noise with probability p.2. Single-qubit and two-qubit gates: Fol-lowing each single-qubit (respectively two-qubit) gate, a symmetric single-qubit (re-spectively two-qubit) depolarizing channel is applied to the target qubit (respectively the control and target qubits). 3. Measurement assignment: Each mea-surement is followed by a classical bit-flip error with probability p.To calculate the logical fidelity of the state pre-pared by the noisy execution of Uprep , the soft-ware framework appends a mathematically ideal, completely noiseless diagnostic tail Mdiag before parsing the statistical registers. In particular, the simulation blocks per Monte Carlo shot can be de-scribed as a noisy execution of the circuit Uprep 
+
+followed by a noiseless execution directive Mdiag 
+
+containing: • so called “flag detectors” will be added to mid-circuit flag ancilla measurements that were left unaddressed in the circuit. • ideal stabilizer and logical Pauli observ-able measurements (syndrome extractions) required to stabilize the desired logical state. 
+
+Data processing and error rate determi-nation. The sampler generates a batch of Ntotal 
+
+shots containing binary vectors for all detectors and logical observables. Since we are incorporat-ing fault-tolerant verification using flag qubits, a post-selection step is applied. In particular, we consider a trial acceptable if and only if all flag de-tectors are zero. Trials exhibiting non-trivial flag signatures, not all zeros, will be discarded. The 
+
+Discard Rate is evaluated as: 
+
+Rdiscard = Ndiscarded 
+
+Ntotal 
+
+For each accepted shot, the extracted (noiseless) stabilizer syndromes are forwarded to a circuit-level decoder for a follow-up error correction cir-cuit. Then, the decoder predicts a logical correc-tion operator. A Logical Error Event is recorded 19 if the decoder’s prediction fails, i.e., after perform-ing the correction we end up with a wrong logical state. The conditional Logical Error Rate is com-puted strictly over the surviving population as: 
+
+Plog = 1 − Nsuccess 
+
+Naccepted 
+
+where Naccepted shows the number of shots with a trivial flag signature, and Nsuccess represents the number of shots with trivial flag signatures and correct decoder prediction. Finally, simulations at each physical error rate p continue dynamically un-til reaching either a maximum sample roof of 10 7
+
+shots or an accumulated threshold of 10 5 logical failure events.      
+
+> B. Code-switching between [[31 ,1,3]] and distance three surface code
+
+In this section, we discuss the steps required to implement the code-switching protocol described in Theorem V.1, and demonstrate its applica-tion to distance 3 codes, namely the triorthogo-nal [[31 , 1, 3]] code and the [[9 , 1, 3]] surface code. In particular, we perform end-to-end circuit-level simulations for fault tolerant magic state prepa-ration (after replacing T |+⟩ with S |+⟩), demon-strating logical error suppression in the low-noise regime using only 45 physical qubits. The details of our main steps are reflected below. 
+
+|+⟩ state preparation. The first step to pre-pare a logical |T ⟩ magic state in a distance three surface code, using the code-switching circuit of Theorem V.1, is to prepare a logical |+⟩ in a triorthogonal code with a local geometry of ro-tated surface code. Here we take advantage of the 
+
+[[31 , 1, 3]] and [[39 , 1, 3]] triorthogonal codes that we constructed in Section IV. To evaluate the fidelity of the logical |+⟩ state preparation, we first ex-tract a |+⟩ state preparation circuit for each code, and then we add ancilla qubits to make the circuit FT. We take advantage of the MQT QECC package [87] to design such a circuit. In particular, we add three and six mid-circuit flag qubits to the encod-ing circuits of [[31 , 1, 3]] and [[39 , 1, 3]] , respectively to detect certain logical errors. Since both of the mentioned triorthogonal codes have distance three, they are single error correct-ing codes and therefore we use a look-up table de-coder. The logical error rate of this state prepara-tion step can be seen in Figure 10. We note that this work does not present an exhaustive search for depth-optimal encoding cir-cuits or generalized FT strategies for such state preparation tasks. Discovering alternative encod-ing circuits with reduced depth and tailored FT protocols offers a clear path to boosting the state preparation performance of these codes. 
+
+Figure 10: Logical |+⟩ preparation in the codes 
+
+[[31 , 1, 3]] and [[39 , 1, 3]] with the aid of three and six flag qubits. 
+
+|0⟩ state preparation. The second ingredient for executing the code-switching protocol of The-orem V.1 is to prepare a logical |0⟩ state in the 
+
+d = 3 rotated surface code. Here again we use a preparation circuit equipped with an extra flag qubit in order to detect and discard certain logi-cal errors. The logical error rate of our |0⟩ state preparation circuit is given in Figure 11. 
+
+Figure 11: Logical |0⟩ preparation in the d = 3 
+
+rotated surface code with the aid of an ancilla flag qubit. 
+
+Magic state preparation. Next, we simu-late the end-to-end execution of the code-switching protocol described in Theorem V.1 after replacing 
+
+T |+⟩ with its Clifford proxy S |+⟩.We first define a [[40 , 2, 3]] quantum code as the direct sum of the [[31 , 1, 3]] code and the [[9 , 1, 3]] 
+
+rotated surface code. We then concatenate the logical |+⟩ and |0⟩ state preparation circuits for the [[31 , 1, 3]] and [[9 , 1, 3]] codes, respectively, to obtain a logical |+⟩ | 0⟩ state preparation circuit for the [[40 , 2, 3]] code. This circuit consists of 40 data qubits together with four ancilla qubits: three for the FT |+⟩ state preparation of the [[31 , 1, 3]] code and one for the FT |0⟩ state preparation of the 
+
+[[9 , 1, 3]] code. The complete circuit is depicted in Figure 13. Next, we apply a logical S gate to the first logi-cal qubit, followed by a transversal CNOT between the two logical qubits. Finally, we record the out-come of the logical X measurement on the first logical qubit in an additional flag qubit, thereby enforcing the logical X measurement to have a trivial syndrome. 20 The resulting logical error rate and discard rate of our S |+⟩ state preparation are shown in Figure 12. Again here we use the look-up table to deter-mine whether the decoder has predicated a cor-rect logical correction, or if a logical error event has happened. The simulation shows a success-
+
+Figure 12: Logical S |+⟩ state preparation as a Clifford proxy for T |+⟩ state preparation in the 
+
+d = 3 rotated surface code using the code-switching protocol described in Theorem V.1. The simulation uses a total of 45 qubits, including 5 ancilla qubits. ful state preparation for physical error rate of be-low roughly 6 × 10 −4. At the physical error rate of 10 −4, the protocol successfully prepares a ver-ified logical S |+⟩ state in approximately 99% of attempts, with a conditional logical error rate of only ≈ 10 −5.Overall, our simulation uses only 45 qubits, a resource overhead drastically smaller than tradi-tional surface code distillation factories requiring hundreds of qubits for an equivalent code distance. Lastly, although the protocol is demonstrated only for distance-three codes, the simulation vali-dates the complete fault-tolerant implementation of the proposed code-switching scheme. Extending the simulation to larger code distances and evalu-ating the fidelity of the prepared magic states are natural directions for future work.  
+
+> VI. CONCLUSION
+
+In this work, we developed a unified framework for constructing families of r-orthogonal and divis-ible quantum codes supporting transversal logical 
+
+Z-rotation gates at arbitrary levels of the Clifford hierarchy. Beyond developing color-code construc-tions, our framework produces r-orthogonal codes compatible with the local geometry of rotated sur-face codes, therefore extending the applicability of fault-tolerant code switching well beyond previ-ously known settings. Together with an overhead optimization procedure, these constructions pro-vide practical candidates for implementing logical non-Clifford gates within architectures based on rotated surface codes. Building on these constructions, we generalized the transversal CNOT code-switching protocol to this broader class of codes, enabling the fault-tolerant realization of logical Z-rotation gates while preserving the favorable hardware proper-ties of rotated surface codes. As a proof of princi-ple, we presented the first end-to-end circuit-level demonstration of fault-tolerant magic-state prepa-ration in a distance three rotated surface code us-ing only 45 physical qubits, validating the com-plete implementation of the proposed protocol. Several interesting directions remain for future work. These include extending the simulations to larger code distances, investigating the re-source overhead and error-suppression properties of the protocol, investigating more efficient de-coding strategies tailored to the new code fam-ilies, and characterizing the fidelity of the pre-pared logical resource states. More broadly, the framework introduced here opens the possibility of constructing additional families of locally con-strained quantum codes with transversal higher-level Clifford-hierarchy gates, providing new av-enues toward scalable fault-tolerant quantum com-putation. 
+
+> ACKNOWLEDGMENT
+
+We thank other members of the Quantum Infor-mation Lab at Tecnun and the Hitachi Cambridge Laboratory for their support. This work was sup-ported by the Spanish Ministry of Economy and Competitiveness through the MADDIE project (Grant No. PID2022-137099NBC44) and by the Basque Quantum (BasQ) strategy through the De-coders for quantum low-density parity-check codes (qLDPCDec) project. RD gratefully acknowl-edges the kind hospitality and fruitful discussions with Gilles Zémor, Elena Bardini, Eduardo Camps Moreno, and Virgile Guemard at the Institut de Mathématiques de Bordeaux, and David Feder, Mohsen Mehrani, and Ali Moradi at the Depart-ment of Physics and Astronomy at the University of Calgary. Parts of this research were developed during his visits to these institutions.         
+
+> [1] Daniel Gottesman. Class of quantum error-correcting codes saturating the quantum ham-ming bound. Physical Review A , 54(3):1862, 1996. [2] A Robert Calderbank, Eric M Rains, PM Shor, and Neil JA Sloane. Quantum error correction via codes over gf (4). IEEE Transactions on In-formation Theory , 44(4):1369–1387, 1998.
+
+21 
+
+[3] Andrew M Steane. Active stabilization, quantum computation, and quantum state synthesis. Phys-ical Review Letters , 78(11):2252, 1997. [4] Emanuel Knill. Scalable quantum computing in the presence of large detected-error rates. Phys-ical Review A—Atomic, Molecular, and Optical Physics , 71(4):042322, 2005. [5] Sascha Heußen and Janine Hilder. Efficient fault-tolerant code switching via one-way transversal cnot gates. Quantum , 9:1846, 2025. [6] Bryan Eastin and Emanuel Knill. Restrictions on transversal encoded quantum gate sets. Physical review letters , 102(11):110502, 2009. [7] Aranya Chakraborty and Daniel Gottesman. No-go theorem on fault tolerant gadgets for multiple logical qubits. arXiv preprint arXiv:2602.13395 ,2026. [8] Hector Bombin and Miguel Angel Martin-Delgado. Topological quantum distillation. Phys-ical review letters , 97(18):180501, 2006. [9] Nikolas P Breuckmann and Simon Burton. Fold-transversal clifford gates for quantum codes. 
+
+Quantum , 8:1372, 2024. [10] Dominic Horsman, Austin G Fowler, Simon De-vitt, and Rodney Van Meter. Surface code quan-tum computing by lattice surgery. New Journal of Physics , 14(12):123011, 2012. [11] Jonathan E Moussa. Transversal clifford gates on folded surface codes. Physical Review A,94(4):042316, 2016. [12] Yi-Cong Zheng, Ching-Yi Lai, Todd A Brun, and Leong-Chuan Kwek. Constant depth fault-tolerant clifford circuits for multi-qubit large block codes. Quantum Science & Technology ,5(4):045007, 2020. [13] Sergey Bravyi and Alexei Kitaev. Universal quantum computation with ideal clifford gates and noisy ancillas. Physical Review A—Atomic, Molecular, and Optical Physics , 71(2):022316, 2005. [14] Emanuel Knill. Fault-tolerant postselected quan-tum computation: Threshold analysis. arXiv preprint quant-ph/0404104 , 2004. [15] Daniel Litinski. Magic state distillation: Not as costly as you think. Quantum , 3:205, 2019. [16] Michael E Beverland, Aleksander Kubica, and Krysta M Svore. Cost of universality: A compara-tive study of the overhead of state distillation and code switching with color codes. PRX Quantum ,2(2):020341, 2021. [17] Sergey Bravyi and Jeongwan Haah. Magic-state distillation with low overhead. Physical Re-view A—Atomic, Molecular, and Optical Physics ,86(5):052329, 2012. [18] Cody Jones. Multilevel distillation of magic states for quantum computing. Physical Re-view A—Atomic, Molecular, and Optical Physics ,87(4):042305, 2013. [19] Hugo Jacinto, Xavier Valcarce, Victor Barizien, Élie Gouzien, and Nicolas Sangouard. Exploring the landscape of compact magic-state distillation factories, 2026. [20] Craig Gidney, Noah Shutty, and Cody Jones. Magic state cultivation: growing t states as cheap as cnot gates. arXiv preprint arXiv:2409.17595 ,2024. [21] Zi-Han Chen, Ming-Cheng Chen, Chao-Yang Lu, and Jian-Wei Pan. Efficient magic state cultiva-tion on RP 2. arXiv preprint arXiv:2503.18657 ,2025. [22] I-Chi Chen, Matheus da Silva Fonseca, and An-drew Sornborger. Efficient magic state cultivation for √T gates, 2026. [23] Jahan Claes. Cultivating t states on the surface code with only two-qubit gates. arXiv preprint arXiv:2509.05232 , 2025. [24] Yotam Vaknin, Shoham Jacoby, Arne Grimsmo, and Alex Retzker. Efficient magic state cul-tivation on the surface code. arXiv preprint arXiv:2502.01743 , 2025. [25] Jonas T Anderson, Guillaume Duclos-Cianci, and David Poulin. Fault-tolerant conversion between the steane and reed-muller quantum codes. Phys-ical review letters , 113(8):080501, 2014. [26] Héctor Bombín. Gauge color codes: optimal transversal gates and gauge fixing in topologi-cal stabilizer codes. New Journal of Physics ,17(8):083002, 2015. [27] Héctor Bombín. Dimensional jump in quan-tum error correction. New Journal of Physics ,18(4):043038, 2016. [28] Lucas Daguerre and Isaac H Kim. Code switch-ing revisited: Low-overhead magic state prepara-tion using color codes. Physical Review Research ,7(2):023080, 2025. [29] Dawei Jiao, Mahdi Bayanifar, Alexei Ashikhmin, and Olav Tirkkonen. Low overhead universal quantum computation with triorthogonal codes. 
+
+arXiv preprint arXiv:2510.05708 , 2025. [30] Earl T Campbell, Barbara M Terhal, and Christophe Vuillot. Roads towards fault-tolerant universal quantum computation. Nature ,549(7671):172–179, 2017. [31] Louis Golowich, Kathleen Chang, and Guanyu Zhu. Constant-overhead addressable gates via single-shot code switching. arXiv preprint arXiv:2510.06760 , 2025. [32] Yingkai Ouyang, Yumang Jing, and Gavin KBrennen. Measurement-free code-switching pro-tocol for low-overhead quantum computation us-ing permutation-invariant codes. PRX Quantum ,6(4):040341, 2025. [33] H Bombin and MA Martin-Delgado. Exact topo-logical quantum order in d= 3 and beyond: Branyons and brane-net condensates. Physi-cal Review B—Condensed Matter and Materials Physics , 75(7):075103, 2007. [34] Color code. In Victor V. Albert and Philippe Faist, editors, The Error Correction Zoo . 2023. [35] Friederike Butt, Sascha Heußen, Manuel Rispler, and Markus Müller. Fault-tolerant code-switching protocols for near-term quantum processors. PRX Quantum , 5(2):020345, 2024. [36] Christine Li, John Preskill, and Qian Xu. Transversal dimension jump for product qldpc codes. arXiv preprint arXiv:2510.07269 , 2025. [37] Shi Jie Samuel Tan, Yifan Hong, Ting-Chun Lin, Michael J Gullans, and Min-Hsiu Hsieh. Single-shot universality in quantum LDPC codes via code-switching. arXiv preprint arXiv:2510.08552 ,2025. 22 
+
+[38] Jianshuo Gao, Xiao Yuan, and Yuan Yao. A re-source comparison of logical t-state preparation. 
+
+arXiv preprint arXiv:2605.26522 , 2026. [39] Narayanan Rengaswamy, Robert Calderbank, Michael Newman, and Henry D Pfister. On op-timality of css codes for transversal t. IEEE Journal on Selected Areas in Information Theory ,1(2):499–514, 2020. [40] Sergey Bravyi and Andrew Cross. Doubled color codes. arXiv preprint arXiv:1509.03239 , 2015. [41] Shubham P Jain and Victor V Albert. Transver-sal clifford and t-gate codes of short length and high distance. IEEE Journal on Selected Areas in Information Theory , 2025. [42] Elena Berardini, Reza Dastbasteh, Josu Etx-ezarreta Martinez, Shreyas Jain, and Olatz Sanz Larrarte. Asymptotically good CSS-T codes and a new construction of triorthogonal codes. IEEE Journal on Selected Areas in Information Theory ,2025. [43] Sepehr Nezami and Jeongwan Haah. Classifica-tion of small triorthogonal codes. Physical Review A, 106(1):012437, 2022. [44] Eduardo Camps-Moreno, Hiram H López, Gretchen L Matthews, Diego Ruano, Rodrigo San-José, and Ivan Soprunov. An algebraic characterization of binary css-t codes and cyclic css-t codes for quantum fault tolerance: E. camps-moreno et al. Quantum Information Processing , 23(6):230, 2024. [45] Eduardo Camps-Moreno, Hiram H López, Gretchen L Matthews, Narayanan Rengaswamy, and Rodrigo San-José. Transversal gates for quan-tum css codes. arXiv preprint arXiv:2601.21514 ,2026. [46] Adam Wills, Min-Hsiu Hsieh, and Hayata Ya-masaki. Constant-overhead magic state distilla-tion. Nature Physics , 21(11):1842–1846, 2025. [47] Quynh T Nguyen. Good binary quantum codes with transversal ccz gate. In Proceedings of the 57th Annual ACM Symposium on Theory of Com-puting , pages 697–706, 2025. [48] Louis Golowich and Venkatesan Guruswami. Asymptotically good quantum codes with transversal non-clifford gates. In Proceedings of the 57th Annual ACM Symposium on Theory of Computing , pages 707–717, 2025. [49] Louis Golowich and Ting-Chun Lin. Quantum ldpc codes with transversal non-clifford gates via products of algebraic codes. In Proceedings of the 57th Annual ACM Symposium on Theory of Com-puting , pages 689–696, 2025. [50] Thomas R Scruby, Arthur Pesah, and Mark Web-ster. Quantum rainbow codes: Achieving lin-ear rate, growing distance and transversal non-clifford gates with generalised colour codes. arXiv preprint arXiv:2408.13130 , 2024. [51] Lucas Daguerre, Robin Blume-Kohout, Natalie C Brown, David Hayes, and Isaac H Kim. Ex-perimental demonstration of high-fidelity logical magic states from code switching. Physical Re-view X , 15(4):041008, 2025. [52] Ivan Pogorelov, Friederike Butt, Lukas Postler, Christian D Marciniak, Philipp Schindler, Markus Müller, and Thomas Monz. Experimental fault-tolerant code switching. Nature Physics ,21(2):298–303, 2025. [53] Laxmidhar Biswal, Debjyoti Bhattacharjee, Anu-pam Chattopadhyay, and Hafizur Rahaman. Techniques for fault-tolerant decomposition of a multicontrolled toffoli gate. Physical Review A ,100(6):062326, 2019. [54] Simon Forest, David Gosset, Vadym Kliuchnikov, and David McKinnon. Exact synthesis of single-qubit unitaries over clifford-cyclotomic gate sets. 
+
+Journal of Mathematical Physics , 56(8):082201, 2015. [55] Marius Bothe, Christoph Sünderhauf, Michael J Witham, Earl T Campbell, and Nick S Blunt. More efficient clifford+ t synthesis for small-angle rotations and application to trotterization. arXiv preprint arXiv:2605.31544 , 2026. [56] A Robert Calderbank and Peter W Shor. Good quantum error-correcting codes exist. Physical Review A , 54(2):1098–1105, 1996. [57] Andrew Steane. Multiple-particle interference and quantum error correction. Proceedings of the Royal Society of London. Series A: Math-ematical, Physical and Engineering Sciences ,452(1954):2551–2577, 1996. [58] 2D color code. In Victor V. Albert and Philippe Faist, editors, The Error Correction Zoo . 2023. [59] Mark A Webster, Armanda O Quintavalle, and Stephen D Bartlett. Transversal diagonal logi-cal operators for stabiliser codes. New Journal of Physics , 25(10):103018, 2023. [60] Heather Leitch and Alastair Kay. Transversal gates for highly asymmetric qldpc codes. arXiv preprint arXiv:2506.15905 , 2025. [61] Andrew M Steane. Efficient fault-tolerant quan-tum computing. Nature , 399(6732):124–126, 1999. [62] Markus Grassl and Thomas Beth. Cyclic quantum error–correcting codes and quantum shift regis-ters. Proceedings of the Royal Society of London. Series A: Mathematical, Physical and Engineering Sciences , 456(2003):2689–2706, 2000. [63] Theerapat Tansuwannont, Yugo Takada, and Keisuke Fujii. Clifford gates with logical transver-sality for self-dual CSS codes. arXiv preprint arXiv:2503.19790 , 2025. [64] Markus Grassl. Code Tables: Bounds on the pa-rameters of various types of codes. http://www. codetables.de/ , accessed on 2026-03-25. [65] Salah A Aly, Andreas Klappenecker, and Pradeep Kiran Sarvepalli. Remarkable degener-ate quantum stabilizer codes derived from duadic codes. In 2006 IEEE International Symposium on Information Theory , pages 1105–1108. IEEE, 2006. [66] Reza Dastbasteh and Petr Lisoněk. New quantum codes from self-dual codes over F4. Designs, Codes and Cryptography , 92(3):787–801, 2024. [67] Reza Dastbasteh, Josu Etxezarreta Martinez, An-drew Nemec, Antonio deMarti iOlius, and Pedro Crespo Bofill. An infinite class of quantum codes derived from duadic constacyclic codes. Quantum Information Processing , 24(7):204, 2025. [68] Avanti Ketkar, Andreas Klappenecker, Santosh Kumar, and Pradeep Kiran Sarvepalli. Nonbi-nary stabilizer codes over finite fields. IEEE trans-actions on information theory , 52(11):4892–4914, 2006. 23 
+
+[69] Reza Dastbasteh, Olatz Sanz Larrarte, Josu Etx-ezarreta Martinez, Antonio deMarti iOlius, Javier Oliva del Moral, and Pedro Crespo Bofill. Quan-tum css duadic and triadic codes: New insights and properties. In International Workshop on the Arithmetic of Finite Fields , pages 70–87. Springer, 2024. [70] Koichi Betsumiya and Akihiro Munemasa. On triply even binary codes. Journal of the London Mathematical Society , 86(1):1–16, 2012. [71] Stergios Koutsioumpas, Darren Banfield, and Alastair Kay. The smallest code with transver-sal T. arXiv preprint arXiv:2210.14066 , 2022. [72] Aleksander Kubica and Michael E Beverland. Universal transversal gates with color codes: A simplified approach. Physical Review A,91(3):032330, 2015. [73] Héctor Bombín. An introduction to topological quantum codes. arXiv preprint arXiv:1311.0277 ,2013. [74] Theerapat Tansuwannont and Debbie Leung. Achieving fault tolerance on capped color codes with few ancillas. PRX Quantum , 3(3):030322, 2022. [75] Tomas Jochym-O’Connor and Stephen DBartlett. Stacked codes: Universal fault-tolerant quantum computation in a two-dimensional layout. Physical Review A , 93(2):022323, 2016. [76] Jingzhen Hu, Qingzhong Liang, and Robert Calderbank. Designing the quantum channels in-duced by diagonal gates. Quantum , 6:802, 2022. [77] Antonio deMarti iOlius, Patricio Fuentes, Román Orús, Pedro M Crespo, and Josu Etxezarreta Martinez. Decoding algorithms for surface codes. 
+
+Quantum , 8:1498, 2024. [78] Austin G Fowler, Matteo Mariantoni, John M Martinis, and Andrew N Cleland. Surface codes: Towards practical large-scale quantum computa-tion. Physical Review A—Atomic, Molecular, and Optical Physics , 86(3):032324, 2012. [79] Rajeev Acharya, Dmitry A. Abanin, Laleh Aghababaie-Beni, Igor Aleiner, Trond I. Ander-sen, Markus Ansmann, Frank Arute, Kunal Arya, Abraham Asfaw, Nikita Astrakhantsev, Juan Ata-laya, Ryan Babbush, Dave Bacon, Brian Ballard, Joseph C. Bardin, Johannes Bausch, Andreas Bengtsson, Alexander Bilmes, Sam Blackwell, Sergio Boixo, Gina Bortoli, Alexandre Bourassa, Jenna Bovaird, Leon Brill, Michael Broughton, David A. Browne, Brett Buchea, Bob B. Buck-ley, David A. Buell, Tim Burger, Brian Bur-kett, Nicholas Bushnell, Anthony Cabrera, Juan Campero, Hung-Shen Chang, Yu Chen, Zijun Chen, Ben Chiaro, Desmond Chik, Charina Chou, Jahan Claes, Agnetta Y. Cleland, Josh Cogan, Roberto Collins, Paul Conner, William Courtney, Alexander L. Crook, Ben Curtin, Sayan Das, Alex Davies, Laura De Lorenzo, Dripto M. Debroy, Sean Demura, Michel Devoret, Agustin Di Paolo, Paul Donohoe, Ilya Drozdov, Andrew Dunsworth, Clint Earle, Thomas Edlich, Alec Eickbusch, Aviv Moshe Elbag, Mahmoud Elzouka, Cather-ine Erickson, Lara Faoro, Edward Farhi, Vini-cius S. Ferreira, Leslie Flores Burgos, Ebrahim Fo-rati, Austin G. Fowler, Brooks Foxen, Suhas Gan-jam, Gonzalo Garcia, Robert Gasca, Élie Genois, William Giang, Craig Gidney, Dar Gilboa, Raja Gosula, Alejandro Grajales Dau, Dietrich Grau-mann, Alex Greene, Jonathan A. Gross, Steve Habegger, John Hall, Michael C. Hamilton, Mon-ica Hansen, Matthew P. Harrigan, Sean D. Har-rington, Francisco J. H. Heras, Stephen Heslin, Paula Heu, Oscar Higgott, Gordon Hill, Jeremy Hilton, George Holland, Sabrina Hong, Hsin-Yuan Huang, Ashley Huff, William J. Huggins, Lev B. Ioffe, Sergei V. Isakov, Justin Iveland, Evan Jef-frey, Zhang Jiang, Cody Jones, Stephen Jor-dan, Chaitali Joshi, Pavol Juhas, Dvir Kafri, Hui Kang, Amir H. Karamlou, Kostyantyn Kechedzhi, Julian Kelly, Trupti Khaire, Tanuj Khattar, Mostafa Khezri, Seon Kim, Paul V. Klimov, An-drey R. Klots, Bryce Kobrin, Pushmeet Kohli, Alexander N. Korotkov, Fedor Kostritsa, Robin Kothari, Borislav Kozlovskii, John Mark Kreike-baum, Vladislav D. Kurilovich, Nathan Lacroix, David Landhuis, Tiano Lange-Dei, Brandon W. Langley, Pavel Laptev, Kim-Ming Lau, Loïck Le Guevel, Justin Ledford, Joonho Lee, Kenny Lee, Yuri D. Lensky, Shannon Leon, Brian J. Lester, Wing Yan Li, Yin Li, Alexander T. Lill, Wayne Liu, William P. Livingston, Aditya Locharla, Erik Lucero, Daniel Lundahl, Aaron Lunt, Sid Madhuk, Fionn D. Malone, Ashley Mal-oney, Salvatore Mandrà, James Manyika, Leigh S. Martin, Orion Martin, Steven Martin, Cameron Maxfield, Jarrod R. McClean, Matt McEwen, Seneca Meeks, Anthony Megrant, Xiao Mi, Kevin C. Miao, Amanda Mieszala, Reza Molavi, Sebastian Molina, Shirin Montazeri, Alexis Mor-van, Ramis Movassagh, Wojciech Mruczkiewicz, Ofer Naaman, Matthew Neeley, Charles Neill, Ani Nersisyan, Hartmut Neven, Michael New-man, Jiun How Ng, Anthony Nguyen, Murray Nguyen, Chia-Hung Ni, Murphy Yuezhen Niu, Thomas E. O’Brien, William D. Oliver, Alex Opremcak, Kristoffer Ottosson, Andre Petukhov, Alex Pizzuto, John Platt, Rebecca Potter, Orion Pritchard, Leonid P. Pryadko, Chris Quintana, Ganesh Ramachandran, Matthew J. Reagor, John Redding, David M. Rhodes, Gabrielle Roberts, Eliott Rosenberg, Emma Rosenfeld, Pe-dram Roushan, Nicholas C. Rubin, Negar Saei, Daniel Sank, Kannan Sankaragomathi, Kevin J. Satzinger, Henry F. Schurkus, Christopher Schus-ter, Andrew W. Senior, Michael J. Shearn, Aaron Shorter, Noah Shutty, Vladimir Shvarts, Shrad-dha Singh, Volodymyr Sivak, Jindra Skruzny, Spencer Small, Vadim Smelyanskiy, W. Clarke Smith, Rolando D. Somma, Sofia Springer, George Sterling, Doug Strain, Jordan Suchard, Aaron Szasz, Alex Sztein, Douglas Thor, Al-fredo Torres, M. Mert Torunbalci, Abeer Vaish-nav, Justin Vargas, Sergey Vdovichev, Guifre Vi-dal, Benjamin Villalonga, Catherine Vollgraff Hei-dweiller, Steven Waltman, Shannon X. Wang, Brayden Ware, Kate Weber, Travis Weidel, Theodore White, Kristi Wong, Bryan W. K. Woo, Cheng Xing, Z. Jamie Yao, Ping Yeh, Bicheng Ying, Juhwan Yoo, Noureldin Yosri, Grayson Young, Adam Zalcman, Yaxing Zhang, Ningfeng Zhu, Nicholas Zobrist, Google Quantum AI, and Collaborators. Quantum error correc-24 
+
+tion below the surface code threshold. Nature ,638(8052):920–926, Feb 2025. [80] Dolev Bluvstein, Simon J. Evered, Alexan-dra A. Geim, Sophie H. Li, Hengyun Zhou, Tom Manovitz, Sepehr Ebadi, Madelyn Cain, Marcin Kalinowski, Dominik Hangleiter, J. Pablo Bonilla Ataides, Nishad Maskara, Iris Cong, Xun Gao, Pedro Sales Rodriguez, Thomas Karolyshyn, Giulia Semeghini, Michael J. Gullans, Markus Greiner, Vladan Vuletić, and Mikhail D. Lukin. Logical quantum processor based on reconfig-urable atom arrays. Nature , 626(7997):58–65, Feb 2024. [81] Xinlan Zhou, Debbie W Leung, and Isaac LChuang. Methodology for quantum logic gate con-struction. Physical Review A , 62(5):052316, 2000. [82] Lov K Grover. A fast quantum mechanical algo-rithm for database search. In Proceedings of the twenty-eighth annual ACM symposium on Theory of computing , pages 212–219, 1996. [83] Peter W Shor. Algorithms for quantum compu-tation: discrete logarithms and factoring. In Pro-ceedings 35th annual symposium on foundations of computer science , pages 124–134. Ieee, 1994. [84] Markus Reiher, Nathan Wiebe, Krysta M Svore, Dave Wecker, and Matthias Troyer. Elucidat-ing reaction mechanisms on quantum computers. 
+
+Proceedings of the national academy of sciences ,114(29):7555–7560, 2017. [85] Michael A. Perlin. qLDPC. https://github. com/qLDPCOrg/qLDPC , 2023. [86] Craig Gidney. Stim: a fast stabilizer circuit sim-ulator. Quantum , 5:497, July 2021. [87] Robert Wille, Lucas Berent, Tobias Forster, Ja-gatheesan Kunasaikaran, Kevin Mato, Tom Pe-ham, Nils Quetschlich, Damian Rovara, Aaron Sander, Ludwig Schmid, Daniel Schoenberger, Yannick Stade, and Lukas Burgholzer. The MQT handbook: A summary of design automation tools and software for quantum computing. In IEEE International Conference on Quantum Software (QSW) , 2024. [88] Arthur Chalom Pesah. Quantum error correction in three dimensions and beyond . PhD thesis, UCL (University College London), 2026. [89] Jurgen Bierbrauer. Introduction to coding theory .Chapman and Hall/CRC, 2016. 
+
+Appendix A: Color codes and logical gates 
+
+Here, we provide a more detailed definition of topological color codes using the language of cell complexes and the materials of [50, 72, 88]. Let 
+
+L be a finite, d-dimensional cell complex, and let 
+
+G be its 1-skeleton (the graph consisting of the vertices and edges of L). We can define a d-dimensional color code on L if the following two conditions are met: • Regularity : The graph G is (d + 1) -regular, i.e., every vertex is incident to exactly d + 1 
+
+edges. • Colorability : The d-cells (the highest-dimensional faces) of L admit a (d + 1) -coloring such that any two d-cells sharing a 
+
+(d − 1) -dimensional face are assigned differ-ent colors. Given such a complex, the quantum code is con-structed as follows. A physical qubit is associated with each vertex (0-cell) of L. The stabilizer group is generated by X-type and Z-type operators. An 
+
+X-type stabilizer is associated with each x-cell, and a Z-type operator is associated with each z-cell, acting non-trivially as Pauli X or Z on the qubits within those respective cells. The dimen-sions of these cells must satisfy 
+
+2 ≤ x + z ≤ d + 2 .
+
+The parameter d defines the topological dimension of the color code. To encode logical information, we consider color codes defined on manifolds with boundaries. Fol-lowing the convention of punctured closed lattices, these are constructed by selecting a vertex v ∈ L 
+
+and removing it along with all incident k-cells for 
+
+1 ≤ k ≤ d. Such puncturing creates a single connected boundary, yielding a code that encodes 
+
+k = 1 logical qubit. 
+
+1. Transversal gates 
+
+For the rest of this section, we discuss the con-ditions for realizing a logical phase gate through the transversal application of different phase gates on data qubits for arbitrary CSS codes. Here the condition is for realizing a logical gate without re-quiring a correction operator. For more details and the proof, one can see [59] and [60]. 
+
+Theorem A.1. Let Q be a quantum CSS code of length n with the X-stabilizer generator set HX
+
+and X-logical operator LX = {u}. Then applying the transversal operator 
+
+> n
+
+O
+
+> i=1
+
+RZ ( π
+
+2r−1 )ti
+
+to the data qubits realizes a logical RZ ( π 
+
+> 2r−1
+
+)t gate if • Pni=1 tiui ≡ t (mod 2 r )
+
+• Pni=1 tivi ≡ 0 (mod 2 r ) for each v ∈ HX ,and • Schur product of (t1, t 2, . . . , t n) and any 2 ≤
+
+s ≤ r number of vectors in HX ∪ LX has weight divisible by 2r−s+1 .
+
+Appendix B: Supplementary materials of Section III 
+
+Proof of Theorem III.1. Following similar steps as in other relevant proofs, for example see [40–42], 25 one gets a new quantum code with parameters 
+
+[[2 n1 + n2, 1, min {d1, d 2 + 2 }]] . Moreover, the re-sulted quantum code corresponds to the CSS code of C2 ⊆ C1, where C2 satisfies C2 ⊆ C1 ⊆ C⊥ 
+
+> 2
+
+.This implies that C1 \ C2 ⊆ C⊥ 
+
+> 2
+
+\ C⊥ 
+
+> 1
+
+. Thus, 
+
+dx ≥ dz for such code. That is why we ignored the X-distance in the theorem. The new quantum code Q has the X-stabilizer generators 
+
+G =
+
+ E1 E1 0n2
+
+0n1 0n1 E2
+
+0n1 1n1 1n2
+
+ ,
+
+Note that by Theorem II.5 the code Q2 has a transversal logical RZ ( π 
+
+> 2r−1
+
+) in the form of 
+
+O2 =
+
+> n2
+
+O
+
+> i=1
+
+RZ ( π
+
+2r−1 )t,
+
+where n2t ≡ 1 (mod 2 r ). Since n1 is odd, we can choose an operator 
+
+O1 =
+
+> n1
+
+O
+
+> i=1
+
+RZ ( π
+
+2r−1 )s,
+
+satisfying n1s1 ≡ − 1 (mod 2 r ), for si ∈ Z2r . Now the operator 
+
+O = O−11 ⊗ O1 ⊗ O2
+
+gives the desired logical action. This is because one can choose the logical X-operator to be the all 1
+
+vector u. Now the exponent vector t has the form 
+
+(−sn1 , s n1 , t n2 ). One can check easily that all the Schur products satisfy the conditions of Theorem A.1. For instance, u∗t ≡ 1 (mod 2 r ), and the first two blocks generate 2r divisible codes, the third row satisfies 
+
+(0 n1 , 1n1 , 1n2 ) ∗ t ≡ 1 − 1 = 0 (mod 2 r ),
+
+and the rest of Schur products will be implied sim-ilarly. Thus O gives a logical RZ ( π 
+
+> 2r−1
+
+). □
+
+We just remark that, in the above proof, if n1 +
+
+n2 ≡ 0 (mod 2 k), one can choose the physical op-erator to be 
+
+O =
+
+> 2n1+n2
+
+O
+
+> i=1
+
+M, 
+
+where M = ( RZ ( π 
+
+> 2k−1
+
+)) n−11 .
+
+Proof of Theorem III.6. The proof follows from applying the result of Corollary III.2 recursive us-ing all-even codes of different lengths and the pre-viously generated quantum code of smaller dis-tance. More precisely, to build a quantum code with minimum distance d = 2 k − 1, one needs three ingredients, namely: 1. the quantum code of distance d = 2 k − 3
+
+obtained from the previous step, 2. two copies of all-even code of distance 2k −1,and 3. a new check qubit connected to all data qubits of one pair of all-even code, and con-nected to all data qubits in the top layer of the previous block. As an example, one can see the structure of 
+
+[[17 , 1, 5]] in Figure 3. We proceed with induction on k. The initial cases for k = 2 and 3 have already been dis-cussed ( [[7 , 1, 3]] and [[17 , 1, 5]] codes). So suppose that a 2D quantum self-orthogonal code Q with parameters [[2 k2 − 1, 1, 2k − 1]] containing k2 −
+
+k − 3 X-stabilizer generators of weight four, and the rest of X-stabilizer generators having weights 
+
+8, 12 , 16 , . . . , 4k − 4. We assume this code has the geometry discussed in the theorem (2D, three col-orable, top layer representing a logical X and Z). We modify the code Q and two copies of the all-even code of length 2k + 1 using the result of Corollary III.2 to generate a new quantum code 
+
+Q′ with the X stabilizer generators of the form matrix G shown in (III.1). Since the top of layer of data qubits in Q represent a minimum weight logical operator, the code Q′ has a Tanner graph, where • the bottom part is the Tanner graph of Q,• on the top there are 2 layers of 2k + 1 
+
+data qubits connected through 2k wight four checks, and • in the middle there is a check qubit connect-ing a layer of 2k + 1 from the top with the logical operator of Q through a check which has weight 2k + 1 + 2 k − 1 = 4 k.Now Corollary III.2 implies that the top layer re-sembles a minimum weight logical operator, and hence the claimed triangular 2D representation is preserved. One can color the middle check with a color that is different from the two colors on the top layer of Q, and the new 2k checks of all-even codes by the remaining two colors. Hence it is three colorable. The self-orthogonality part and the claims about parameters and logical action are other direct consequence of Corollary III.2. So we only prove the fact about the weight of stabilizer generators. The code Q has k2 −k+3 weight four generators. Adding the new 2k weight four generators give the total of 
+
+k2 + k − 3 = ( k + 1) 2 − (k + 1) − 3
+
+weight four stabilizer generators for Q′. Finally, the new wight 4k (connecting top layer of Q and 26 all data qubits of one pair of all-even code, called middle check above) stabilizer generator described above, gives a set of (k+1) −2 stabilizer generators with weights 
+
+8, 12 , 16 , . . . , 4k − 4, 4k. 
+
+□
+
+Proof of Theorem III.7. We proceed recursively by applying the doubling construction of Theorem III.1 to the following pair of codes; (a) distance 
+
+2k + 1 quantum code of Theorem III.6 and, (b) the distance 2k − 1 quantum code obtained from the previous round of recursion. The case with distance d = 1 (the [[1 , 1, 1]] code) follows trivially, and d = 3 was already mentioned in Example III.4 (the [[15 , 1, 3]] Reed-Muller code). Suppose that the result is true for m = 2 k − 1, i.e. this approach implies the existence of a family of quantum codes with parameters 
+
+[[ 23 k(k + 1)(2 k + 1) − (2 k + 1) , 1, 2k − 1]] 
+
+that realizes logical T gate through transversal ac-tion of powers of T on physical qubits, and all 
+
+X-stabilizers have weights divisible by 8, for each 
+
+1 ≤ m ≤ 2k − 1. Next we prove the result for m =2k+1 . Applying the doubling construction of The-orem III.1 to (a) the [[ n1 = 2( k + 1) 2 − 1, 1, 2k + 1]] 
+
+self-orthogonal code and (b) the previously ob-tained 
+
+[[ n2 = 23 k(k + 1)(2 k + 1) − (2 k + 1) , 1, 2k − 1]] 
+
+code gives a new code with parameters 
+
+[[2 n1 + n2, 1, 2k + 1]] .
+
+An easy computation shows that 
+
+2n1 + n2 = 23 (k + 1)( k + 2)(2 k + 3) − (2 k + 3) .
+
+So we only need to check the claim about the weight of X-stabilizers. The set of new X sta-bilizer generators are in the form 
+
+G =
+
+ E1 E1 0n2
+
+0n1 0n1 E2
+
+0n1 1n1 1n2
+
+ ,
+
+where E1 and E2 are the X-stabilizer generators of the (a) and (b) codes above, respectively. Since 
+
+E1 generates a doubly even code, and E2 a triply even code, we conclude that the first two blocks of matrix G above, and any linear combination of them, always have triply even weights. A linear combination of the last row with the other blocks implies an X-stabilizer of the form 
+
+u = ( v, v + 1n1 , w + 1n2 ),
+
+where v and w are generated by E1 and E2. More-over, we have 
+
+wt( u) ≡ n1 + n2 = (2( k + 1) 2 − 1) + ( 23 k(k + 1)(2 k + 1) − (2 k + 1)) 
+
+≡ 43 k(k + 1)( k + 2) ≡ 0 (mod 8) .
+
+The last equality is because 6 | k(k + 1)( k + 2) .Now since it is a triply even code, Theorem III.1 implies the existence of transversal logical T gate and completes the proof. □
+
+Below, we give the proof of the identities given in (III.3) and (III.4). 
+
+Lemma B.1. Let r, k ≥ 1 be two integers and 
+
+Sr (k) = 2   kX
+
+> i=1
+
+Sr−1(i) − 1,
+
+where Sr (1) = 1 for all r ≥ 1 and 
+
+S1(k) = 2 k − 1.
+
+Then for each r ≥ 1 and k ≥ 2, we have 
+
+Sr (k) = 
+
+> r
+
+X
+
+> i=0
+
+2i
+
+i + k − 2
+
+i
+
+
+
+.
+
+Proof. We proceed by induction on r ≥ 1. Base case ( r = 1 ): By definition, S1(k) = 2 k − 1. Using the summation formula, we have 
+
+> 1
+
+X
+
+> i=0
+
+2i
+
+i + k − 2
+
+i
+
+
+
+=
+
+k − 20
+
+
+
++ 2 
+
+k − 11
+
+
+
+= 1 + 2( k − 1) = 2 k − 1.
+
+Hence the base case holds. So assume the hypoth-esis holds for some r ≥ 1 and for all k ≥ 2. We evaluate Sr+1 (k) as 
+
+Sr+1 (k) = 2 
+
+> k
+
+X
+
+> i=1
+
+Sr (i)
+
+!
+
+− 1.
+
+Substituting the inductive hypothesis gives 
+
+Sr+1 (k) = 2 
+
+
+
+> k
+
+X
+
+> i=1
+> r
+
+X
+
+> j=0
+
+2j
+
+j + i − 2
+
+j
+
+ − 1.
+
+Interchanging the order of summation 
+
+Sr+1 (k) = 2 
+
+
+
+> r
+
+X
+
+> j=0
+
+2jkX
+
+> i=1
+
+j + i − 2
+
+j
+
+ − 1.
+
+We simplify the inner sum using the hockey-stick identity, Pni=r
+
+ ir
+
+ =  n+1 
+
+> r+1
+
+. For our inner sum, we have 
+
+> k
+
+X
+
+> i=1
+
+j + i − 2
+
+j
+
+
+
+=
+
+j − 1
+
+j
+
+
+
++
+
+jj
+
+
+
++
+
+j + 1 
+
+j
+
+
+
++ · · · +
+
+j + k − 2
+
+j
+
+
+
+.27 Since  j−1
+
+> j
+
+ = 0 , we have 
+
+> k
+
+X
+
+> i=1
+
+j + i − 2
+
+j
+
+
+
+=
+
+j + k − 1
+
+j + 1 
+
+
+
+.
+
+Substituting this back into Sr+1 (k) gives 
+
+Sr+1 (k) = 
+
+
+
+> r
+
+X
+
+> j=0
+
+2j+1 
+
+j + k − 1
+
+j + 1 
+
+ − 1.
+
+Choosing i = j + 1 in the above sum implies 
+
+Sr+1 (k) = 
+
+> r+1
+
+X
+
+> i=1
+
+2i
+
+i + k − 2
+
+i
+
+!
+
+− 1
+
+Finally, observe that when i = 0 , term of the target summation is 
+
+20
+
+0 + k − 20
+
+
+
+= 1 .
+
+Thus we can therefore replace the main sum by 
+
+Sr+1 (k) = 
+
+> r+1
+
+X
+
+> i=0
+
+2i
+
+i + k − 2
+
+i
+
+
+
+.
+
+This completes the induction. □
+
+Next we proof the divisibility condition of (III.4). 
+
+Lemma B.2. For integers r ≥ 1 and k ≥ 2, let 
+
+Sr (k) = 
+
+> r
+
+X
+
+> i=0
+
+2i
+
+k + i − 2
+
+i
+
+
+
+.
+
+Then the following identity holds 
+
+Sr (k − 1) + Sr−1(k) = 2 r
+
+k + r − 2
+
+r
+
+
+
+. (B.1) 
+
+Proof. Applying the identity (III.2) gives 
+
+Sr (k) − Sr (k − 1) = 2 Sr−1(k) (B.2) or equivalently one gets 
+
+Sr (k − 1) = Sr (k) − 2Sr−1(k).
+
+Substituting this into the left-hand side of (B.1), we get 
+
+Sr (k − 1) + Sr−1(k) = Sr (k) − 2Sr−1(k)
+
++ Sr−1(k) = Sr (k) − Sr−1(k).
+
+Applying the result of previous lemma implies that 
+
+Sr (k) − Sr−1(k) = 
+
+> r
+
+X
+
+> i=0
+
+2i
+
+k + i − 2
+
+i
+
+
+
+−
+
+> r−1
+
+X
+
+> i=0
+
+2i
+
+k + i − 2
+
+i
+
+
+
+= 2 r
+
+k + r − 2
+
+r
+
+
+
+.
+
+Proof of Theorem III.8. The proof for r = 2 and 
+
+3 and each k ≥ 1 was provided in Theorems III.6 and III.7. We proceed by applying the doubling construction of Theorem III.1 to the codes with lengths Sr (k − 1) and Sr−1(k) for each r and k
+
+values. We prove by induction on r. The base cases 
+
+r = 2 , 3 have already discussed. So we assume that the result holds for each r ≤ i − 1. To prove the result for i = r and each k ≥ 1, we apply another induction on k.The base case k = 1 correspond to the [[1 , 1, 1]] 
+
+(and k = 2 was shown by the codes discussed in Example III.4). So we assume that the result holds for k = j − 1, and we need to show that the exis-tence of the code with parameters [[ Si(j), 1, 2j −1]] .Existence of such code consequently completes the claims of both of the inductions. Applying the doubling of the codes with lengths 
+
+Si(j − 1) and Si−1(j), obtained from the previous steps yields a quantum code with parameters 
+
+[[ Sr (k − 1) + 2 Sr−1(k), 1, 2k]] .
+
+Equation (III.2) implies that Sr (k − 1) +2Sr−1(k) = Sr (k) as desired. The claims about weight of stabilizers and the logical gate now fol-lows from Theorem III.1. □
+
+> Appendix C: Supplementary materials of Section IV
+
+Proof of Theorem IV.4. The proof is based on re-cursively applying the result of Proposition IV.3. First, recall that the codes constructed from this proposition have the X-stabilizer generator matrix of the form 
+
+G =
+
+ E E 0n
+
+0(d+2)2 0(d+2)2 G2
+
+0(d+2)2 1(d+2)2 v
+
+ ,
+
+where E and G2 are the generator matrices of the 
+
+X-stabilizers of a surface code with distance d +2, and the code Q is obtained from the previous recursion (with minimum distance d), respectively. Also, v is a minimum weight logical X-operator of 
+
+Q. The vector (1(d+2)2 , 0(d+2)2 , 0n) is a logical X-operator of the new quantum code. One can show that the minimum weight X-logical operator has the form (u, u, v ), where u is a minimum weight 
+
+X-logical operator of the surface code. The case d = 1 is trivial (the [[1 , 1, 1]] code). For d = 3 , applying the mentioned proposition to the [[9 , 1, 3]] surface code and the totally orthogonal code [[1 , 1, 1]] gives a quantum code with parame-ters [[19 , 1, 3]] . In this case, the first two row blocks of G generate a subspace with weight divisible by four. The last row is (0 9, 19, 11), which has weight 
+
+10 ≡ 2 (mod 4) . The orthogonality part can be easily checked by the structure of the rows. The 28 claim about the transversal logical S follows im-mediately as the X-stabilizers are orthogonal. Next, we assume that the claim is true for dis-tance i = d−2 and one can obtain a quantum code 
+
+Q0 with the claimed properties. Applying the con-struction of Proposition IV.3 to the code Q0 with parameters 
+
+[[ n = (d − 2)( d − 1) d
+
+3 − 1, 1, d − 2]] 
+
+and the [[ d2, 1, d ]] rotated surface code gives a new quantum code with the parameters 
+
+[[2 d2 + (d − 2)( d − 1) d
+
+3 − 1, 1, d ]] 
+
+and X-stabilizers 
+
+G =
+
+ E E 0n
+
+0d2 0d2 G2
+
+0d2 1d2 1n
+
+ .
+
+A simple calculation shows that 
+
+2d2 + (d − 2)( d − 1) d
+
+3 − 1 = d(d + 1)( d + 2) 3 − 1.
+
+Moreover, note that the matrix G2 can be decom-posed into [G′
+
+> 2
+
+, w ]T , where rows of G′ 
+
+> 2
+
+generate a subspace with weights divisible by four, and w has weight equal to 2 modulo 4. We can represent the matrix G above as 
+
+G =
+
+
+
+E E 0n
+
+0d2 0d2 G′
+
+> 2
+
+0d2 0d2 w
+
+0d2 1d2 1n
+
+ .
+
+We consider two cases. (a) Suppose that n+d2 ≡ 0(mod 4) . Then the first two blocks of G always have a weight divisible by four. Moreover, adding the last row to the vectors generated by the first two blocks gives new vectors of the form 
+
+u = ( a, a + 1d2 , b + 1n).
+
+Since n + d2 and wt( b) ≡ 0 (mod 4) , we conclude that 
+
+wt( u) = wt( a)+ d2−wt( a)+ n−wt( b) ≡ 0 (mod 4) .
+
+This shows that, except the third row, the rest of the rows of G generate a space of vectors with weights divisible by four. (b) Suppose that n + d2 ≡ 2 (mod 4) . Again the first two blocks of G generate vectors of weight divisible by four. Adding such vectors to the sum of the last two rows gives vectors of the form 
+
+u = ( a, a + 1d2 , b + w + 1n).
+
+Since n + d2, wt( b + w) ≡ 2 (mod 4) , we conclude that 
+
+wt( u) = d2 + n − wt( b + w) ≡ 0 (mod 4) .
+
+This completes the proof by partitioning the X-stabilizers to a set with weights divisible by four and a set with weights equal to 2 modulo 4. □
+
+For the rest of this section, we deal with the proof of Theorem IV.5. The process of the proof is very similar to that of Theorem III.8, and occa-sionally we refer to the later for more details. 
+
+Proof of Theorem IV.5. First recall that applying the result of Theorem III.1 to rotated surface codes led to the family of quantum codes presented in Theorem IV.4. We represent length of the codes obtained this way by 
+
+S2(k) = (2 k − 1)(2 k)(2 k + 1) 3
+
+i.e the codes inside this family have parameters 
+
+[[ S2(k), 1, 2k − 1]] . Furthermore, using the same convention, we can represent S1(k) to be the length of a surface code with distance 2k − 1, i.e., 
+
+[[ S1(k) = (2 k − 1) 2, 1, 2k − 1]] .
+
+Repeated application of Theorem III.1 implies a hierarchy of codes, and using induction on first r
+
+and then on k one can show that such codes have parameters [[ Sr (k), 1, 2k − 1]] , where r, k ≥ 1 and 
+
+Sr (k) = 2 Sr−1(k) + Sr (k − 1) . Note also that we choose Sr (1) = 1 , corresponding to the triv-ial [[1 , 1, 1]] code. Moreover, using the same in-duction steps one obtain the following matrix for 
+
+X-stabilizers 
+
+G =
+
+ E E 0Sr (k−1) 
+
+0Sr−1(k) 0Sr−1(k) G2
+
+0Sr−1(k) 1Sr−1(k) 1Sr (k−1) 
+
+ ,
+
+with a logical operator 
+
+(1Sr−1(k), 0Sr−1(k), 0Sr (k−1) ), where by induc-tion hypothesis G2 is r-orthogonal and E is 
+
+(r − 1) -orthogonal. Now, one can easy verify that G with the give logical operator forms an 
+
+r-orthogonal quantum code. The last remaining piece is to prove the claimed formula for Sr (k).
+
+Lemma C.1. For each integer r and k ≥ 1, if 
+
+S1(k) = (2 k − 1) 2, Sr (1) = 1, and Sr (k) =2Sr−1(k) + Sr (k − 1) , then 
+
+Sr (k) = 2 r+2 
+
+k + r − 1
+
+r + 1 
+
+
+
++
+
+> r−1
+
+X
+
+> i=0
+
+2i
+
+k + i − 2
+
+i
+
+
+
+.
+
+Proof. We prove by induction on r. The base case for r = 1 implies that for any k the formula gives 
+
+S1(k) = 8 k(k − 1) 2 + 1 = (2 k − 1) 2.
+
+Next we assume that the result is true for all in-tegers equal or smaller than r − 1, and we prove it for r. We proceed with another induction on k.When k = 1 , we get Sr (1) = 1 (because   0
+
+> −1
+
+ = 1 )which is true. So we assume that the result holds for any integers i ≤ r − 1 and any j ≤ k − 1,29 and we need to prove the formula for Sr (k). Note that Sr (k) = 2 Sr−1(k) + Sr (k − 1) . Also by the induction hypothesis we have 
+
+Sr−1(k) = 2 r+1 
+
+k + r − 2
+
+r
+
+
+
++
+
+> r−2
+
+X
+
+> i=0
+
+2i
+
+k + i − 2
+
+i
+
+
+
+and 
+
+Sr (k − 1) = 2 r+2 
+
+k + r − 2
+
+r + 1 
+
+
+
++
+
+> r−1
+
+X
+
+> i=0
+
+2i
+
+k + i − 3
+
+i
+
+
+
+.
+
+Then we have: 
+
+Sr (k) = 2 Sr−1(k) + Sr (k − 1) = 2r+2  k + r − 2
+
+r
+
+
+
++
+
+k + r − 2
+
+r + 1 
+
+
+
++  2
+
+> r−2
+
+X
+
+> i=0
+
+2i
+
+k + i − 2
+
+i
+
+
+
++
+
+> r−1
+
+X
+
+> i=0
+
+2i
+
+k + i − 3
+
+i
+
+
+
+= 2 r+2 
+
+k + r − 1
+
+r + 1 
+
+
+
++
+
+> r−1
+
+X
+
+> i=0
+
+2i
+
+k + i − 2
+
+i
+
+
+
+,
+
+where the first sum follows from Pascal’s identity and the second sum from (B.2) (here the terms in the sum translate to the 2Sr−1(k) + Sr (k − 1) of (B.2)). 
+
+Appendix D: Symplectic form and proof of Theorem IV.7 
+
+We will use the properties of symplectic vector spaces in the proof of Theorem IV.7. Therefore we highlight important properties of symplectic spaces before proving the theorem. For more in-formation about symplectic bilinear forms, one can see, for example, [89, pp. 284–285]. 
+
+Definition D.1. A symplectic vector space is a pair (V, ω ) where V is a vector space over a field 
+
+F and ω : V × V → F is a bilinear form that is • alternating, i.e., ω(v, v ) = 0 for all v ∈ V ,and • non-degenerate, i.e., if ω(v, w ) = 0 for all 
+
+w ∈ V , then v = 0 .The form ω is called a symplectic form. A symplectic vector space of dimension 2n has a basis 
+
+{e1, . . . , e n, f 1, . . . , f n}
+
+such that 
+
+ω(ei, e j ) = 0 , ω(fi, f j ) = 0 , ω(ei, f j ) = δij .
+
+Such a basis is called a symplectic basis .In the proof, we view the binary space of all X-stabilizers as a binary vector space endowed with the Euclidean inner product, and we show that this structure gives rise to a symplectic form. 
+
+Proof of Theorem IV.7. (1) The distance d surface code has parameters [[ d2, 1, d ]] consisting of d2−12 X-checks generators that all have even weight. Let 
+
+V1 be the space of all X-checks. Note that if v ∈ V1
+
+is orthogonal to all X-stabilizers, then it has to be a Z-stabilizer. However, X- and Z-stabilizers of surface code are disjoint. This implies that V1 is a symplectic of dimension d2−12 .Similarly, the code space of all-even vectors of length d2+1 2 , namely V2, forms a symplectic form of dimension d2−12 .Let 
+
+{e1, . . . , e r , f 1, . . . , f r }
+
+and 
+
+{e′
+
+> 1
+
+, . . . , e ′ 
+
+> r
+
+, f ′
+
+> 1
+
+, . . . , f ′ 
+
+> r
+
+}
+
+be symplectic basis of V1 and V2, respectively. Then the length 3d2+1 2 vectors 
+
+{(e1, e ′
+
+> 1
+
+), . . . , (er , e ′ 
+
+> r
+
+), (f1, f ′
+
+> 1
+
+), . . . , (fr , f ′ 
+
+> r
+
+)}
+
+are pairwise orthogonal and form a self-orthogonal binary space. (2) As we mentioned earlier, the claimed quan-tum code Q has X-check generator 
+
+G =
+
+ E E′′ 0n
+
+0d2 0d2−2d +2 G
+
+0d2 1d2−2d +2 1n
+
+ ,
+
+where E′′ is obtained from puncturing the 2d − 2
+
+columns of matrix E corresponding to data qubits that overlap X-checks with weight 4 only once. We also fix an X-logical operator for Q in the form of 
+
+(1d2 , 0d2−2d +2, 0n). Hence the quantum code Q
+
+is the CSS code of C2 generated by the rows of G
+
+and C1 is generated by the rows of G along with 
+
+(1d2 , 0d2−2d +2, 0n).First we prove the self-orthogonality of the ma-trix G, which implies that Q is X-self-orthogonal. Note that the last row of G is orthogonal to any other rows ( E′′ is an even code). Let (x, y, 0) and 
+
+(x′, y ′, 0) be two vectors belonging to the first row block. Then both have even weights, and the way 
+
+E′′ is constructed, imply that x · x′ = y · y′. Thus the block [E E ′′ 0] forms self-orthogonal vectors. Note also that the minimum distance of this CSS code is minimum of dx and dz , where 
+
+dx = min(wt( C1 \ C2)) 
+
+and 
+
+dz = min(wt( C⊥ 
+
+> 2
+
+\ C⊥ 
+
+> 1
+
+)) .
+
+Moreover, since C2 is self-orthogonal, we have 
+
+(C1 \ C2) ⊆ (C⊥ 
+
+> 2
+
+\ C⊥ 
+
+> 1
+
+).30 Hence dz ≤ dx. So we only need to show that 
+
+dz = d. If x is a weight d Z -logical operator, then 
+
+(x, 0, 0) ∈ (C⊥ 
+
+> 2
+
+\ C⊥ 
+
+> 1
+
+), which show that dz ≤ d.Next let (x1, x 2, x 3) ∈ (C⊥ 
+
+> 2
+
+\ C⊥ 
+
+> 1
+
+). This implies that wt( x1) is odd. Then we have one of the fol-lowing two cases. • Suppose that wt( x2) is even. Then adding 
+
+x2 to the appropriate locations of x1 gives a Z-logical operator of surface code. Thus 
+
+d ≥ wt( x1) + wt( x2).• Suppose that wt( x2) is odd. Then wt( x3) is odd, and thus it is a Z-logical operator of 
+
+Q2. Thus (x1, x 2, x 3) has weight at least d.Hence in any case, the code Q has minimum dis-tance d.        
+
+> Appendix E: Stabilizers of [[15 ,1,3]] orthogonal and [[31 ,1,3]] triorthogonal codes
+
+Previously we constructed a quantum orthog-onal code by applying a doubling approach to the distance three surface code, the all-even code of size five, and the totally orthogonal code of 
+
+[[1 , 1, 1]] . Below we present the generators of X
+
+stabilizers in binary form: 
+
+[0 , 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0] [0 , 0, 0, 1, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0] [1 , 1, 0, 1, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0] [0 , 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 1, 1, 0, 0] [0 , 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1] .
+
+The first 9 columns span the X-stabilizers of 
+
+[[9 , 1, 3]] , the next 5 columns form a generator ma-trix for all-even code of size five with a row per-mutation to match the orthogonality of surface code. A minimum weight logical X operator has the form of a minimum weight X-logical operator of the rotated surface code expanded by six extra zeros. For instance, the following is an X-logical operator of the [[15 , 1, 3]] code 
+
+[1 , 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0] .
+
+This code has dX = 5 and dZ = 3 as the set of 
+
+Z-stabilizers is larger. Moreover, this code is de-generate to both X and Z distances (which are respectively 4 and 2). Applying another round of doubling to this code implies the tri-orthogonal code with parameters 
+
+[[31 , 1, 3]] . One can realize a logical T gate for this code by applying the transversal operator that acts as 
+
+TL =
+
+> 31
+
+Y
+
+> i=1
+
+Oi, (E.1) where • Oi = I for i = 1 , 2, 8, 9, 16 , 17 , 24 , 25 ,• Oi = T † for i = 15 , 30 , 31 , and • Oi = T for the remaining qubits. Below we provide the X-stabilizer matrix of the 
+
+[[31 , 1, 3]] code. Since the all ones vector is a logical X-operator, one can build such quantum code using this infor-mation. 
+
+
+
+0 0 1 0 0 1 0 0 0 0 0 0 1 1 0 0 0 1 0 0 1 0 0 0 0 0 0 1 1 0 0 0 0 0 1 0 0 1 0 0 1 1 0 0 0 0 0 0 0 1 0 0 1 0 0 1 1 0 0 0 0 0 1 1 0 1 1 0 0 0 0 0 1 1 0 0 0 1 1 0 1 1 0 0 0 0 0 1 1 0 0 0 0 0 0 0 0 1 1 0 1 1 0 0 1 1 0 0 0 0 0 0 1 1 0 1 1 0 0 1 1 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 
+
+31 
+
+Figure 13: Circuit for S |+⟩ preparation via code-switching between [[31 , 1, 3]] and d = 3 rotated surface code. The last five qubits are ancilla flag qubits.

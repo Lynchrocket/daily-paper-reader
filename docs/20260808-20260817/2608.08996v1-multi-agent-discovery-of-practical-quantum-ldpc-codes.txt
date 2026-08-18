@@ -1,0 +1,576 @@
+Title: Multi-agent discovery of practical quantum LDPC codes
+
+URL Source: https://arxiv.org/pdf/2608.08996v1
+
+Published Time: Tue, 11 Aug 2026 01:42:31 GMT
+
+Number of Pages: 20
+
+Markdown Content:
+Multi-agent discovery of practical quantum LDPC codes 
+
+Dongheng Qian *, †1, 2 and Tianyi Li ‡, †3
+
+> 1
+
+State Key Laboratory of Surface Physics and Department of Physics, Fudan University, Shanghai 200433, China 
+
+> 2
+
+Shanghai Research Center for Quantum Sciences, Shanghai 201315, China 
+
+> 3
+
+University of Wisconsin–Madison, Madison, Wisconsin 53706, USA 
+
+Quantum low-density parity-check (qLDPC) codes can encode multiple logical qubits using sparse parity checks, yet searching for useful finite-length instances remains a challenging design problem because code performance must be optimized while satisfying practical constraints. Motivated by recent advances in artificial-intelligence agents for scientific discovery, we develop a multi-agent framework for discovering practical qLDPC codes. The framework combines specialist proposal and review, persistent scientific memory, long-horizon evolution of executable programs, and deterministic construction and evaluation within a closed-loop search. These programs instantiate coset-orbit balanced-product codes, providing a search space that includes bicycle and lifted-product constructions as well as non-normal subgroup actions. To incorporate practical constraints, we restrict the search to binary CSS codes with block length 𝑛 ≤ 400 and overall weight 𝑤 ≤ 10. Within this regime, the framework discovers codes with leading or competitive rate–distance performance in every weight class considered, with representative instances including [[288 , 16 , 18]] at 𝑤 = 7, [[288 , 18 , 18]] at 
+
+𝑤 = 9, and [[234 , 28 , 18]] at 𝑤 = 10. The search also uncovers structurally distinct, high-performing constructions, including a [[336 , 12 , ≤ 24]] candidate and a [[368 , 18 , 16]] code, both of which are genuine balanced-product constructions with non-normal subgroup actions. When evaluated under code-capacity depolarizing noise using a common BP–OSD decoding protocol, the discovered codes also exhibit low logical failure rates. Together, these results provide hardware-relevant finite-length candidates for further experimental evaluation and show how structured agentic search can contribute to scientific discovery. 
+
+I. INTRODUCTION 
+
+Quantum error correction protects logical information by encoding it redundantly across physical qubits and repeatedly measuring parity checks to identify errors without directly measuring the logical state [1]. Surface codes have become a leading route to fault-tolerant quantum computation because they combine comparatively high thresholds with geometrically local syndrome extraction in two dimensions [2]. Recent experiments have demonstrated surface-code operation on superconducting and reconfigurable neutral-atom platforms [3–5]. The locality of surface code, however, comes with a vanishing encoding rate and consequently a large physical-qubit overhead. Quantum low-density parity-check (qLDPC) codes offer a complementary route: sparse parity checks are compatible with a finite encoding rate and substantially better asymptotic rate–distance trade-offs [6–10]. Realizing these advantages generally requires nonlocal interactions during syndrome extraction, but such connectivity is becoming achievable on experimental platforms, including reconfigurable neutral-atom arrays and superconducting processors with long-range couplers [5, 11, 12]. These advances create a path toward realizing qLDPC codes and exploiting their improved encoding efficiency in physical devices. Although theoretical advances have established qLDPC families with progressively stronger asymp-totic parameters, culminating in asymptotically good constructions with constant rate and linear distance [6–9, 13, 14], these asymptotic results provide limited guidance for choosing useful codes at finite block lengths accessible to current hardware. In practice, finite-length qLDPC codes have largely been developed within expert-designed construction families, including hypergraph-product, lifted-product and bivariate-bicycle codes [6, 10, 15]. Promising instances are typically identified by    
+
+> *Email: dhqian2022@gmail.com
+> †These authors contributed equally to this work.
+> ‡Email: tianyi.phys@gmail.com arXiv:2608.08996v1 [quant-ph] 10 Aug 2026
+
+2enumerating or heuristically optimizing parameters within the selected family [10, 15–22]. The choice of construction space creates a central trade-off. A narrowly parameterized family may permit efficient enumeration but explores only a limited set of codes; a more general construction space admits a wider range of candidates, yet systematic optimization over that space remains difficult. Practical code design also involves several competing objectives: a finite-length code must balance encoding rate and distance with sparse checks, bounded qubit participation, decoder performance and feasible syndrome extraction. Candidate evaluation presents a further bottleneck: rank and sparsity are inexpensive to compute, whereas reliable distance and logical-error estimates require substantially greater computational effort. These considerations make it difficult to search broadly and efficiently for strong finite-length qLDPC codes under practical constraints. Recent advances in artificial intelligence may offer a route to addressing these challenges. Reinforce-ment learning and Bayesian optimization have been used to discover small quantum codes and optimize selected qLDPC families [23–25], while language-model-guided evolution has searched executable gen-erators for bivariate-bicycle and lifted-product codes [26, 27]. At the same time, AI-scientist systems have begun to use coordinated agents, external tools, persistent memory and iterative experimentation to organize longer and more structured scientific workflows [28–31]. Here we develop a multi-agent framework for finite-length qLDPC discovery that efficiently searches a general class of qLDPC constructions while optimizing code performance under multiple practical constraints. 1 A council of researcher agents proposes and cross-reviews search directions, a curator agent converts their conclusions and accumulated evidence into persistent tasks and lessons, and long-horizon worker agents evolve executable code-family generators through repeated construction, probing and revision. Each worker’s output is passed to a deterministic pipeline that validates the construction, removes equivalent codes and computes a proxy score 𝑄 proxy = 𝑘𝑑 2ub /𝑛 , where 𝑑 ub 
+
+is a distance upper bound obtained using QDistEvol [33]. Because reliable distance estimation is computationally expensive, the researcher and curator agents selectively promote promising candidates to higher-budget QDistEvol runs. This adaptive allocation concentrates computational effort on the candidates for which improved distance estimates are most informative, thereby increasing search efficiency. We apply the framework to coset-orbit balanced products, a construction space that contains bicycle and lifted-product codes and also permits non-normal subgroup actions [14]. Each executable family is represented at four levels: local terms, protograph shape, subgroup action and underlying group family. This representation directly generalizes the three-level structured concept evolution (SCE) developed for lifted-product codes [27], retaining hierarchical mutation of executable family generators while introducing subgroup actions and thereby expanding the search space. To maintain broad coverage of this enlarged space, a MAP-Elites archive treats the underlying group family as an explicit niche dimension, together with subgroup type, code rate and overall weight. Parent selection combines the proxy score with niche coverage and candidate freshness, distributing exploration across different group families while continuing to refine strong candidates. Specifically, we search binary CSS codes with 𝑛 ≤ 400 and 6 ≤ 𝑤 ≤ 10, where the overall weight 𝑤 
+
+is defined as the larger of the maximum stabilizer weight and the maximum number of checks incident on any qubit. These bounds limit both the complexity of individual stabilizer measurements and the number of check interactions required by each qubit, making the resulting codes more amenable to implementation on realistic hardware. The search yields competitive finite-length parameters in every weight class considered. For selected candidates, we determine the code distance 𝑑 rigorously using mixed-integer linear programming (MILP) and evaluate their final parameter quality using 𝑄 = 𝑘𝑑 2/𝑛 .Among codes with rigorously established distances in our comparison, the [[288 , 16 , 18]], [[288 , 18 , 18]] and [[234 , 28 , 18]] codes attain the largest 𝑄 values at 𝑤 = 7, 9 and 10, respectively. The search also produces structurally distinct constructions, including a [[336 , 12 , ≤ 24]] candidate over PSL(2 , 11) and  
+
+> 1During the finalization of this manuscript, we became aware of related work that also uses agents to discover QEC codes [32]. While both studies use agents for QEC-code discovery, they differ in system architecture, optimization objective and search scope.
+
+3a [[368 , 18 , 16]] code over 𝐴 6 × Z2, both arising from non-normal subgroup actions. Finally, under a common BP–OSD decoding protocol for code-capacity depolarizing noise, selected discoveries perform comparably to the bivariate-bicycle benchmarks, while the [[400 , 16 , ≤ 22]] code performs better than both benchmarks across the sampled physical error rates.  
+
+> II. THE MULTI-AGENT SEARCH FRAMEWORK
+
+The framework couples three agent roles to a fixed evaluator in a closed discovery loop, as summarized in Fig. 1. A researcher council formulates scientific directions, a curator distills accumulated evidence into persistent knowledge and proposes new tasks, and a worker executes those tasks by producing candidate programs. Together, the agents determine what should be explored, while the evaluator determines what constitutes an improvement. Inspired by IBM’s evolutionary search for quantum codes [26], the objects evolved in this loop are executable programs that generate parameterized families of CSS codes, rather than individual parity-check matrices. This representation allows a promising modification to be explored simultaneously at several structural scales. Each program is indexed by a scaling parameter 𝑡 , so different values of 𝑡 produce members of the same family at different block lengths. The researcher council formulates hypotheses and proposes mathematical directions for the search. Its three members bring complementary expertise in finite groups and subgroup actions, qLDPC codes, and distance and sparse-graph structure. They first develop proposals independently and then examine one another’s suggestions from their respective viewpoints, identifying changes that would make each proposal mathematically sound or more informative. The reviewed proposals are passed to the curator for synthesis. The curator combines these theory-driven proposals with conclusions drawn from the search itself. It records a lesson as a falsifiable relation between a design choice and an observed property, together with the candidates that support or contradict it. Positive lessons can progress from hypotheses to leaning and then confirmed statements as support accumulates, while recurring negative evidence is stored separately as an anti-lesson. Conversely, a counterexample can weaken an earlier lesson. By combining reviewed proposals, established lessons and unresolved contrasts, the curator formulates subsequent exploration and validation tasks. After each worker submission, the fixed evaluator returns a quantitative outcome. It instantiates the submitted program at admissible values of 𝑡 in the block-length window 40 ≤ 𝑛 ≤ 400. A parameter point is retained only if 𝐻 𝑋 𝐻 T 
+
+> 𝑍
+
+= 0, the number of encoded qubits 𝑘 = 𝑛 − rank( 𝐻 𝑋 ) − rank( 𝐻 𝑍 ) is positive and the LDPC weight constraint is satisfied. We define the overall weight as 
+
+𝑤 = max {︁ max  
+
+> 𝑖
+
+wt (︀ 𝐻 𝑋,𝑖 )︀ , max  
+
+> 𝑖
+
+wt (︀ 𝐻 𝑍,𝑖 )︀ , max  
+
+> 𝑞 [︀
+
+deg 𝑋 (𝑞 ) + deg 𝑍 (𝑞 )]︀}︁ , (1) where 𝐻 𝑋,𝑖 and 𝐻 𝑍,𝑖 are check rows and deg 𝑋 (𝑞 ) and deg 𝑍 (𝑞 ) count the 𝑋 - and 𝑍 -type checks incident on physical qubit 𝑞 . The search requires 𝑤 ≤ 10. This definition constrains both stabilizer weight and the total number of check interactions involving a qubit. 2 The evaluator selects up to three representative values of 𝑡 , prioritizing both large numbers of encoded qubits 𝑘 and high encoding rates 𝑘/𝑛 . Before scoring, it canonically labels the three-colored Tanner graph, whose vertex types distinguish physical qubits, 𝑋 checks and 𝑍 checks, and discards codes isomorphic to an archived representative [35]. Each new representative is assigned the proxy score 
+
+𝑄 proxy = 𝑘 ̃︀ 𝑑 2
+
+𝑛 ,̃︀ 𝑑 = min (︀ 𝑑 ub , 1.3√𝑛 )︀ . (2)      
+
+> 2This convention is more restrictive than definitions that characterize sparsity by the maximum check weight, or by the qubit degree within each Pauli sector separately. For example, the [[300 ,60 ,14]] code of Ref. [34] has check weight 9 and per-sector qubit degree at most 6, but each qubit participates in up to six 𝑋 -type and six 𝑍 -type checks, so its overall weight under Eq. (1) is 12.
+
+4SCIENTIFIC REASONING LOOP               
+
+> Research council Curator
+> Hypothesis Evidence
+> Lessons Anti-lessons
+> Ideas
+> Groups qLDPC Distance
+> PROGRAM EVOLUTION LOOP
+> Long-horizon worker Fixed evaluator MAP-Elites scheduler
+> Build code CSS & weight check
+> Quality-diversity archive
+> select
+> Parent & level
+> Score
+> Construct Probe Revise
+> Executable family
+> L4 Group
+> L3 Subgroups
+> L2 Protographs
+> L1 Local terms
+> Escalated validation Result Task Knowledge
+
+Figure 1: The multi-agent discovery framework. A scientific-reasoning loop (top) uses researcher proposals, curator synthesis and persistent memory to generate exploration and validation tasks. A program-evolution loop (bottom) mutates executable qLDPC-family generators within a MAP-Elites archive and scores candidates using a fixed evaluator. Evaluated candidates update both the archive and the evidence available to the scientific loop. L1–L4 denote mutations of local terms, protographs, subgroups and host groups, respectively. 
+
+Here 𝑑 ub is obtained by QDistEvol from an explicit logical operator and is therefore an upper bound on the true distance [33]. Following IBM’s evolutionary search [26], the cap in Eq. (2) prevents an unusually loose upper bound from dominating selection. The score assigned to a family is the largest credible value of 𝑄 proxy among its fully evaluated representatives. Furthermore, because distance estimation dominates the cost of evaluation, it is allocated in stages. Each representative first receives a 10 4-iteration QDistEvol search. If the resulting upper bound exceeds 1 .3√𝑛 , the evaluator automatically repeats the calculation at 10 5 iterations before applying the credibility cap. Beyond this automatic escalation, we introduce a 10 6-iteration tier that can be commissioned only through an explicit validation task issued by the curator, either directly or following a recommendation from the researcher council. Such a task is reserved for cases in which stronger evidence could resolve a lesson, distinguish competing explanations or alter a search decision. By directing the most expensive distance calculations towards candidates whose uncertainty matters to an active hypothesis or selection decision, this agent-guided allocation is expected to use the verification budget more efficiently than uniform escalation. All of the design choices above are independent of the particular code construction. In the present search, we apply them to coset-orbit balanced-product CSS codes [14]. We choose this construction for two reasons. First, it admits a transparent hierarchical specification. A family is determined by four components: a finite host group 𝐺 (𝑡 ); the assignment of subgroups to the protograph row and column types; the shapes of two protograph matrices 𝐴 (𝑡 ) and 𝐵 (𝑡 ) and their scaling with 𝑡 ; and the local terms in their entries. Each local term is an F2 sum of double-coset orbits 𝐾 𝑖 𝑔𝐾 𝑗 , where 𝐾 𝑖 and 𝐾 𝑗 are the subgroups assigned to the corresponding row and column types. A fixed assembler converts these four components into the binary check matrices 𝐻 𝑋 (𝑡 ) and 𝐻 𝑍 (𝑡 ). These components directly define four mutation levels. L1 changes the local terms in 𝐴 and 𝐵 ; L2 changes the protograph shapes and their scaling with 𝑡 ; L3 changes the subgroup assignment; and L4 changes the executable construction of 𝐺 (𝑡 ). This hierarchy extends the three-level representation used in lifted-product search [27] by making the subgroup action an independent structural variable. Researcher and curator tasks specify the intended level, whereas automatic refinement tasks obtain one from the scheduler. 5Second, balanced products provide a broad construction space in which strong qLDPC codes are expected to occur. On the one hand, a common trivial subgroup gives a lifted-product code over 𝐺 [36], with generalized and bivariate bicycle codes arising as more specialized abelian cases [10, 37]. This region already contains asymptotically good qLDPC families [7, 9]. On the other hand, non-normal subgroup actions extend the construction beyond lifted products. A common normal subgroup reduces to a lifted product over 𝐺/𝐾 , so a genuinely beyond-LP construction requires a non-abelian host group and a non-normal subgroup. Allowing distinct subgroups for different row and column types broadens this less-explored region further. Evaluated families are stored in a MAP-Elites archive, which partitions the population into niches and retains the best member of each niche [38]. The niche coordinates are the host-group family, subgroup structure, code-rate bin and overall weight. Scientific tasks proposed by the curator or researchers take priority. When no such task is ready, the scheduler chooses a parent and mutation level by balancing family score, coverage of underexplored group and rate regions, and the freshness of the lineage. Structural mutations are emphasized earlier in the campaign and local refinement increasingly later. Together, niche preservation and score-informed scheduling balance exploration and exploitation: separate niches maintain coverage across distinct groups, while selection within those niches continually refines the strongest candidates. After evaluation, the child updates the archive and its contrast with the parent becomes new evidence for the curator and researcher council. Repeating this cycle couples short-range program evolution to longer-range revision of scientific hypotheses. This is the principal methodological advance over AlphaEvolve-style systems, in which executable-program mutations are guided primarily by fitness feedback from previously evaluated candidates [39, 40]. Our framework retains this effective form of program evolution, including its recent use in quantum-code search [26, 27], but adds an explicit scientific-reasoning cycle: hypotheses are formulated across code families, tested against accumulated evidence and converted into new experiments. Finally, selected output matrices are examined in a separate post-search MILP calculation. Adistance is reported as exact only when a logical witness gives the matching upper bound and the optimization has excluded every smaller nontrivial logical operator; otherwise, it remains an upper bound [41].   
+
+> III. SEARCH RESULTS A. Leading finite-length codes across weight classes
+
+The search produced competitive codes throughout the full range of sparsity constraints. Figure 2 organizes the finite-length comparison into five panels, one for each overall-weight class. Because relaxing the weight constraint greatly changes the feasible construction space, 𝑄 is compared at fixed 𝑤 .Within each panel, rigorous distances and QDistEvol upper bounds are indicated by distinct markers. The exact-distance results establish a strong finite-length frontier. At 𝑤 = 6, the [[336 , 12 , 20]] code attains 𝑄 = 14 .29, within 7% of the leading exact code in the comparison, the [[340 , 16 , 18]] generalized-bicycle code with 𝑄 = 15 .25 [16]. At 𝑤 = 7, the [[288 , 16 , 18]] code reaches 𝑄 = 18 .00. To our knowledge, this is the strongest known code in this weight class under 𝑄 ; its rigorous score also exceeds the highest value derived from the distance upper bound, 𝑄 ≤ 17 .78 [18]. At 𝑤 = 8, the Heisenberg-group [[378 , 32 , 19]] code gives 𝑄 = 30 .56, while [[288 , 24 , 18]] and [[224 , 22 , 16]] codes obtained from distinct constructions give 𝑄 = 27 .00 and 25 .14. These values are competitive with the recently reported strongest code in this class [42]. The [[288 , 18 , 18]] code gives 𝑄 = 20 .25 at 𝑤 = 9 and also exceeds the previously known best result [43]. At 𝑤 = 10, the [[234 , 28 , 18]] and [[372 , 44 , 18]] codes reach 𝑄 = 38 .77 and 38 .32, respectively, both surpassing the strongest previous exact code in this class [20]. Together, our certified discoveries provide best-known or competitive codes across every weight class considered. For candidates whose putative distance is high enough that exact MILP certification becomes impractical, we performed 10 6-iteration QDistEvol runs and report the smallest logical-operator weights 6found as distance upper bounds. At 𝑤 = 6, the [[400 , 16 , ≤ 22]] code reaches 𝑄 ≤ 19 .36. This endpoint exceeds 𝑄 ≤ 19 .20 for the best-known weight-six bivariate-bicycle code, [[360 , 12 , ≤ 24]] [16]. The [[384 , 16 , ≤ 24]] code raises the weight-seven endpoint to 𝑄 ≤ 24 .00, while the [[336 , 24 , ≤ 24]] code at 
+
+𝑤 = 8 reaches 𝑄 ≤ 41 .14, close to the benchmark value 𝑄 ≤ 41 .41 of [[306 , 22 , ≤ 24]] [18]. At 𝑤 = 9 and 10, the leading candidates are [[384 , 18 , ≤ 28]] with 𝑄 ≤ 36 .75 and [[390 , 32 , ≤ 32]] with 𝑄 ≤ 84 .02. Taken together, these upper-bound results indicate progress across all weight classes. They identify candidates that would substantially improve the known finite-length frontier, while further rigorous certification remains necessary. Table I gives the construction data for the 20 discovered codes highlighted in Fig. 2. The leading codes span generalized-bicycle constructions, abelian lifted products, non-abelian metacyclic and dicyclic hosts, finite Heisenberg and modular groups, and a Frobenius construction. They vary not only the group family and subgroup action, including free and normal actions, but also the base-matrix shape, from 1 × 1 constructions to 3 × 4, 4 × 4 and 5 × 5 designs. The results therefore arise from mutations at every level of the executable representation, rather than from a large enumeration of local supports within a single established code family. 
+
+Table I: Finite-length codes selected from the search. These 20 discoveries are the colored points in Fig. 2. Group family denotes the instantiated host 𝐺 ; ⋊ denotes a semidirect product, with the subscript specifying the action when shown, Dic 𝑡 is dicyclic, He( Z3) is the finite Heisenberg group, 𝑀 27 is the modular group of order 27, and SL(2 , 3) and GL(2 , 3) are the special and general linear groups of degree two over 
+
+F3. In SL(2 , 3) ⋊𝜑 Z16 , 𝜑 is the order-four automorphism induced by conjugation with ( 1 1 2 1 ) ∈ GL(2 , 3). Action gives the orbit stabilizer 𝐾 , with “free” denoting 𝐾 = {𝑒 } and “normal” or “non-normal” specifying its relation to 𝐺 . Shape gives the row-by-column dimensions of 𝐴 and 𝐵 as 𝐴/𝐵 . Numeric distances are rigorous; entries containing ≤
+
+are QDistEvol upper bounds, with the corresponding 𝑄 values reported as upper-bound endpoints.                                                                                                                                                                                                                                                                                                          
+
+> 𝑤 Code 𝑄 Group family Action Shape 6[[336 ,12 ,20]] 14.29 Z84 ⋊29 Z4normal |𝐾 |= 2 1×1/1×16[[400 ,16 ,≤22]] ≤19 .36 Dic 5×Dic 5normal |𝐾 |= 2 1×1/1×17[[288 ,16 ,18]] 18.00 Z12 ×Z48 normal |𝐾 |= 4 1×1/1×17[[384 ,16 ,≤24]] ≤24 .00 Z12 ×Z48 normal |𝐾 |= 3 1×1/1×18[[378 ,32 ,19]] 30.56 He( Z3)×Z7free 1×1/1×18[[288 ,24 ,18]] 27.00 Z12 ×Z48 normal |𝐾 |= 4 1×1/1×18[[224 ,22 ,16]] 25.14 Z84 ⋊29 Z4normal |𝐾 |= 3 1×1/1×18[[336 ,24 ,≤24]] ≤41 .14 Z4×Z42 free 1×1/1×18[[378 ,18 ,≤27]] ≤34 .71 𝑀 27 ×Z7free 1×1/1×18[[336 ,28 ,≤20]] ≤33 .33 Z22×Z42 free 1×1/1×19[[288 ,18 ,18]] 20.25 SL(2 ,3) ⋊ Z 12 normal |𝐾 |= 2 1×1/1×19[[320 ,24 ,16]] 19.20 Z41 ⋊ Z 8normal 𝐾 =Z41 4×4/5×59[[400 ,26 ,16]] 16.64 Dic 4free 3×4/3×49[[384 ,18 ,≤28]] ≤36 .75 SL(2 ,3) ⋊𝜑 Z16 normal |𝐾 |= 2 1×1/1×19[[384 ,14 ,≤28]] ≤28 .58 GL(2 ,3) ×Z4free 1×1/1×110 [[234 ,28 ,18]] 38.77 Z13 ×Z9free 1×1/1×110 [[372 ,44 ,18]] 38.32 Z31 ×Z6free 1×1/1×110 [[170 ,32 ,14]] 36.89 Z85 free 1×1/1×110 [[390 ,32 ,≤32]] ≤84 .02 Z195 free 1×1/1×110 [[390 ,36 ,≤30]] ≤83 .08 Z39 ×Z5free 1×1/1×1
+
+7100 200 300 400 0816 24 w = 6 
+
+a    
+
+> [[336, 12, 20]] [[400, 16, ≤22]]
+> 100 200 300 400 0816 24
+> w= 7
+
+b     
+
+> [[288, 16, 18]] [[384, 16, ≤24]]
+> 100 200 300 400 015 30 45 w= 8
+
+c     
+
+> [[378, 32, 19]] [[336, 24, ≤24]]
+> 100 200 300 400 015 30 45 w= 9
+
+d     
+
+> [[288, 18, 18]] [[384, 18, ≤28]]
+> 100 200 300 400 030 60 90 w= 10
+
+e  
+
+> [[234, 28, 18]] [[390, 32, ≤32]]
+> Discovered, exact d
+> Discovered, upper bound Literature, exact d
+> Literature, upper bound
+
+Block length, n
+
+> Parameter score,  Q = kd  2/n
+
+Figure 2: Finite-length performance under overall-weight constraints. Panels (a)–(e) compare the parameter score 𝑄 = 𝑘𝑑 2/𝑛 against block length 𝑛 at fixed overall weights 𝑤 = 6–10. Purple circles are codes discovered in this work and gray squares are literature codes; filled markers denote exact distances and open markers denote QDistEvol distance upper bounds, for which the plotted 𝑄 is an upper endpoint. Selected discoveries from Table I are labeled with their [[ 𝑛, 𝑘, 𝑑 ]] parameters, including the exact-distance leaders [[288 , 16 , 18]], [[288 , 18 , 18]] and [[234 , 28 , 18]] at 𝑤 = 7, 9 and 10. 
+
+B. Exploration of nontrivial group constructions 
+
+The preceding parameter comparison emphasizes exploitation, showing that the framework can locate high-quality codes under fixed sparsity constraints. We next examine the search from the complementary perspective of exploration, focusing on the diversity of nontrivial construction mechanisms among the discovered codes. While the codes in Table I all have free or normal 𝐾 and therefore reduce to lifted products over 𝐺 or 𝐺/𝐾 , the four-level representation broadens exploration within the lifted-product class. Independent mutations of the stabilizer subgroup and host group can make unusual lifted-product groups accessible through non-obvious host–subgroup descriptions. For example, in the [[400 , 16 , ≤ 22]] code, the diagonal central stabilizer identifies the two central involutions 𝑧 1 and 𝑧 2 of Dic 5 × Dic 5. The resulting lifted product is defined over the order-200 central product (Dic 5 × Dic 5)/⟨(𝑧 1, 𝑧 2)⟩. (3) For the [[384 , 18 , ≤ 28]] code, quotienting the host SL(2 , 3) ⋊𝜑 Z16 by 𝐾 = ⟨(−𝐼, 0) ⟩ gives (SL(2 , 3) ⋊𝜑 Z16 )/𝐾 ∼= 𝐴 4 ⋊¯𝜑 Z16 , (4) where 𝐴 4 is the alternating group on four letters and ¯𝜑 is the induced order-four automorphism. These two codes show how the four-level language reaches uncommon non-abelian lifted products rather than merely scanning local supports over standard cyclic or abelian hosts. Table II presents two further lifted-product examples based on distinctive groups. The exact [[256 , 18 , 16]] code, with 𝑄 = 18 .00, is constructed over the wreath product Z8 ≀Z2, in which Z2 exchanges two copies of Z8. The exact [[384 , 32 , 16]] code, with 𝑄 = 21 .33, is generated from the twisted-dihedral 8
+
+Table II: Structurally distinct codes found by the framework. These seven codes supplement the parameter-frontier selection in Table I, using the same column definitions. 
+
+𝐴 6 is the alternating group on six letters, PSL(2 , 𝑞 ) is the projective special linear group over F𝑞 , ≀ denotes a wreath product, and D 6 ⋊𝜃 Z8 is the twisted-dihedral host defined in the text. Numeric distances are rigorous; entries containing ≤ are QDistEvol upper bounds, with the corresponding 𝑄 values reported as upper-bound endpoints.                                                                                                                
+
+> 𝑤 Code 𝑄 Group family Action Shape 8[[256 ,18 ,16]] 18.00 Z8≀Z2free 1×1/1×18[[384 ,32 ,16]] 21.33 D6⋊𝜃 Z8normal |𝐾 |= 2 2×2/2×29[[368 ,18 ,16]] 12.52 𝐴 6×Z2non-normal |𝐾 |= 2 1×1/1×19[[336 ,12 ,≤24]] ≤20 .57 PSL(2 ,11) non-normal |𝐾 |= 2 1×1/1×110 [[248 ,12 ,18]] 15.68 PSL(2 ,13) non-normal |𝐾 |= 3 1×1/1×110 [[396 ,8,≤32]] ≤20 .69 Z31 ⋊ Z 6non-normal |𝐾 |= 3 3×3/3×310 [[306 ,8,≤25]] ≤16 .34 (Z217 )⋊swap Z2non-normal |𝐾 |= 2 1×1/1×1
+
+host D 6 ⋊𝜃 Z8 with the normal stabilizer 𝐾 = ⟨(𝑟 3, 0) ⟩. Here D 6 = ⟨𝑟, 𝑠 | 𝑟 6 = 𝑠 2 = 𝑒, 𝑠𝑟𝑠 = 𝑟 −1⟩ has order 12, and 𝜃 fixes 𝑟 while sending 𝑠 to 𝑟 3𝑠 . Quotienting by 𝐾 removes the twist because 𝑟 3 = 𝑒 and hence 𝜃 (𝑠 ) = 𝑠 , giving D6 ⋊𝜃 Z8
+
+𝐾 ∼=(︁ D6/⟨𝑟 3⟩)︁ × Z8 ∼= 𝑆 3 × Z8. (5) Together, these examples illustrate how the search explores nontrivial group structure even when the resulting codes remain lifted products. Moreover, the framework discovered genuine balanced-product constructions with useful finite-length parameters. 3 For non-normal 𝐾 , the coset space 𝐺/𝐾 is not a quotient group, and the construction cannot be reduced through 𝐺/𝐾 to an ordinary lifted product. The remaining five codes in Table II realize four such mechanisms. The alternating-group construction uses 𝐴 6 × Z2, where 
+
+𝐴 6 is the alternating group on six letters, and yields the exact [[368 , 18 , 16]] code with a non-normal order-two stabilizer. Constructions over the projective special linear groups PSL(2 , 𝑞 ) give the exact [[248 , 12 , 18]] code at 𝑞 = 13 and the [[336 , 12 , ≤ 24]] candidate at 𝑞 = 11. A Frobenius construction over 
+
+Z31 ⋊ Z 6 produces [[396 , 8, ≤ 32]]. Finally, a swap-semidirect construction over ( Z217 ) ⋊swap Z2 produces [[306 , 8, ≤ 25]] and admits the closed double-coset count, for which the number of K-double cosets has the closed form 𝑡 (𝑡 + 1) /2. These constructions span several distinct forms of non-normal group action, demonstrating that genuine balanced products are a recurring outcome of the exploration rather than an isolated exception. Given the diversity of these genuine balanced-product examples, we conjecture that lifted products are intrinsically favored for maximizing 𝑄 in the finite regime considered here, rather than appearing dominant because the framework failed to explore genuine balanced products. Under the simultaneous constraints 𝑛 ≤ 400 and 𝑤 ≤ 10, the additional orbit geometry of genuine balanced products has not yet translated into parameter scores comparable to the leading lifted products. Their advantages may emerge at larger block lengths or under less restrictive weight budgets. 
+
+C. Code-capacity performance 
+
+We next evaluated the discovered codes under a common code-capacity depolarizing-noise model. All discovered and reference codes were decoded using the same minimum-sum BP–OSD implementation, with no code-specific tuning. We denote the block error rate by 𝑝 block , defined as the probability that a decoding trial produces at least one logical error. To compare codes encoding different numbers of logical qubits, we further consider the per-logical error rate 𝜖 𝐿 = 1 − (1 − 𝑝 block )1/𝑘 . The computation  
+
+> 3Here “genuine” refers to the explicit ( 𝐺, 𝐾 ) presentation found by the search and does not rule out an alternative lifted-product representation of the same finite matrix.
+
+9details can be found in Methods. Figure 3 compares four parameter-leading discoveries at 𝑤 = 6 and 7 with two representative weight-six bivariate-bicycle benchmarks, [[288 , 12 , 18]] and [[360 , 12 , ≤ 24]], under the same protocol [10]. The discovered codes perform comparably across the sampled physical error rates. Moreover, the [[400 , 16 , ≤ 22]] code performs better than both benchmarks across all physical error rates. Table III collects the leading exact-distance and upper-bound discoveries from every weight class, including the parameter champions not displayed in Fig. 3. Their estimated pseudo-thresholds 𝑝 ⋆,defined by the crossing of 𝑝 block (𝑝 ) with 𝑝 , are all above 5% and range from 5.40% to 9.30%. At 
+
+𝑝 = 0 .03, all ten codes have 𝜖 𝐿 ≤ 1.68 × 10 −5, and eight are below 10 −6. These low per-logical error rates provide a complementary assessment of the discovered codes and further support their finite-length quality beyond the parameter score. The table also reveals a systematic weight dependence. Although the larger weight classes contain candidates with substantially higher 𝑄 , the pseudo-threshold decreases monotonically. This trend is not specific to the discovered codes: under the same protocol, we verified that weight-ten generalized-bicycle code [[254 , 28 , 14–20]] has a pseudo-threshold of 5.44% [15]. These results suggest that the present BP–OSD implementation is better matched to lower-weight Tanner graphs. Decoder algorithms adapted to denser or more structured graphs may therefore yield stronger performance for higher-weight codes. 4 6 8 10   
+
+> Physical error rate, p(%)
+> 10 −6
+> 10 −5
+> 10 −4
+> 10 −3
+> 10 −2
+> 10 −1
+> pblock
+
+a       
+
+> pblock =p
+> 46810
+> Physical error rate, p(%)
+> 10 −7
+> 10 −6
+> 10 −5
+> 10 −4
+> 10 −3
+> 10 −2
+> εL
+
+b        
+
+> [[288, 16, 18]], w= 7 [[336, 12, 20]], w= 6 [[384, 16, ≤24]], w= 7 [[400, 16, ≤22]], w= 6 [[288, 12, 18]] BB [[360, 12, ≤24]] BB
+
+Figure 3: Code-capacity performance under depolarizing noise. (a) Block error rate 𝑝 block and (b) per-logical error rate 𝜖 𝐿 versus the physical error rate 𝑝 for four discovered codes at 𝑤 = 6 and 7 (solid purple: [[288 , 16 , 18]], [[336 , 12 , 20]], [[384 , 16 , ≤ 24]] and [[400 , 16 , ≤ 22]]) and two weight-six bivariate-bicycle benchmarks (dashed gray: [[288 , 12 , 18]] and [[360 , 12 , ≤ 24]]), all decoded with the same minimum-sum BP–OSD protocol. The dashed line in (a) marks 𝑝 block = 𝑝 , whose crossing defines the pseudo-threshold. Error bars are exact 95% confidence intervals; points with no observed failures are plotted as open markers at their upper confidence limits. 10 
+
+Table III: Code-capacity performance of the parameter champions. One exact-distance code and one upper-bound code are reported for each overall-weight class. Values marked with an asterisk correspond to zero observed block failures in 10 6 shots; the reported values are the upper endpoints of the two-sided exact 95% Clopper–Pearson confidence intervals transformed to 𝜖 𝐿 .
+
+𝑤 Code 𝑄 𝑝 ⋆ 𝜖 𝐿 (0 .03) 𝜖 𝐿 (0 .05) 𝜖 𝐿 (0 .07) 6 [[336 , 12 , 20]] 14.29 9.30% (3 .07 × 10 −7)* 9.42 × 10 −6 4.87 × 10 −4
+
+6 [[400 , 16 , ≤ 22]] ≤ 19 .36 9.26% (2 .31 × 10 −7)* 2.75 × 10 −6 2.77 × 10 −4
+
+7 [[288 , 16 , 18]] 18.00 8.03% 6.25 × 10 −8 4.85 × 10 −5 1.57 × 10 −3
+
+7 [[384 , 16 , ≤ 24]] ≤ 24 .00 8.28% 1.25 × 10 −7 1.29 × 10 −5 9.74 × 10 −4
+
+8 [[378 , 32 , 19]] 30.56 7.08% 1.25 × 10 −7 5.41 × 10 −5 2.10 × 10 −3
+
+8 [[336 , 24 , ≤ 24]] ≤ 41 .14 7.11% 1.67 × 10 −7 8.02 × 10 −5 2.72 × 10 −3
+
+9 [[288 , 18 , 18]] 20.25 6.28% 2.72 × 10 −6 5.26 × 10 −4 8.37 × 10 −3
+
+9 [[384 , 18 , ≤ 28]] ≤ 36 .75 6.55% 4.44 × 10 −7 2.35 × 10 −4 6.99 × 10 −3
+
+10 [[234 , 28 , 18]] 38.77 5.40% 1.68 × 10 −5 1.21 × 10 −3 1.01 × 10 −2
+
+10 [[390 , 32 , ≤ 32]] ≤ 84 .02 5.78% 8.13 × 10 −7 4.89 × 10 −4 8.76 × 10 −3
+
+IV. DISCUSSION 
+
+In summary, our work makes both practical and methodological contributions. On the practical side, it identifies qLDPC codes with strong finite-length parameters under practical length and weight constraints, together with structurally distinct constructions. These results provide relevant candidates for experimental QEC while broadening the range of finite-length constructions available for further investigation. On the methodological side, our results show that an agentic framework can support both effective optimization and broad exploration in qLDPC code discovery, offering a concrete example of how AI systems can contribute to scientific discovery. Our results also suggest several directions for future work. First, the score 𝑄 proxy summarizes the finite-length rate–distance trade-off, whereas operational performance additionally depends on the parity-check representation, decoder and noise model. In the present study, logical failure probabilities are evaluated for selected codes after the parameter-based search; future implementations could incorporate decoder feedback directly into the search loop [27]. The search could also include structural constraints beyond overall weight. For example, requiring Tanner graphs with girth of at least six would suppress the shortest cycles and may improve performance under BP-based decoders. Second, the framework could be extended to other qLDPC construction languages. The current implementation focuses on coset-orbit balanced products, but the same search architecture can accommodate other families once a deterministic constructor and a compact program representation are provided. Recent constructions based on multivariate multicycle codes, pair partitions, systematic lifts of lifted-product codes and hardware-oriented routing codes provide natural directions for such extensions [19, 22, 42, 44]. Finally, the framework could be applied beyond code discovery to other important tasks in quantum error correction and fault-tolerant quantum computation. More generally, tasks with a well-defined objective and candidate solutions that can be expressed as executable programs and assessed through computation or simulation are natural targets for this approach. Examples include discovering decoder algorithms [45], developing faster methods for distance estimation and certification [33], and designing fault-tolerant gadgets and hardware layouts [22, 46, 47]. These extensions could support the joint design of codes, decoders and fault-tolerant implementations. 
+
+V. METHODS 
+
+The subsections below follow the order in which the components of the framework are introduced in the main text. We first describe the researcher council, curator and worker, and then give the 11 deterministic evaluation procedure applied to every worker submission. We next define the executable family representation and balanced-product construction used in the present search, followed by the MAP-Elites archive, task scheduler and feedback loop. The final subsections distinguish agent-directed distance verification during the search from post-search MILP certification, and then describe the published-code comparison and code-capacity simulations used in the results.  
+
+> A. Researcher council, curator and worker execution
+
+In the reported search, all agents were implemented using Claude Code; the researcher-council members and the curator used Opus 4.8, whereas the worker used Sonnet 5. The researcher council generates theory-driven proposals for the search. Each of its three members receives a compact summary of the evaluated population, current lessons and representative candidates, together with access to relevant literature and read-only structural measurements. The researchers reason independently from the perspectives of finite groups, qLDPC codes, and distance and sparse-graph structure. They then cross-review one another’s proposals and return revised proposals and distance-verification recommendations to the curator. The curator combines the reviewed proposals with evidence generated by the search, including recent outcomes, informative parent–child and cross-family contrasts, worker notes and unresolved validation results. It records each lesson as a falsifiable statement linked to explicit supporting and contradicting candidates. To avoid counting related descendants as independent discoveries, candidates that share any search root form one evidence group. For a lesson with prior strength 𝑝 , 𝑠 independent supporting groups and 𝑐 independent contradicting groups, the confidence is 
+
+𝐶 lesson = 1 + 𝑝 + 𝑠 
+
+2 + 𝑝 + 𝑠 + 𝑐 . (6) Positive lessons are labeled hypothesis, leaning or confirmed at confidence thresholds 0 .60 and 0 .85, while anti-lessons form a separate negative category. The status is recomputed from the cited candidates rather than supplied by an agent, allowing later counterexamples to demote an earlier conclusion. The curator synthesizes at most five reviewed directions into worker tasks and can also issue high-budget distance-verification requests as described below. The worker executes one task at a time. It receives zero or more selected parent programs, the intended mutation level, active lessons and anti-lessons, relevant failed siblings, cross-niche exemplars and a compact lineage history. Read-only tools allow the worker to assemble a draft, test validity, check for duplicates and probe the search score. During a multi-round session, it can construct, test and revise several drafts, but only one final family program is submitted to the evaluator. Alongside that submission, the worker produces a short free-form note recording the variants tried, their probe or self-check results, the reason for its final choice, and any dead ends or promising leads. This note is stored with the candidate and passed to later workers in the lineage and to the curator. Worker sessions in the reported search were limited to 40 agent turns.  
+
+> B. Deterministic evaluation and family score
+
+The deterministic evaluator applies the same sequence of checks to every submitted family program. It scans the program’s declared values of 𝑡 within the global range 1 ≤ 𝑡 ≤ 500, skips groups of order above 20,000 and retains only assembled matrices in the window 40 ≤ 𝑛 ≤ 400. All code parameters are recomputed from the binary matrices. A parameter point is valid only if it satisfies 𝐻 𝑋 𝐻 T 
+
+> 𝑍
+
+= 0, encodes 
+
+𝑘 = 𝑛 − rank( 𝐻 𝑋 ) − rank( 𝐻 𝑍 ) > 0 (7) logical qubits and obeys the overall-weight constraint in Eq. (1). 12 From the valid parameter points, the evaluator retains at most three representatives for full scoring. It first selects the point with the largest 𝑘 , then the highest-rate point among those remaining, and finally the next-largest k among the remaining points; repeated selections are suppressed. Each retained matrix is converted to a three-colored Tanner graph with separate colors for qubits, 𝑋 
+
+checks and 𝑍 checks. BLISS canonical labeling gives an exact isomorphism key under color-preserving permutations [35]. A representative is marked as a duplicate and assigned zero score if an isomorphic matrix is already present in the archive. Every new, non-certified representative first receives a QDistEvol probe with iterCount set to 10 4
+
+and genCount to 1,000 [33]. If the resulting logical-operator witness gives 𝑑 ub > 1.3√𝑛 , the evaluator automatically repeats the calculation with iterCount set to 10 5 and genCount to 2,000. The point score is then computed using Eq. (2); its cap prevents a loose upper bound from being rewarded as if it were a genuine distance improvement [26]. A previously certified exact distance can be used directly instead of the capped upper bound. The family score is the largest point score among the fully evaluated representatives, and the representative attaining this maximum supplies the rate and weight coordinates used by the archive. The separate 10 6-iteration verification tier is described below.  
+
+> C. Executable family programs and balanced-product construction
+
+The unit of evolution is a program that generates an entire code family rather than a single parity-check matrix. For each admissible value of the scaling parameter 𝑡 , the program constructs a finite group 𝐺 (𝑡 ) and specifies two protographs 𝐴 (𝑡 ) and 𝐵 (𝑡 ). It defines their shapes and scaling with 𝑡 , the subgroups assigned to their row and column types, and the local terms in every entry. The subgroup assignment may use one common subgroup 𝐾 or distinct subgroups for different row and column types. Each local term is an F2 sum of double-coset orbits 
+
+𝐾 𝑖 𝑔𝐾 𝑗 = {𝑘 𝑖 𝑔𝑘 𝑗 : 𝑘 𝑖 ∈ 𝐾 𝑖 , 𝑘 𝑗 ∈ 𝐾 𝑗 }, (8) where 𝐾 𝑖 and 𝐾 𝑗 are associated with the corresponding protograph types. Before assembly, every entry is projected onto canonical double-coset representatives, and repeated orbits cancel modulo two. The deterministic assembler then materializes the required coset spaces and applies the balanced-product incidence rules to obtain 𝐻 𝑋 (𝑡 ) and 𝐻 𝑍 (𝑡 ).  
+
+> D. MAP-Elites archive, scheduling and feedback
+
+The MAP-Elites archive stores evaluated families and supplies parents for subsequent tasks. Its niches are indexed by host-group family, subgroup structure, rate bin and overall-weight class [38]. The subgroup coordinate distinguishes trivial, normal, non-normal and mixed assignments. Writing 
+
+𝑟 = 𝑘/𝑛 for the rate of the best-scoring representative, the five rate bins have lower edges 0, 0 .05, 0 .10, 0.15 and 0 .20. A family replaces the current elite of its niche only when its family score is larger. The scheduler first considers tasks proposed by the researcher council and curator in descending order of priority. The first task whose parent conditions can be met is paired with the highest-scoring matching parent or parents; a task explicitly marked as parentless bypasses this matching step. Tasks that test an existing lesson are subject to a 10% dispatch-budget guard. If no queued task can be dispatched, the scheduler creates an automatic refinement task from the archive. Automatic parent selection proceeds from a weight class to a niche and then to an individual family. Let 𝒞 denote the non-empty classes among 6 , . . . , 10, and let 𝑀 𝑤 be the number of selectable niches in class 𝑤 . The weight class is sampled according to 
+
+𝑃 (𝑤 ) = 𝜖 
+
+|𝒞| + (1 − 𝜖 )
+
+√1 + 𝑀 𝑤 ∑︀ 
+
+> 𝑣 ∈𝒞
+
+√1 + 𝑀 𝑣 
+
+, 𝜖 = 0 .3. (9) The first term guarantees exposure for every available weight class, while the second allocates more trials to classes containing more distinct niches, but only sublinearly in their number. 13 Within the selected weight class, niche selection balances quality, coverage and freshness. The unnormalized weight of niche 𝑗 is 
+
+𝑊 𝑗 = 𝑞 𝑗 𝑐 𝑗 𝑓 𝑗 , 𝑞 𝑗 = exp [︂ 𝜑 (𝐹 𝑗 ) − max ℓ 𝜑 (𝐹 ℓ)
+
+𝜏 ]︂ , 𝑐 𝑗 = 1 + 𝛽𝑠 𝑗 , (10) where 𝐹 𝑗 is the family score and 
+
+𝜑 (𝐹 ) = log(1 + 𝐹 )log(1 + 𝐹 max ) . (11) Here 𝐹 max is the largest family score observed so far, with a minimum normalization scale of one. Thus 𝑞 𝑗 is an annealed quality factor. The coverage factor 𝑐 𝑗 uses 𝛽 = 0 .5 and 
+
+𝑠 𝑗 = 12[︂(︂ 1 − 𝑎 𝑗 
+
+𝑎 max )︂ +(︂ 1 − 𝑏 𝑗 
+
+𝑏 max )︂]︂ , (12) where 𝑎 𝑗 and 𝑏 𝑗 count occupied niches sharing the group-family and rate-bin coordinates of niche 𝑗 ,respectively. 𝑎 max and 𝑏 max are the corresponding maxima within the weight class. Sparsely represented group families and rate bins therefore receive a larger coverage factor. Freshness prevents a small set of parents from repeatedly consuming the search budget. For candidate 𝑖 , it is 
+
+𝑓 𝑖 = 1
+
+√1 + 𝐷 𝑖 + 𝐵 𝑖 
+
+, (13) where 𝐷 𝑖 is the previous dispatch count and 𝐵 𝑖 is an unproductive-history penalty. The niche-level factor 𝑓 𝑗 is the largest freshness among its eligible members. After a niche is selected, its eligible members are sampled using the same annealed quality factor multiplied by 𝑓 𝑖 .The history penalty records whether previous descendants were informative. A child that exceeds its parent or becomes an elite resets 𝐵 𝑖 to zero without resetting 𝐷 𝑖 . An invalid or zero-score child adds two units, whereas a valid child that improves neither its parent nor any niche adds one. If an elite reaches 𝐵 𝑖 ≥ 4, the strongest runner-up with 𝐵 𝑖 < 4 becomes eligible when its score is at least 0.3 of the elite score. Finally, the scheduler samples a mutation level for an automatic refinement task. The temper-ature in Eq. (10) decreases geometrically from 𝜏 = 0 .6 to 0 .3 over the course of the campaign. Over the same interval, the L1–L4 probabilities interpolate geometrically from (1 /3, 1/3, 1/6, 1/6) to (0 .50 , 0.30 , 0.08 , 0.12) and are normalized before sampling. The schedule gradually shifts trials from structural L3/L4 exploration toward L1/L2 refinement while retaining a non-zero probability for every level. After evaluation, the child updates the appropriate archive niche and is compared with its parent or parents. The resulting parent–child and cross-family contrasts, together with worker notes and validation outcomes, become evidence for the curator and researcher council. In the reported search, the curator was invoked after every 25 evaluated candidates. The researcher council normally convened after every 50 candidates and was also triggered after eight consecutive unsuccessful evaluations. Their new tasks and lessons then re-enter the scheduler, closing the search loop.  
+
+> E. Agent-directed distance verification
+
+The 10 6-iteration verification tier is distinct from the automatic 10 5-iteration escalation used for scoring. It is not triggered by a numerical threshold. Instead, the curator can issue a dedicated verification request when a tighter distance bound may resolve a lesson, distinguish competing explanations or change a selection decision. A request can arise from the curator’s own contrastive analysis or from a recommendation made by the researcher council. At most three requests are admitted in one curator cycle. 14 QDistEvol, an evolutionary descendant of QDistRnd [48], is run for each request with iterCount 
+
+set to 10 6 and genCount to 10 4. The 𝑋 and 𝑍 sectors are searched independently with seeds 1001–1004, giving eight runs per code. Every run returns an explicit logical-operator witness, which is checked by independent binary linear algebra. The tightest validated upper bound is written back to the candidate, after which its family score and archive position are recomputed and the new evidence becomes available to the curator. These calculations can tighten an upper bound but cannot certify the distance.  
+
+> F. Post-search MILP distance certification
+
+MILP certification is applied after the search to selected code matrices. For a code with 𝑘 logical qubits, we choose a symplectic basis of logical generators and solve one mixed-integer minimization for each generator in each Pauli sector. A subproblem minimizes the Hamming weight of an operator that commutes with the relevant checks and anticommutes with the chosen dual logical generator. Any nontrivial logical operator anticommutes with at least one dual generator, so these 2 𝑘 overlapping subproblems cover the full logical group. QDistEvol witnesses warm-start the solver and provide validated upper bounds for the minimizations. A distance is certified as exact only when an explicit witness supplies the global upper bound and every subproblem has terminated with a proven optimum or has proved that no operator up to that bound is feasible. Otherwise, it is not reported as exact. Evidence bundles store matrix hashes, every solver status and the optimal witnesses, which are replayed using independent F2 arithmetic. Exact claims in this paper therefore rely on solver-attested global optimality under Gurobi version 12.0.3 [41].  
+
+> G. Comparison with published codes
+
+The gray points in Fig. 2 come from a curated comparison set of published binary CSS and stabilizer LDPC instances with 𝑛 ≤ 400 and 𝑘 > 0. The literature benchmark comprises 1,209 code instances from 91 sources identified before the completion of this work. Each entry is assigned one of five distance-evidence labels: exact distance, certified lower bound, upper bound, two-sided interval or unverified numerical claim. Exact values and upper bounds are compared separately. The overall weight is recomputed from the defining matrices or construction data using Eq. (1).  
+
+> H. Code-capacity simulations
+
+The code-capacity protocol applies independent depolarizing noise to data qubits, with probabilities 1 − 𝑝, 𝑝/ 3, 𝑝/ 3, 𝑝/ 3 for 𝐼, 𝑋, 𝑌, 𝑍 . The 𝑋 and 𝑍 sectors are decoded independently using minimum-sum belief propagation followed by order-four combination-sweep ordered-statistics decoding [15, 49]. Belief propagation uses a parallel schedule, 5,000 iterations and scaling factor 1.0. The implementation uses the ldpc package [50]. Physical error probabilities are 𝑝 = 0 .02 , 0.03 , . . . , 0.10. All codes use the same implementation, channel prior, seed policy and decoder settings; no parameters are tuned for an individual code. Each point uses at most 10 6 shots. Simulations of non-BB codes stop early after exactly 10,000 block errors, whereas the bivariate-bicycle references use 10 6 shots throughout. We report the block error rate 𝑝 block , defined as the probability that a decoding trial produces at least one logical error, and the per-logical error rate 
+
+𝜖 𝐿 = 1 − (1 − 𝑝 block )1/𝑘 . (14) Fixed-shot points use exact Clopper–Pearson 95% confidence intervals. Adaptively stopped points use the corresponding exact negative-binomial intervals, and zero-failure observations are displayed as 15 upper limits. The pseudo-threshold 𝑝 ⋆ solves 𝑝 block (𝑝 ⋆) = 𝑝 ⋆ and is estimated by log-linear interpolation between the two adjacent simulated points that bracket the crossing. 
+
+Data availability 
+
+Explicit constructions of all discovered codes presented in the main text are given in the Supple-mentary Information. All other data, including detailed recoreds for all code instances for comparison, will be made publicly available upon publication. 
+
+Code availability 
+
+The construction, search and evaluation code will be made publicly available upon publication. 
+
+[1] Michael A. Nielsen and Isaac L. Chuang. Quantum Computation and Quantum Information . Cambridge University Press, 10th anniversary edition, 2010. [2] Austin G. Fowler, Matteo Mariantoni, John M. Martinis, and Andrew N. Cleland. Surface codes: Towards practical large-scale quantum computation. Physical Review A , 86:032324, 2012. [3] Google Quantum AI. Suppressing quantum errors by scaling a surface code logical qubit. Nature , 614:676– 681, 2023. [4] Google Quantum AI and Collaborators. Quantum error correction below the surface code threshold. Nature ,638:920–926, 2025. [5] Dolev Bluvstein, Alexandra A. Geim, Sophie H. Li, Simon J. Evered, J. Pablo Bonilla Ataides, Gefen Baranes, Andi Gu, Tom Manovitz, Muqing Xu, Marcin Kalinowski, et al. A fault-tolerant neutral-atom architecture for universal quantum computation. Nature , 649:39–46, 2026. [6] Jean-Pierre Tillich and Gilles Zemor. Quantum LDPC codes with positive rate and minimum distance proportional to the square root of the blocklength. IEEE Transactions on Information Theory , 60(2):1193– 1202, 2014. [7] Pavel Panteleev and Gleb Kalachev. Asymptotically good quantum and locally testable classical LDPC codes. In Proceedings of the 54th Annual ACM SIGACT Symposium on Theory of Computing , pages 375–388, 2022. [8] Irit Dinur, Min-Hsiu Hsieh, Ting-Chun Lin, and Thomas Vidick. Good quantum LDPC codes with linear time decoders. In Proceedings of the 55th Annual ACM Symposium on Theory of Computing , pages 905–918, 2023. [9] Anthony Leverrier and Gilles Zemor. Quantum tanner codes. In Proceedings of the 63rd IEEE Annual Symposium on Foundations of Computer Science , pages 872–883, 2022. [10] Sergey Bravyi, Andrew W. Cross, Jay M. Gambetta, Dmitri Maslov, Patrick Rall, and Theodore J. Yoder. High-threshold and low-overhead fault-tolerant quantum memory. Nature , 627:778–782, 2024. [11] Dolev Bluvstein, Simon J. Evered, Alexandra A. Geim, Sophie H. Li, Hengyun Zhou, Tom Manovitz, Sepehr Ebadi, Madelyn Cain, Marcin Kalinowski, Dominik Hangleiter, et al. Logical quantum processor based on reconfigurable atom arrays. Nature , 626:58–65, 2024. [12] Ke Wang, Zhide Lu, Chuanyu Zhang, Gongyu Liu, Jiachen Chen, Yanzhe Wang, Yaozu Wu, Shibo Xu, Xuhao Zhu, Feitong Jin, et al. Demonstration of low-overhead quantum error correction codes. Nature Physics , 22:308–314, 2026. [13] Matthew B. Hastings, Jeongwan Haah, and Ryan O’Donnell. Fiber bundle codes: Breaking the 
+
+𝑛 1/2 polylog( 𝑛 ) barrier for quantum LDPC codes. In Proceedings of the 53rd Annual ACM SIGACT Symposium on Theory of Computing , pages 1276–1288, 2021. [14] Nikolas P. Breuckmann and Jens N. Eberhardt. Balanced product quantum codes. IEEE Transactions on Information Theory , 67(10):6653–6674, 2021. [15] Pavel Panteleev and Gleb Kalachev. Degenerate quantum LDPC codes with good finite length performance. 
+
+Quantum , 5:585, 2021. [16] Zijian Liang, Ke Liu, Hao Song, and Yu-An Chen. Generalized toric codes on twisted tori for quantum error correction. PRX Quantum , 6:020357, 2025. [17] Hsiang-Ku Lin and Leonid P. Pryadko. Quantum two-block group algebra codes. Physical Review A ,109:022407, 2024. 16 
+
+[18] Arda Aydin, Itzhak Tamo, and Alexander Barg. Breaking the bicycle frame: Coset-based quantum LDPC codes. arXiv preprint arXiv:2606.17268 , 2026. [19] Feroz Ahmed Mian, Owen Gwilliam, and Stefan Krastanov. Multivariate multicycle codes for complete single-shot decoding. arXiv preprint arXiv:2601.18879 , 2026. [20] Koki Okada and Kenta Kasai. A two-branch finite-field construction for regular CSS LDPC bases. arXiv preprint arXiv:2605.23894 , 2026. [21] Yifan Hong. Quantum LDPC codes with design rate 1/5 and good performance below 1000 physical qubits. 
+
+arXiv preprint arXiv:2607.27644 , 2026. [22] Yuta Hirasaki and Jong Yeon Lee. Lifting lifted product codes. arXiv preprint arXiv:2607.28621 , 2026. [23] Vincent Paul Su, ChunJun Cao, Hong-Ye Hu, Yariv Yanay, Charles Tahan, and Brian Swingle. Discovery of optimal quantum codes via reinforcement learning. Physical Review Applied , 23:034048, 2025. [24] Austin Yubo He and Zi-Wen Liu. Discovering highly efficient low-weight quantum error-correcting codes with reinforcement learning. arXiv preprint arXiv:2502.14372 , 2025. [25] Yihua Chengyu, Richard Meister, Conor Carty, Sheng-Ku Lin, and Roberto Bondesan. Bayesian optimization for quantum error-correcting code discovery. arXiv preprint arXiv:2601.18562 , 2026. [26] Juan Cruz-Benito, Andrew W. Cross, David Kremer, and Ismael Faro. Evolutionary discovery of bivariate bicycle codes with LLM-guided search. arXiv preprint arXiv:2606.02418 , 2026. [27] Zidu Liu and Florian Marquardt. Large-language-model discovery of quantum LDPC codes through structured concept evolution. arXiv preprint arXiv:2606.24808 , 2026. [28] Juraj Gottweis, Wei-Hung Weng, Alexander Daryin, Tao Tu, Petar Sirkovic, Artiom Myaskovsky, Grzegorz Glowaty, Felix Weissenberger, Alessio Orlandi, Dan Popovici, et al. Accelerating scientific discovery with Co-Scientist. Nature , 655:487–496, 2026. [29] Ali Essam Ghareeb, Benjamin Chang, Ludovico Mitchener, Angela Yiu, Caralyn J. Szostkiewicz, Dmytro Shved, Gavin J. Gyimesi, Jon M. Laurent, Samantha M. Wright, Muhammed T. Razzak, et al. A multi-agent system for automating scientific discovery. Nature , 655:497–505, 2026. [30] InternAgent Team, Bo Zhang, Shiyang Feng, Xiangchao Yan, Jiakang Yuan, Runmin Ma, Yusong Hu, Zhiyin Yu, Xiaohan He, Songtao Huang, et al. InternAgent: When agent becomes the scientist—building closed-loop system from hypothesis to verification. arXiv preprint arXiv:2505.16938 , 2025. [31] Shiyang Feng, Runmin Ma, Xiangchao Yan, Yue Fan, Yusong Hu, Songtao Huang, Shuaiyu Zhang, Zongsheng Cao, Tianshuo Peng, Jiakang Yuan, et al. InternAgent-1.5: A unified agentic framework for long-horizon autonomous scientific discovery. arXiv preprint arXiv:2602.08990 , 2026. [32] Ge Yan, Shanchuan Li, Pengyue Ma, Qixin Zhang, Pingchuan Ma, Jianping Wang, Min-Hsiu Hsieh, and Yuxuan Du. OmniQEC: discovering practical quantum error-correcting codes by an AI scientist. arXiv preprint arXiv:2607.25865 , 2026. [33] Mark Webster, Abraham Jacob, and Oscar Higgott. Distance-finding algorithms for quantum codes and circuits. arXiv preprint arXiv:2603.22532 , 2026. [34] Aditya Bhardwaj, Muzhou Ma, Nadine Meister, Robbie King, Dolev Bluvstein, John Preskill, Madelyn Cain, Qian Xu, and Hsin-Yuan Huang. High-rate qldpc processors. arXiv preprint arXiv:2607.28795 , 2026. [35] Tommi Junttila and Petteri Kaski. Engineering an efficient canonical labeling tool for large and sparse graphs. In Proceedings of the Ninth Workshop on Algorithm Engineering and Experiments (ALENEX) ,pages 135–149, 2007. [36] Pavel Panteleev and Gleb Kalachev. Quantum LDPC codes with almost linear minimum distance. IEEE Transactions on Information Theory , 68(1):213–229, 2022. [37] Alexey A. Kovalev and Leonid P. Pryadko. Quantum kronecker sum-product low-density parity-check codes with finite rate. Physical Review A , 88:012311, 2013. [38] Jean-Baptiste Mouret and Jeff Clune. Illuminating search spaces by mapping elites. arXiv preprint arXiv:1504.04909 , 2015. [39] Alexander Novikov, Ngân V˜ u, Marvin Eisenberger, Emilien Dupont, Po-Sen Huang, Adam Zsolt Wagner, et al. AlphaEvolve: a coding agent for scientific and algorithmic discovery. arXiv preprint arXiv:2506.13131 ,2025. [40] Tianyi Li, Shihui Zang, and Moritz Münchmeyer. MadEvolve: evolutionary optimization of cosmological algorithms with large language models. arXiv preprint arXiv:2602.15951 , 2026. [41] Gurobi Optimization, LLC. Gurobi optimizer reference manual. https://www.gurobi.com , 2025. [42] Koki Okada and Kenta Kasai. Pair-partition constructions for CPM-based quantum LDPC codes. arXiv preprint arXiv:2607.14091 , 2026. [43] Abraham Jacob, Campbell McLauchlan, and Dan E. Browne. Single-shot decoding and fault-tolerant gates with trivariate tricycle codes. arXiv preprint arXiv:2508.08191 , 2025. [44] Jiaxuan Zhang, Zhao-Yun Chen, Peng Duan, Jia-Ning Li, Tian-Hao Wei, Qing-Yang Hou, Wei-Cheng Kong, Yu-Chun Wu, and Guo-Ping Guo. Routing codes: High-rate quantum LDPC codes with short, parallel 17 
+
+non-local connectivity. arXiv preprint arXiv:2606.25330 , 2026. [45] Mohsen Moradi, Taejoon Kim, Rémi A. Chou, and David G. M. Mitchell. Learning to decode quantum LDPC codes via cluster-based sequential belief propagation. arXiv preprint arXiv:2607.20130 , 2026. [46] Xi He, Sirui Lu, and Bei Zeng. Co-designing quantum codes with transversal diagonal gates via multi-agent systems. In Proceedings of the 2026 IEEE 19th Dallas Circuits and Systems Conference (DCAS) , pages 1–6, 2026. [47] Melvin Mathews, Lukas Pahl, David Pahl, Vaishnavi L. Addala, Catherine Tang, William D. Oliver, and Jeffrey A. Grover. Placing and routing quantum LDPC codes in multilayer superconducting hardware. npj Quantum Information , 12:114, 2026. [48] Leonid P. Pryadko, Vadim A. Shabashov, and Valerii K. Kozin. QDistRnd: a GAP package for computing the distance of quantum error-correcting codes. Journal of Open Source Software , 7(71):4120, 2022. [49] Joschka Roffe, David R. White, Simon Burton, and Earl Campbell. Decoding across the quantum low-density parity-check code landscape. Physical Review Research , 2:043423, 2020. [50] Joschka Roffe. LDPC: Python tools for low density parity check codes. https://pypi.org/project/ldpc/ ,2022. 18 
+
+Supplementary Information Construction data for the codes in Tables I and II 
+
+Each code below is the coset-orbit balanced product specified by its host group 𝐺 , stabilizer subgroup 𝐾 and protograph matrices 𝐴 and 𝐵 , assembled as described in Methods. Every entry of 𝐴 
+
+and 𝐵 is an F2 sum of double cosets 𝐾𝑔𝐾 , written through the listed representatives 𝑔 ; for 𝐾 = {𝑒 }
+
+the entries are ordinary group-algebra elements. Group elements are written multiplicatively in the stated generators, with 𝑒 the identity. 
+
+a. [[336 , 12 , 20]] , 𝑤 = 6 (Table I). 𝐺 = Z84 ⋊29 Z4, generators 𝑥, 𝑠 : 𝑥 84 = 𝑠 4 = 𝑒 , 𝑠𝑥𝑠 −1 = 𝑥 29 ;
+
+|𝐺 | = 336. 𝐾 = ⟨𝑥 42 ⟩ (normal, order 2). 
+
+𝐴 = 𝑒 + 𝑥𝑠 + 𝑥 3, 𝐵 = 𝑠 3 + 𝑥 2 + 𝑥 4.
+
+b. [[400 , 16 , ≤ 22]] , 𝑤 = 6 (Table I). 𝐺 = Dic 5 × Dic 5, generators 𝑟 𝑖 , 𝑠 𝑖 (𝑖 = 1 , 2): 𝑟 10  
+
+> 𝑖
+
+= 𝑒 , 𝑠 2 
+
+> 𝑖
+
+= 𝑟 5 
+
+> 𝑖
+
+,
+
+𝑠 𝑖 𝑟 𝑖 𝑠 −1 
+
+> 𝑖
+
+= 𝑟 −1 
+
+> 𝑖
+
+; |𝐺 | = 400. 𝐾 = ⟨𝑟 51𝑟 52⟩ (normal, order 2). 
+
+𝐴 = 𝑠 1𝑟 2𝑠 2 + 𝑟 91𝑟 22𝑠 2 + 𝑟 21𝑠 1𝑟 32𝑠 2, 𝐵 = 𝑟 81 + 𝑟 21𝑟 2 + 𝑟 2𝑠 2.
+
+c. [[288 , 16 , 18]] , 𝑤 = 7 (Table I). 𝐺 = Z12 × Z48 , generators 𝑥, 𝑦 : 𝑥 12 = 𝑦 48 = 𝑒 ; |𝐺 | = 576. 
+
+𝐾 = ⟨𝑦 12 ⟩ (normal, order 4). 
+
+𝐴 = 𝑦 2 + 𝑦 7 + 𝑥, 𝐵 = 𝑦 3 + 𝑥 + 𝑥 2 + 𝑥 5𝑦 9.
+
+d. [[384 , 16 , ≤ 24]] , 𝑤 = 7 (Table I). 𝐺 = Z12 × Z48 , generators 𝑥, 𝑦 : 𝑥 12 = 𝑦 48 = 𝑒 ; |𝐺 | = 576. 
+
+𝐾 = ⟨𝑥 4⟩ (normal, order 3). 
+
+𝐴 = 𝑦 14 + 𝑦 19 + 𝑥, 𝐵 = 𝑦 3 + 𝑥 + 𝑥 2 + 𝑥 5𝑦 21 .
+
+e. [[378 , 32 , 19]] , 𝑤 = 8 (Table I). 𝐺 = He( Z3) × Z7, generators 𝑥, 𝑦, 𝑧, 𝑢 : 𝑥 3 = 𝑦 3 = 𝑧 3 = 𝑢 7 = 𝑒 ,
+
+𝑧 = 𝑥𝑦𝑥 −1𝑦 −1 central in He( Z3), 𝑢 generates Z7; |𝐺 | = 189. 𝐾 = {𝑒 } (free action). 
+
+𝐴 = 𝑧𝑢 3 + 𝑦 + 𝑥𝑢 + 𝑥𝑦𝑢 6, 𝐵 = 𝑧𝑢 4 + 𝑦𝑢 5 + 𝑥 + 𝑥𝑦𝑧 2𝑢 3.
+
+f. [[288 , 24 , 18]] , 𝑤 = 8 (Table I). 𝐺 = Z12 × Z48 , generators 𝑥, 𝑦 : 𝑥 12 = 𝑦 48 = 𝑒 ; |𝐺 | = 576. 
+
+𝐾 = ⟨𝑦 12 ⟩ (normal, order 4). 
+
+𝐴 = 𝑦 2 + 𝑦 7 + 𝑥𝑦 + 𝑥 3 + 𝑥 11 𝑦 11 , 𝐵 = 𝑦 3 + 𝑥 + 𝑥 2.
+
+g. [[224 , 22 , 16]] , 𝑤 = 8 (Table I). 𝐺 = Z84 ⋊29 Z4, generators 𝑥, 𝑠 : 𝑥 84 = 𝑠 4 = 𝑒 , 𝑠𝑥𝑠 −1 = 𝑥 29 ;
+
+|𝐺 | = 336. 𝐾 = ⟨𝑥 28 ⟩ (normal, order 3). 
+
+𝐴 = 𝑠 2 + 𝑥 + 𝑥 2𝑠 3 + 𝑥 5𝑠 2, 𝐵 = 𝑠 + 𝑥 5 + 𝑥 17 𝑠 + 𝑥 20 𝑠 3.
+
+h. [[336 , 24 , ≤ 24]] , 𝑤 = 8 (Table I). 𝐺 = Z4 × Z42 , generators 𝑥, 𝑦 ; |𝐺 | = 168. 𝐾 = {𝑒 } (free action). 
+
+𝐴 = 𝑒 + 𝑥𝑦 2 + 𝑥 2𝑦 5 + 𝑥 3𝑦 6, 𝐵 = 𝑒 + 𝑥𝑦 13 + 𝑥 2𝑦 9 + 𝑥 3𝑦 19 .
+
+i. [[378 , 18 , ≤ 27]] , 𝑤 = 8 (Table I). 𝐺 = 𝑀 27 × Z7, generators 𝑥, 𝑠, 𝑢 : 𝑥 9 = 𝑠 3 = 𝑢 7 = 𝑒 ,
+
+𝑠𝑥𝑠 −1 = 𝑥 4, 𝑢 generates Z7; |𝐺 | = 189. 𝐾 = {𝑒 } (free action). 
+
+𝐴 = 𝑒 + 𝑠 2𝑢 3 + 𝑥 3𝑠𝑢 + 𝑥 5𝑢 6, 𝐵 = 𝑠 + 𝑥 + 𝑥 2𝑠 2𝑢 5 + 𝑥 5𝑠𝑢 3.
+
+j. [[336 , 28 , ≤ 20]] , 𝑤 = 8 (Table I). 𝐺 = Z2 × Z2 × Z42 , generators 𝑥, 𝑦, 𝑧 ; |𝐺 | = 168. 𝐾 = {𝑒 }
+
+(free action). 
+
+𝐴 = 𝑒 + 𝑦𝑧 5 + 𝑥𝑧 2 + 𝑥𝑦𝑧 6, 𝐵 = 𝑒 + 𝑦𝑧 9 + 𝑥𝑧 13 + 𝑥𝑦𝑧 19 .19 
+
+k. [[288 , 18 , 18]] , 𝑤 = 9 (Table I). 𝐺 = SL(2 , 3) ⋊𝜃 Z12 : elements 𝑀 𝑦 𝑧 with 𝑀 ∈ SL(2 , 3), 𝑦 
+
+generating Z12 and 𝑦𝑀 𝑦 −1 = 𝜃 (𝑀 ) = 𝑃 𝑀 𝑃 −1, 𝑃 = ( 1 0 0 2 ); |𝐺 | = 288. 𝐾 = ⟨− 𝐼 ⟩ (normal, order 2). 
+
+𝐴 = ( 1 1 0 1 ) + 𝑦 + ( 0 1 2 0 ) 𝑦 2 + ( 1 0 1 1 ) 𝑦 3, 𝐵 = ( 1 2 0 1 ) + ( 2 1 2 0 ) 𝑦 + 𝑦 2 + ( 1 0 2 1 ) 𝑦 3 + ( 2 1 2 0 ) 𝑦 6.
+
+l. [[320 , 24 , 16]] , 𝑤 = 9 (Table I). 𝐺 = Z41 ⋊ Z 8, generators 𝑥, 𝑠 : 𝑥 41 = 𝑠 8 = 𝑒 , 𝑠𝑥𝑠 −1 = 𝑥 38 ;
+
+|𝐺 | = 328. 𝐾 = ⟨𝑥 ⟩ = Z41 (normal). 
+
+𝐴 =
+
+⎛⎜⎜⎜⎜⎝
+
+𝑒 𝑥 𝑠 𝑠 6
+
+𝑠 6 𝑒 𝑥 𝑠 𝑠 𝑠 6 𝑒 𝑥 𝑥 𝑠 𝑠 6 𝑒 
+
+⎞⎟⎟⎟⎟⎠ , 𝐵 =
+
+⎛⎜⎜⎜⎜⎜⎜⎝
+
+𝑒 𝑥 5𝑠 3 𝑠 2 𝑥 15 𝑠 3 𝑥 20 𝑠 3
+
+𝑥 20 𝑠 3 𝑒 𝑥 5𝑠 3 𝑠 2 𝑥 15 𝑠 3
+
+𝑥 15 𝑠 3 𝑥 20 𝑠 3 𝑒 𝑥 5𝑠 3 𝑠 2
+
+𝑠 2 𝑥 15 𝑠 3 𝑥 20 𝑠 3 𝑒 𝑥 5𝑠 3
+
+𝑥 5𝑠 3 𝑠 2 𝑥 15 𝑠 3 𝑥 20 𝑠 3 𝑒 
+
+⎞⎟⎟⎟⎟⎟⎟⎠
+
+.
+
+m. [[400 , 26 , 16]] , 𝑤 = 9 (Table I). 𝐺 = Dic 4, generators 𝑟, 𝑠 : 𝑟 8 = 𝑒 , 𝑠 2 = 𝑟 4, 𝑠𝑟𝑠 −1 = 𝑟 −1;
+
+|𝐺 | = 16. 𝐾 = {𝑒 } (free action). 
+
+𝐴 =
+
+⎛⎜⎝
+
+𝑒 𝑟 𝑟 2𝑠 𝑟 5
+
+𝑟 2𝑠 𝑒 + 𝑟 4 𝑟 𝑟 4𝑠 𝑟 𝑟 7𝑠 𝑒 𝑟 2
+
+⎞⎟⎠ , 𝐵 =
+
+⎛⎜⎝
+
+𝑒 𝑟 2 𝑟 5𝑠 𝑟 𝑟𝑠 𝑒 𝑟 2 𝑟 4
+
+𝑟 3 𝑟 5𝑠 𝑒 𝑟 5
+
+⎞⎟⎠ .
+
+n. [[384 , 18 , ≤ 28]] , 𝑤 = 9 (Table I). 𝐺 = SL(2 , 3) ⋊𝜑 Z16 : elements 𝑀 𝑦 𝑧 with 𝑀 ∈ SL(2 , 3), 𝑦 
+
+generating Z16 and 𝑦𝑀 𝑦 −1 = 𝜑 (𝑀 ), where 𝜑 is conjugation by ( 1 1 2 1 ) ∈ GL(2 , 3); |𝐺 | = 384. 𝐾 = ⟨− 𝐼 ⟩
+
+(normal, order 2). 
+
+𝐴 = 𝑒 + ( 1 1 1 2 ) 𝑦 + ( 1 0 1 1 ) 𝑦 3 + ( 1 1 0 1 ) 𝑦 3 + ( 0 1 2 0 ) 𝑦 6, 𝐵 = 𝑒 + ( 1 2 0 1 ) 𝑦 + ( 1 0 1 1 ) 𝑦 2 + ( 0 1 2 0 ) 𝑦 5.
+
+o. [[384 , 14 , ≤ 28]] , 𝑤 = 9 (Table I). 𝐺 = GL(2 , 3) × Z4: elements 𝑀 𝑦 𝑧 with 𝑀 ∈ GL(2 , 3) and 𝑦 
+
+generating Z4; |𝐺 | = 192. 𝐾 = {𝑒 } (free action). 
+
+𝐴 = ( 0 1 1 0 ) + 𝑒 + ( 0 1 2 0 ) 𝑦 + ( 1 1 0 1 ) 𝑦 2 + ( 2 0 0 2 ) 𝑦 3, 𝐵 = 𝑒 + ( 1 0 1 1 ) 𝑦 + ( 1 1 0 1 ) 𝑦 2 + ( 0 1 2 0 ) 𝑦 3.
+
+p. [[234 , 28 , 18]] , 𝑤 = 10 (Table I). 𝐺 = Z13 × Z9, generators 𝑥, 𝑦 ; |𝐺 | = 117. 𝐾 = {𝑒 } (free action). 
+
+𝐴 = 𝑒 + 𝑦 2 + 𝑦 8 + 𝑥 4𝑦 4 + 𝑥 6𝑦 8, 𝐵 = 𝑥 2𝑦 8 + 𝑥 5𝑦 4 + 𝑥 10 𝑦 2 + 𝑥 11 𝑦 5 + 𝑥 12 .
+
+q. [[372 , 44 , 18]] , 𝑤 = 10 (Table I). 𝐺 = Z31 × Z6, generators 𝑥, 𝑦 ; |𝐺 | = 186. 𝐾 = {𝑒 } (free action). 
+
+𝐴 = 𝑥 5𝑦 + 𝑥 5𝑦 3 + 𝑥 7𝑦 2 + 𝑥 18 𝑦 2 + 𝑥 30 𝑦 2, 𝐵 = 𝑥 10 𝑦 + 𝑥 10 𝑦 3 + 𝑥 21 𝑦 5 + 𝑥 24 𝑦 5 + 𝑥 26 𝑦 5.
+
+r. [[170 , 32 , 14]] , 𝑤 = 10 (Table I). 𝐺 = Z85 , generator 𝑥 ; |𝐺 | = 85. 𝐾 = {𝑒 } (free action). 
+
+𝐴 = 𝑒 + 𝑥 3 + 𝑥 4 + 𝑥 10 + 𝑥 67 , 𝐵 = 𝑒 + 𝑥 5 + 𝑥 29 + 𝑥 31 + 𝑥 37 .
+
+s. [[390 , 32 , ≤ 32]] , 𝑤 = 10 (Table I). 𝐺 = Z195 , generator 𝑥 ; |𝐺 | = 195. 𝐾 = {𝑒 } (free action). 
+
+𝐴 = 𝑒 + 𝑥 5 + 𝑥 28 + 𝑥 155 + 𝑥 186 , 𝐵 = 𝑒 + 𝑥 + 𝑥 64 + 𝑥 86 + 𝑥 161 .
+
+t. [[390 , 36 , ≤ 30]] , 𝑤 = 10 (Table I). 𝐺 = Z39 × Z5, generators 𝑥, 𝑦 ; |𝐺 | = 195. 𝐾 = {𝑒 } (free action). 
+
+𝐴 = 𝑒 + 𝑥 + 𝑥 7𝑦 + 𝑥 8𝑦 3 + 𝑥 25 𝑦 2, 𝐵 = 𝑒 + 𝑥𝑦 2 + 𝑥 3𝑦 3 + 𝑥 11 𝑦 + 𝑥 12 𝑦 2.
+
+u. [[256 , 18 , 16]] , 𝑤 = 8 (Table II). 𝐺 = Z8 ≀ Z2, generators 𝑥 1, 𝑥 2, 𝜎 : 𝑥 81 = 𝑥 82 = 𝜎 2 = 𝑒 ,
+
+𝑥 1𝑥 2 = 𝑥 2𝑥 1, 𝜎𝑥 1𝜎 = 𝑥 2; |𝐺 | = 128. 𝐾 = {𝑒 } (free action). 
+
+𝐴 = 𝑥 22 + 𝑥 1 + 𝑥 1𝑥 62𝜎 + 𝑥 21𝑥 32𝜎, 𝐵 = 𝑥 2𝜎 + 𝑥 1𝑥 32 + 𝑥 21𝑥 42𝜎 + 𝑥 51.20 
+
+v. [[384 , 32 , 16]] , 𝑤 = 8 (Table II). 𝐺 = D 6⋊𝜃 Z8, generators 𝑟, 𝑠, 𝑢 : 𝑟 6 = 𝑠 2 = 𝑢 8 = 𝑒 , 𝑠𝑟𝑠 −1 = 𝑟 −1,
+
+𝑢𝑟𝑢 −1 = 𝑟 , 𝑢𝑠𝑢 −1 = 𝑟 3𝑠 ; |𝐺 | = 96. 𝐾 = ⟨𝑟 3⟩ (normal, order 2). 
+
+𝐴 =(︃ 𝑟 + 𝑠𝑢 2 𝑢 + 𝑟 4𝑢 3
+
+𝑢 + 𝑟 4𝑢 3 𝑟 + 𝑠𝑢 2)︃ , 𝐵 =(︃ 𝑟 + 𝑠𝑢 3 𝑟 2𝑢 + 𝑟 5𝑢 2
+
+𝑟 2𝑢 + 𝑟 5𝑢 2 𝑟 + 𝑠𝑢 3)︃ .
+
+w. [[368 , 18 , 16]] , 𝑤 = 9 (Table II). 𝐺 = 𝐴 6 × Z2: elements 𝜋𝑢 𝑧 with 𝜋 ∈ 𝐴 6 (permutations of 
+
+{1, . . . , 6}, cycle notation) and 𝑢 generating Z2; |𝐺 | = 720. 𝐾 = ⟨(1 2)(3 4) ⟩ (non-normal, order 2). 
+
+𝐴 = (2 3 4 5 6) + (1 2 3) 𝑢, 𝐵 = (2 3 4 5 6) 𝑢 + (2 6 5 4 3) 𝑢 + (1 3)(2 4) 𝑢. 
+
+x. [[336 , 12 , ≤ 24]] , 𝑤 = 9 (Table II). 𝐺 = PSL(2 , 11): matrices over F11 with unit determinant, modulo ±𝐼 (one representative listed); |𝐺 | = 660. 𝐾 = ⟨( 0 110 0 )⟩ (non-normal, order 2). 
+
+𝐴 = ( 1 0 4 1 ) + ( 1 1 0 1 ) , 𝐵 = 𝑒 + ( 1 0 4 1 ) + ( 1 10 0 1 ) .
+
+y. [[248 , 12 , 18]] , 𝑤 = 10 (Table II). 𝐺 = PSL(2 , 13): matrices over F13 with unit determinant, modulo ±𝐼 (one representative listed); |𝐺 | = 1092. 𝐾 = ⟨( 3 0 0 9 )⟩ (non-normal, order 3). 
+
+𝐴 = ( 1 0 4 1 ) + ( 1 1 0 1 ) , 𝐵 = ( 0 112 0 ) + ( 1 12 0 1 ) .
+
+z. [[396 , 8, ≤ 32]] , 𝑤 = 10 (Table II). 𝐺 = Z31 ⋊ Z 6, generators 𝑥, 𝑠 : 𝑥 31 = 𝑠 6 = 𝑒 , 𝑠𝑥𝑠 −1 = 𝑥 26 ;
+
+|𝐺 | = 186. 𝐾 = ⟨𝑠 2⟩ (non-normal, order 3). 
+
+𝐴 =
+
+⎛⎜⎝
+
+𝑒 𝑥 𝑠 𝑠 𝑒 𝑥 𝑥 𝑠 𝑒 
+
+⎞⎟⎠ , 𝐵 =
+
+⎛⎜⎝
+
+𝑒 𝑥 3𝑠 3 𝑠 5
+
+𝑠 5 𝑒 𝑥 3𝑠 3
+
+𝑥 3𝑠 3 𝑠 5 𝑒 
+
+⎞⎟⎠ .
+
+aa. [[306 , 8, ≤ 25]] , 𝑤 = 10 (Table II). 𝐺 = ( Z217 ) ⋊swap Z2, generators 𝑥, 𝑦, 𝜎 : 𝑥 17 = 𝑦 17 = 𝜎 2 = 𝑒 ,
+
+𝑥𝑦 = 𝑦𝑥 , 𝜎𝑥𝜎 = 𝑦 ; |𝐺 | = 578. 𝐾 = ⟨𝜎 ⟩ (non-normal, order 2). 
+
+𝐴 = 𝑦 4 + 𝑥 + 𝑥 3𝑦 3𝜎, 𝐵 = 𝑥 2𝑦 3 + 𝑥 5𝑦 + 𝑥 6𝑦 6𝜎.

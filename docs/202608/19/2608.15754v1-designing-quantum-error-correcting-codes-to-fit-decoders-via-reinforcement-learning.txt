@@ -1,0 +1,895 @@
+Title: Designing Quantum Error Correcting Codes to fit decoders via Reinforcement Learning
+
+URL Source: https://arxiv.org/pdf/2608.15754v1
+
+Published Time: Tue, 18 Aug 2026 01:32:11 GMT
+
+Number of Pages: 30
+
+Markdown Content:
+# Designing Quantum Error Correcting Codes to fit decoders via Reinforcement Learning 
+
+Omer S. Sella 1, Robert Pinsler 2, and Thomas Heinis 1
+
+> 1Imperial College London
+> 2Microsoft Research
+
+We present a reinforcement learning (RL) approach to the co-design of stabilizer sets of Quantum Error Correcting Codes (QECCs) and decoders. We show how to produce a generative model that produces Bivariate Bicycle (BB) codes based on the choice of decoder. Specifically, we fix a decoder architecture and use Proximal Policy Optimisation (PPO) to train an agent over BB codes to maximise decoder performance under a depolarising channel noise model. 
+
+# 1 Introduction 
+
+Fault-tolerant quantum computation requires that physical noise rates be suppressed low enough, and decoding is done fast enough. Quantum error correcting codes (QECCs) achieve the former by restricting a larger space of physical qubits to a subspace of logical qubits that satisfy some relations. These relations can be measured without collapsing the encoded quantum state. The design of such codes is just one side of a foundational problem in the path to scalable quantum computing. The choice of decoder is another, and the two operate together. Quantum Low Density Parity Check codes (qLDPC) [1, 2] present an attractive approach as they promise good asymptotic parameters and can be decoded using algorithms such as belief propagation (BP) [3]. Furthermore, the implication of low density is that the connectivity required between logical qubits is low, an appealing property in some qubit architectures and quantum control hardware. Practical decoding for fault tolerant quantum computing is likely to constrain the decoder design further than qubit connectivity. Much like the binary setting, the decoder must complete its work under a certain time limit, otherwise its decoding latency may kill the entire application [4]. A central insight motivating this work is that code design and decoder design are not independent problems, especially in decoders that rely on heuristics and approximations of Maximum Likelihood (ML) decoding. The performance of a given decoder depends strongly on the structure of the code. We can ask the question: given a fixed decoder, which code maximises its performance ? 
+
+A deeper question that motivated this work is: Assuming deep knowledge of a quantum-device-under-test (qDUT), its error modalities, failure modes etc., how could one use that knowledge to engineer better, stack-integrated, QECC-decoder pair ? 
+
+While we are still far from answering the latter, we believe this work presents some progress in answering the former. This paper proceeds as follows: 
+
+> Omer S. Sella: o.sella@imperial.ac.uk, https://omer-sella.github.io/, wishes to thank Dr. Panteleev Pavel for helpful clarifications, guidance and methodology in the early stages of this work.
+
+1arXiv:2608.15754v1 [quant-ph] 16 Aug 2026 Section 2 is meant to serve as a presentation of the tools we use in this work for a non expert in the corresponding field. We also include a dataset of BB codes we used for supervised learning in a later section. Section 3 describes a Markov Decision Process (MDP) formulation of Bicycle-Bivariate (BB) code design in which the state is a parity check matrix and an action modifies the matrix. Following the action we present a reward function based on the area under a fitted BER physical-error-rate curve, giving a single scalar. A “warm start” strategy, in the form of a predictive model, is presented in Section 4.6. It is then used in as part of the policy architecture in order to improve sampling efficiency. Following the related work in Section 5, we evaluate the training and resulting policy in Section 6, and discuss potential further work in Section 7. 
+
+# 2 Background 
+
+In binary communication setting, a transmitter sends a codeword through a noisy channel, some of the bits may be corrupted, and the receiver attempts to reconstruct the message from the received bits. A binary linear code is defined 1 by a parity check matrix H ∈ Fm×n 
+
+> 2
+
+;codewords are elements of the null space ker( H). LDPC codes have sparse H, which enables efficient decoding via belief propagation (BP) on the Tanner graph [5], a bipartite graph in which bit nodes are connected to check nodes according to the nonzero entries of H.BP then passes probabilistic messages along Tanner graph edges and terminates when all parity checks are satisfied or after a fixed number of iterations. Its performance degrades in the presence of short cycles in the Tanner graph. The soft information produced by BP algorithms can serve as a ranking of the indices in an increasing order of likelihood to be a non trivial Error. Using this ranking, a decoder can search for a rank (H) set of indices. If the corresponding rows of H happen to be linearly independent, the decoder can invert the sub-matrix and calculate the error. Such sets of indices are called Information Sets [6], and the decoding method is termed Ordered Statistics Decoding (OSD). When the soft information used by OSD is produced by Belief-Propagation (BP), the decoding is often termed BP+OSD. In the binary case, the error pattern is not the end-game, but rather a means to reconstruct the transmitted codeword 2. The quantum setting is different, in the sense that we are not allowed to learn anything about the underlying quantum information, and the goal of the decoder is only to counter the error pattern, which is sometimes referred to as syndrome decoding. Keeping that in mind, we introduce qubits primarily as a backdrop for the errors that may experience. 
+
+2.1 Qubits and Pauli operators 
+
+A qubit is a unit vector in C2, which could be written as 
+
+|q⟩ = α
+
+> (
+
+10
+
+> )
+
++ β
+
+> (
+
+01
+
+> )
+
+= α |0⟩ + β |1⟩ (1) 
+
+where 
+
+α, β ∈ C, |α|2 + |β|2 = 1 (2) 
+
+> 1In a non-unique way.
+> 2Decoding would halt if at any point the sent codeword is recovered.
+
+2A “bit flip” operator, X, interchanges |0⟩ and |1⟩. A “phase flip” operator Z moves |1⟩ to 
+
+−1 · | 1⟩, and their composite, up to a global phase, is Y = iXZ 3:
+
+X =
+
+> (
+
+0 11 0
+
+> )
+
+, Z =
+
+> (
+
+1 00 −1
+
+> )
+
+, Y =
+
+> (
+
+0 −ii 0
+
+> )
+
+(3) 
+
+If we assume that single-qubit errors are unitary linear maps, then since X, Y, Z along with the identity matrix, I span the 2 × 2 complex matrices, any single-qubit noise channel can be written as a linear combination of the Pauli operators I, X, Z, Y . We also note that 
+
+X · Z = −1 · Z · XX · Y = −1 · Y · XZ · Y = −1 · Y · Z
+
+(4) 
+
+and say that these operators anti-commute. A register (memory element) of n qubits resides in the tensor product of C2, i.e., (C2)⊗n. For multi qubit errors the analysis is slightly more complicated, we explain next. It is worth knowing the formal definition of a Quantum Error Correcting Code [7]: 
+
+Definition 1 (Quantum error-correcting code) . A quantum error-correcting code U, E is a partial isometry U : HK → H N with a set of correctable errors E, where each E ∈ E is a linear map E : HN → H M , such that there exists a recovery operation D : HM → H K
+
+with ∀E ∈ E , ∀| ψ⟩ ∈ H K ,
+
+D(EU |ψ⟩⟨ ψ|U †E†) = c(E, |ψ⟩)|ψ⟩⟨ ψ|.
+
+We note that this definition suggests we need to consider the noise from the very beginning. In this work, we consider the noise to be in the form of n dimensional Pauli operators, which can be described as tensor products of n (single qubit) Pauli operators (together with the identity matrix): 
+
+P = P0 ⊗ . . . ⊗ Pn−1, Pi ∈ { I, X, Z, Y } (5) 
+
+For two operators M, N of the above form, their product is defined as the tensor product of their coordinate-wise product: 
+
+E =
+
+> n−1⊗
+> i=0
+
+(Mi · Ni) (6) 
+
+We say that such operators commute if 
+
+E =
+
+> n−1⊗
+> i=0
+
+(Mi · Ni) = 
+
+> n−1⊗
+> i=0
+
+(Ni · Mi) (7) 
+
+which, for Pauli operators, amounts to the number of coordinates where they anti-commute being even. For n dimensional Pauli operators, we can define two homomorphisms onto binary vectors: 
+
+Definition 2. Let P be a dimension n Pauli operator P = P0 ⊗ . . . ⊗ Pn−1 define two vectors, PX and PZ with binary coordinates as follows: 
+
+PX (k) = 0 if P (k) = IPX (k) = 1 if P (k) ∈ { X, Y }
+
+PZ (k) = 0 if P (k) = IPZ (k) = 1 if P (k) ∈ { Z, Y }
+
+(8)   
+
+> 3We remark that global phase, i.e., the ifactor is disregarded.
+
+3The decomposition above respects multiplication, i.e., if P, Q are two n dimension Pauli operators, and P · Q = S then: 
+
+SX =PX + QX mod 2 
+
+SZ =PZ + QZ mod 2 (9) 
+
+and therefore, to tell if P and Q commute is the same as checking that 4:
+
+> ∑
+> k
+
+PX (k) · QZ (k) + ∑
+
+> k
+
+PZ (k) · QX (k) = 0 mod 2 (10) 
+
+In the classical setting, the codewords can be seen as the null space of the parity check matrix and (recoverable) errors take a codeword to a non codeword, so out of this null space. The parity matrix, can, in turn be thought of as a stack of single parity checksums (SPCs). In the quantum setting, at least for some types of codes, we replace the stack of SPCs (rows of the parity check matrix) with a stack of Pauli operators, and we can look at the concurrent +1 eigen space of these Pauli operators (which may be trivial). In the case this code is not trivial, this stack of Pauli operators are referred to as the stabilizers of the code (since the stabilize, or fix, the space point-wise). It can be shown that if the code is non trivial, then all stabilizers commute. Calderbank-Steane-Shor (CSS) codes [8, 9], are such codes, in which every stabilizer contains only only X or Z components. This means that, for each operator in the stabilizer stack, only one of the projections 2 is non trivial, which allows us to look at two binary matrices, Hx, H z . This also provides an easy view into the code dimension, i.e.: 
+
+N − rank (Hx) − rank (HZ ) (11) 
+
+The requirement that the stabilizers commute, is then translated to 
+
+Hx · (Hz )T = 0 (12) 
+
+Given any n dimensional Pauli operator E, it either commutes or anti-commutes with each operator in the stack of stabilizers. Suppose it has only X components, then it will commute with every X type stabilizer, or equivalently: 
+
+PX (E) ∈ ker (HX ) (13) 
+
+If it happens to have non trivial X components in an odd number of places as one of the 
+
+Z-type stabilizers, then it anti-commutes with it, and so 5:
+
+sZ = HZ · PX (E)̸ = 0 (14) 
+
+Decoding could then be thought of as the task of inferring 
+
+PX (E) = EX from sZ
+
+and 
+
+PZ (E) = EZ from sX
+
+> 4This is very useful for leveraging binary error correcting codes (and decoders) and porting them to the quantum setting.
+> 5and note that this is a binary vector
+
+4and reassembling an error E′ with the same syndrome. In fact, this powerful description of Pauli noise as well as the stabilizers as binary vectors, readily yields a decoding algorithm. Starting from any binary BP algorithm that provides an error approximation, decode ˆEZ
+
+from sX , ˆEX from sZ , and return ˆE = P −1 
+
+> X
+
+( ˆEX ) · P −1 
+
+> Z
+
+( ˆEZ ), i.e., the coordinate-wise multiplication of the inverse image of ˆEX and ˆEZ 6.Given a code with parity matrices H and a decoder, a monte-carlo evaluation can be carried as in Algorithm 1. The reader with background in classical error correction will likely distinguish between 
+
+decoder failure , where the decoder admits it failed to decode, but is aware of this fact, and 
+
+decoder error , where the decoder thinks it found a correction, and did in fact not (making this a silent data corruption event). In our context, these events are counted equally. A physical error rate to logical error rate can subsequently be drawn as in Figure 1. In this work, we focus on training the agent at the physical error range 
+
+0.001 , 0.00316228 , 0.01 , 0.03162278 , 0.1
+
+corresponding to    
+
+> 1numpy . geomspace (0.001 , 0.1 , 5)
+
+the majority of the dataset introduced in section 2.4, however, was evaluated on a larger range (but a uniform number of samples across the error range).  
+
+> Figure 1: Physical-to-logical error rate curve explanation. The reward is calculated as the area between the performance curve and the constant function 1.
+
+2.2 Bivariate Bicycle Codes 
+
+Bicycle codes are a sub-family of CSS codes, originally defined in [10]. Bivariate Bicycle codes were subsequently defined as follows: 
+
+Definition 3 (Bivariate Bicycle code [2]) . Let Sℓ be the cyclic shift matrix of size ℓ × ℓ
+
+and set 
+
+X = Sℓ ⊗ Im, Y = Iℓ ⊗ Sm (15) 
+
+And note that XY = Y X and Xl = Y m = Ilm . A BB code is specified by a pair of matrices 
+
+A = A1 + A2 + A3, B = B1 + B2 + B3 (16) 
+
+> 6An immediate heuristic from (potentially) a composite of heuristics.
+
+5where each matrix Ai and Bj is a power of X or Y , and subsequent parity check matrices, 
+
+HX = [ A | B], HZ = [ B⊤ | A⊤]. (17) 
+
+The definition in [2] also suggested that the Ais should be distinct as to not cancel out (similarly for the Bis). In this work, we take a slight generalisation of this definition, following [11, 12], by defining polynomials a(x), b (x), a (y), b (y) and subsequently taking: 
+
+A = a(X) ⊕ a(Y ) B = b(X) ⊕ b(Y ) (18) 
+
+Either definition guarantees the commutation of the resulting stabilizers, since circulant matrices ( X, Y and their powers) commute, as well as a symmetry between the number of 
+
+X and Z stabilizers. The code has length n = 2 lm . The code is entirely determined by the coefficients of the four polynomials a(x), b (x), a (y), b (y). This compact parameterisation is important to our RL formulation: rather than searching over binary matrices, each of size (lm ) × (2 lm ), the agent searches over a space of four polynomials of degrees at most 
+
+l − 1, m − 1 and binary coefficients. The reader should be aware that other definitions, narrower and wider, exist in [13–16]. 
+
+2.3 Proximal Policy Optimisation 
+
+Loosely speaking, reinforcement learning provides a framework for problems where we make sequential decisions, or “actions”, moving us through “states”, each associated with a “reward”. If we denote the state at time t by st and the action by at, then a trajectory τ ,is a sequence of states and actions, starting at t = 0 , i.e.: 
+
+τ = {si, a i}∞ 
+
+> i=0
+
+(19) 
+
+If we further denote the reward by rt(st, a t) then we can look at the discounted cumulative reward: 
+
+R(τ ) = 
+
+> ∞∑
+> i=0
+
+γk · rt (20) 
+
+Assuming one starts from a state s, and acting using a policy π, we can look at the following two functions: the first is the value function, which tells what is the value of acting using 
+
+π from state s:
+
+V π(s) = E  
+
+> τ∼π
+
+[R(τ )|s0 = s] (21) 
+
+The second is: if we were to take an action a (not necessarily using the policy π), what would be the value of continuing the trajectory but sticking to the policy π, i.e., the Action-Value function: 
+
+Qπ(s, a ) = E  
+
+> τ∼π
+
+[R(τ )|s0 = s, a 0 = a] (22) 
+
+The advantage function, is then defined by: 
+
+Aπ(s, a ) = Qπ(s, a ) − V π(s) (23) 
+
+The goal of an RL agent is to learn a parametrized policy, πθ that maximises the re-turn 20. Policy gradient methods are a family of RL algorithms that learn such policies, and are appealing especially when the action and state spaces are either continuous or high-dimensional discrete. In this work we use Proximal Policy Optimisation (PPO) [17], 
+
+6which forces a policy update to stay close to the current policy via a clipped surrogate objective: 
+
+LCLIP (θ) = 
+
+Et
+
+> [
+
+min 
+
+> (
+
+ρt(θ) ˆAt, clip (ρt(θ), 1 − ϵ, 1 + ϵ) ˆAt 
+
+> )]
+
+(24) 
+
+where ρt(θ) = πθ(at|st)/π θold (at|st) is the importance weight and ˆAt is an approximation of the advantage function. In addition to the policy πθ, PPO also learns an approximation to the value function Vϕ(s). The overall algorithm is summarised in Algorithm 2. The code we used to apply PPO, once we state the problem in terms of states and actions in Section 3, is almost a drop-in-place reuse of the code explained in [18], and described by Algorithm 2. 
+
+2.4 Dataset 
+
+We accumulated a dataset of BB codes of various parameters as described in Table 5. Although it is not strictly needed to carry out PPO training in Algorithm 2, we used it in supervised learning manner, in an effort to start PPO from a better-than-random policy weights. We discuss this strategy, as well as our findings in Section 4.6. The collection was done by setting the agent to high exploration mode (by enforcing high entropy) and setting the environment to log them. A more extensive statistical analysis of this dataset can be     
+
+> Figure 2: Coefficient heatmap showing hits per coefficient index for the codes in the l= 6 , m = 6
+> dataset. Similar figures for other code sizes are provided in A, Figure 12.
+
+found in Appendix A. The dataset itself, as well as the code used to produce the figures describing is available for public use [19]. The dataset provides “labels”, i.e., the monte-carlo evaluation of each code over 50 samples per point. A typical .jsonl file in the repository contains multiple code records, each with the code parameters ( l, m , a(x), b (x), a (y), b (y),number of logical qubits) as well as the error range over which the code was evaluated, and the corresponding logical error counts. We note that the codes were not evaluated until a fixed number 7 of errors were observed, but rather over a fixed number of samples, as we use in training. 
+
+> 7The usual methodology is to observe 100 errors for high confidence.
+
+7Figure 3: Distribution of the number of logical qubits for the codes in the l = 6 , m = 6 dataset. Similar figures for other code sizes are provided in A, Figure 10 
+
+It should be stated that, the representation of a BB code using the polynomials a(x), b (x), a (y), b (y)
+
+is not unique, and the dataset contains duplicates. Two evaluations of the same code by the same decoder are independent Bernoulli trials of the same probability, so pooling them could improve the estimate. 
+
+# 3 Framing as a sequential decision making problem 
+
+For a code, defined by a pair of parity matrices HX , H Z and a choice of decoder, we define performance based on the evaluation 1 and the resulting plot 1. The first problem with the way the evaluation data is gathered is that it is only a noisy approximation of the true performance of the code. This can be accommodated in learning paradigms like PPO. The second, has to do with the way it is presented in Figure 1, namely, that it contains multiple scalar values. A “better” code will have a steeper fall, and its curve stays lower. We collapse it into a single scalar in the following section. 
+
+3.1 Reward 
+
+To obtain a single scalar that is function of this scattered dataset, integrate to obtain the area bounded between the evaluation curve and the constant function 18.
+
+r(HX , H Z ) = 
+
+∫ pmax 
+
+> pmin
+
+(1 −̂ f (p; H))dp (25) 
+
+where ̂ f is the empirical combined failure rate, computed by the trapezoid rule over the error range and where [pmin , p max ] is the evaluation range. This reward has several desirable properties, and some that are not desirable. While a higher number would mean “less errors 
+
+> 8We note that this is a design choice, and one could choose differently (for example, by sampling a single error point).
+
+8Algorithm 1: A Monte Carlo evaluation of code-decoder pair 
+
+Input: HX , HZ , errorRange, numberOf Samples 
+
+Output: logicalErrorRate  
+
+> 1
+
+Prepare X and Z logical operators LX , LZ from Hx, Hz  
+
+> 2
+
+for p in errorRange do  
+
+> 3
+
+for i in 1..numberOfSamples do  
+
+> 4
+
+Sample E with probability p for E(i) ∈ { X, Z, Y } 
+
+> 5
+
+Calculate sX = PZ (E) · HX , sZ = PX (E) · HZ 
+
+> 6
+
+ˆEX , ˆEZ = decode( HX , H Z , s X , s Z ) 
+
+> 7
+
+RX ← ( ˆEX + EX ) mod 2, RZ ← ( ˆEZ + EZ ) mod 2 // residual error  
+
+> 89
+
+if HX · RZ̸ = 0 or HZ · RX̸ = 0 then  
+
+> 10
+
+logicalErrorRate + = 1 
+
+// The residual error does not commute with the stabilizers, i.e., nonzero syndrome  
+
+> 11
+
+else  
+
+> 12
+
+if LX · RZ̸ = 0 or LZ · RX̸ = 0 then  
+
+> 13
+
+logicalErrorRate + = 1 
+
+// The residual error does not commute with the logical operators, i.e., it is not a stabilizer 
+
+observed in the range”, the integration provides a very small number, which we compensate for by dividing it by the width of the error range. Another problem with the above reward, as it stands, is that it rewards the agent solely on logical error rate. A code with no logical qubits will be highly performant by this definition, and this could drive the agent towards codes with fewer logical qubits, denoted as k. One way to discourage any agent negatively on coming up with a code that has no, or not enough, logical qubits, is to engineer the reward function to be proportional to the distance of k from some minimum requirement on the number of logical qubits we expect a code should have, denoted kmin , i.e.: 
+
+(k − kmin )/k min 
+
+For 
+
+k ≤ kmin 
+
+and switch to the decoder generated evaluation when k ≥ kmin . We summarise this as Definition 4: 
+
+Definition 4 (Reward) .
+
+r(HX , H Z ) =  
+
+> 
+> 1
+> pmax −pmin
+> ∫pmax
+> pmin
+> (
+
+1 −̂ f (p; H))dp if k ≥ kmin , 
+
+> k−kmin
+> kmin
+
+if k < k min .
+
+(26) 
+
+Before moving ahead, we note that in many constructions the number of logical qubits can be calculated, and even designed by the choice of the polynomials. We chose to treat it as a quantity that is to be learned by the agent, since other constructions may not allow this quantity to be designed. 
+
+93.2 Framing as a Markov Decision Process 
+
+At first glance, we could state the problem as “stateless”, i.e., for given l, m , produce polynomials a(x), b (x), a (y), b (y), and construct code matrices from them as in 3. This has no consideration for the “present state code”, whereas in the long run, we would like a generative model that would augment an existing code as little as possible, to yield a better performing code, maybe even just one term of one polynomial at a time. To this end, 
+
+State The state s ∈ S are the current parity check matrices HX = [ A | B], HZ =[B⊤ | A⊤], where A, B are generated from the polynomials a(x), b (x), a (y), b (y).
+
+Transition The transition is deterministic: 
+
+H′ =T (H(a(x), b (x), a (y), b (y)) ,Aa(x), A b(x), A a(y), A b(y)) (27) 
+
+applies the action and returns the modified matrix. 
+
+Action An action Ap on the polynomial p(x) = c0 + c1 · x + . . . , where ci ∈ { 0, 1}, selects at most one index i and XORs the coefficient of ci with 1, i.e., ci ⊕ 1. We subsequently define an action on the polynomials a(x), b (x), a (y), b (y) to be a tuple of individual actions 
+
+Aa(x), A b(x), A a(y), A b(y). We will abuse notation and write 
+
+p(t) ⊕ Ap(t) (28) 
+
+instead of explicitly saying which coefficient of p(t) is being flipped. 
+
+Reward After each action, the new matrices HX ′, H Z ′ are constructed, their rank is calculated, and the reward r(HX ′, H Z ′) from Definition 4 is returned. 
+
+Episode structure Each episode begins from a random set of a(x), b (x), a (y), b (y), with up to 3 non zero coefficients, and proceeds for a fixed number of transitions. There are subtle failure modes which sit on the boundary of the hyperparameters (specifically the entropy coefficient), error range, code parameters and reward. First, we note that an actor which applies only one action (which could happen for example, if policy entropy collapses) is either stuck on a single code, or toggles between two codes. The single code case is exactly when the single action is “do nothing”, communicated through a per-polynomial “no-op” bit to the environment. Otherwise there is at least one p(t) ∈ { a(x), b (x), a (y), b (y)} with non trivial Ap(t). Say, for example, p(t) = b(x). Following action Ab(x) the new polynomial is b(x) ⊕ Ab(x). Following another identical action b(x) ⊕ Ab(x) ⊕ Ab(x) is again b(x).This becomes catastrophic for a certain combination of BB code parameters and agent-environment hyperparameters. In error ranges that are too high, almost no code succeeds. In physical error rates that are too low, a fixed number of samples in Algorithm 1 provides a limited view, since the error sampled may be trivial, and this changes as a function of the code length. This may lead to mediocre codes that score a positive, yet lower-than-possible reward 9. The agent could then get stuck on such mediocre codes, at the expense 
+
+> 9Think of a code where the number of logical qubits is the same as the number of physical qubits, under low enough error rate.
+
+10 of exploration. To counter that effect, we cap each episode at O(l + m) steps, at the end of which the environment communicates a “truncated” signal 10 This means that, over the span of collection, the agent will have experienced a sufficiently diverse view [21]. 
+
+Algorithm 2: RL-based QECC co-design  
+
+> 1
+
+initialise policy πθ and value network Vϕ 
+
+> 2
+
+for batch = 1 , 2, . . . do  
+
+> 3
+
+for each of the F transitions in the batch do 
+
+// episodes reset each polynomial to a random vector with at most three non-zero coefficients, and truncate after T
+
+steps  
+
+> 4
+
+sample AaX , A bX , A aY , A bY ∼ πθ(· | s), each one-hot (includes no-op)  
+
+> 5
+
+p ← p ⊕ Ap for each polynomial build H′; k ← number of logical qubits  
+
+> 6
+
+if k ≥ kmin then  
+
+> 7
+
+r ← Monte-Carlo decoder evaluation of H′ 
+
+> 8
+
+else  
+
+> 9
+
+r ← (k − kmin )/k min // no decoding performed  
+
+> 10
+
+update πθ, V ϕ with PPO on the batch // truncated episodes bootstrapped  
+
+> 11
+
+record the best H found so far  
+
+> 12
+
+return policy and value weights, evaluation log 
+
+# 4 Policy Architecture 
+
+The only ingredient missing in order to apply Algorithm 2 is a parameterisation of the policy πθ and of the value function Vϕ. Both read the same state, i.e., the pair HX =[A | B], H Z = [ B⊤ | A⊤] built from the polynomials a(x), b (x), a (y), b (y), but are required to answer different questions. The actor is asked which action to take next, which in our framing corresponds to “which coefficient of each polynomial to flip next” (if any). The critic is meant to estimate what is the value of the present code, with the present policy. It helps to think of the case where we have arrived at “the best possible” performing code. In such a case we would like the actor to choose to do nothing, and the critic to estimate a value that is directly related to how well that code performs under the decoder. The critic therefore has to approximate, implicitly, what Algorithm 1 approximates explicitly, which is to map a code to its performance. Because the environment constructs the code from the polynomials, the same state is available to us in more than one form, and at no extra cost: 1. The coefficients of a(x), b (x), a (y), b (y), which are the compact description of the code, and how the action was defined. 2. The expanded matrices HX , H Z , which is what the decoder actually uses, and 3. The number of logical qubits k, which is easily computable from HX , H Z (by using Equation 11). 
+
+> 10 which is different than a “terminated” signal [20].
+
+11 flattened                                  
+
+> A∥B∈{− 1,+1 }2( lm )2
+> polynomial coefficients
+> [a(x)a(y)b(x)b(y) ]
+> logical-qubit features
+> [ min( k−kmin ,0) /k min ,
+> 1k≥kmin ,log(1+ k) ]
+> MLP
+> 2( lm )2→256 ,Tanh ×3
+> tokenizer + cyclic positional encoding (Hharmonics) Transformer encoder
+> d=64 , 4 heads ×2
+> attention pooling
+> Encoder (Figure 6) optionally pretrained and frozen for warm-start
+> fusion
+> 323 →256
+> Tanh policy head 4 categorical blocks (6 coefficients + no-op each) value head
+> 256 →1
+> action
+> 4×Cat(7) ˆV(s)256 64 3256
+> second, independent instance of the trunk
+> (2 l+2 m)×(9+2 H)(2 l+2 m)×64
+> pretrained (surrogate transfer) trained from scratch task heads (actor / critic) separate network instance
+
+Figure 4: Network architecture. Each of the actor and critic instantiates the architecture independently. The structure encoder (blue) has the ability to be warm-started as explained in Section 4.6 and kept frozen for the first N collector batches while the randomly initialised branches (teal/orange) settle. The fusion input size 323 = 64 enc + 256 mlp + 3 k is independent of the code size. The MLP input width 
+
+2( lm )2, the token count 2l + 2 m, and the policy-head sizes l+1 , m +1 scale with l, m . All dimensions in the figure are shown for l = m = 6 and H = 3 .
+
+In our policy architecture, each one its own branch, then “fuse” them using a single layer, on top of which there is either a single value head used by the critic, or parametrised Categorical distribution over the action space, used by the actor. The resulting network is drawn in Figure 4. The actor and the critic each instantiate it independently, i.e., they share the design but not the weights. We first describe branch that consumes the code matrices, as it is straightforward. 
+
+4.1 Multi-Layer-Perceptron (MLP) 
+
+The most direct parameterisation uses the matrices HX , H Z as the decoder uses them. Since these matrices are linear functions of A, B from Definition 3, we flatten the concate-nation of A, B and feed the resulting 2( lm )2-dimensional vector ( 2592 entries for l = m = 6 )into a three-layer MLP with tanh activations, which returns a 256 -dimensional vector. The advantage of this part of the architecture is that it gives the agent complete visibility of the observed state, so it does not need to learn a latent representation of what it is acting on. The disadvantage is double, as follows: 1. It increases the size of the network, as a function of l, m , and consequently the number of agent-environment interactions needed to learn. This is a costly sampling task even for codes of small size, since every interaction that produces a code with 
+
+k ≥ kmin costs a full Monte-Carlo evaluation. 2. The learning becomes code-size specific. The width of the input layer is 2( lm )2, so the weights of a network trained at (6 , 6) cannot be reused at (9 , 6) , and nothing learned at one size transfers to another. For these reasons we add a second branch, which is size transferable. 
+
+4.2 BB code construction aware encoder 
+
+The second part of the architecture learns from the polynomials a(x), b (x), a (y), b (y),through an encoder 11 , i.e., a fixed size neural network whose job is to turn the param-
+
+> 11
+
+To clarify, the encoder in this context is a function that accepts code parameters, and encodes them into a latent vector representation, to be used downstream (and not an encoder of physical qubits to logical 
+
+12 Table 1: Anatomy of one encoder token (width F = 9 + 2 H. At H = 3 F = 15 ). A code of size l, m 
+
+produces 2l + 2 m such tokens, one per coefficient in the order [a(x) | a(y) | b(x) | b(y)] .                                
+
+> Feature Value Width Role Coefficient bit {0,1}1is this monomial set to 1 One-hot label eg∈ { 0,1}44which polynomial from a(x), a(y), b(x), b(y) Cyclic position (sin hθ k,cos hθ k)2Hposition on the period-pcycle, per h=1. . . H Linear position k/p ∈[0 ,1) 1absolute position Global size features log( l),log( m),1.03code size, identical across all tokens
+
+eters of a code (four polynomials as well as l, m ) into a fixed-size latent vector that is meant to predict the expected reward and code structure. We design this encoder, and its learned representation, to be transferable across code sizes. Later in this section we discuss under what circumstances this learned representation transfers, and how successfully. From a code’s polynomials we produce tokens as described below, project each token lin-early to d = 64 , pass the sequence through two transformer encoder layers ( d = 64 , 4
+
+attention heads, feed-forward width 128 , GELU activations), and pool the token represen-tations by attention into a single 64 -dimensional latent vector. All encoders in Section 4.6 share this architecture. The number of harmonics H ∈ { 3, 4, 6, 7, 10 } is the only architec-tural variable. While the number of tokens depends on the code size, the width of each token does not change, i.e., the same network can accept the tokens from any code size as input. This means the encoder could be regarded as a standalone objective that could be pretrained. We review our approach and results in Section 4.6.1. While we think of it as an integral part of this work, the reader may choose to treat Section 4.6 as a side-quest, one that could be returned to later. We have already capitalised on the compact representation of a BB code using the poly-nomials a(x), b (x), a (y), b (y) to define the action space in 3. We now capitalise further on their cyclic property. Since 3 implies xl = ym = I, each non zero binary coefficient naturally maps to a position on the unit circle using the transform: 
+
+ck · xk → ek·2·i·π/p (29) 
+
+where i is a square root of −1, and p ∈ { l, m }. Exponentiating further by h ∈ { 1, 2, 3 . . . H }
+
+we may obtain further expressiveness for a neural network to use. Each of the coefficients of the four polynomials a(x), b (x), a (y), b (y) becomes one token . Table 1 lists its features. Coefficient k of a polynomial with period p (p = l for a(x), b (x); p = m for a(y), b (y)) sits at angle θk = 2 πk/p on the unit circle, so the cyclic features respect the modulus xl = ym = I.The H harmonics form a Fourier basis, and the first linear layer of the encoder learns its coefficients. So for a fixed choice of H, each token has width F = 9+2 H. This makes every feature a function of (k, p, l, m ) that is a real number, and the token width is independent of l, m .The encoder architecture is given in Figure 6 
+
+4.3 The logical-qubit features 
+
+Recall from Definition 4 that if the number of logical qubits k, is below kmin the reward is a deterministic function of k. The environment computes k by Gaussian elimination 
+
+> qubits).
+
+13 cos sin 
+
+a1
+
+a3
+
+a4 a5
+
+a0
+
+a2
+
+h = 1 : eiθ k
+
+a0, a 3
+
+a1, a 4
+
+a2, a 5
+
+h = 2 : ei2θk
+
+a0, a 2, a 4a1, a 3, a 5
+
+h = 3 : ei3θk
+
+Figure 5: Cyclic encoding for period p = l = 6 , at three harmonics. Coefficient ak is encoded at angle θk = 2 πk/p . Harmonic h stores the real and imaginary parts of e2πi ·k·h/p . Adjacent coefficients (modulo l, m ) are mapped to adjacent angles. At h = 1 the map is one-to-one. At h = 2 the map identifies slots k and k + 3 . The harmonics h ≤ ⌊ p/ 2⌋ = 3 form a complete Fourier basis for functions of position on the period-6 cycle, which is why we chose H ≥ 3 for training on l = 6 = m codes. polynomial coefficients                   
+
+> [a(x)a(y)b(x)b(y) ]
+> tokenizer + cyclic positional encoding (Hharmonics) Transformer encoder
+> d=64 , 4 heads ×2
+> ∼68K parameters
+> attention pooling curve head
+> 64 →64 →5,sigmoid
+> ˆp∈[0 ,1] 5(∼4.5K)
+> k-head
+> 64 →64 →1
+> \log(1+ k)(∼4.2K)
+> (2 l+2 m)×(9+2 H)(2 l+2 m)×64 64
+> ✂
+> Encoder carried over into Figure 4 Pretraining task heads. Discarded ( ✂) before carrying into PPO agent.
+
+Figure 6: The encoder trained in advance by the multi-task loss of Section 4.6. A shared trunk feeding a curve head and a k-head. The parameters depend only on (H, d model , heads , layers ), but not on (l, m ),i.e., the token count 2l + 2 m varies with code size, but the token width 9 + 2 H does not. The two task heads are discarded once training is done. The rest of the network (blue, ∼68K parameters at H=3 )is carried over to the agent architecture in Figure 4. 
+
+14 over GF (2) at every step. It is therefore sensible to help both the agent and the critic to consume k as an input, and address it immediately. Otherwise, we would have to either teach the agent to perform Gaussian elimination, which is somewhat wasteful, or, force (by some design insight) to steer towards codes with sufficiently high number of logical qubits. We therefore pass three scalars,  
+
+> [
+
+min( k − kmin , 0) /k min , 1k≥kmin , log(1 + k) ],
+
+i.e.: 1. The (normalised) difference between the minimum number of logical qubits required 2. An indicator of whether the requirement is met, and 3. log(1 + k)
+
+4.4 The fusion layer 
+
+The three branches are combined by concatenation followed by a single tanh layer, 
+
+323 = 64 enc + 256 mlp + 3 k −→ 256 ,
+
+the output of which is the representation read by the instance head (two instances, one for the critic, one for the actor). Fusing the three branches of the architecture later rather than sooner allows us to inspect each branch, and potentially hot-plugging branches between trained models, interchanging branches without harming the rest of the network. 
+
+4.5 The policy head and the value head 
+
+The action as we defined it in Section 3 is a tuple Aa(x), A b(x), A a(y), A b(y) of four per-polynomial actions, each of which flips at most one coefficient. This dictates what the policy head should look like. It is made of four independent categorical distributions, one per polynomial, of size l + 1 for a(x), b (x) and m + 1 for a(y), b (y), i.e., one entry per coefficient, and an additional “no-op”. This makes ( 7 categories each for l = m = 6 ). The four are conditionally independent given the state, so the log probability of a joint action is the sum of the four log probabilities. We point out, that single cells changes of 
+
+HX , H Z directly, using an independent Bernoulli output per matrix cell, the head would have O(( lm )2) outputs, quadratic in the code size. This is a place to state again, that the policy construction benefits from mirroring the code construction, and that otherwise the agent would have to learn (or otherwise be constrained) to reproduce code qualities, a sampling inefficiency. The value head is a single linear map 256 → 1 returning ˆV (s), trained on the PPO value target of Algorithm 2. Since the actor and the critic are separate instances of Figure 4, the value head reads its own trunk, and the two networks share no weights during PPO even though they may start from the same pretrained encoder. The reader should be aware that there is a body of work where the actor and critic share weights, and that we did not explore such a path, and leave it as potential further work. 
+
+15 4.6 Pretraining the encoder 
+
+We now return to the branch of Section 4.2 and ask: 
+
+Can we train the encoder to improve sampling efficiency, and speed up training by guiding the agent to better codes ? 
+
+Unlike the MLP branch, where the input width is a function of the code size, the input of the encoder has code-size-agnostic width. The encoder maps a code to a latent description of that code. This could be a supervised problem for which we already have data, i.e., the dataset of Section 2.4, and Appendix A, which contains evaluated codes, each logged with its polynomials, its number of logical qubits, and its Monte-Carlo error counts. We therefore train the encoder in advance as a surrogate model, i.e., from a code’s poly-nomials a(x), b (x), a (y), b (y) we train it to predicts • The monte-carlo combined error and failure rate curve and • The number of logical qubits k.Which are the two ingredients that make up the reward in Definition 4. These two tasks can be expressed as two terms of a loss function for the encoder, a multi-task sum 
+
+L = 155∑
+
+> i=1
+
+n · BCE (ˆpi, c i/n )︸ ︷︷ ︸
+
+> Binomial NLL of the curve
+
++ λk 
+
+> (
+
+\log(1 + k) − log(1 + k))2  
+
+> ︸︷︷ ︸
+> k-head MSE
+
+(30) 
+
+The two heads used here are discarded once pretraining is done, and the rest of the weights are carried over into Figure 4 and plugged as the weights of the encoder that produced the 
+
+64 -dimensional latent representation. The motivation behind this was, that a representation which is sufficient to predict how a code performs is also a good starting point for a critic that has to estimate what the code value is, and for an actor that has to decide how to improve it. This extrapolation was expected to be hard, since for a fixed physical error probability p,the probability that a sampled error is trivial is (1 − 3p)N , where N = 2 lm is the number of physical qubits of a BB code. As N grows, this quantity reduces, and for a fixed number of samples in a monte carlo evaluation (we use 50 samples for each p) does not take this into account. In addition to this, a 6, 6 code can have a maximum number of logical qubits of 72 , and this number grows with the size of the code. Our approach is to train the encoder at small l, m and then use it unchanged or cheaply adapt (“ground”) it at larger sizes. The token design explained in Table 1 of Section 4.2 makes this possible in principle, i.e., features are extracted identically at every size. Whether the learned weights actually succeed in extrapolating is a question which we answer with a sweep over training recipes. We trained over several training recipes , which vary in which values of (l, m ) ∈ { (6 , 6) , (9 , 6) , (12 , 6) , (15 , 3) } are we training on, how many harmonics are used H, and which labels, the encoder consumes, as explained below: 
+
+(6,6) only using both labels: the error-rate data and the number of logical qubits k.
+
+(6,6) + k-grounding Fine-tune the above baseline at the three larger sizes using the k-prediction task alone on the larger sizes, not using the error-rate data. Fine tuning is done using 2 epochs and at a lower training rate. The rationale is that k is computable exactly at any size by Gaussian elimination over GF (2) , so this adaptation requires no 
+
+16 Table 2: Encoder training recipes. Every recipe was trained at each H ∈ { 3, 4, 6, 7, 10 } with ten independent seeds (50 models per recipe, 300 in total). Grounded models are initialised from the (6 , 6) -only checkpoint with matching H and seed, so ground-vs-baseline comparisons are paired by lineage. Each size’s pool is partitioned 80 /10 /10 into training, validation and test sets by the model’s own seed; “Training codes” is the training partition summed over the recipe’s sizes, and the best epoch is selected on the validation partition. Every trained model is then evaluated on the full pools of all seven code sizes which include codes that the model has seen.                                                 
+
+> Recipe k
+> labels Curve labels Training codes Evaluation codes lr Best epoch (val) Base(66) (6 ,6) (6 ,6) 716 040 38 005 438 10 −323 [20–23] Mixed 66-96 +(9 ,6) same as k2 912 631 38 005 438 10 −311 [10–11] Mixed 66-96-126 + (12 ,6) same as k3 995 213 38 005 438 10 −37 [5–7] Mixed 66-96-126-153 + (15 ,3) same as k7 525 051 38 005 438 10 −35 [4–5] Ground + Anchored(66) all four (6 ,6) only 7 525 051 38 005 438 10 −41 [0–1] Ground all four none 7 525 051 38 005 438 10 −41 [1–1]
+
+Monte-Carlo decoder labels at larger sizes. We ground in two variants, both include k
+
+loss (consuming the k labels of the bigger codes): anchored and non-anchored . In the 
+
+anchored variant, we revisit the original 6, 6 curve task while training on new labels, as a guard against forgetting. In the non-anchored we do not revisit the 6, 6.
+
+Mixed sizes Train on mixed sizes jointly on the full task (curve and k) using the dataset codes in sizes: • (6 , 6) + (9 , 6) 
+
+• (6 , 6) + (9 , 6) + (12 , 6) 
+
+• (6 , 6) + (9 , 6) + (12 , 6) + (15 , 3) 
+
+Each recipe, as documented in Table 2, is trained several times with independent seeds. 
+
+4.6.1 Evaluation (of the encoder) 
+
+We evaluate each model on the entire dataset, four sizes that were included in the training recipes, and three that were not, but using Mean Absolute Error (MAE): 
+
+k-MAE Error of the k-head in logical qubits. between actual number of logical qubits, shown in Figure reffig:eval-encoder-kMae, and 
+
+Curve-MAE Per error point MAE of the predicted vs. measured shown in Figure 7. We note that this is not the metric on which training was done. While training was meant to enable transference, we evaluate the resulting models in MAE terms to see if transference was successful. Table 3 shows a tension between successful prediction on k vs. the curve. By looking at rank correlation, we see that at unseen code sizes there is negative correlation, suggesting the encoder cannot succeed at extrapolating both metrics. With respect to predicting the curve, Figure 7 shows the prediction for p ∈ { 0.01 , 0.0316 }. As expected, predicting the error rate is harder a larger code sizes, but all models seem to be clustered (in agreement), including their in their collective failure at the (3 , 27) size at p = 0 .01 and 21 , 18 at 
+
+p = 0 .0316 .
+
+17 Table 3: Rank correlation between the encoder’s k-MAE and its curve-MAE. Rows are training recipes, columns are the code parameters (l, m ) the encoder was evaluated on. A positive entry means the codes whose k is predicted well are also the codes whose error curve is predicted well. A negative value means the two objectives disagree. The three rightmost sizes appear in none of the recipes, so they are pure extrapolation. The negative correlations in the last row, where the model was trained on the 
+
+(6 , 6) codes dataset and grounded using k labels, as well as in the rightmost three columns, suggest there is a tension between predicting k and predicting the performance of a code.                                                         
+
+> Sizes named in the recipes Unseen sizes (6 ,6) (9 ,6) (12 ,6) (15 ,3) (5 ,15) (3 ,27) (21 ,18)
+> Base(66) 0.36 0.21 −0.05 0.22 −0.46 −0.50 −0.10
+> Mixed 66-96 0.29 0.47 −0.05 0.39 0.17 −0.62 0.56
+> Mixed 66-96-126 −0.03 0.61 0.76 0.70 −0.19 −0.39 0.40
+> Mixed 66-96-126-153 0.03 0.12 0.34 0.39 −0.53 −0.40 0.06
+> Ground + Anchored(66) 0.42 0.08 0.07 −0.15 −0.21 −0.35 −0.26
+> Ground 0.34 −0.03 0.00 −0.08 −0.12 −0.43 −0.23
+
+Figure 7: Mean absolute error of prediction vs. measured logical error rate across the 300 encoders trained, plotted for p ∈ { 0.01 , 0.0316 }.
+
+# 5 Related Work 
+
+At the time of writing, the field of quantum error correction codes is experiencing a mon-tage of 70 years worth of classical information theory, error correction codes and machine learning, making it hard to stay up to date. In writing this section we aimed to give the reader a grounding in related QECC, and specifically machine learning for ECC and QECC. Two resources were instrumental in laying the ground work in QECC for this work. The first is by Pantellev and Kalachev [13], which present BP+OSD decoding used here, as well as multiple code constructions, and methodology notes. The second is Gottesman’s book-in-writing [7], which serves as a one-stop-shop for everything QECC related, and also makes a brilliant read 12 . The decoder implemented in this work is the one reported in [22], which is a CPU bound implementation. For the Belief Propagation step, specifi-cally Min-Sum decoding, we considered using [23], but have not yet paired it with the OSD post processing stage, which is needed to avoid CPU-GPU contention. For the BB family specifically, we note that search algorithms were reported by [14, 24]. Parametrised con-
+
+> 12 With pearls of wisdom such as “...lattice surgery is an elective procedure...”
+
+18 structions of quantum Low Density Parity Check (qLDPC) Error Correcting Codes (ECC) draw from several mathematical constructs like polynomials [13] and graphs [25, 26], but ultimately require an assignment of these parameters for practical use, and [13] raises the question of finding good parameters. Reinforcement learning has been applied to the actual decoding as shown in [27, 28], as well as to modify surface-code construction in [29], optimizing tensor-network codes as reported in [30], and reducing stabiliser weights of existing qLDPC codes [31]. These works reward primarily structural properties of code parameters. In contrast, our main focus is the measured performance of the code under a fixed decoder. Machine learning alternatives to RL have appeared recently as well, one workflow that uses LLM was introduced in [32], and, closer to our encoder approach, a Bayesian-optimisation framework that trains a model that predicts logical error rates without decoder simulation, and uses it to discover competitive [[144 , 36]] and [[144 , 16]] codes [33]. In our work this type of model is deployed to warm-start an RL agent, which trains a generative policy. Conceptually, the closest work to ours is [34], which sets to discover QECCs with k = 1 logical qubits using an analytic proxy physical-to-logical error rate. The work in [34] applies RL methods to Quantum Lego [35], a way to build QECCs from tensor networks. Finally, this work is continuation of our previous work on co-designing (classical) LDPC codes and decoders [36]. 
+
+# 6 Evaluation and results 
+
+We evaluate the policy every 10 collector batches in a deterministic modes, by taking the mode of the the policy distribution. The evaluation starts at random polynomials with up to 3 non zero elements (similarly to training). Every step of every evaluation is logged, giving, per evaluation, the full trajectory of rewards and of the constructed codes. The following metrics are observed: 
+
+Best-performing code We are interested, of course, in maximising the reward under a given decoder. For known, published, code parameters, we can calculate this number and measure against it. 
+
+80% of the evaluation This is of interest because it helps understand whether the agent is actually improving, in which case the 80% band will tighten in width, and tighten the gap with the maximum. A persistent gap between the band and the maximum means the best codes visited are fewer than 10% of the time, implying that discovered good codes are not integrated into the policy. A persistently wide 80% band is a proxy metric to how many steps did it take the agent to reach the best code ? as an all knowing agent would plot a reward-greedy course towards the best code. The best code (the reference published code) is at most maxl, m actions far, but potentially goes through some bad-paying codes. This is why we look at the fraction of steps the agent spent in 5 regions: i Invalid codes 
+
+ii Codes that yielded 0-50% of the reference reward iii Codes that yielded 50-95% of the reference reward iv Codes that yielded 95-100% of the reference reward v Codes that yielded a reward equal to or greater than the reference. 
+
+19 Average reward The average reward can indicate whether or not the agent has learned that codes with insufficient number of logical qubits obtain a negative reward. 
+
+Within-episode gain This is the difference between the the reward for the code the envornoment reset into, and the last code the agent arrived in. Where learning was succesful, we expect this value to increase over time. This metric helps to filter out any episodes where the agent received a “lucky” reset value, and Figure 8 summarises several metrics, carried over one training run. We use the codes reported in [2] as baselines. Where a baseline code exists, we plot the reward this code would achieve as a reference (horizontal, gray, dashed). The shaded region below zero reward marks where the reward was negative due to a code with less than the minimum number of logical qubits required, and the exact number of logical qubits can be recovered from the negative reward (annotated next to the reward ticks). A dashed vertical line indicates when the encoder weights were unfrozen. Within each evaluation we plot the 
+
+best (maximum) reward obtained (blue), the average (orange), and the 10th to 90th percentile of the rewards obtained in that evaluation in shaded orange 13 , which indicates where 80% of that evaluation was spent. 0 10 20 30 40 50 60 70 80 90 
+
+1.00 
+
+0.75 
+
+0.50 
+
+0.25 
+
+0.00 0.25 0.50 slope +0.0058/eval 
+
+> k=0 k=2 k=4 k=6
+
+80% of evaluation Best Average      
+
+> Figure 8: Evaluation of a single PPO training session. Horizontal dashed line marks the reward for a published reference code (which is expected to be the maximum possible reward). Vertical dashed line marks when the encoder weights were unfrozen →\.As learning progresses, the 80% band (transparent orange) is contracts towards the best codes in the evaluation and lifts off from the penalty region (shaded lower part).
+
+Anatomy of a single run Early in training the 80% band is high-spread and sits largely inside the penalty region (shaded gray) and the agent spends most of its steps climbing from the random reset code towards codes with more logical qubits. As training progresses, a successful run shows the band shifting away from the penalty region. As training matures, we see the best-in-evaluation line (blue) crossing the reference more consistently. We also see that the 80% band contracts later in training. A deep dip accompanied by a high-spread 
+
+> 13 Which will always be around the average and below the maximum.
+
+20 0 20 40 60 80 100 0.0 0.2 0.4 0.6 0.8 1.0 Fraction of steps      
+
+> invalid 0-50% of reference 50-95% 95-100% >=reference 020 40 60 80 100 0.0 0.2 0.4 0.6 0.8 1.0 1.2 1.4 Reward gain
+> median of 28 runs
+
+Figure 9: Left: stacked plot corresponding to the regions defined in 6. The reference code is considered the best possible. As training progresses, the agent spends more of the evaluation time in better performing regions. Right: rolling median (pooled over one adjacent evaluation on either side) within-episode gain, calculated as the difference between the reward for the first and last code of the episode. 
+
+band is a slow recovery, suggesting the evaluation started from an unfavourable and the agent was slow to recover. A dip whose band is tightly centered around −1 suggests a trapped evaluation, i.e., the deterministic policy cannot climb out of the penalty region. Recall that evaluations are deterministic. A trapped evaluation reflects a property of the greedy policy from that particular initial code. The training time policy, which samples with an entropy bonus, wouldn’t necessarily fail from the same state, but such an event shows a weakness of the deterministic policy. These observations can be seen in Figure 8. 
+
+Analysis of multiple runs Figure 9 (left) show a stacked plot of where the agent spends evaluation time divided by the regions 6, for 28 runs for the 9, 6 parameters (multiple seeds, multiple encoders). As training progresses, the agent spends less time on codes that have less the minimum required number of logical qubits. Figure 9 (right) shows the median episode gain for the same 28 runs of the 9, 6 code, with a 50% band. As learning progresses, the median gain within episode increases up to evaluation 50 , where it begins to stabilise. The reward for the reference code can be found in Table 4, 0.546 for the 9, 6 code. 
+
+# 7 Discussion and further work 
+
+We have presented a reinforcement learning framework for designing quantum error correct-ing codes as a function of decoder architecture, by formulating the problem as a sequential decision making problem. The use of Reinforcement Learning tools such as PPO is made applicable by defining a reward function based on the area under the physical-to-logical-error-rate curve. The learned policy can be used to edit, and potentially optimise existing codes. 
+
+7.1 Immediate further work 
+
+By immediate we mean that an improvement of the existing codes could provide an answer. 
+
+Decoder budget Follow up work could limit the episode on decoding budget similar to [37]. In our setting the natural limit is a budget of decoder invocations, since a Monte-
+
+21 Carlo simulation using a BP+OSD decoder is the main cost of a rollout. 
+
+Reset archive In our work, each episode reset uses random polynomials (with up to 3 non zero coefficients), since a reset distribution that better covers the state space is known to positively impact policy quality [38]. An immediate follow up is to use an archive of specific codes, which are to be remembered and explored repeatedly [39]. This would entail taking a subset of the existing dataset (say of the worst codes) and retraining with reset codes sampled from this subset. 
+
+Decoder architecture, Error model We did not consider OSD-w type postprocess-ing, i.e., allowing the decoder to scan for error patterns up to w coordinates away, nor did we investigate training with one decoder and evaluating with another. Another dimension which we consider immediate follow up work, is steering away from the symmetric prob-ability in the depolarizing channel (the reader may recall that in section 2 we noted that BB codes provide symmetric X and Z generators). 
+
+7.2 Wider application 
+
+The most natural extension of this work would be to frame other code constructions as a sequential decision making problem, i.e., an environment for a PPO agent to interact with. The evaluation in this work uses a simplistic code-capacity noise model (independent depolarising noise on each physical qubit). A natural extension is circuit-level noise, where ancilla preparation, syndrome measurement, and gate errors are modelled explicitly [40], and an RL agent could be rewarded for performance under a circuit-level simulator. We are also interested in expanding this work to lattice surgery [41], and optimise codes as a function of the complexity of lattice surgery on them. At the time of submission, an interesting potential application came up following [26], in which context, the agent might have to learn automorphism groups to provide logical gates. There is a very natural extension of this work to truly co-design codes and decoders: In [42] the authors propose a parametrized decoder, made of several “legs” of Belief Propagation. By treating these parameters as actionable, just as we address the code parameters, one could optimize both decoder and code at the same time. Finally, we wish to offer some self-criticism about the (non) necessity of this work. At the time of writing there are O(1 , 000) distinct entities engaged in building quantum hardware for useful quantum computation. Assume that each entity will develop around O(100) 
+
+quantum devices, each with its own decoder architecture, and that neither will share these codes with the others. Optimistically, that’s still only around O(100 , 000) potential appli-cations of this work as it stands. Where we see this work going, and where we believe the use case could truly benefit from these methods, is when an arbitrary quantum algorithm is to be compiled to, (potentially) a Linear Combination of quantum Channels (LCC), that run on one of several hardware backends (which, at the time of writing, seem to only grow), each running their own set of potential QECC and instruction sets, and where each instruction (apply a gate, measure a qubit, extract syndromes, correct for errors) is at-tached to some latency cost and error rate which cascades. Once compiled, the user applies a sequence of changes . The question we ask in this case is: 
+
+Can a generative policy be trained to optimise the compiled algorithm, in lock-step with changes to the algorithm ? 
+
+22 Table 4: Per-size experimental configuration. A and B are lm ×lm binary circulant sums, so a code has          
+
+> n= 2 lm physical qubits and the flattened code observation A∥Bhas 2( lm )2entries. The parameter
+> kmin is set to the logical dimension of the published reference code at that size [2]. Reference rewards are computed by the reward of Definition 4 on the geometric5 error range, with width normalisation.
+
+l m n = 2 lm A, B Reference code kmin Reference reward 6 6 72 36 × 36 [[72 , 12 , 6]] 12 0.346 15 3 90 45 × 45 [[90 , 8, 10]] 8 0.506 9 6 108 54 × 54 [[108 , 8, 10]] 8 0.546 12 6 144 72 × 72 [[144 , 12 , 12]] 12 0.554 5 15 150 75 × 75 — — —3 27 162 81 × 81 — — —21 18 756 378 × 378 [[756 , 16 , ≤ 34]] 16 0.600 
+
+7.3 Reproducibility 
+
+The dataset of BB codes used in this work is available to clone on https://github.com/O mer-Sella/bbCodesDataset or Zenodo [19]. The repository includes a minimal script to reproduce the figures relating to statistical properties like the distribution of the number of logical qubits. The model weights (checkpoints) for the encoder of Section 4.6.1 can be found at https: //github.com/Omer-Sella/bbCodeSurrogates as well as Zenodo [43], and include the script to produce Figures 7. To evaluate the ( 300 ) models over the dataset, we advise cloning both repositories, adding an environment variable that includes the path to the dataset, and running the evaluation module in the encoder repository. 
+
+Experimental configuration All reported experiments use the single-coefficient action space ( –env-bit-flipping True ), episodes that reset to a random code with at most three non-zero coefficients per polynomial ( –env-reset-type random3 ) and truncate after 
+
+T = 30 steps, the five-point geometric5 grid, 50 Monte-Carlo samples and 50 belief-propagation iterations per grid point, and the width-normalised reward of Definition 4 (–env-reward-engineering True ). Evaluations use deterministic action selection with a rollout length of 30 − 60 steps, every tenth collector batch. 
+
+# Acknowledgements 
+
+We thank Dr. Pavel Panteleev for helpful clarification and for guidance on methodology in the early stages of this work. 
+
+# A Dataset 
+
+For each set of code parameters l, m we plot the distribution of the number of logical qubits which can be computed as explained in Equation 11, as well as a heatmap, that shows how many of the codes have that coefficient set to 1. Finally, for each set of parameters we plot the logical error rate as a function of the physical error rate, averaged across all code with 
+
+100% variance. The latter should provide an idea of how a code chosen in random in that space would perform. 
+
+23 (a) 12,6 (b) 15,3   
+
+> (c) 21,18 (d) 3,27
+> (e) 5,15 (f) 9,6
+
+Figure 10: Distribution of the number of logical qubits over the dataset. 
+
+24 (a) 6,6 (b) 12,6   
+
+> (c) 21,18 (d) 3,27
+> (e) 5,15 (f) 9,6
+
+Figure 11: Physical error rate to logical error rate with 100% variance. 
+
+25 (a) 12,6 (b) 15,3 
+
+(c) 21,18 (d) 3,27 
+
+(e) 5,15 (f) 9,6 
+
+Figure 12: Coefficient heat map. 
+
+26 Table 5: Code-evaluation records collected per code size and physical-error grid (as of 27/07/2026). The original dataset was collected only on a linear five-point grid: p ∈ linspace(10 −4, 10 −1, 5) . The union grid is the a 15-point superset that contains the linear grid together with every geometric grid used in this work, so that one collection run serves all of them. Geometric evaluations are obtained by filtering out the corresponding evaluation points in the union grid records. 
+
+(l, m ) n = 2 lm Linear (5-pt) Union (15-pt) Total (6 , 6) 72 1 948 449 964 343 2 912 792 (15 , 3) 90 458 638 3 850 656 4 309 294 (9 , 6) 108 2 681 585 2 257 087 4 938 672 (12 , 6) 144 457 979 1 108 666 1 566 645 (5 , 15) 150 0 16 640 753 16 640 753 (3 , 27) 162 0 9 078 743 9 078 743 (21 , 18) 756 385 6 726 7 111 Total 5 547 036 33 906 974 39 454 010 
+
+# References 
+
+[1] Pavel Panteleev and Gleb Kalachev. Asymptotically good quantum and lo-cally testable classical ldpc codes. In Proceedings of the 54th Annual ACM SIGACT Symposium on Theory of Computing (STOC) , pages 375–388, 2022. DOI: 10.1145/3519935.3520017. URL https://doi.org/10.1145/3519935.3520017 .[2] Sergey Bravyi, Andrew W Cross, Jay M Gambetta, Dmitri Maslov, Patrick Rall, and Theodore J Yoder. High-threshold and low-overhead fault-tolerant quantum memory. 
+
+Nature , 627(8005):778–782, 2024. DOI: 10.1038/s41586-024-07107-7. URL https: //doi.org/10.1038/s41586-024-07107-7 .[3] Judea Pearl. Probabilistic Reasoning in Intelligent Systems: Networks of Plausible Inference . Morgan Kaufmann, 1988. [4] Omer S Sella, Andrew W Moore, and Noa Zilberman. Fec killed the cut-through switch. In Proceedings of the 2018 Workshop on Networking for Emerging Applications and Technologies , pages 15–20, 2018. DOI: 10.1145/3229574.3229577. [5] R Michael Tanner. A recursive approach to low complexity codes. IEEE Transactions on Information Theory , 27(5):533–547, 1981. DOI: 10.1109/tit.1981.1056404. URL 
+
+https://doi.org/10.1109/TIT.1981.1056404 .[6] Marc PC Fossorier and Shu Lin. Soft-decision decoding of linear block codes based on ordered statistics. IEEE Transactions on Information Theory , 41(5):1379–1396, 1995. DOI: 10.1109/isit.1994.394624. URL https://doi.org/10.1109/18.412683 .[7] Daniel Gottesman. Surviving as a quantum computer in a classical world. Textbook manuscript preprint , 2026. URL https://www.cs.umd.edu/~dgottesm/QECCbook-2 026.pdf .[8] A Robert Calderbank and Peter W Shor. Good quantum error-correcting codes exist. 
+
+Physical Review A , 54(2):1098, 1996. DOI: 10.1103/physreva.54.1098. URL https: //doi.org/10.1103/PhysRevA.54.1098 .[9] Andrew M Steane. Error correcting codes in quantum theory. Physical Review Letters ,77(5):793, 1996. DOI: 10.1103/PhysRevLett.77.793. URL https://doi.org/10.110 3/PhysRevLett.77.793 .[10] David J. C. MacKay, Graeme Mitchison, and Paul L. McFadden. Sparse-graph codes for quantum error correction. IEEE Transactions on Information Theory , 50(10): 2315–2330, 2004. DOI: 10.1109/TIT.2004.834737. 
+
+27 [11] Lukas Voss, Sim Jian Xian, Tobias Haug, and Kishor Bharti. Multivariate bicycle codes, 2024. [12] Lukas Voss, Sim Jian Xian, Tobias Haug, and Kishor Bharti. Multivariate bicycle codes. Physical Review A , 111(6):L060401, 2025. DOI: 10.1103/ll5p-z88p. [13] Pavel Panteleev and Gleb Kalachev. Degenerate quantum ldpc codes with good finite length performance. Quantum , 5:585, 2021. DOI: 10.22331/q-2021-11-22-585. URL 
+
+https://doi.org/10.22331/q-2021-11-22-585 .[14] Ming Wang and Frank Mueller. Coprime bivariate bicycle codes. arXiv preprint arXiv:2408.10001 , 2024. [15] Jens Niklas Eberhardt and Vincent Steffan. Logical operators and fold-transversal gates of bivariate bicycle codes. IEEE Transactions on Information Theory , 71(2): 1140–1152, 2024. DOI: 10.48550/arXiv.2407.03973. [16] Alexey A. Kovalev and Leonid P. Pryadko. Quantum kronecker sum-product low-density parity-check codes with finite rate. Physical Review A , 88(1):012311, 2013. DOI: 10.1103/PhysRevA.88.012311. [17] John Schulman, Filip Wolski, Prafulla Dhariwal, Alec Radford, and Oleg Klimov. Proximal policy optimization algorithms. arXiv preprint arXiv:1707.06347 , 2017. DOI: 10.48550/arXiv.1707.06347. URL https://doi.org/10.48550/arXiv.170 7.06347 .[18] Albert Bou, Matteo Bettini, Sebastian Dittert, Vikash Kumar, Shagun Sodhani, Xi-aomeng Yang, Gianni De Fabritiis, and Vincent Moens. TorchRL: A data-driven decision-making library for PyTorch. In International Conference on Learning Repre-sentations (ICLR) , 2024. DOI: 10.48550/arXiv.2306.00577. [19] Omer S. Sella. bbCodesDataset: decoder-evaluation data for bivariate bicycle codes, 2026. URL https://github.com/Omer-Sella/bbCodesDataset . Dataset and figure-reproduction scripts. [20] Mark Towers, Ariel Kwiatkowski, Jordan Terry, John U. Balis, Gianluca De Cola, Tristan Deleu, Manuel Goulão, Andreas Kallinteris, Markus Krimmel, Arjun KG, et al. Gymnasium: A standard interface for reinforcement learning environments. 
+
+arXiv preprint arXiv:2407.17032 , 2024. DOI: 10.48550/arXiv.2407.17032. [21] Richard S. Sutton and Andrew G. Barto. Reinforcement Learning: An Introduction .MIT Press, 2 edition, 2018. [22] Joschka Roffe, David R. White, Simon Burton, and Earl Campbell. Decoding across the quantum low-density parity-check code landscape. Physical Review Research , 2 (4), Dec 2020. ISSN 2643-1564. DOI: 10.1103/physrevresearch.2.043423. URL http: //dx.doi.org/10.1103/PhysRevResearch.2.043423 .[23] Omer Shimon Sella and Thomas Heinis. A mapping of the min-sum decoder to reduction operations, and its implementation using cuda kernels. arXiv preprint arXiv:2507.10424 , 2025. DOI: 10.48550/arXiv.2507.10424. [24] Ming Wang and Frank Mueller. Coprime bivariate bicycle codes and their layouts on cold atoms. Quantum , 10:2009, 2026. DOI: 10.22331/q-2026-02-23-2009. [25] Shai Evra, Tali Kaufman, and Gilles Zémor. Decodable quantum ldpc codes be-yond the √n distance barrier using high-dimensional expanders. SIAM Journal on Computing , 53(6):FOCS20–276, 2022. DOI: 10.1137/20M1383689. URL https: //doi.org/10.1137/20M1383689 .[26] Naren Manjunath, Vieri Mattei, Apoorv Tiwari, and Tyler D Ellison. Universal quan-tum computation with group surface codes. arXiv preprint arXiv:2603.05502 , 2026. DOI: 10.48550/arXiv.2603.05502. URL https://doi.org/10.48550/arXiv.2603. 05502 .
+
+28 [27] Ryan Sweke, Markus S Kesselring, Evert PL van Nieuwenburg, and Jens Eisert. Rein-forcement learning decoders for fault-tolerant quantum computation. Machine Learn-ing: Science and Technology , 2(2):025005, 2020. DOI: 10.1088/2632-2153/abc609. URL https://doi.org/10.1088/2632-2153/abc609 .[28] John Blue, Harshil Avlani, Zhiyang He, Liu Ziyin, and Isaac L Chuang. Machine learning decoding of circuit-level noise for bivariate bicycle codes. Quantum , 10:2149, 2026. DOI: 10.22331/q-2026-06-30-2149. [29] Hendrik Poulsen Nautrup, Nicolas Delfosse, Vedran Dunjko, Hans J Briegel, and Nicolai Friis. Optimizing quantum error correction codes with reinforcement learning. 
+
+Quantum , 3:215, 2019. DOI: 10.22331/q-2019-12-16-215. URL https://doi.org/10 .22331/q-2019-12-16-215 .[30] Caroline Mauron, Terry Farrelly, and Thomas M Stace. Optimization of tensor net-work codes with reinforcement learning. New Journal of Physics , 26:023024, 2024. DOI: 10.1088/1367-2630/ad23a6. URL https://doi.org/10.1088/1367-2630/ad 23a6 .[31] Austin Yubo He and Zi-Wen Liu. Discovering highly efficient low-weight quantum error-correcting codes with reinforcement learning. arXiv preprint arXiv:2502.14372 ,2025. DOI: 10.48550/arXiv.2502.14372. URL https://doi.org/10.48550/arXiv.2 502.14372 .[32] Juan Cruz-Benito, Andrew W Cross, David Kremer, and Ismael Faro. Evolution-ary discovery of bivariate bicycle codes with LLM-guided search. arXiv preprint arXiv:2606.02418 , 2026. DOI: 10.48550/arXiv.2606.02418. URL https://doi.or g/10.48550/arXiv.2606.02418 .[33] Yihua Chengyu, Richard Meister, Conor Carty, Sheng-Ku Lin, and Roberto Bondesan. Bayesian optimization for quantum error-correcting code discovery. arXiv preprint arXiv:2601.18562 , 2026. DOI: 10.48550/arXiv.2601.18562. URL https://doi.org/ 10.48550/arXiv.2601.18562 .[34] Vincent Paul Su, C Cao, Hong-Ye Hu, Yariv Yanay, Charles Tahan, and Brian Swingle. Discovery of optimal quantum error correcting codes via reinforcement learning (2023). 
+
+arXiv preprint arXiv:2305.06378 . DOI: 10.48550/arXiv.2305.06378. [35] ChunJun Cao and Brad Lackey. Quantum lego: Building quantum error cor-rection codes from tensor networks. PRX Quantum , 3(2):020332, 2022. DOI: 10.1103/PRXQuantum.3.020332. [36] Omer Sella. Coding for emerging archival storage media . PhD thesis, University of Cambridge, 2024. [37] Fabio Pardo, Arash Tavakoli, Vitaly Levdik, and Petar Kormushev. Time lim-its in reinforcement learning. In Proceedings of the 35th International Conference on Machine Learning (ICML) , volume 80 of PMLR , pages 4045–4054, 2018. DOI: 10.48550/arXiv.1712.00378. [38] Sham Kakade and John Langford. Approximately optimal approximate reinforcement learning. In Proceedings of the 19th International Conference on Machine Learning (ICML) , pages 267–274, 2002. [39] Adrien Ecoffet, Joost Huizinga, Joel Lehman, Kenneth O. Stanley, and Jeff Clune. First return, then explore. Nature , 590(7847):580–586, 2021. DOI: 10.1038/s41586-020-03157-9. [40] Austin G Fowler, Matteo Mariantoni, John M Martinis, and Andrew N Cleland. Surface codes: Towards practical large-scale quantum computation. Physical Review A, 86(3):032324, 2012. DOI: 10.1103/physreva.86.032324. URL https://doi.org/ 10.1103/PhysRevA.86.032324 .
+
+29 [41] Daniel Litinski. A game of surface codes: Large-scale quantum computing with lattice surgery. Quantum , 3:128, 2019. DOI: 10.22331/q-2019-03-05-128. URL https://do i.org/10.22331/q-2019-03-05-128 .[42] Tristan Müller, Thomas Alexander, Michael E Beverland, Markus Bühler, Blake R Johnson, Thilo Maurer, and Drew Vandeth. Improved belief propagation is sufficient for real-time decoding of quantum memory. arXiv preprint arXiv:2506.01779 , 2025. DOI: 10.48550/arXiv.2506.01779. URL https://arxiv.org/pdf/2506.01779 .[43] Omer S. Sella. bbCodeSurrogates: pretrained encoders for bivariate bicycle codes, 2026. URL https://github.com/Omer-Sella/bbCodeSurrogates . 300 encoder checkpoints (6 recipes × 5 harmonics × 10 seeds) and the transfer-evaluation census. 
+
+30

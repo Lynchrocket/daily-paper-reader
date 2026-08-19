@@ -6,67 +6,46 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-08-08 ~ 2026-08-17
-- 运行时间：2026-08-18 00:05:59 UTC
+- 最新运行日期：2026-08-19
+- 运行时间：2026-08-19 20:08:12 UTC
 - 运行状态：成功
-- 本次总论文数：15
-- 精读区：8
-- 速读区：7
+- 本次总论文数：8
+- 精读区：7
+- 速读区：1
 
 ### 今日简报（AI）
-今日15篇论文聚焦量子纠错，精读两篇满分量子LDPC码构造。
-最值得看：实用量子LDPC码发现与高kd²/n自行车码，速读补充了量子LRC边界及经典解码优化。
-建议优先精读两篇10分论文，理解除数驱动搜索，再联系经典LDPC解码改进。
-- 详情：[/20260808-20260817/README](/20260808-20260817/README)
+今日精读聚焦量子纠错码，重点探索用机器学习与强化学习优化解码方案。  
+最值得关注的是《Machine Learning Approaches to Decoding Topological Quantum Codes》（10分）与《Designing Quantum Error Correcting Codes to fit decoders via Reinforcement Learning》（9分），显示智能算法正成为量子纠错的核心工具。  
+建议普通读者后续留意“AI驱动解码”方向，它有望大幅降低实用量子计算的纠错门槛。
+- 详情：[/202608/19/README](/202608/19/README)
 
 ### 精读区论文标签
-1. [Multi-agent discovery of practical quantum LDPC codes](/20260808-20260817/2608.08996v1-multi-agent-discovery-of-practical-quantum-ldpc-codes)  
-   标签：评分：10.0/10、query:qec-code
-   evidence：直接针对量子LDPC码的设计与发现
-2. [Quantum Bicycle LDPC Codes with High $kd^2/n$ from Divisor-Driven Search](/20260808-20260817/2608.09115v1-quantum-bicycle-ldpc-codes-with-high-kd2n-from-divisor-driven-search)  
-   标签：评分：10.0/10、query:qec-code
-   evidence：直接构造并搜索量子LDPC（自行车）码
-3. [Stream Decoding with Confidence Scores at Room and Cryogenic Temperatures](/20260808-20260817/2608.10576v1-stream-decoding-with-confidence-scores-at-room-and-cryogenic-temperatures)  
+1. [Machine Learning Approaches to Decoding Topological Quantum Codes](/202608/19/2608.15760v1-machine-learning-approaches-to-decoding-topological-quantum-codes)  
    标签：评分：10.0/10、query:qec-decoding
-   evidence：在FPGA上实现并验证表面码流式解码器，支持置信分数计算
-4. [Do Not Let CNOTs Overwhelm the Decoder: Scheduling Transversal Gates for Fast FTQC](/20260808-20260817/2608.11719v1-do-not-let-cnots-overwhelm-the-decoder-scheduling-transversal-gates-for-fast-ftqc)  
-   标签：评分：10.0/10、query:qec-decoding
-   evidence：直接涉及表面码解码算法及解码器负载
-5. [Decoupling 2D translation-invariant topological CSS codes](/20260808-20260817/2608.09915v1-decoupling-2d-translation-invariant-topological-css-codes)  
-   标签：评分：9.0/10、query:qec-code
-   evidence：拓扑CSS码、局域酉解耦为环面码
-6. [Coupled-Layer Codes: Beyond Quantum Product Constructions](/20260808-20260817/2608.10069v1-coupled-layer-codes-beyond-quantum-product-constructions)  
-   标签：评分：9.0/10、query:qec-code
-   evidence：量子纠错码；乘积与耦合层构造可产生渐近好量子LDPC码
-7. [Kinetics of sliding-window quantum error correction](/20260808-20260817/2608.10081v1-kinetics-of-sliding-window-quantum-error-correction)  
+   evidence：机器学习解码拓扑量子码，直接对应量子纠错解码算法
+2. [Designing Quantum Error Correcting Codes to fit decoders via Reinforcement Learning](/202608/19/2608.15754v1-designing-quantum-error-correcting-codes-to-fit-decoders-via-reinforcement-learning)  
    标签：评分：9.0/10、query:qec-decoding
-   evidence：研究量子纠错的滑窗解码动力学
-8. [Quantum Codes with Arbitrary Z-Rotation logical Gates and Applications to Fault-Tolerant Code Switching](/20260808-20260817/2608.11160v1-quantum-codes-with-arbitrary-z-rotation-logical-gates-and-applications-to-fault-tolerant-code-switching)  
+   evidence：使用强化学习协同设计量子纠错码与解码器，生成适配解码器的Bivariate Bicycle码
+3. [Non-Binary Quasi-Cyclic LDPC Codes with Entanglement Assistance](/202608/19/2608.16761v1-non-binary-quasi-cyclic-ldpc-codes-with-entanglement-assistance)  
    标签：评分：9.0/10、query:qec-code
-   evidence：构造量子颜色码并讨论旋转表面码，用于容错码切换
+   evidence：构造了非二进制纠缠辅助准循环QLDPC码
+4. [Non-CSS Quantum Code Embedding](/202608/19/2608.16995v1-non-css-quantum-code-embedding)  
+   标签：评分：9.0/10、query:qec-code
+   evidence：将稳定子码框架推广到非CSS码，影响qLDPC手术和权重降低
+5. [Hardness of approximation for minimum-weight decoding of two-dimensional topological quantum codes](/202608/19/2608.17109v1-hardness-of-approximation-for-minimum-weight-decoding-of-two-dimensional-topological-quantum-codes)  
+   标签：评分：9.0/10、query:qec-decoding
+   evidence：关于二维拓扑码（包括表面码和色码）最小权重解码的不可近似性
+6. [Entanglement assisted quantum $(r,δ)$-locally recoverable codes](/202608/19/2608.17118v1-entanglement-assisted-quantum-r-locally-recoverable-codes)  
+   标签：评分：9.0/10、query:qec-code
+   evidence：关于纠缠辅助量子局部可恢复码的编码构造理论
+7. [CSS Quantum LRCs with Intersecting Recovery Sets: Constructions and Bounds](/202608/19/2608.10912v1-css-quantum-lrcs-with-intersecting-recovery-sets-constructions-and-bounds)  
+   标签：评分：8.0/10、query:qec-code
+   evidence：CSS量子局部可恢复码；稳定子码构造与界
 
 ### 速读区论文标签
-1. [Bounds for Pure Disjoint $(r,δ)$-Quantum Locally Recoverable Codes](/20260808-20260817/2608.10922v1-bounds-for-pure-disjoint-r-quantum-locally-recoverable-codes)  
-   标签：评分：8.0/10、query:qec-code
-   evidence：量子局部可恢复码的界，与量子编码理论相关
-2. [Row-Boosted Ensemble Belief Propagation for Short LDPC Codes](/20260808-20260817/2608.09560v1-row-boosted-ensemble-belief-propagation-for-short-ldpc-codes)  
-   标签：评分：7.0/10、query:qec-decoding
-   evidence：经典LDPC BP解码方法可迁移至量子LDPC解码
-3. [SECS: A Soft Ensemble-Combining Stage for Low-Latency Decoding](/20260808-20260817/2608.09563v1-secs-a-soft-ensemble-combining-stage-for-low-latency-decoding)  
-   标签：评分：7.0/10、query:qec-decoding
-   evidence：软BP集成与OSD重编码，可用于qLDPC解码
-4. [Entanglement-assisted quantum locally recoverable codes: bounds and constructions with availability](/20260808-20260817/2608.09886v1-entanglement-assisted-quantum-locally-recoverable-codes-bounds-and-constructions-with-availability)  
+1. [Bounds for Pure Disjoint $(r,δ)$-Quantum Locally Recoverable Codes](/202608/19/2608.10922v1-bounds-for-pure-disjoint-r-quantum-locally-recoverable-codes)  
    标签：评分：7.0/10、query:qec-code
-   evidence：量子纠错码构造与界，涉及稳定子码相关方法
-5. [From Koszul-Complex Stabilizer Models to Superselection Profiles: Topological Rigidity and Nonsplit Extensions](/20260808-20260817/2608.09913v1-from-koszul-complex-stabilizer-models-to-superselection-profiles-topological-rigidity-and-nonsplit-extensions)  
-   标签：评分：7.0/10、query:qec-code
-   evidence：在同一同调框架下统一toric码层次与双变量bicycle码
-6. [Entanglement-assisted quantum locally recoverable codes: bounds and constructions with availability](/20260808-20260817/2608.09886v2-entanglement-assisted-quantum-locally-recoverable-codes-bounds-and-constructions-with-availability)  
-   标签：评分：6.0/10、query:qec-code
-   evidence：稳定子框架下的量子纠错码构造与界
-7. [CSS Quantum LRCs with Intersecting Recovery Sets: Constructions and Bounds](/20260808-20260817/2608.10912v1-css-quantum-lrcs-with-intersecting-recovery-sets-constructions-and-bounds)  
-   标签：评分：6.0/10、query:qec-code
-   evidence：利用CSS构造具有相交恢复集的量子局部可恢复码
+   evidence：量子局部可恢复码推动量子纠错编码理论
 
 
 <div class="dpr-home-promo-card">

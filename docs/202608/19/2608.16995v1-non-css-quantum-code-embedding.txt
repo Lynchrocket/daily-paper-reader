@@ -1,0 +1,3467 @@
+Title: Non-CSS Quantum Code Embedding
+
+URL Source: https://arxiv.org/pdf/2608.16995v1
+
+Published Time: Wed, 19 Aug 2026 00:03:38 GMT
+
+Number of Pages: 61
+
+Markdown Content:
+# Non-CSS Quantum Code Embedding 
+
+Andrew C. Yuan and Nou´ edyn Baspin 
+
+Iceberg Quantum Sydney, Australia  
+
+> {andrew, nouedyn }@iceberg-quantum.com
+
+We generalize the unified framework in [Yua26] to accommodate arbitrary stabilizer codes (referred as non-CSS for emphasis). The generalization has immediate consequences in areas including logical measurement, quantum weight reduction and Euclidean embedding. For example, currently CSS (pure X, Z -type) logical measurements are well-understood based on the (height-1) cone, while non-CSS (e.g., Y -type) logical mea-surements are ad hoc (e.g., rely on local Clifford transform). Similarly, quantum weight reduction and optimal Euclidean embeddings only exist for CSS input codes. Here, we show that our generalized framework ad-dresses this issue, and thus many constructions, including qLDPC surgery, Layer Codes and quantum weight reduction generalize to non-CSS codes in a relatively straightforward fashion. The previously mentioned ex-amples are derived in detail for clarity. 
+
+On the length of this paper. The main result is Theorem 2, whose statement and proof together occupy roughly two pages (Section II); with the symplectic preliminaries of Section III, it is self-contained. Ev-erything after that derives its applications in detail – non-CSS surgery, Layer codes and weight reduction in Sections IV, V and VI, with fault tolerance and low-level implementation in the appendices. These are largely independent of one another and may be read in any order. The reader should not be deterred by the length of this paper. 
+
+CONTENTS 
+
+I. Introduction 2A. Existing Limitations 3B. Result 4C. Outlook and Open Questions 4D. Acknowledgment: Use of AI 5II. Main Result 5III. Preliminaries 7A. General 7B. Complexes 71. Canonical Formalism 72. Basis Formalism 8C. Symplectic Complex 91. Canonical Formalism 92. Basis Formalism 10 IV. Non-CSS Surgery 11 A. CSS Data Code 12 B. Ancilla Code 13 C. Attaching Ancilla to Data 14 1. Gluing Maps 14 2. Defect Map 14 D. Non-CSS Logical Measurement 15 E. Non-CSS Logical on Non-CSS Code 16 V. Non-CSS Layer Codes 17 A. Input Code 17 B. Qubit Layers 18 arXiv:2608.16995v1 [quant-ph] 17 Aug 2026 2C. Check Layers 18 D. Attaching Check and Qubit Layers 19 1. Gluing Maps 20 2. Defect Maps 20 E. Main Results 23 VI. Non-CSS Weight Reduction with Layer Codes 24 A. Input Code 24 B. Qubit Layers 25 C. Check Layers 25 D. Attaching Check and Qubit Layers 25 1. Gluing Maps 26 2. Defect Maps 26 E. Main Results 27 A. CSS Measurement 27 1. Preliminaries 27 2. Fault Complexes 29 a. Syndrome Extraction 30 b. Logical Measurement 33 B. Non-CSS Measurement 36 1. Preliminaries 36 2. Non-CSS Fault Complexes 38 a. Syndrome Extraction 38 b. Logical Measurement 40 C. Implementation 42 1. Low Level CSS Measurement 42 a. Syndrome Extraction 44 b. Logical Measurement 45 2. Low Level Non-CSS Measurement 50 a. Non-CSS Syndrome Extraction 53 b. Non-CSS Logical Measurement 54 D. Fast Non-CSS Surgery 57 References 60  
+
+> I. INTRODUCTION
+
+Quantum code embedding (or iterative mapping cones) [Yua26] has emerged as a common structural theme across several seemingly distinct problems in quantum error correction (QEC). In many settings, one begins with an input code and modifies it by adding physical qubits and stabilizer checks. The purpose of the modification may vary: to measure a logical operator fault-tolerantly [CKBB22, IGND25, WY26, HCWY25, SJOY26, CHWY26, BBC25, CHY +26], to embed a quantum low-density parity-check (qLDPC) code into Euclidean space [Por23, WB24, LWH23, LLWH26, YB26, BDL26] or to reduce stabilizer weight and qubit degree [Has16, Has21, HLL25, YBW26]. Yet in all cases the central requirement is the same. The output code must retain the logical content of the input code in a controlled and natural way, so that the embedding changes the physical realization of the code without inadvertently changing the encoded information. The unified framework for quantum code embedding provides an algebraic language for this requirement. For Calder-bank–Shor–Steane (CSS) codes, the separation between X- and Z- type stabilizers allows the code to be represented as a chain complex, with logical operators identified through the (co)homology. Code modifications can then be organized as an (iterative) mapping-cone-type construction, which naturally preserves the logical degrees of freedom under general regularity conditions. In the CSS setting, fault-tolerant measurement of an X- or Z-type logical operator is well understood through the conventional (height-1) cone [IGND25]. One attaches an ancilla complex to the data code so that the target logical operator becomes a stabilizer whose value can be inferred by syndrome extraction. This gives a clean homological 3            
+
+> Application CSS (Prior) Non-CSS (Prior) Non-CSS (This work)
+> Logical Measurement Height-1 cone [IGND25] Ad hoc; Clifford to CSS Section IV representative [CHWY26, YCH +26] Euclidean Embedding Layer codes [WB24, YB26]; None known Section V Random embeddings [Por23, LWH23, LLWH26] Weight Reduction Hastings weight reduction [Has16, Has21]; None known Section VI Low-overhead variants [HLL25, YBW26] TABLE I. The CSS-only restriction, organized by application. The generalization presented here resolves the qualitative restriction in all three rows simultaneously. It does not, by itself, improve upon the best CSS-specific parameters, which are compared in Table II.
+
+interpretation of code surgery and explains why logical measurement is closely related to quantum weight reduction: a high-weight logical operator is effectively promoted to a stabilizer check and then replaced by a low-weight, fault-tolerant measurement ancilla. The same embedding perspective has also played a central role in the search for geometrically local quantum codes that saturate the Bravyi–Poulin–Terhal (BPT) bounds [BT09, BPT10]. After the discovery of good qLDPC codes [PK22, LZ22, DHLV23], whose encoding rates and relative distance are constants, this problem became one of optimal embedding: how can an abstract qLDPC code be realized in Euclidean space while preserving its logical degrees of freedom and asymptotic parameters? Important progress came from random embedding methods which established nearly – up to polylogarithmic corrections – optimal Euclidean embeddings [Por23, LLWH26, LWH23], and from Layer codes which gave an explicit, optimal and modular construction for CSS qLDPC codes using surface-code layers and local defects [WB24, YB26]. From the viewpoint of the unified framework, these developments illustrate how logical preservation, geometric locality, and optimal parameter scaling can be controlled within a common homological language. Beyond optimal code parameters, one may also prefer embedded quantum codes to possess stronger physical prop-erties. A particularly important property is (passive) self-correction, where encoded quantum information is protected thermally without active error correction. The Layer codes, for example, were shown not to be fully self-correcting [Bas25], but only partially self-correcting [WB24, GCC +26], despite their optimal parameter scaling in Euclidean space. A recent breakthrough goes beyond this limitation by constructing a three-dimensional self-correcting quantum mem-ory [BDL26], thereby resolving the longstanding problem of whether self-correction can exist in three spatial dimen-sions. Conceptually, this construction can again be viewed as an embedding procedure: the code is iteratively modified while preserving a single logical qubit, maintaining locality in R3, and increasing the syndrome cost of both X- and 
+
+Z-type errors across scales. Thus, the unified embedding framework provides a natural algebraic lens through which both BPT-saturating embeddings and self-correcting constructions can be understood. Quantum weight reduction provides another important area where the embedding framework is useful. Even when a code is qLDPC in the asymptotic sense, the constant check weights and qubit degrees may still be too large for practical implementation; weight reduction aims to sparsify the code while preserving its logical subspace and distance. A cen-tral requirement is that this sparsification incurs low ancilla overhead. Hastings pioneered quantum weight reduction for CSS codes, transforming codes with check weight w and qubit degree q into constant weight and degree codes, though with polynomial overhead O(poly( w, q)) and, in early versions, a loss in distance [Has16, Has21]. Subsequent developments improved this picture: Hsieh et al. [HLL25] achieved substantially lower overhead O(wq log( wq )) while preserving distance up to a constant factor, while Yuan et al. [YBW26] provides a simple and explicit construction with (state of the art) check weight and total qubit degree = 6 , at the cost of larger asymptotic overhead O(w4q4). These con-structions again fit naturally into the embedding viewpoint: high-weight checks are replaced by auxiliary low-weight structures, and the main algebraic task is to guarantee that the original logical information is preserved.  
+
+> A. Existing Limitations
+
+Despite its breadth, the framework – and most constructions it unifies – is restricted to CSS codes. For logical mea-surement there is at least a stopgap: a single-qubit Clifford reduces a non-CSS logical to a CSS representative, after which CSS surgery applies [CHWY26, YCH +26]. This is a workaround due to the limitation of the framework, not an account of non-CSS logical measurement in its own terms. Nor does it survive the passage from a single operator to a whole code: there need be no single-qubit Clifford making every generator simultaneously pure X- or Z-type, since generators overlapping on a qubit can demand incompatible rotations there. The five-qubit code J5, 1, 3K is the standard example: no single-qubit Clifford maps it to a CSS code. In particular, the stopgap does not transfer to Euclidean embedding and weight reduction, and thus non-CSS analogues of the CSS constructions are simply unknown. Table I summarizes the 4
+
+Subfield CSS (Existing) Non-CSS (This work) 
+
+Single Measurement O(W log W ) [YCH +26] O(W log W )
+
+3D Layer Code Each edge hosts ≤ 3 qubits Each edge hosts ≤ 3 qubits 
+
+O(q2)n qubits O(wq 3)n qubits Reduced weight, total qubit degree = 6 [WB24] Reduced weight = 9 , total qubit degree = 8 
+
+Weight Reduction Overhead O(w4q4)n qubits Overhead O(w4q4)n qubits Reduced weight, total qubit degree = 6 [YBW26] Reduced weight = 9 , total qubit degree = 8 
+
+TABLE II. Comparison between constructions for CSS and their generalizations to non-CSS codes. For single logical measurement, 
+
+W is the weight of the targeted logical, so that the entries are the ancilla size. For 3D Layer codes and weight reduction, n, w, q is the number of qubits, maximum check weight, and total qubit degree of the input code, respectively. 
+
+situation across the three applications. The limitation also bears on Majorana fermion codes, whose structure shares the symplectic character of non-CSS codes (see Example 27). A Majorana code on 2n operators c1, . . . , c 2n is specified by even-weight products Q 
+
+> i∈S
+
+ci
+
+generating an isotropic subspace of a quadratic form over F2 – the same data as the commutation structure of a Pauli group, with the Majorana operators playing the role of the 2n symplectic coordinates rather than n qubit pairs. No distinguished X/Z split is available 1, so a Majorana code is closer to a generic non-CSS code than to a CSS one. Bravyi 
+
+et al. [BTL10] maps any Majorana code locally to a CSS code, but at the cost of doubling the logical degrees of freedom, so the encoded information is not preserved exactly. Whether logical measurement, embedding, and weight reduction extend without this doubling is a question a genuinely non-CSS framework is positioned to address, though we do not attempt it here. 
+
+B. Result 
+
+In this manuscript, we generalize the CSS framework [Yua26] to general stabilizer codes, which we refer as non-CSS for emphasis. Specifically, Theorem 2 formalizes the statement in terms of symplectic complexes, which describes both non-CSS codes (Example 25) and Majorana fermion codes (Example 27). Similar to [Yua26], the result unifies multiple constructions across distinct problems in QEC. In particular, while the conventional (height-1) cone was sufficient to describe CSS logical measurement [IGND25], we show in Section IV that for non-CSS logical measurement, the symplectic height-2 cone presents as a more natural language. Moreover, in contrast to [Yua26], this manuscript is not merely organizational. In fact, it permits the immediate generalization of optimal embeddings and weight reduction to non-CSS codes, which we describe utilizing the example of conventional CSS Layer codes in Section V and VI, respectively. These examples are tabulated in Table II. Given the generality of the symplectic formalism, we expect that many other CSS constructions can similarly be extended to non-CSS stabilizer codes, and potentially to Majorana fermion codes. We emphasize that the main theorem is self-contained in Section II, assuming only familiarity with the preliminaries of symplectic forms reviewed in Section III. The applications are then developed separately: explicit examples of non-CSS qLDPC surgery, Layer codes, and weight reduction are presented in Sections IV, V, and VI, respectively. As in Ref. [Yua26], these application sections are largely independent and may be read in any order. 
+
+C. Outlook and Open Questions 
+
+One open question is whether the symplectic framework enables parallel non-CSS logical measurement natively, at low spatial overhead: given a set L⋆ of commuting non-CSS logicals, possibly densely overlapping at qubits, can they be measured in parallel without additional Y -type ancillas? Cowtan et al. [CHWY26] address this mostly for the case where L⋆ is quasi-CSS :
+
+Definition 1 (Quasi-CSS) . A commuting set of logicals L⋆ is quasi-CSS if there is a single-qubit Clifford U = N 
+
+> i
+
+ui
+
+such that 
+
+U ℓ U † is pure X- or Z-type for every ℓ ∈ L ⋆. (1)     
+
+> 1A Jordan–Wigner transformation restores an X/Z-like split, but only after choosing an ordering of the 2nmodes, so the split depends on that choice rather than being canonical; its locality also degrades once the modes are not laid out along a 1D chain, which is why it is used mainly in one dimension, with auxiliary modes needed to restore locality in higher dimensions – see [VC05].
+
+5A single non-CSS logical is always quasi-CSS on its own. The content of the definition is that one Clifford works for the whole set simultaneously, which fails as soon as two logicals act as X and Y on the same qubit. Whether the more complicated (non-quasi-CSS) case can be addressed remains open. This also bears on constant-time (fast) surgery [BBC25, CHY +26], which measures multiple commuting logicals in 
+
+O(1) rounds instead of the usual O(d) [Got13]. Although the framework for fast surgery [BBC25] generalizes to non-CSS codes using the symplectic framework (see Appendix D), the actual ancilla [BBC25, CHY +26] is expected to only generalize for quasi-CSS L⋆; for arbitrarily commuting sets, the analogue ancilla construction is not immediate and needs further study. We consider this the framework’s most consequential open question. It is not hypothetical: [CHWY26], [BBC25], and [CHY +26] all appeared within the past year, all are organized around measuring many logicals in parallel or in constant time, and the quasi-CSS restriction is a bottleneck they hit rather than one we anticipate on their behalf. There is also a precedent for what a unifying framework can and cannot do. [Yua26] did not itself derive the 4D and 5D Layer Codes of [YB26] – those needed a genuinely new combinatorial idea (color routing), absent from the framework entirely; what [Yua26] supplied was the language in which the harder problem could be posed and checked. If the symplectic cone plays that role for parallel non-CSS measurement, that would be the clearest evidence that generalizing past CSS matters. A second, more practical question concerns Majorana fermion codes. The CSS literature’s focus is partly a matter of available tools, i.e., chain complexes making homological methods directly applicable; the applications here show those tools survive the passage to the symplectic setting, and Majorana codes carry the same structure (Section I A). Admitting no CSS description at all without the logical doubling of [BTL10], they are arguably a more natural target for the symplectic formalism than qubit non-CSS codes are. This raises the broader question of whether symplectic methods can make Majorana codes more useful in practical fault-tolerant architectures.  
+
+> D. Acknowledgment: Use of AI
+
+The results of this paper – Theorem 2, its proof, and the constructions and analyses derived from it – were obtained by the authors without the use of artificial intelligence. AI tools were used for writing and polishing only: improving the exposition, and checking the manuscript for notational consistency and typographical errors. All such changes were reviewed by the authors, who take full responsibility for the content of this paper.  
+
+> II. MAIN RESULT
+
+As demonstrated in Section III C (and, specifically, Example 25), every non-CSS code can be written in the form of a symplectic complex with basis, and thus we formulate the code embedding theorem as follows. 
+
+Theorem 2 (Symplectic Embedding) . Let 
+
+D = SD σD
+
+−−→ P D ˆσD
+
+−−→ ¯SD (2) be a symplectic complex with basis, symplectic map λD so that P D = QDX ⊕ QDZ , and isometry (Definition 8) ϕD :
+
+SD → ¯SD . Let ( A⊤) A be a (co)complex with basis, and with (co)differential ∂A (δA) given by 
+
+A⊤ = XA → QAX → ¯ZA (3) 
+
+A = ZA → QAZ → ¯XA (4) where ¯XA, ¯ZA are (isometric) copies of XA, Z A, respectively, and QAX , Q AZ are (isometric) copies of, say, QA.6Consider the height-2 cone C = S → P → ¯S [Yua26] given by the following diagram 
+
+XA QAX ¯ZA
+
+SD P D ¯SD
+
+ZA QAZ ¯XAδA δA        
+
+> σDˆσD
+> ∂A∂A
+> gh
+> ˆh=h⊤ϕDˆg=g⊤λD
+> pp⊤
+
+(5) where gluing maps (g, h ) is a chain map 2, and g, ˆg are compatible with defect map 3 p, i.e., ˆgg = ∂Ap + p⊤δA. Equip the height-2 cone C with (mixed) symplectic map 
+
+λ =
+
+
+
+0 0 I
+
+0 λD 0
+
+I 0 0
+
+ (6) so that C has symplectic basis P = QX ⊕ QZ where 
+
+QX = QAX ⊕ QDX , QZ = QAZ ⊕ QDZ (7) and with isometry ϕ : S → ¯S via 
+
+ϕ =
+
+
+
+0 0 I
+
+0 ϕD 0
+
+I 0 0
+
+ (8) Equip the embedded column complex Cg below 
+
+Cg = H0(A) [g]
+
+−→ H1(D) [ˆ g]
+
+−→ H0(A) (9) with the induced 4 symplectic form [Λ D ] and canonically identify 5 H0(A) = H0(A)∗. Then C, C g are both symplectic complexes. In particular, as in [Yua26], if H1(A) = 0 , then H1(C) ∼= H1(Cg) with the standard isomorphism. 
+
+Remark 3 (Basis) . Note that Theorem 2 can be formulated in a canonical (basis independent) manner (similar to Theo-rem 1 of [Yua26]). However, for applications in non-CSS (especially the code distance), a corresponding basis is always chosen, and thus we’ve chosen the slightly more concrete formulation with basis. In particular, the distance d(C) of C
+
+can be lower bounded in the conventional manner using the Cleaning Lemma in [Yua26]. 
+
+Remark 4 (Canonical Necessity) . Note that the the embedded column Cg technically does not possess a basis even if the construction of C is equipped with a basis, and thus it’s also necessary to understand the terminology in a canonical manner. The relation between the canonical formalism and the basis dependent formalism is elaborated in the Prelimary Section III. However, for most practical applications, the embedded code corresponds to an input code with chosen basis, and thus the convention is to choose a basis for the embedded code which matches that of the input code. 
+
+Remark 5 (Ancilla Dressing) . Note that the ancilla A is CSS on its own: before gluing, XA acts purely on QAX (via δA)and ZA acts purely on QAZ (via ∂A), with no coupling between the two sectors. This changes once C is assembled. The map g, p indicates that a generator x ∈ XA – an ancilla check that was pure X-type in isolation – has a contribution 
+
+gx to the data code D, and, whenever p̸ = 0 , an additional Z-type action px on the ancilla’s own qubits QAZ . In other words, the ancilla itself generically becomes non-CSS once attached, its former X-checks dressed by Z-type support from the defect map p. See Fig. 1b for an example.            
+
+> 2And thus, by definition, (ˆh, ˆg)is also a chain map
+> 3Equivalently, (p, p ⊤)is a chain homotopy for ˆgg and the zero map
+> 4Lemma 20
+> 5Lemma 11
+
+7
+
+Remark 6 (Homological Perturbation Lemma) . As noted in Ref. [BDL26], the CSS framework [Yua26] can be under-stood via the homological perturbation lemma instead of the original iterative mapping cone picture. It’s expected that a similar observation applies to the non-CSS (symplectic) framework. 
+
+Proof of Theorem 2. Most of the proof follows similarly as in [Yua26]. The key observation and improvement is the construction of the height-2 cone in a manner which preserves the symplectic duality. Hence, it’s sufficient to prove that the height-2 cone C and the embedded complex complex Cg are symplectic complexes. First note that Λ is indeed a symplectic form, since λ is non-degenerate (bijective). Further note that the generating map σ : S → P of C thus has block-matrix form 
+
+σ =
+
+
+
+δA 0 0
+
+g σD 0
+
+p ˆh ∂A
+
+ (10) Similarly, the map ε : P → ¯S of C has block-matrix form 
+
+ε =
+
+
+
+δA 0 0
+
+h ˆσD 0
+
+p⊤ ˆg ∂A
+
+ (11) Utilizing the isometry ϕ : S → ¯S, it’s straightforward to check that ε = ϕσ ⊤λ ≡ ˆσ and thus C is indeed a symplectic complex (with basis). Now let us consider the embedded column complex. By Lemma 11 and 20, we see that if [ℓD ] ∈ H1(D) and [a⊤] ∈
+
+H0(A) = ker δA, then the canonical isomorphism ψ : H0(A) → H0(A)∗ implies that 
+
+(ψ[ˆ g][ ℓD ])[ a⊤] = ( ψ[ˆ gℓ D ])[ a⊤] (12) 
+
+= a⊤(ˆ gℓ D ) (13) 
+
+= Λ D (ℓD , ga ⊤) (14) 
+
+= [Λ D ]([ ℓD ], [g][ a⊤]) (15) where we utilized the fact that [g] maps H0(A) into H1(D). Hence, Cg is also a symplectic complex.   
+
+> III. PRELIMINARIES A. General
+
+Definition 7. We write [n] = {1, ..., n } and [n) = {1, ..., n − 1}. We also write [a, b ] to only denote the integer values within the interval and similarly for [a, b ), (a, b ], (a, b ).In the following sections, we will often deal with vector spaces V, W equipped with some basis, such that there is a one-to-one correspondence between basis elements, and thus warrants the following (slightly different from convention) definition. 
+
+Definition 8 (Isometry) . Let V, W be spaces equipped with basis and ϕ : V → W be an isomorphism that maps the the basis of V, W in a one-to-one correspondence, then we refer to ϕ as an isometry , and V, W are isometric , denoted by V ∼= W .  
+
+> B. Complexes
+> 1. Canonical Formalism
+
+Definition 9. A (chain) complex C (of length n) is a sequence of (finite-dimensional) F2-vector spaces Ci (whose elements are referred as i-chains ) together with linear ∂i : Ci → Ci−1, called the differentials of C, such that 
+
+∂i∂i+1 = 0 where the subscripts are often omitted. We write 
+
+C = Cn · · · → Ci∂i
+
+−→ Ci−1 → · · · C0 (16) 8Note that im ∂i+1 ⊆ ker ∂i for all i, and thus the i-homology of C is defined as 
+
+Hi(C) ≡ ker ∂i/ im ∂i+1 (17) Denote the equivalences class of i-chain ℓ as [ℓ] ∈ Hi(C) – conversely, we may also write [ℓ] ∈ Hi(C) without specifying the representation ℓ.
+
+Definition 10 (Cocomplex) . Let C denote a complex. Then the cocomplex C⊤ is defined as 
+
+C⊤ = C∗ 
+
+> n
+
+· · · ← C∗
+
+> iδi
+
+←− C∗ 
+
+> i−1
+
+← · · · C∗ 
+
+> 0
+
+(18) where C∗ 
+
+> i
+
+is the dual space of Ci, whose elements are referred as i-cochains , and codifferential δi is defined as 
+
+(δic⊤
+
+> i−1
+
+)( ci) = c⊤
+
+> i−1
+
+(∂ici) (19) where ci is a chain of C and c⊤ 
+
+> i−1
+
+is a cochain. The i-cohomology of C is Hi(C) = ker δi+1 / im δi
+
+Lemma 11 ((Co)homology Isomorphism) . Let C be a complex. Then δδ = 0 and there exists a canonical isomorphism 
+
+Hi(C) → Hi(C)∗.
+
+Proof. It’s straightforward to check that δδ = 0 and thus let us restrict our attention to the canonical isomorphism. Without loss of generality, we shall consider the canonical isomorphism ϕ : Hi(C) → Hi(C)∗, since the dual of a dual is canonically isomorphic to itself. Specifically, define ϕ as follows 
+
+(ϕ[c⊤])[ c] = c⊤(c) (20) where c, c ⊤ are arbitrary representations of the equivalence class [c], [c⊤], respectively. First note that ϕ is well-defined. Indeed, note that 
+
+(c⊤ + δf ⊤)( c + ∂g ) = c⊤(c) + f ⊤(∂c ) (21) 
+
++ ( δc ⊤)( g) + f ⊤(∂2g) (22) 
+
+= c⊤(c) (23) where we used the fact that ∂c = 0 , δc ⊤ = 0 and ∂2 = 0 . It’s straightforward to check that ϕ is linear. Note that if ϕ[c⊤] = 0 , then c⊤(c) = 0 for any c ∈ ker ∂. Define f : im ∂ → F2 as f (∂c ) = c⊤(c), which is well-defined since if ∂c = ∂c ′, then c⊤(c + c′) = 0 . Using simple basis extension, we can extend f to some linear map on Ci → F2, and thus f (∂c ) = ( δf )( c). Hence, c⊤ = δf ∈ im δ, and thus [c⊤] = 0 . Hence, ϕ is injective. One can then easily check that dim Hi(C)∗ = dim Hi(C) and thus ϕ is an isomorphism. Note that although we chose a basis in the proof (for simple basis extension), the definition of ϕ is basis independent and thus canonical. Using the fact that the dual of dual is canonically isomorphic to itself, one can show that the corresponding canonical isomorphism 
+
+ψ : Hi(C) → Hi(C)∗ is given by 
+
+(ψ[c])[ c⊤] = c⊤(c) (24)  
+
+> 2. Basis Formalism
+
+Definition 12 (Basis) . A complex C is equipped with a basis C (assumed henceforth) if each Ci is equipped basis elements in Ci referred as i-cells , which induces a nondegenerate bilinear form ⟨·|·⟩ on Ci (or equivalently, each Ci =
+
+Fni 
+
+> 2
+
+and the i-cells are the standard basis). The (Hamming) weight |ℓ| is then defined for any ℓ ∈ Ci. We say that cells 
+
+ci, c i−1 are adjacent if ⟨ci−1|∂c i⟩̸ = 0 , and write ci ∼ ci−1.
+
+Remark 13 (Riesz) . If complex C is equipped with a non-degenerate bilinear form, then by Riesz representation, the map c 7 → ⟨ c| · · ·⟩ from Ci 7 → C∗ 
+
+> i
+
+is an isomorphism. This isomorphism also induces the relation δ = ∂⊤ where ∂⊤ is that defined by the nondegenerate bilinear form. Hence, when complex C is equipped with a basis, we shall identify the cochains in C⊤ as chains in C and δ = ∂⊤.9
+
+Definition 14 (Systolic Distance) . Let C be a complex. Then the i-systolic distance di(C) is 
+
+di(C) = min  
+
+> ℓ:0 ̸=[ ℓ]∈Hi(C)
+
+|ℓ| (25) Similarly, define the (co)systolic distance di(C) via Hi(C).
+
+Example 15 (Repetition Code) . The repetition code on L bits is the complex R ≡ R(L) with differential ∂R. The 1-cells are denoted via |i+⟩ for i ∈ [L) where i± = i ± 1/2, and 0-cells via |i⟩ for i ∈ [L] so that 
+
+∂R|i+⟩ = |i⟩ + |i + 1 ⟩ (26) We implicitly assume that |i⟩, |i±⟩ = 0 if the label is not within the previous parameters. 
+
+Example 16 (Graphs) . Given a graph G = ( E, V), there is an associated complex G = E → V where E, V are the F2
+
+span of E, V and the differential map is the adjacency relation. Conversely, a complex G = E → V can define a graph 
+
+G = ( E, V) if |∂e | = 2 for all 1-cells e ∈ E. In either case, we refer to G as a graph complex with associated graph 
+
+G. For example, the repetition code R(L) is a graph complex. We further call complex C = C2 → C1 → C0 a cell 
+
+complex if C1 → C0 is a graph complex and G is a subgraph of C if G is a subgraph of C1 → C0.
+
+Example 17 (CSS Codes) . Consider a CSS code as a complex A = Z → Q → X and convention that Z, Q, X are the Z-type checks, qubits, X-type checks, respectively. Then the (co)homology H1(C) (H1(C)) corresponds to the collection of equivalence classes of Z- ( X-) type logical operators, while the 1-(co)systolic distance d1(C) (d1(C)) is the 
+
+Z- ( X-) type code distance.   
+
+> C. Symplectic Complex
+> 1. Canonical Formalism
+
+Definition 18. A symplectic form on a F2 vector space P is a map Λ : P × P → F2 which is bilinear, alternating (Λ( ℓ, ℓ ) = 0 for any ℓ) and non-degenerate ( Λ( ℓ, ·) is an isomorphism on P for any ℓ). When a symplectic form is given, write V ⊥ to be the symplectic complement of subspace V ⊆ Q, i.e., the collection of all ℓ such that Λ( ℓ, ℓ ′) = 0 for all ℓ′ ∈ V . Note that since Λ is non-degenerate, V ⊥ satisfies dim V + dim V ⊥ = dim P .As we shall soon see in Example 25, general (non-CSS) stabilizer codes can be written in the form of a complex, with additional properties. Hence, this provides motivation for the following definition 
+
+Definition 19 (Symplectic Complex) . A 3-term (length-2) symplectic complex is a complex (not necessarily with basis) 
+
+C = S σ
+
+−→ P ˆσ
+
+−→ S∗ (27) such that S∗ is the dual space of S and P is equipped with a symplectic form Λ and ˆσℓ = Λ( ℓ, σ · · · ). We refer to σ as the stabilizer map and ˆσ as the syndrome map. 
+
+Lemma 20 (Induced Symplectic Form) . Given a symplectic complex C = S → P → S∗ with symplectic form Λ on Q.Then Λ induces a symplectic form [Λ] on H1(C) such that 
+
+[Λ]([ ℓ], [ℓ′]) = Λ( ℓ, ℓ ′) (28) 
+
+Proof. Given ℓ, ℓ ′ ∈ ker ˆ σ, note that 
+
+Λ( ℓ + σg, ℓ ′ + σg ′) = Λ( ℓ, ℓ ′) (29) 
+
++ Λ( σg, ℓ ′) + Λ( ℓ, σg ) (30) 
+
++ Λ( σg, σg ′) (31) 
+
+= Λ( ℓ, ℓ ′) (32) Hence, ([ ℓ], [ℓ′]) 7 → Λ( ℓ, ℓ ′) is a well-defined map H1(C) × H1(C) → F2. It’s straightforward to check that the map is bilinear and alternating and thus it remains to show that it’s non-degenerate. Fix [ℓ] ∈ H1(C) with representation ℓ ∈ ker ˆ σ. If Λ( ℓ, ℓ ′) = 0 for all ℓ′ ∈ ker ˆ σ, then ℓ is in the symplectic complement of ker ˆ σ. However, note that ker ˆ σ is the symplectic complement of im σ in P , and thus ℓ ∈ im σ. Hence, the induced symplectic form is injective. Since dim H1(C) < ∞, the induced symplectic form is an isomorphism. 10 
+
+Lemma 21 (Symplectic Duality) . Given a symplectic complex C = S → P → S∗ with symplectic form Λ on Q. Then its cocomplex C⊤ is also a symplectic complex with symplectic form Λ⊤ : P ∗ × P ∗ → F2 defined as 
+
+Λ⊤(p⊤, q ⊤) = Λ( p, q ) (33) where p ∈ P is the unique element such that p⊤ = Λ( p, · · · ) and similarly for q, q ⊤. Moreover, C is isomorphic to its cocomplex in a canonical manner, given by the chain isomorphism below 
+
+S P S∗
+
+S∗∗ P ∗ S∗          
+
+> σˆσ
+> ˆσ⊤σ⊤
+> ιp7→Λ( p, · · · )id
+
+(34) where ι : S → S∗∗ is the canonical isomorphism (ιs )( s⊤) = s⊤(s) where s⊤ ∈ S∗, s ∈ S.
+
+Proof. It’s straightforward to check that Λ⊤ is a symplectic form since p 7 → p⊤ is an isomorphism. Note that for 
+
+s ∈ S, p ∈ P , we have 
+
+(ˆ σ⊤ιs )( p) = (ˆ σp )( s) = Λ( p, σs ) (35) Similarly, note that 
+
+(σ⊤Λ( p, · · · ))( s) = Λ( p, σs ) = (ˆ σp )( s) (36) Hence, the diagram is commuting. Note that the chain map is indeed an isomorphism since Λ is non-degenerate.  
+
+> 2. Basis Formalism
+
+It’s well know that 
+
+Lemma 22 (Symplectic Basis) . Let P be equipped with symplectic Λ. Then dim P is even and there exists a symplectic basis , i.e., basis qX, 1, ..., q X,n , q Z, 1, ..., q Z,n such that 
+
+Λ( qX,i , q Z,j ) = δij (37) 
+
+Λ( qX,i , q X,j ) = Λ( qZ,i , q Z,j ) = 0 (38) 
+
+Definition 23 (Basis) . Similar to Definition 12, a symplectic complex C is equipped with a basis (assumed henceforth) 
+
+C if S is equipped with a basis S that induces a nondegenerate bilinear form, and S∗ is equipped with a basis S∗
+
+which defines an isometry 6 ϕ : S → S∗, and that P is equipped with a symplectic basis QX ⊔ Q Z (which also induces a nondegenerate bilinear form ⟨·|·⟩ ) and we write P = QX ⊕QZ with the understanding that basis elements QX , QZ are in one-to-one correspondence with say ordered elements Q, which we denote implicitly when writing qX ∈ Q X , q Z ∈ Q Z
+
+and q ∈ Q .
+
+Remark 24 (Riesz) . Given a nondegenerate bilinear form ⟨·|·⟩ and a symplectic form Λ on P , there exists a unique linear map λ : P → P such that ⟨ℓ|λℓ ′⟩ = Λ( ℓ, ℓ ′), and thus we will use Λ and λ interchangeably, where λ will be referred to as the symplectic map . With respect the symplectic basis, λ is in standard form 
+
+λ = 0 II 0
+
+!
+
+(39) Conversely, given matrix λ in standard form relative to some basis, the corresponding Λ( p, q ) = p⊤λq is a well-defined symplectic form and the basis is a symplectic basis. In particular, a symplectic complex (with basis) can be rewritten as 
+
+C = S σ
+
+−→ P ˆσ
+
+−→ ¯S (40) where ¯S, S are isometric via the isometry ϕ : S → ¯S and ˆσ = ϕσ ⊤λ. 
+
+> 6Recall we only deal with finite-dimensional spaces
+
+11 
+
+Example 25 (Non-CSS Codes) . For a general stabilizer code, it is not necessarily possible to find parity checks that are purely X- or Z- type Paulis and thus will be referred as non-CSS codes for emphasis, despite containing CSS codes as a special case. Non-CSS codes can then be written as a symplectic complex with basis 
+
+C = S σ
+
+−→ P ˆσ
+
+−→ ¯S (41) so that S is the space of checks with support defined by the stabilizer map σ, (i.e., each column of σ denotes the abelianization of the corresponding check), P denotes the Pauli space = F2n 
+
+> 2
+
+with symplectic basis P = QX ⊕ QZ so that QX , Q Z are isometric copies of Q = Fn 
+
+> 2
+
+, and ¯S denote the space of syndromes , isometric to S.With this identification, H1(C) is the collection of (equivalence class of) logical operators of the non-CSS code, with the 1-systolic distance d1(C) = d(C) equal to the code distance. Note that by duality in Lemma 21, the 1-systolic and 1-cosystolic distance are equal. Since stabilizer codes have commuting parity checks, ˆσσ = 0 and thus C is indeed a complex. 
+
+Example 26 (CSS Codes as Symplectic Complex) . By Example 17, a CSS code can be written as a complex CCSS =
+
+Z → QZ → ¯X with (co)differential ∂ (δ). By Example 25, it can also be rewritten as a symplectic complex 
+
+C = X ⊕ Z
+
+| {z } 
+
+> Sσ
+
+−→ QX ⊕ QZ
+
+| {z }
+
+> P
+> ˆσ
+
+−→ ¯Z ⊕ ¯X
+
+| {z } 
+
+> ¯S
+
+(42) where the bar notation is the differentiate between checks and syndromes, and QX ∼= QZ ∼= Q denote the X, Z -sectors of qubits Q. In particular, we may write x, z to denote checks (cells) in X, Z and ¯z, ¯x to denote syndrome (cells) in ¯Z, ¯X,respectively. Similarly, write qX , q Z to denote qubits (cells) in the X, Z -sector QX , Q Z corresponding to a physical qubit q ∈ Q, respectively. Further note that the symplectic map λ is in standard form, and stabilizer map 
+
+σ = ∂ 00 δ
+
+!
+
+(43) and syndrome map given by 
+
+ˆσ = ϕσ ⊤λ = ∂ 00 δ
+
+!
+
+(44) where ϕ : S → ¯S is the isometry given by 
+
+ϕ = 0 II 0
+
+!
+
+(45) 
+
+Example 27 (Majorana Codes) . Although this will not be the topic of focus, it’s worth mentioning that Majorana codes can also be written as a symplectic complex. Specifically, the space of Majorana modes M = F2n 
+
+> 2
+
+(with standard basis 
+
+|i⟩) has symplectic form 
+
+Λ( a, b ) = ⟨a|b⟩ + ⟨a|M⟩⟨M| b⟩ (46) where M is the sum of all basis elements in M . A possible symplectic basis is given by the Jordan-Wigner transform 
+
+Xi ≡ X
+
+> s< 2i
+
+|s⟩, Zi ≡ | 2i − 1⟩ + |2i⟩ (47)  
+
+> IV. NON-CSS SURGERY
+
+In this section, we apply the main result in Theorem 2 to qLDPC surgery, and show that non-CSS (e.g., Y -type) logical measurements falls within this framework. For concreteness, we restrict our attention to the measurement of a single non-CSS logical. To guide the reader on the abstract construction, we shall repeatedly consider the example of measuring a ¯Y -logical of the standard surface code, as shown in Fig. 1. 12 As recognized initially in [IGND25], for CSS (pure X- or Z-type) logical measurement of CSS qLDPC codes, the conventional (height-1) cone is sufficient. However, it was previously unknown whether a similar formulation can be achieved for non-CSS logicals, even when restricted to CSS codes, since the addition of non-CSS logicals results in the 
+
+deformed code to be non-CSS. Here, we show that our non-CSS embedding framework addresses this problem – in fact, it also permits the discussion of non-CSS logical measurement on non-CSS codes. Note that [YCH +26] provides the currently known lowest ancilla overhead, i.e., O(W log W) given logical of weight 
+
+W, and thus serves as the fundamental basis of a wide variety of known qLDPC CSS surgery. Hence, we shall generalize the construction to qLDPC non-CSS surgery. For simplicity (and ease of comparison with current literature), we shall restrict our attention to the case where the data code is CSS – the extension to measuring non-CSS logicals on a non-CSS code is straightforward and collected in the last Subsection IV E.   
+
+> (a) (b)
+> (c) (d)
+
+FIG. 1. ¯Y Measurement. (a) denotes a surface code with edges hosting qubits, where blue vertices (red faces) indicates X (Z) checks acting on adjacent edges. Blue (red) solid lines encompass a ¯X ( ¯Z) logical representation so that the product denotes a ¯Y logical. (b) denotes the measurement graph as constructed in Definition 28, where for simplicity, we set Eextra = ∅. Note that the green edge denotes EX∧Z since the ¯X, ¯Z representations overlap. Note that this measurement graph has no cycles and thus we can skip Theorem 29, and take the ancilla code to be the measurement graph so that blue vertices indicate X-checks acting on adjacent edges hosting qubits. (c) denotes the symplectic cone constructed in Theorem 2 or 32. The red shaded region indicates that checks in the ancilla (data) code further act as a Z Pauli on the corresponding qubit in the data (ancilla) code. Similarly, the blue shaded region indicates that checks in the ancilla (data) code further act as an X Pauli on the corresponding qubit in the data (ancilla) code. The red dashed line connecting the green edge indicates that the neighboring blue vertex must also act as a Z Pauli on the green edge, corresponding to the defect p in Theorem 2. (d) denotes the product of all ancilla checks in Fig. 1c (and thus a stabilizer), where qubits encompassed by red (blue) lines are acted upon by a Z (X)-Pauli. See Remark 33. 
+
+A. CSS Data Code 
+
+By Example 26, let the data CSS be written as a symplectic complex 
+
+D = XD ⊕ ZD σD
+
+−−→ QDX ⊕ QDZ
+
+> ˆσD
+
+−−→ ¯ZD ⊕ ¯XD (48) with checks x, z in XD , Z D (and syndromes ¯x, ¯z differentiated by the bar notation), and qubits q with corresponding 
+
+X, Z -sector qubits qX , q Z . Note that we use the superscript D to emphasize that the corresponding objects (e.g., stabi-13 lizer map, syndrome map, symplectic form, etc) are in the data code. As an example, consider D to be the surface code in Fig. 1a.  
+
+> B. Ancilla Code
+
+As discussed in Section II of [YCH +26], the first step of constructing an ancilla A for the data code D is to consider the measurement graph induced by the logical. Here, we generalize the idea to non-CSS logicals of D. Specifically, let 
+
+ℓ⋆ = ℓ⋆X ⊕ ℓ⋆Z ∈ P D denote the abelianization of a logical operator where we also regard ℓ⋆X ⊆ Q DX ∼= QD as a subset, and similarly for ℓ⋆Z . Let W = |ℓ⋆| = |ℓ⋆X | + |ℓ⋆Z | denote the weight of the logical. In the example of Fig. 1a, the solid blue and red lines indicate ℓ⋆X , ℓ ⋆Z , respectively. 
+
+Definition 28 (Measurement (Multi)Graph, Fig. 1b) . Let ℓ⋆ = ℓ⋆X ⊕ ℓ⋆Z be a logical, i.e., ℓ⋆ ∈ ker ˆ σD , with weight 
+
+W. Let VX denote a copy of collection ℓ⋆X ⊆ Q DX with elements (vertices) denotes as |qX ⟩ for qX ∈ ℓX . For every z-check z ∈ ZD with support overlapping with ℓ⋆X , we note that the overlap must be even in cardinality by commutation relations (i.e., ℓ⋆ ∈ ker ˆ σ) and thus can be paired up arbitrarily qX ˜qX . Let EX denote the collection ∥qX ˜qX ; z⟩ over all pairs and over all overlapping z checks so that GX = ( EX , VX ) is a (multi) graph. Similarly define VZ , EZ so that 
+
+GZ = ( EZ , VZ ) is a (multi) graph. Consider the disjoint union of graphs GDX ⊔G DZ . If ℓ⋆X , ℓ ⋆Z regarded as subsets of QD has nontrivial overlap ℓ⋆X ∧ℓ⋆Z̸ = ∅,then add an edge connecting |qX ⟩ ∈ V X and |qZ ⟩ ∈ V Z where qX , q Z correspond to the same qubit in the overlap 
+
+ℓX ∧ ℓZ . Let EX∧Z denote the collection of such edges ∥q⟩ where q ∈ Q D corresponds to qX , q Z . An example of the resulting (multi)graph is shown in Fig. 1b. Further add arbitrary edges Eextra while keeping the max degree fixed so that the resulting (multi) graph G = ( E, V)
+
+is connected and expanding with Ω(1) Cheeger constant 7. Then G is the measurement (multi) graph associated with 
+
+ℓ⋆, with associated graph complex G : E → V .Note that 
+
+V = VX ⊔ V Z (49) 
+
+E = EX ⊔ E Z ⊔ E X∧Z ⊔ E extra (50) Also note that the max degree ∆( G) ≤ q + 1 where q is the total qubit degree of data code D. By [YCH +26], we have the following ancilla construction 
+
+Theorem 29 (Parsimonious Cone) . Let G = E → V denote a graph complex with bounded degree ∆ = ∆( G). Then there exists cell complex C such that G is a subgraph of C with 
+
+dim C0 = O(|V| log |V| ), (51) and 
+
+H2(C) = H1(C) = 0 , H0(C) ∼= F2 (52) 
+
+C25
+
+−−−⇀↽−−−
+
+> 4+∆
+
+C12
+
+−−−⇀↽−−−
+
+> 9+∆
+
+C0. (53) Given measurement graph G of logical ℓ⋆, we can then apply Theorem 29 to construct connected cell complex 
+
+A = ZA → QAZ → ¯XA (54) with faces, edges, and vertices correspond to Z-check, qubits, and X-checks, respectively. Similarly, the cocomplex is given by 
+
+A⊤ = XA → QAX → ¯ZA (55) where the notation is chosen to be consistent with the main result in Theorem 2.  
+
+> 7This can be achieved by adding random edges, or using more sophisticated methods [LPS88, HLW06, ASS08].
+
+14 
+
+C. Attaching Ancilla to Data 
+
+1. Gluing Maps 
+
+Consider the following diagram, copied from Theorem 2 with the ancilla A and data D,
+
+XA QAX ¯ZA
+
+SD P D ¯SD
+
+ZA QAZ ¯XAδA δA    
+
+> σDˆσD
+> ∂A∂A
+> gh
+> ˆhˆgpp⊤
+
+(56) Let g be the inclusion map which maps vertex 
+
+|qα⟩A 7 → qα, α = X, Z (57) And zero otherwise, and h be that which maps the edge 
+
+∥qX ˜qX ; z⟩AX 7 → ¯z, ∥qZ ˜qZ ; x⟩AX 7 → ¯x (58) Then it’s straightforward to check that 
+
+Lemma 30 (Chain Map) . g, h is a chain map 
+
+Proof. Let ϕD : SD → ¯SD denote the isomorphism. Note that ˆσD g maps 
+
+|qX ⟩A g
+
+7−→ qX (59) 
+
+> λD
+
+7−−→ qZ (60) 
+
+> σD⊤
+
+7−−−→ X
+
+> z∼q
+
+z (61) 
+
+> ϕD
+
+7−−→ X
+
+> z∼q
+
+¯z (62) where z ∼ q is the adjacency relation to the CSS code DCSS and q ∈ Q D is the qubit corresponding to qZ . Also note that ˆhσ S maps 
+
+|qX ⟩A σS
+
+7−−→ X
+
+> z∼q
+
+∥qX ˜qX ; z⟩AX + · · · (63) 
+
+> h
+
+7−→ X
+
+> z∼q
+
+¯z (64) where ˜qX is the unique other qubit that was paired up with qX , and · · · denotes possible other edges adjacent to |qX ⟩A,which are irrelevant since h maps those edges to zero. The case is similar for |qZ ⟩A and thus the statement follows. 
+
+2. Defect Map 
+
+Note that ˆgg maps 
+
+|qX ⟩A g
+
+7−→ qX (65) 
+
+> λQ
+
+7−−→ qZ (66) 
+
+> g⊤
+
+7−−→ | ¯qZ ⟩A1{q ∈ ℓX ∧ ℓZ } (67) 15 where q ∈ Q D is the qubit corresponding to qX , and recall the bar notation 8 is to indicate a syndrome. The case for 
+
+|qZ ⟩A is similar. Hence, ˆgg indicates the overlap ℓ⋆X ∧ ℓ⋆Z ⊆ Q D . If ℓ⋆X ∧ ℓ⋆Z = ∅, then ˆgg = 0 and thus a defect map 
+
+p can be set = 0 . However, more generally, a defect line similar to the Layer Codes [WB24, Yua26, YBW26] must be introduced to define p. In particular, if vertex q (corresponding to qX , q Z ) is in the overlap ℓ⋆X ∧ ℓ⋆Z , then let p map 
+
+|qX ⟩A 7 → ∥ q⟩AZ (68) and be the zero map otherwise. 
+
+Lemma 31 (Compatibility) . The gluing maps g, ˆg are compatible with the defect map p, i.e., 
+
+ˆgg = ∂Ap + p⊤δA (69) 
+
+Proof. By Eq. (122)-(128), we see that if q ∈ ℓX ∧ ℓZ (with corresponding qX , q Z ), then 
+
+|qX ⟩A ˆgg 
+
+7−→ | ¯qZ ⟩A (70) 
+
+|qZ ⟩A ˆgg 
+
+7−→ | ¯qX ⟩A (71) Consider the map ∂Ap acting on 
+
+|qX ⟩A p
+
+7−→ ∥ q⟩AZ (72) 
+
+> ∂A
+
+7−−→ | ¯qX ⟩A + |¯qZ ⟩A (73) And acting on 
+
+|qZ ⟩A p
+
+7−→ 0 ∂A
+
+7−−→ 0 (74) Conversely, consider the map p⊤δA as follows 
+
+|qX ⟩A δA
+
+7−−→ ∥ q⟩AX + · · · (75) 
+
+> p⊤
+
+7−−→ | ¯qX ⟩A (76) where technically, δA maps |qX ⟩A also to other edges. However, since p⊤ maps the other edges to zero, they are irrelevant and thus omitted as · · · . The map also acts as follows 
+
+|qZ ⟩A δA
+
+7−−→ ∥ q⟩A + · · · (77) 
+
+> p⊤
+
+7−−→ | ¯qX ⟩A (78) Hence, the statement then follows. 
+
+D. Non-CSS Logical Measurement 
+
+By Theorem 2, logical measurement follows. 
+
+Theorem 32 (Fig. 1c) . Let D be a Jn, k, d K CSS qLDPC code in Eq. (48), and ℓ⋆ = ℓ⋆X ⊕ ℓ⋆Z be a logical operator in D
+
+with weight W. Then there exists an ancilla CSS qLDPC code A with O(W log W) qubits such that if the height-2 cone 
+
+C is constructed by Diagram (56) with maps g, h, p in Eq. (57), (58) and (68), then C is a non-CSS qLDPC code with 
+
+n(C) = n + O(W log W) (79) qubits. C also has k − 1 logical qubits, or more specifically, 
+
+H1(C) ∼= [ ℓ⋆]⊥/[ℓ⋆] (80)    
+
+> 8Technically, should be written as |qZ⟩A.
+
+16 where [ℓ⋆]⊥ is the symplectic complement of [ℓ⋆] in H1(D) with respect to the induced symplectic form [Λ D ]. C also has code distance 
+
+d(C) = Ω(1) d(D) (81) where the Ω(1) depends on the Cheeger constant of the measurement graph in Definition 28, and d(D) is that of D.
+
+Proof. Note that by Theorem 29, we have H0(A) ∼= F2 with unique basis element [V] given by the (unique) connected component of the measurement graph. Note that 
+
+[ℓ⋆] = [ g][ V] (82) Conversely, note that ker[ˆ g] = [ ℓ⋆]⊥ and thus the statement follows from Theorem 2 via the fact that H1(A) = 0 . Proof of the code distance is standard by utilizing the Cleaning Lemma in [Yua26], see, e.g., Theorem V.1 of [YCH +26] or Theorem IV.2 of [YBW26]. 
+
+Remark 33 (Recovery and Threshold, Fig. 1d) . Note that in contrast to conventional CSS measurement, the original logical ℓ⋆ is not a stabilizer of the deformed code C. Instead, as shown in Fig. 1d, ℓ⋆ + some defects of Z-type on the ancilla forms a stabilizer. Specifically, it contains the following stabilizer 
+
+σV =
+
+
+
+0
+
+ℓ⋆
+
+pV
+
+ (83) where V ∈ XA is the unique connected component (sum over all vertices) of the ancilla cell complex, and thus in addition to ℓ⋆, it also acts as Z-Paulis corresponding to pV on the ancilla. Therefore, to recover the measurement of ℓ⋆,the ancilla qubits must be measured out transversally in the Z-basis. Measurement of stabilizer σV + measuring out the ancilla will provide the information of the logical measurement of ℓ⋆.To show that this process is fault tolerant (possesses a threshold), a corresponding spacetime fault complex is built from first principles (see Appendix B). Note that even in conventional measurement of, say, X-type logical, this was necessary to recover the original Z-type stabilizers of the data code (see Appendix A).  
+
+> E. Non-CSS Logical on Non-CSS Code
+
+In this subsection, we shall extend the formulation slightly to incorporate non-CSS logical measurement on any non-CSS code. Specifically, let a non-CSS data code be written in the form of a symplectic complex 
+
+D = SD σD
+
+−−→ P D ˆσD
+
+−−→ ¯SD (84) where SD , ¯SD are isometric, and P D = QDX ⊕ QDZ denotes the corresponding symplectic basis so that ΛD is the symplectic form. Given a non-CSS logical of D, we can thus define a measurement graph in an analogous manner. 
+
+Definition 34 (Measurement (Multi-)Graph) . Let ℓ⋆ = ℓ⋆X ⊕ ℓ⋆Z denote a logical of D, i.e., ℓ⋆ ∈ ker ˆ σD . Let VX
+
+denote a copy of collection ℓ⋆X ⊆ Q DX so that vertices are denoted by |qX ⟩ for qX ∈ ℓ⋆X and similarly define VZ so that 
+
+V = VX ⊔ V Z . Consider the collection of checks s ∈ S which nontrivially overlaps with ℓ⋆, i.e., anti-commutes with 
+
+ℓ⋆ at some qubit 
+
+ΛD (ℓ⋆|q , (σD s)|q ) = 1 (85) where ℓ|q = ℓX |qX ⊕ ℓZ |qZ , and qX , q Z are the X, Z -sector qubits corresponding to q. In this case, we see that one and only one of the following can be true (X) qX ∈ ℓ⋆ and qZ ∈ σD s
+
+(Z) qZ ∈ ℓ⋆ and qX ∈ σD s
+
+Note that ℓ⋆, σ D s must commute. Hence, there exists an even number of q such that ℓ⋆, σ D s overlap (anti-commute) at q, and thus can be arbitrarily paired up. Given a pair qq ′ in the overlap, determine whether q is in scenario (X) or 
+
+(Z), and similarly for q′, which we denote by (X′), (Z′). If in scenario (α) ∩ (β′), then add an edge between vertices in 17 
+
+Vα ⊔ V β corresponding to qα ↔ q′ 
+
+> β
+
+. In any case, denote the edge as ∥qq ′; s⟩, and let ES denote the collection of ∥qq ′; s⟩
+
+over all pairs and overlapping checks s.If ℓ⋆X , ℓ ⋆Z regarded as subsets of QD has nontrivial overlap ℓ⋆X ∧ ℓ⋆Z̸ = ∅, then add an edge connecting |qX ⟩ ∈ V X
+
+and |qZ ⟩ ∈ V Z where qX ↔ qZ correspond to the same qubit in the overlap ℓ⋆X ∧ ℓ⋆Z . Let EX∧Z denote the collection of such edges. Further add arbitrary edges Eextra while keeping the max degree fixed so that the resulting (multi-)graph G = ( E, V)
+
+is connected and expanding with Ω(1) Cheeger constant 9. Then G is the measurement (multi-) graph associated with 
+
+ℓ⋆, with associated graph complex G = E → V .Note that 
+
+V = VX ⊔ V Z (86) 
+
+E = ES ⊔ E X∧Z ⊔ E extra (87) Also note that the max degree ∆( G) ≤ q + 1 where q is the total qubit degree of data code D. The remainder of the construction is then exactly as non-CSS logical measurement on CSS data code, i.e., starting from Theorem 29 and culminating in Theorem 32 (except that the data code D is now non-CSS qLDPC).  
+
+> V. NON-CSS LAYER CODES
+
+In this section, we show that using the non-CSS embedding formalism in Theorem 2, the CSS Layer Codes in [WB24] can be generalized nearly immediately to non-CSS (i.e., the input code can be non-CSS qLDPC), by a simple observation of the geometry of the layers and defects. Specifically, the check layers should be the union of X- and Z-check layers, as elaborated in Definition 37. The generalization also applies to the most recent breakthrough of 4D and 5D CSS Layer Codes [YB26], though for the sake of simplicity, we shall restrict our attention to the conventional 3D Layer Codes. To guide the reader, we shall consider the example input code with checkes XIZ, ZZX on three qubits, as shown in Fig. 2 and 3.  
+
+> A. Input Code
+
+Similar to the setup in [Yua26], let the non-CSS input code B be written as a symplectic complex 
+
+B = S σ
+
+−→ P ˆσ
+
+−→ ¯S (88) where S, ¯S are isometric with checks s ∈ S corresponding to syndromes ¯s ∈ ¯S, and P = QX ⊕ QZ so that X, Z -sector qubits qX ∈ Q X , q Z ∈ Q Z are in one-to-one correspondence with the physical qubits q ∈ Q . Let w, q denote the maximum check weight and total qubit degree of B, respectively. Arrange the qubits |Q| = n along a 1D grid [n] with axes ˆq in a fixed manner. Since QX , Q Z are the X, Z -sectors of qubits Q, we shall use qX , q Z to denote the corresponding basis elements with coordinate q ∈ [n]. Let RQ denote the corresponding repetition code on |Q| = n vertices, which one may view as arranged along the ˆq direction. Let 
+
+ˆx, ˆz denote the transverse directions ⊥ ˆq, and let nS = |S| denote the number of parity checks. Let RX , R Z denote repetition codes on nS vertices, which one may view as arranged along the ˆx, ˆz direction, respectively. Moreover, as we shall soon see in Section V D 2, to decongest the defect lines, we also need additional space wq nS ,corresponding to an upper bound on the number of overlapping pairs ss ′ of checks s ∼ s′. Let N = n+wq nS = O(wq )n
+
+so that the 3D grid is given by 
+
+[nS ] × [N ] × [nS ] ∈ ˆx × ˆq × ˆz (89) In particular, let j(ss ′) ∈ (n, N ] denote the coordinate corresponding to overlapping pair ss ′. Note that only the first n
+
+coordinates correspond to qubits q ∈ Q . 
+
+> 9This can be achieved by adding random edges, or using more sophisticated methods [LPS88, HLW06, ASS08].
+
+18  
+
+> B. Qubit Layers
+
+Similar to the conventional CSS Layer Codes, the qubit layers are defined simple as 
+
+Definition 35 (Qubit Layers) . As depicted in Fig. 2a, define the qubit layer as the 3-term cell complex 
+
+RX ⊗ q ⊗ R⊤ 
+
+> Z
+
+(90) where q ∈ Q = [ n]. By Example 26, the qubit layer is a CSS code, which can be written as a symplectic complex D(q).     
+
+> C. Check Layers
+> (a) (b) (c)
+> FIG. 2. Layers. Consider the example input code with checks XIZ, ZZX . (a) Qubit layers, one for each qubit, (b), (c) denote the check layer corresponding to XIZ, ZZX , respectively.
+
+Recall that in the conventional CSS Layer Codes, each X, Z -check layer is simply a 2D plane with fixed ˆx, ˆz coordinate. A straightforward extension to non-CSS code is to regard each s check layer as the union of some X, Z -type check layers. 
+
+Definition 36 (XZ Graph) . Arrange the checks S along the diagonal of the ˆx× ˆz plane in an arbitrary but fixed manner, so that each s ∈ S has a fixed coordinate ∈ [nS ] so that (s, s ) ∈ [nS ]2 is along the diagonal. Define the XZ graph of check s as the collection of rows and columns in the ˆx × ˆz plane passing through (s, s ), i.e., 
+
+XZ( s) = ( s × [nS ]) ∪ ([ nS ] × s) (91) where we shall treat XZ( s) as a graph complex with the corresponding edges and vertices. Note that the XZ graphs 
+
+XZ( s), s ∈ S are edge decongested in ˆx × ˆz, i.e., no edge belongs to more than one XZ graph. 
+
+Definition 37 (Raw Check Layer) . Let RQ be the repetition code on [N ] vertices and define the (raw) check layer of check s ∈ S as the 3-term cell complex 
+
+Araw (s) = XZ( s) ⊗ RQ (92) and thus correspond to union of X, Z -check layers in conventional CSS Layer Codes [WB24]. 
+
+Remark 38 (Raw Check Layer Congestion) . Note that XZ( s), s ∈ S are edge decongested, but may intersect at vertices. However, due to the degree of the 2D grid ˆx × ˆz, each vertex can belong to at most two check layers. Hence, the raw check layers Araw (s), s ∈ S have edge congestion as follows • 1-congestion for edges in the ˆx × ˆz plane • 2-congestion for edges in the ˆq axis As depicted in Fig. 3c, due to the overlap of distinct (raw) check layers, additional modifications are necessary so that the defects can be paired up locally in the 3D grid. 19 
+
+Definition 39. As depicted in Fig. 2b and 2c, define the check layer of check s ∈ S as the union 
+
+A(s) = Araw (s) + M
+
+> s′∼s
+
+A(s′; s) (93) where the summation of s′ is over all checks which overlap in the support with s relative to the input code B, and 
+
+A(s′; s) = RX ⊗ j(ss ′) ⊗ RZ (94) For notation, label the vertices in A(s) as |xqz ; s⟩ where xqz are coordinates in the 3D grid. Similarly, we can label edges along the ˆx direction as |x±qz ; s⟩ where x± = x ± 1/2 are half-integers and similarly, for |xq ±z; s⟩ and |xqz ±; s⟩.
+
+Remark 40 (Check Layer Congestion) . Note that the addition of layers A(s′, s ) only affects the congestion for edges within the ˆx × ˆz at ˆq coordinate in (n, N ]. In particular, the check layers A(s), s ∈ S have 2 edge congestion. 
+
+D. Attaching Check and Qubit Layers 
+
+As suggested by Theorem 2, define 
+
+A = M
+
+> s∈S B
+
+A(s) (95) 
+
+D = M
+
+> q∈Q B
+
+D(q) (96) Note that collections A(s), s ∈ S and D(q), q ∈ Q have finite congestion and thus embedded in the 3D grid. Hence, it remains to show that the maps g, h, p in Theorem 2 are local in 3D. We copy the diagram here for ease of reference. 
+
+XA QAX ¯ZA
+
+SD P D ¯SD
+
+ZA QAZ ¯XAδA δA    
+
+> σDˆσD
+> ∂A∂A
+> gh
+> ˆhˆgpp⊤
+
+(97)   
+
+> (a) (b) (c)
+
+FIG. 3. Interactions. Continue with the example input code with checks XIZ, ZZX in Fig. 2 (a), (b) denote XIZ and ZZX check layers interacting with the qubit layers, respectively. (c) denotes the defect (green) between the XIZ and ZZX check layers. 20  
+
+> 1. Gluing Maps
+
+As depicted by Fig. 3a and 3b, we define the gluing map g via 
+
+|xqz ; s⟩A 7 → | xqz ⟩DX 1{qX ∼ s = x} (98) 
+
++ |xqz ⟩DZ 1{qZ ∼ s = z} (99) (and zero otherwise), where ∼ is with respect to the input code B, e.g., qX ∼ s if qX ∈ σs and qX are the X- qubit in 
+
+QX corresponding to q (the case is similar for qZ ). Further define the gluing map h via 
+
+|xqz +; s⟩A 7 → | xqz +⟩DX 1{qX ∼ s = x} (100) 
+
+|x+qz ; s⟩A 7 → | x+qz ⟩DZ 1{qZ ∼ s = z} (101) (and zero otherwise), where x± = x ± 1/2 are used to denote the edges along ˆx and similarly for z±. Note that g, ˆh
+
+map cells to those with the same coordinate, and thus are local in 3D. It’s then straightforward to check that 
+
+Lemma 41 (Chain Map) . The gluing maps (g, h ) in Eq. (98) and (100) form a chain map. 
+
+Proof. Note that 
+
+|xqz ; s⟩A g
+
+7−→ | xqz ⟩DX 1{qX ∼ s = x} (102) 
+
++ |xqz ⟩DZ 1{qZ ∼ s = z} (103) 
+
+> ˆσD
+
+7−−→ (|xqz +⟩DX + |xqz −⟩DX )1 {qX ∼ s = x} (104) 
+
++ ( |x+qz ⟩DZ + |x−qz ⟩DZ )1 {qZ ∼ s = z} (105) Also note that 
+
+|xqz ; s⟩A δA
+
+7−−→
+
+
+
+|xqz +; s⟩⊤ + |xqz −; s⟩⊤
+
+1{s = x} (106) 
+
++
+
+
+
+|x+qz ; s⟩⊤ + |x−qz ; s⟩⊤
+
+1{s = z} (107) 
+
+> h
+
+7−→
+
+
+
+|x+qz ⟩DX + |x−qz ⟩DX
+
+
+
+1{qX ∼ s = x} (108) 
+
++
+
+
+
+|x+qz ⟩DZ + |x−qz ⟩DZ
+
+
+
+1{qZ ∼ s = z} (109) Hence, (g, h ) is a chain map.  
+
+> 2. Defect Maps
+
+Note that ˆgg is derived in Eq. (122)-(128), and as depicted by the green dots in Fig. 3c, indicate the overlap between checks. Hence, similar to the CSS Layer codes, the goal is to find defect lines which pair up the overlaps. Concretely, the defect map p has one job: whenever two checks s, s ′ act with clashing Pauli type on a shared qubit – one contributes an 
+
+X Pauli there, the other a Z Pauli – Theorem 2 requires this clash to be absorbed as ˆgg = ∂Ap+p⊤δA, a chain-homotopy condition. Building such a p amounts to drawing a short wire in the 3D grid between every pair of clashing qubits, as shown by the green line in Fig. 3c, dressed so that the wire’s two endpoints are exactly what survives the telescoping sum ∂Ap + p⊤δA. The rest of this subsection is the construction of these wires. For every pair of checks s, s ′ of the input code A with overlapping support, let us choose an arbitrary order. For example, for CSS input codes, the implicit choice was to always choose the order from X-check x to Z-check z given overlapping pair x ∼ z, while the order of checks of the same type, xx ′ or zz ′, was neglected since they do not induce defect lines [WB24]. Since they commute Λ( σs, ˆσs ) = 0 , we see that 
+
+X
+
+> q∈Q
+
+1{qX ∼ s, q Z ∼ s′} = X
+
+> q∈Q
+
+1{qZ ∼ s, q X ∼ s′} (110) where qX , q Z are the X, Z -qubits corresponding to q. In particular, the left side denotes the qubits at which s acts as 
+
+X or Y Pauli and s′ acts as a Z or Y Pauli, whose collection we denote as s⇀
+
+∧s′ ⊆ Q . Similarly, the right side denotes 21 those at which s acts as Z or Y Pauli and s′ acts as a X or Y Pauli, and thus we denote the collections of qubits as 
+
+s↼
+
+∧s′ ⊆ Q . Read the arrow as the direction of the clash: s⇀
+
+∧s′ points from s (contributing the X-half) to s′ (contributing the Z-half), and s↼
+
+∧s′ is the same clash read the other way. The commutation relations is thus equivalent to 
+
+|s⇀
+
+∧s′| = |s↼
+
+∧s′| (111) For the running example s = XIZ, s ′ = ZZX : at qubit 1, s acts X and s′ acts Z, a forward clash; qubit 2 is silent for both; at qubit 3, s acts Z and s′ acts X, a backward clash. Hence s⇀
+
+∧s′ = {1} and s↼
+
+∧s′ = {3}, both of size one – this pair already sits in the odd case treated below, which is exactly why it was chosen as the running example. Let us now separately consider the case where |s⇀
+
+∧s′| = |s↼
+
+∧s′| is even or odd. In the simpler case where both are even 10 , the qubits in s⇀
+
+∧s′ can be ordered based on the total ordering on Q = [ n], so that 
+
+s⇀
+
+∧s′ = ( q1 < · · · < q 2m) (112) A (defect) path can then be drawn between pairs of qubits, i.e., γi(ss ′) = [ q2i−1, q 2i], which corresponds to the defect path in the 3D grid as depicted by the green line in Fig. 3c, and explicitly, defined as 
+
+Γi(ss ′) = s × γi(ss ′) × s′, i ∈ [m] (113) We further parametrize the path [0 , τ i] ∋ t 7 → γi(t; ss ′) so that the path is from q2i−1 → q2i, and similarly, for Γi(t; ss ′).Note that half-integers Γi(t+; ss ′) denote the edges of the path. We then perform the same construction of the defect paths for s↼
+
+∧s′. In particular, 
+
+s↼
+
+∧s′ = (¯ q1 < · · · < ¯q2m) (114) and ¯γi(ss ′) = [¯ q2i−1, ¯q2i] and 11 
+
+¯Γi(ss ′) = s′ × ¯γi(ss ′) × s, i ∈ [m] (115) and [0 , ¯τi] ∋ t 7 → ¯γi(t; ss ′) is parametrized so that the path is from ¯q2i−1 → ¯q2i, and similarly for ¯Γi(t; ss ′)
+
+Let us now consider the sightly more difficult case where both are odd (which does not occur for CSS codes). Similar to the even case, let 
+
+s⇀
+
+∧s′ = ( q1 < · · · < q 2m < q 0) (116) 
+
+s↼
+
+∧s′ = (¯ q1 < · · · < ¯q2m < ¯q0) (117) Define the defect paths Γi, ¯Γi as in the even case for i̸ = 0 , so that we may restrict our attention to i = 0 .The reason i = 0 needs special treatment is geometric: q0 is a forward-clash qubit, so it lies on the line (x, z ) = ( s, s ′),while ¯q0 is a backward-clash qubit, lying on the different line (x, z ) = ( s′, s ). Since a single grid move changes only one coordinate, no straight path connects two points on different (x, z )-lines – unlike the pairs i̸ = 0 , whose two endpoints share the same crossing direction and hence the same line. This is exactly what the extra coordinate j(ss ′) is for: at 
+
+q = j(ss ′), the check layer spans every (x, z ) pair at once, so the path can travel in along one line, pivot freely at this coordinate, and travel back out along the other. In the running example, this connects ¯q0 = qubit 3 (on the line 
+
+(x, z ) = ( s′, s )) to q0 = qubit 1 (on the line (x, z ) = ( s, s ′)) via the pivot at j(ss ′), exactly the defect line depicted in Fig. 3c. Define the time-parametrized defect path Γ0(t; ss ′) defined as follows 
+
+s′ ¯q0s → s′j(s′s)s → sj (ss ′)s → sj (ss ′)s′ → sq 0s′ (118) where at each step, only one coordinate changes and thus is simply a straight line. Note that this is the only time where the additional coordinates (n, N ] along the ˆq axis are utilized. Further define Ii( ⇀
+
+ss ′) to be the interval [0 , τ i) if s → s′ is consistent with the order between pair s, s ′ and = (0 , τ i] if inconsistent. Similarly, define sign ⇀
+
+ss ′ = + if s → s′ is consistent, and − if inconsistent. We can thus define the defect map p as follows 
+
+|xqz ; s⟩A 7 → X
+
+> s′∼s
+
+X
+
+> i
+
+X 
+
+> t∈Ii(⇀
+> ss ′)
+
+1{xqz = Γ i(t; ss ′)} (119) 
+
+× | Γi(tsign ⇀
+
+> ss ′
+
+; ss ′); s′⟩AZ (120)     
+
+> 10 This occurs, for example, when the input code is CSS
+> 11 Note that the role of s, s ′are reversed
+
+22 where the summation is over all s′ such that s, s ′ have overlapping support (denoted as s′ ∼ s), and we treat ¯Γi = Γ −i
+
+so that the summation over i is such that |i| ≤ m, and the notation emphasizes | · · ·⟩ AZ ∈ QAZ . Note that the defect map 
+
+p maps a cell with coordinate xqz = Γ i(t; ss ′) to that with coordinate of a neighboring edge Γi(t±; ss ′) in the 3D grid, and thus is local. 
+
+Lemma 42 (Compatibility) . The gluing maps g, ˆg are compatible with the defect map p, i.e., 
+
+ˆgg = ∂Ap + p⊤δA (121) 
+
+Proof. Note that ˆgg maps the following 
+
+|xqz ; s⟩A g
+
+7−→ | xqz ⟩DX 1{qX ∼ s = x} (122) 
+
++ |xqz ⟩DZ 1{qZ ∼ s = z} (123) 
+
+> λD
+
+7−−→ | xqz ⟩DZ 1{qX ∼ s = x} (124) 
+
++ |xqz ⟩DX 1{qZ ∼ s = z} (125) 
+
+> g⊤
+
+7−−→ X
+
+> s′∈S
+
+|xqz ; ¯ s′⟩A (126) 
+
+× (1 {qX ∼ s = x, q Z ∼ s′ = z} (127) 
+
++ 1 {qZ ∼ s = z, q X ∼ s′ = x}) (128) where the | · · · ; ¯ s′⟩A notation emphasizes that the element is in the syndrome ¯XA. Let us consider the defect maps. Specifically, note that ∂Ap maps 
+
+|xqz ; s⟩A p
+
+7−→ X
+
+> s′∼s
+
+X 
+
+> i,t ∈Ii(⇀
+> ss ′)
+
+1{xqz = Γ i(t; ss ′)} (129) 
+
+× | Γi(tsign ⇀
+
+> ss ′
+
+; ss ′); s′⟩AZ (130) 
+
+> ∂A
+
+7−−→ X
+
+> s′∼s
+
+X 
+
+> i,t ∈Ii(⇀
+> ss ′)
+
+1{xqz = Γ i(t; ss ′)}× (131) 
+
+(|Γi(t; ss ′); ¯ s′⟩A + |Γi(t + sign ⇀
+
+ss ′; ss ′); ¯ s′⟩A) (132) Similarly, note that p⊤δA maps 
+
+|xqz ; s⟩A δA
+
+7−−→ X
+
+> e∼sxqz
+
+|e; s⟩AX (133) 
+
+> p⊤
+
+7−−→ X
+
+> s′∼s
+
+X 
+
+> i,t ∈Ii(↼
+> ss ′)
+
+|Γi(t; ss ′); ¯ s′⟩A (134) 
+
+× X
+
+> e∼xqz
+
+1{e = Γ i(tsign ↼
+
+> ss ′
+
+; ss ′)} (135) where e ∼s xqz denote edges in cell complex A(s) (contained in the 3D grid) adjacent to coordinate xqz , i.e., e =
+
+x±qz, xq ±z, xqz ±. Note that by utilizing the fact that ↼
+
+ss ′ is the opposite direction of ⇀
+
+ss ′, we can rewrite the map p⊤δA
+
+as 
+
+|xqz ; s⟩A 7 → X
+
+> s′∼s
+
+X 
+
+> i,t ∈Ii(⇀
+> ss ′)
+
+|Γi(t + sign ⇀
+
+ss ′; ss ′); ¯ s′⟩A (136) 
+
+× X
+
+> e∼xqz
+
+1{e = Γ i(tsign ⇀
+
+> ss ′
+
+; ss ′)} (137) Fix s′ ∼ s, and assume that ⇀
+
+ss ′ is consistent with the chosen direction. If xqz is at the boundary of some defect line, say 
+
+xqz = Γ i(0; ss ′). Then we see that ∂Ap maps 
+
+|xqz ; s⟩A 7 → | Γi(0; ss ′); ¯ s′⟩A + |Γi(1; ss ′); ¯ s′⟩A + · · · (138) 23 where · · · denotes cells in other ̸ = s′ check layers, while p⊤δA maps 
+
+|xqz ; s⟩A 7 → | Γi(1; ss ′); ¯ s′⟩A + · · · (139) Hence, the sum ∂Ap + p⊤δA maps 
+
+|xqz ; s⟩A 7 → | xqz ; ¯ s′⟩A + · · · (140) Similarly, if xqz = Γ i(τi; ss ′), then we see that ∂Ap maps 
+
+|xqz ; s⟩A 7 → 0 + · · · (141) while p⊤δA maps 
+
+|xqz ; s⟩A 7 → | Γi(τi; ss ′); ¯ s′⟩A + · · · (142) Hence, the sum ∂Ap + p⊤δA maps 
+
+|xqz ; s⟩A 7 → | xqz ; ¯ s′⟩A + · · · (143) The other cases can be similarly verified to show that 
+
+∂Ap + p⊤δA
+
+maps 
+
+|xqz ; s⟩A 7 → X
+
+> s′∼s
+
+|xqz ; ¯ s′⟩A1{xqz ∈ ∂Γ( ss ′)} (144) where we regard Γ( ss ′) as the union of all defect lines Γi(ss ′). Since the boundary ∂Γ( ss ′) is exactly the overlap between s, s ′ checks, we see that the statement follows.  
+
+> E. Main Results
+
+Theorem 43 (non-CSS Layer Codes) . Let A, D be defined as in Eq. (95)-(96). Let gluing maps g, ˆh be defined as in Eq. (98)-(100), and defect map p in Eq. (119). Then the output constructed via Theorem 2, referred as the 3D non-CSS Layer Code , C is a well-defined symplectic complex embedded in the 3D grid [nS ] × [O(wq )n] × [nS ] where each edge hosts at most 3 qubits, and with column code equal to input code = B so that 
+
+H1(C) ∼= H1(B) (145) And maximum weight 9 and total qubit degree 8, and 
+
+d(C) = Ω 
+
+ nS
+
+wq 
+
+
+
+d(B) (146) where d(C), d (B) are the code distance of the output C and input B codes, respectively. 
+
+Proof. The proof is similar to [Yua26, YBW26, YB26] where the key difference is that for non-CSS codes, we utilize the main result in Theorem 2 (combined with Lemma 41 and 42). The lower bound on the code distance d(C) follows similarly as in [YBW26, YB26], where we utilize relative expansion and the Cleaning Lemma in [Yua26], and thus omitted. Note that the number of qubits each edge hosts follows from Remark 40, and the fact the qubit layers are edge decongested. It may be worth mentioning that the weights of the non-CSS Layer Code is depicted by the following diagram 
+
+XA QAX ¯ZA
+
+SD P D ¯SD
+
+ZA QAZ ¯XA
+
+> 644411221112
+
+(147) 24 where the number labels the maximum column weight of the linear map corresponding to the arrow. In particular, the maximum check weight of the 3D non-CSS Layer Code is 9, which is computed by the red arrows. Note that the total qubit degree is not quite the maximum column weight of the syndrome map. However, as shown in Theorem 2, the X, Z sector qubits given by 
+
+QCα = QAα ⊕ QDα , α = X, Z (148) Hence, the total qubit degree should be upper bounded by the sum of all blue arrows, and double the sum of green arrows. In particular, the total qubit degree is ≤ 8. 
+
+> VI. NON-CSS WEIGHT REDUCTION WITH LAYER CODES
+
+In this section, we show that using the non-CSS embedding formalism in Theorem 2, the CSS weight reduction pro-cedure [YBW26] can be generalized nearly immediately to the non-CSS scenario (i.e., the input code can be non-CSS 12 ). Specifically, the CSS weight reduction procedure in [YBW26] generalizes the CSS Layer Code construction by removing the Euclidean geometry constraint, while keeping topological defects (interactions between layers) sparse. A similar intuition is applied to the non-CSS Layer codes in the previous section V to obtain the corresponding non-CSS weight reduction procedure. In particular, due to the parallels between CSS weight reduction [YBW26] and CSS Layer Codes [WB24], we shall be relatively brief with the non-CSS weight reduction since the non-CSS Layer Codes were derived in detail in Section V.  
+
+> A. Input Code
+
+Adopt the notation in Section V A so that the non-CSS input code B is written as a symplectic complex 
+
+B = S σ
+
+−→ P ˆσ
+
+−→ ¯S (149) where checks s ∈ S and qubits q ∈ Q with X, Z -sectors qX , q Z . Let w, q denote the maximum check weight and total qubit degree of B, respectively. 
+
+Definition 44 (Induced Check Graph) . Let GS = ( S, ES ) denote the graph with vertices S and edges s1s2 ∈ E Q if (1) 
+
+supp s1 ∩ supp s2̸ = ∅ or (2) there exists check s which nontivially overlaps (as in Definition 34) with both s1, s 2. Let 
+
+χS be such that GS is χS vertex colorable so that 
+
+χS = O(w2q2) (150) The coloring scheme induces a mapping ηS : S → [χS ]. We may omit the subscript, when the meaning is clear from context. Let RX , R Z denote repetition codes on χS vertices, which we shall view as arranged in the ˆx, ˆz axes, respectively. 
+
+Definition 45 (Induced Qubit Graph) . Let GQ = ( Q, EQ) denote the graph with vertices Q and edges q1q2 ∈ E Q if there exists check s ∈ S such that both q1, q 2 ∈ supp s are within the support of s. Let χQ be such that GQ is χQ vertex colorable so that 
+
+χQ = O(wq ) (151) The coloring scheme induces a mapping ηQ : Q → [χQ]. We may omit the subscript, when the meaning is clear from context. As described in Section V A for the non-CSS Layer Codes, additional space (which was unnecessary for CSS codes) is necessary to decongest the defect lines for general non-CSS codes. In particular, define  
+
+> 12 Unlike the Euclidean Layer Codes, the (CSS and non-CSS) weight reduction procedure permits Non-qLDPC codes
+
+25 
+
+Definition 46 (Induced Check-Check Graph) . Let GSS = ( S, ESS ) denote the graph with vertices S and edges s1s2 ∈EQ if supp s1 ∩ supp s2̸ = ∅. Let χSS be such that GSS is χSS edge colorable so that 
+
+χSS = O(wq ) (152) The coloring scheme induces a mapping ηSS : ES → [χSS ]. We may omit the subscript, when the meaning is clear from context. Note that GSS is simply GS with edges given by requirement (1) in Definition 44. Let RQ denote the repetition code on ˜χQ vertices where 
+
+˜χQ = χQ + χSS = O(wq ) (153) With slight abuse of notation, let ηSS map to the latter χSS colors in [ ˜ χQ], i.e., ∈ (χQ, ˜χQ]. 
+
+> B. Qubit Layers
+
+Similar to Section V B, the qubit layers are defined simply as 
+
+Definition 47 (Qubit Layers) . Define the qubit layer as the 3-term cell complex 
+
+RX ⊗ q ⊗ R⊤ 
+
+> Z
+
+(154) where q ∈ Q . By Example 26, the qubit layer is a CSS code, which can be written as a symplectic complex D(q). 
+
+> C. Check Layers
+
+Similar to Section V C, we define the ( raw ) check layers as follows. 
+
+Definition 48 (XZ Graph) . Consider a plane with axes ˆx × ˆz and of linear dimension χS , i.e., [χS ]2. Define the XZ graph of check s as the collection of rows and columns in the ˆx × ˆz plane passing through (η(s), η (s)) ∈ [χS ]2, i.e., 
+
+XZ( s) = ( η(s) × [nS ]) ∪ ([ nS ] × η(s)) (155) where we shall treat XZ( s) as a graph complex with the corresponding edges and vertices. Note that XZ( s) can be viewed as the union of RX , R Z joining at the η(s) vertex. 
+
+Definition 49 (Raw Check Layer) . Define the (raw) check layer of check s ∈ S as the 3-term cell complex 
+
+Araw (s) = XZ( s) ⊗ RQ (156) and thus correspond to union of X, Z -check layers in CSS weight reduction [YBW26]. 
+
+Definition 50 (Check Layer) . Define the check layer of check s ∈ S as the union 
+
+A(s) = Araw (s) + M
+
+> s′∼s
+
+A(s′; s) (157) where the summation of s′ is over all checks which nontrivially overlap with s relative to the input code B, and 
+
+A(s′; s) = RX ⊗ η(ss ′) ⊗ RZ (158) For notation, label the vertices in A(s) as |ijk ; s⟩ where ijk are coordinates along the axes ˆx × ˆq × ˆz. Similarly, we can label edges along the ˆx direction as |i±jk ; s⟩ where i± = i ± 1/2 are half-integers and similarly, for |ij ±k; s⟩ and 
+
+|ijk ±; s⟩. 
+
+> D. Attaching Check and Qubit Layers
+
+Similar to Section V D, define 
+
+A = M
+
+> s∈S
+
+A(s) (159) 
+
+D = M
+
+> q∈Q
+
+D(q) (160) Hence, it remains to show that the maps g, h, p in Theorem 2 can be defined in a manner that is sufficiently sparse so that the output code C is weight and degree reduced. 26  
+
+> 1. Gluing Maps
+
+We thus define the gluing map g via 
+
+|i, η (q), k ; s⟩A 7 → | iqk ⟩DX 1{qX ∼ s, η (s) = i} (161) 
+
++ |iqk ⟩DZ 1{qZ ∼ s, η (s) = k} (162) (and zero otherwise), where ∼ is with respect to the input code B, e.g., qX ∼ s if qX ∈ σs and qX are the X- qubit in 
+
+QX corresponding to q (the case is similar for qZ ). Note that the map is well-defined since by Definition 45, the coloring map η is injective on the support of any check s. Further define the gluing map h via 
+
+|i, η (q), k +; s⟩A 7 → | iqk +⟩DX 1{qX ∼ s, η (s) = i} (163) 
+
+|i+, η (q), k ; s⟩A 7 → | i+qk ⟩DZ 1{qZ ∼ s, η (s) = k} (164) (and zero otherwise), where i± = i ± 1/2 are used to denote the edges along ˆx and similarly for k±. It’s then straight-forward to check the following, whose proof is omitted since it’s nearly the same as that of Lemma 41. 
+
+Lemma 51 (Chain Map) . The gluing maps (g, h ) in Eq. (161)-(164) form a chain map.  
+
+> 2. Defect Maps
+
+The construction of the defects is similar to that in Section V D 2, where we utilize the additional χSS planes to route the defect lines. Here, we provide a sketch instead of repeating the details. Let s⇀
+
+∧s′, s ↼
+
+∧s′ ⊆ Q be as before so that by the commutation relations, |s⇀
+
+∧s′| = |s↼
+
+∧s′|. By Definition 45, the color mapping ηQ is injective on s⇀
+
+∧s′ and on s↼
+
+∧s′,and thus qubits can be ordered ≺ with respect to the values of ηQ. In particular, if |s⇀
+
+∧s′| = |s↼
+
+∧s′| are both odd, then 
+
+s⇀
+
+∧s′ = ( q1 ≺ · · · ≺ q2m ≺ q0) (165) 
+
+s↼
+
+∧s′ = (¯ q1 ≺ · · · ≺ ¯q2m ≺ ¯q0) (166) We then construct the defect paths ,
+
+γi(ss ′) = [ η(q2i−1), η (q2i)] , i ∈ [m] (167) 
+
+Γi(ss ′) = η(s) × γi(ss ′) × η(s′) (168) and 
+
+¯γi(ss ′) = [ η(¯ q2i−1), η (¯ q2i)] , i ∈ [m] (169) 
+
+¯Γi(ss ′) = η(s′) × ¯γi(ss ′) × η(s) (170) and similar to Eq. (118), define the special route Γ0(ss ′) as follows (where the Euclidean coordinates are replaced by the corresponding color maps) 
+
+η(s′)η(¯ q0)η(s) → · · · → η(s)η(q0)η(s′) (171) Add a time parametrization to the defect paths similar to Section V D 2, e.g., [0 , τ i] 7 → γi(t; ss ′) routes η(q2i−1) → η(q2i).The case where |s⇀
+
+∧s′| = |s↼
+
+∧s′| are both even is similarly derived. Further define Ii( ⇀
+
+ss ′) to be the interval [0 , τ i) if s → s′ is consistent with the order between pair s, s ′ and = (0 , τ i] if inconsistent. Similarly, define sign ⇀
+
+ss ′ = + if s → s′ is consistent, and − if inconsistent. We can thus define the defect map p as follows 
+
+|ijk ; s⟩A 7 → X
+
+> s′∼s
+
+X
+
+> i
+
+X 
+
+> t∈Ii(⇀
+> ss ′)
+
+1{ijk = Γ i(t; ss ′)} (172) 
+
+× | Γi(tsign ⇀
+
+> ss ′
+
+; ss ′); s′⟩AZ (173) where the summation is over all s′ such that s, s ′ have overlapping support (denoted as s′ ∼ s), and we treat ¯Γi = Γ −i
+
+so that the summation over i is such that |i| ≤ m, and the notation emphasizes | · · ·⟩ AZ ∈ QAZ .It’s then straightforward to check that (whose proof we omit since it’s nearly identical to that of Lemma 42) 
+
+Lemma 52 (Compatibility) . The gluing maps g, ˆg are compatible with the defect map p, i.e., 
+
+ˆgg = ∂Ap + p⊤δA (174) 27  
+
+> E. Main Results
+
+Theorem 53 (Non-CSS Weight Reduction) . Let A, D be defined as in Eq. (159)-(160) (along with Definitions 50 and 47). Let gluing maps g, h be defined as in Eq. (161)-(164), and defect map p in Eq. (172). Then the output C constructed via Theorem 2 is a well-defined symplectic complex with qubits 
+
+|Q C | = O(w4q4)|Q| (175) and 
+
+H1(C) ∼= H1(B) (176) And maximum weight 9 and total qubit degree 8, and 
+
+d(C) ≥ min( χS , 2 ˜ χQ) 1
+
+w d(B) (177) where d(C), d (B) are the code distance of the output C and input B codes, respectively. 
+
+Remark 54. As discussed previously, it’s typical to expect 
+
+χS = Θ( w2q2) (178) 
+
+˜χQ = Θ( wq ) (179) Hence, for large weights and degrees, we have ˜χQ ≪ χS and thus the code distance is 
+
+d(C) ≥ Θ( q)d(B) (180) Note that this lower bound in code distance is not ideal due to ˜χQ ≪ χS .However, similar to the CSS weight reduction procedure [YBW26], this lower bound may be an artifact of our proof. Moreover, similar to Remark 1 of [YBW26], we can arbitrarily increase ˜χQ so that ˜χQ, χ S = Θ( w2q2) without increasing the asymptotic scaling of the output code size. In this case, the code distance has a larger lower bound 
+
+d(C) ≥ Θ( wq 2)d(B) (181) 
+
+Proof. This proof is nearly identical to Theorem 43 and Theorem III.2-III.3 in SI of [YBW26], and thus omitted. 
+
+> Appendix A: CSS Measurement
+
+In this section, we derive the fault complex [HDTV25] for CSS measurement – specifically, for syndrome extraction of CSS codes in Section A 2 a and CSS logical measurement of CSS codes in Section A 2 b. This approach echoes the spacetime code of [WY26]. Note that to rewrite the error correction procedure as a fault complex, the measurement information, which exists at the level of Pauli groups, must be incorporated in the language of complexes. This is elaborated in the following subsection.  
+
+> 1. Preliminaries
+
+It’s well known that after abelianization, a CSS code can be treated as a length-2 complex. However, technically, abelianization does not capture the information of phases. For example, a CSS code with checks XXX, ZZI and another with −XXX, ZZI would be described by the same complex. For most scenarios, this subtlety is not important, since properties such as the code distance or logical subspace dimension do not depend on the phase information. However, when performing measurement, the phases are important, since the measurement outcome (−1) s can be regarded as the phase in front of the stabilizer checks. Hence, this section provides some preliminaries on how such information can be captured after abelianization, i.e., in complexes. 
+
+Definition A1 (CSS Code) . Let P denote the Pauli group with phases and PX , PZ be X, Z -type Pauli subgroups. A CSS code is a commuting Pauli subgroup −I /∈ S ⊆ P such that S is generated by subgroups SX , SZ where 
+
+Sα ⊆ P α, α = X, Z .28 
+
+Definition A2 (Abelianization) . Let Σα ⊆ Fn 
+
+> 2
+
+be subspaces and μ¯α ∈ Σ∗ 
+
+> α
+
+for α = X, Z and ¯α is the other choice. Then the quantum state ψ is stabilized with measurement μX , μ Z if 
+
+ρ(s)ψ = ( −1) μ ¯αsψ, s ∈ Σα (A1) where ρ(s) is the X, Z -type operator obtained from s, e.g., ZZI from 110 . If μX = μZ = 0 , then the measurements are trivial and omitted. 
+
+Lemma A3 (Equivalence) . There exists a canonical bijective map from collection of subgroups SX ⊆ P X with −I / ∈ S X
+
+to the tuple (Σ X , μ Z ) where ΣX is a subspace of Fn 
+
+> 2
+
+and μZ ∈ Σ∗ 
+
+> X
+
+is in the dual space. The case is similar for Z-type Paulis. 
+
+Proof. Given subgroup SX ⊆ P X with −I /∈ S X , let ΣX ⊆ Fn 
+
+> 2
+
+denote its abelianization. Note that given s ∈ ΣX ,there must exist a unique Pauli in SX , which we denote by ρ(s). Indeed, if there are more than one, then the product of the two must be a phase ̸ = I, and thus −I ∈ S X so that we reach a contradiction. Let μZ : Σ X → F2 denote the phase of the unique Pauli ρ(s) ∈ S X with abelianization s ∈ ΣX . Linearity follows from the fact that abelianization is a homomorphism. Hence, this defines a map. The converse is similarly derived and thus we obtain a bijective map. 
+
+Remark A4. The previous observation tells us that a CSS code is specified uniquely by its abelianization Σα and measurement maps μ¯α.
+
+Corollary A5. Let S be a CSS code with corresponding abelianizations Σα and linear maps μ¯α. Then state ψ is stabilized by S ⇔ ψ is stabilized by Σα with measurements μ¯α.
+
+Remark A6 (Orientation) . Throughout this section (and Section C 1) we treat the CSS case on its own and orient the CSS complex as 
+
+A = X ∂
+
+−→ Q ∂
+
+−→ Z (A2) i.e. ∂ carries the X-checks and δ = ∂⊤ carries the Z-checks. This is the transpose of the convention used in the main text and in the non-CSS sections B and C 2, where ∂A : ZA → QAZ and δA : XA → QAX . The two settings are developed independently and never share a diagram, so no translation is required; the reader need only keep in mind that ∂A acts on XA here and on ZA there. 
+
+Remark A7 (Distances) . For a CSS code D we write dX (D) (dZ (D)) for the minimum weight of a nontrivial X-(Z-) type logical. For a fault complex F = F2 → F1 → F0 – which is not in general a spatial code – we write 
+
+d1(F ) for its 1-systolic distance, and, when F is the fault complex for X- ( Z-) type errors, we also write dX (F ) ≡
+
+d1(F ) (dZ (F ) ≡ d1(F )) to record the error type. Accumulated (time-summed) quantities are written in fraktur, e.g. 
+
+eX (QD ) = P 
+
+> t
+
+eX (QD )|t, to distinguish them from the vectorized eX (QD ) = P 
+
+> t
+
+eX (QD )|t ⊗ | t⟩.
+
+Lemma A8 (Physical) . Let A = X → Q → Z be a complex (co)differential δ = ∂⊤. Then there exists a canonical isomorphism [aZ ] 7 → μZ : Q/ ker δ → (im ∂)∗ defined by 
+
+μZ (· · · ) = ⟨aZ | · · ·⟩ (A3) where aZ is any representation of equivalence class [aZ ], i.e., modulo ( Z-type) logical. 
+
+Remark A9 (Physical) . From a physical perspective, aZ can be regarded as a physical Z-Pauli acting on a state sta-bilized by A so that the resulting state has measurement μZ = ⟨aZ |. Hence, we say that ψ is stabilized by A with (Z-type) physical (measurements) aZ (modulo logical) 13 , instead of measurements μZ ∈ (im ∂)∗. In particular, this formulation also includes the possibility that a (presumably small) unknown physical error occurs on the given state. The case is similar for X-type. 
+
+Remark A10 (Valid Syndrome) . Note that δ : Q/ ker δ → im δ is an isomorphism. Since X is the space of ( Z-type) 
+
+syndrome , we refer to im δ as the space of ( Z-type) valid syndromes . The case is similar for X-type valid syndromes.  
+
+> 13 We will often omit the “mod logical” portion for simplicity
+
+29 
+
+Proof. Since the basis on X defines a non-degenerate bilinear form, by Riesz representation, given any μZ ∈ (im ∂)∗,there exists a unique α ∈ X such that 
+
+μZ (∂x ) = ⟨α|x⟩ (A4) Note that if x ∈ ker ∂, then μZ (∂x ) = 0 and thus α ∈ (ker ∂)⊥ = im δ. Conversely, given any ∂x ∈ im ∂, we define the map ∂x 7 → ⟨ α|x⟩. This is well-defined since if ∂x = ∂x ′, then x + x′ ∈ ker ∂ and thus ⟨α|x⟩ = ⟨α|x′⟩. Since μZ 7 → α is linear, we obtain an isomorphism (im ∂)∗ → im δ. Note that im δ ∼= Q/ ker δ via the isomorphism δ : Q/ ker δ → im δ.The statement then follows from combining the two isomorphism. 
+
+Example A11 (Initialization) . Suppose that qubits Q are initialized transversally in the X-basis, so that the state is stabilized by 
+
+X(Q) id 
+
+−→ Q (A5) where X(Q) is a copy of Q, with unknown physical e•. Note that eX can always be chosen = 0 since the X-logicals (and X-stabilizers) are arbitrary, and thus only the Z-type physical error requires to be specified. Utilizing the canonical isomorphism in Lemma A8, we can formulate subsequent measurements on a given state as follows. 
+
+Lemma A12 (Overcomplete Measurement) . Let ψ be stabilized by a CSS code 
+
+A = XA → QA → ZA (A6) with physical a•. Measure X-type Paulis based on ∂B : XB → QA with physical bZ . Then 
+
+aZ + bZ ∈ ker δA + ker δB (A7) where δα = ( ∂α)⊤. Moreover, if αZ ∈ ker δA and βZ ∈ ker δB are such that cZ ≡ aZ + αZ = bZ + βZ , then the output state is stabilized by • X-Paulis in im ∂A + im ∂B with physical cZ .• Z-Paulis in im δA ∩ ker δB with physical aX
+
+Remark A13 (Valid Measurement) . Note that the measurement may be overcomplete since the initial state ψ is already stabilized by A, and thus measurements on im ∂A ∩ im ∂B must be consistent with both a and b. This is equivalent to Eq. (A7), as thus referred as the valid measurement condition. 
+
+Remark A14. Note that when perform an X-Pauli measurement, the X-type physical error aX does not change; instead, only the Z-type stabilizers change (which may change the mod logical part) and thus we often omit it in writing. 
+
+Remark A15 (Transversal Measurement) . Note that if QB ⊆ QA denotes a subspace with basis QB ⊆ Q A and QB
+
+which are then measured in the X-basis transversally, then the readout (QB )∗ can be identified with some physical bZ
+
+since (QB )∗ ∼= QB gives the canonical isomorphism in Lemma A8.  
+
+> 2. Fault Complexes
+
+In this section, we derive the spacetime fault complexes for d rounds of measurement, for both syndrome extraction (in Algorithm 4) and logical measurement (in Algorithm 5). Note that the detailed algorithms are postponed, since the relevant information is the measurement obtained each round, along with the possibility that physical errors can accumulate (with small probability) between rounds of measurement. In particular, to prove a threshold, we shall utilizing the following fact about complexes. Note that the theorem applies to any complex, and not necessarily those that are interpreted as spatial CSS codes. Hence, the statement also applies to spacetime fault complex, as we shall elaborate in the following subsections. 
+
+Lemma A16 (General Threshold) . Let 
+
+F = F2 → F1 → F0 (A8) 30 denote an arbitrary sparse (qLDPC) complex with basis F and differential ∂F . Let errors e ∈ F1 occur with probability 
+
+p, i.e., Pr [e ⊇ f ] ≤ p|f | for any f ⊆ F 1. Given readout ∂F e, let ∂F e 7 → ˆe denote the min-weight correction. Then there exists threshold pc such that if p < p c, then the probability that e + ˆ e is a nontrivial logical of F is upper bounded by 
+
+Pr [e + ˆ e / ∈ im ∂F ] ≤ O(1) dim F1
+
+ ppc
+
+d1(F )/2
+
+(A9) where d1(F ) is the 1-systolic distance of F .
+
+Proof. Follows from Gottesman [Got13].  
+
+> a. Syndrome Extraction
+
+Since syndrome extraction is symmetric in X and Z-type errors, we shall restrict our attention to X-type errors. The case of Z-type errors is similarly derived. Given a quantum state stabilized by a data CSS code D = XD → QD → ZD ,input the state into Algorithm 4 and use the output as the input for subsequent syndrome extractions of Algorithm 4. Perform the syndrome extraction T + 1 times (where we assume that that last measurement is perfect without measurement errors), and assume that physical errors can accumulate on QD before each extraction, so that we can regard physical errors eX (QD )|t occuring at integer time steps t ∈ [0 , T ] and measurement errors eX (ZD )|t+ occurring at half-integer time steps t+ where t ∈ [0 , T ), where the subscript X is omitted henceforth since we will only deal with 
+
+X-type errors. In particular, after t + 1 rounds of subsequent extraction, we have readout 
+
+∂D
+
+X
+
+> s≤t
+
+e(QD )|s
+
+ + e(ZD )|t+ (A10) where the summation denotes the accumulated physical error, and we assumed that e(ZD )|0− , e (ZD )|T + = 0 . Equiv-alently, we can compute the difference between readouts t+ and and t− to obtain readouts 
+
+∂D e(QD )|t + e(ZD )|t+ + e(ZD )|t− , t ∈ [0 , T ] (A11) where we assume that e(ZD )|0− , e (ZD )|T + = 0 . This corresponds to the diagram 
+
+ZD EQD V ZD V 
+
+> ∂D
+> ∂R
+
+(A12) where R = E → V denote the repetition code on T +1 vertices |t⟩, t ∈ [0 , T ] with differential ∂R. It’s then clear that the physical errors occupy space QV and the measurement errors occupy ZD E, where we have omitted the tensor product 
+
+⊗ for simplicity, so that the direct sum QD V ⊕ ZD E indicates the fault locations (data and syndrome qubits) . The readouts in Eq. (A11) occupy ZD V and are determined by the sum of the differentials. In particular, ZD V is the space of fault syndromes , differential ∂F = ∂R + ∂D is the syndrome map and im ∂F denotes the space of valid fault syndromes .To create a fault complex, we must also introduce fault stabilizers to indicate whether accumulated errors are trivial logicals. Writing eX (QD ) = P 
+
+> t
+
+eX (QD )|t ⊗ | t⟩ ∈ QD V the vectorized version of eX (QD ), we have the following lemma. 
+
+Lemma A17 (Fault Stabilizers) . If eX (QD ) ∈ QD V , then the accumulated error 
+
+eX (QD ) = 
+
+> T
+
+X
+
+> t=0
+
+eX (QD )|t (A13) 31 is a trivial logical, i.e., ∈ im ∂D ⇔ eX (QD ) is in the image of the map given by the red arrows as follows. 
+
+QD E ZD EXD V QD V ZD V 
+
+> ∂D
+> ∂R
+> ∂D
+> ∂R
+
+(A14) 
+
+Remark A18. Physically, the map QD E → QD V denotes physical errors that come in pairs and thus do not contribute to the accumulated error since they cancel each other out. We refer to QD E ⊕ XD V as the fault stabilizers .
+
+Proof. This direction ⇐ is trivial and thus we focus on the ⇒ direction. Consider the collection T = T(e(QD )) of times 
+
+t such that e(QD )|t is not a stabilizer, i.e., /∈ im ∂D . Suppose that T is non-empty; otherwise e(QD )|t ∈ im ∂D for every 
+
+t and the claim is immediate. Let T(e) = ( τ0 < · · · < τ ℓ) be ordered. Note that the accumulated error is a stabilizer 
+
+e ∈ im ∂D and thus 
+
+> ℓ
+
+X
+
+> i=0
+
+e(QD )|τi ∈ im ∂D (A15) Let s0(QD ) ∈ QD E be defined as 
+
+s0(QD )|t+ = e(QD )|τ0 1{τ0 ≤ t < τ 1} (A16) Then we see that 
+
+(e(QD )+ ∂Rs0(QD )) |t (A17) 
+
+=
+
+
+
+e(QD )|t t̸ = τ0, τ 1
+
+0 t = τ0
+
+e(QD )|τ0 + e(QD )|τ1 t = τ1
+
+(A18) In particular, the error at τ0 is pushed to time-step τ1. Repeat this process to obtain s(QD ) ∈ QD E such that 
+
+(e(QD )+ ∂Rs(QD )) |t (A19) 
+
+=
+
+
+
+e(QD )|t t / ∈ T(e(QD )) 0 t ∈ T(e(QD )) \τℓ
+
+Pℓi=0 e(QD )|τi t = τℓ
+
+(A20) It’s then clear e(QD ) + ∂Rs(QD ) ∈ im ∂D and thus the statement follows. Let us further complete the diagram in Eq. (A14) to form a complex. 
+
+Lemma A19. Consider the map indicated by the red arrow. 
+
+QD E ZD EXD V QD V ZD V 
+
+> ∂D
+> ∂R
+> ∂D
+> ∂R
+
+(A21) Then the fault stabilizers has trivial fault syndrome ⇔ the map is ∂D .
+
+Proof. The direction ⇐ is trivial and thus we consider the direction ⇒. Specifically, let the red arrow have linear map 
+
+∂tbd . Let s(QD ) ∈ QD E and consider its image (∂tbd + ∂R)s(QD ). If the fault stabilizer has trivial fault syndrome, then 
+
+∂D ∂Rs(QD ) = ∂R∂tbd s(QD ) (A22) 
+
+∂R(∂D + ∂tbd )s(QD ) = 0 (A23) where we utilized the fact that ∂D , ∂ R commute. Since ker ∂R = 0 , we see that ∂tbd = ∂D .32 With these lemmas in place, the appropriate fault complex naturally follows. 
+
+Definition A20. The fault complex F = F2 → F1 → F0 for X-type errors in syndrome extraction after T + 1 rounds of measurements for the code D is then given by 
+
+QD E ZD EXD V QD V ZD V
+
+> ∂D
+> ∂R
+> ∂D
+> ∂R
+> ∂D
+
+(A24) One may notice the that Definition A20 corresponds to the tensor product D ⊗ R, where XD E doesn’t play a role. The fault complex then provides a natural threshold. 
+
+Remark A21. On the correspondence with the construction of [WY26]; the components QD V, Z D E correspond to respectively space and time faults, ZD V corresponds to detectors, while XD V, Q D E map to respectively space and time stabilizers. Much like the distance of a code, the distance of the fault complex then allows us to guarantee resilience against both data and measurement errors. 
+
+Lemma A22 (Recovery) . Let F the fault complex for a code D, and e = eX (QD ) ⊕ eX (ZD ) ∈ F1 a set of faults satisfying 
+
+|e| < dX (F )2 (A25) Then, there exists ˆe ∈ F1 such that 
+
+X
+
+> t
+
+eX (QD )|t + ˆ eX (QD )|t ∈ im ∂D (A26) 
+
+Proof. Pick ˆe the minimum weight correction with ∂F e = ∂F ˆe. From the usual code theoretic argument, we have 
+
+e + ˆ e ∈ im ∂F ; and Lemma A17 gives Eq. (A26). The function of the fault complex, relative to the usual code complex, is to find the correction ˆeX (QD ) = P 
+
+> t
+
+ˆeX (QD )|t;which is typically unattainable for a simple code complex in the presence of measurement errors. While the recovery operation is entirely contained on the data qubits, the fault complex finds ˆeX (QD ) by extending its phase space to in-clude syndrome qubits. One can also remark that the above lemma is optimal, in the sense that the tight characterization given by Lemma A17 guarantees the existence of an uncorrectable error of size dX (F )/2.Beyond the adversarial setting, we also obtain a threshold theorem in the stochastic setting when the measurements are repeated a number T ≥ dX (D) times. 
+
+Theorem A23 (Threshold) . Suppose that T ≥ dX (D) where dX (D) is the X-type code distance of the qLDPC CSS data code. Let (physical and measurement) X-type errors 
+
+eX (F1) = eX (QD ) ⊕ eX (ZD ) (A27) occur with rate p. Suppose that readouts ∂F eX (F1) and min-weight correction ∂F eX (F1) 7 → ˆeX (F1) relative to the fault complex F are provided. Then there exists threshold pc such that if p < p c, then the accumulated physical error of eX (QD ) + ˆ eX (QD ) is a nontrivial logical with probability 
+
+≤ O(1) |Q D |dX (D)
+
+ ppc
+
+dX (D)/2
+
+(A28) 
+
+Proof. Since T ≥ dX (D), we see that the fault complex has 1-systolic distance ≥ dX (D), which follows from the tensor product D ⊗R. By Lemma A16, it’s then sufficient to show that the accumulated physical error of eX (QD )+ ˆ eX (QD ) is nontrivial /∈ im ∂D only if eX (F1)+ˆ eX (F1) /∈ im ∂F . Indeed, by Lemma A17, we see that eX (QD )+ˆ eX (QD ) /∈ im π∂ F
+
+where π denotes the projection onto QD V . Hence, eX (F1) + ˆ eX (F1) /∈ im ∂F and thus the statement follows. 33  
+
+> b. Logical Measurement
+
+In this subsection, we similarly derive the fault complex of logical measurement in Algorithm 5. However, there are a couple of subtleties that must be clarified to compare with that of syndrome extraction. For example, Algorithm 5 has three readouts instead of two in Algorithm 4, so that the X- and Z-type readouts are asymmetric and thus must be treated differently. Also note that any physical error on ancilla qubits QA are discarded after each round of measurement, and thus the physical meaning of accumulated error on QA must be clarified. 
+
+a. X-Pauli errors We start by considering the X-type errors in logical measurement in Algorithm 5. Suppose that we are given a quantum state stabilized by a data CSS code D. Input the state with possible unknown errors e(Q)|0 into Algorithm 5, and write Q = QA ⊕ QD , Z = ZA ⊕ ZD , so that we obtain relevant readouts 
+
+∂e X (Q)|0 + eX (Z)|0+ ∈ Z (A29) 
+
+∂AxA|0 + eX (QA)|0 ∈ QA (A30) where the output state has X-type physical eX (QD )|0 + gx A|0. Use the output as the input for another round of logical measurement to obtain relevant readouts 
+
+∂(eX (QD )|0 + gx A|0 + eX (Q)|1) + e(Z)|1+ ∈ Z (A31) 
+
+∂AxA|1 + eX (QA)|1 ∈ QA (A32) Let rA 
+
+> 0
+
+:= ∂AxA|0 + eX (QA)|0 denote the measured readout in Eq. (A30). Then the qubit contribution to the syndrome of the next round is explicitly 
+
+∂ eX (QA)|1
+
+eX (QD )|0 + gx A|0 + eX (QD )|1
+
+!
+
+= ∂ ∂AxA|0 + eX (QA)|1
+
+eX (QD )|0 + eX (QD )|1
+
+!
+
+= ∂
+
+ eX (QA)|0 + eX (QA)|1
+
+eX (QD )|0 + eX (QD )|1
+
+!
+
++ rA
+
+> 0
+
+0
+
+!
+
+= ∂(eX (Q)|0 + eX (Q)|1) + ∂ rA
+
+> 0
+
+0
+
+!
+
+, (A33) Hence, by utilizing the readout in Eq. (A30) when discarding the ancilla qubits, we can regard the readout as that error caused by the accumulated error eX (Q)|0 + eX (Q)|1 even though errors eX (QA)|0 on the ancilla were discarded. Specifically while the observed syndrome s is 
+
+s1 = ∂(eX (Q)|0 + eX (Q)|1) + ∂r A
+
+> 0
+
+0
+
+!
+
+∈ Z (A34) 
+
+rA 
+
+> 1
+
+∈ QA (A35) the quantity rA 
+
+> 0
+
+is known from the destructive readout of QA in the previous round, thus the effective syndrome infor-mation instead is: 
+
+seff  
+
+> 1
+
+= s1 + ∂r A 
+
+> 0
+
+= ∂(eX (Q)|0 + eX (Q)|1) ∈ Z (A36) 
+
+rA 
+
+> 1
+
+∈ QA (A37) Repeat this procedure T + 1 times (where the last logical measurement is assumed to be perfect without measurement errors). Then by computing the difference between readouts t+ and t−, we obtain information 
+
+∂e X (Q)|t + eX (Z)|t+ + e(Z)|t− , t ∈ [0 , T ] (A38) 
+
+∂AxA|t + eX (QA)|t ∈ QA, t ∈ [0 , T ] (A39) 34 where eX (Z)|0− , e X (Z)|T + = 0 by assumption, and the output state has accumulated physical errors 
+
+ephys = X
+
+> t≤T
+
+eX (QD )|t + g X
+
+> t≤T
+
+xA|t (A40) Using Eq. (A38), we can then obtain a fault complex F similar to Eq. (A24). 
+
+Definition A24. The fault complex F = F2 → F1 → F0 for X-type errors for measuring g ker ∂A on D using A,after T + 1 rounds of measurements, is given by cone( g) ⊗ R, where cone( g) is the (height-1) cone corresponding to the following complex: 
+
+XA QA ZA
+
+XD QD ZDg g (A41) 
+
+Lemma A25 (Recovery) . Let F the fault complex for a pair D, A , and eX (F1) = eX (Q) ⊕ eX (Z) ∈ F1 a set of faults satisfying 
+
+|eX (F1)| < dX (F )2 (A42) Then, there exists ˆeX (F1) ∈ F1 such that 
+
+X
+
+> t≤T
+
+eX (Q)|t + ˆ eX (Q)|t ∈ im ∂D + g ker ∂A (A43) 
+
+Proof. We write 
+
+eX (QD ) = X
+
+> t≤T
+
+eX (QD )|t, eX (QA) = X
+
+> t≤T
+
+eX (QA)|t, xA = X
+
+> t≤T
+
+xA|t, rA = X
+
+> t≤T
+
+rAt (A44) 
+
+ephys = eX (QD ) + gxA (A45) where the fraktur letters denote accumulated (time-summed) quantities as in Remark A7. From Lemma A22, the fault complex gives a correction ˆeX (Q) = ˆ eX (QD ) ⊕ ˆeX (QA) ∈ QD ⊕ QA, such that: 
+
+eX (QD ) + ˆ eX (QD ) = ∂D sD + gs A (A46) 
+
+eX (QA) + ˆ eX (QA) = ∂AsA (A47) for some sA ∈ XA, s D ∈ XD . As the fault complex is oblivious to xA, the residual error remains non trivial: 
+
+ephys + ˆ eX (QD ) = ∂D sD + gs A + gxA (A48) Note that much like in [WY26], the residual error on the data subsystem is the image of an ancilla stabilizer sA + xA
+
+through the map g. This image is then corrected by finding a pre-image, or correction 14 , for ∂A(sA + xA). For this we leverage the correction ˆeX (QA) we obtained for the ancillary system, applied to rA:
+
+rA + ˆ eX (QA) = ∂AxA + eX (QA) + ˆ eX (QA) = ∂AxA + ∂AsA = ∂A ˆsA (A49) for some choice of ˆsA. We then have 
+
+ephys + ˆ eX (QD ) + gˆsA = ∂D sD + g(sA + xA + ˆ sA) ∈ im ∂D + g ker ∂A (A50) We see that the accumulated data error belongs to im ∂D + g ker ∂A, which is simply an X-type stabilizer, plus some 
+
+g ker ∂A term. That term corresponds to the subspace of logicals that is measured, which stabilizes the post-measurement state, and thus the remaining error acts trivially on that state.        
+
+> 14 In [WY26] the correction obtained is exactly sA+xA, because the graph ancilla has H1(D)∼=Z1(D). In our case we recover it up to some element that acts trivially on the output state.
+
+35 We can then obtain a threshold similar to Theorem A23. 
+
+Theorem A26 (X-Type Logical Threshold) . Suppose that T ≥ dX (C) where dX (C) is the X-type code distance of the (height-1) cone C. Let X-type fault errors 
+
+eX (F1) = eX (Q) ⊕ eX (Z) (A51) occur with rate p. Suppose that readouts ∂F eX (F1) and min-weight correction ∂F eX (F1) 7 → ˆeX (F1) relative to the fault complex F are provided. Then there exists threshold pc such that if p < p c, then the accumulated physical error of eX (Q) + ˆ eX (Q) is a nontrivial logical with probability 
+
+≤ O(1) |Q| dX (C)
+
+ ppc
+
+dX (C)/2
+
+(A52) Note that the ancilla gadget A was chosen so that the code C has distance dX (C) = Ω(1) dX (D).
+
+b. Z-Pauli errors By Theorem C58 or Algorithm 5, 
+
+˜eZ (Q) = ˜ eZ (QD ) ⊕ ˜eZ (QA) (A53) where ˜eZ (QD ) = eZ (QD ) + ℓZ (QD ) for some Z logical ℓZ (QD ) of D (which contains information of the logical measurement of the targeted ℓ⋆X ), so that eZ (QD ) can be regarded as small physical errors appearing at integer time steps and ℓZ (QD ) is the measurement information of the targeted X-type logical ℓ⋆X . However, ˜eZ (QA) is unknown and thus its weight cannot be well-controlled (which is a result of discarding the ancilla at the end of each round of measurement). Note that the X-type errors on the ancilla were still relevant since the ancilla qubits were measured out in the Z-basis and thus can be determined from the readout. Therefore, the only relevant information of the readout δ˜eZ (Q) + eZ (X) for Z-type errors is given by that ∈ XD ,i.e., 
+
+δD eZ (QD ) + eZ (XD ) ∈ XD (A54) where both eZ (QD ), e Z (XD ) are small errors, and we used the fact that δD ˜eZ (QD ) = δD eZ (QD ). Hence, the fault complex for Z-type errors can be constructed similar to that in syndrome extraction and given by D ⊗ R⊤.
+
+Definition A27. The fault complex F = F2 → F1 → F0 for Z-type errors for measuring g ker ∂A on D using A,after T + 1 rounds of measurements, is given by the construction of Definition A20 applied to the following (height-1) cone: 
+
+XA QA ZA
+
+XD QD ZDg g (A55) 
+
+Lemma A28 (Recovery) . Let F the fault complex for a pair D, A , and e = eZ (QD ) ⊕ eZ (XD ) ∈ F1 a set of faults satisfying 
+
+|e| < dZ (F )2 (A56) Then, there exists ˆe ∈ F1 such that 
+
+eZ (QD ) + ˆ eZ (QD ) ∈ im δD , ⟨g⊤ℓZ (QD )|X A⟩ = ⟨mA + g⊤ˆeZ (QD )|X A⟩ (A57) Where mA is the readout of the last XA measurements, X A ∈ XA is the sum over all X-checks (vertices) of the ancilla, 
+
+eZ (QD ) = P 
+
+> t≤T
+
+eZ (QD )|t, and ˆeZ (QD ) = P 
+
+> t≤T
+
+ˆeZ (QD )|t.
+
+Proof. We have eZ (QD ) +ˆ eZ (QD ) ∈ im δD directly from Lemma A22. Then, by Algorithm 5, the T + 1 -th measurement (assumed to be void of measurement errors) has readout 
+
+mA = g⊤ 
+
+eZ (QD ) + ℓZ (QD )
+
+
+
++ α, α ∈ im δA (A58) 36 with α encoding the effect of eZ (QA) on the syndrome. Now note that 
+
+⟨mA|X A⟩ = ⟨g⊤ 
+
+eZ (QD ) + ℓZ (QD )
+
+
+
++ α|X A⟩ = ⟨g⊤ 
+
+eZ (QD ) + ℓZ (QD )
+
+
+
+|X A⟩ (A59) Since X A ∈ ker ∂A, we see that the F2 measurement is invariant under a change of α within im δA; and therefore no matter how large the error eZ (QA) on the ancilla qubits is, it does not materially affect the measurement outcome. Therefore, using the corrections ˆeZ (QD )|t, we can obtain the desired logical information: 
+
+⟨g⊤ℓZ (QD )|X A⟩ = ⟨g⊤ 
+
+eZ (QD ) + ˆ eZ (QD ) + ℓZ (QD )
+
+
+
+|X A⟩ = ⟨mA + g⊤ˆeZ (QD )|X A⟩ (A60) The threshold then follows from Lemma A16, i.e., 
+
+Theorem A29 (Z-Type Logical Threshold) . Suppose that T ≥ dZ (D) where dZ (D) is the Z-type code distance of the data code D. Let Z-type fault errors 
+
+eZ (F1) = eZ (QD ) ⊕ eZ (XD ) (A61) occur with probability p. Suppose that readouts δF eZ (F1) and min-weight correction δF eZ (F1) 7 → ˆeZ (F1) relative to the fault complex F = D ⊗ R⊤ are provided. Then there exists threshold pc such that if p < p c, then the accumulated physical error of eZ (QD ) + ˆ eZ (QD ) is nontrivial with probability 
+
+≤ O(1) |Q D |dZ (D)
+
+ ppc
+
+dZ (D)/2
+
+(A62) 
+
+Remark A30. We note that the fault-complexes we obtain are based on a circuit model, and are distinct from those derived for measurement-based computation [HDTV25]. In particular we obtain two different complexes, one for each of X and Z type errors. 
+
+> Appendix B: Non-CSS Measurement
+
+Similar to Section A, in this section, we derive the fault complex [HDTV25] from first principles for non-CSS mea-surement using the language of symplectic complexes.  
+
+> 1. Preliminaries
+
+In this section, we generalize the formalism of Section A 1 to non-CSS codes. 
+
+Definition B31 (Non-CSS Code) . Let P denote the Pauli group with phases. A non-CSS code is a commuting Pauli subgroup −I / ∈ S ⊆ P . Note despite the name, CSS codes are non-CSS codes. Let S⊥ denote the collection of elements in P which commute with S, i.e., the logicals of S, so that S⊥\S are the nontrivial logicals. 
+
+Definition B32 (Abelianization) . Let P = F2n 
+
+> 2
+
+be the Pauli space on n qubits, where P is equipped with the standard 
+
+symplectic form Λ : P × P → F2,
+
+Λ( a, b ) = a⊤λb, λ = 0 II 0
+
+!
+
+(B1) We say that a, b ∈ P are commuting if Λ( a, b ) = 0 . Let a 7 → a : P → P be the usual abelianization (homomorphism) map so that X, Y, Z Pauli on the i-th qubit maps to 10 , 11 , 01 on bit positions i, i + n, respectively. 
+
+Remark B33. Note that the image of a non-CSS code S is a commuting subspace Σ. In fact, abelianization S → Σ
+
+defines an isomorphism when restricted to S and its image. The question is then given a commuting subspace, how can all the non-CSS codes that abelianize to the same subspace be specified. This will correspond to the phase information as follows, similar to Lemma A3 for CSS codes, though for general non-CSS, the equivalence will be non-canonical, i.e., depends on a fixed stabilizer group. Note that this nature does not affect measurement, since we always start with a fixed stabilizer group, and obtain the corresponding phase information. 37 
+
+Lemma B34 (Equivalence) . Let S be a fixed stabilizer group with abelianized commuting subspace Σ ⊆ P . Then there exists a one-to-one correspondence between stabilizer groups Sμ with abelianization = Σ and F2 linear maps μ ∈ Σ∗.In particular, we say that Sμ is equivalent to S up to phase information μ ∈ Σ∗.
+
+Proof. Note that abelianization S → Σ is an isomorphism when restricted to S (i.e., injective) since −I / ∈ S . Let ρ : Σ →S ⊆ P denote the inverse map so that if s ∈ S has abelianization s, then s = ρ(s). Also note that ρ(s)2 = ρ(0) = I
+
+and thus ρ(s) is Hermitian. Now let μ : Σ → F2 be a linear map, and define Sμ as the collection of Pauli group elements of the form 
+
+(−1) μs ρ(s), s ∈ Σ (B2) Then it’s clear that Sμ is a subgroup which does not contain −I and that has abelianized subspace = Σ .Conversely, let Sμ be a stabilizer group with abelianized subspace = Σ . By abelianization, we see that there exists map μ : Σ → F2 such that 
+
+s = ( −1) μs ρ(s) (B3) where s 7 → s after abelianization. Indeed, since s and ρ(s) have the same abelianization, they must be equal up to a phase. If that phase is = ±i, then (sρ(s)) 2 = s2 = −I where we utilized the fact that ρ(s)2 = I and thus we reach a contradiction since −I / ∈ S μ.Now it remains to show that μ is linear. Specifically, note that 
+
+si = ( −1) μs i ρ(si), si ∈ S μ (B4) Then 
+
+s1s2 = ( −1) μs 1+μs 2 ρ(s1 + s2) (B5) Note that s = s1 + s2 is the abelianization of s1s2 and thus μs = μs 1 + μs 2 since ρ(s)2 = I. The statement then follows. 
+
+Corollary B35. Let S be a non-CSS code and Sμ be an equivalent up to phase μ ∈ Σ∗. Then state ψ is stabilized by 
+
+Sμ ⇔ ψ is stabilized by S with measurement μ, i.e., 
+
+sψ = ( −1) μs ψ, ∀s ∈ S (B6) where s 7 → s by abelianization. 
+
+Lemma B36 (Physical Measurement) . Let A = S → P → S∗ be a symplectic complex with stabilizer map σ. Then there exists a canonical isomorphism [a] 7 → μ : P/ ker ˆ σ → (im σ)∗ defined by 
+
+μ(· · · ) = Λ( a, · · · ) (B7) where a is any representation of equivalence class [a], i.e., modulo logical. 
+
+Proof. It’s clear that P/ ker ˆ σ → (im σ)∗ via [a] 7 → Λ( a, · · · ) is well-defined linear and injective, and thus it remains to show that the map is surjective. Since μ ∈ (im σ)∗, by simple basis extension, we can extend μ to a linear map ˜μ on P .Since the symplectic form Λ is non-degenerate, there exists unique a such that ˜μ(· · · ) = Λ( a, · · · ). In particular, we see that μ(σs ) = Λ( a, σs ) = (ˆ σa )( s) and thus the statement follows. 
+
+Remark B37 (Physical Errors) . Similar to Remark A9 for CSS codes, a can be regarded as a physical Pauli (modulo logicals). In particular, if S is a CSS code with measurement a•, then a = aX ⊕ aZ modulo logicals. 
+
+Remark B38 (Valid Syndrome) . Note that ˆσ : P/ ker ˆ σ → im ˆ σ is an isomorphism. Since S∗ is the space of syndromes ,we refer to im ˆ σ as the space of valid syndromes .Similar to Lemma A12, the non-CSS measurement can be given below. 38 
+
+Lemma B39 (Overcomplete Measurement) . Let ψ be stabilized by a non-CSS code SA with symplectic complex 
+
+A = SA → P A → SA∗ (B8) with physical measurements a modulo logicals. Measure Paulis in commuting subgroup SB based on map σB : SB →
+
+P A with physical measurement b modulo logical. Then the measurement is valid iff 
+
+a + b ∈ ker ˆ σA + ker ˆ σB (B9) Moreover, if α ∈ ker ˆ σA and β ∈ ker ˆ σB are such that c ≡ a + α = b + β, then the output state is stabilized by Paulis in ⟨S A, SB ⟩ ∩ (SB )⊥ with abelianization 
+
+(im σA + im σB ) ∩ ker ˆ σB (B10) and physical measurement c mod logicals. 
+
+Remark B40 (CSS Measurement) . Recall that if we perform a CSS, say, X-type, measurement so that im σB ⊆ QAX ,then b can always be chosen in the Z-sector, i.e., b ∈ QAZ , since it’s modulo logicals, and thus the X-type physical error 
+
+aX (mod logicals) does not change.  
+
+> 2. Non-CSS Fault Complexes
+
+In this section, we derive the spacetime fault complexes for d rounds of measurement, for both syndrome extrac-tion in Algorithm 9 and logical measurement in Algorithm 10. Note that the detailed algorithms are postponed, since the relevant information is the measurement obtained each round, along with the possibility that physical errors can accumulate (with small probability) between rounds of measurement. Also note that despite dealing with non-CSS codes which are represented as symplectic complexes, the spacetime fault complex is not necessarily symplectic, and thus we will utilize the same Lemma A16.  
+
+> a. Syndrome Extraction
+
+Given a quantum state stabilized by a (non-CSS) data code D = SD → P D → ¯SD , input the state into Algorithm 9 and use the output as the input for subsequent syndrome extractions of Algorithm 9. Perform the syndrome extraction 
+
+T + 1 times (where we assume that that last measurement is perfect without measurement errors), and assume that physical errors can accumulate on P D before each extraction, so that we can regard physical errors e(P D )|t occuring at integer time steps t ∈ [0 , T ] and measurement errors e( ¯SD )|t+ ∈ ¯SD occurring at half-integer time steps t+ where 
+
+t ∈ [0 , T ).In particular, after t + 1 rounds of subsequent extraction, we have readout 
+
+ˆσD
+
+X
+
+> s≤t
+
+e(P D )|s
+
+ + e( ¯SD )|t+ (B11) where the summation denotes the accumulated physical error, and we assumed that e( ¯SD )|0− , e ( ¯SD )|T + = 0 . Equiva-lently, we can compute the difference between readouts t+ and and t− to obtain readouts 
+
+ˆσD e(P D )|t + e( ¯SD )|t+ + e( ¯SD )|t− , t ∈ [0 , T ] (B12) This corresponds to the diagram 
+
+¯SD EP D V ¯SD V 
+
+> ˆσ∂R
+
+(B13) 39 where R = E → V denote the repetition code on T + 1 vertices |t⟩, t ∈ [0 , T ] with differential ∂R. It’s then clear that the physical errors occupy space P D V and the measurement errors occupy ¯SD E, where we have omitted the tensor product ⊗ for simplicity, so that the direct sum P D V ⊕ ¯SD E indicates the fault locations (data and syndrome qubits) . The readouts in Eq. (B12) occupy ¯SD V and are determined by the sum of the differentials. In particular, ¯SD V
+
+is the space of fault syndromes , differential ∂F = ∂R + ˆ σD is the syndrome map and im ∂F denotes the space of 
+
+valid fault syndromes .To create a fault complex, we must also introduce fault stabilizers to indicate whether accumulated errors are trivial logicals. Specifically, writing e(P D ) = P 
+
+> t
+
+e(P D )|t ⊗ | t⟩ ∈ P D V for the vectorized error, we have the following. 
+
+Lemma B41 (Fault Stabilizers) . If e(P D ) ∈ P D V , then the accumulated error 
+
+e(P D ) = 
+
+> T
+
+X
+
+> t=0
+
+e(P D )|t (B14) is a trivial logical, i.e., ∈ im σD ⇔ e(P D ) is in the image of the map given by the red arrows as follows. 
+
+P D E ¯SD ESD V P D V ¯SD V 
+
+> ˆσD
+> ∂R
+> σD
+> ∂R
+
+(B15) 
+
+Remark B42. Physically, the map P D E → P D V denotes physical errors that come in pairs and thus do not contribute to the accumulated error since they cancel each other out. We refer to P D E ⊕ SD V as the fault stabilizers .
+
+Proof. The proof is exactly the same as Lemma A17 and thus omitted. Let us further complete the diagram in Eq. (B15) to form a complex. 
+
+Lemma B43. Consider the map indicated by the red arrow. 
+
+P D E ¯SD ESD V P D V ¯SD V 
+
+> ˆσD
+> ∂R
+> σD
+> ∂R
+
+(B16) Then the fault stabilizers has trivial fault syndrome ⇔ the map is ˆσD .
+
+Proof. Proof exactly the same as Lemma A19 and thus omitted. The fault complex F = F2 → F1 → F0 for syndrome extraction is then given by 
+
+P D E ¯SD ESD V P D V ¯SD V
+
+> ˆσD
+> ∂R
+> σD
+> ∂R
+> ˆσD
+
+(B17) which one may notice corresponds to the tensor product D ⊗ R, where SD E doesn’t play a role. The fault complex then provides a natural threshold. 
+
+Theorem B44 (Threshold) . Suppose that T ≥ d(D) where d(D) is the code distance of the qLDPC (non-CSS) data code 
+
+D. Let (physical and measurement) errors 
+
+e(F1) = e(P D ) ⊕ e( ¯SD ) (B18) 40 occur with probability p. Suppose that readouts ∂F e(F1) and min-weight correction ∂F e(F1) 7 → ˆe(F1) relative to the fault complex F are provided. Then there exists threshold pc such that if p < p c, then the accumulated physical error of e(P D ) + ˆ e(P D ) is nontrivial with probability 
+
+≤ O(1) |Q D |d(D)
+
+ ppc
+
+d(D)/2
+
+(B19) 
+
+Proof. Exactly the same as Theorem A23 and thus omitted. 
+
+b. Logical Measurement 
+
+In this subsection, we derive the fault complex of logical measurement in Algorithm 10, which by Remark 33, will be similar to that in Section A 2 b. Specifically, suppose that we are given a quantum state stabilized by a data (non-CSS) code D written as a symplectic complex 
+
+D = SD σD
+
+−−→ P D ˆσD
+
+−−→ ¯SD (B20) (equipped with the usual objects), and a logical ℓ⋆(P D ) of D. Input the state with possible unknown errors e(P D )|0
+
+into Algorithm 10 so that we obtain readouts (where ˆσ, P, ¯S refer to the height-2 cone C of Theorem 2 assembled from 
+
+A and D)
+
+ˆσ˜e(P )|0 + e( ¯S)|0+ ∈ ¯S (B21) 
+
+δAxA|0 + e(QAX )|0 ∈ QAX (B22) where 
+
+˜e(P ) = 
+
+
+
+e(QAX )
+
+e(P D )˜e(QAZ )
+
+ (B23) and the output state has error e(P D )|0 + gx A|0. Note that similar to CSS logical measurement in Section A 2 b, we have no information (and no control over the size) regarding the Z-type errors on ancilla qubits ˜e(QAZ ) since the ancilla qubits are measured out in the Z-basis at the end of every round of measurement. Hence, the only relevant information is instead 
+
+δA 0ˆh ˆσD
+
+!
+
+e(QAX )
+
+e(P D )
+
+!
+
+> 0
+
++ e( ¯ZA)
+
+e( ¯SD )
+
+!
+
+> 0+
+
+∈ ¯ZA
+
+¯SD
+
+!
+
+(B24) 
+
+δAxA|0 + e(QAX )|0 ∈ QAX (B25) In particular, note that Eq. (B24) denotes the differential of the following cone complex (not symplectic anymore), which we denote as G = G2 → G1 → G0 with differential ∂G, so that G2 = XA ⊕ SD , G1 = QAX ⊕ P D and G0 = ¯ZA ⊕ ¯SD .
+
+XA QAX ¯ZA
+
+SD P D ¯SDδA δA 
+
+> ˆσD
+> ghσD
+
+(B26) Note that G has 1-systolic distance d1(G) = Ω(1) d(D) due to the relative expansion of g. Hence, we can rewrite the relevant readouts as 
+
+∂Ge(G1)|0 + e(G0)|0+ ∈ G0 (B27) 
+
+δAxA|0 + e(QAX )|0 ∈ QAX (B28) 41 Similar to conventional CSS logical measurement, we use the output as the input for another round of logical mea-surement to obtain relevant readouts 
+
+∂G(e(P D )|0 + gx A|0 + e(G1)|1) + e(G0)|1+ ∈ G0 (B29) 
+
+δAxA|1 + e(QAX )|1 ∈ QAX (B30) Note that 
+
+∂G(e(P D )|0+gx A|0 + e(G1)|1) (B31) 
+
+= ∂G δAxA|0 + e(QAX )|1
+
+e(P D )|0 + e(P D )|1
+
+!
+
+(B32) 
+
+= ∂G(e(G1)|0 + e(G1)|1) (B33) 
+
++ ∂GEq. (B22) (B34) Hence, by utilizing the readout in Eq. (B22) when discarding the ancilla qubits, we can regard the readout as that error caused by the accumulated error e(G1)|0 + e(G1)|1 even though errors e(QAX )|0 on the ancilla were discarded. Specifically, we have information 
+
+∂G(e(G1)|0 + e(G1)|1) + e(G0)|1+ ∈ G0 (B35) 
+
+δAxA|1 + e(QAX )|1 ∈ QAX (B36) Repeat this procedure T +1 times (where the last logical measurement is assumed to be perfect without measurement errors). Then by computing the difference between readouts t+ and t−, we obtain information 
+
+∂Ge(G1)|t + e(G0)|t+ + e(G0)|t− , t ∈ [0 , T ] (B37) 
+
+δAxA|t + e(QAX )|t ∈ QAX , t ∈ [0 , T ] (B38) where measurement errors e(G0)|0− , e (G0)|T + = 0 by assumption, and the output state has accumulated physical errors 
+
+X
+
+> t≤T
+
+e(P D )|t + g X
+
+> t≤T
+
+xA|t (B39) Using Eq. (B37), we can then obtain a fault complex F = G ⊗ R similar to Eq. (A24) with ∂D 7 → ∂G replaced with the differential of the deformed code G, and R is the repetition code on T + 1 ≥ d1(G) = Ω(1) d(D) vertices. We can then obtain a threshold similar to Theorem A23. 
+
+Theorem B45 (Non-CSS Logical Threshold) . Suppose that T + 1 ≥ d1(G) where d1(G) is the 1-systolic distance of the deformed code G. Let fault errors 
+
+e(F1) = e(G1) ⊕ e(G0) (B40) occur with probability p. Suppose that readouts ∂F e(F1) and min-weight correction ∂F e(F1) 7 → ˆe(F1) relative to the fault complex F = G⊗R are provided. Then there exists threshold pc such that if p < p c, then the accumulated physical error of e(P D ) + ˆ e(P D ) is nontrivial with probability 
+
+≤ O(1) dim G1 d1(G)
+
+ ppc
+
+d1(G)/2
+
+(B41) Note that the ancilla gadget A was chosen so that the merged code G has distance d1(G) = Ω(1) d(D).
+
+Remark B46 (Recovery) . Note, however, that the accumulated physical error on the data code is given by 
+
+X
+
+> t≤T
+
+(e(P D )|t + gx A|t) (B42) 42 and thus Theorem B45 only guarantees that, with high probability, 
+
+X
+
+> t≤T
+
+(e(QAX )|t + ˆ e(QAX )|t) = δAsA (B43) 
+
+X
+
+> t≤T
+
+(e(P D )|t + ˆ e(P D )|t) = gs A + σD sD (B44) for some s = sA ⊕ sD ∈ G2 = XA ⊕ SD . Hence, we must utilize the additional readouts in Eq. (B38) to apply a final recovery procedure. Specifically, sum over all t ∈ [0 , T ] in Eq. (B38), along with the correction ˆe(QAX ) to obtain information 
+
+δA
+
+X
+
+> t≤T
+
+xA|t + sA
+
+ ∈ im δA (B45) Choose any ˆsA ∈ XA such that 
+
+δA
+
+X
+
+> t≤T
+
+xA|t + sA + ˆ sA
+
+ = 0 (B46) And apply the Pauli onto data qubits corresponding to gˆsA. Then, in addition to correction ˆe(P D ), we see that, with high probability, the accumulated data error belongs to im σD + g ker δA, which is simply a stabilizer of D plus the measured logical, and thus the accumulated error is corrected. 
+
+> Appendix C: Implementation
+
+For the sake of completeness, we provide a detailed derivation of the implementation of measurement, where subsec-tions C 1 and C 2 treat the special CSS and more general non-CSS case separately. In particular, we show that measure-ment errors arise due to physical errors on check qubits.  
+
+> 1. Low Level CSS Measurement
+
+We adopt the convention that given a F2 space X, the space is always equipped with basis X . We also adopt the notation that Q(X) is an (isometric) copy of X with corresponding basis Q(X).
+
+Lemma C47 (Low Level) . Algorithm 1 is correct. 
+
+Remark C48 (Physical ↔ Measurement Error) . Note that at the low-level implementation, the Z-type physical error 
+
+eZ (XB ) on discarded qubits converts to a measurement error in the readout. 
+
+Proof. By Lemma A12, the valid measurement condition is equivalent to 
+
+eZ + sZ ∈ ker δ + Q(XB )⊥ (C1) where sZ (XB ) ∈ Q(XB ) is the readout and eZ = eZ (XB ) ⊕ eZ (QA) where eZ (XB ) ∈ Q(XB ) and eZ (QA) ∈ QA.Note that if ℓZ ∈ ker δ, we have ℓZ (QA) ∈ ker δA and ℓZ (XB ) = δB ℓZ (QA). Hence, 
+
+sZ = δB ℓZ (QA) + eZ (XB ) (C2) Again, by Lemma A12, the residual Z-type physical error, modulo logical, is then eZ (QA)+ ℓZ (QA), since qubits Q(XB )
+
+are discarded. The X-type residual physical errors are straightforward. 
+
+Lemma C49 (High Level Measurement) . Algorithm 2 is correct. 
+
+Algorithm 1 Low-Level Measurement 43 
+
+Require: State stabilized by complex with (co)differential ∂ (δ)
+
+XB Q(XB )
+
+XA QA ZA     
+
+> id
+> ∂A∂A
+> ∂Bg=∂A∂B
+
+(C3) (where the bottom row is also a complex A) with (unknown) physical e•(QA) ∈ QA, e •(XB ) ∈ Q(XB ).
+
+Ensure: Readout 
+
+δB ℓZ (QA) + eZ (XB ) ∈ XB (C4) for some logical ℓZ (QA) ∈ ker δA and output state stabilized by • X Paulis in im ∂A + im ∂B with physical eZ (QA) + ℓZ (QA)
+
+• Z Paulis in im δA ∩ (im ∂B )⊥ with physical eX (QA) 
+
+> 1:
+
+Measure out Q(XB ) in the X-basis with physical measurement s ∈ Q(XB ) ∼= XB
+
+Algorithm 2 High-Level Measurement 
+
+Require: State stabilized by CSS code 
+
+A = XA ∂A
+
+−−→ QA ∂A
+
+−−→ ZA (C5) with (unknown) physical e•(QA). Circuit to perform X-type measurement ∂B : XB → QA.
+
+Ensure: Valid syndrome 
+
+δB (eZ (QA) + ℓZ (QA)) ∈ XB (C6) for some logical ℓZ (QA) ∈ ker δA and output stabilized by • X Paulis in im ∂A + im ∂B with physical eZ (QA) + ℓZ (QA)
+
+• Z Paulis in im δA ∩ (im ∂B )⊥ with physical eX (QA) 
+
+> 1:
+
+Perform X-type measurement ∂B : XB → QA with valid syndrome ∈ XB
+
+Algorithm 3 Low-Level with CNOTs 
+
+Require: State stabilized by CSS code 
+
+A = XA ∂A
+
+−−→ QA ∂A
+
+−−→ ZA (C7) with (unknown) physical e•(QA).
+
+Ensure: Measure X-Paulis in ∂B : XB → QA with readout 
+
+δB (eZ (QA) + ℓZ (QA)) + eZ (XB ) ∈ XB (C8) where eZ (XB ) is an unknown initialization error, and ℓZ (QA) ∈ ker δA. The output state is stabilized by • X Paulis in im ∂A + im ∂B with physical eZ (QA) + ℓZ (QA)
+
+• Z Paulis in im δA ∩ (im ∂B )⊥ with physical eX (QA) 
+
+> 1:
+
+Initialize check qubits Q(XB ) transversally in X-basis with (unknown) physicals eZ (XB ) ▷ Example A11  
+
+> 2:
+
+Apply CNOT circuits from Q(XB ) → QA based on ∂B 
+
+> 3:
+
+Measure out Q(XB ) in the X-basis with physical ∈ Q(XB ) ∼= XB
+
+Lemma C50 (Relation) . Algorithm 3 is correct. 44 
+
+Proof. After initialization (line 1), the state is stabilized by 
+
+XB Q(XB )
+
+XA QA ZA 
+
+> id
+> ∂A∂A
+
+(C9) By applying a CNOT, the state is stabilized by 
+
+XB Q(XB )
+
+XA QA ZA     
+
+> id
+> ∂A∂A
+> ∂Bg=∂A∂B
+
+(C10) where the dashed arrow denotes the CNOT circuit implementing ∂B . Note that CNOT maps control c and target qubit Paulis as follows 
+
+Zc 7 → Zc (C11) 
+
+Zt 7 → ZcZt (C12) 
+
+Xc 7 → XcXt (C13) 
+
+Xt 7 → Xt (C14) Hence, after line 2, the state has Z-type physical eZ (QA) ∈ QA and eZ (XB ) + δB eZ (QA) ∈ Q(XB ). The statement then follows from Lemma C47. 
+
+Remark C51. Note that the only difference between Algorithm 2 and 3 is the measurement error as described in Remark C48.  
+
+> a. Syndrome Extraction
+
+In this section, we shall apply the low level implementation of a measurement in the context of syndrome extraction of a data code. At a high-level, we shall utilize the following corollary, which implies that if an input state has physical errors, those error can be detected via subsequential measurement without modifying the stabilizer code. 
+
+Corollary C52 (Subsequent Measurement) . Suppose that XB is a copy of XA with ∂A = ∂B . Then Algorithm 3 has readout δAeZ (QA) + eZ (XB ) with output state stabilized by A with unknown physical e•(QA).Let us further elaborate the syndrome extraction as follows. 
+
+Definition C53 (Code Gadget) . Given a CSS code D = XD → QD → ZD with basis X D , QD , ZD and (co)differential 
+
+∂D (δD ), the corresponding code gadget is the collection of • Qubits QD and check qubits Q(XD ), Q(ZD )
+
+• CNOT circuits such that a CNOT from check qubits Q(X) to data qubits Q can be implemented in O(1) circuit depth based on the differential ∂ : Q(X) ∼= X → Q. Similarly, a CNOT from data qubits Q to check qubits Q(Z)
+
+can be implement in O(1) depth based on ∂ : X → Q(Z) ∼= Z.We shall always assume that qubits can be initialized transversally relative to the X or Z basis with unknown but presumably small physical errors, and can be measured transversally perfectly. The following algorithm then addresses the initialization and subsequent measurement of a syndrome extraction process. 
+
+Algorithm 4 Syndrome Extraction 45 
+
+Require: Data code D gadget. 
+
+Ensure: Readout 
+
+δD ˜eZ (QD ) + eZ (XD ) ∈ XD (C15) 
+
+∂D ˜eX (QD ) + eX (ZD ) ∈ ZD (C16) for some ˜eZ (QD ), ˜eX (QD ), e Z (XD ), e X (ZD ), and output state stabilized by D with physical error ˜e•(QD ) mod logicals  
+
+> 1:
+
+If input state is not given, initialize QD in Z-basis with unknown physical ˜eX (QD ) 
+
+> 2:
+
+Initialize Q(XD ), Q (ZD ) in the X, Z basis, with unknown physical eZ (XD ), e X (ZD ), respectively  
+
+> 3:
+
+Apply O(1) depth CNOT circuit for ∂ 
+
+> 4:
+
+Measure out Q(XD ) transversally in the X-basis with readout 
+
+δD ˜eZ (QD ) + eZ (XD ) (C17) for some ˜eZ (QD ) so that output state has Z-type physical measurement ˜eZ (QD ) mod logicals  
+
+> 5:
+
+Measure out Q(ZD ) transversally in the Z-basis with readout 
+
+∂D ˜eX (QD ) + eX (ZD ) (C18) so that the output state has X-type physical measurement eX (QD ) mod logicals 
+
+Lemma C54 (Syndrome Extraction) . Algorithm 4 is correct. Moreover, if an input state stabilized by D with physical 
+
+e•(QD ) (e.g., subsequent measurement) is given, then the output is as given by Algorithm 4 with ˜e•(QD ) = e•(QD ).
+
+Remark C55 (Fault Tolerance with Threshold) . The physical errors can then be corrected via the general error cor-rection procedure [Got13]. Specifically, after T ≥ d rounds of subsequent syndrome extractions of Algorithm 4 where 
+
+d is the code distance of D, one can build a spacetime fault complex. A threshold can then be obtained by applying min-weight correction relative to the fault complex. See Section A 2 a for details. 
+
+Proof. The proofs follows from Lemma C47.  
+
+> b. Logical Measurement
+
+In this section, we shall consider the low level implementation of a logical measurement on a data code 
+
+D = XD → QD → ZD (C19) Conventionally, an ancilla A is constructed which is then merged with the data code D to form a deformed code. The checks of the deformed code are then measured in a manner similar to syndrome extraction in Section C 1 a, so that the logical measurement can be extracted using the general error correction procedure [Got13] after d(D) rounds of subsequential measurement. Let us first consider the ancilla gadget. Currently, most ancillas for logical measurements follow the same underlying procedure, which first constructs a measurement graph defined as follow. 
+
+Definition C56 (Measurement Graph) . Given, say an X-type, logical operator ℓ⋆X ∈ QD of data code D, the cor-responding measurement (multi) graph G = ( E, V) is constructed with vertices |q⟩ ∈ V that are in one-to-one correspondence of qubits in q ∈ ℓ⋆X ⊆ Q D . For every z check of D, the support of z must have an even overlap with 
+
+ℓ⋆X and thus can be paired up arbitrarily. Define an edge ∥q ¯q; z⟩ ∈ E for each pair of overlapping qubits q, ¯q and each overlapping check z.Given the measurement graph of logical ℓ⋆X with associated graph complex G = E → V , a corresponding cell (co)complex 
+
+A = XA → QA → ZA (C20) is then constructed with X-checks, qubits and Z-checks corresponding to the vertices, edges and faces, such that A is connected as a graph with only trivial (contractible) cycles, qLDPC, has low overhead [YCH +26, WY26], and contains 46 the graph complex G as a subgraph so that a natural projection (chain) map is depicted by the diagram below 
+
+XA QA ZA
+
+V E  
+
+> ππ
+
+(C21) We refer to A as a (logical) ancilla with respect to the measurement graph of logical ℓ⋆X .Further note that by construction, the measurement graph induces a natural inclusion (chain) map ι depicted as follows. 
+
+V EXD QD ZDι ι (C22) such that ι maps 
+
+|q⟩ 7 → q (C23) 
+
+∥q ¯q; z⟩ 7 → z (C24) Hence, the composition g = ιπ defines a chain map as depicted below 
+
+XA QA ZA
+
+XD QD ZDg g (C25) The corresponding cone( g : A → D) is the deformed code , which we label as 
+
+cone( g) = X → Q → Z (C26) equipped with (co)differential ∂ (δ = ∂⊤). We refer to g as the (relative) connectivity from the ancilla to the data code. Note that despite the construction of A, the map g only depends on its restriction to the measurement graph, and thus g defines the relative connectivity from the measurement graph to the data code. 
+
+Definition C57 ((Relative) Connectivity Gadget) . The relative connectivity gadget is a O(1) depth circuit which implements a CNOT from ancilla check qubits Q(XA) to data qubits QD based on 
+
+g : Q(XA) ∼= XA → QD (C27) and similarly for g : QA → Q(ZD ).
+
+Theorem C58 (Logical Measurement) . Algorithm 5 is correct. In particular, if no errors occur, then the Algorithm provides readout s ∈ X such that the X-type logical ℓ⋆X has measurement 
+
+⟨s|X A⟩ ∈ F2 (C28) where X A ∈ XA denotes the sum over all X-checks (vertices) of the ancilla. Moreover, if the input state is also stabilized by logical ℓ⋆X (e.g., subsequent measurement), then we replace ˜eZ (QD ) → eZ (QD ) in the output (but ˜eZ (QA) is still unknown since it captures the logical measurement). 47 
+
+Proof. After line 3, the coupled state is stabilized by the (CSS code) complex (with some errors) depicted by the following diagram 
+
+XA QA ZA
+
+XD QD ZD
+
+(C29) where, to keep the diagram simple, we have done some simplifications. Specifically, red nodes indicate that the cor-responding (check) qubits are initialized in the X-basis, e.g., XD indicates that the system has check qubits stabilized by the CSS code XD → Q(XD ). Blue nodes indicate the corresponding qubits are initialized in the Z-basis, e.g., ZA
+
+indicates Q(ZA) → ZA. Green node QD indicates the qubits in QD are stabilized by the data CSS code D, while QA
+
+indicates that the qubits in QA are initialized in the Z-basis. In all cases, there are corresponding unknown physical errors e•(X), e •(Q), e •(Z)(mod logicals). Equivalently, the state is stabilized by the complex with the fully drawn out diagram 
+
+X Q(X)
+
+QA Z(QA)
+
+X′D QD Z′D
+
+Q(Z) Z 
+
+> id id id
+> ∂D∂D
+
+⊕ ⊕ (C30) where X′D , Z ′D denote copies of XD , Z D which were stabilized due to the input. After line 4, the system is stabilized (with some errors) by 
+
+XA QA ZA
+
+XD QD ZDg g (C31) where the colored arrows indicate that we have omitted other arrows so that overall sequence is a complex if the check qubits are also shown. Equivalently, the full diagram is given by (compare with [Yua26]) 
+
+X Q(X)
+
+QA Z(QA)
+
+X′D QD Z′D
+
+Q(Z) Z 
+
+> id id id
+> ∂D∂D
+
+⊕ ⊕ 
+
+> ∂· · ·
+> ∂· · ·
+
+(C32) where are vertical maps form a chain map. Note that as shown in Lemma C47, the omitted arrows (which resemble g in Eq. (C3)) are irrelevant once we measure out the check qubits. Note that CNOT maps control c and target qubit Paulis 48 as follows 
+
+Zc 7 → Zc (C33) 
+
+Zt 7 → ZcZt (C34) 
+
+Xc 7 → XcXt (C35) 
+
+Xt 7 → Xt (C36) Therefore, the system maps physical errors on qubits given as follows: 
+
+Q(X) : eZ (X) 7 → eZ (X) + δe Z (Q) (C37) 
+
+Q : e•(Q) 7 → e•(Q) (C38) 
+
+Q(Z) : eX (Z) 7 → eX (Z) + ∂e X (Q) (C39) where 
+
+e•(Q) = e•(QA) ⊕ e•(QD ) (C40) where recall that we can take eZ (QA) = 0 since QA is initialized in the Z-basis. By Lemma C47, measuring out the check qubits Q(X) = Q(XA) ⊕ Q(XD ) will output the readout 
+
+δ ˜ℓZ (Q) + eZ (X) + δe Z (Q) ∈ X (C41) for some Z-type logical ˜ℓZ (Q) of the green portion in Eq. (C30). In particular, since ancillas QA are initialized in the 
+
+Z-basis of Eq. (C30), ˜ℓZ (QA) is arbitrary in QA. Similarly, since QD are stabilized by the data code D due to the input, we see that ˜ℓZ (QD ) is a logical of data code D. Let 
+
+˜eZ (Q) = eZ (Q) + ˜ℓZ (Q) (C42) Then we see that line 5 is correct. Specifically, the state after line 5 is stabilized by X Paulis of the form im ∂ on Q with physical errors ˜eZ (Q) (mod logicals), where we have ignored the stabilizers on the Z-check qubits Q(Z), since they will be measured out in the next line. Similarly, the state after line 5 is stabilized by Z Pauli of the form 
+
+(QA ⊕ im δD ) ∩ (im ∂)⊥ (C43) with physical errors eX (Q). Note that if qA ⊕ δD zD ∈ (im ∂)⊥ = ker δ, then δA(qA + g⊤zD ) = 0 and thus qA ∈
+
+g⊤zD + im δA where we utilized the fact that the ancilla has no internal logicals so that ker δA = im δA. Hence, 
+
+(QA ⊕ im δD ) ∩ (im ∂)⊥ = im δ (C44) By Lemma C47, measuring out the check qubits Q(Z) = Q(ZA) ⊕ Q(ZD ) will output the readout 
+
+∂ℓ X (Q) + eX (Z) + ∂e X (Q) ∈ Z (C45) for some X-type logical ℓX (Q) of the stabilizer code after line 5. However, note that after line 5, the state is stabilize by 
+
+Z-check of the form im δ, and thus ∂ℓ X (Q) = 0 so that the readout is 
+
+eX (Z) + ∂e X (Q) ∈ Z (C46) and thus the state has physical X-error eX (Q)+ ℓX (Q) = eX (Q) mod logicals so that line 6 is correct. More specifically, the state after line 6 is stabilized by the deformed code cone( g) with errors ˜eZ (Q), e X (Q) mod logicals. By Lemma C47, we see that measuring ancilla qubits QA transversally gives readout 
+
+sX (QA) + eX (QA) ∈ QA (C47) with sX (QA) ∈ ℓ(QA) where ℓ(QA) is the projection of some ℓ(Q) ∈ ker ∂ onto QA. In particular, we see that 
+
+ℓ(QA) ∈ ker ∂A and thus sX (QA) = ∂AxA since the ancilla only has trivial logicals. Also note that ∂D ℓ(QD ) = 
+
+gℓ (QA) = ∂D gx A. The output is then stabilized by • X-Paulis of the form im δD and ℓD with error ˜eZ (QD ) mod logicals 49 • Z-Paulis of the form im ∂D with error eX (QD ) + ℓ(QD ) = eX (QD ) + gx A mod logicals. In particular, note that the measurement of ℓD is given by 
+
+⟨˜eZ (QD )|ℓD ⟩ = ⟨˜eZ (QD )|gX A⟩ (C48) 
+
+= ⟨δ˜eZ (Q)|X A⟩ (C49) where we utilized the fact that ∂AX A = 0 . Note that if no errors occurs, then we obtain readout δ˜eZ (Q) and thus can determine the logical measurement exactly. 
+
+Algorithm 5 Logical Measurement 
+
+Require: An input state stabilized by data code D with unknown physical e•(QD ). Data code gadget D. Ancilla code gadget A with respect to X-type logical ℓ⋆X and relative connectivity gadget g.
+
+Ensure: Readout 
+
+δ˜eZ (Q) + eZ (X) ∈ X (C50) 
+
+∂e X (Q) + eX (Z) ∈ Z (C51) 
+
+∂AxA + eX (QA) ∈ QA (C52) where 
+
+eX (Z) = eX (ZA) ⊕ eX (ZD ) (C53) 
+
+eX (Q) = eX (QA) ⊕ eX (QD ) (C54) 
+
+eZ (X) = eZ (XA) ⊕ eZ (XD ) (C55) 
+
+˜eZ (Q) = ˜ eZ (QA) ⊕ ˜eZ (QD ) (C56) where non-tilde elements e denote (presumably small) initialization errors, and 
+
+δD ˜eZ (QD ) = δD eZ (QD ) (C57) The output state is stabilized by data code D and X-type logical ℓ⋆X with physical ˜eZ (QD ), e X (QD ) + gx A. In particular, ℓ⋆X has measurement 
+
+⟨˜eZ (Q)|ℓ⋆X ⟩ = ⟨δ˜eZ (Q)|X A⟩ ∈ F2 (C58) where X A is the sum over all X-checks (vertices) in XA. 
+
+> 1:
+
+Initialize QA in the Z basis with unknown error eX (QA), and eZ (QA) = 0  
+
+> 2:
+
+Initialize Q(X) = Q(XA) ⊕ Q(XD ) in the X basis with unknown error 
+
+eZ (X) = eZ (XA) ⊕ eZ (XD ) (C59)  
+
+> 3:
+
+Initialize Q(Z) = Q(ZA) ⊕ Q(ZD ) in the Z basis with unknown error 
+
+eX (Z) = eX (ZA) ⊕ eX (ZD ) (C60)  
+
+> 4:
+
+Apply O(1) depth CNOT circuit for ∂D , ∂ A, g  
+
+> 5:
+
+Measure out Q(X) transversally in the X-basis with readout 
+
+δ˜eZ (Q) + eZ (X) ∈ X (C61) for some ˜eZ (Q) ∈ Q such that δD ˜eZ (QD ) = δD eZ (QD ) so that the output state has physical error ˜eZ (Q) mod logicals.  
+
+> 6:
+
+Measure out Q(Z) transversally in the Z-basis with readout 
+
+∂e X (Q) + eX (Z) ∈ Z (C62) so that the output state has physical error eX (Q) mod logicals.  
+
+> 7:
+
+Measure out QA transversally in the Z-basis (opposite of logical type ℓ⋆X ) with readout 
+
+∂AxA + eX (QA) ∈ QA (C63) for some xA ∈ XA. so that the output state is stabilized by • X-Paulis in im ∂D + ℓ⋆X with physical ˜eZ (QD ) mod logicals (not only commute with X-Paulis of D but also 
+
+ℓ⋆X )• Z-Paulis in im δD with physical eX (QD ) + gx A mod logicals 50  
+
+> 2. Low Level Non-CSS Measurement
+
+Lemma C59 (Low Level) . Algorithm 6 is correct. 
+
+Proof. By Lemma B39, the transversal measurement outcome s( ¯XA) ∈ Q( ¯XA) (in the Z-sector of the ancilla qubits 
+
+P A) must satisfy 
+
+e(P ) + s( ¯XA) ∈ ker ˆ σ +
+
+
+
+Q(XA) ⊕ P D 
+
+(C64) Hence, there must exists ℓ = 0 ⊕ ℓ(P D ) ⊕ ℓ( ¯XA) ∈ ker ˆ σ and xA ∈ XA such that 
+
+
+
+e(XA)
+
+e(P D )
+
+e( ¯XA)
+
+ +
+
+
+
+0
+
+ℓ(P D )
+
+ℓ( ¯XA)
+
+ + σx A
+
+| {z }
+
+> ∈ker ˆ σ
+
+=
+
+
+
+00
+
+s
+
+ +
+
+
+
+Q(XA)
+
+P D
+
+0
+
+ (C65) Hence, 
+
+s = e( ¯XA) + ℓ( ¯XA) (C66) where we utilized the fact that the defect map p = 0 . As we shall see in Algorithm 8, this is due to measurement of commuting Paulis so that ˆgg = 0 . Since ℓ is a logical, we see that ℓ( ¯XA) = ˆ gℓ (P D ) where ℓ(P D ) ∈ ker ˆ σD is a logical of the data code D and thus the readout is 
+
+e( ¯XA) + ˆ gℓ (P D ) (C67) Again, by Lemma B39, we see that the output state is stabilized with physical measurement e(P ) + ℓ + σx A, with stabilizer of the form 
+
+im σ ∩ (Q(XA) ⊕ P D ) + Q(XA) (C68) 
+
+= Q(XA) ⊕ (im σD ∩ ker ˆ g + im g)
+
+| {z } 
+
+> PD
+
+(C69) Since we discard ancilla qubits P A = Q(XA)⊕Q( ¯XA), we only care about the phase info in im σD ∩ker ˆ g. In particular, we see that if sD ∈ SD is such that σD sD ∈ im σD ∩ ker ˆ g, then the output state is stabilized by the Pauli element corresponding to σD sD with measurement 
+
+ΛD (e(P D ) + ℓ(P D ) + gx A, σ D sD ) (C70) 
+
+= Λ D (e(P D ) + ℓ(P D ), σ D sD ) + (ˆ gσ D sD )( xA) (C71) 
+
+= Λ D (e(P D ) + ℓ(P D ), σ D sD ) (C72) Similarly, note that 
+
+ΛD (gx A, g ˜xA) = 0 (C73) where we used the fact that ˆgg = 0 . Hence, the output state has physical measurement e(P D )+ ℓ(P D ) mod logicals. 
+
+Lemma C60 (High Level) . Algorithm 7 is correct. 
+
+Algorithm 6 Low-Level non-CSS Measurement 
+
+Require: State stabilized by symplectic complex (so that the diagram commutes and ˆgg = 0 ) with stabilizer maps σXA Q(XA)
+
+SD P D ¯SD
+
+Q( ¯XA) ¯XA    
+
+> id
+> σDˆσD
+> gˆσDg
+> ˆgσ Dˆg
+> id
+
+(C74) 51 with (unknown) physical 
+
+e(P ) = e(P D ) ⊕ e( ¯XA) (C75) mod logicals. 
+
+Ensure: Readout 
+
+ˆgℓ (P D ) + e( ¯XA) ∈ ¯XA (C76) for some logical ℓ(P D ) ∈ ker ˆ σD and output state stabilized by 
+
+im σD ∩ ker ˆ g + im g (C77) with physical e(P D ) + ℓ(P D ) mod logicals.  
+
+> 1:
+
+Measure out P A = Q(XA) ⊕ Q( ¯XA) (in the X-basis correspond to Q(XA)) with physical measurement (in the 
+
+Z-sector) ∈ Q( ¯XA) ∼= ¯XA
+
+Algorithm 7 High-Level non-CSS Measurement 
+
+Require: State stabilized by non-CSS code with symplectic complex 
+
+D = SD σD
+
+−−→ P D ˆσD
+
+−−→ ¯SD (C78) with (unknown) physical e(P D ) mod logicals. Circuit to perform (commuting) measurement g : XA → P D so that 
+
+ˆgg = 0 
+
+Ensure: Valid syndrome 
+
+ˆg(e(P D ) + ℓ(P D )) ∈ ¯XA ∼= XA (C79) for some logical ℓ(P D ) ∈ ker ˆ σD and output stabilized by Paulis of the form 
+
+im σD ∩ ker ˆ g + im g (C80)  
+
+> 1:
+
+Perform (commuting) measurement g : XA → P D with valid syndrome ∈ ¯XA ∼= XA
+
+Algorithm 8 Low-Level non-CSS with CNOTs 
+
+Require: State stabilized by non-CSS code with symplectic complex 
+
+D = SD σD
+
+−−→ P D ˆσD
+
+−−→ ¯SD (C81) with (unknown) physical e(P D ) mod logicals. 
+
+Ensure: Measure commuting Paulis in g : XA → P D with readout 
+
+ˆg˜e(P D ) + e( ¯XA) ∈ ¯XA (C82) where e( ¯XA) is unknown, and ˜e(P D ) + e(P D ) ∈ ker ˆ σD is some unknown logical of D, and the output state is stabilized by Paulis of the form 
+
+im σD ∩ ker ˆ g + im g (C83) with physical ˜e(P D ) mod logicals.  
+
+> 1:
+
+Initialize ancilla qubits P A = Q(XA) ⊕ Q( ¯XA) transversally in X-basis with (unknown) physicals in the Z-sector 
+
+e( ¯XA) ∈ Q( ¯XA) ∼= ¯XA mod logicals  
+
+> 2:
+
+Apply CNOT and CZ circuits from ancilla qubits to data qubits based on gX , g Z (defined as the projection of g onto the X- and Z-sector), respectively  
+
+> 3:
+
+Measure out P A in the X-basis (correspond to Q(XA)) with (physical) measurement in the Z-sector ∈ Q( ¯XA) ∼=¯XA
+
+Lemma C61 (Relation) . Algorithm 8 is correct. 52 
+
+Proof. After initialization (line 1), the state is stabilized by 
+
+XA Q(XA)
+
+SD P D ¯SD
+
+Q( ¯XA) ¯XA 
+
+> id
+> σDˆσD
+> id
+
+(C84) Note that CNOT maps control c and target qubit Paulis as follows 
+
+Xc 7 → XcXt (C85) 
+
+Xt 7 → Xt (C86) 
+
+Zt 7 → ZcZt (C87) 
+
+Zc 7 → Zc (C88) Hence, if a CNOT circuit is applied from ancilla qubits Q(XA) ∼= XA to data qubits QD ∼= QDX based on gX : XA →
+
+QDX , then the stabilizer map σ of the height-2 cone 
+
+7→
+
+
+
+id 
+
+gX id id 
+
+g⊤ 
+
+> X
+
+id 
+
+ σ (C89) where the matrix is relative to 
+
+Q(XA) ⊕ QDX ⊕ QDZ ⊕ Q( ¯XA) (C90) Note that the matrix is block-diagonal with respect to the X, Z -decomposition, i.e., X, Z Paulis are mapped to X, Z 
+
+Paulis, respectively. This corresponds to a diagram of the height-2 cone with p = 0 .Similarly, a CZ maps control c and target qubit Paulis as follows 
+
+Xc 7 → XcZt (C91) 
+
+Xt 7 → ZcXt (C92) 
+
+Zt 7 → Zt (C93) 
+
+Zc 7 → Zc (C94) Hence, if a CZ is applied from ancilla qubits Q(XA) ∼= XA to data qubits QD ∼= QDZ based on gZ : XA → QDZ , then the stabilizer map σ of the height-2 cone 
+
+7→
+
+
+
+id id 
+
+gZ id 
+
+g⊤ 
+
+> Z
+
+id 
+
+ σ (C95) where we note that the matrix representation is no longer block-diagonal, i.e., it mixes X, Z Paulis. Note that the matrix is lower-triangular and thus corresponds to a similar height-2 cone diagram with p = 0 .In particular, note that the application of CNOT and CZ circuits results in matrix 
+
+
+
+id 
+
+gX id 
+
+gZ id 
+
+g⊤ 
+
+> Z
+
+g⊤ 
+
+> X
+
+id 
+
+ =
+
+
+
+id 
+
+g id ˆg id 
+
+ (C96) 53 Hence, physical e(P D ) ⊕ e( ¯XA) maps to 
+
+7→ e(P D ) ⊕ (ˆ ge (P D ) + e( ¯XA)) (C97) The statement then follows from Lemma C59. 
+
+Remark C62. Note that the only difference between Algorithm 7 and 8 is the measurement error as described in Remark C48.  
+
+> a. Non-CSS Syndrome Extraction
+
+In this section, we shall apply the low level implementation of a measurement in the context of syndrome extraction of a data code. At a high-level, we shall utilize the following corollary, which implies that if an input state has physical errors, those error can be detected via subsequential measurement without modifying the stabilizer code. 
+
+Corollary C63 (Subsequent Measurement) . Suppose that XA is a copy of SD with g = σD . Then Algorithm 8 has the same output but with ˜e(P D ) = e(P D ).Let us further elaborate the syndrome extraction as follows. 
+
+Definition C64 (Non-CSS Code Gadget) . Consider a non-CSS code D = SD → P D → ¯SD in the form of a symplectic complex with (basis) checks SD and ( X, Z -sector) qubits QDX , QDZ ∼= QD and stabilizer map σD , and isometry ϕD :
+
+SD → ¯SD . The corresponding code gadget is the collection of • qubits Q and check qubits Q(SD ) where Q(SD ) is in one-to-one correspondence with checks SD . For notation consistency, write Q(SD ) to be the F2 space generated by Q(SD ) so that the identity map is an isometry between 
+
+Q(SD ) ∼= SD .• CNOT circuits such that a CNOT from check qubits Q(SD ) to data qubits QD can be implemented in O(1) circuit depth based on the X-sector generator σDX : Q(SD ) ∼= SD → QDX of σD . Similarly, a CZ from check qubits 
+
+Q(SD ) to data qubits QD can be implemented in O(1) depth based on the Z-sector generator σDZ : Q(SD ) ∼=
+
+SD → QDZ .We shall always assume that qubits can be initialized transversally relative to the X or Z basis with unknown physical errors (mod logicals), and can be measured transversally perfectly. The following two algorithms then addresses the initialization and subsequent measurement of a syndrome extraction process. 
+
+Algorithm 9 non-CSS Syndrome Extraction 
+
+Require: Data code D gadget 
+
+Ensure: Readout 
+
+ˆσD ˜e(P D ) + e( ¯SD ) ∈ ¯SD (C98) for some ˜e(P D ), e ( ¯SD ), and output state stabilized by D with physical ˜e(P D ) 
+
+> 1:
+
+Initialize Q(SD ) in the X basis, with unknown physical e( ¯SD ) in the Z-sector  
+
+> 2:
+
+Apply O(1) depth CNOT and CZ circuit for σD : SD → P D 
+
+> 3:
+
+Measure out Q(SD ) transversally in the X-basis with readout 
+
+ˆσD ˜e(P D ) + e( ¯SD ) (C99) for some ˜e(P D ) so that the output state has physical measurement ˜e(P D ) mod logicals 
+
+Lemma C65 (non-CSS Syndrome Extraction) . Algorithm 9 is correct. Moreover, if an input state stabilized by D with physical e(P D ) (e.g., subsequent measurement) is given, then the output is as given by Algorithm 9 with ˜e(P D ) = 
+
+e(P D ).
+
+Remark C66 (Fault Tolerance with Threshold) . The physical errors can then be corrected via the general error correc-tion procedure [Got13]. Specifically, after T ≥ d(D) rounds of subsequent syndrome extractions of Algorithm 9 where 
+
+d(D) is the code distance of D, one can build a spacetime fault complex. A threshold can then be obtained by applying min-weight correction relative to the fault complex. See Section B 2 a for details. 
+
+Proof. The proofs follows from Lemma C61. 54  
+
+> b. Non-CSS Logical Measurement
+
+In this section, we shall consider the low level implementation of a logical measurement on a data code 
+
+D = SD → P D → ¯SD (C100) Conventionally, an ancilla A is constructed which is then merged with the data code D to form a deformed code. The checks of the deformed code are then measured in a manner similar to syndrome extraction in Section C 2 a, so that the logical measurement can be extracted using the general error correction procedure [Got13] after d(D) rounds of subsequential measurement. 
+
+Theorem C67 (Non-CSS Logical Measurement) . Algorithm 10 is correct. In particular, if no errors occur, then Algorithm 10 provides readout 
+
+ˆg˜e(P D ) ∈ ¯XA (C101) 
+
+δAxA ∈ QAX (C102) so that the logical ℓ⋆(P D ) has measurement 
+
+⟨ˆg˜e(P D )| ¯X A⟩ + ⟨δAxA|pX A⟩ ∈ F2 (C103) where X A ∈ XA is the sum over all checks (vertices) in XA and ¯X A ∈ ¯XA is the corresponding syndrome. Moreover, if the input state is also stabilized by logical ℓ⋆(P D ) (e.g., subsequent measurement), then we replace ˜e(P ) → e(P ) = 
+
+e(QAX ) ⊕ e(P D ) in the output. 
+
+Proof. For simplicity, we shall only consider the case where the input state is only stabilized by the data code (with some errors). The proof for when the input state is also stabilized by the intended logical follows similarly, and thus omitted. After initialization in line 1, the state is stabilized by the complex with the fully drawn out diagram 
+
+S Q(S)
+
+QAX ¯Z(QA)
+
+S′D P D ¯S′D
+
+Z(QA) QAZ
+
+Q( ¯S) ¯S 
+
+> id id id
+> σDˆσD
+> id
+
+(C104) where S′D , ¯S′D denote copies of SD , ¯SD which were stabilized due to the input, and Q(S) ⊕ Q( ¯S) denote the ( X, Z -sectors) of check qubits where S = XA ⊕ SD ⊕ ZA. The corresponding physicals are given by (mod logicals) 
+
+
+
+0
+
+e(P )
+
+e( ¯S)
+
+ , e(P ) = 
+
+
+
+e(QAX )
+
+e(P D )0
+
+ (C105) Since the check qubits Q(S) will ultimately be measured out, we rewrite the diagram by hiding the irrelevant info 
+
+XA QAX ¯ZA
+
+SD P D ¯SD
+
+ZA QAZ ¯XA
+
+(C106) 55 After performing the CNOT and CZ circuits in line 2, the system is stabilized (with some errors) by 
+
+XA QAX ¯ZA
+
+SD P D ¯SD
+
+ZA QAZ ¯XA
+
+(C107) where the colored nodes indicate that we still have omitted other arrows so that overall sequence is a complex if the check qubits are also shown. Equivalently, the full diagram is given by 
+
+S Q(S)
+
+QAX ¯Z(QA)
+
+S′D P D ¯S′D
+
+Z(QA) QAZ
+
+Q( ¯S) ¯S 
+
+> id id id
+> σDˆσD
+> id
+> σ
+> ˆσ
+
+(C108) Note that due to the CNOT and CZ circuits, physicals propagate so that the corresponding physical maps to 
+
+
+
+id 
+
+σ id ˆσ id 
+
+
+
+0
+
+e(P )
+
+e( ¯S)
+
+ =
+
+
+
+0
+
+e(P )ˆσe (P ) + e( ¯S)
+
+ (C109) By Lemma C59, after line 4, we obtain readout 
+
+ˆσe (P ) + e( ¯S) + ˆ σ ˜ℓ(P ) ∈ ¯S (C110) where ˜ℓ(P ) is some logical of only the green part in Diagram (C108). Hence, ˜ℓ(P ) must be of the form 
+
+
+
+0ker ˆ σD
+
+QAZ
+
+ (C111) Indeed, the ancilla qubits are initialized in the Z-basis and thus ˜ℓ(P ) cannot act as X-Paulis on the ancilla. Also note that the output state after line 4 is stabilized by (with errors e(P ) + ˜ℓ(P ))
+
+
+
+0im σD
+
+QAZ
+
+ ∩ ker ˆ σ + im σ (C112) Note that 
+
+ˆσ
+
+
+
+0
+
+σD sD
+
+qAZ
+
+ = 0 (C113) 
+
+∂A(ˆhs D + qAZ ) = 0 (C114) 56 and thus by the fact that the ancilla has no nontrivial logicals, i.e., ker ∂A = im ∂A, there exists zA ∈ ZA such that 
+
+qAZ = ˆhs D + ∂AzA so that 
+
+
+
+0im σD
+
+QAZ
+
+ ∩ ker ˆ σ = σ
+
+
+
+0
+
+SD
+
+ZA
+
+ (C115) Hence, the output state after line 4 is stabilized by the deformed code im σ. Note that any Pauli of the form 
+
+
+
+0ker ˆ σD
+
+QAZ
+
+ (C116) is a logical of the code after line 4, i.e., commutes with σ(SD ⊕ ZA), and thus we can say that the output state after line 4 has physical e(P ) (mod logicals) instead of e(P ) + ˜ℓ(P ) (mod logicals). Finally, by Lemma B39, line 5 gives us readout in the X-sector s(QAX ) ∈ QAX such that 
+
+
+
+s(QAX )00
+
+ + ˜ e(P ) ∈ ker ˆ σ +
+
+
+
+0
+
+P D
+
+QAZ
+
+ (C117) Note that any element in ker ˆ σ (say by the Cleaning Lemma) can be written as 
+
+
+
+0
+
+ℓ(P D )
+
+ℓ(QAZ )
+
+| {z } 
+
+> ℓ(P)
+
++σx A (C118) where xA ∈ XA and ℓ(P ) ∈ ker ˆ σ. Therefore, we see that the readout satisfies 
+
+s(QAX ) = e(QAX ) + δAxA (C119) Moreover, the output state is stabilized by Paulis of the form 
+
+im σ ∩
+
+
+
+0
+
+P D
+
+QAZ
+
+ +
+
+
+
+00
+
+QAZ
+
+ =
+
+
+
+0im σD + g ker δA
+
+QAZ
+
+ (C120) with physical measurement given by (mod logicals) 
+
+˜e(P ) + ℓ(P ) + σx A (C121) Note that ℓ(P ) ∈ ker ˆ σ is also a logical of the final output code and thus can be omitted. Moreover, any element in QAZ
+
+is a logical of the final output code and thus can be omitted. Hence, the final state has physical measures (mod logicals) 
+
+
+
+e(QAX )˜e(P D ) + gx A
+
+0
+
+ (C122) Note that we discard the ancilla qubits and thus we are left with physical measuremenet ˜e(P D ) + gx A relative to stabilizers in im σD + g ker δA = im σD + ℓ⋆(P D ).
+
+Algorithm 10 Non-CSS Logical Measurement 
+
+Require: An input state stabilized by data code D with unknown physical errors e(P D ) mod logicals. Data code gadget 
+
+D. Ancilla code gadget A with respect to logical ℓ⋆(P D ) and relative connectivity gadget g.57 
+
+Ensure: Readout 
+
+ˆσ˜e(P ) + e( ¯S) ∈ ¯S (C123) 
+
+δAxA + e(QAX ) ∈ QAX (C124) for some 
+
+˜e(P ) = e(QAX ) ⊕ ˜e(P D ) ⊕ ˜e(QAZ ) (C125) 
+
+e( ¯S) = e( ¯ZA) ⊕ e( ¯SD ) ⊕ e( ¯XA) (C126) and 
+
+ˆσD ˜e(P D ) = ˆ σD e(P D ) (C127) and output state stabilized by data code D and logical ℓ⋆(P D ) with physical ˜e(P D )+ gx A mod logicals. In particular, 
+
+ℓ⋆(P D ) has measurement 
+
+ΛD (˜ e(P D ) + gx A, ℓ ⋆(P D )) (C128) 
+
+= ⟨ˆσ˜e(P )| ¯X A⟩ + ⟨δAxA + e(QAX )|pX A⟩ ∈ F2 (C129) where X A ∈ XA is the sum over all checks (vertices) in XA, and ¯X A ∈ ¯XA is the corresponding syndrome.  
+
+> 1:
+
+Initialize P A = QAX ⊕ QAZ in the Z basis with unknown error (in the X-sector) e(QAX ) 
+
+> 2:
+
+Initialize qubits Q(S) = Q(XA) ⊕ Q(SD ) ⊕ Q(ZA) in the X basis with unknown error e( ¯S) in the Z-sector  
+
+> 3:
+
+Apply O(1) depth CNOT and CZ circuit for σ : S → P 
+
+> 4:
+
+Measure out Q(S) transversally in the X-basis with readout 
+
+ˆσ˜e(P ) + e( ¯S) ∈ ¯S (C130) for some ˜e(P ) ∈ P such that 
+
+˜e(QAX ) = e(QAX ) (C131) 
+
+˜e(P D ) + e(P D ) ∈ ker ˆ σD (C132) so that the output state has physical error ˜e(P ) mod logicals.  
+
+> 5:
+
+Measure out P A transversally in the Z-basis with readout 
+
+δAxA + e(QAX ) ∈ QAX (C133) for some xA ∈ XA, so that the output state is stabilized by Paulis in im σD + g ker δA with physical measurement 
+
+˜e(P D ) + gx A mod logicals (not only commute with Paulis of D but also ℓ⋆(P D ) = g ker δA)
+
+> Appendix D: Fast Non-CSS Surgery
+
+In this section, we generalize the framework for fast surgery [BBC25] to the non-CSS scenario using Theorem 2 in the main text. Specifically, following the notation of Theorem 2, consider a non-CSS code in the form of a symplectic complex D with the usual objects. Suppose that there exists an ancilla CSS code in the form of a (co)complex ( A⊤) A
+
+with only trivial logicals, and maps (g, h, p ) such that the symplectic height-2 cone C in Theorem 2 is well-defined. In contrast to conventional surgery in Section IV of the main text, we must further assume that the ancilla code A
+
+has meta-syndromes as follows 
+
+A = ZA → QAZ → ¯XA → ¯M A (D1) Which we grade as 
+
+A = A2 → A1 → A0 → A−1 (D2) 58 where we extend the (co)complex and treat the meta-syndrome in ¯M A as (−1) -(co)chains so that d0(A) is the meta-syndrome distance. Also assume that the extended (co)complex possesses a map f such that (f, g, h ) forms a chain map as follows. 
+
+M A XA QAX ¯ZA
+
+SD P D ¯SD
+
+ZA QAZ ¯XA ¯M Afp gp hp⊤ p⊤  
+
+> ˆfˆgˆh
+
+(D3) where M A denotes the space dual to ¯M A, so that the top row is the extended cocomplex A⊤.Much like in [BBC25], we will also make use of systolic expansion on the ancilla complex A.
+
+Definition D68 (Relative Expansion) . The ancilla A is said to be (ε, l )-expanding relative to the code D if 
+
+∀f ∈ XA : |δAf | ≥ min 
+
+
+
+ε · min  
+
+> z∈ker δA
+
+|g(f + z)|, l 
+
+
+
+(D4) where | · | is the Hamming weight of Definition 12. 
+
+Theorem D69 (Fast Surgery) . Take D a code, and A an ancilla that is (ε, d 1(D)) -expanding relative to D (Definition D68). As long as 
+
+|p⊤e(QAX )| + |ˆge (P D )| + |e( ¯XA)| < d 0(A)/2 (D5) 
+
+|e(QAX )| < min {d1(A)/2, εd 1(D)/4, d 1(D)/2} (D6) then Algorithm 11 measures g ker δA ⊂ ker ˆ σD , such that: 1. there exists a correction ˆe( ¯XA) such that 
+
+⟨ˆσ˜e(P ) + e( ¯S) + ˆ e( ¯XA)|ℓ⋆(XA)⟩ = ⟨ˆgℓ (P D )|ℓ⋆(XA)⟩ (D7) 2. there exists ˆe(P D ) and uA ∈ XA with |g(uA)| < d 1(D)/2 such that 
+
+ephys + ˆ e(P D ) ∈ ℓ(P D ) + g(uA) + g ker δA (D8) for ephys = e(P D ) + ℓ(P D ) + gx A the physical error of the system at the output of Algorithm 11. 
+
+Proof. After applying Algorithm 11, we obtain the following readout from the measurement outcomes: 
+
+ˆσ˜e(P ) + e( ¯S) ∈ ¯S, δAxA + e(QAX ) ∈ QAX (D9) 
+
+˜e(P ) = e(QAX ) ⊕ ˜e(P D ) ⊕ ˜e(QAZ ), e( ¯S) = e( ¯ZA) ⊕ e( ¯SD ) ⊕ e( ¯XA) (D10) The measured value mraw of ℓ⋆(XA) ∈ ker δA is then 
+
+mraw =⟨ˆσ˜e(P ) + e( ¯S)|ℓ⋆(XA)⟩
+
+=⟨p⊤e(QAX ) + ˆ g˜e(P D ) + ∂A ˜e(QAZ ) + e( ¯XA)|ℓ⋆(XA)⟩
+
+=⟨ˆgℓ (P D ) + ∂A ˜e(QAZ )|ℓ⋆(XA)⟩ + ⟨p⊤e(QAX ) + ˆ ge (P D ) + e( ¯XA)|ℓ⋆(XA)⟩
+
+=⟨ˆgℓ (P D )|ℓ⋆(XA)⟩ + ⟨p⊤e(QAX ) + ˆ ge (P D ) + e( ¯XA)|ℓ⋆(XA)⟩
+
+The last equality uses that ℓ⋆(XA) ∈ ker( δA), and hence ⟨∂A ˜e(QAZ )|ℓ⋆(XA)⟩ = 0 ; i.e. the quantity ⟨ˆgℓ (P D ) + 
+
+∂A ˜e(QAZ )|ℓ⋆(XA)⟩ depends uniquely on the (co)homological classes of ℓ, ℓ ⋆ which is as expected for a logical mea-surement. Further, note that in the absence of errors (or e(QAX ), e (P D ) = 0 ) the outcome is entirely determined by this quantity, as we have ⟨p⊤e(QAX ) + ˆ ge (P D ) + e( ¯XA)|ℓ⋆(XA)⟩ = 0 , which yields the correct measurement 
+
+mraw = ⟨ˆgℓ (P D )|ℓ⋆(XA)⟩.59 Otherwise, we can compute the meta-check syndrome: 
+
+∂A(ˆ σ˜e(P ) + e( ¯S)) ∈ ¯M A
+
+=∂A(p⊤e(QAX ) + ˆ g˜e(P D ) + ∂A ˜e(QAZ ) + e( ¯XA)) =∂A(p⊤e(QAX ) + ˆ ge (P D ) + e( ¯XA)) 
+
+This syndrome is then leveraged into a correction ˆe( ¯XA), such that as long as |p⊤e(QAX ) + ˆ ge (P D ) + e( ¯XA)| <d0(A)/2, we have ˆe( ¯XA) + p⊤e(QAX ) + ˆ ge (P D ) + e( ¯XA) ∈ im ∂A. This gives us a rectified mcorrected :
+
+mcorrected =⟨ˆσ˜e(P ) + e( ¯S) + ˆ e( ¯XA)|ℓ⋆(XA)⟩ (D11) 
+
+=⟨ˆgℓ (P D )|ℓ⋆(XA)⟩ + ⟨p⊤e(QAX ) + ˆ ge (P D ) + e( ¯XA) + ˆ e( ¯XA)|ℓ⋆(XA)⟩ (D12) 
+
+=⟨ˆgℓ (P D )|ℓ⋆(XA)⟩ (D13) Where the last equality is from p⊤e(QAX ) + ˆ ge (P D ) + e( ¯XA) + ˆ e( ¯XA) ∈ im ∂A. Meanwhile the physical error on the state at the output of Algorithm 11 is: 
+
+ephys = ˜ e(P D ) + gx A = e(P D ) + ℓ(P D ) + gx A (D14) for some ℓ(P D ) ∈ ker ˆ σD . Our main problem here is we are not assuming that there already exists a decoder for the code complex like in Lemma A25, so we cannot guarantee something of the form ephys + ˆ e(P D ) = σD sD + gs A + gxA.Instead we need to wrestle with the dissonance between the physical system being affected by gx A, while the recorded 
+
+¯SD syndrome: 
+
+srec = ˆ σD (e(P D ) + ℓ(P D )) + h(e(QAX )) = ˆ σD e(P D ) + h(e(QAX )) (D15) is affected by e(QAX ) instead. From assumptions, |e(QAX )| < d 1(A)/2, so we can find ˆe(QAX ) and some uA ∈ XA with 
+
+ˆe(QAX ) + e(QAX ) = δAuA, from the syndrome δA(δAxA + e(QAX )) = δAe(QAX ) that we compute from the destructive readout of QAX . We update the recorded syndrome as follows: 
+
+sclean = srec + h(ˆ e(QAX )) = ˆ σD e(P D ) + h(δAuA) = ˆ σD e(P D ) + ˆ σD g(uA). (D16) In a second step, pick ˆsA ∈ XA such that δA ˆsA = δA(xA + uA). We also update the physical system by applying gˆsA,which gives 
+
+eclean = ephys + gˆsA ∈ e(P D ) + ℓ(P D ) + g(uA) + g ker δA (D17) This cleaning allows us to resolve the dissonance as we get ˆσD eclean = sclean . From here we use the relative expansion of Definition D68: 
+
+|g(uA)| ≤ 1
+
+ε |δAuA| ≤ 2
+
+ε |e(QAX )| < d 1(D)/2 (D18) Hence the leftover error is correctable. 
+
+Algorithm 11 Fast Non-CSS Surgery 
+
+Require: Input state stabilized by D with unknown physical e(P D ). Ancilla code A and maps (f, g, h, p ).
+
+Ensure: Readout 
+
+ˆσ˜e(P ) + e( ¯S) ∈ ¯S (D19) 
+
+δAxA + e(QAX ) ∈ QAX (D20) for some 
+
+˜e(P ) = e(QAX ) ⊕ ˜e(P D ) ⊕ ˜e(QAZ ) (D21) 
+
+e( ¯S) = e( ¯ZA) ⊕ e( ¯SD ) ⊕ e( ¯XA) (D22) where non-tilde elements e denote (presumably small) initialization errors, and 
+
+ˆσD ˜e(P D ) = ˆ σD e(P D ). (D23) The output state is stabilized by D and logicals of D in g ker δA with physical ˜e(P D ) + gx A. In particular, if 
+
+ℓ⋆(XA) ∈ ker δA, then ℓ⋆(P D ) = gℓ ⋆(XA) has F2 measurement 
+
+ΛD (˜ e(P D ) + gx A, ℓ ⋆(P D )) = ⟨ˆσ˜e(P )|ℓ⋆(XA)⟩ + ⟨Eq. (D20) |pℓ ⋆(XA)⟩ (D24) 60  
+
+> 1:
+
+Initialize ancilla qubits QA in the Z-basis with unknown error (in the X-sector) e(QAX ) 
+
+> 2:
+
+Initialize check qubits Q(S) in the X-basis with unknown error e( ¯S) in the Z-sector  
+
+> 3:
+
+Apply O(1) depth CNOT and CZ circuit for σ : S → P of the height-2 cone C 
+
+> 4:
+
+Measure out Q(S) transversally in the X-basis with readout 
+
+ˆσ˜e(P ) + e( ¯S) ∈ ¯S (D25) where ˜e(P ), e ( ¯S) satisfy Eq. (D21)-(D23), so that the output state has physical ˜e(P ). 
+
+> 5:
+
+Measure out ancilla qubits QA transversally in the Z-basis with readout 
+
+δAxA + e(QAX ) ∈ QAX (D26) for some xA ∈ XA, so that the output state is stabilized by Paulis ∈ im σD + g ker δA with physical ˜e(P D ) + gx A.
+
+[ASS08] Noga Alon, Oded Schwartz, and Asaf Shapira. An elementary construction of constant-degree expanders. Combinatorics, Probability and Computing , 17(3):319–327, 2008. [Bas25] Nou´ edyn Baspin. The free energy barrier: An eyring-polanyi bound for stabilizer hamiltonians, with applications to quantum error correction. arXiv preprint arXiv:2509.17356 , 2025. [BBC25] Nou´ edyn Baspin, Lucas Berent, and Lawrence Z. Cohen. Fast surgery for quantum LDPC codes. arXiv preprint arXiv:2510.04521 , 2025. [BDL26] Shankar Balasubramanian, Margarita Davydova, and Ting-Chun Lin. A passive self-correcting quantum memory in three dimensions. arXiv preprint arXiv:2605.10943 , 2026. [BPT10] Sergey Bravyi, David Poulin, and Barbara Terhal. Tradeoffs for reliable quantum information storage in 2d systems. Physical Review Letters , 104(5), February 2010. URL: http://dx.doi.org/10.1103/PhysRevLett.104.050503 , doi: 10.1103/physrevlett.104.050503 .[BT09] Sergey Bravyi and Barbara Terhal. A no-go theorem for a two-dimensional self-correcting quantum memory based on sta-bilizer codes. New Journal of Physics , 11(4):043029, April 2009. URL: http://dx.doi.org/10.1088/1367-2630/ 11/4/043029 , doi:10.1088/1367-2630/11/4/043029 .[BTL10] Sergey Bravyi, Barbara M Terhal, and Bernhard Leemhuis. Majorana fermion codes. New Journal of Physics , 12(8):083039, 2010. [CHWY26] Alexander Cowtan, Zhiyang He, Dominic J Williamson, and Theodore J Yoder. Parallel logical measurements via quantum code surgery. PRX Quantum , 7(2):020325, 2026. [CHY +26] Kathleen Chang, Zhiyang He, Theodore J. Yoder, Guanyu Zhu, and Tomas Jochym-O’Connor. Constant-Time Surgery on 2D Hypergraph Product Codes with Near-Constant Space Overhead. arXiv preprint arXiv:2603.02157 , 2026. [CKBB22] Lawrence Z. Cohen, Isaac H. Kim, Stephen D. Bartlett, and Benjamin J. Brown. Low-overhead fault-tolerant quantum computing using long-range connectivity. Science Advances , 8(20):eabn1717, 2022. [DHLV23] Irit Dinur, Min-Hsiu Hsieh, Ting-Chun Lin, and Thomas Vidick. Good quantum ldpc codes with linear time decoders. In 
+
+Proceedings of the 55th Annual ACM Symposium on Theory of Computing , STOC 2023, page 905–918, New York, NY, USA, 2023. Association for Computing Machinery. doi:10.1145/3564246.3585101 .[GCC +26] Shouzhen Gu, Libor Caha, Shin Ho Choe, Zhiyang He, Aleksander Kubica, and Eugene Tang. Layer codes as partially self-correcting quantum memories. Physical Review Letters , 136(21):210601, 2026. [Got13] Daniel Gottesman. Fault-tolerant quantum computation with constant overhead. arXiv preprint arXiv:1310.2984 , 2013. [Has16] Matthew B Hastings. Weight reduction for quantum codes. arXiv preprint arXiv:1611.03790 , 2016. [Has21] Matthew B Hastings. On quantum weight reduction. arXiv preprint arXiv:2102.10030 , 2021. [HCWY25] Zhiyang He, Alexander Cowtan, Dominic J. Williamson, and Theodore J. Yoder. Extractors: QLDPC Architectures for Efficient Pauli-Based Computation. arXiv preprint arXiv:2503.10390 , 2025. [HDTV25] Timo Hillmann, Guillaume Dauphinais, Ilan Tzitrin, and Michael Vasmer. Single-shot and measurement-based quantum error correction via fault complexes. Physical Review A , 112(4):L040401, 2025. [HLL25] Min-Hsiu Hsieh, Xingjian Li, and Ting-Chun Lin. Simplified quantum weight reduction with optimal bounds. arXiv preprint arXiv:2510.09601 , 2025. [HLW06] Shlomo Hoory, Nathan Linial, and Avi Wigderson. Expander graphs and their applications. Bulletin of the American Mathematical Society , 43(4):439–561, 2006. [IGND25] Benjamin Ide, Manoj G Gowda, Priya J Nadkarni, and Guillaume Dauphinais. Fault-tolerant logical measurements via homological measurement. Physical Review X , 15(2):021088, 2025. [LLWH26] Xingjian Li, Ting-Chun Lin, Adam Wills, and Min-Hsiu Hsieh. Almost optimal geometrically local quantum ldpc codes in any dimension. Nature Communications , 2026. URL: https://doi.org/10.1038/s41467-026-69031-w .[LPS88] Alexander Lubotzky, Ralph Phillips, and Peter Sarnak. Ramanujan graphs. Combinatorica , 8(3):261–277, 1988. [LWH23] Ting-Chun Lin, Adam Wills, and Min-Hsiu Hsieh. Geometrically local quantum and classical codes from subdivision. arXiv preprint arXiv:2309.16104 , 2023. URL: https://arxiv.org/abs/2309.16104 .[LZ22] Anthony Leverrier and Gilles Zemor. Quantum Tanner codes . In 2022 IEEE 63rd Annual Symposium on Foundations of Computer Science (FOCS) , pages 872–883, Los Alamitos, CA, USA, November 2022. IEEE Computer Society. URL: https: 61 
+
+//doi.ieeecomputersociety.org/10.1109/FOCS54457.2022.00117 , doi:10.1109/FOCS54457. 2022.00117 .[PK22] Pavel Panteleev and Gleb Kalachev. Asymptotically good quantum and locally testable classical ldpc codes. In Proceedings of the 54th Annual ACM SIGACT Symposium on Theory of Computing , STOC 2022, page 375–388, New York, NY, USA, 2022. Association for Computing Machinery. doi:10.1145/3519935.3520017 .[Por23] Elia Portnoy. Local quantum codes from subdivided manifolds. arXiv preprint arXiv:2303.06755 , 2023. URL: https:// arxiv.org/abs/2303.06755 .[SJOY26] Esha Swaroop, Tomas Jochym-O’Connor, and Theodore J. Yoder. Universal Adapters between Quantum Low-Density Parity Check Codes. PRX Quantum , 7:010324, Feb 2026. URL: https://link.aps.org/doi/10.1103/1g44-jp62 ,
+
+doi:10.1103/1g44-jp62 .[VC05] Frank Verstraete and J Ignacio Cirac. Mapping local hamiltonians of fermions to local hamiltonians of spins. Journal of Statistical Mechanics: Theory and Experiment , 2005(09):P09012, 2005. [WB24] Dominic J. Williamson and Nou´ edyn Baspin. Layer codes. Nature Communications , 15(1):9528, 2024. doi:10.1038/ s41467-024-53881-3 .[WY26] Dominic J Williamson and Theodore J Yoder. Low-overhead fault-tolerant quantum computation by gauging logical opera-tors. Nature Physics , pages 1–6, 2026. [YB26] Andrew C Yuan and Nou´ edyn Baspin. 4d and 5d layer codes through color routing. arXiv preprint arXiv:2605.18961 , 2026. [YBW26] Andrew C Yuan, Nou´ edyn Baspin, and Dominic J Williamson. Quantum weight reduction with layer codes. arXiv preprint arXiv:2603.04883 , 2026. [YCH +26] Andrew C Yuan, Alexander Cowtan, Zhiyang He, Ting-Chun Lin, and Dominic J Williamson. Parsimonious quantum low-density parity-check code surgery. arXiv preprint arXiv:2603.05082 , 2026. [Yua26] Andrew C. Yuan. Unified framework for quantum code embedding. Phys. Rev. A , 113:022438, Feb 2026. URL: https: //link.aps.org/doi/10.1103/gtlz-3q9d , doi:10.1103/gtlz-3q9d .

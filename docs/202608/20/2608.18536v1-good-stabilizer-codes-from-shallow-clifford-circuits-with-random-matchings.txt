@@ -1,0 +1,2454 @@
+Title: Good Stabilizer Codes from Shallow Clifford Circuits with Random Matchings
+
+URL Source: https://arxiv.org/pdf/2608.18536v1
+
+Published Time: Thu, 20 Aug 2026 00:27:55 GMT
+
+Number of Pages: 33
+
+Markdown Content:
+# Good Stabilizer Codes from Shallow Clifford Circuits with Random Matchings 
+
+## Emile Anand 1, Elia Gorokhovsky 2, Jennifer Hritz 3, and Jingtong Sun 41Georgia Institute of Technology, School of Computer Science 
+
+2Harvard University, Department of Mathematics 
+
+3University of New Mexico, Department of Physics and Astronomy 
+
+4California Institute of Technology 
+
+Abstract 
+
+Encoding quantum information with low circuit overhead is a fundamental challenge in fault-tolerant quantum computation. Random circuits provide a natural mechanism for rapidly spreading logical information through simple gates applied in parallel. Brown and Fawzi [BF13b] showed that random Clifford circuits on two-qubit Clifford gates provide such encoders that achieve the quantum Gilbert-Varshamov rate-distance tradeoff with depth 
+
+𝑂 (log 3 𝑛 ). We show that the same asymptotic tradeoff is attained in optimal 𝑂 (log 𝑛 ) depth under a gate distribution with a more restricted support. Specifically, for every fixed 𝛿 > 0 and sufficiently large 𝑛 , if 𝑘 𝑛 < 1−𝐻 ( 𝑑 𝑛 )− 𝑑 𝑛 log 2 3−𝛿 ,we can construct random circuits of depth 𝑂 (log 𝑛 ) which define, with high probability, an [𝑛, 𝑘 ] stabilizer code of distance at least 𝑑 + 1, which matches the Ω(log 𝑛 ) light-cone lower bound for linear distance encoders. Our ensemble employs a random matching circuit architecture consisting of 𝑇 independent permutation-invariant layers. In each layer, the qubits are paired up by a uniformly random perfect matching, and a random independent two-qubit Clifford gate is applied to each pair. The gate distribution need not be uniform over, or even have full support on, the two-qubit Clifford group; instead, we allow for very general distributions on Clifford gates satis-fying three regularity conditions. In particular, the construction can be implemented using 𝑛 /2 CNOT gates on randomly matched pairs in each layer, together with parallel one-qubit Clifford twirls. The regularity conditions we assume allow us to reduce the second-moment dynamics of our random circuits to a reversible Markov chain on binary support strings. We establish logarithmic hitting-time bounds for this Markov chain and comparisons of its stationary distribution to prove the coding properties of the circuits. 
+
+1arXiv:2608.18536v1 [quant-ph] 19 Aug 2026 2
+
+# Contents 
+
+1 Introduction 3
+
+1.1 Preliminaries and Notation . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 41.2 Our Results . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 51.3 Further Discussion . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 61.4 Limitations and Open Problems. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 61.5 Related Work . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 7
+
+2 Circuit Architecture and Proofs of Main Results 8
+
+2.1 Circuit Architecture . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 82.2 Second Moment Operators . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 10 2.3 Good Quantum Codes from Random Matching Circuits . . . . . . . . . . . . . . . . . . . . . . . . . . 13 
+
+3 Analysis of the Pauli Weight Chain 15 
+
+3.1 Martingales and One-Step Probability . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 19 3.2 Hitting Time to Large Enough Weight . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 21 3.3 Hitting Time to a Narrow Weight Range . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 25 
+
+A Auxiliary Propositions 32 
+
+A.1 Distance Condition for Codes from Unitaries . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 32 A.2 Light Cone Lower Bound . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 32 3
+
+# 1 Introduction 
+
+Quantum error-correcting codes protect logical information from physical noise and are a fundamental ingredient of large-scale fault-tolerant quantum computation [ABO97, Got97, Got10, EDN +21, GYW +22, PHP +22, ZYH +22, Got13]. The existence of asymptotically good quantum codes was established through probabilistic and algebraic methods, beginning with the CSS constructions [CS96] and the stabilizer-code framework based on additive codes over F4
+
+[CRSS97]; but these probabilistic existence results do not by themselves provide a shallow or gate-constrained en-coder. Their usefulness, however, also depends on the complexity of the encoding circuit, as a code with strong parameters may still require a circuit with large depth or complicated gate set. There has been a recent resurgence of interest in random (stabilizer) quantum error correction codes. Brown and Fawzi [BF13b] showed that shallow random Clifford circuits of depth 𝑂 (log 3 𝑛 ) using 𝑂 (𝑛 log 2 𝑛 ) two-qubit gates in an all-to-all connected architecture form good quantum error correction codes. Their construction samples each two-qubit gate uniformly from the full two-qubit Clifford group C2. Specifically, they showed that random Clifford circuits of size 𝑂 (𝑛 log 2 𝑛 ) can encode 𝑘 logical qubits into 𝑛 physical qubits with distance 𝑑 , achieving the quantum Gilbert-Varshamov rate-distance tradeoff. Although every element of C2 has a constant-size decomposition into el-ementary Clifford gates, sampling from the full two-qubit Clifford group requires a richer two-qubit gate ensemble and may require multiple native entangling operations per sampled gate. In fact, an open question, posed explic-itly by Brown and Fawzi, is whether a more restricted and hardware-friendly gate set, particularly, the elementary Clifford generators (CNOT, Hadamard, and phase gates), would be sufficient. More recently, [WLZH26] constructs randomized and explicit families of asymptotically good CSS codes at any prescribed constant rate. Their encoders and inverse encoders use only CNOT gates, have 𝑂 (log 𝑛 ) depth, and contain 𝑂 (𝑛 ) gates to achieve linear distance. However, their exact rate-distance tradeoff remains undetermined, and they explicitly ask for a characterization of this tradeoff. A parallel line of research studies random-circuit codes under geometric locality constraints, particularly in one-dimensional brickwork architectures [GKH +21, DNTY24, LDLM26, KH26]. These works establish different guar-antees, such as approximate quantum error correction or performance against specified noise channels, with loga-rithmic depth. In contrast, we study the exact minimum distance in an all-to-all architecture. These two settings are complementary to each other. Geometric locality imposes rate-distance tradeoffs; for example, two-dimensional local commuting-projector codes satisfy 𝑘𝑑 2 = 𝑂 (𝑛 ) [BPT10]. In contrast, the all-to-all architecture is not subject to this particular locality tradeoff, motivating the question below: 
+
+Can the quantum-GV tradeoff be attained by an encoder of optimal 𝑂 (log 𝑛 ) depth, without additional work ancillas, and implemented using only a small elementary gate set? 
+
+In this work, we answer the question affirmatively by analyzing the encoding power of random circuits with restricted two-qubit gate sets in an all-to-all architecture. For every fixed 𝛿, 𝑚 > 0 and all sufficiently large even 
+
+𝑛 , we construct an ensemble of random matching circuits such that, whenever 𝑘 𝑛 < 1 − 𝐻 ( 𝑑 𝑛 ) − 𝑑 𝑛 log 2 3 − 𝛿 , a circuit sampled from the ensemble has depth 𝑂 (log 𝑛 ) and defines an [𝑛, 𝑘 ] stabilizer code of distance at least 𝑑 + 1with probability at least 1 − 𝑛 −𝑚 − 2−Ω𝛿 (𝑛 ) , where 𝐻 is the binary entropy function. In our principal construction, each matching round samples a uniformly random perfect matching, applies 𝑛 /2 CNOT gates to the matched pairs in parallel, and applies independent one-qubit Clifford twirls before and after the CNOT layer with independent one-qubit Clifford twirls which may be supported on the three-element set {I, HS , (HS )2 }. The resulting circuits use 𝑂 (𝑛 log 𝑛 ) CNOT gates and 𝑂 (𝑛 log 𝑛 ) one-qubit Clifford gates with optimal depth, thereby approaching the quantum Gilbert-Varshamov tradeoff. More generally, the conclusion holds for any fixed distribution 𝑝 2 on two-qubit Clifford gates satisfying three regularity conditions: first, 𝑝 2 should be invariant under left and right multiplication by a subgroup of local Clifford gates that acts transitively on the non-identity single-qubit Paulis. Second, 𝑝 2 must assign positive probability to an entangling gate. Third, 𝑝 2 should be invariant under taking inverses. Under these regularity conditions, the resulting random matching circuits satisfy the same depth, distance, and success-probability guarantees. In particular, the locally twirled CNOT distribution satisfies these conditions. More generally, so does the locally twirled distribution obtained by choosing equiprobably between any fixed entangling two-qubit Clifford gate and its inverse. For a Clifford encoder, our regularity conditions reduce the coding problem to bounding, for each relevant nontrivial input Pauli, the probability that it is mapped to a Pauli of weight at most 𝑑 . The local bi-invariance of 𝑝 2 makes the second-moment dynamics depend only on the binary support of the Pauli operator, yielding a reversible Markov chain on nonzero support strings. The induced chain on the Hamming weight 𝑤 has stationary distribution 𝜋 (𝑤 ) =1.1 Preliminaries and Notation 43𝑤  𝑛 𝑤 
+
+/( 4𝑛 − 1). We prove that low-weight states reach linear weight within 𝑂 (log 𝑛 ) steps and that, at linear weight, the chain rapidly hits a neighborhood of the stationary weight 3 𝑛 /4. We then use reversibility to compare the probability of returning to low weight with the corresponding stationary tail, which yields the uniform low-weight estimates needed for the distance union bound. There is a line of works on unitary 𝑡 -designs which are ensembles whose 𝑡 -fold moment operator matches that of the Haar measure exactly or up to some approximation error [DCEL09]. [HL09] show that polynomial-length random circuits give approximate 1 and 2-designs, and [BHH16] proved that one-dimensional nearest-neighbor random circuits form approximate unitary 𝑡 -designs for general 𝑡 . Later work improves design depths, including [Haf22]’s 
+
+𝑂 (𝑛𝑡 5+𝑜 (1) )-depth, and [SHH25]’s log-depth design constructions. While exact unitary design and its sufficiently accurate approximations are a natural sufficient condition for Haar-like second moment behavior (indeed, random circuits are often analyzed through the lens of unitary designs), they are not necessary for obtaining GV-distance stabilizer codes. Our coding argument does not require convergence of the full second-moment channel, as it is enough that every nontrivial input Pauli have a very small probability of landing in the set of low-weight Paulis to control the code union bound, thereby allowing us to recover the quantum GV rate-distance tradeoff from a significantly more restricted random circuit ensemble with shallow depth. Beyond quantum coding, random circuits play important roles in randomized benchmarking [HKR22, HRO +22, KLR +08], unitary-design constructions [BHH16, Haf22, SHH25], randomized measurements and classical-shadow estimation [BHH +24], and models of many-body dynamics [NRVH17]. These connections provide broader motiva-tion for understanding Pauli spreading in restricted random-circuit ensembles. 
+
+## 1.1 Preliminaries and Notation 
+
+Notation. For 𝑛 ∈ N, we write [𝑛 ] := {1, 2, . . . , 𝑛 }, and let 0 𝑛 denote the all-zero string of length 𝑛 . All logarithms are in base 2 unless explicitly stated otherwise. For 0 ≤ 𝑝 ≤ 1, we let 𝐻 (𝑝 ) = −𝑝 log 𝑝 − ( 1 − 𝑝 ) log (1 − 𝑝 ) denote the binary entropy function, with the convention 0 log 0 = 0. For 𝑥 ∈ { 0, 1}𝑛 , we write the support of 𝑥 as supp (𝑥 ) :=
+
+{𝑖 ∈ [ 𝑛 ] | 𝑥 𝑖 = 1}, with 𝑤 (𝑥 ) = |supp (𝑥 )| for its Hamming weight. Finally, we use 1{·} as the indicator function. 
+
+Pauli operators. We work on the 𝑛 -qubit Hilbert space (C2)⊗𝑛 and use the Pauli basis to decompose operators. The single-qubit Pauli operators are 
+
+𝜎 0 = I =
+
+1 00 1
+
+
+
+, 𝜎 1 = 𝑋 =
+
+0 11 0
+
+
+
+, 𝜎 2 = 𝑌 =
+
+0 −𝑖 𝑖 0
+
+
+
+, 𝜎 3 = 𝑍 =
+
+1 00 −1
+
+
+
+For a Pauli index string 𝜈 ∈ { 0, 1, 2, 3}𝑛 , we define 𝜎 𝜈 = 𝜎 𝜈 1 ⊗ · · · ⊗ 𝜎 𝜈 𝑛 . The support supp (𝜈 ) of 𝜈 is then the subset 
+
+{𝑖 ∈ [ 𝑛 ] | 𝜈 𝑖 ≠ 0} and the weight is 𝑤 (𝜈 ) = |supp (𝜈 )| . We define a string 𝑏 (𝜈 ) ∈ { 0, 1}𝑛 as the unique binary string with supp (𝑏 (𝜈 )) = supp (𝜈 ). Since the operators {𝜎 𝜈 | 𝜈 ∈ { 0, 1, 2, 3}𝑛 } form an orthogonal basis for the space of linear operators on (C2)⊗𝑛 with respect to the Hilbert-Schmidt inner product (tr  𝜎 𝜇 𝜎 𝜈 
+
+ = 2𝑛 1{𝜇 = 𝜈 }), we can decompose any operator 𝐴 acting on (C2)⊗𝑛 as 𝐴 = 2−𝑛 Í𝜈 ∈ { 0,1,2,3}𝑛 tr [𝜎 𝜈 𝐴 ]𝜎 𝜈 .
+
+CNOT and SWAP gates. The controlled NOT (CNOT) gate is a quantum logic gate which acts on two qubits: CNOT 1→2 |𝑎, 𝑏 ⟩ = |𝑎, 𝑎 ⊕ 𝑏 ⟩. Similarly, a SWAP gate is a quantum logic gate that exchanges the states of two qubits: SWAP |𝑎, 𝑏 ⟩ = |𝑏, 𝑎 ⟩.
+
+Pauli and Clifford groups. Let P𝑛 denote the 𝑛 -qubit Pauli group including phases, P𝑛 := {± 1, ±𝑖 } · { I, 𝑋, 𝑌, 𝑍 }⊗𝑛 .The 𝑛 -qubit projective Clifford group is the normalizer of P𝑛 in the unitary group up to global phase : C𝑛 := {𝑈 |
+
+𝑈 P𝑛 𝑈 † = P𝑛 }/ 𝑈 (1). Thus, for every 𝑈 ∈ C 𝑛 and every Pauli string 𝜎 𝜈 , there exists a phase 𝜔 ∈ {± 1} and a Pauli index 𝜇 ∈ { 0, 1, 2, 3}𝑛 such that 𝑈 𝜎 𝜈 𝑈 † = 𝜔𝜎 𝜇 . The single-qubit Clifford group is denoted by C1, and is generated by the Hadamard gate 𝐻 and the phase gate 𝑆 . The full 𝑛 -qubit Clifford group is generated by single-qubit Clifford gates together with CNOT gates. 
+
+Quantum Error-Correcting Codes. We describe codes using the encoding operation, which is a unitary trans-formation on the input Hilbert space that we decompose as 𝐴 ⊗ 𝐵  (C2)⊗𝑘 ⊗ ( C2)⊗ ( 𝑛 −𝑘 ) . Here, the subsystem 𝐴 
+
+contains the 𝑘 logical input qubits, while the subsystem 𝐵 contains the 𝑛 − 𝑘 ancilla qubits initialized to |0⟩⊗ ( 𝑛 −𝑘 ) .Such a code is called an [𝑛, 𝑘 ] quantum error-correcting code. For an encoding unitary 𝑈 , the associated code space is defined as the vector space {𝑈 (| 𝜓 ⟩𝐴 ⊗ | 0⟩⊗ ( 𝑛 −𝑘 ) 
+
+> 𝐵
+
+) | | 𝜓 ⟩𝐴 ∈ ( C2)⊗𝑘 }. By considering a basis {| 𝑥 ⟩ | 𝑥 ∈ { 0, 1}𝑘 } of 
+
+𝐴 , we obtain a basis {| ¯𝑥 ⟩ = 𝑈  |𝑥 ⟩ ⊗ | 0⟩⊗ ( 𝑛 −𝑘 )  | 𝑥 ∈ { 0, 1}𝑘 } of the code space. A code has distance at least 𝑑 + 1if for all 𝑥, 𝑦 ∈ { 0, 1}𝑘 , 𝜇 ∈ { 0, 1, 2, 3}𝑛 with 1 ≤ 𝑤 (𝜇 ) ≤ 𝑑 , we have ⟨ ¯𝑥 |𝜎 𝜇 | ¯𝑦 ⟩ = 𝐶 𝜇 𝛿 𝑥 𝑦 for some real numbers 𝐶 𝜇 1.2 Our Results 5depending only on 𝜇 and not on 𝑥, 𝑦 . A code with minimum distance 2 𝑑 + 1 can correct 𝑑 errors. When 𝑈 ∈ C 𝑛 , this is a stabilizer code, and the distance of the code can be characterized using [BF13b, Proposition II.1], whose proof we give in Appendix A: 
+
+Proposition A.1. A unitary 𝑈 ∈ C 𝑛 defines a quantum error-correcting code of distance at least 𝑑 +1 if and only if for all 
+
+𝜈 𝐴 ∈ { 0, 1, 2, 3}𝑘 −{ 0𝑘 }, 𝜈 𝐵 ∈ { 0, 3}𝑛 −𝑘 , and 𝜇 ∈ { 0, 1, 2, 3}𝑛 of weight 1 ≤ 𝑤 (𝜇 ) ≤ 𝑑 , we have tr 𝜎 𝜇 𝑈 (𝜎 𝜈 𝐴 ⊗ 𝜎 𝜈 𝐵 )𝑈 † =0.
+
+## 1.2 Our Results 
+
+Our main result is a proof that shallow random all-to-all circuits with a restricted gate support become good quantum error correction codes in depth 𝑂 (log 𝑛 ). In Definitions 2.1 and 2.2 of Subsection 2.1 we define a random circuit model, called a random matching circuit , that takes as input a distribution 𝑝 2 on two-qubit Clifford gates and outputs a random circuit of depth 𝑇 using 𝑛𝑇 /2 independently random gates drawn from 𝑝 2. Given a distribution 𝑝 2 on C2, a random matching circuit is constructed as follows: in each layer of the circuit, the 𝑛 qubits are paired up at random, and a random gate drawn from 𝑝 2 is applied to each pair of qubits. We count one parallel application of disjoint two-qubit gates as a matching round. A depth-𝑇 random matching circuit is a product of 𝑇 independent matching rounds. 
+
+Theorem 1.1 (Informal) . Suppose 𝑝 2 is a distribution on the two-qubit Clifford group C2 satisfying some regularity conditions. For every fixed 𝜀 > 0, 𝑚 > 0, and every 𝜌 ∈ ( 0, 3/4) satisfying 0 ≤ 𝑅 ≤ 1 − 𝐻 (𝜌 ) − 𝜌 log 2 3 − 𝜀 , there is a constant 𝐶 = 𝐶 (𝜀, 𝑚, 𝑝 2) such that a depth 𝐶 log 𝑛 random matching circuit drawn from 𝑝 2 defines an [𝑛, ⌊𝑅𝑛 ⌋] 
+
+stabilizer code of distance at least ⌊𝜌𝑛 ⌋ + 1 with probability at least 1 − 𝑛 −𝑚 − 2−Ω𝜀 (𝑛 ) , for sufficiently large even 𝑛 .
+
+This result matches the tradeoff achieved by Brown and Fawzi in [BF13b] with only 𝑂 (log 𝑛 ) depth compared to their 𝑂 (log 3 𝑛 ). More precisely, we prove the following universality theorem for the ensemble of 𝑛 -qubit random circuits we consider: 
+
+Theorem 1.2 (see Theorem 2.3 for the full statement) . Suppose 𝑝 2 is a distribution on the two-qubit Clifford group C2
+
+satisfying three regularity conditions (see Definition 2.1). Let 𝑚, 𝛿 > 0. Then, for sufficiently large even 𝑛 , there exists a constant 𝑐 > 0 depending on 𝛿 , 𝑚 , and 𝑝 2 such that a random matching circuit (Definition 2.2) of depth ⌈𝑐 log 𝑛 ⌉ derived from 𝑝 2 defines an [𝑛, 𝑘 ] quantum error-correcting code with distance at least 𝑑 + 1 with probability at least 
+
+𝑝 code ≥ 1 − 𝑛 −𝑚 − 2𝑘 −𝑛 (1−𝐻 (𝑑 /𝑛 ) − log 2 (3)𝑑 /𝑛 −𝛿 ) .
+
+For example, one can take 𝑝 2 to be the uniform distribution on C2. In fact, the regularity conditions we impose are much weaker. A typical example of a distribution satisfying the three conditions needed for Theorem 1.2 to apply is given by twirling a CNOT gate by independent uniformly random one-qubit Cliffords (see Definition 2.3). This gives rise to the following consequence: 
+
+Corollary 1.3. Let 𝑚, 𝛿 > 0. Then there is a random matching circuit (Definition 2.3) of depth 𝑂 (log 𝑛 ) using 𝑂 (𝑛 log 𝑛 )
+
+CNOT gates and 𝑂 (𝑛 log 𝑛 ) random one-qubit Clifford gates that defines an [𝑛, 𝑘 ] quantum error-correcting code with distance at least 𝑑 + 1 with probability at least 
+
+𝑝 code ≥ 1 − 𝑛 −𝑚 − 2𝑘 −𝑛 (1−𝐻 (𝑑 /𝑛 ) − log 2 (3)𝑑 /𝑛 −𝛿 ) .
+
+The random one-qubit Clifford gates may be taken from a very small restricted gate set, such as {𝐼, 𝐻𝑆, (𝐻𝑆 )2 }
+
+(where 𝐻 is the Hadamard gate and 𝑆 is the phase gate); see Remark 2.1. In particular, there exists a quantum circuit of depth 𝑂 (log 𝑛 ) using 𝑂 (𝑛 log 𝑛 ) CNOT gates and 𝑂 (𝑛 log 𝑛 ) ran-dom one-qubit Clifford gates that asymptotically achieves the quantum Gilbert-Varshamov bound. Moreover, in the locally twirled construction, CNOT may be replaced by any fixed entangling two-qubit Clifford gate, with the gate and its inverse mixed symmetrically before applying the same independent twirls. This allows us to construct random circuits that produce good codes with high probability using a variety of extremely restricted gate sets. Using a light cone argument, one can see that depth 𝑂 (log 𝑛 ) is optimal for any circuit built from one- and two-qubit gates hoping to achieve linear code distance in 𝑛 . In the next subsection in Proposition A.2, we will show that 𝑂 (𝑛 log 𝑛 ) gates is also optimal within the random matching model (even those allowing fewer than 𝑛 /2 gates per layer) hoping to achieve linear code distance with asymptotically positive probability, so our results are optimal within the independent random-matching model. Finally, we provide a table that summarizes the results of the most relevant works in Table 1. 1.3 Further Discussion 6Work Encoder Ensemble Log Depth GV Rate-Distance Additional Ancillas [BF13b] Random pairs; uniform C2 No Yes None [CLLW16] Exact unitary 2-design Yes Yes (implied) e𝑂 (𝑛 )
+
+[WLZH26] Lossless-expander; CNOT only Yes Not established None 
+
+Ours Independent matchings; twirled CNOT Yes Yes None Table 1: Closest all-to-all exact-encoder results 
+
+## 1.3 Further Discussion 
+
+Optimality in the random matching model. In any circuit architecture consisting only of one- and two-qubit gates, a qubit’s forward light cone can grow by at most a multiplicative factor per layer. Producing an 𝑛 -qubit code of linear distance 𝛿𝑛 for any constant 𝛿 > 0 requires each encoding qubit’s light cone to reach at least 𝛿𝑛 other qubits by the end of the circuit. Therefore, any such circuit of linear distance must have depth Ω(log 𝑛 ) and use 
+
+Ω(𝑛 ) two-qubit gates. Our random matching construction achieves this lower bound on depth, but uses 𝑂 (𝑛 log 𝑛 )
+
+two-qubit gates, missing this naïve lower bound by a logarithmic factor. This answers a question of Brown–Fawzi [BF13b, Section IV] about achievability of the depth lower bound. We can at least show (in Appendix A) that no ensemble in the independent random-matching model of Proposi-tion A.2 can achieve an 𝑂 (𝑛 ) gate count with constant success probability, even if it is made sparser by only matching a subset of the 𝑛 qubits at each layer. 
+
+Proposition A.2. Consider an ensemble of 𝑇 layers in which layer 𝑟 places arbitrary two-qubit gates on a uniformly random set of fixed size 𝐵 𝑟 ≤ 𝑛 /2 disjoint pairs, independently of earlier layers. Let 𝑁 := Í𝑇 𝑟 =1 𝐵 𝑟 be the total number of two-qubit gates. Suppose that, with probability at least 𝑝 , the resulting Clifford encoder defines an [𝑛, 𝑘 ] stabilizer code of distance at least 𝑑 + 1, where 𝑘 ≥ 1. Then 
+
+𝑁 ≥ 𝑛 − 12 ln  𝑝 (𝑑 + 1).
+
+Therefore, if 𝑝 is bounded below by a positive constant and 𝑑 ≥ 𝛿𝑛 for some constant 𝛿 > 0, then 𝑁 = Ω(𝑛 log 𝑛 ) and 
+
+𝑇 = Ω(log 𝑛 ).
+
+Thus, a construction that achieves the Ω(𝑛 )-gate lower bound would likely need to be highly structured or at least allow for dependence between random layers. 
+
+Restricted gate set. Brown and Fawzi sample each two-qubit gate uniformly from the full two-qubit Clifford group C2. Although such gates can be compiled into a constant number of elementary Clifford gates, our principal construction uses CNOT as the only entangling gate, with the remaining randomness supplied by independent one-qubit Clifford twirls. Theorem 1.2 constructs a quantum error correction code using a random circuit with a more restricted gate set, namely standard locally-twirled two-qubit Clifford gates, and Corollary 1.3 specializes this to the case where CNOT is the only entangling gate, addressing the restricted-gate question raised in [BF13b]. Moreover, our circuit primitive also has a direct hardware motivation: recent trapped-ion experiments implemented 98-qubit random Clifford layers using uniformly random pairings, random one-qubit Cliffords, and a fixed maximally entan-gling 𝑅 𝑍𝑍 (𝜋 /2) gate on every pair [Qua25]. This experiment closely parallels our ensemble, with the key differences being that our bounds remain logical all-to-all circuit bounds, which do not include device-specific routing or trans-port time, restrictions on simultaneous gates, encoding noise, fault-tolerant state preparation, or decoding. 
+
+## 1.4 Limitations and Open Problems. 
+
+The regularity conditions on 𝑝 2 under which we prove Theorem 1.2 are (see Definition 2.1): 1. Bi-invariance: there exists a subgroup H of the one-qubit projective Clifford group C1 such that H acts tran-sitively on {𝑋, 𝑌, 𝑍 } up to sign and 𝑝 2 is invariant under left and right multiplication by H ⊗ H .2. Positive Entanglement: 𝑝 2 assigns a positive probability to an entangling gate; 3. Reversibility: For 𝑈 ∼ 𝑝 2, we have 𝑈 † ∼ 𝑝 2.1.5 Related Work 7Clearly, positive entanglement is a necessary condition for a random matching circuit derived from 𝑝 2 to produce a good code with any nonzero probability. However, while the assumptions of bi-invariance and reversibility are cru-cial to the structure of our argument for technical reasons, they are not obviously necessary for a random matching circuit derived from 𝑝 2 to produce a good quantum error-correcting code (although some assumption is still nec-essary to replace bi-invariance). For example, our current bi-invariance assumption allows twirling by a random element from a three-element gate set {𝐼, 𝐻𝑆, (𝐻𝑆 )2 }, but not from some other natural three-element gate sets such as {𝐼, 𝐻, 𝑆 }. It would be interesting to see if these conditions could be relaxed. Next, we give an existence result for the quantum code, rather than a deterministic explicit family. Therefore, successfully derandomizing the matching sequence and the twirling process would be very promising directions. Similarly, our work only studies the encoding complexity. While our construction gives a high-distance stabilizer code, it does not yield an efficient decoder. Hence, designing an efficient decoder for our ensemble is an open problem. Within the independent random-matching model, Proposition A.2 shows that an ensemble achieving distance 
+
+𝑑 + 1 with probability at least 𝑝 must use 𝑁 ≥ 𝑛 −12 ln  𝑝 (𝑑 + 1) two-qubit gates. Hence, our gate count is therefore optimal within this model. 
+
+## 1.5 Related Work 
+
+The closest predecessors to our work are the scrambling, decoupling, and coding results of Brown and Fawzi [BF13a, BF15, BF13b]. Their scrambling work already studied parallel random-matching circuits on the complete graph and proved 𝑂 (log 𝑛 )-depth scrambling for a constant-size message. Their stronger exact-code result used 𝑂 (𝑛 log 2 𝑛 )
+
+sequential random Clifford gates and, after parallelization, yielded depth 𝑂 (log 3 𝑛 ). They showed that for any 𝛿 > 0random Clifford circuits of size 𝑂 (𝑛 log 2 𝑛 ) can encode 𝑘 logical qubits into 𝑛 physical qubits with distance 𝑑 + 1whenever 𝑘 𝑛 < 1 − 𝐻 ( 𝑑 𝑛 ) − 𝑑 𝑛 log 2 3 − 𝛿 , which matches the quantum Gilbert-Varshamov tradeoff [Got97] up to an arbitrarily small fixed slack. Wills et al. [WLZH26] construct randomized and explicit asymptotically good CSS codes at every prescribed constant rate. Their CNOT-only encoding and unencoding circuits have 𝑂 (log 𝑛 ) depth and 𝑂 (𝑛 )
+
+gates, and they provide efficient classical decoding algorithms. Although their construction is advantageous in gate count, explicitness, and decoding, their exact rate–distance tradeoff is explicitly left open. Our contribution is to obtain the quantum-GV rate-distance tradeoff in 𝑂 (log 𝑛 ) random-matching layers, while also allowing restricted locally twirled two-qubit Clifford distributions such as the Clifford-twirled CNOT. 
+
+Local and brickwork random-circuit codes. A parallel line of recent work studies random-circuit codes under geometric locality constraints. [GKH +21, NBFG25] investigated quantum codes generated by low-depth random cir-cuits with local connectivity in spatial dimension 𝐷 , showing that local random circuits can already produce strong coding behavior, especially for erasure noise. [DNTY24] studied one-dimensional logarithmic-depth random Clif-ford encoders against Pauli noise using tensor-network maximum-likelihood decoding, giving evidence that such local random encoders can approach hashing-bound behavior despite their geometric constraints. More recently, [LDLM26] proved approximate quantum error-correction guarantees for one-dimensional logarithmic-depth ran-dom Clifford circuits, and [KH26] proved error-correction results for one-dimensional brickwork Clifford circuits, including logarithmic-depth approximate correction and matching bounds for exact correction in their model. These local and brickwork results are complementary to ours. They impose much stronger geometric constraints on the interaction graph, often in one spatial dimension, and obtain approximate or channel-specific error-correction guarantees. In contrast, our general theorem applies to a class of locally Clifford-invariant two-qubit gate distribu-tions, and our principal restricted-gate construction uses CNOT as its only entangling operation. Our goal is there-fore different: we ask how little two-qubit gate randomness is needed to recover [BF13b]’s exact-distance guarantee for stabilizer codes. In this sense, the brickwork literature moves toward spatial locality, while our work addresses gate-set restriction. 
+
+Unitary 𝑡 -designs. Random quantum circuits are frequently studied as efficient approximations to Haar random-ness [Haf22, DCEL09, BHH16, YSMY26, CLLW16]. A unitary 𝑡 -design is an ensemble whose 𝑡 -fold moment operator agrees with the Haar 𝑡 -fold moment operator, and approximate designs have applications throughout quantum in-formation, including randomized benchmarking [ZZP17], decoupling and quantum cryptography. Unitary designs provide a natural benchmark for shallow random encoders. The uniform Clifford group is an exact unitary 2-design [DCEL09], and random-circuit constructions of approximate designs were developed in [HL09, BHH16], with im-proved depth bounds in [Haf22, SHH25]. [HL09] showed that polynomial-size random quantum circuits form ap-proximate unitary 2-designs, and [BHH16] proved that local random circuits form approximate unitary 𝑡 -designs for 8general 𝑡 . Our result is related to this literature through the use of second moments; however, the code-distance ar-gument only requires control of a specific part of the second moment: the probability that a nontrivial Pauli operator evolves to a low-weight Pauli operator. Most related to our work is [CLLW16] which constructed near-linear-size Pauli-mixing Clifford ensembles that form exact unitary 2-designs. Their construction also implies the quantum Gilbert–Varshamov distance tradeoff with exponentially high probability. Their unconditional Clifford-based implementation has 𝑂 (log 2 𝑛 ) depth and uses e𝑂 (𝑛 ) additional work ancillas; conversely, our result instead gives an unconditional encoder of depth 𝑂 (log 𝑛 )
+
+and size 𝑂 (𝑛 log 𝑛 ) without additional work ancillas, generated by independent random-matching layers with a fixed entangling gate and local twirls. Rather than establishing a full unitary design, we prove our result by establishing the low Pauli-weight estimate needed in the union bound. 
+
+Explicit and LDPC quantum codes. Another major direction seeks explicit families of quantum codes with sparse parity checks. Topological codes, including toric and surface codes [Kit03, DKLP02, FMMC12], have local stabilizer checks and strong practical appeal, but geometric locality imposes rate-distance tradeoffs: for instance, two-dimensional local stabilizer codes must obey the Bravyi-Poulin-Terhal bound [BPT10]. More recently, hyper-graph product codes of [TZ14] gave quantum LDPC codes with positive rate and distance proportional to the square root of the block-length. This initiated a sequence of breakthroughs improving the asymptotic parameters of quan-tum LDPC codes, including fiber-bundle codes [HHO21] and balanced-product codes [BE21] which broke the earlier square-root distance barrier. The recent resolution of the quantum LDPC conjecture in [PK22] produced asymptotically good quantum LDPC codes using lifted products over non-abelian groups. Quantum Tanner codes of [LZ22b] provide a related expander-based construction with good rate and linear distance. A further line of work has developed efficient decoders for these good quantum LDPC codes [GPT22, LZ22a], including linear-time decoding results [DHLV22] and single-shot decoding guarantees for quantum Tanner codes [GTC +24]. In contrast, we do not address efficient decoding. Instead, we focus on the complexity and physical simplicity of the encoder, proving that short random circuits built from CNOT gates and one-qubit Clifford gates already suffice to obtain high-distance stabilizer codes that achieve the quantum GV tradeoff. 
+
+# 2 Circuit Architecture and Proofs of Main Results 
+
+In this section we will describe a random circuit architecture and show that it produces a good quantum error-correcting code. The circuit architecture takes as input a distribution on two-qubit Clifford gates, which we allow to be any distribution satisfying three reasonable conditions (Definition 2.1). We describe this architecture in Subsec-tion 2.1. The remaining subsections are dedicated to proving that this architecture produces a good quantum error-correcting code assuming the results of Section 3 as a black box. The method is similar to that of Brown–Fawzi [BF13b]: in Subsection 2.2 we define a second moment operator for the random Clifford produced by our circuit and in Subsection 2.3 we relate the behavior of this second moment operator to the probability of producing a code of given distance. Since our circuit architecture consists of a sequence of random layers, the second moment operator of the circuit defines a Markov chain on length-𝑛 strings of Pauli matrices. We study this Markov chain in Subsec-tion 2.2 and show that the three conditions of Definition 2.1 imply some properties of the Markov chain that we will use in Section 3 to give good bounds on the quantities we need to control to produce a good code with high probability. 
+
+## 2.1 Circuit Architecture 
+
+Here, we describe our circuit architecture. Fix even 𝑛 . We consider an all-to-all random matching architecture on 𝑛 
+
+physical qubits, where each circuit layer is a Clifford-twirled CNOT matching layer, as given in Definition 2.3. 
+
+Definition 2.1. Let 𝑝 2 be a distribution on the two-qubit Clifford group C2. We define the following three properties: 1. Bi-invariance: there exists a subgroup H of the one-qubit projective Clifford group C1 such that H acts transitively on {𝑋, 𝑌, 𝑍 } up to sign and 𝑝 2 is invariant under left and right multiplication by H ⊗ H .2. Positive Entanglement: 𝑝 2 assigns a positive probability to an entangling gate; 2.1 Circuit Architecture 9
+
+3. Reversibility: For 𝑈 ∼ 𝑝 2, we have 𝑈 † ∼ 𝑝 2.Here, acting transitively up to sign means that H acts transitively on the set {𝑋 ⊗ 𝑋, 𝑌 ⊗ 𝑌, 𝑍 ⊗ 𝑍 }.
+
+An example of a subgroup H1 ⊆ C 1 satisfying the condition needed to witness bi-invariance is C1 itself. For example, the uniform distribution on C2 satisfied bi-invariance with this choice of subgroups. For a more interesting example illustrating the condition that H acts on {𝑋, 𝑌, 𝑍 } transitively up to sign, see Remark 2.1. 
+
+Definition 2.2 (Random matching layer Γ). Let 𝑝 2 be a distribution on the two-qubit Clifford group C2. A random 
+
+𝑝 2-matching layer Γ is sampled as follows. First sample a uniformly random ordered perfect matching O of [𝑛 ] which partitions the qubits into 𝑛 /2 disjoint ordered pairs. For every ordered pair (𝑖, 𝑗 ) ∈ O , let 𝐺 𝑖 𝑗 be a random two-qubit Clifford gate sampled according to 𝑝 2, applied to the 𝑖 th and 𝑗 th qubits. Then, the layer Γ = Î(𝑖,𝑗 ) ∈ 𝑂 𝐺 𝑖 𝑗 is given by applying all gates 𝐺 𝑖 𝑗 for (𝑖, 𝑗 ) ∈ O in parallel. 
+
+Then, our depth-𝑇 encoder is the product of 𝑇 independent layers (see Figure 1), which is given by the unitary 
+
+𝑈 𝑇 = Γ(𝑇 ) Γ(𝑇 −1) · · · Γ(1) . (1) 
+
+Definition 2.3 (Clifford-twirled CNOT layer ΓCNOT ). We define 𝐺 ∼ 𝑝 2,CNOT by 𝐺 = (𝐴 ⊗ 𝐵 )CNOT 1→2 (𝐶 ⊗ 𝐷 ), where 
+
+𝐴, 𝐵, 𝐶, 𝐷 ∼ Unif (C 1) are independent uniformly random single-qubit Clifford gates. Then let ΓCNOT be the random matching layer (Definition 2.2) obtained from 𝑝 2,CNOT . We denote by 𝑈 CNOT  
+
+> 𝑇
+
+the associated depth-𝑇 circuit from (1) .
+
+Note that since CNOT is entangling and its own inverse, the distribution 𝑝 2,CNOT satisfies all three conditions of Definition 2.1. 
+
+Remark 2.1 (Cyclic local twirls) . A three-element cyclic Clifford twirl is sufficient for the Clifford-twirled CNOT con-struction. Similar cyclic Pauli uniformization twirls are used in the construction of approximate unitary designs in [DCEL09]. Let 𝑅 := 𝐻𝑆 , where 𝐻 is the Hadamard gate and 𝑆 is the phase gate. Conjugation by 𝑅 cyclically permutes the non-identity Pauli operators up to sign: 
+
+𝑅𝑋 𝑅 † = −𝑌, 𝑅𝑌 𝑅 † = −𝑍, 𝑅𝑍𝑅 † = 𝑋 . 
+
+Therefore, the subgroup of C1 generated by 𝑅 indeed acts transitively on {𝑋, 𝑌, 𝑍 } up to sign. Note that 𝑅 has order 3 in the projective Clifford group C1/𝑈 (1) because 𝑅 3 = 𝑒 𝑖𝜋 /4𝐼 . Thus the uniform distribution on {𝐼, 𝑅, 𝑅 2 } is invariant under multiplication by 𝑅 up to global phase. Consequently, one can replace 𝐴, 𝐵, 𝐶, 𝐷 in Definition 2.3 with random gates from {𝐼, 𝑅, 𝑅 2 } without changing the conclusion of Corollary 1.3. 
+
+Each layer of 𝑈 CNOT  
+
+> 𝑇
+
+contains exactly 𝑛 /2 CNOT gates arranged on a uniformly random ordered perfect matching, together with local random single-qubit Clifford gates before and after the CNOT layer (see Figure 2). So, for a depth 
+
+𝑇 circuit, the total number of CNOT gates is 𝑛𝑇 /2. We use 𝑈 𝑇 as the encoding Clifford for an [𝑛, 𝑘 ] stabilizer code by applying it to 𝑘 logical input qubits and 𝑛 − 𝑘 ancilla qubits initialized to |0⟩.
+
+· · · · · · · · · · · · · · · · · · 
+
+𝑞 1
+
+Γ(1) Γ(2) Γ(𝑇 )
+
+𝑞 2
+
+𝑞 3
+
+...𝑞 𝑛 −1
+
+𝑞 𝑛 
+
+Figure 1: The encoder 𝑈 𝑇 = Î𝑇 −1  
+
+> 𝑡 =0
+
+Γ(𝑇 −𝑡 ) is a product of random matching layers, as in Definition 2.2. 2.2 Second Moment Operators 10 
+
+𝑞 1 𝐿 (1) 
+
+> 1
+
+𝑅 (1) 
+
+> 1
+
+𝐿 (2) 
+
+> 1
+
+𝑅 (2)
+
+> 1
+
+𝑞 2 𝐿 (1) 
+
+> 2
+
+𝑅 (1) 
+
+> 2
+
+𝐿 (2) 
+
+> 2
+
+𝑅 (2)
+
+> 2
+
+𝑞 3 𝐿 (1) 
+
+> 3
+
+𝑅 (1) 
+
+> 3
+
+𝐿 (2) 
+
+> 3
+
+𝑅 (2)
+
+> 3
+
+𝑞 4 𝐿 (1) 
+
+> 4
+
+𝑅 (1) 
+
+> 4
+
+𝐿 (2) 
+
+> 4
+
+𝑅 (2)
+
+> 4
+
+𝑞 5 𝐿 (1) 
+
+> 5
+
+𝑅 (1) 
+
+> 5
+
+𝐿 (2) 
+
+> 5
+
+𝑅 (2)
+
+> 5
+
+𝑞 6 𝐿 (1) 
+
+> 6
+
+𝑅 (1) 
+
+> 6
+
+𝐿 (2) 
+
+> 6
+
+𝑅 (2)
+
+> 6
+
+Figure 2: Two Clifford-twirled CNOT matching layers. Each 𝐿 (𝑡 ) 
+
+> 𝑖
+
+, 𝑅 (𝑡 ) 
+
+> 𝑖
+
+∈ C 1 is an independent one-qubit Clifford. Layer Γ(1) 
+
+> CNOT
+
+uses O = {( 1, 2), (3, 4), (5, 6)} , while layer Γ(2) 
+
+> CNOT
+
+uses O = {( 1, 6), (2, 5), (3, 4)} .
+
+## 2.2 Second Moment Operators 
+
+Consider a random circuit with the above architecture. Applying all the gates in this random circuit to 𝑛 qubits is equivalent to applying some random unitary 𝑈 𝑇 ∈ C 𝑛 . This random circuit thus defines a measure 𝜇 circ over unitary transformations on 𝑛 qubits. Any such measure defines a second moment operator :
+
+Definition 2.4 (Second moment operator) . Let 𝐵 (( C2)⊗𝑛 ) be the space of operators acting on the Hilbert space asso-ciated to 𝑛 qubits. Let 𝑝 be a probability measure on C𝑛 .The second moment operator 𝑀 𝑝 of 𝑝 is a superoperator acting on 𝐵 (( C2)⊗𝑛 ) ⊗ 𝐵 (( C2)⊗𝑛 ) as follows: 
+
+𝑀 𝑝 [𝑋 ⊗ 𝑌 ] = E  
+
+> 𝑈 ∼𝑝
+
+[( 𝑈 𝑋𝑈 †) ⊗ ( 𝑈 𝑌𝑈 †)] 
+
+for any operators 𝑋, 𝑌 on 𝑛 qubits. We will sometimes also write 𝑀 𝑈 for 𝑀 𝑝 if 𝑈 ∼ 𝑝 .
+
+Note that if 𝑈 , 𝑉 are independent random operators on (C2)⊗𝑛 , then 𝑀 𝑈 𝑉 = 𝑀 𝑈 𝑀 𝑉 .For the purposes of defining good quantum error-correcting codes from random Clifford operators, we only care about the action of the second moment operator on pairs of identical Pauli strings 𝜎 𝜈 ⊗ 𝜎 𝜈 , where 𝜈 ∈ { 0, 1, 2, 3}𝑛 .(Here 𝜎 𝜈 = 𝜎 𝜈 1 ⊗ · · · ⊗ 𝜎 𝜈 𝑛 .) For the remainder of this subsection we will focus exclusively on this domain. Let 𝑝 2 be a bi-invariant distribution on the two-qubit Clifford group C2. We denote by 𝑀 circ ,𝑝 2 the second moment operator of a single layer Γ of the resulting random matching circuit. The second moment operator of a 𝑇 -layer circuit is given by 𝑀 𝑇  
+
+> circ ,𝑝 2
+
+. We will analyze its action on pairs of Pauli strings 𝜎 𝜈 ⊗ 𝜎 𝜈 , where 𝜈 ∈ { 0, 1, 2, 3}𝑛 .To start, note that by bi-invariance of 𝑝 2, the distribution of a random layer Γ is invariant under left and right multiplication by H ⊗ H for some subgroup H ⊆ C 1 acting transitively on {𝑋, 𝑌, 𝑍 } up to sign. Let 𝜙 (𝑛 ) be the second moment operator for 𝑛 independent uniformly random gates drawn from H applied in parallel. We have 
+
+𝑀 circ ,𝑝 2 = 𝜙 (𝑛 ) ◦ 𝑀 circ ,𝑝 2 ◦ 𝜙 (𝑛 ) .
+
+Let 𝜙 (1) 
+
+> 𝑖
+
+be the second moment operator for a uniformly random gate drawn from H applied to qubit 𝑖 . We have 
+
+𝜙 (𝑛 ) = Î𝑛 𝑖 =1 𝜙 (1) 
+
+> 𝑖
+
+. We note that H acts transitively on {𝑋 ⊗ 𝑋, 𝑌 ⊗ 𝑌, 𝑍 ⊗ 𝑍 } via 𝑇 · ( 𝜎 𝛼 ⊗ 𝜎 𝛼 ) := 𝑇 𝜎 𝛼 𝑇 † ⊗ 𝑇 𝜎 𝛼 𝑇 †.Thus for 𝛼 ∈ { 0, 1, 2, 3} we have 
+
+𝜙 (1) [𝜎 𝛼 ⊗ 𝜎 𝛼 ] =
+
+(
+
+𝜎 0 ⊗ 𝜎 0 if 𝛼 = 0
+
+> 13
+
+Í𝛽 ∈ { 1,2,3} 𝜎 𝛽 ⊗ 𝜎 𝛽 if 𝛼 ≠ 0. (2) Now let 𝜈 ∈ { 0, 1, 2, 3}𝑛 . Let 𝑤 (𝜈 ) be the number of nonzero entries in 𝜈 . For a string 𝑥 ∈ { 0, 1}𝑛 , let 𝑤 (𝑥 ) be the number of nonzero entries in 𝑥 ; for a string 𝜈 ∈ { 0, 1, 2, 3}𝑛 , let 𝑏 (𝜈 ) ∈ { 0, 1}𝑛 be the string with zeroes in the same 2.2 Second Moment Operators 11 positions as in 𝜈 . Then let 
+
+𝐸 𝑥 := 13𝑤 (𝑥 )∑︁ 𝜐 ∈ { 0,1,2,3}𝑛   
+
+> 𝑏 (𝜐 )=𝑥
+
+𝜎 𝜐 ⊗ 𝜎 𝜐 .
+
+We have 14𝑛 tr [( 𝜎 𝜈 ⊗ 𝜎 𝜈 )𝐸 𝑥 ] =
+
+(
+
+0 if 𝑏 (𝜈 ) ≠ 𝑥 
+
+3−𝑤 (𝑥 ) if 𝑏 (𝜈 ) = 𝑥, and so 14𝑛 tr 𝐸 𝑥 𝐸 𝑦 
+
+ =
+
+(
+
+0 if 𝑥 ≠ 𝑦 
+
+3−𝑤 (𝑥 ) if 𝑥 = 𝑦. 
+
+In particular, the 𝐸 𝑥 are linearly independent, and we write 
+
+E := span {𝐸 𝑥 | 𝑥 ∈ { 0, 1}𝑛 }.
+
+Iterating (2) we get 
+
+𝜙 (𝑛 ) [𝜎 𝜈 ⊗ 𝜎 𝜈 ] = 𝐸 𝑏 (𝜈 )
+
+In other words, the second moment operator for 𝑛 independent uniformly random elements of H sends any pair of identical Pauli strings to the average over all pairs which have nonidentity Paulis in the same locations. It follows that the action of the second moment operator 𝑀 circ ,𝑝 2 on pairs of identical Pauli strings is determined by how it acts on the basis states 𝐸 𝑥 for strings 𝑥 ∈ { 0, 1}𝑛 , i.e., by its restriction to span {𝐸 𝑥 | 𝑥 ∈ { 0, 1}𝑛 }. For any string 
+
+𝜈 ∈ { 0, 1, 2, 3}𝑛 we have 𝑀 circ ,𝑝 2 [𝜎 𝜈 ⊗ 𝜎 𝜈 ] = 𝑀 circ ,𝑝 2 [𝐸 𝑏 (𝜈 ) ] ∈ E .Following [BF13b, Section II.C] we can encode the action of 𝑀 circ ,𝑝 2 on pairs of identical Pauli strings using a 4𝑛 × 4𝑛 matrix 
+
+𝑄 (𝜈, 𝜈 ′) = 14𝑛 tr (𝜎 𝜈 ′ ⊗ 𝜎 𝜈 ′ )𝑀 circ ,𝑝 2 (𝜎 𝜈 ⊗ 𝜎 𝜈 ) .
+
+Since 𝑀 circ ,𝑝 2 (𝜎 𝜈 ⊗ 𝜎 𝜈 ) is the average of a random Clifford applied to 𝜎 𝜈 ⊗ 𝜎 𝜈 , it can be written as a linear combination of Pauli strings with positive coefficients summing to 1. Thus, for any Pauli string 𝜈 we have Í𝜈 ′ ∈ { 0,1,2,3}𝑛 𝑄 (𝜈, 𝜈 ′) = 1, and we can interpret 𝑄 as the transition matrix for a Markov chain on the state space on length 𝑛 Pauli strings. A Pauli string transitions according to this Markov chain simply by applying a random matching layer Γ. Later, we will see that the distribution of this Markov chain after 𝑇 steps governs the quality of the depth-𝑇 encoding circuit described in Subsection 2.1. In fact, we can reduce to studying a simpler Markov chain. Using the knowledge that 
+
+𝑀 circ ,𝑝 2 (𝜎 𝜈 ⊗ 𝜎 𝜈 ) only depends on 𝑏 (𝜈 ) we can compress the information in 𝑄 into a 2 𝑛 × 2𝑛 matrix 
+
+𝑄 0 (𝑦, 𝑦 ′) = 3𝑤 (𝑦 ′ )
+
+4𝑛 tr 𝐸 𝑦 ′ 𝑀 circ ,𝑝 2 (𝐸 𝑦 )
+
+with 𝑄 0 (𝑏 (𝜈 ), 𝑏 (𝜈 ′)) = 3𝑤 (𝑏 (𝜈 ′ ) ) 𝑄 (𝜈, 𝜈 ′). We see that 𝑄 0 is the transition matrix for the Markov chain describing the locations of nonidentity Paulis in strings evolving according to 𝑄 . Indeed, for any binary strings 𝑦 , 𝑦 ′ and any Pauli string 𝜈 with 𝑏 (𝜈 ) = 𝑦 we have 
+
+𝑄 0 (𝑦, 𝑦 ′) =∑︁    
+
+> 𝜈 ′∈ { 0,1,2,3}𝑛
+> 𝑏 (𝜈 ′)=𝑦 ′
+
+𝑄 (𝜈, 𝜈 ′)
+
+The remainder of this subsection is dedicated to describing some nice properties of the Markov chain 𝑄 0 which are consequences of its construction. We will use these properties in Section 3 to have sufficient control over the dynamics of 𝑄 to ensure that our depth-𝑇 encoding circuit produces good codes when 𝑇 is large enough. We have 
+
+𝑀 circ ,𝑝 2 = EO
+
+Ö 
+
+> (𝑖,𝑗 ) ∈ O
+
+𝑚 𝑖 𝑗 
+
+
+
+where O is a uniformly random ordered perfect matching on [𝑛 ] and 𝑚 𝑖 𝑗 is the second moment operator for 𝑝 2 acting on only the 𝑖 th and 𝑗 th qubits. By the same argument as above, the second moment operator 𝑀 𝑝 2 associated to 𝑝 2 is determined by how it acts on the four basis states 𝐸 00 , 𝐸 01 , 𝐸 10 , and 𝐸 11 . This operator also gives rise to a transition matrix on binary strings of length 2: 
+
+𝐾 𝑝 2 =
+
+©«
+
+1 0 0 00 𝑝 01 →01 𝑝 01 →10 𝑝 01 →11 
+
+0 𝑝 10 →01 𝑝 10 →10 𝑝 10 →11 
+
+0 𝑝 11 →01 𝑝 11 →10 𝑝 11 →11 
+
+ª®®®¬2.2 Second Moment Operators 12 The string 00 is isolated because it is impossible to obtain the identity matrix by conjugating a nonidentity Pauli string by any Clifford operator. As such, this matrix is determined by the bottom-right 3 × 3 corner, which we call 
+
+𝐾 ′ 
+
+> 𝑝 2
+
+.One step of the Markov chain 𝑄 0 is performed on a string 𝑥 by choosing a uniformly random ordered perfect matching O of [𝑛 ]. Then, for each (𝑖, 𝑗 ) ∈ O , we evolve 𝑥 𝑖 𝑥 𝑗 independently according to 𝐾 𝑝 2 . Markov chains of this form are studied in some generality in Section 3. In Lemma 3.2, we determine properties of the Markov chain 𝑄 0
+
+from properties of 𝐾 ′ 
+
+> 𝑝 2
+
+that we prove in the following lemma: 
+
+Lemma 2.2. Let 𝑝 2 be a distribution on the two-qubit Clifford group C2 satisfying bi-invariance, positive entanglement, and reversibility (Definition 2.1). Let 
+
+𝐾 ′ 
+
+> 𝑝 2
+
+= ©«
+
+𝑝 01 →01 𝑝 01 →10 𝑝 01 →11 
+
+𝑝 10 →01 𝑝 10 →10 𝑝 10 →11 
+
+𝑝 11 →01 𝑝 11 →10 𝑝 11 →11 
+
+ª®¬
+
+(3) 
+
+be the 3 × 3 row-stochastic matrix constructed from the second moment operator associated to 𝑝 2 as above. Then 𝐾 ′ 
+
+> 𝑝 2
+
+is reversible with respect to the stationary distribution 𝜋 ′ = (1/5, 1/5, 3/5) on 01 , 10 , 11 , and 1/3 ≤ 𝑝 11 →11 < 1.Proof. Let 𝑈 be a random two-qubit Clifford gate drawn from 𝑝 2. The matrix 𝐾 ′ 
+
+> 𝑝 2
+
+is the transition matrix describing the positions of the nonidentity Pauli operators after applying 𝑈 to a Pauli string of length 2. We check the detailed balance condition for 𝐾 ′ 
+
+> 𝑝 2
+
+with respect to 𝜋 ′. Let 𝑥 and 𝑦 be two nonzero bit strings of length 2. The probability 𝐾 ′ 
+
+> 𝑝 2
+
+(𝑥, 𝑦 ) of moving from 𝑥 to 𝑦 in one step of 𝐾 ′ 
+
+> 𝑝 2
+
+is given by 3𝑤 (𝑥 ) 𝐾 ′ 
+
+> 𝑝 2
+
+(𝑥, 𝑦 ) =∑︁     
+
+> 𝜈 ∈ { 0,1,2,3}2−{ 00 }
+> 𝑏 (𝜈 )=𝑥
+
+P[𝑏 (𝑈 𝜎 𝜈 𝑈 †) = 𝑦 ].
+
+Now by bi-invariance, any two Pauli strings with 𝑏 (𝑈 𝜎 𝜈 𝑈 †) = 𝑦 are equally likely to appear as 𝑈 𝜎 𝜈 𝑈 †. Therefore we can write ∑︁     
+
+> 𝜈 ∈ { 0,1,2,3}2−{ 00 }
+> 𝑏 (𝜈 )=𝑥
+
+P[𝑏 (𝑈 𝜎 𝜈 𝑈 †) = 𝑦 ] =∑︁     
+
+> 𝜈 ∈ { 0,1,2,3}2−{ 00 }
+> 𝑏 (𝜈 )=𝑥
+
+∑︁ 𝜐 ∈ { 0,1,2,3}2 −{ 00 }  
+
+> 𝑏 (𝜐 )=𝑦
+
+P[𝑈 𝜎 𝜈 𝑈 † = ±𝜎 𝜐 ]
+
+By reversibility of 𝑝 2 we have 
+
+P[𝑈 𝜎 𝜈 𝑈 † = ±𝜎 𝜐 ] = P[± 𝜎 𝜈 = 𝑈 𝜎 𝜐 𝑈 †]
+
+and we obtain 3𝑤 (𝑥 ) 𝐾 ′ 
+
+> 𝑝 2
+
+(𝑥, 𝑦 ) =∑︁     
+
+> 𝜈 ∈ { 0,1,2,3}2−{ 00 }
+> 𝑏 (𝜈 )=𝑥
+
+∑︁ 𝜐 ∈ { 0,1,2,3}2 −{ 00 }  
+
+> 𝑏 (𝜐 )=𝑦
+
+P[𝑈 𝜎 𝜐 𝑈 † = ±𝜎 𝜈 ] = 3𝑤 (𝑦 ) 𝐾 ′ 
+
+> 𝑝 2
+
+(𝑦, 𝑥 )
+
+Since 𝜋 ′ (𝑥 ) is proportional to 3 𝑤 (𝑥 ) , this shows that 𝐾 ′ 
+
+> 𝑝 2
+
+is reversible with respect to 𝜋 ′; in particular, 𝜋 ′ is stationary for 𝐾 ′ 
+
+> 𝑝 2
+
+.Since 𝜋 ′ is stationary for 𝐾 ′ 
+
+> 𝑝 2
+
+, we have 𝑝 10 →11 + 𝑝 01 →11 = 3 − 3𝑝 11 →11 . Since the left hand side is at most 2, we have 𝑝 11 →11 ≥ 1/3. To show that 𝑝 11 →11 < 1, we will show that 𝑝 11 →01 > 0. Indeed, by reversibility , it is equivalent to show that 𝑝 01 →11 > 0. To do this, we will show that any entangling gate sends some string of the form 𝜎 0 ⊗ 𝜎 𝑖 to a Pauli string of weight 2, where 𝑖 ∈ { 1, 2, 3}.Let 𝑈 0 be a two-qubit Clifford gate in the support of 𝑝 2. For 𝑖 ∈ { 1, 2, 3}, suppose 𝑈 0 (𝜎 0 ⊗ 𝜎 𝑖 )𝑈 † 
+
+> 0
+
+= 𝜔 𝑖 (𝜎 𝛼 𝑖 ⊗ 𝜎 𝛽 𝑖 ),where 𝛼 𝑖 , 𝛽 𝑖 ∈ { 0, 1, 2, 3} (but not 𝛼 𝑖 = 𝛽 𝑖 = 0) and 𝜔 𝑖 is a phase. Suppose that for each 𝑖 , either 𝛼 𝑖 = 0 or 𝛽 𝑖 = 0. We want to show that 𝑈 0 is not entangling. We start by noticing that either 𝛼 𝑖 = 0 for all 𝑖 or 𝛽 𝑖 = 0 for all 𝑖 . Indeed, suppose 𝛼 𝑖 = 0 and 𝛼 𝑗 ≠ 0 (hence 𝛽 𝑗 = 0) for some 𝑖 ≠ 𝑗 . Then 𝑈 0 (𝜎 0 ⊗ 𝜎 𝑖 )𝑈 † 
+
+> 0
+
+and 𝑈 0 (𝜎 0 ⊗ 𝜎 𝑗 )𝑈 † 
+
+> 0
+
+commute, while 𝜎 0 ⊗ 𝜎 𝑖 and 𝜎 0 ⊗ 𝜎 𝑗 do not, a contradiction. We may assume 𝛼 𝑖 = 0 for all 𝑖 . Otherwise, replace 𝑈 0 by SWAP 𝑈 0, where SWAP denotes the two-qubit Clifford gate swapping two qubits, which is not entangling. We have that 𝑈 0 is entangling if and only if SWAP 𝑈 0 is. Now since the Pauli operators span the space 𝐵 (C2) of operators on C2, we have that 𝑈 0 normalizes 𝐼 ⊗ 𝐵 (C2). In fact, 𝑈 0 defines a ∗-automorphism Φ of 𝐵 (C2) by 𝜎 0 ⊗ Φ(𝐴 ) = 𝑈 0 (𝜎 0 ⊗ 𝐴 )𝑈 † 
+
+> 0
+
+for 𝐴 ∈ 𝐵 (C2). By the Skolem–Noether theorem [Sko27, Noe33], Φ is given by conjugation by a unitary matrix 𝑉 0, i.e., 𝑈 0 (𝜎 0 ⊗ 𝐴 )𝑈 † 
+
+> 0
+
+= 𝜎 0 ⊗ 𝑉 0𝐴𝑉 † 
+
+> 0
+
+.2.3 Good Quantum Codes from Random Matching Circuits 13 The operator (𝜎 0 ⊗ 𝑉 † 
+
+> 0
+
+)𝑈 0 commutes with 𝜎 0 ⊗ 𝐵 (C2), so it must be of the form 𝑊 0 ⊗ 𝜎 0 for some unitary 𝑊 0,whence 𝑈 0 = 𝑊 0 ⊗ 𝑉 0 is a product gate and not entangling. Thus, we have shown that any gate that cannot take a Pauli string of the form 𝜎 0 ⊗ 𝜎 𝑖 (for some 𝑖 ∈ { 1, 2, 3}) to a Pauli string of weight 2 is not entangling. Now if 𝑝 2 assigns positive probability to any entangling gate, we must have 𝑝 01 →11 > 0, so by reversibility 
+
+𝑝 11 →01 > 0 and 𝑝 11 →11 < 1. 
+
+## 2.3 Good Quantum Codes from Random Matching Circuits 
+
+In this subsection, we will show how the second moment operator can be used to control the probability that our random circuit from Subsection 2.1 defines a good quantum error-correcting code. We will start by describing the bound on the probability that a random circuit fails to satisfy the condition of being an error correcting code. This follows the start of the proof for Theorem 3.1 in [BF13b]. Recall the following proposition from [BF13b], whose proof we restate in Appendix A: 
+
+Proposition A.1. A unitary 𝑈 ∈ C 𝑛 defines a quantum error-correcting code of distance at least 𝑑 +1 if and only if for all 
+
+𝜈 𝐴 ∈ { 0, 1, 2, 3}𝑘 −{ 0𝑘 }, 𝜈 𝐵 ∈ { 0, 3}𝑛 −𝑘 , and 𝜇 ∈ { 0, 1, 2, 3}𝑛 of weight 1 ≤ 𝑤 (𝜇 ) ≤ 𝑑 , we have tr 𝜎 𝜇 𝑈 (𝜎 𝜈 𝐴 ⊗ 𝜎 𝜈 𝐵 )𝑈 † =0.
+
+From here, we will freely use notation from Subsection 2.2. Suppose 𝑈 𝑇 is a random Clifford obtained from 𝑇 
+
+layers of the random matching circuit defined in Definition 2.2. The second moment operator for 𝑈 𝑇 is given by 
+
+𝑀 𝑇  
+
+> circ ,𝑝 2
+
+, as defined in Subsection 2.2. Following [BF13b] we observe that 
+
+P[tr 
+
+h
+
+𝜎 𝜇 𝑈 𝑇 (𝜎 𝜈 𝐴 ⊗ 𝜎 𝜈 𝐵 )𝑈 †
+
+> 𝑇
+
+i
+
+≠ 0] = 12𝑛 E
+
+h
+
+tr 
+
+h
+
+𝜎 𝜇 𝑈 𝑇 (𝜎 𝜈 𝐴 ⊗ 𝜎 𝜈 𝐵 )𝑈 †
+
+> 𝑇
+
+i i 
+
+because tr 
+
+h
+
+𝜎 𝜇 𝑈 𝑇 (𝜎 𝜈 𝐴 ⊗ 𝜎 𝜈 𝐵 )𝑈 †
+
+> 𝑇
+
+i
+
+∈ { 0, ±2𝑛 }. We can write 12𝑛 E
+
+h
+
+tr 
+
+h
+
+𝜎 𝜇 𝑈 𝑇 (𝜎 𝜈 𝐴 ⊗ 𝜎 𝜈 𝐵 )𝑈 †
+
+> 𝑇
+
+i i 
+
+= 14𝑛 E
+
+
+
+tr 
+
+h
+
+𝜎 𝜇 𝑈 𝑇 (𝜎 𝜈 𝐴 ⊗ 𝜎 𝜈 𝐵 )𝑈 †
+
+> 𝑇
+
+i  2
+
+= 14𝑛 E
+
+h
+
+tr 
+
+h
+
+𝜎 ⊗2 
+
+> 𝜇
+
+𝑀 𝑇  
+
+> circ ,𝑝 2
+
+[𝜎 𝜈 𝐴 𝜈 𝐵 ⊗ 𝜎 𝜈 𝐴 𝜈 𝐵 ]
+
+i i 
+
+= 𝑄 𝑇 (𝜈 𝐴 𝜈 𝐵 , 𝜇 ).
+
+By Proposition A.1 and the union bound, combined with the above calculation, we have that 𝑈 𝑇 defines a quantum error-correcting code with probability at least 
+
+𝑝 code ≥ 1 −∑︁     
+
+> 𝜈 𝐴 ∈ { 0,1,2,3}𝑘 −{ 0𝑘 }
+> 𝜈 𝐵 ∈ { 0,3}𝑛 −𝑘
+
+∑︁ 𝜇 ∈ { 0,1,2,3}𝑛   
+
+> 1≤𝑤 (𝜇 ) ≤ 𝑑
+
+𝑄 𝑇 (𝜈 𝐴 𝜈 𝐵 , 𝜇 ).
+
+We split up the terms of the outer sum by 𝑏 (𝜈 𝐴 𝜈 𝐵 ), the binary string with zeroes in the same location as 𝜈 𝐴 𝜈 𝐵 . Then we have 
+
+𝑝 code ≥ 1 −∑︁     
+
+> 𝑥 𝐴 ∈ { 0,1}𝑘 −{ 0𝑘 }
+> 𝑥 𝐵 ∈ { 0,1}𝑛 −𝑘
+
+3𝑤 (𝑥 𝐴 )∑︁   
+
+> 𝑦 ∈ { 0,1}𝑛
+> 1≤𝑤 (𝑦 ) ≤ 𝑑
+
+𝑄 𝑇  
+
+> 0
+
+(𝑥 𝐴 𝑥 𝐵 , 𝑦 )
+
+Define a matrix 
+
+𝑃 (𝑤, ℓ ) =∑︁   
+
+> 𝑦 ∈ { 0,1}𝑛
+> 𝑤 (𝑦 )=ℓ
+
+𝑄 0 (𝑥, 𝑦 ) for any (all) 𝑥 ∈ { 0, 1}𝑛 of weight 𝑤 . 
+
+Also, set 
+
+𝑃 𝑇 (𝑤, ≤ 𝑑 ) =
+
+> 𝑑
+
+∑︁ 
+
+> ℓ=1
+
+𝑃 𝑇 (𝑤, ℓ ).
+
+To see that 𝑃 (𝑤, ℓ ) is independent of the starting string 𝑥 used to define it, we observe that the distribution of a uniformly random perfect matching is invariant under composition with permutations of [𝑛 ]. Thus, 𝑄 0 (𝑥, 𝑦 ) =2.3 Good Quantum Codes from Random Matching Circuits 14 
+
+𝑄 0 (𝜏𝑥, 𝜏𝑦 ) for any permutation 𝜏 of the indices of 𝑥 and 𝑦 . Since permutations of [𝑛 ] act transitively on strings of a fixed weight, Í𝑦 ∈ { 0,1}𝑛  
+
+> 𝑤 (𝑦 )=𝑚
+
+𝑄 0 (𝑥, 𝑦 ) = Í𝑦 ∈ { 0,1}𝑛  
+
+> 𝑤 (𝑦 )=𝑚
+
+𝑄 0 (𝜏𝑥, 𝑦 ). Thus, 
+
+𝑝 code ≥ 1 −∑︁     
+
+> 𝑥 𝐴 ∈ { 0,1}𝑘 −{ 0𝑘 }
+> 𝑥 𝐵 ∈ { 0,1}𝑛 −𝑘
+
+3𝑤 (𝑥 𝐴 )∑︁   
+
+> 𝑦 ∈ { 0,1}𝑛
+> 1≤𝑤 (𝑦 ) ≤ 𝑑
+
+𝑄 𝑇  
+
+> 0
+
+(𝑥 𝐴 𝑥 𝐵 , 𝑦 ) ≥ 1 −∑︁     
+
+> 𝑥 𝐴 ∈ { 0,1}𝑘 −{ 0𝑘 }
+> 𝑥 𝐵 ∈ { 0,1}𝑛 −𝑘
+
+3𝑤 (𝑥 𝐴 ) 𝑃 𝑇 (𝑤 (𝑥 𝐴 𝑥 𝐵 ), ≤ 𝑑 ) (4) The matrix 𝑃 also defines a Markov chain on [𝑛 ], and we study it carefully in Section 3. In particular, given a matrix 
+
+𝐾 ′ of the form (3) we will produce a Markov chain with transition matrix 𝑃 as above, and in Section 3 we will show the following theorem: 
+
+Theorem 3.4. Suppose 𝐾 ′ is reversible with respect to the stationary distribution 𝜋 ′ = (1/5, 1/5, 3/5) on 01 , 10 , 11 , and that 0 < 𝑝 11 →11 < 1. Let 𝑚, 𝛽, 𝛿 > 0. There is a constant 𝑐 > 0 depending on 𝛿 , 𝑚 , 𝛽 , and 𝑝 11 →11 such that for large enough (even) 𝑛 and for 𝑡 ≥ 𝑐 log 𝑛 we have 
+
+𝑃 𝑡 (𝑤, ℓ ) ≤ 4𝛿𝑛 3ℓ  𝑛 ℓ
+
+
+
+4𝑛 − 1 + 13𝑤  𝑛 𝑤 
+
+ 𝑛 −𝑚 + 𝑒 −𝛽𝑛 
+
+for any integers 1 ≤ 𝑤, ℓ ≤ 𝑛 and 
+
+𝑃 𝑡 (𝑤, ≤ 𝑑 ) ≤ 4𝛿𝑛 
+
+4𝑛 − 1 3𝑑 2𝑛𝐻 (𝑑 /𝑛 ) + 13𝑤  𝑛 𝑤 
+
+ 𝑛 −𝑚 + 𝑒 −𝛽𝑛 
+
+for any integers 1 ≤ 𝑤 ≤ 𝑛 and 1 ≤ 𝑑 ≤ 𝑛 /2, where 𝐻 is the binary entropy function. 
+
+The bounds from Theorem 3.4 will give us the following result, whose proof is very similar to that of [BF13b, Theorem III.1]: 
+
+Theorem 2.3 (Universality for good quantum codes from random matching circuits) . Suppose 𝑝 2 is a distribution on 
+
+C2 satisfying bi-invariance, positive entanglement, and reversibility (Definition 2.1). Let 𝑚, 𝛿 > 0. There is a constant 
+
+𝑐 > 0 depending on 𝛿 , 𝑚 , and 𝑝 2 such that for large enough (even) 𝑛 , a random matching circuit (Definition 2.2) of depth 
+
+⌈𝑐 log 𝑛 ⌉ derived from 𝑝 2 defines an [𝑛, 𝑘 ] quantum error-correcting code with distance at least 𝑑 + 1 with probability at least 
+
+𝑝 code ≥ 1 − 𝑛 −𝑚 − 2𝑘 −𝑛 (1−𝐻 (𝑑 /𝑛 ) − log 2 (3)𝑑 /𝑛 −𝛿 ) .
+
+Proof. By Lemma 2.2, since 𝑝 2 satisfies bi-invariance, positive entanglement, and reversibility, 𝐾 ′ 
+
+> 𝑝 2
+
+is reversible with respect to 𝜋 ′ and 0 < 𝑝 11 →11 < 1. Thus, Theorem 3.4 applies (with 𝛿 /3 in place of 𝛿 and 𝑚 + 2 in place of 𝑚 ), and for each 𝛽 > 0 (to be chosen later) there is a 𝑐 > 0 such that for 𝑇 ≥ 𝑐 log 𝑛 we have 1 − 𝑝 code ≤
+
+> 𝑛
+
+∑︁ 
+
+> 𝑤 =1
+
+∑︁ 𝑥 𝐴 ∈ { 0,1}𝑘 −{ 0𝑘 }   
+
+> 𝑥 𝐵 ∈ { 0,1}𝑛 −𝑘
+> 𝑤 (𝑥 𝐴 𝑥 𝐵 )=𝑤
+
+3𝑤 (𝑥 𝐴 ) 𝑃 𝑇 (𝑤, ≤ 𝑑 )≤
+
+> 𝑛
+
+∑︁ 
+
+> 𝑤 =1
+
+∑︁ 𝑥 𝐴 ∈ { 0,1}𝑘 −{ 0𝑘 }   
+
+> 𝑥 𝐵 ∈ { 0,1}𝑛 −𝑘
+> 𝑤 (𝑥 𝐴 𝑥 𝐵 )=𝑤
+
+3𝑤 (𝑥 𝐴 ) 4𝛿𝑛 /3
+
+4𝑛 − 1 3𝑑 2𝑛𝐻 (𝑑 /𝑛 ) + 13𝑤  𝑛 𝑤 
+
+ 𝑛 −𝑚 −2 + 𝑒 −𝛽𝑛 
+
+!
+
+.
+
+We split into two sums and bound each one separately. To bound 𝑛 ∑︁ 
+
+> 𝑤 =1
+
+∑︁ 𝑥 𝐴 ∈ { 0,1}𝑘 −{ 0𝑘 }   
+
+> 𝑥 𝐵 ∈ { 0,1}𝑛 −𝑘
+> 𝑤 (𝑥 𝐴 𝑥 𝐵 )=𝑤
+
+3𝑤 (𝑥 𝐴 )
+
+ 4𝛿𝑛 /3
+
+4𝑛 − 1 3𝑑 2𝑛𝐻 (𝑑 /𝑛 ) + 𝑒 −𝛽𝑛 
+
+15 we use the fact that ∑︁ 
+
+𝑥 𝐴 ∈ { 0,1}𝑘 −{ 0𝑘 }
+
+𝑥 𝐵 ∈ { 0,1}𝑛 −𝑘 
+
+𝑤 (𝑥 𝐴 𝑥 𝐵 )=𝑤 
+
+3𝑤 (𝑥 𝐴 ) ≤∑︁ 
+
+𝜈 𝐴 ∈ { 0,1,2,3}𝑘 −{ 0𝑘 }
+
+𝜈 𝐵 ∈ { 0,3}𝑛 −𝑘 
+
+1 ≤ 4𝑘 2𝑛 −𝑘 − 1 = 2𝑛 +𝑘 − 1in the inner sum, so 
+
+𝑛 ∑︁ 
+
+𝑤 =1∑︁ 𝑥 𝐴 ∈ { 0,1}𝑘 −{ 0𝑘 }
+
+𝑥 𝐵 ∈ { 0,1}𝑛 −𝑘 
+
+𝑤 (𝑥 𝐴 𝑥 𝐵 )=𝑤 
+
+3𝑤 (𝑥 𝐴 )
+
+ 4𝛿𝑛 /3
+
+4𝑛 − 1 3𝑑 2𝑛𝐻 (𝑑 /𝑛 ) + 𝑒 −𝛽𝑛 
+
+
+
+≤ 𝑛 (2𝑛 +𝑘 − 1)
+
+ 4𝛿𝑛 /3
+
+4𝑛 − 1 3𝑑 2𝑛𝐻 (𝑑 /𝑛 ) + 𝑒 −𝛽𝑛 
+
+
+
+≤ 𝑛 2𝑘 −𝑛 (1−𝐻 (𝑑 /𝑛 ) − log 2 (3)𝑑 /𝑛 −2𝛿 /3) + 𝑛𝑒 − ( 𝛽 −ln 4 )𝑛 .
+
+Now choose 𝛽 > ln 4 + 1 so that the right hand side is bounded above by 2 𝑛 2𝑘 −𝑛 (1−𝐻 (𝑑 /𝑛 ) − log 2 (3)𝑑 /𝑛 −2𝛿 /3) , which is bounded above by 2 𝑘 −𝑛 (1−𝐻 (𝑑 /𝑛 ) − log 2 (3)𝑑 /𝑛 −𝛿 ) for large enough 𝑛 .We can make the bound uniform in 𝑛 by increasing 𝑐 .To bound 𝑛 ∑︁ 
+
+𝑤 =1∑︁ 𝑥 𝐴 ∈ { 0,1}𝑘 −{ 0𝑘 }
+
+𝑥 𝐵 ∈ { 0,1}𝑛 −𝑘 
+
+𝑤 (𝑥 𝐴 𝑥 𝐵 )=𝑤 
+
+3𝑤 (𝑥 𝐴 ) 13𝑤  𝑛 𝑤 
+
+ 𝑛 −𝑚 −2
+
+we use the fact that ∑︁ 
+
+𝑥 𝐴 ∈ { 0,1}𝑘 −{ 0𝑘 }
+
+𝑥 𝐵 ∈ { 0,1}𝑛 −𝑘 
+
+𝑤 (𝑥 𝐴 𝑥 𝐵 )=𝑤 
+
+3𝑤 (𝑥 𝐴 ) =
+
+𝑤 ∑︁ 
+
+𝑞 =1
+
+𝑘 𝑞 
+
+
+
+3𝑞 
+
+𝑛 − 𝑘 𝑤 − 𝑞 
+
+
+
+≤
+
+𝑤 ∑︁ 
+
+𝑞 =1
+
+𝑛 𝑤 
+
+
+
+3𝑤 ≤ 𝑛 
+
+𝑛 𝑤 
+
+
+
+3𝑤 
+
+so that 
+
+𝑛 ∑︁ 
+
+𝑤 =1∑︁ 𝑥 𝐴 ∈ { 0,1}𝑘 −{ 0𝑘 }
+
+𝑥 𝐵 ∈ { 0,1}𝑛 −𝑘 
+
+𝑤 (𝑥 𝐴 𝑥 𝐵 )=𝑤 
+
+3𝑤 (𝑥 𝐴 ) 13𝑤  𝑛 𝑤 
+
+ 𝑛 −𝑚 −2 ≤
+
+𝑛 ∑︁ 
+
+𝑤 =1
+
+𝑛 
+
+𝑛 𝑤 
+
+
+
+3𝑤 13𝑤  𝑛 𝑤 
+
+ 𝑛 −𝑚 −2
+
+=
+
+𝑛 ∑︁ 
+
+𝑤 =1
+
+𝑛 −𝑚 −1 = 𝑛 −𝑚 .
+
+Combining the bounds from the two sums yields the claim in the theorem. 
+
+# 3 Analysis of the Pauli Weight Chain 
+
+In this section, we study a class of Markov chains 𝑄 0 on nonzero binary strings of even length 𝑛 . The input to this process is a transition kernel on strings of length 2 given by a row-stochastic 4 × 4 matrix of the following form: 
+
+𝐾 =
+
+©«
+
+1 0 0 00 𝑝 01 →01 𝑝 01 →10 𝑝 01 →11 
+
+0 𝑝 10 →01 𝑝 10 →10 𝑝 10 →11 
+
+0 𝑝 11 →01 𝑝 11 →10 𝑝 11 →11 
+
+ª®®®¬
+
+We denote by 𝐾 ′ the bottom-right 3 × 3 corner, and we require that 𝐾 ′ is reversible with respect to the stationary distribution 𝜋 ′ = (1/5, 1/5, 3/5) and that 0 < 𝑝 11 →11 < 1. The data of 𝐾 ′ and its entries will be in use throughout 16 the rest of this section. Note that row stochasticity implies that 𝑝 11 →01 + 𝑝 11 →10 = 1 − 𝑝 11 →11 , and stationarity of 
+
+𝜋 ′ implies that 𝑝 01 →11 + 𝑝 10 →11 = 3 − 3𝑝 11 →11 . The entry 𝑝 11 →11 will govern most of the dynamics of the processes described in this section. One step of the process 𝑄 0 is defined as follows: 
+
+Algorithm 1 String chain 𝑄 0
+
+Require: 𝑦 ∈ { 0, 1}𝑛 − { 0𝑛 } 
+
+> 1:
+
+Pick a uniformly random ordered perfect matching O of [𝑛 ]. 
+
+> 2:
+
+For each (𝑖, 𝑗 ) ∈ O , let 𝑦 ′ 
+
+> 𝑖
+
+𝑦 ′ 
+
+> 𝑗
+
+be obtained at random from 𝑦 𝑖 𝑦 𝑗 according to the transition kernel 𝐾 . 
+
+> 3:
+
+Output 𝑦 ′ ∈ { 0, 1}𝑛 .In words, we partition [𝑛 ] := {1, . . . , 𝑛 } into ordered pairs uniformly at random. Each pair of indices defines a two-bit string, which we evolve according to 𝐾 . In particular, the string 00 is almost surely not modified in this process. 
+
+Remark 3.1. Let ˜𝐾 ′ be the matrix 𝐾 ′ with the first and second row and column switched (i.e., exchanging 𝑝 01 →11 for 
+
+𝑝 10 →11 and so on). We note that 𝐾 ′ and ˜𝐾 ′ yield the same string chain 𝑄 0, since (𝑖, 𝑗 ) and ( 𝑗, 𝑖 ) appear in a uniformly random ordered perfect matching O with equal probability. In particular, 12 (𝐾 ′ + ˜𝐾 ′) also yields the same string chain. When studying the string chain, we do not lose any generality by assuming 
+
+𝐾 ′ = ©«
+
+𝑝 1→1 𝑝 𝑠𝑤𝑎𝑝 𝑝 1→2
+
+𝑝 𝑠𝑤𝑎𝑝 𝑝 1→1 𝑝 1→212 𝑝 2→1 12 𝑝 2→1 𝑝 2→2
+
+ª®¬
+
+where 𝑝 1→1 = 12 (𝑝 01 →01 +𝑝 10 →10 ), 𝑝 𝑠𝑤𝑎𝑝 = 12 (𝑝 01 →10 +𝑝 10 →01 ), 𝑝 1→2 = 12 (𝑝 01 →11 +𝑝 10 →11 ), and 𝑝 2→1 = 𝑝 11 →01 +𝑝 11 →10 .
+
+Any random 2-qubit Clifford gate satisfying the conditions of Definition 2.1 yields a kernel 𝐾 of the desired form via the second-moment operator by Lemma 2.2. We recall that the weight 𝑤 (𝑦 ) of a string 𝑦 ∈ { 0, 1}𝑛 is the number of ones in the string. The Markov chain 𝑄 0
+
+defines a weight chain 𝑃 on [𝑛 ] as follows: 
+
+Algorithm 2 Weight chain 𝑃 
+
+Require: 𝑤 ∈ [ 𝑛 ] 
+
+> 1:
+
+Let 𝑦 ∈ { 0, 1}𝑛 be a string of weight 𝑤 . 
+
+> 2:
+
+Let 𝑦 ′ be obtained from 𝑦 at random according to 𝑄 0. 
+
+> 3:
+
+Output 𝑤 (𝑦 ′).We observe that 𝑃 is indeed a Markov chain. To see this, note that the distribution of 𝑤 (𝑦 ′) is insensitive to permutations of the string 𝑦 because the distribution of a uniformly random ordered perfect matching of [𝑛 ] is invariant under composition with permutations of [𝑛 ]. We denote by 𝑃 𝑡 (𝑤, 𝑘 ) the probability of reaching 𝑘 from 𝑤 
+
+in exactly 𝑡 steps of 𝑃 starting from 𝑤 and set 𝑃 𝑡 (𝑤, [𝑘 1, 𝑘 2]) := Í𝑘 2 
+
+> 𝑘 =𝑘 1
+
+𝑃 𝑡 (𝑤, 𝑘 ) to be the probability of being in the range [𝑘 1, 𝑘 2] after exactly 𝑡 steps of 𝑃 starting from 𝑤 .
+
+Lemma 3.2 (Stationary distributions) . Use notation from the start of this section. Assume 0 < 𝑝 11 →11 < 1 and 𝐾 ′ is reversible with respect to 𝜋 ′ = (1/5, 1/5, 3/5). Then the following is true. The chains 𝑄 0 and 𝑃 are irreducible, and aperiodic. The chain 𝑄 0 is reversible with respect to the stationary distri-bution 
+
+𝜋 0 (𝑦 ) = 3𝑤 (𝑦 )
+
+4𝑛 − 1
+
+and the chain 𝑃 is reversible with respect to the stationary distribution 
+
+𝜋 (𝑤 ) = 3𝑤  𝑛 𝑤 
+
+
+
+4𝑛 − 1 .17 The assumptions on 𝐾 ′ will be standing assumptions throughout this section. 
+
+Proof. To see that 𝑄 0 is irreducible, we first observe that any two states with weight 1 can communicate. To see this, let 𝑦 (𝑖 ) be the string of weight 1 with 1 in the 𝑖 ’th position. Since 𝑝 11 →11 < 1 we have 𝑝 01 →11 > 0 or 𝑝 10 →11 > 0, and 
+
+𝑝 11 →01 > 0 or 𝑝 11 →10 > 0. Then for 𝑖 ≠ 𝑗 we see that 𝑦 ( 𝑗 ) is reachable from 𝑦 (𝑖 ) in two steps by picking a partition involving the pair (𝑖, 𝑗 ) or ( 𝑗, 𝑖 ), replacing 𝑦 (𝑖 ) 
+
+> 𝑖
+
+𝑦 (𝑖 ) 
+
+> 𝑗
+
+= 10 with 11, and then picking another partition involving the pair (𝑖, 𝑗 ) or ( 𝑗, 𝑖 ) and replacing the 11 string by 01. Next we see that any string 𝑦 communicates with a string of weight 1. To see this, we will show that 𝑦 com-municates with a string of weight 𝑤 (𝑦 ) − 1 if 𝑤 (𝑦 ) > 1. If 𝑤 (𝑦 ) is even, we can pair up all the 1s in 𝑦 and change exactly one of them to 10 or 01 (using 𝑝 11 →11 > 0 and 𝑝 11 →01 > 0 or 𝑝 11 →10 > 0). If 𝑤 (𝑦 ) is odd, this can be done in two steps. We necessarily have 𝑤 (𝑦 ) < 𝑛 , so in the first step we can pair up all but one of the 1s and pair the remaining one with a 0. Then we change none of the 11 pairs and replace the 10 or 01 pair with 11 (using 𝑝 11 →11 > 0and 𝑝 01 →11 > 0 or 𝑝 10 →11 > 0). In the second step, the new weight is even and at least 4, so we can pair up all the 1s and change exactly two of them into 10 or 01. We observe that the same process can be performed in reverse, so any string communicates with a string of weight 1. Hence 𝑄 0 is irreducible. To see that 𝑄 0 is aperiodic, we observe that any state of even weight is aperiodic; we can leave it unchanged with positive probability by pairing up all the 1s and leaving each 11 pair unchanged (using 𝑝 11 →11 > 0). To see that 𝑄 0 is reversible with respect to 𝜋 0, let 𝑦, 𝑧 be two strings with 𝑄 0 (𝑦, 𝑧 ) > 0 (i.e., the probability of reaching 𝑧 from 𝑦 in one step of 𝑄 0 is positive). Let 𝑌 be the random string obtained from 𝑦 after one step of 𝑄 0 and 
+
+𝑍 the random string obtained from 𝑧 after one step of 𝑄 0. Let O𝑦 , O𝑧 be uniformly random partitions of [𝑛 ] into ordered pairs used to evolve 𝑦 and 𝑧 , respectively. Fix a partition 𝑂 . Let 𝑂 1, . . . , 𝑂 𝑛 /2 be the associated ordered pairs. Assume that if 𝑂 𝑘 = (𝑖 𝑘 , 𝑗 𝑘 ) with 𝑦 𝑖 𝑘 𝑦 𝑗 𝑘 = 00 then 𝑧 𝑖 𝑘 𝑧 𝑗 𝑘 = 00 as well, and vice versa. We claim that 
+
+𝜋 0 (𝑦 ) P[𝑌 = 𝑧 | O 𝑦 = 𝑂 ] = 𝜋 0 (𝑧 ) P[𝑍 = 𝑦 | O 𝑧 = 𝑂 ]
+
+Indeed, for 𝑌 = 𝑧 conditioned on O𝑦 = 𝑂 we need that for each 𝑂 𝑘 = (𝑖 𝑘 , 𝑗 𝑘 ) we have 𝑌 𝑖 𝑘 𝑌 𝑗 𝑘 = 𝑧 𝑖 𝑘 𝑧 𝑗 𝑘 ; similarly for 
+
+𝑍 = 𝑦 we need that for each 𝑂 𝑘 we have 𝑍 𝑖 𝑘 𝑍 𝑗 𝑘 = 𝑦 𝑖 𝑘 𝑦 𝑗 𝑘 . Let 𝜋 ′ = (1/5, 1/5, 3/5) be the stationary distribution of 𝐾 ′
+
+on strings (01 , 10 , 11 ).For each 𝑘 , either we have 𝑦 𝑖 𝑘 𝑦 𝑗 𝑘 = 𝑧 𝑖 𝑘 𝑧 𝑗 𝑘 = 𝑌 𝑖 𝑘 𝑌 𝑗 𝑘 = 𝑍 𝑖 𝑘 𝑍 𝑗 𝑘 = 00 or, by reversibility of 𝐾 ′ with respect to 𝜋 ′, we have 
+
+𝜋 ′ (𝑦 𝑖 𝑘 𝑦 𝑗 𝑘 ) P[𝑌 𝑖 𝑘 𝑌 𝑗 𝑘 = 𝑧 𝑖 𝑘 𝑧 𝑗 𝑘 | O 𝑦 = 𝑂 ] = 𝜋 ′ (𝑧 𝑖 𝑘 𝑧 𝑗 𝑘 ) P[𝑍 𝑖 𝑘 𝑍 𝑗 𝑘 = 𝑦 𝑖 𝑘 𝑦 𝑗 𝑘 | O 𝑧 = 𝑂 ].
+
+Hence, 
+
+P[𝑌 = 𝑧 | O 𝑦 = 𝑂 ]
+
+> 𝑛 /2
+
+Ö
+
+> 𝑘 =1
+
+𝜋 ′ (𝑦 𝑖 𝑘 𝑦 𝑗 𝑘 ) =
+
+> 𝑛 /2
+
+Ö
+
+> 𝑘 =1
+
+𝜋 ′ (𝑦 𝑖 𝑘 𝑦 𝑗 𝑘 ) P[𝑌 𝑖 𝑘 𝑌 𝑗 𝑘 = 𝑧 𝑖 𝑘 𝑧 𝑗 𝑘 | O 𝑦 = 𝑂 ]
+
+=
+
+> 𝑛 /2
+
+Ö
+
+> 𝑘 =1
+
+𝜋 ′ (𝑧 𝑖 𝑘 𝑧 𝑗 𝑘 ) P[𝑍 𝑖 𝑘 𝑍 𝑗 𝑘 = 𝑦 𝑖 𝑘 𝑦 𝑗 𝑘 | O 𝑧 = 𝑂 ]
+
+= P[𝑍 = 𝑦 | O 𝑧 = 𝑂 ]
+
+> 𝑛 /2
+
+Ö
+
+> 𝑘 =1
+
+𝜋 ′ (𝑧 𝑖 𝑘 𝑧 𝑗 𝑘 ).
+
+Each term 𝜋 ′ (𝑦 𝑖 𝑘 𝑦 𝑗 𝑘 ) is proportional to 3 𝑤 (𝑦 𝑖 𝑘 𝑦 𝑗 𝑘 ) , and similarly for 𝑧 . Hence, we have shown 
+
+P[𝑌 = 𝑧 | O 𝑦 = 𝑂 ]3𝑤 (𝑦 ) = P[𝑍 = 𝑦 | O 𝑧 = 𝑂 ]3𝑤 (𝑧 ) .
+
+Averaging over O𝑦 and O𝑧 we obtain the detailed balance condition for 𝑄 0:
+
+P[𝑌 = 𝑧 ]3𝑤 (𝑦 ) = P[𝑍 = 𝑦 ]3𝑤 (𝑧 ) .
+
+Hence 𝑄 0 is reversible with respect to 𝜋 0 and 𝜋 0 is stationary for 𝑄 0.Now we will transfer these nice properties from 𝑄 0 to 𝑃 .Since 𝑄 0 is irreducible and aperiodic, we immediately get that 𝑃 is as well. Indeed, if any two strings commu-nicate in 𝑄 0, then their weights communicate in 𝑃 . Moreover, if any string is aperiodic in 𝑄 0, then its weight is 18 aperiodic in 𝑃 . To show that 𝑃 is reversible with respect to the stationary distribution, choose two weights 𝑤 and 𝑤 ′
+
+and add up the detailed balance condition for 𝑄 0 over all pairs of strings of weights 𝑤 and 𝑤 ′, respectively to obtain 
+
+𝜋 (𝑤 )𝑃 (𝑤, 𝑤 ′) = 𝜋 (𝑤 ′)𝑃 (𝑤 ′, 𝑤 ).The goal of this section is to get bounds on 𝑃 𝑡 (𝑤, [1, 𝑑 ]) in terms of 𝑤 when 𝑡 is large enough in terms of 𝑛 . The strategy is similar to the proof of [BF15, Theorem 4.2], and we will get a very similar bound. The main idea is that when 𝑤 is close to the average of the stationary distribution, then 𝑃 𝑡 (𝑤, 𝑘 ) is not much bigger than 𝜋 (𝑘 ). This part of the proof is essentially identical to the one in [BF15]. For more general 𝑤 , we will use a hitting time argument to show that the weight chain gets close to the average of the stationary distribution within 𝑂 (log 𝑛 ) steps with very high probability. This argument is quite different from that of [BF15]. At each step of the string chain, we will study the ordered pairs in O one at a time as a martingale and use concentration inequalities for martingales together with a large deviation bound to control the hitting time. 
+
+Lemma 3.3 (Start of proof of [BF15, Theorem 4.2]) . Suppose |𝑤 − 3𝑛 /4| ≤ 𝛿𝑛 for some 𝛿 ∈ ( 0, 1/16 ). Then for large enough (even) 𝑛 depending only on 𝛿 we have 
+
+𝑃 𝑡 (𝑤, ℓ ) ≤ 4𝛿𝑛 3ℓ  𝑛 ℓ
+
+
+
+4𝑛 − 1
+
+and 
+
+𝑃 𝑡 (𝑤, [1, 𝑑 ]) ≤ 4𝛿𝑛 
+
+4𝑛 − 1 3𝑑 2𝑛𝐻 (𝑑 /𝑛 )
+
+for any 𝑡 ≥ 0, 1 ≤ ℓ ≤ 𝑛 , and 1 ≤ 𝑑 ≤ 𝑛 /2, where 𝐻 is the binary entropy function. Proof. We have 𝜋 (𝑤 )𝑃 𝑡 (𝑤, ℓ ) ≤ Í𝑛 𝑖 =1 𝜋 (𝑖 )𝑃 𝑡 (𝑖, ℓ ) = 𝜋 (ℓ), where the second equality follows from stationarity of 𝜋 .Thus, we have 
+
+𝑃 𝑡 (𝑤, ℓ ) ≤ 𝜋 (ℓ)
+
+𝜋 (𝑤 ) = 4𝑛 − 13𝑤  𝑛 𝑤 
+
+ 3ℓ  𝑛 ℓ
+
+
+
+4𝑛 − 1 .
+
+Now by Stirling’s formula we have  𝑛 
+
+⌊3𝑛 /4⌋
+
+
+
+33𝑛 /4 ≥ 𝐶 
+
+√𝑛 4𝑛 
+
+for some constant 𝐶 > 0. We wish to bound 3 𝑤  𝑛 𝑤 
+
+ when 𝑤 is close to 3 𝑛 /4. Indeed when 𝑤 ≤ 3𝑛 /4 we have 
+
+𝑛 𝑤 
+
+
+
+3𝑤 =
+
+ 𝑛 
+
+⌊3𝑛 /4⌋
+
+
+
+33𝑛 /43𝑤 −3𝑛 /4
+
+> ⌊3𝑛 /4⌋− 𝑤
+
+Ö
+
+> 𝑗 =0
+
+⌊3𝑛 /4⌋ − 𝑗 
+
+⌈𝑛 /4⌉ + 𝑗 + 1
+
+=
+
+ 𝑛 
+
+⌊3𝑛 /4⌋
+
+
+
+33𝑛 /4
+
+> ⌊3𝑛 /4⌋− 𝑤
+
+Ö
+
+> 𝑗 =0
+
+⌊3𝑛 /4⌋ − 𝑗 
+
+3⌈𝑛 /4⌉ + 3𝑗 + 3 .
+
+When 𝑤 ≥ ( 3/4 − 𝛿 )𝑛 , each of the at most 𝛿𝑛 terms in the product on the right hand side is bounded below by  
+
+> 3𝑛 /4−𝛿𝑛 −13𝑛 /4+3𝛿𝑛 +6
+
+= 1 − 16 𝛿𝑛 +28 3𝑛 +12 𝛿𝑛 +24 . When 𝑛 is large enough we can bound this below by 1 − 16 𝛿 /3 so that 
+
+𝑛 𝑤 
+
+
+
+3𝑤 ≥ 𝐶 
+
+√𝑛 4𝑛 (1 − 16 𝛿 /3)𝛿𝑛 .
+
+Similarly, when 3 𝑛 /4 ≤ 𝑤 ≤ ( 3/4 + 𝛿 )𝑛 we have 
+
+𝑛 𝑤 
+
+
+
+3𝑤 =
+
+ 𝑛 
+
+⌊3𝑛 /4⌋
+
+
+
+33𝑛 /43𝑤 −3𝑛 /4
+
+> 𝑤 −⌊ 3𝑛 /4⌋
+
+Ö
+
+> 𝑗 =0
+
+⌈𝑛 /4⌉ − 𝑗 
+
+⌊3𝑛 /4⌋ + 𝑗 + 1
+
+=
+
+ 𝑛 
+
+3𝑛 /4
+
+
+
+33𝑛 /4
+
+> 𝑤 −⌊ 3𝑛 /4⌋
+
+Ö
+
+> 𝑗 =0
+
+3⌈𝑛 /4⌉ − 3𝑗 
+
+⌊3𝑛 /4⌋ + 𝑗 + 1 .3.1 Martingales and One-Step Probability 19 Each of the at most 𝛿𝑛 terms in the product on the right hand side is bounded below by 3𝑛 /4−3𝛿𝑛  
+
+> 3𝑛 /4+𝛿𝑛 +1
+
+= 1 − 16 𝛿 +4/𝑛  
+
+> 3+4𝛿 +4/𝑛
+
+,which we can again bound from below by 1 − 16 𝛿 /3. Thus we get the same bound for  𝑛 𝑤 
+
+3𝑤 as before. If 𝛿 < 1/16 then 1 − 16 𝛿 /3 > 2/3, so 𝐶 √𝑛 4𝑛 (1 − 16 𝛿 /3)𝛿𝑛 ≥ 4(1−𝛿 )𝑛 for sufficiently large 𝑛 . Thus 
+
+𝑃 𝑡 (𝑤, ℓ ) ≤ 4𝑛 − 14(1−𝛿 )𝑛 
+
+3ℓ  𝑛 ℓ
+
+
+
+4𝑛 − 1 ≤ 4𝛿𝑛 3ℓ  𝑛 ℓ
+
+
+
+4𝑛 − 1 .
+
+This concludes the proof of the first part of the claim. The second claim follows from the bound Í𝑑 ℓ=0
+
+ 𝑛 ℓ
+
+ ≤ 2𝑛𝐻 (𝑑 /𝑛 ) .To get from the conclusion of Lemma 3.3 to a bound for any starting 𝑤 , we show that the Markov chain driven by 𝑃 reaches the interval [( 3/4 − 𝛿 )𝑛, (3/4 + 𝛿 )𝑛 ] quickly. For 𝑡 ≥ 0 and 𝑤 ∈ [ 𝑛 ] let 𝑋 𝑡 (𝑤 ) be the state of the weight chain with 𝑋 0 (𝑤 ) := 𝑤 . We will write 𝑋 𝑡 if the initial state is irrelevant. For an interval [ℓ1, ℓ 2] we define a random variable ( hitting time )
+
+𝑇 ℎ𝑖𝑡 (𝑤, [ℓ1, ℓ 2]) := min {𝑡 ≥ 0 | 𝑋 𝑡 (𝑤 ) ∈ [ ℓ1, ℓ 2]} .
+
+We have 
+
+𝑃 𝑡 (𝑤, ℓ ) = P[𝑋 𝑡 (𝑤 ) = ℓ]≤ P[𝑋 𝑡 (𝑤 ) = ℓ, 𝑋 𝑠 ∈ [( 3/4 − 𝛿 )𝑛, (3/4 + 𝛿 )𝑛 ] for some 0 ≤ 𝑠 ≤ 𝑡 ]+ P[𝑋 𝑠 ∉ [( 3/4 − 𝛿 )𝑛, (3/4 + 𝛿 )𝑛 ] for all 0 ≤ 𝑠 ≤ 𝑡 ]≤ 4𝛿𝑛 3ℓ  𝑛 ℓ
+
+
+
+4𝑛 − 1 + P[𝑇 ℎ𝑖𝑡 (𝑤, [( 3/4 − 𝛿 )𝑛, (3/4 + 𝛿 )𝑛 ]) > 𝑡 ].
+
+Similarly we have 
+
+𝑃 𝑡 (𝑤, [1, 𝑑 ]) ≤ 4𝛿𝑛 
+
+4𝑛 − 1 3𝑑 2𝑛𝐻 (𝑑 /𝑛 ) + P[𝑇 ℎ𝑖𝑡 (𝑤, [( 3/4 − 𝛿 )𝑛, (3/4 + 𝛿 )𝑛 ]) > 𝑡 ].
+
+The next subsections will be concerned with bounding the second term in the sum on the right hand side when 𝑡 is large enough. The consequence of the work in those subsections (see Proposition 3.2) is the following theorem: 
+
+Theorem 3.4. Suppose 𝐾 ′ is reversible with respect to the stationary distribution 𝜋 ′ = (1/5, 1/5, 3/5) on 01 , 10 , 11 , and that 0 < 𝑝 11 →11 < 1. Let 𝑚, 𝛽, 𝛿 > 0. There is a constant 𝑐 > 0 depending on 𝛿 , 𝑚 , 𝛽 , and 𝑝 11 →11 such that for large enough (even) 𝑛 and for 𝑡 ≥ 𝑐 log 𝑛 we have 
+
+𝑃 𝑡 (𝑤, ℓ ) ≤ 4𝛿𝑛 3ℓ  𝑛 ℓ
+
+
+
+4𝑛 − 1 + 13𝑤  𝑛 𝑤 
+
+ 𝑛 −𝑚 + 𝑒 −𝛽𝑛 
+
+for any integers 1 ≤ 𝑤, ℓ ≤ 𝑛 and 
+
+𝑃 𝑡 (𝑤, ≤ 𝑑 ) ≤ 4𝛿𝑛 
+
+4𝑛 − 1 3𝑑 2𝑛𝐻 (𝑑 /𝑛 ) + 13𝑤  𝑛 𝑤 
+
+ 𝑛 −𝑚 + 𝑒 −𝛽𝑛 
+
+for any integers 1 ≤ 𝑤 ≤ 𝑛 and 1 ≤ 𝑑 ≤ 𝑛 /2, where 𝐻 is the binary entropy function. 
+
+Note that we do not assume 𝛿 < 1/16, since otherwise we can shrink 𝛿 as desired. 
+
+## 3.1 Martingales and One-Step Probability 
+
+Let 𝛿 ∈ ( 0, 1/16 ) as in Lemma 3.3. In this section, we begin the task of bounding the hitting time of the weight chain 
+
+𝑋 𝑡 by showing that when 𝑋 𝑡 < (3/4 − 𝛿 )𝑛 , it grows rather quickly (in fact, exponentially fast) with high probability. The goal of this section is to study the distribution of 𝑋 𝑡 +1 conditional on 𝑋 𝑡 . To do this, we introduce a well-known concentration inequality. Recall that a sequence of real random variables 𝑌 0, 𝑌 1, . . . is a martingale if E[| 𝑌 𝑖 |] < ∞ and E[𝑌 𝑖 +1 | 𝑌 1, . . . , 𝑌 𝑖 ] =
+
+𝑌 𝑖 . We have the following concentration inequality for martingales: 3.1 Martingales and One-Step Probability 20 
+
+Lemma 3.5 (Azuma–Hoeffding inequality) . Suppose 𝑌 0, 𝑌 1, . . . is a martingale and |𝑌 𝑖 − 𝑌 𝑖 −1 | ≤ 𝑐 𝑖 almost surely for all 𝑖 . Then for all positive integers 𝑁 and 𝜆 > 0 we have 
+
+P[𝑌 𝑁 − 𝑌 0 ≥ 𝜆 ] ≤ exp −𝜆 2
+
+2 Í𝑁 𝑖 =1 𝑐 2
+
+> 𝑖
+
+!
+
+and 
+
+P[𝑌 𝑁 − 𝑌 0 ≤ − 𝜆 ] ≤ exp −𝜆 2
+
+2 Í𝑁 𝑖 =1 𝑐 2
+
+> 𝑖
+
+!
+
+.
+
+We will use this inequality to prove two tail bounds (Lemma 3.8 and Lemma 3.10) which we will combine to get our hitting time results. 
+
+Lemma 3.6. Let 𝑋 0, 𝑋 1, . . . be the weight chain. For any 𝜆 > 0 we have 
+
+P[𝑋 𝑡 +1 − E[𝑋 𝑡 +1 | 𝑋 𝑡 ] ≥ 𝜆 | 𝑋 𝑡 ] ≤ exp 
+
+
+
+− 𝜆 2
+
+32 𝑋 𝑡 
+
+
+
+and 
+
+P[𝑋 𝑡 +1 − E[𝑋 𝑡 +1 | 𝑋 𝑡 ] ≤ − 𝜆 | 𝑋 𝑡 ] ≤ exp 
+
+
+
+− 𝜆 2
+
+32 𝑋 𝑡 
+
+
+
+.
+
+Proof. Condition on 𝑋 𝑡 = 𝑤 .Let 𝑊 ∈ { 0, 1}𝑛 be a fixed string of weight 𝑤 and let O be a uniformly random partition of [𝑛 ] into ordered pairs. Let 𝑊 ′ be the random string obtained from 𝑊 by evolving according to the string process, so 𝑋 𝑡 +1 = 𝑤 (𝑊 ′).We define a sequence of random variables 𝑌 0, . . . , 𝑌 𝑤 as follows. For 𝑖 = 1, . . . , 𝑤 let O 𝑖 be the ordered pair in O
+
+containing the 𝑖 th bit 1 in 𝑊 . Note the O𝑖 may not be distinct. When O 𝑖 is first revealed, we also reveal the local transition applied to the pair. Let F𝑖 be the sigma algebra generated by 𝑊 and all information revealed up to step 𝑖 ,and define 
+
+𝑌 𝑖 := E[𝑋 𝑡 +1 | F 𝑖 ] for 0 ≤ 𝑖 ≤ 𝑤 . 
+
+In particular, 𝑌 0 = E[𝑋 𝑡 +1 | 𝑊 ] = E[𝑋 𝑡 +1 | 𝑋 𝑡 = 𝑤 ] and 𝑌 𝑤 = 𝑋 𝑡 +1 because each pair in O that is not exposed during this process corresponds to input 00 and contributes deterministically zero. By the tower property, 
+
+E[𝑌 𝑖 | F 𝑖 −1] = E[E[𝑋 𝑡 +1 | F 𝑖 ] | F 𝑖 −1] = E[𝑋 𝑡 +1 | F 𝑖 −1] = 𝑌 𝑖 −1
+
+Thus the sequence {𝑌 𝑖 } is a martingale with respect to the filtration (F 𝑖 )𝑤 𝑖 =0.Let 𝑐 𝑖 = |𝑌 𝑖 − 𝑌 𝑖 −1 |. If O 𝑖 = O𝑗 for some 𝑗 < 𝑖 , then F𝑖 = F𝑖 −1, so 𝑐 𝑖 = 0. Otherwise, revealing one new pair and its local transition outcome changes the conditional expectation of 𝑋 𝑡 +1 by at most 4, because changing the revealed pair can be coupled by modifying at most two output pairs. Indeed, condition on the previously exposed pairs and let 𝑣 be the next unexposed active vertex. If one completion pairs 𝑣 with 𝑢 and another pairs 𝑣 with 𝑢 ′, then the two random completions can be coupled by the standard matching switch: if 𝑢 ′ is paired to 𝑧 in the first completion, replace the pairs (𝑣, 𝑢 ) and (𝑢 ′, 𝑧 ) by (𝑣, 𝑢 ′) and (𝑢, 𝑧 ). Thus the coupled completions differ on at most two pairs, and since each pair contributes weight at most 2, the conditional expectation changes by at most 4. Hence, 
+
+> 𝑤
+
+∑︁ 
+
+> 𝑖 =1
+
+𝑐 2 
+
+> 𝑖
+
+≤ 16 𝑤 . 
+
+By the Azuma–Hoeffding inequality (Lemma 3.5) we obtain the desired result. 
+
+Lemma 3.7 (Expected drift) . Let 𝑋 0, 𝑋 1, . . . be the weight chain. Let 
+
+𝐸 (𝛼 ) = 𝛼 + 2 𝑛 𝑛 − 1 (1 − 𝑝 11 →11 )𝛼 
+
+ 34 − 𝛼 
+
+
+
+.
+
+We have 
+
+𝑛𝐸 (𝑤 /𝑛 ) ≤ E[𝑋 𝑡 +1 | 𝑋 𝑡 = 𝑤 ] ≤ 𝑛𝐸 (𝑤 /𝑛 ) + 1.3.2 Hitting Time to Large Enough Weight 21 
+
+Proof. Let 𝑊 be a string of weight 𝑤 and O a random partition of 𝑊 into ordered pairs. By linearity of expectation, we may compute E[𝑋 𝑡 +1 − 𝑋 𝑡 | 𝑋 𝑡 ] as the sum of expected changes in weight due to each pair in O.A random ordered pair of bits in 𝑊 is 01 or 10 with probability 2 𝑛 −𝑤 𝑛 𝑤 𝑛 −1 and 11 with probability 𝑤 𝑛 𝑤 −1 
+
+> 𝑛 −1
+
+. Thus the expected change in weight for each ordered pair is 
+
+𝑛 − 𝑤 𝑛 𝑤 𝑛 − 1 (𝑝 01 →11 + 𝑝 10 →11 ) − 𝑤 𝑛 𝑤 − 1
+
+𝑛 − 1 (𝑝 11 →01 + 𝑝 11 →10 ).
+
+By stochasticity we have 𝑝 11 →01 +𝑝 11 →10 = 1 −𝑝 11 →11 , and since (1/5, 1/5, 3/5) is stationary for 𝐾 ′, we have 𝑝 01 →11 +
+
+𝑝 10 →11 = 3 − 3𝑝 11 →11 . The expected change in weight for one step is 
+
+E[𝑋 𝑡 +1 − 𝑋 𝑡 | 𝑋 𝑡 = 𝑤 ] = 𝑛 
+
+2
+
+𝑛 − 𝑤 𝑛 𝑤 𝑛 − 1 (𝑝 01 →11 + 𝑝 10 →11 ) − 𝑤 𝑛 𝑤 − 1
+
+𝑛 − 1 (𝑝 11 →01 + 𝑝 11 →10 )
+
+
+
+= 𝑤 
+
+2(𝑛 − 1) (( 𝑛 − 𝑤 )( 3 − 3𝑝 11 →11 ) − ( 𝑤 − 1)( 1 − 𝑝 11 →11 )) 
+
+= 𝑤 
+
+2(𝑛 − 1) (1 − 𝑝 11 →11 )( 3𝑛 − 4𝑤 + 1)
+
+The result follows from 𝑤  
+
+> 2(𝑛 −1)
+
+≤ 1. 
+
+## 3.2 Hitting Time to Large Enough Weight 
+
+In this subsection, we concern ourselves with the “low-weight” regime 1 ≤ 𝑤 < 𝑛 /2. We show that, with high probability, it only takes logarithmically many steps for the weight chain to exit this regime. This is the first half of our hitting time result. In Subsection 3.3 we will show that outside this regime the weight chain very quickly converges to any small linear-width interval around 3 𝑛 /4. 
+
+Lemma 3.8 (Large jumps from low weight) . Let 𝛾 be as in Lemma 3.7 and let 𝑋 0, 𝑋 1, . . . be the weight chain. Suppose 
+
+1 ≤ 𝑤 < 𝑛 /2. Then 
+
+P[𝑋 𝑡 +1 ≤ ( 1 + 𝛾 )𝑤 | 𝑋 𝑡 = 𝑤 ] ≤ 𝑒 −𝛾 2 𝑤 /32 
+
+where 𝛾 = (1 − 𝑝 11 →11 )/ 4.Proof. By Lemma 3.7 we have 
+
+E[𝑋 𝑡 +1 | 𝑋 𝑡 = 𝑤 ] ≥ 𝑤 + 2 𝑛 𝑛 − 1 (1 − 𝑝 11 →11 )𝑤 
+
+ 34 − 𝑤 𝑛 
+
+
+
+>
+
+
+
+1 + 1 − 𝑝 11 →11 
+
+2
+
+
+
+𝑤 = (1 + 2𝛾 )𝑤 . 
+
+Applying the second half of Lemma 3.6 with 𝜆 = 𝛾𝑤 gives the desired result. Lemma 3.8 shows that the weight chain grows exponentially fast with high probability. Proposition 3.1 uses this fact to show a logarithmic hitting time to 𝑛 /2 for the weight chain. Recall that we defined 
+
+𝑇 ℎ𝑖𝑡 (𝑤, [𝑛 /2, 𝑛 ]) := min {𝑡 ≥ 0 | 𝑋 𝑡 (𝑤 ) ∈ [ 𝑛 /2, 𝑛 ]} .
+
+The strategy for proving Proposition 3.1 is to instead control the time it takes for the chain to escape an interval 
+
+[𝑎, 𝑛 /2) from either side. It will turn out that escaping from the left side is much less likely than escaping from the right side. Define the escape time 𝑇 𝑒𝑠𝑐 (𝑤, [𝑎, 𝑛 /2)) by 
+
+𝑇 𝑒𝑠𝑐 (𝑤, [𝑎, 𝑛 /2)) := min {𝑡 ≥ 0 | 𝑋 𝑡 (𝑤 ) ∉ [𝑎, 𝑛 /2)} .
+
+Before we prove Proposition 3.1 we need one more lemma that controls this escape time: 
+
+Lemma 3.9. Let 𝑋 0, 𝑋 1, . . . be the weight chain. Let 𝑚 > 0. There is a constant 𝑐 depending on 𝑚 and 𝑝 11 →11 such that for 𝑎 ∈ [ 1, 𝑛 /2) and 𝑤 ∈ [ 𝑎, 𝑛 /2) we have 
+
+P[𝑇 𝑒𝑠𝑐 (𝑤, [𝑎, 𝑛 /2)) > 𝑐 log 𝑛 ] ≤ 𝑛 −𝑚𝑎 .3.2 Hitting Time to Large Enough Weight 22 
+
+Proof. Let 𝛾 be as in Lemma 3.8. The strategy for this proof is to consider the quantity 
+
+𝑅 𝑡 :=
+
+(
+
+(𝑛 /2𝑋 𝑡 )𝜃𝑎 if 𝑋 𝑡 ≥ 𝑎 
+
+0 otherwise. for a small positive parameter 𝜃 . This quantity is large when 𝑋 𝑡 is small and larger than 𝑎 ; it is at most 1 exactly when 𝑋 𝑡 is outside the range [𝑎, 𝑛 /2). We want to show that it drops below 1 quickly. We will do this by controlling 
+
+E[𝑅 𝑡 +1 | 𝑅 𝑡 ]; we will show that it decays exponentially, so that eventually E[𝑅 𝑇 | 𝑅 0] < 1 and we can conclude using Markov’s inequality. By Lemma 3.8 we have 
+
+P[𝑋 𝑡 +1 ≤ ( 1 + 𝛾 )𝑋 𝑡 | 𝑋 𝑡 ] ≤ 𝑒 −𝛾 2𝑋 𝑡 /32 .
+
+Condition on 𝑋 𝑡 = 𝑢 ∈ [ 𝑎, 𝑛 /2). Since 𝑅 𝑡 +1 ≤ ( 𝑛 /2𝑎 )𝜃𝑎 we have 
+
+ 2𝑢 𝑛 
+
+𝜃𝑎 
+
+E[𝑅 𝑡 +1 | 𝑋 𝑡 = 𝑢 ] ≤ ( 1 + 𝛾 )−𝜃𝑎 + 𝑒 −𝛾 2𝑢 /32 𝑢 𝑎 
+
+𝜃𝑎 
+
+. (5) At this point we will split into two regimes by picking a constant 𝑎 0; we will handle the cases 𝑎 ≥ 𝑎 0 and 𝑎 < 𝑎 0
+
+separately. We start by working in the large 𝑎 regime; we will pick 𝑎 0 later to make the proof work out. Since 𝑎 ≤ 𝑢 , we have 𝑎 log (𝑢 /𝑎 ) ≤ 𝑢 /𝑒 . By choosing 𝜃 sufficiently small, say 𝜃 ≤ 𝛾 2𝑒 /64, we have 
+
+𝑒 −𝛾 2𝑢 /32 𝑢 𝑎 
+
+𝜃𝑎 
+
+≤ 𝑒 −𝛾 2𝑢 /64 ≤ 𝑒 −𝛾 2𝑎 /64 
+
+so that  2𝑢 𝑛 
+
+𝜃𝑎 
+
+E[𝑅 𝑡 +1 | 𝑋 𝑡 = 𝑢 ] ≤ 𝑒 −𝜃 log (1+𝛾 )𝑎 + 𝑒 −𝛾 2𝑎 /64 
+
+Let 2 𝐶 = min {𝜃 log (1 + 𝛾 ), 𝛾 2/64 } > 0. Choose 𝑎 0 = (log 2 )/ 𝐶 . Then for 𝑎 ≥ 𝑎 0, we have 𝑒 −𝜃 log (1+𝛾 )𝑎 , 𝑒 −𝛾 2𝑎 /64 ≤ 
+
+> 12
+
+𝑒 −𝐶𝑎 . It follows that for 𝑎 ≥ 𝑎 0, we have 
+
+E[𝑅 𝑡 +1 | 𝑅 𝑡 ] ≤ 𝑒 −𝐶𝑎 𝑅 𝑡 
+
+whence 
+
+E[𝑅 𝑇 1{𝑇 𝑒𝑠𝑐 (𝑤, [𝑎, 𝑛 /2)) > 𝑇 } | 𝑋 0 = 𝑤 ] ≤ 𝑒 −𝐶𝑎𝑇  𝑛 
+
+2𝑤 
+
+𝜃𝑎 
+
+≤ 𝑒 −𝐶𝑎𝑇 𝑛 𝜃𝑎 .
+
+If 𝑇 ≥ 𝑐 log 𝑛 then the right hand side is bounded above by 𝑛 − ( 𝐶𝑐 −𝜃 )𝑎 . Choose 𝑐 large enough that when 𝑎 ≥ 𝑎 0 we have 𝐶𝑐 − 𝜃 > 0. Then for large enough 𝑛 depending on (𝐶𝑐 − 𝜃 )𝑎 0 we have, by Markov’s inequality, 
+
+P[𝑇 𝑒𝑠𝑐 (𝑤, [𝑎, 𝑛 /2)) > 𝑐 log 𝑛 ] ≤ P[𝑅 𝑇 1{𝑇 𝑒𝑠𝑐 (𝑤, [𝑎, 𝑛 /2)) > 𝑇 } ≥ 1 | 𝑋 0 = 𝑤 ] ≤ 𝑛 − ( 𝐶𝑐 −𝜃 )𝑎 ≤ 𝑛 − 𝐶𝑐 −2𝜃   
+
+> 2𝑎
+
+.
+
+Now we consider the regime 𝑎 < 𝑎 0. We will split into two cases. Our starting point is (5). Let 𝑢 0 be large enough that 𝑒 −𝛾 2𝑢 0/64 ≤ 12 (1 − ( 1 + 𝛾 )−𝜃𝑎 ). Note 𝑢 0 is a constant depending only on 𝛾 and 𝜃 (which itself depends only on 𝛾 ), and for 𝑢 ≥ 𝑢 0 we have 
+
+ 2𝑢 𝑛 
+
+𝜃𝑎 
+
+E[𝑅 𝑡 +1 | 𝑋 𝑡 = 𝑢 ] ≤ 𝑒 −𝜃 log (1+𝛾 )𝑎 + 𝑒 −𝛾 2𝑢 /64 ≤ 12 (1 + ( 1 + 𝛾 )−𝜃𝑎 ) < 1.
+
+Then there is a 𝐶 ′ > 0 bounded away from 0 and depending only on 𝛾 , 𝜃 , and 𝑎 0 such that if 𝑢 ≥ 𝑢 0 and 𝑎 < 𝑎 0 we have 
+
+E[𝑅 𝑡 +1 | 𝑋 𝑡 = 𝑢 ] ≤ 𝑒 −𝐶 ′𝑎  𝑛 
+
+2𝑢 
+
+𝜃𝑎 
+
+.
+
+Now we consider the case 𝑎 ≤ 𝑢 ≤ 𝑈 := 𝑎 0 + 𝑢 0. This is now a bounded problem, where we work with strings of weight that is very low relative to the length of the string. In such cases, when taking steps of the string process, we expect no 11 pairs to appear among the two-bit strings coming from the matching O. Indeed, we have 
+
+P[O has a 11 pair ] ≤ 
+
+ 𝑈 
+
+> 2
+
+
+
+𝑛 − 1 ≤ 𝑈 2
+
+𝑛 .3.2 Hitting Time to Large Enough Weight 23 Conditioned on 𝑋 𝑡 = 𝑢 and on no 11 pairs appearing in O, we have 𝑋 𝑡 +1 = 𝑢 + 𝑌 𝑢 , where 𝑌 𝑢 follows a bino-mial distribution with 𝑢 trials and with success probability 𝑝 1→2 (see Remark 3.1 for notation). In particular, with probability at least 𝑝 1→2 we have 𝑌 𝑢 ≥ 1 so that 𝑋 𝑡 +1 ≥ 𝑢 + 1. Thus 
+
+E
+
+" 𝑢 𝑋 𝑡 +1
+
+𝜃𝑎 
+
+O has no 11 pair , 𝑋 𝑡 = 𝑢 
+
+#
+
+≤ 1 − 𝑝 1→2 + 𝑝 1→2
+
+ 𝑢 𝑢 + 1
+
+𝜃𝑎 
+
+= 1 − 𝑝 1→2
+
+
+
+1 −
+
+ 𝑢 𝑢 + 1
+
+𝜃𝑎 
+
+= 1 − 𝑝 1→2 (1 − exp (− 𝜃𝑎 log (1 + 1/𝑢 ))) ≤ 1 − 𝑝 1→2
+
+
+
+1 − exp 
+
+
+
+− 𝜃𝑎 
+
+2𝑈 
+
+ 
+
+Since log (1 + 1/𝑢 ) ≥ 1/( 2𝑈 ) and 𝑎 ≤ 𝑈 , we have 1 − exp (− 𝜃𝑎 /( 2𝑈 )) ≥ 𝜃𝑎 /( 4𝑈 ), so 
+
+E
+
+" 𝑢 𝑋 𝑡 +1
+
+𝜃𝑎 
+
+O has no 11 pair , 𝑋 𝑡 = 𝑢 
+
+#
+
+≤ 1 − 𝑝 1→2
+
+𝜃𝑎 
+
+4𝑈 ≤ exp 
+
+
+
+−𝑝 1→2
+
+𝜃𝑎 
+
+4𝑈 
+
+
+
+.
+
+We always have 
+
+ 𝑢 𝑋 𝑡 +1
+
+𝜃𝑎 
+
+≤ ( 𝑢 )𝜃𝑎 ≤ 𝑈 𝜃𝑎 so 
+
+E
+
+" 𝑢 𝑋 𝑡 +1
+
+𝜃𝑎 
+
+𝑋 𝑡 = 𝑢 
+
+#
+
+≤ exp 
+
+
+
+−𝑝 1→2
+
+𝜃𝑎 
+
+4𝑈 
+
+
+
++ 𝑈 2
+
+𝑛 𝑈 𝜃𝑎 .
+
+Then for 𝑛 large enough, there is a constant 𝐶 ′′ > 0 bounded away from 0 and depending on 𝑝 1→2 (hence on 𝛾 ), 𝜃 ,and 𝑈 such that 
+
+E[𝑅 𝑡 +1 | 𝑅 𝑡 ] ≤ 𝑒 −𝐶 ′′ 𝑎 𝑅 𝑡 
+
+whenever 𝑎 < 𝑎 0 (regardless of 𝑢 ). Now the same argument as before shows P[𝑇 𝑒𝑠𝑐 (𝑤, [𝑎, 𝑛 /2)) > 𝑐 log 𝑛 ] ≤
+
+𝑛 − (𝐶 ′′ 𝑐 −2𝜃 )𝑎  
+
+> 2
+
+when 𝑎 < 𝑎 0, and we are done. Now we use Lemma 3.9 to control how long it takes for the chain to reach [𝑛 /2, 𝑛 ]. We prove a result that is somewhat stronger than control on 𝑇 ℎ𝑖𝑡 (𝑤, [𝑛 /2, 𝑛 ]) ; instead, we bound the probability that any trajectory starting at 𝑤 spends too long in [1, 𝑛 /2) at any particular point in the trajectory. We will need this to argue that if the chain manages to reach [𝑛 /2, 𝑛 ] and then drops out of [𝑛 /2, 𝑛 ] later, it can still return quickly. 
+
+Proposition 3.1 (Logarithmic hitting time to high weight) . Let 𝑋 0, 𝑋 1, . . . be the weight chain. For every 𝑡 ≥ 0, define 
+
+𝑇 ≥𝑡 ℎ𝑖𝑡 (𝑤, [𝑛 /2, 𝑛 ]) = min {𝑠 ≥ 𝑡 | 𝑋 𝑠 (𝑤 ) ∈ [ 𝑛 /2, 𝑛 ]} − 𝑡 . 
+
+Let 𝑚 > 0. Then, there exists constants 𝑐, 𝐶 > 0 depending on 𝑚 and 𝑝 11 →11 such that for large enough (even) 𝑛 depending on 𝑚 , we have 
+
+P[𝑇 ≥𝑡 ℎ𝑖𝑡 (𝑤, [𝑛 /2, 𝑛 ]) > 𝑐 log 𝑛 ] ≤ 13𝑤  𝑛 𝑤 
+
+ 𝑛 −𝑚 
+
+for any 1 ≤ 𝑤 ≤ 𝑛 .Proof. Let 𝛾 be as in Lemma 3.8. The main idea of the proof is that with high probability depending on 𝑎 , the weight chain starting at 𝑤 < 𝑛 /2does not stay in any range [𝑎, 𝑛 /2) for more than about log 𝑛 steps. We will use the reversibility of the weight chain to control that the probability that a 𝑇 -step trajectory of the weight chain has minimum at most 𝑎 when 𝑇 ≈ log 𝑛 ,then combine these results to show that the weight chain starting at 𝑤 < 𝑛 /2 does not stay in the range [1, 𝑛 /2) for more than about log 𝑛 steps. Let 
+
+𝐴 (𝑤, [𝑡, 𝑡 + 𝑇 ]) = min {𝑋 𝑠 (𝑤 ) | 𝑡 ≤ 𝑠 ≤ 𝑡 + 𝑇 }
+
+and 
+
+𝜎 ≥𝑡 𝑎 (𝑤 ) = min {𝑠 ≥ 𝑡 | 𝑋 𝑠 (𝑤 ) = 𝑎, }3.2 Hitting Time to Large Enough Weight 24 and define the escape time 𝑇 𝑒 (𝑤, [𝑎, 𝑛 /2)) by 
+
+𝑇 ≥𝑡 𝑒 (𝑤, [𝑎, 𝑛 /2)) := min {𝑠 ≥ 𝑡 | 𝑋 𝑠 (𝑤 ) ∉ [𝑎, 𝑛 /2)} .
+
+Then, we have 
+
+P[𝑇 ≥𝑡 ℎ𝑖𝑡 (𝑤, [𝑛 /2, 𝑛 ]) > 𝑇 ] =
+
+> 𝑛 /2−1
+
+∑︁ 
+
+> 𝑎 =1
+
+P[𝑇 ≥𝑡 ℎ𝑖𝑡 (𝑤, [𝑛 /2, 𝑛 ]) > 𝑇 and 𝐴 (𝑤, [𝑡, 𝑡 + 𝑇 ]) = 𝑎 ].
+
+We will bound each summand separately. Consider the scenario where 𝐴 (𝑤, [𝑡, 𝑡 +𝑇 ]) = 𝑎 and the weight chain hits 
+
+𝑎 within 𝑇 /2 steps after time 𝑡 . In that case, in order for 𝑇 ≥𝑡 ℎ𝑖𝑡 (𝑤, [𝑛 /2, 𝑛 ]) > 𝑡 + 𝑇 we would need the chain to stay within [𝑎, 𝑛 /2) for at least 𝑇 /2 steps. Thus for 𝑡 ≤ 𝑠 ≤ 𝑡 + 𝑇 /2 we have 
+
+P[𝑇 ≥𝑡 ℎ𝑖𝑡 (𝑤, [𝑛 /2, 𝑛 ]) > 𝑇 , 𝐴 (𝑤, [𝑡, 𝑡 + 𝑇 ]) = 𝑎, 𝜎 𝑎 = 𝑠 ] ≤ 𝑃 𝑠 (𝑤, 𝑎 ) P[𝑇 𝑒𝑠𝑐 (𝑎, [𝑎, 𝑛 /2)]) > 𝑇 /2].
+
+By reversibility of the weight chain (Lemma 3.2) we have 
+
+𝑃 𝑠 (𝑤, 𝑎 ) = 𝜋 (𝑎 )
+
+𝜋 (𝑤 ) 𝑃 𝑠 (𝑎, 𝑤 ) ≤ 𝜋 (𝑎 )
+
+𝜋 (𝑤 ) ,
+
+whence 
+
+P[𝑇 ≥𝑡 ℎ𝑖𝑡 (𝑤, [𝑛 /2, 𝑛 ]) > 𝑇 , 𝐴 (𝑤, [𝑡, 𝑡 + 𝑇 ]) = 𝑎, 𝜎 𝑎 = 𝑠 ] ≤ 𝜋 (𝑎 )
+
+𝜋 (𝑤 ) P[𝑇 𝑒𝑠𝑐 (𝑎, [𝑎, 𝑛 /2)]) > 𝑇 /2].
+
+On the other hand, suppose 𝜎 𝑎 = 𝑠 > 𝑡 + 𝑇 /2. Then for the first 𝑠 − 𝑡 steps of the weight chain after time 𝑡 , it is confined to [𝑎, 𝑛 /2). We can consider the reversed chain, which hits 𝑎 at time 𝑡 + 𝑇 − 𝑠 and then stays in [𝑎, 𝑛 /2) for 
+
+𝑠 steps before reaching 𝑤 . By reversibility, the probability of this occurring is bounded above by 
+
+P[𝑇 ≥𝑡 ℎ𝑖𝑡 (𝑤, [𝑛 /2, 𝑛 ]) > 𝑇 , 𝐴 (𝑤, [𝑡, 𝑡 + 𝑇 ]) = 𝑎, 𝜎 𝑎 = 𝑠 ] ≤ 𝜋 (𝑎 )
+
+𝜋 (𝑤 ) P[𝑇 𝑒𝑠𝑐 (𝑎, [𝑎, 𝑛 /2)]) > 𝑇 /2].
+
+Averaging over the 𝜎 𝑎 = 𝑠 conditions yields 
+
+P[𝑇 ≥𝑡 ℎ𝑖𝑡 (𝑤, [𝑛 /2, 𝑛 ]) > 𝑇 , 𝐴 (𝑤, [𝑡, 𝑡 + 𝑇 ]) = 𝑎 ] ≤ 𝜋 (𝑎 )
+
+𝜋 (𝑤 ) (𝑇 + 1) P[𝑇 𝑒𝑠𝑐 (𝑎, [𝑎, 𝑛 /2)]) > 𝑇 /2].
+
+For 𝑚 > 0 we can choose 𝑐 such that by Lemma 3.9 we have P[𝑇 𝑒𝑠𝑐 (𝑎, [𝑎, 𝑛 /2)) > 𝑐 log 𝑛 /2] ≤ 𝑛 −𝑚𝑎 . Thus, 
+
+P[𝑇 ≥𝑡 ℎ𝑖𝑡 (𝑤, [𝑛 /2, 𝑛 ]) > 𝑐 log 𝑛 and 𝐴 (𝑤, [𝑡, 𝑡 + 𝑇 ]) = 𝑎 ] ≤ 𝜋 (𝑎 )
+
+𝜋 (𝑤 ) (𝑐 log 𝑛 + 1)𝑛 −𝑚𝑎 
+
+Summing over possible minima 𝑎 yields 
+
+P[𝑇 ≥𝑡 ℎ𝑖𝑡 (𝑤, [𝑛 /2, 𝑛 ]) > 𝑐 log 𝑛 ] ≤ 
+
+> 𝑛 /2−1
+
+∑︁ 
+
+> 𝑎 =1
+
+𝜋 (𝑎 )
+
+𝜋 (𝑤 ) 𝑛 −𝑚𝑎 
+
+= 𝑐 log 𝑛 + 13𝑤  𝑛 𝑤 
+
+
+
+> 𝑛 /2−1
+
+∑︁ 
+
+> 𝑎 =1
+
+3𝑎 
+
+𝑛 𝑎 
+
+
+
+𝑛 −𝑚𝑎 
+
+Since 3 𝑎  𝑛 𝑎 
+
+ ≤   3𝑒𝑛 𝑎 
+
+𝑎 ≤ ( 3𝑒 )𝑎 𝑛 𝑎 we have 
+
+P[𝑇 ≥𝑡 ℎ𝑖𝑡 (𝑤, [𝑛 /2, 𝑛 ]) > 𝑐 log 𝑛 ] ≤ 𝑐 log 𝑛 + 13𝑤  𝑛 𝑤 
+
+
+
+> 𝑛 /2−1
+
+∑︁ 
+
+> 𝑎 =1
+
+(3𝑒𝑛 1−𝑚 )𝑎 
+
+≤ 𝑐 log 𝑛 + 13𝑤  𝑛 𝑤 
+
+ (3𝑒𝑛 )1−𝑚 
+
+1 − ( 3𝑒𝑛 )1−𝑚 .
+
+By replacing 𝑚 by a larger number (say, 2 𝑚 + 1) and then taking 𝑛 large enough, we obtain the desired result. 3.3 Hitting Time to a Narrow Weight Range 25 
+
+## 3.3 Hitting Time to a Narrow Weight Range 
+
+In this subsection, we show that, starting from linear weight, the weight chain converges to a narrow interval around 3𝑛 /4 very quickly, in a constant number of steps, with high probability. The strategy is to study the dynamics of the function 𝐸 (𝛼 ) defined in Lemma 3.7; we observe that it has an attracting fixed point at 3 /4, and we use the concentration bounds from Lemma 3.6 to show that the weight chain’s dynamics are very close to the deterministic dynamics of 𝐸 (𝛼 ). The first step is to show that a single step of the weight chain is likely to contract the distance between 𝑋 𝑡 and 𝑋 𝑡 +1 by a constant factor. 
+
+Lemma 3.10 (Contraction toward 3 𝑛 /4 from high weight) . Let 𝑋 0, 𝑋 1, . . . be the weight chain. Suppose 0 < 𝑝 11 →11 < 1
+
+and 𝑤 ∈ [ 𝑛 /2, 𝑛 ] with |𝑤 − 3𝑛 /4| > 𝛿𝑛 . Let 𝑛 be a sufficiently large even-valued integer depending on 𝑝 11 →11 . Then 
+
+P
+
+
+
+𝑋 𝑡 +1 − 3𝑛 
+
+4 > 1 + 𝜎 
+
+2 𝑤 − 3𝑛 
+
+4 𝑋 𝑡 = 𝑤 
+
+
+
+≤ 2 exp 
+
+
+
+− (1 − 𝜎 )2𝛿 2𝑛 
+
+128 
+
+
+
+where 𝜎 := max {𝑝 11 →11 , 1 − 𝑝 11 →11 } < 1.Proof. For any 𝛼 ∈ [ 1/2, 1] we have 
+
+𝐸 (𝛼 ) − 3/4
+
+𝛼 − 3/4 = 1 − 2 𝑛 𝑛 − 1 (1 − 𝑝 11 →11 )𝛼 
+
+Choose 𝑛 large enough such that 𝑛 𝑛 −1 (1 − 𝑝 11 →11 ) ≤ 1 − 𝑝 11 →11 /2 so that 
+
+(1 − 𝑝 11 →11 ) ≤ 2 𝑛 𝑛 − 1 (1 − 𝑝 11 →11 )𝛼 ≤ 2 − 𝑝 11 →11 .
+
+Then 𝐸 (𝛼 ) − 3/4
+
+𝛼 − 3/4 ≤ 1 − 2 𝑛 𝑛 − 1 (1 − 𝑝 11 →11 )𝛼 ≤ max {𝑝 11 →11 , 1 − 𝑝 11 →11 }
+
+and so |𝐸 (𝛼 ) − 3/4| ≤ 𝜎 |𝛼 − 3/4|.Let 𝜀 = 𝛿 (1−𝜎 ) 
+
+> 2
+
+. Then 𝜎 |𝛼 − 3/4| + 𝜀 ≤ 1+𝜎  
+
+> 2
+
+|𝛼 − 3/4|, and if |𝑋 𝑡 +1/𝑛 − 𝐸 (𝑤 /𝑛 )| ≤ 𝜀 then 
+
+𝑋 𝑡 +1
+
+𝑛 − 34 ≤ 1 + 𝜎 
+
+2 · 𝑤 𝑛 − 34 .
+
+Hence 
+
+P
+
+ 𝑋 𝑡 +1
+
+𝑛 − 34 > 1 + 𝜎 
+
+2
+
+𝑤 𝑛 − 34 𝑋 𝑡 = 𝑤 
+
+
+
+≤ P[| 𝑋 𝑡 +1/𝑛 − 𝐸 (𝑤 /𝑛 )| > 𝜀 | 𝑋 𝑡 = 𝑤 ]≤ 2 exp 
+
+
+
+−𝜀 2𝑛 
+
+32 
+
+
+
+as we wanted, where the second inequality comes from both halves of Lemma 3.6 with 𝜆 = 𝜀𝑛 .Using Lemma 3.10, it is straightforward to give an estimate of the hitting time we want using the union bound: 
+
+Lemma 3.11. There is a constant 𝑁 depending on 𝛿 and 𝑝 11 →11 such that for large enough (even) 𝑛 we have that 
+
+P[𝑇 ℎ𝑖𝑡 (𝑤, [( 3/4 − 𝛿 )𝑛, (3/4 + 𝛿 )𝑛 ]) > 𝑁 ] ≤ 2𝑁 exp 
+
+
+
+− (1 − 𝜎 )2𝛿 2𝑛 
+
+128 
+
+
+
+for all 𝑤 ∈ [ 𝑛 /2, 𝑛 ].Proof. In order to get from a distance of at most 𝑛 /4 to a distance of at most 𝛿𝑛 one needs to take 𝑁 = ⌈ log (𝛿 /4)  
+
+> log ( ( 1+𝜎 )/ 2)
+
+⌉ 
+
+> 1+𝜎
+> 2
+
+-contraction steps, where 𝜎 is as in Lemma 3.10. Then, by the union bound, the right hand side of the lemma is an upper bound on the probability that at least one of the first 𝑁 steps of the chain starting at 𝑤 is not a contraction step, which proves the lemma. 3.3 Hitting Time to a Narrow Weight Range 26 Finally, we want to combine Lemma 3.11 with Proposition 3.1 to get control over the hitting time to [( 3/4 −
+
+𝛿 )𝑛, (3/4 + 𝛿 )𝑛 ] from anywhere. However, the exponential error term in Lemma 3.11 is not good enough for our purposes. Instead, we need to be able to control the exponential rate of decay of this error term. To do this, we allow the chain enough time to spend a substantial amount of time in [𝑛 /2, 𝑛 ] and get more chances at hitting the target interval. To ensure that the chain spends enough time in [𝑛 /2, 𝑛 ], we will need an upper bound for the probability of leaving this interval: 
+
+Lemma 3.12. Let 𝑋 0, 𝑋 1, . . . be the weight chain. Assume 0 < 𝑝 11 →11 < 1. For sufficiently large (even) 𝑛 , uniformly over all 𝑤 ∈ [ 𝑛 /2, 𝑛 ], we have 
+
+Pr [𝑋 𝑡 +1 < 𝑛 /2 | 𝑋 𝑡 = 𝑤 ] ≤ exp 
+
+
+
+− (1 − 𝜎 )2𝑛 
+
+512 
+
+
+
+where 𝜎 = max {𝑝 11 →11 , 1 − 𝑝 11 →11 }.Proof. Fix 𝑤 ∈ [ 𝑛 /2, 𝑛 ]. By Lemma 3.7, 
+
+E[𝑋 𝑡 +1 | 𝑋 𝑡 = 𝑤 ] ≥ 𝑛𝐸 (𝑤 /𝑛 ).
+
+Also, by the definition of 𝐸 (𝛼 ),
+
+𝐸 
+
+𝑤 𝑛 
+
+
+
+− 12 = 𝑤 𝑛 − 12 + 2 𝑛 𝑛 − 1 (1 − 𝑝 11 →11 ) 𝑤 𝑛 
+
+ 34 − 𝑤 𝑛 
+
+
+
+.
+
+which is a concave quadratic, since its quadratic coefficient is negative on [1/2, 1]. Hence its minimum on [1/2, 1]
+
+is attained at one of the endpoints. At 𝑤 /𝑛 = 1/2, the value is 𝑛  
+
+> 4(𝑛 −1)
+
+(1 − 𝑝 11 →11 ) ≥ 1−𝑝 11 →11  
+
+> 4
+
+; at 𝑤 /𝑛 = 1, the value is 12 − 𝑛  
+
+> 2(𝑛 −1)
+
+(1 − 𝑝 11 →11 ) =  
+
+> 𝑛𝑝 11 →11 −12(𝑛 −1)
+
+≥ 𝑝 11 →11  
+
+> 4
+
+. Hence, 
+
+𝐸 (𝑤 /𝑛 ) − 12 ≥ min 
+
+ 1 − 𝑝 11 →11 
+
+4 , 𝑝 11 →11 
+
+4
+
+
+
+= 1 − 𝜎 
+
+4 .
+
+Therefore, the event 𝑋 𝑡 +1 < 𝑛 /2 implies 
+
+𝑋 𝑡 +1 − E[𝑋 𝑡 +1 | 𝑋 𝑡 = 𝑤 ] ≤ − 𝑛 1 − 𝜎 
+
+4 .
+
+Equivalently, {𝑋 𝑡 +1 < 𝑛 /2} ⊆ 𝑋 𝑡 +1 − E[𝑋 𝑡 +1 | 𝑋 𝑡 = 𝑤 ] ≤ − 𝑛 1−𝜎  
+
+> 4
+
+. Finally, applying the one-step concentration bound Lemma 3.6 with 𝜆 = 𝑛 1−𝜎  
+
+> 4
+
+, we obtain the desired claim. Now we are ready to control the hitting time to [( 3/4 − 𝛿 )𝑛, (3/4 + 𝛿 )𝑛 ]:
+
+Proposition 3.2. Let 𝛿, 𝑚, 𝛽 > 0. There is a constant 𝑐 > 0 depending on 𝛿 , 𝑚 , 𝛽 , and 0 < 𝑝 11 →11 < 1 such that for large enough (even) 𝑛 we have 
+
+P[𝑇 ℎ𝑖𝑡 (𝑤, [( 3/4 − 𝛿 )𝑛, (3/4 + 𝛿 )𝑛 ] > 𝑐 log 𝑛 ] ≤ 13𝑤  𝑛 𝑤 
+
+ 𝑛 −𝑚 + 𝑒 −𝛽𝑛 
+
+for any 1 ≤ 𝑤 ≤ 𝑛 .Proof. Let 𝑇 = ⌈𝐾 log 𝑛 ⌉, where 𝐾 is determined later. Let 𝑇 1, . . . ,𝑇 𝐷 be the times 0 ≤ 𝑡 < 𝑇 when downcrossing happens, i.e., 𝑋 𝑡 ≥ 𝑛 /2 and 𝑋 𝑡 +1 < 𝑛 /2. Also let 𝑇 0 = −1 and 𝑇 𝐷 +1 = 𝑇 .By Lemma 3.12, for every fixed set of 𝑑 + 1 times at which such downcrossings occur, the Markov property gives 
+
+P[all these 𝑑 + 1 times are downcrossings ] ≤ exp 
+
+
+
+− (𝑑 + 1)( 1 − 𝜎 )2𝑛 
+
+512 
+
+
+
+.
+
+where 0 < 1 − 𝜎 < 1. Thus 
+
+P[𝐷 > 𝑑 ] ≤ 
+
+ 𝑇 𝑑 + 1
+
+
+
+exp 
+
+
+
+− (𝑑 + 1)( 1 − 𝜎 )2𝑛 
+
+512 
+
+
+
+.3.3 Hitting Time to a Narrow Weight Range 27 Since 𝑇 = 𝑂 (log 𝑛 ), for fixed 𝑑 and 𝐾 , and for sufficiently large 𝑛 ,
+
+ 𝑇 𝑑 + 1
+
+
+
+≤ exp 
+
+ (𝑑 + 1)( 1 − 𝜎 )2𝑛 
+
+1024 
+
+
+
+.
+
+Hence 
+
+P[𝐷 > 𝑑 ] ≤ exp 
+
+
+
+− (𝑑 + 1)( 1 − 𝜎 )2𝑛 
+
+1024 
+
+
+
+.
+
+If 𝐷 ≤ 𝑑 , then for some 0 ≤ 𝑖 ≤ 𝐷 there is a run with no downcrossing from [𝑛 /2, 𝑛 ] to [1, 𝑛 /2) of length at least  𝑇 𝑑 +1
+
+ − 1. In other words, there is some run . . . , 𝑋 𝑡 −1, 𝑋 𝑡 , 𝑋 𝑡 +1, . . . of length at least  𝑇 𝑑 +1
+
+ − 1 such that the weight chain does not cross from [𝑛 /2, 𝑛 ] to [1, 𝑛 /2) during the run. By looking at the first or last part of this long run, we either find a run of length at least 𝐾 ′ log 𝑛 (where 𝐾 ′ can be chosen arbitrarily close to 𝐾 /( 2(𝑑 + 1)) for sufficiently large 𝑛 ) during which 𝑋 𝑡 ∈ [ 1, 𝑛 /2), or a run of length at least 𝐾 ′ log 𝑛 during which 𝑋 𝑡 ∈ [ 𝑛 /2, 𝑛 ]. In particular, during a run with no downcrossing, the chain can pass from [1, 𝑛 /2) to [𝑛 /2, 𝑛 ] at most once. Here 𝐾 ′ is a constant depending on 𝐾 and 𝑑 , and can be made arbitrarily large by choosing 𝐾 depending on 𝑑 . We bound the two alternatives separately: a long low-region run is controlled by Proposition 3.1, while a long high-region run hits [( 3/4 − 𝛿 )𝑛, (3/4 + 𝛿 )𝑛 ] with exponentially high probability. Suppose we have a run of length at least 𝐾 ′ log 𝑛 during which 𝑋 𝑡 ∈ [ 𝑛 /2, 𝑛 ]. We split this run into  𝐾 ′ 
+
+> 𝑁
+
+log 𝑛 
+
+blocks of length 𝑁 , where 𝑁 is the constant in Lemma 3.11. Each block has a probability of at most 2 𝑁 exp 
+
+
+
+− (1−𝜎 )2𝛿 2𝑛 
+
+> 128
+
+
+
+of failing to hit the target interval [( 3/4 − 𝛿 )𝑛, (3/4 + 𝛿 )𝑛 ], so, after summing over the at most 𝑇 possible starting locations of such a run, the probability that some such run fails to hit the target interval is at most 
+
+𝑇 (2𝑁 ) 𝐾 ′   
+
+> 𝑁 log 𝑛
+
+exp 
+
+
+
+− (1 − 𝜎 )2𝛿 2𝑛 
+
+128 
+
+ 𝐾 ′ log 𝑛 𝑁 
+
+  
+
+≤ 𝑒 − ( 𝛽 +1)𝑛 
+
+after choosing 𝐾 ′ large enough. On the other hand, we bound the probability of having a run of length at least 𝐾 ′ log 𝑛 entirely contained in 
+
+[1, 𝑛 /2). By Proposition 3.1, applied with 2 𝑚 + 2 in place of 𝑚 , there is a 𝑐 > 0 such that the probability, from original starting weight 𝑤 , of having a run of length at least 𝑐 log 𝑛 starting at a particular time 𝑡 and staying in [1, 𝑛 /2) is at most 13𝑤 (𝑛 𝑤 ) 𝑛 −2𝑚 −2 for large 𝑛 .Thus, summing over possible starting locations of the run, the probability of a trajectory of length 𝐾 log 𝑛 having any run of length at least 𝑐 log 𝑛 staying in [1, 𝑛 /2) is at most 𝐾 (log 𝑛 ) 
+
+> 3𝑤
+
+(𝑛 𝑤 ) 𝑛 −2𝑚 −2 ≤ 13𝑤 (𝑛 𝑤 ) 𝑛 −𝑚 for large enough 𝑛 .To summarize, a run of the weight chain starting at 𝑤 of length 𝐾 log 𝑛 can fail to hit the target interval [( 3/4 −
+
+𝛿 )𝑛, (3/4 + 𝛿 )𝑛 ] if any of the following events happen: • It downcrosses from [𝑛 /2, 𝑛 ] to [1, 𝑛 /2) more than 𝑑 times: this happens with probability at most exp 
+
+
+
+− (𝑑 + 1)( 1 − 𝜎 )2𝑛 
+
+1024 
+
+
+
+.
+
+• It fails to hit the target interval while it is in [𝑛 /2, 𝑛 ]: this happens with probability at most 𝑒 − ( 𝛽 +1)𝑛 for sufficiently large 𝑛 , after increasing 𝐾 if necessary. • It spends too much consecutive time outside of [𝑛 /2, 𝑛 ]: this happens with probability at most 13𝑤 (𝑛 𝑤 ) 𝑛 −𝑚 for sufficiently large 𝑛 .Now choose 𝑑 large enough that 
+
+(𝑑 + 1)( 1 − 𝜎 )2
+
+1024 ≥ 𝛽 + 1.
+
+Then 
+
+P[𝐷 > 𝑑 ] ≤ 𝑒 − ( 𝛽 +1)𝑛 
+
+for sufficiently large 𝑛 . Choose 𝐾 large enough that 𝐾 ′ > 𝑐 , where 𝑐 is the constant from Proposition 3.1, and large enough that the high-region run error above is at most 𝑒 − ( 𝛽 +1)𝑛 . Finally, we combine the three alternatives and obtain 
+
+P[𝑇 ℎ𝑖𝑡 (𝑤, [( 3/4 − 𝛿 )𝑛, (3/4 + 𝛿 )𝑛 ]) > 𝑇 ] ≤ 13𝑤  𝑛 𝑤 
+
+ 𝑛 −𝑚 + 𝑒 −𝛽𝑛 .3.3 Hitting Time to a Narrow Weight Range 28 Since 𝑇 = ⌈𝐾 log 𝑛 ⌉, this gives the desired hitting-time bound. 
+
+# Acknowledgements 
+
+This work was supported by NSF Grant CCF 2338816, the Packard Fellowship for Science and Engineering, and an NSF Waterman Award DMS-2140043. We also express our thanks to Jin Ming Koh and Professors Zongchen Chen, Ryan O’Donnell, John Preskill, and Min-Hsiu Hsieh for insightful discussions. 3.3 Hitting Time to a Narrow Weight Range 29 
+
+# References 
+
+[ABO97] Dorit Aharonov and Michael Ben-Or. Fault-tolerant quantum computation with constant error. In 
+
+Proceedings of the twenty-ninth annual ACM symposium on Theory of computing , pages 176–188, 1997. [BE21] Nikolas P. Breuckmann and Jens N. Eberhardt. Balanced Product Quantum Codes. IEEE Transactions on Information Theory , 67(10):6653–6674, October 2021. [BF13a] Winton Brown and Omar Fawzi. Scrambling speed of random quantum circuits, 2013. [BF13b] Winton Brown and Omar Fawzi. Short random circuits define good quantum error correcting codes. In 
+
+2013 IEEE International Symposium on Information Theory . IEEE, July 2013. [BF15] Winton Brown and Omar Fawzi. Decoupling with Random Quantum Circuits. Communications in Mathematical Physics , 340(3):867–900, December 2015. [BHH16] Fernando G. S. L. Brandão, Aram W. Harrow, and Michał Horodecki. Local Random Quantum Circuits are Approximate Polynomial-Designs. Communications in Mathematical Physics , 346(2):397–434, August 2016. [BHH +24] Christian Bertoni, Jonas Haferkamp, Marcel Hinsche, Marios Ioannou, Jens Eisert, and Hakop Pashayan. Shallow shadows: Expectation estimation using low-depth random clifford circuits. Physical Review Letters , 133(2):020602, 2024. [BPT10] Sergey Bravyi, David Poulin, and Barbara Terhal. Tradeoffs for Reliable Quantum Information Storage in 2D Systems. Phys. Rev. Lett. , 104:050503, Feb 2010. [CLLW16] Richard Cleve, Debbie Leung, Li Liu, and Chunhao Wang. Near-linear constructions of exact unitary 2-designs, 2016. [CRSS97] A. R. Calderbank, E. M Rains, P. W. Shor, and N. J. A. Sloane. Quantum Error Correction via Codes over GF(4), 1997. [CS96] A. R. Calderbank and Peter W. Shor. Good quantum error-correcting codes exist. Physical Review A ,54(2):1098–1105, August 1996. [DCEL09] Christoph Dankert, Richard Cleve, Joseph Emerson, and Etera Livine. Exact and approximate unitary 2-designs and their application to fidelity estimation. Physical Review A , 80(1):012304, 2009. [DHLV22] Irit Dinur, Min-Hsiu Hsieh, Ting-Chun Lin, and Thomas Vidick. Good Quantum LDPC Codes with Linear Time Decoders, 2022. [DKLP02] Eric Dennis, Alexei Kitaev, Andrew Landahl, and John Preskill. Topological quantum memory. Journal of Mathematical Physics , 43(9):4452–4505, September 2002. [DNTY24] Andrew S. Darmawan, Yoshifumi Nakata, Shiro Tamiya, and Hayata Yamasaki. Low-depth random Clifford circuits for quantum coding against Pauli noise using a tensor-network decoder. Physical Review Research , 6(2), April 2024. [EDN +21] Laird Egan, Dripto M Debroy, Crystal Noel, Andrew Risinger, Daiwei Zhu, Debopriyo Biswas, Michael Newman, Muyuan Li, Kenneth R Brown, Marko Cetina, et al. Fault-tolerant control of an error-corrected qubit. Nature , 598(7880):281–286, 2021. [FMMC12] Austin G. Fowler, Matteo Mariantoni, John M. Martinis, and Andrew N. Cleland. Surface codes: Towards practical large-scale quantum computation. Physical Review A , 86(3), September 2012. [GKH +21] Michael J. Gullans, Stefan Krastanov, David A. Huse, Liang Jiang, and Steven T. Flammia. Quantum Coding with Low-Depth Random Circuits. Phys. Rev. X , 11:031066, Sep 2021. [Got97] Daniel Gottesman. Stabilizer codes and quantum error correction . California Institute of Technology, 1997. 3.3 Hitting Time to a Narrow Weight Range 30 [Got10] Daniel Gottesman. An introduction to quantum error correction and fault-tolerant quantum computa-tion. In Quantum information science and its contributions to mathematics, Proceedings of Symposia in Applied Mathematics , volume 68, pages 13–58, 2010. [Got13] Daniel Gottesman. Fault-tolerant quantum computation with constant overhead. arXiv preprint arXiv:1310.2984 , 2013. [GPT22] Shouzhen Gu, Christopher A. Pattison, and Eugene Tang. An efficient decoder for a linear distance quantum ldpc code, 2022. [GTC +24] Shouzhen Gu, Eugene Tang, Libor Caha, Shin Ho Choe, Zhiyang He, and Aleksander Kubica. Single-Shot Decoding of Good Quantum LDPC Codes. Communications in Mathematical Physics , 405(3), March 2024. [GYW +22] Ming Gong, Xiao Yuan, Shiyu Wang, Yulin Wu, Youwei Zhao, Chen Zha, Shaowei Li, Zhen Zhang, Qi Zhao, Yunchao Liu, et al. Experimental exploration of five-qubit quantum error-correcting code with superconducting qubits. National Science Review , 9(1):nwab011, 2022. [Haf22] Jonas Haferkamp. Random quantum circuits are approximate unitary 𝑡 -designs in depth 𝑂 (𝑛𝑡 5+𝑜 (1) ).
+
+Quantum , 6:795, 2022. [HHO21] Matthew B. Hastings, Jeongwan Haah, and Ryan O’Donnell. Fiber bundle codes: breaking the 
+
+𝑛 1/2polylog (𝑛 )) barrier for Quantum LDPC codes. In Proceedings of the 53rd Annual ACM SIGACT Sym-posium on Theory of Computing , STOC ’21, page 1276–1288. ACM, June 2021. [HKR22] Markus Heinrich, Martin Kliesch, and Ingo Roth. Randomized benchmarking with random quantum circuits. arXiv preprint arXiv:2212.06181 , 2022. [HL09] Aram W. Harrow and Richard A. Low. Random Quantum Circuits are Approximate 2-designs. Commu-nications in Mathematical Physics , 291(1):257–302, July 2009. [HRO +22] Jonas Helsen, Ingo Roth, Emilio Onorati, Albert H Werner, and Jens Eisert. General framework for randomized benchmarking. PRX quantum , 3(2):020357, 2022. [KH26] Twan Kroll and Jonas Helsen. Error correction with brickwork Clifford circuits, 2026. [Kit03] A.Yu. Kitaev. Fault-tolerant quantum computation by anyons. Annals of Physics , 303(1):2–30, January 2003. [KLR +08] Emanuel Knill, Dietrich Leibfried, Rolf Reichle, Joe Britton, R Brad Blakestad, John D Jost, Chris Langer, Roee Ozeri, Signe Seidelin, and David J Wineland. Randomized benchmarking of quantum gates. Physical Review A—Atomic, Molecular, and Optical Physics , 77(1):012307, 2008. [LDLM26] Guoding Liu, Zhenyu Du, Zi-Wen Liu, and Xiongfeng Ma. Approximate Quantum Error Correction with 1D Log-Depth Circuits. PRX Quantum , 7(1), February 2026. [LZ22a] Anthony Leverrier and Gilles Zémor. Efficient decoding up to a constant fraction of the code length for asymptotically good quantum codes, 2022. [LZ22b] Anthony Leverrier and Gilles Zémor. Quantum Tanner codes, 2022. [NBFG25] Jon Nelson, Gregory Bentsen, Steven T. Flammia, and Michael J. Gullans. Fault-tolerant quantum mem-ory using low-depth random circuit codes. Phys. Rev. Res. , 7:013040, Jan 2025. [Noe33] Emmy Noether. Nichtkommutative Algebra. Mathematische Zeitschrift , 37(1):514–541, 1933. [NRVH17] Adam Nahum, Jonathan Ruhman, Sagar Vijay, and Jeongwan Haah. Quantum entanglement growth under random unitary dynamics. Physical Review X , 7(3):031016, 2017. [PHP +22] Lukas Postler, Sascha Heu 𝛽 en, Ivan Pogorelov, Manuel Rispler, Thomas Feldker, Michael Meth, Chris-tian D Marciniak, Roman Stricker, Martin Ringbauer, Rainer Blatt, et al. Demonstration of fault-tolerant universal quantum gate operations. Nature , 605(7911):675–680, 2022. 3.3 Hitting Time to a Narrow Weight Range 31 [PK22] Pavel Panteleev and Gleb Kalachev. Asymptotically Good Quantum and Locally Testable Classical LDPC Codes, 2022. [Qua25] Quantinuum. Helios: A 98-qubit trapped-ion quantum computer. arXiv preprint arXiv:2511.05465 , 2025. [SHH25] Thomas Schuster, Jonas Haferkamp, and Hsin-Yuan Huang. Random unitaries in extremely low depth. 
+
+Science , 389(6755):92–96, 2025. [Sko27] Thoralf Skolem. Zur Theorie der assoziativen Zahlensysteme . Number 12 in Skrifter utgitt av Det Norske Videnskaps-Akademi i Oslo. I, Matematisk-naturvidenskapelig klasse. Det Norske Videnskaps-Akademi i Oslo, 1927. [TZ14] Jean-Pierre Tillich and Gilles Zemor. Quantum LDPC Codes With Positive Rate and Minimum Distance Proportional to the Square Root of the Blocklength. IEEE Trans. Inf. Theor. , 60(2):1193–1202, February 2014. [WLZH26] Adam Wills, Ting-Chun Lin, Rachel Yun Zhang, and Min-Hsiu Hsieh. Linear-time encodable and de-codable quantum error-correcting codes, 2026. [YSMY26] Toshihiro Yada, Ryotaro Suzuki, Yosuke Mitsuhashi, and Nobuyuki Yoshioka. Non-haar random circuits form unitary designs as fast as haar random circuits. Phys. Rev. Lett. , 136:030401, Jan 2026. [ZYH +22] Youwei Zhao, Yangsen Ye, He-Liang Huang, Yiming Zhang, Dachao Wu, Huijie Guan, Qingling Zhu, Zuolin Wei, Tan He, Sirui Cao, et al. Realization of an error-correcting surface code with superconducting qubits. Physical Review Letters , 129(3):030501, 2022. [ZZP17] Linxi Zhang, Chuanghua Zhu, and Changxing Pei. Randomized benchmarking using unitary t-design for average fidelity estimation of practical quantum circuit, 2017. 32 
+
+# A Auxiliary Propositions 
+
+## A.1 Distance Condition for Codes from Unitaries 
+
+The following proposition from [BF13b] is used to prove our main theorems in Subsection 2.3. 
+
+Proposition A.1 ([BF13b, Proposition II.1]) . A unitary 𝑈 ∈ C 𝑛 defines a quantum error-correcting code of distance at least 𝑑 + 1 if and only if for all 𝜈 𝐴 ∈ { 0, 1, 2, 3}𝑘 − { 0𝑘 }, 𝜈 𝐵 ∈ { 0, 3}𝑛 −𝑘 , and 𝜇 ∈ { 0, 1, 2, 3}𝑛 of weight 1 ≤ 𝑤 (𝜇 ) ≤ 𝑑 , we have tr 𝜎 𝜇 𝑈 (𝜎 𝜈 𝐴 ⊗ 𝜎 𝜈 𝐵 )𝑈 † = 0.Proof. First, we prove the “if”; suppose for all 𝜈 𝐴 ∈ { 0, 1, 2, 3}𝑘 − { 0𝑘 }, 𝜈 𝐵 ∈ { 0, 3}𝑛 −𝑘 , and 𝜇 ∈ { 0, 1, 2, 3}𝑛 of weight 1 ≤ 𝑤 (𝜇 ) ≤ 𝑑 , we have tr 𝜎 𝜇 𝑈 (𝜎 𝜈 𝐴 ⊗ 𝜎 𝜈 𝐵 )𝑈 † = 0. We have ⟨ ¯𝑥 |𝜎 𝜇 | ¯𝑦 ⟩ = ⟨𝑥 |𝐴 ⊗ ⟨ 0|𝐵 𝑈 †𝜎 𝜇 𝑈 |𝑦 ⟩𝐴 ⊗ | 0⟩𝐵 = tr 𝜎 𝜇 𝑈 (| 𝑦 ⟩⟨ 𝑥 | ⊗ | 0⟩⟨ 0|) 𝑈 †. Here, note that 
+
+|𝑦 ⟩⟨ 𝑥 | = 𝛿 𝑥 𝑦 
+
+2𝑘 𝜎 0 + 12𝑘 ∑︁ 𝜈 𝐴 ∈ { 0,1,2,3}𝑘 −{ 0}𝑘 
+
+tr 𝜎 𝜈 𝐴 |𝑦 ⟩⟨ 𝑥 |𝜎 𝜈 𝐴 , |0⟩⟨ 0|⊗𝑛 −𝑘 = 12𝑛 −𝑘 ∑︁ 𝜈 𝐵 ∈ { 0,3}𝑛 −𝑘 
+
+𝜎 𝜈 𝐵 .
+
+Therefore, if tr 𝜎 𝜇 𝑈 (𝜎 𝜈 𝐴 ⊗ 𝜎 𝜈 𝐵 )𝑈 † = 0, then ⟨ ¯𝑥 |𝜎 𝜇 | ¯𝑦 ⟩ = tr 𝜎 𝜇 𝑈 ( 𝜎 0 
+
+> 2𝑘
+
+⊗ | 0⟩⟨ 0|) 𝑈 † · 𝛿 𝑥 𝑦 =: 𝐶 𝜇 𝛿 𝑥 𝑦 .Now, assume 𝑈 satisfies the condition that for all 𝑥, 𝑦 ∈ { 0, 1}𝑘 and all 𝜇 ∈ { 0, 1, 2, 3}𝑛 with 1 ≤ 𝑤 (𝜇 ) ≤ 𝑑 ,
+
+⟨ ¯𝑥 |𝜎 𝜇 | ¯𝑦 ⟩ = 𝐶 𝜇 𝛿 𝑥 𝑦 . We write 𝜎 𝜈 𝐴 = Í𝑥,𝑦 ∈ { 0,1}𝑘 𝜎 𝜈 𝐴 (𝑥, 𝑦 )| 𝑥 ⟩⟨ 𝑦 |. Thus, if 1 ≤ 𝑤 (𝜇 ) ≤ 𝑑 , we have tr 𝜎 𝜇 𝑈 (𝜎 𝜈 𝐴 ⊗ | 0⟩⟨ 0|) 𝑈 † =∑︁  
+
+> 𝑥,𝑦 ∈ { 0,1}𝑘
+
+𝜎 𝜈 𝐴 (𝑥, 𝑦 ) tr 𝜎 𝜇 𝑈 (| 𝑥 ⟩⟨ 𝑦 | ⊗ | 0⟩⟨ 0|) 𝑈 †
+
+=∑︁  
+
+> 𝑥,𝑦 ∈ { 0,1}𝑘
+
+𝜎 𝜈 𝐴 (𝑥, 𝑦 )𝐶 𝜇 𝛿 𝑥 𝑦 = 0,
+
+since tr 𝜎 𝜈 𝐴 
+
+ = Í𝑥 𝜎 𝜈 𝐴 (𝑥, 𝑥 ) = 0. Finally, since 𝑈 transforms Pauli operators to Pauli operators, we have that tr 𝜎 𝜇 (𝑈 𝜎 𝜈 𝐴 ⊗ | 0⟩⟨ 0|) 𝑈 † = 0 implies that for all 𝜈 𝐵 ∈ { 0, 3}𝑛 −𝑘 , it must be that tr 𝜎 𝜇 (𝑈 𝜎 𝜈 𝐴 ⊗ 𝜎 𝜈 𝐵 )𝑈 † = 0. 
+
+## A.2 Light Cone Lower Bound 
+
+In this subsection, we use a light cone argument to show that Ω(𝑛 log 𝑛 ) number of gates and Ω(log 𝑛 ) layers are necessary for a random matching circuit to produce a code of linear distance with probability bounded away from 0. See the discussion in Subsection 1.3. 
+
+Proposition A.2. Consider an ensemble of 𝑇 layers in which layer 𝑟 places arbitrary two-qubit gates on a uniformly random set of fixed size 𝐵 𝑟 ≤ 𝑛 /2 disjoint pairs, independently of earlier layers. Let 𝑁 := Í𝑇 𝑟 =1 𝐵 𝑟 be the total number of two-qubit gates. Suppose that, with probability at least 𝑝 , the resulting Clifford encoder defines an [𝑛, 𝑘 ] stabilizer code of distance at least 𝑑 + 1, where 𝑘 ≥ 1. Then 
+
+𝑁 ≥ 𝑛 − 12 ln  𝑝 (𝑑 + 1).
+
+Therefore, if 𝑝 is bounded below by a positive constant and 𝑑 ≥ 𝛿𝑛 for some constant 𝛿 > 0, then 𝑁 = Ω(𝑛 log 𝑛 ) and 
+
+𝑇 = Ω(log 𝑛 ).Proof. Fix a logical input qubit 𝑖 ∈ [ 𝑘 ]. Let 𝐿 𝑟 (𝑖 ) be the forward light cone of qubit 𝑖 after the first 𝑟 layers. In particular, let 𝐿 0 (𝑖 ) = {𝑖 } and recursively define 𝐿 𝑟 +1 (𝑖 ) by adding to 𝐿 𝑟 (𝑖 ) every qubit that is paired in layer 𝑟 + 1with a qubit in 𝐿 𝑟 (𝑖 ). Let 𝐵 𝑟 = 𝑏 and |𝐿 𝑟 | = 𝑦 . There are 𝑦 (𝑛 − 𝑦 ) unordered pairs with one endpoint in 𝐿 𝑟 (𝑖 ) and the other endpoint in [𝑛 ] \ 𝐿 𝑟 (𝑖 ).Since the matching in layer 𝑟 + 1 is a uniformly random matching of size 𝑏 , every unordered pair is included with probability 𝑏 
+
+(𝑛 
+
+> 2
+
+) . Therefore, the expected number of matching edges crossing from 𝐿 𝑟 (𝑖 ) to its complement is 
+
+𝑏 · 𝑦 (𝑛 − 𝑦 )
+
+ 𝑛 
+
+> 2
+
+ = 𝑏 · 2𝑦 (𝑛 − 𝑦 )
+
+𝑛 (𝑛 − 1) .A.2 Light Cone Lower Bound 33 We note that each such crossing edge adds at most one new qubit to the light cone. Therefore 
+
+E[| 𝐿 𝑟 +1 | | | 𝐿 𝑟 | = 𝑦, 𝐵 𝑟 = 𝑏 ] = 𝑦 + 𝑏 · 2𝑦 (𝑛 − 𝑦 )
+
+𝑛 (𝑛 − 1)≤ 𝑦 
+
+
+
+1 + 2𝑏 𝑛 − 1
+
+
+
+.
+
+Taking expectations and iterating over the layer, we bound the expected light cone at the final layer 𝑇 ,
+
+E[| 𝐿 𝑇 |] ≤ 
+
+Ö
+
+> 𝑟
+
+(1 + 2𝐵 𝑟 
+
+𝑛 − 1 )≤ exp 
+
+ 2𝑁 𝑛 − 1
+
+
+
+.
+
+On the event that the circuit has distance at least 𝑑 + 1, every nontrivial encoded logical Pauli has weight at least 
+
+𝑑 + 1. Hence, with probability at least 𝑝 , we have |𝐿 𝑇 (𝑖 )| ≥ 𝑑 + 1. To see this, note that for a Clifford encoder 𝑈 , the encoded logical Pauli 𝑈 𝑋 𝑖 𝑈 † is supported inside the forward light cone of logical qubit 𝑖 . If the resulting stabilizer code has distance at least 𝑑 + 1, then every nontrivial logical Pauli has weight at least 𝑑 + 1. Therefore, |𝐿 𝑇 (𝑖 )| ≥ 𝑑 + 1. Applying Markov’s inequality, we see that 
+
+𝑝 ≤ Pr [| 𝐿 𝑇 | ≥ 𝑑 + 1] ≤ exp   2𝑁 𝑛 −1
+
+
+
+𝑑 + 1 .
+
+Since 𝑑 = 𝛿𝑛 and 𝑝 is bounded below by a positive constant, 
+
+𝑁 ≥ 𝑛 − 12 ln  𝑝 (𝑑 + 1)
+
+≥ 𝑛 − 12 ln  𝑝 (𝛿𝑛 + 1)
+
+=
+
+ 12 − 𝑜 (1)
+
+
+
+𝑛 ln 𝑛, 
+
+which proves that 𝑁 = Ω(𝑛 log 𝑛 ). Finally, each layer contains at most 𝑛 /2 two-qubit gates, so 𝑁 ≤ 𝑛𝑇  
+
+> 2
+
+. Thus, 
+
+𝑇 ≥ 2𝑁 𝑛 = Ω(log 𝑛 ).

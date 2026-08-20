@@ -1,0 +1,1438 @@
+Title: Integer Linear Programming Decoder for Abelian and Non-Abelian Topological Codes
+
+URL Source: https://arxiv.org/pdf/2608.18512v1
+
+Published Time: Thu, 20 Aug 2026 00:29:49 GMT
+
+Number of Pages: 25
+
+Markdown Content:
+# Integer Linear Programming Decoder for Abelian and Non-Abelian Topological Codes 
+
+Dian Jing, 1, 2, ∗ Aubrey Zhang, 1 Liang Jiang, 2 and Ruben Verresen 2
+
+> 1
+
+Department of Physics, University of Chicago, Chicago, IL 60637, USA 
+
+> 2
+
+Pritzker School of Molecular Engineering, University of Chicago, Chicago, IL 60637, USA 
+
+(Dated: August 20, 2026) Topological orders (TOs) are widely used as quantum error-correcting codes, with anyon excita-tions serving as error syndromes. For certain Abelian TOs, decoding can be performed by inde-pendently matching particle-antiparticle pairs of each species. However, matching-based decoders cannot handle more general fusion rules in either Abelian or non-Abelian TOs, nor account for noise that correlates different anyon species. While clustering decoders are more broadly applicable, they typically neglect anyon data and fusion properties, leading to poor performance in practice. In this work, we introduce a fundamentally different decoder for arbitrary TOs based on integer linear programming (ILP). The ILP formulation linearizes the error-correction problem through the intro-duction of auxiliary variables and encodes fusion rules as linear constraints. Classical optimization then identifies the minimum-weight error configuration. As concrete examples, we determine error-correction thresholds for three TOs: the Abelian Z2 TO under depolarizing noise, where charge and flux errors are correlated; the Abelian Z3 TO, which does not admit a pairwise matching decoder; and the non-Abelian D4 TO under noise channels that generate all anyon species. We demonstrate the versatility of the ILP decoder by showing a clear performance advantage over most existing decoders in all three cases. We further extend the method to incorporate noisy syndrome mea-surements and propose a just-in-time variant for continuous error correction. Our results establish ILP as a natural framework for handling correlated errors and general anyon fusion rules, and as a powerful and flexible general-purpose decoder for incoherent anyon noise in arbitrary TOs, with applications to fault-tolerant quantum computation. 
+
+I. INTRODUCTION 
+
+Topological orders (TOs) are long-range entangled quantum phases that are robust against local perturba-tions [1–9]. They have been exploited as quantum er-ror correction codes, with their anyon excitations serving as error syndromes and anyon strings acting as correc-tion operators [10–15]. TOs are either Abelian or non-Abelian. For Abelian TOs, such as the toric code, anyons obey deterministic fusion rules and pairwise annihilate with their antiparticles. Their error correction problem is well studied, and a variety of efficient decoding algo-rithms have been developed [14–18]. Decoders for Abelian TOs can be broadly divided into two categories: matching-based decoders and cluster-ing decoders. For anyons that are their own antiparti-cles, matching-based decoders identify lattice paths along which they can be pairwise annihilated. Classical graph algorithms, such as Dijkstra’s algorithm [19, 20] or the Blossom algorithm [21, 22], are typically used to deter-mine the shortest pairing paths, yielding the strategy known as minimum-weight perfect matching (MWPM) [14, 23]. However, matching-based decoders apply only in special cases: they cannot naturally accommodate more general fusion rules, even for Abelian TOs in which an anyon is not its own antiparticle, and become inadequate when different anyon species are correlated by the noise. In contrast, clustering decoders identify and fuse anyons within independent error clusters created by errors with  
+
+> ∗rossoneri@uchicago.edu
+
+non-overlapping support [24–26]. While clustering de-coders apply to arbitrary TOs and arbitrary local noise channels, their under-utilization of anyon data, fusion properties, and details of the noise channel typically leads to lower thresholds in practice [17, 18]. Since the anyons within each cluster necessarily fuse to the vacuum, in-dependent of their internal braiding or fusion structure, logical errors are avoided provided that all clusters re-main smaller than the code distance. Consequently, clus-tering decoders exhibit subthreshold behavior whenever the probability of large error clusters is sufficiently sup-pressed [18, 27, 28]. While decoding general Abelian TOs is already chal-lenging, error correction for non-Abelian TOs is even more difficult due to their non-Abelian braiding and fu-sion properties [29]. By definition, non-Abelian anyons, denoted by a, have multiple, nondeterministic fusion channels 
+
+a × ¯a = 1 + ( a) + b + ... , (1) leading to a quantum dimension da > 1. Moreover, an anyon a may appear among its own fusion outcomes (as indicated by the parentheses), a feature commonly re-ferred to as the cyclic property. For non-Abelian TOs, matching-based decoders are applicable only to anyons that are their own antiparti-cles and obey acyclic fusion rules [22, 30–32]. In this restricted setting, intrinsic heralding can provide addi-tional information about error paths and thereby improve error-correction thresholds by exploiting nondeterminis-tic fusion outcomes [31]. However, intrinsic heralding is effective only when the noise channel is dominated by arXiv:2608.18512v1 [quant-ph] 19 Aug 2026 2pair creation of a single species of acyclic, self-antiparticle non-Abelian anyon. More severely, for cyclic non-Abelian TOs, which can support universal quantum computation through braiding and fusion [11, 13, 33–37], matching-based decoding breaks down entirely, even when the anyons are their own antiparticles. In general, non-Abelian anyon strings can form branch-ing, tree-like networks that cannot be decomposed into pairwise annihilation. As a result, existing decoders for non-Abelian TOs are almost exclusively clustering de-coders [22, 28, 38–42], in which independent error clusters are identified using renormalization group (RG) methods [18, 43]. While such clustering decoders have provided valuable tools for proving the existence of error correction thresholds for non-Abelian TOs [18, 27, 28, 30, 42] and for numerically demonstrating threshold behavior, they do not utilize the fusion and braiding properties of the underlying TO. Consequently, their numerical thresholds are typically much lower than the MWPM thresholds achieved for Abelian TOs [18, 22, 28, 38–41, 44]. These limitations motivate the development of fun-damentally new decoding strategies applicable to both Abelian and non-Abelian anyons. To this end, we intro-duce a qualitatively different decoding approach based on the classical optimization framework of integer lin-ear programming (ILP). To date, linear programming decoders have been primarily explored in the context of qLDPC codes [45–50], whose syndromes effectively be-have as Abelian anyons with the simple fusion rule of particle-antiparticle annihilation. In this setting, the ex-pressive power of ILP is not fully utilized, and decod-ing is more efficiently and preferably handled by other methods such as belief propagation [51–53]. By contrast, for arbitrary TOs with general fusion rules, ILP pro-vides a genuine extension beyond pairwise annihilation of anyon syndromes. It does so by explicitly encoding fu-sion rules as linear constraints on anyon-string configura-tions, thereby capturing allowed string terminations that are absent from existing decoding schemes, as illustrated in Fig. 1. These linear constraints can also encode cor-relations among different anyon species in the local noise channel. Although auxiliary variables are required to rep-resent the fusion rules and correlations, the ILP formu-lation linearizes the error-correction problem, enabling classical optimization to identify the most probable error configuration consistent with the measured syndromes. This yields a minimum-weight decoder for arbitrary TOs that serves as a direct analog of MWPM. In this way, we establish linear constraints as a natural language for enforcing anyon fusion rules and ILP as a natural frame-work for general-purpose decoding of arbitrary TOs. While our construction is general, we benchmark the performance of the ILP decoder by numerically compar-ing its error-correction threshold against that of existing decoders for the Abelian Z2 TO, the Abelian Z3 TO, and the acyclic non-Abelian D4 ∼= Z4 ⋊Z 2 TO. As a warm-up and an introduction to the ILP formalism, we first con-sider decoding the Z2 TO under a depolarizing channel                   
+
+> FIG. 1. Example configuration of incoherent anyon errors obtained from the ILP decoder. Given the anyon syndromes, the ILP decoder uses classical optimiza-tion to identify the minimum-weight configuration of incoher-ent anyon errors. These configurations allow anyon strings to terminate on syndromes as well as other anyon strings accord-ing to the fusion rules of the TO, a feature not captured by existing decoders. In the ILP formulation, the fusion channels
+> fand the corresponding multiplicities Nfof incident anyons are encoded as linear constraints. An example anyon-string configuration is shown, with the relevant fusion rules provided in the bottom-left panel. At each lattice site with a measured anyon syndrome, the selected fusion channel fand the multi-plicities Nfof incident anyons are specified. The labels at the bottom of each fusion channel fdenote the incident anyons, while the label at the top denotes the fusion outcome corre-sponding to the measured syndrome.
+
+that correlates charge and flux errors. We then consider the Abelian Z3 TO, whose anyon fusion rules do not al-low a matching-based decoder, under an incoherent noise channel in the charge sector. Finally, we consider the non-Abelian D4 TO under a noise channel that indepen-dently and incoherently creates all anyon species. The 
+
+D4 TO is of practical relevance, having recently been re-alized in trapped-ion experiments [54, 55], and provides a resource for universal quantum computation [30, 56, 57]. Importantly, the self-antiparticle and acyclicity proper-ties of the D4 fusion rules permit matching-based de-coding, enabling a direct comparison. Since clustering decoders are known to exhibit substantially lower thresh-olds than matching-based decoders, demonstrating an advantage over matching suffices to establish the perfor-mance gains of the ILP approach.  
+
+> II. MINIMUM-WEIGHT DECODING WITH INTEGER LINEAR PROGRAMMING
+
+Given a set of anyon measurement outcomes σ serv-ing as error syndromes, the goal of error correction is to identify the most likely homology class h of physical error 3strings across all anyon species [14], according to 
+
+P (h|σ) = X
+
+> E∈h
+
+P (E|σ) ∝ X
+
+> E∈h
+
+P (σ|E)P (E)
+
+≈ max  
+
+> E∈h
+
+P (σ|E)P (E). (2) In the second step, the probability of a physical error string E conditioned on the syndrome σ is decomposed via Bayes’ rule into the prior P (E) and the likelihood 
+
+P (σ|E), where the latter captures the probabilistic col-lapse of any superposition of non-Abelian fusion out-comes into the observed syndromes σ [31]. For Abelian TOs, the fusion outcomes are deterministic, so P (σ|E)reduces to a delta function that enforces consistency be-tween the error configuration E and the measured syn-drome σ. Approximating the sum over all error strings 
+
+E by its dominant contribution, as in the final step of Eq. 2, leads to the minimum-weight decoder. For Abelian TOs with the simple fusion rule of particle-antiparticle annihilation, decoding can be implemented efficiently using MWPM [23], which, in the context of this paper, specifically refers to a particle-antiparticle matching decoder restricted to a single anyon species. In contrast, minimum-weight decoding for arbitrary TOs, either Abelian or non-Abelian, is more challenging due to general anyon fusion rules, which allow error strings to terminate on different anyon species. This difficulty is especially pronounced for non-Abelian TOs, where non-deterministic fusion channels give rise to a nontrivial 
+
+P (σ|E). In this work, we develop an ILP approach for minimum-weight decoding of arbitrary TOs under inco-herent noise that can generate all anyon species, includ-ing correlated errors across different species, thereby nat-urally addressing both of these difficulties. The linear programming problem [58] seeks to optimize a linear objective function 
+
+f (x) = wTx = w1x1 + w2x2 + . . . , (3) where w is a vector of real coefficients and x is the vector of decision variables subject to the linear constraints 
+
+bL ≤ Ax ≤ bR, x ≥ 0. (4) If the decision variables are restricted to integer or binary values, the problem is referred to as integer linear pro-gramming (ILP) or binary linear programming (BLP), respectively. The decision variables x will encode both the physical error-string configuration E and the anyon fusion out-comes along the strings. The linear constraints, specified by A, bL, and bR in Eq. 4, ensure that the decision vari-ables are consistent with the fusion rules of the TO and the measured syndromes σ. Thus, the error configura-tion is determined by the decision variables, E = E(x), while the constraint bounds depend on σ. Moreover, the constructions of x, A, bL, and bR depend on the anyon data and fusion rules of the TO. For minimum-weight error correction in TOs, the coef-ficients w, also referred to as weights, are chosen so that the objective function f (x) is a monotonic function of 
+
+P (σ|E)P (E) in Eq. 2. Under local noise channels, the probability P (E|σ) ∝ P (σ|E)P (E) of an error configu-ration is built from products of local probabilities, while the objective function is additive. This motivates choos-ing f (x) = ln [ P (σ|E)P (E)]. Therefore, optimizing f (x)correctly identifies max E P (σ|E)P (E). Details of the ILP decoder, including its decision vari-ables, linear constraints, and objective functions, are pre-sented in Secs. III-VI for general TOs with perfect syn-drome measurements, together with explicit examples for the Abelian Z2 and Z3 TOs and the non-Abelian D4 TO. Continuous spacetime ILP decoding in the presence of measurement errors is discussed in Sec. VII.    
+
+> III. ILP FOR ABELIAN Z2TO UNDER CORRELATED NOISE
+
+As a warm-up, we introduce a simplified ILP formalism using the Abelian Z2 TO, commonly known as the toric code, under single-qubit depolarizing noise with equal Pauli probabilities, pX = pY = pZ = p 
+
+> 3
+
+. While Pauli ˆX
+
+and ˆZ operators incoherently create m- and e-anyons, respectively, Pauli ˆY operators create both species of anyons in a correlated manner. Therefore, the Z2 ex-ample also serves as a demonstration of the ability of ILP to correct correlated anyon errors.  
+
+> A. Input
+
+We consider the Z2 TO on a square lattice with peri-odic boundary conditions, with qubits residing on lattice links ℓ. As in Ref. 10, a site s is defined by a vertex to-gether with the plaquette immediately northeast of that vertex. We denote by ∂es the set of qubits in the support of the vertex operator, on which a Pauli ˆY or ˆZ opera-tor creates an e-anyon at site s, and by ∂ms the set of qubits in the support of the plaquette operator, on which a Pauli ˆX or ˆY operator creates an m-anyon at site s.At each site, perfect anyon measurement is performed, reporting a syndrome of either vacuum, e, m, or f . Al-though this measurement scheme is equivalent to in-dependently measuring e-anyons at all vertices and m-anyons at all plaquettes, this representation includes syndrome labels corresponding to fusion channels be-yond simple particle-antiparticle annihilation, namely 
+
+f = e × m, making it an illustrative minimal example of ILP decoding. For each decoder instance, the syndromes are input to the decoder as binary variables σes , σ ms , σ fs ∈ { 0, 1},where σe/m/f s = 1 indicates the presence of an e/m/f -anyon syndrome and σe/m/f s = 0 indicates its absence. 4 
+
+> B. Weights and Objective Function
+
+To describe errors from the depolarizing noise channel, we introduce three binary error variables yXℓ , y Yℓ , y Zℓ ∈{0, 1} for each qubit ℓ. The assignment yPℓ = 1 indicates that the Pauli operator P ∈ { X, Y, Z } acts on qubit ℓ,while the all-zero assignment corresponds to the identity. Under depolarizing noise, each of the three nontrivial Pauli errors occurs with probability p/ 3, while the iden-tity occurs with probability 1 − p. Therefore, an error configuration E, uniquely specified by the assignment of the binary error variables y, occurs with probability 
+
+P (E) = Y
+
+> ℓ
+
+(1 − p)
+
+ p/ 31 − p
+
+yXℓ  p/ 31 − p
+
+yYℓ  p/ 31 − p
+
+yZℓ
+
+.
+
+(5) For the Abelian Z2 TO, the deterministic fusion rules imply that P (σ|E) is either zero or one, depending on whether E is consistent with the syndrome σ. The con-straints introduced in the next subsection enforce this consistency, ensuring that every candidate error configu-ration E satisfies P (σ|E) = 1. It is therefore sufficient to optimize P (E) and assign weights only to the error variables y.Taking the logarithm f (y) = ln [ P (σ|E)P (E)] and re-stricting to allowed configurations satisfying P (σ|E) = 1, we obtain, up to an additive constant, f (y) =
+
+P 
+
+> ℓ,P
+
+wPℓ yPℓ , where wPℓ = ln p/ 31−p < 0 is the weight as-sociated with an activated error variable yPℓ = 1. Since this weight is identical for all error variables, we may rescale the objective function by the common negative weight, reverse the optimization direction, and use the equivalent objective function 
+
+f (y) = X
+
+> ℓ
+
+ yXℓ + yYℓ + yZℓ
+
+ . (6) Minimum-weight decoding is achieved by minimizing 
+
+f (y), yielding an assignment of y that corresponds to max E P (σ|E)P (E). Intuitively, the ILP decoder iden-tifies the most likely error configuration consistent with the measured syndrome, which in this case is the config-uration containing the fewest Pauli errors.  
+
+> C. Linear Constraints
+
+The core of the ILP decoder lies in the decision vari-ables and linear constraints in Eq. 4, which ensure that each allowed assignment of the decision variables encodes an anyon-string configuration consistent with both the measured syndromes and the fusion rules of the underly-ing TO. For the Z2 TO, the anyon fusion rules impose par-ity constraints on the Pauli errors incident on each site 
+
+s. On the support ∂es of the vertex, the total number of Pauli ˆY and ˆZ operators must be odd when the measured syndrome is e or f , and even when it is m or vacuum. Similarly, on the support ∂ms of the plaquette, the total number of Pauli ˆX and ˆY operators must be odd when the measured syndrome is m or f , and even otherwise. These fusion rules are encoded by the constraints 
+
+X
+
+> ℓ∈∂es
+
+ yYℓ + yZℓ
+
+ = σes + σfs + 2 nes,
+
+X
+
+> ℓ∈∂ms
+
+ yXℓ + yYℓ
+
+ = σms + σfs + 2 nms , (7) defined at each site s. The integer variables nes, n ms ∈{0, 1, 2} enforce the required parities. They are neces-sary because the matrix multiplication Ax in Eq. 4 can-not directly implement the modulo-2 addition needed to impose parity constraints. The bounds on nes and nms are sufficient because each vertex and plaquette operator is supported on four qubits. Since the single-qubit Pauli noise channel applies at most one nontrivial Pauli operator to each qubit, one may impose the constraint 
+
+yXℓ + yYℓ + yZℓ ≤ 1 (8) for every qubit ℓ. However, this constraint is redun-dant under minimization of the objective function in Eq. 6. Suppose an ILP solution satisfying Eq. 7 has two active error variables on the same qubit, for example 
+
+yXℓ = yYℓ = 1 and yZℓ = 0. Since the product of Pauli ˆX and ˆY operators is equivalent, up to a global phase, to a Pauli ˆZ operator, the assignment yXℓ = yYℓ = 0 and yZℓ = 1 produces the same syndrome and also sat-isfies Eq. 7, with an appropriate reassignment of nes and 
+
+nms , while reducing the objective f (y). The ILP decoder therefore always prefers the latter assignment. Similarly, the assignment yXℓ = yYℓ = yZℓ = 0 is always preferred over yXℓ = yYℓ = yZℓ = 1. This automatic satisfaction of Eq. 8 is specific to the Z2 TO under single-qubit Pauli noise. We nevertheless include the constraint here as an example of a linear constraint on the error variables im-posed directly by the noise model.  
+
+> D. Decoder Performance
+
+In summary, the ILP decoder for the Z2 TO un-der the depolarizing noise channel minimizes the objec-tive function f (y) in Eq. 6, which depends on the er-ror variables y contained in the decision-variable vector 
+
+xT =  yPℓ , nes, nms
+
+. These decision variables are sub-ject to linear constraints of the form in Eq. 4, specifically Eq. 7, together with bounds on their allowed ranges. With the error-correction problem formulated as an ILP, the minimum-weight error configuration can be ob-tained using commercial solvers such as Gurobi [75]. Numerically, this ILP decoder achieves a threshold of 18 .039(7)%, outperforming most existing decoders [60– 66] and substantially exceeding the uncorrelated MWPM value of 15 .5(5)% [59], as shown in Fig. 2. This result is 5                   
+
+> FIG. 2. Error-correction thresholds for example Abelian TOs. (a) For the Abelian Z2TO under single-qubit depolarizing noise, the ILP decoder achieves an error-correction threshold of 18 .039(7)%, exceeding most exist-ing decoders, including uncorrelated MWPM [59], union-intersection union-find (UIUF) [60], renormalization group with belief propagation (RG-BP) [61], deep Q-learning based on deep reinforcement learning [62], belief propaga-tion with approximate degenerate ordered-statistics decod-ing (BP-ADOSD) [63, 64], matrix product states (MPS) [65], and belief propagation with MWPM (BP-MWPM) [66]. This threshold is also close to the optimal value of 18 .9(3)% [67, 68] and to that obtained using an approximate optimal decoder based on Monte Carlos sampling [69]. (b) For the Abelian Z3
+> TO under incoherent charge noise, the ILP decoder achieves an error-correction threshold of 15 .346(5)%, substantially ex-ceeding those reported for existing decoders, including hard-decision renormalization group (HDRG) [70], MWPM-based HDRG [71], and soft-decision renormalization group (SDRG) [72]. This threshold is also close to the optimal value of 15 .8(2)% estimated using Monte Carlo sampling [73, 74].
+
+also close to the optimal depolarizing-noise threshold of 18 .9(3)% [67, 68]. Exact optimal decoding would require accounting for all possible error configurations, whose number grows exponentially with the code distance. Such an exhaustive calculation is infeasible in practice. Ap-proximate optimal decoders therefore use Monte Carlo sampling to estimate the most likely error homology class [67, 69]. Although runtime depends on the specific code and implementation, the ILP decoder typically runs or-ders of magnitude faster than the approximately optimal Monte Carlo decoder at numerically relevant code dis-tances while retaining near-optimal performance. Fur-thermore, it avoids the complicated convergence criteria associated with Monte Carlo sampling. The minimum-weight decoding problem for the Z2 TO under single-qubit Pauli noise is NP-hard [76–78], and we efficiently formulate it as an ILP, which is itself NP-hard in general. Accordingly, polynomial-time scaling cannot be guaranteed in the worst case. Nevertheless, worst-case complexity does not determine the runtime for practically relevant error configurations. In practice, quantum error correction operates in the subthreshold regime, where we find that both the mean and median runtimes of our ILP decoder are consistent with poly-nomial scaling over the numerically accessible code dis-tances. At the error-correction threshold, the runtime increases substantially, but the observed scaling remains inconsistent with a simple exponential dependence on system size, measured by the number of qubits, over the accessible range. Details of the runtime scaling are pro-vided in Appendix A. These results indicate that the ILP decoder can operate efficiently over practically relevant error rates and code distances.    
+
+> IV. ILP FOR ABELIAN Z3TO WITH NON-TRIVIAL FUSION
+
+Following the Abelian Z2 example, we now introduce a simplified ILP formulation for the Abelian Z3 TO. For simplicity, we focus on the charge sector, whose nontrivial anyons e and ¯ e obey the deterministic fusion rules 
+
+e × ¯e = 1 , e × e = ¯ e, ¯e × ¯e = e. (9) In particular, in addition to particle-antiparticle annihi-lation, three identical nontrivial anyons can fuse to the vacuum, e.g., e × e × e = 1. Consequently, the Z3 TO cannot in general be decoded using a matching-based de-coder. This example therefore demonstrates the ability of the ILP decoder to accommodate more general fusion rules while yielding a substantial threshold improvement over existing clustering decoders. We consider decod-ing the Z3 TO under incoherent creation of e¯e pairs on neighboring lattice sites, with the two possible pair ori-entations each occurring with probability p 
+
+> 2
+
+. 
+
+> A. Input
+
+We consider the Z3 TO on a square lattice with pe-riodic boundary conditions, with qutrits residing on lat-tice links ℓ. Since the noise channel acting on the qutrits can create e¯e pairs in two orientations, we assign a fixed orientation to each qutrit and label the two error orien-tations by e and ¯ e. At a lattice site s, we denote by ∂+s
+
+the set of qutrits oriented toward s, for which an error labeled by e creates an e-anyon at site s, and by ∂−s the set of qutrits oriented away from s, for which an error labeled by e creates a ¯ e-anyon at site s. The choice of qutrit orientation is arbitrary provided that it is made consistently. At each site s, a perfect anyon measurement assigns a unique anyon charge label, including the vacuum. The corresponding syndrome data are supplied to the decoder as binary variables σes , σ ¯es ∈ { 0, 1}, with σes = 1 or σ¯es = 1 indicating that an e-anyon or ¯ e-anyon, respectively, is measured at site s.6 
+
+> B. Decision Variables and Linear Constraints
+
+To describe the errors in our noise channel, we intro-duce two binary error variables yeℓ , y ¯eℓ ∈ { 0, 1} for each oriented qutrit ℓ, corresponding to the two possible ori-entations of e¯e pair creation. The variable yeℓ = 1 denotes an error with orientation label e on qutrit ℓ, while y¯eℓ = 1 denotes an error with orientation label ¯ e. Since the two orientations are mutually exclusive on each qutrit, we impose 
+
+yeℓ + y¯eℓ ≤ 1. (10) As with Eq. 8 for the Z2 TO under single-qubit Pauli noise, the constraint in Eq. 10 is imposed directly by the noise model but is automatically satisfied upon mini-mization of the objective function introduced below, and is therefore redundant. The fusion constraints enforce that, at each site s, the total anyon charge generated by errors on the support 
+
+∂+s ∪ ∂−s fuses to the measured syndrome according to Eq. 9. To express this condition as linear constraints, we introduce variables ns ∈ { 0, 1, 2} that account for multi-ples of three, yielding 
+
+X
+
+> ℓ∈∂+s
+
+ yeℓ + 2 y¯eℓ
+
+ + X
+
+> ℓ∈∂−s
+
+ 2yeℓ + y¯eℓ
+
+ = σes + 2 σ¯es + 3 ns,
+
+(11) for each site s. The bound ns ∈ { 0, 1, 2} is sufficient be-cause, on the square lattice, the support of each site con-tains four qutrits, and the active error variable on each qutrit contributes at most the equivalent of two units of 
+
+e-anyon charge to the site, so the left-hand side of Eq. 11 is at most eight.  
+
+> C. Weights, Objective Function, and Threshold
+
+As before, we choose the objective function as f (x) = ln P (E), with the trivial factor P (σ|E) enforced by the linear constraints. Under our noise channel, the creation of an e¯e pair in either orientation occurs with equal prob-ability p 
+
+> 2
+
+on each qutrit residing on link ℓ. Therefore, all error variables have the same weight w = ln p/ 21−p < 0 and the objective function, equivalent up to an overall scaling by a nonzero constant, is 
+
+f (x) = X
+
+> ℓ
+
+ yeℓ + y¯eℓ
+
+ , (12) Minimum-weight decoding is obtained by minimizing 
+
+f (x). Numerically, this ILP decoder achieves a threshold of 15 .346(5)%, close to the optimal threshold of 15 .8(2)% under the same noise channel [73, 74]. Furthermore, this ILP threshold is substantially higher than previously reported thresholds for renormalization group decoders, none of which exceed 13% [70–72], as shown in Fig. 2.   
+
+> V. ILP FOR ARBITRARY ANYON MODEL A. Input
+
+In this section, we present the full ILP formulation for decoding arbitrary TOs, both Abelian and non-Abelian. For error correction with perfect anyon syndromes, the input to the ILP decoder consists of three components: the two-dimensional lattice whose sites support anyons, the measured anyon syndromes at those sites, and the fusion data of the TO. Anyons are assumed to occupy the sites of the lattice 
+
+S. At each site s ∈ S, the anyon syndrome is deter-mined by measuring a maximal set of locally compatible anyon species. As an example, Appendix B details such a syndrome-measurement protocol for the quantum dou-ble model using commuting projectors [10]. For now, we assume perfect anyon measurements, with measure-ment errors considered later in Sec. VII. While the lattice structure is fixed for a given realization of the TO, the syndrome information varies between decoder instances. The fusion rules of the TO are provided as input to the decoder and organized by fusion outcome. Let Fa
+
+denote the set of allowed fusion channels that produce an a-anyon at a lattice site. For each fusion channel 
+
+f ∈ F a, let Nf,b ∈ Z≥0 denote the multiplicity of inci-dent b-anyon strings associated with that channel. Since the connectivity at each site is typically a small finite integer, enumerating all allowed f ∈ F a is feasible for relevant TOs. Examples of f ∈ F a and the correspond-ing Nf,b are illustrated in Fig. 1. The fusion rules are properties of the TO and are therefore also fixed for a given realization. In terms of the noise model, we consider physical er-rors that create incoherent pairs or multiplets of anyons on neighboring lattice sites, such that the anyon created at each site has a definite species label rather than be-ing in a superposition of different species. When non-Abelian anyons created by different error events meet at a site, however, they may subsequently undergo nonde-terministic fusion, producing a superposition of fusion outcomes prior to syndrome measurement. The noise model may also include correlations between incoherent creation events, either among different anyon species, as induced by Pauli ˆY errors in the Z2 TO, or across differ-ent lattice sites.  
+
+> B. Decision Variables and Linear Constraints
+
+To capture the physical errors in the noise model, we introduce binary error variables ϵi ∈ { 0, 1} in one-to-one correspondence with local incoherent anyon-creation events. The index i specifies both the location of the er-ror and its anyon content. For example, in the Z2 TO, i
+
+corresponds to the qubit label ℓ and the Pauli label P of the error variable yPℓ . The value ϵi = 1 indicates that the corresponding error occurs, while ϵi = 0 indicates that it 7does not. These variables may be subject to constraints imposed directly by the noise model, such as those in Eq. 8 or Eq. 10. Because the error variables and their as-sociated constraints are determined by the noise model, they remain fixed across decoder instances. Next, we introduce additional decision variables and constraints to ensure that the anyon strings specified by 
+
+ϵi are consistent with both the fusion rules of the TO and the anyon syndromes measured at each lattice site. Since the syndromes vary between decoder instances, the corresponding fusion variables and constraints vary ac-cordingly. At each site, the measurement yields a definite anyon label, which we denote by a; this may be the vacuum if all anyon syndromes are trivial. For each measured anyon species a at site s, we introduce fusion variables 
+
+gf →a,s ∈ { 0, 1} for each fusion channel f ∈ F a, where 
+
+gf →a,s = 1 indicates that a is produced through fusion channel f . Since the anyon strings are assumed to be in-coherent, at most one fusion channel f can be consistent with the given errors and measured syndrome. Accord-ingly, the variables gf →a,s satisfy the linear constraint 
+
+X 
+
+> f∈F a
+
+gf →a,s = 1 , (13) which is imposed at each site s.Lastly, the multiplicities of anyons created by physical errors at site s must be consistent with the selected fusion channel. If the measured syndrome at s is labeled by a,then for each anyon species b, the number of incident 
+
+b-anyons specified by the error configuration must equal the multiplicity of b in the selected fusion channel f ∈ F a.This gives the linear constraint, for fixed s, a, and b,
+
+X   
+
+> ϵi7→bon s
+
+ϵi = X 
+
+> f∈F a
+
+Nf,b gf →a,s , (14) where ϵi 7 → b on s indicates that the error ϵi incoherently creates a b-anyon at site s. This constraint is imposed for every anyon species b at each lattice site s. For the Abelian Z2 and Z3 TOs under the noise channels con-sidered above, Eqs. 13 and 14 reduce to Eqs. 7 and 11, respectively. In the general case involving non-Abelian fusion, however, Eqs. 13 and 14 explicitly keep track of the full fusion trees at each site. Collecting the decision variables, the vector x in Eq. 3 is defined as 
+
+x = ( ϵi, gf →a,s ) , (15) whose dimension scales approximately linearly with the code distance multiplied by the number of anyon fusion channels in the TO. The number of linear constraints in Eqs. 13, and 14 scales similarly. Since all decision variables in Eq. 15 are binary, the formulation defines a BLP decoder, which is a special case of ILP. For specific TOs, the decision variables and constraints can often be reformulated in equivalent but simplified forms, thereby leading to faster runtime in practice. An example of such a reformulation is provided for the D4 TO in Appendix C and is used to benchmark the performance of the ILP decoder in Sec. VI.  
+
+> C. Weights and Objective Function
+
+As before, the objective function is chosen as f (x) = ln[ P (σ|E)P (E)], so that products of local probabilities are converted into additive contributions to the objective. The error variables ϵi enter through the prior probability 
+
+P (E). If each error i occurs independently with proba-bility pi, activating ϵi contributes a factor pi 
+
+> 1−pi
+
+to P (E); accordingly, the associated weight is wi = ln pi 
+
+> 1−pi
+
+. When the noise model imposes additional constraints on the physical errors, such as mutual exclusivity, these weights should be adjusted accordingly, or effective weights may instead be used, as we do later for the D4 TO. The fusion variables, by contrast, contribute to P (σ|E). At a site s
+
+with measured anyon a, let pf →a denote the probability that fusing the incident anyons through channel f ∈ F a
+
+yields outcome a. The corresponding weight associated with gf →a,s is then wf →a,s = ln pf →a. Admittedly, for non-Abelian TOs, P (σ|E) is not fully captured by the product of the local factors pf →a. In particular, it also includes global consistency conditions requiring anyons created within isolated, homologically trivial components to fuse to the vacuum, which are difficult to encode using purely local probabilities. In practice, however, such conditions are often either automatically satisfied or can be relaxed, since the internal degrees of freedom of non-Abelian anyons that determine fusion outcomes are not accessible through syndrome measurements. Conse-quently, in most cases, the product of the local factors 
+
+pf →a over all sites still provides a good approximation to 
+
+P (σ|E), and neglecting these global conditions has only a minimal effect on decoder performance. Therefore, the objective function can be written as 
+
+f (x) = wTx = X
+
+> i
+
+wiϵi + X
+
+> s
+
+X 
+
+> f∈F a
+
+wf →a,s gf →a,s , (16) so that the minimum-weight decoding, which is to find max E P (σ|E)P (E), is achieved by maximizing f (x).    
+
+> VI. RESULTS FOR D4TO WITH PERFECT MEASUREMENTS
+
+To benchmark the performance of the ILP decoder, we numerically determine the error-correction threshold for the non-Abelian D4 TO realized on a three-colorable kagome lattice [79]. In this realization, the TO can be viewed as an Abelian Z32 TO that is “twisted” to become non-Abelian [54, 55, 79]. The D4 TO contains 22 anyon species generated by three Abelian anyons ec and three non-Abelian anyons mc, with color label c ∈ { R, G, B }.8The relevant fusion rules are 
+
+mR × mR = (1 + eG)(1 + eB ), eR × eR = 1 , (17) together with permutations of the color labels. The D4
+
+TO is acyclic, since the non-Abelian m-anyon does not appear among its own fusion outcomes. In the kagome-lattice realization, the anyons are generated by physical Pauli errors. Specifically, Pauli ˆX errors pair-create non-Abelian m-anyons of each color on the honeycomb lattice, whereas Pauli ˆZ errors pair-create Abelian e-anyons of each color on the dual triangular lattice. We consider a single-qubit Pauli noise model in which all three colors of m- and e-anyons are generated independently, such that py = pxpz on each physical qubit. This noise model generalizes that of Ref. 31, in which only a single color of m-anyon is subject to noise, and is identical to the physical noise model considered in Ref. 32. We assume perfect anyon measurements throughout.   
+
+> A. D4Phase Diagram and MWPM Decoding
+
+Previous works have exploited the self-antiparticle and acyclicity properties of non-Abelian TOs to perform error correction using a two-step MWPM decoder [22, 30–32]. For the D4 TO, the first step uses MWPM to correct the non-Abelian m-anyons, after which the Abelian e-anyons are measured and corrected in the second step. We first use this decoder to characterize the D4 error-correction phase diagram and compare it with its Abelian Z32 coun-terpart. In the next subsection, we then benchmark the performance of the ILP decoder against MWPM. In Fig. 3 (b), the pink dotted line shows the MWPM error-correction threshold for the single-qubit Pauli chan-nel that independently generates all anyon species of the 
+
+D4 TO. For comparison, Fig. 3 (a) shows the correspond-ing threshold for its Abelian counterpart, the Z32 TO, de-fined on the same lattice and evaluated using the same noise model and decoder [80]. For the Abelian Z32 TO, the correction of m- and e-anyons decouples. Consequently, there are two error correction phases corresponding to a classical memory: one in which the logical ˆZL operator is protected but the logical ˆXL operator is not (classical memory I), and another in which the logical ˆXL opera-tor is protected but the logical ˆZL operator is not (clas-sical memory II). In contrast, as shown in Fig. 3 (b), for the non-Abelian D4 TO, the logical ˆXL operator is necessarily corrupted once the logical ˆZL operator is no longer protected. Hence, only the classical memory I phase exists. This behavior follows from the fact that non-Abelian m-anyons can absorb e-anyons. The prolif-eration of m-anyons, which destroys the logical ˆZL oper-ator, therefore also induces the proliferation of e-anyons, which destroys the logical ˆXL operator. Similar behav-ior was observed for the steady state of the D4 TO under a passive error-correction scheme [81]. The D4 phase diagram with a single classical-memory phase is also ob-served for all three ILP decoder variants discussed below,                                                  
+
+> FIG. 3. Error-correction phase diagrams of the Abelian Z32and non-Abelian D4TOs defined on the three-colorable kagome lattice. (a) Error-correction phase diagram of the Abelian Z32TO using the MWPM de-coder. In addition to the quantum-memory and no-memory phases, there are two classical-memory phases, in which only the logical ˆZLoperator is protected (I) or only the logical ˆXL
+> operator is protected (II). (b) Error-correction phase diagram of the non-Abelian D4TO obtained using the ILP decoder with an effective weight ratio and the two-step MWPM de-coder. The classical-memory-II phase is absent because pro-liferation of the non-Abelian m-anyons necessarily entails pro-liferation of the Abelian e-anyons. (c) Error-correction phase boundary for the logical |0L/1L⟩states of the non-Abelian
+> D4TO. (d) Error-correction phase boundary for the logical
+> |+L/−L⟩states of the non-Abelian D4TO. In both (c) and (d), the ILP decoder that maximizes P(E|σ)∝P(σ|E)P(E), shown by the green lines, outperforms the two-step MWPM decoder, shown by the pink lines, at small pzand achieves comparable thresholds at larger pz. In contrast, the ILP de-coder that considers only P(E), shown by the orange lines, overestimates the heralding of m-anyons by e-anyons, improv-ing the thresholds at small pzat the cost of substantially lower thresholds at large pz.Finally, the ILP decoder with an ef-fective weight ratio between m- and e-anyon strings achieves higher thresholds than all other decoders shown, establishing ILP as a better decoder for non-Abelian TOs with perfect syn-drome measurements than currently available alternatives.
+
+indicating that this phase structure is a general feature of the D4 TO rather than a consequence of the choice of decoder. Among these variants, ILP with an effective weight ratio achieves the highest error-correction thresh-old and is shown as the blue solid line in Fig. 3 (b).  
+
+> B. Performance of ILP Decoders
+
+Having established the MWPM benchmark and the structure of the phase diagram, we now study the appli-9cation of the ILP decoder to the D4 TO. Given perfect anyon syndromes, we consider three ILP decoder variants that differ only in their weight assignments. The first ignores P (σ|E) and maximizes P (E); the second maxi-mizes P (σ|E)P (E); and the third uses effective weights. Error correction is performed by applying both Pauli ˆX
+
+and ˆZ operators along the correction strings identified by the ILP decoder. Due to the nondeterministic fusion of non-Abelian anyons, a single application of the ILP de-coder does not necessarily eliminate all anyons. However, the acyclicity of the m-anyons guarantees that all m-anyons are removed. After a subsequent round of e-anyon measurements, any remaining e-anyons can only lie along the applied Pauli ˆX correction strings and should there-fore be pairwise annihilated along the same strings. The simulation of the D4 TO under Pauli noise, the genera-tion of measurement outcomes, and the identification of logical errors after error correction are performed using the generalized stabilizer-tableau update method devel-oped in Ref. 81. Details of the MWPM decoding protocol and the three ILP decoding protocols are provided in Ap-pendix D, while the numerical simulation details can be found in the public repository of Ref. 82. In the first variant, the ILP decoder ignores the prob-abilistic collapse of the intermediate anyon superposi-tions created along non-Abelian anyon paths by setting 
+
+wf →a,s = 0 at all sites, and instead identifies the correc-tion string that maximizes P (E). As shown in Fig. 3 (c) and (d), this method improves the thresholds for both logical |0L/1L⟩ and logical |+L/−L⟩ states (orange lines) beyond those of the two-step MWPM decoder (pink lines) at small values of pz . However, the performance of the ILP decoder maximizing only P (E) degrades sharply below that of the MWPM decoder as pz increases. This is because, at small pz , Abelian e-anyons are primarily created along the error strings of non-Abelian m-anyons, and therefore provide useful intrinsic heralding for cor-recting m-anyons, even without accounting for P (σ|E)[31]. As pz increases, however, the heralding becomes unreliable and can incorrectly guide the correction of m-anyons, since e-anyons are predominantly created and moved by Pauli ˆZ errors rather than appearing at sites where m-anyons fuse. Instead of considering only P (E), the nondetermin-istic fusion encoded by wf →a,s should also be included to construct the non-Abelian analog of minimum-weight decoding, which maximizes P (E|σ) ∝ P (σ|E)P (E). Ac-counting for P (σ|E) introduces an additional penalty for 
+
+m-anyon strings. Intuitively, this can be understood as an entropic factor, since longer m-anyon strings require repeated fusion into the channels specified by the inter-mediate syndrome measurements, each occurring with probability less than one at the corresponding site along the string. The resulting preference for shorter m-anyon strings effectively weakens the heralding provided by the 
+
+e-anyons. As shown by the green lines in Fig. 3 (c) and (d), the threshold improvement over the two-step MWPM decoder persists at small pz , and the thresholds are slightly better than those of the ILP decoder that maximizes only P (E) even if the heralding is weakened. At larger pz , however, this decoder performs much bet-ter than the decoder based only on P (E) and achieves thresholds close to those of the two-step MWPM decoder. As the heralding becomes increasingly unreliable with in-creasing pz , it becomes difficult for any decoder to signif-icantly outperform two-step MWPM, which does not use the e-anyon information. Indeed, in the limit of large pz ,the ILP decoder becomes equivalent to MWPM for the 
+
+m-anyons. Weaker heralding improves error correction at larger 
+
+pz , whereas stronger heralding works well at smaller pz .To get the best of both worlds, one can tune the rela-tive weights of m- and e-anyon strings according to the physical error parameters, which can typically be learned on practical quantum devices. For simplicity, we set 
+
+wf →a,s = 0 and introduce a single effective parameter 
+
+reff = wm/w e. Since the ILP solution is unchanged by an overall rescaling of all weights, it is sufficient to consider only this ratio. For each noise parameter, we determine one optimal value of reff that yields the highest threshold. Because the ILP decoder makes discrete decisions, the optimal reff typically lies within a finite interval rather than at a single fine-tuned value. This makes the opti-mization straightforward and does not require advanced machine-learning techniques. The optimal values of reff 
+
+obtained from our numerical simulations are provided in the repository of Ref. 82. As shown by the blue lines in Fig. 3 (c) and (d), the ILP decoder with this effective pa-rameter outperforms both the two-step MWPM decoder and the other two ILP variants across the full range of noise parameters considered. Taken together, these re-sults demonstrate that the ILP decoder provides a clear advantage for decoding non-Abelian TOs with perfect anyon syndromes.   
+
+> VII. MEASUREMENT ERRORS A. ILP Input
+
+In the presence of anyon-syndrome measurement er-rors, multiple rounds of measurements are required to reliably infer the measurement errors before applying er-ror correction [14]. Accordingly, the input lattice for the ILP decoder becomes three-dimensional, with space-time sites ( s, t ), where s labels the spatial location and the additional time coordinate t labels the syndrome-measurement round. The goal of the decoder is to in-fer the error configuration within a finite time interval during continuous error correction from the anyon syn-dromes measured over the corresponding rounds. Since errors may occur both before and after this interval, we impose open boundary conditions in the time direction. At each spacetime site ( s, t ), the anyon syndrome a is determined by measuring a maximal set of locally com-patible anyon species, such as the commuting projectors 10                                         
+
+> FIG. 4. Examples of fusion channels for spacetime ILP decoding. (a) At the previous time step, a measurement error misidentified the vacuum as an aanyon. At the current time step, assuming that no anyon strings of other species are present and no measurement error occurs, the absence of a defect ∆ implies that an aanyon is created by a physical error at ( s, t ). This configuration is analogous to standard spacetime matching of defects in the Abelian Z2TO [14]. (b) An aanyon was not identified at the previous time step due to a measurement error and then fused with another aanyon created by a physical error at time t, leading to a probabilistic syndrome measurement at ( s, t ) that yields syndrome band contributes a nontrivial ILP weight. (c) At ( s, t −1), a measurement error reports a false-positive aanyon, implying that the true syndrome is the vacuum. At ( s, t ), multiple anyons are reported due to measurement errors. The ILP decoder may identify both reported anyons as false positives while assigning the true syndrome at ( s, t ) to be a banyon created by a physical error. Since this banyon is present but unreported, an outgoing temporal bstring corresponding to the measurement error must also be present. (d) Although the incoming temporal string, spatial anyon strings, and defect at ( s, t ) are the same as in (c), the absence of a reported a
+> syndrome at ( s, t ) implies that an aanyon is physically present but not identified due to a measurement error. By the fusion rule a×b=a, the banyon created by a physical error can fuse with the aanyon and go unreported without any additional measurement error, so no outgoing temporal bstring is required. Comparison with (c) illustrates why both the defect ∆ and the measured syndrome are required to specify the fusion channel.
+
+in the quantum double model described in Appendix B. Due to measurement errors, multiple anyon species a
+
+may be reported at a given site, as illustrated in Fig. 4(c). Since at most one anyon species can physically occupy the site, at most one reported species can be correct, while the others are false-positive measurement outcomes. An error creating an anyon at site ( s, t ) is detected through a change in the syndrome relative to the previ-ous time step ( s, t − 1), which we refer to as a defect ∆. The full set of defects ∆ within the time interval is there-fore provided as input to the decoder. For Abelian TOs, defects alone are sufficient to infer error configurations [14]. An analogous situation is illustrated in Fig. 4(a), where the particular non-Abelian error configuration can likewise be inferred from the defects alone. The same is true for Fig. 4(b), which involves the non-Abelian fusion rule a × a = 1 + b + · · · . In general, however, for non-Abelian TOs, the measured syndrome a at each site must also be provided in addition to the defects to determine the allowed spacetime anyon-string configurations, as il-lustrated in Fig. 4(c,d), which show the same defects but different syndrome outcomes. For example, if the fusion rule includes a × b = a, then a physical error can create a 
+
+b anyon at a site already containing an a anyon without producing a defect. The fusion rules of the TO are provided as input to the decoder through the set of allowed fusion channels, denoted by Fa,∆, that are consistent with the measured syndrome a and defect ∆ at spacetime site ( s, t ). For each fusion channel f ∈ F a,∆, let N sp  
+
+> f,b
+
+∈ Z≥ 0 denote the multiplicity of incident spatial b-anyon strings cre-ated by physical errors, while N in 
+
+> f,b
+
+, N out  
+
+> f,b
+
+∈ { 0, 1} de-note the multiplicities of incoming and outgoing tem-poral b-anyon strings corresponding to measurement er-rors at sites ( s, t − 1) and ( s, t ), respectively. In the ab-sence of measurement errors, the allowed fusion channels 
+
+f ∈ F a,∆ reduce to the set Fa introduced in Sec. V. Ex-amples of these fusion channels and the corresponding 
+
+N sp 
+
+> f,b
+
+, N in 
+
+> f,b
+
+, and N out  
+
+> f,b
+
+are illustrated in Fig. 4. In terms of the noise model, we consider ILP decoding against physical errors that create incoherent, possibly correlated, pairs or multiplets of anyons on neighboring sites, together with anyon-syndrome measurement errors, which are inherently incoherent. For simplicity, we as-sume that physical and measurement errors are uncorre-lated.  
+
+> B. Decision Variables, Constraints, and Weights
+
+As in Sec. V, we introduce binary error variables ϵi ∈{0, 1} for physical errors. These variables are in one-to-one correspondence with local incoherent anyon-creation events, with the index i specifying both the spacetime location of the error and its anyon content. They may also be subject to constraints imposed directly by the 11 noise model. In addition, we introduce binary variables 
+
+ma,s,t ∈ { 0, 1} for a-anyon measurement errors at site (s, t ). For both types of error variables, a value of 1 in-dicates that the corresponding error occurs. Then, for each spacetime site ( s, t ) with measured syn-drome a and defect ∆, we introduce a binary fusion vari-able gf →(a,∆) ,s,t ∈ { 0, 1} for each allowed fusion channel 
+
+f ∈ F a,∆. The decoder is therefore a BLP, with the decision-variable vector x in Eq. 3 given by 
+
+x =  ϵi, ma,s,t , gf →(a,∆) ,s,t 
+
+ . (18) The multiplicities of incident spatial and temporal b-anyon strings must be consistent with the selected fusion channel f ∈ F a,∆. For each anyon species b and space-time site ( s, t ) with measured syndrome a and defect ∆, this requirement gives separate constraints for the spa-tial, outgoing temporal, and incoming temporal b anyon strings: 
+
+X  
+
+> ϵi7→bon ( s,t )
+
+ϵi = X 
+
+> f∈F a,∆
+
+N sp  
+
+> f,b
+
+gf →(a,∆) ,s,t ,mb,s,t = X 
+
+> f∈F a,∆
+
+N out  
+
+> f,b
+
+gf →(a,∆) ,s,t , (19) 
+
+mb,s,t −1 = X 
+
+> f∈F a,∆
+
+N in  
+
+> f,b
+
+gf →(a,∆) ,s,t ,
+
+which generalize Eq. 14 of Sec. V to spacetime decoding with measurement errors. Lastly, the unique choice of f ∈ F a,∆ at each site ( s, t )is enforced by 
+
+X 
+
+> f∈F a,∆
+
+gf →(a,∆) ,s,t = 1 , (20) analogous to Eq. 13 in Sec. V. With the decision variables subject to the linear con-straints above, the BLP decoder identifies the most likely error configuration by maximizing the linear objective function 
+
+f (x) = wTx = X
+
+> i
+
+wiϵi + X
+
+> s,t
+
+X
+
+> a
+
+wa,s,t ma,s,t 
+
++ X
+
+> s,t
+
+X 
+
+> f∈F a,∆
+
+wf,s,t gf,s,t . (21) Here, wi = ln pi 
+
+> 1−pi
+
+accounts for the probability pi of the physical error ϵi under the assumption that physical er-rors occur independently, and should be adjusted when additional constraints are imposed by the noise model. Similarly, wa,s,t = ln qa,s,t  
+
+> 1−qa,s,t
+
+accounts for the probabil-ity qa,s,t of an a-anyon measurement error at site ( s, t ). Given the selected fusion channel f ∈ F a,∆, the decoder infers how the anyons created by physical errors along the spatial anyon strings fuse with the true anyon from the previous time step, as determined by a, ∆, and the in-coming temporal strings. The resulting fusion outcome, inferred from a and the outgoing temporal strings, is obtained upon measurement with probability pf →(a,∆) 
+
+according to the fusion rules of the TO and contributes the weight wf,s,t = ln pf →(a,∆) to the objective. As in Sec. V, although global consistency conditions are not accounted for, this weight assignment nevertheless pro-vides a good approximation to P (E|σ) ∝ P (σ|E)P (E)for minimum-weight decoding. 
+
+C. Just-in-time ILP 
+
+The ILP decoder described in the previous subsec-tions determines the minimum-weight error configura-tion within a finite spacetime region from the measured anyon syndromes. For Abelian TOs, continuous er-ror correction can be performed by applying one round of ILP decoding over the entire code after T = O(d)rounds of measurements [14]. For non-Abelian TOs, how-ever, the fusion rules allow anyons to fuse into other non-Abelian anyons. Consequently, accumulated non-Abelian charge can hide additional anyon content, mak-ing delayed decoding less reliable. It is therefore prefer-able to apply corrections as soon as measurement errors can be inferred with sufficient confidence, i.e., just in time [30, 32, 83–85]. Although the just-in-time strat-egy is not necessary for Abelian TOs, it can also be applied to them. We therefore incorporate just-in-time techniques into the spacetime ILP decoder, enabling con-tinuous error correction for arbitrary TOs in the pres-ence of anyon-syndrome measurement errors. Our proto-col largely follows the matching-based just-in-time algo-rithms proposed in Ref. 30 for the D4 TO, which rely on its self-antiparticle and acyclic fusion properties, while replacing the matching decoder with our ILP decoder. 
+
+Algorithm 1 Just-in-time ILP decoder 
+
+Initialize an empty set ∆ to collect all uncorrected defects. At each time step t:1: Measure and record the anyon syndromes at time t.2: Compute the defects ∆ relative to the syndrome history at time t − 1 and add all nontrivial defects to ∆.3: Perform ILP decoding using the syndrome history and the uncorrected defects ∆. In the ILP solution, defects in ∆ are connected by correction strings either to one another or to the current time boundary, thereby parti-tioning them into disconnected clusters. For each clus-ter, let Q denote the linear size of the smallest space-time cube containing the cluster. 3.1 If the cluster contains any defect or correction string younger than Q, i.e., occurring after time 
+
+t − Q, leave the cluster uncorrected at the current time step. 3.2 Otherwise, apply correction circuits that move all defects in the cluster from their spatial locations to the spatial center of the cluster, and remove all nontrivial defects in the cluster from ∆.12 Colloquially, the ILP decoder uses the syndrome his-tory to identify clusters of uncorrected defects. Before correcting a cluster at the current time step, we require its age to exceed its spatial and temporal extent, so that measurement errors can be inferred with sufficient confi-dence. The defects within a cluster can then be corrected by applying exact anyon strings. Although such strings are generally of linear depth [86–89], their depth can re-main comparable to that of the syndrome-measurement circuit in the subthreshold regime, where the clusters are small, making such correction between successive mea-surement rounds reasonable. Alternatively, one may ap-ply the inverse of the inferred error operators, which can be implemented in finite depth for local physical noise channels. In the proposed algorithm, the ordering of correction operations, corresponding to different braiding processes, is not explicitly tracked. This is because braid-ing affects the internal degrees of freedom of non-Abelian anyons, which are not accessible through the syndrome measurements provided to the decoder. After correction, the cluster is removed from the set of uncorrected defects, while any nontrivial fusion outcomes resulting from the correction are effectively pushed to the current time step 
+
+t.To prove the existence of a threshold, one typically considers hierarchically defined error clusters, which be-come increasingly rare at higher levels of the hierarchy, and shows that error correction does not spread a cluster into well-separated larger clusters [18, 28, 30, 42]. Since this proof-of-principle algorithm does not increase the spatial extent of an identified cluster in the absence of larger nearby clusters, it is plausible that a threshold proof could be obtained by further showing that correc-tion does not spread the cluster temporally into higher levels of the hierarchy. We leave the explicit construc-tion and numerical study of a just-in-time ILP decoder for practical non-Abelian TOs, together with a threshold proof, to future work.  
+
+> VIII. CONCLUSION AND OUTLOOK
+
+In this work, we introduced an integer linear program-ming (ILP) framework for decoding arbitrary TOs, both Abelian and non-Abelian. By introducing auxiliary vari-ables, the framework linearizes the error-correction prob-lem and enables minimum-weight decoding using classi-cal optimization methods. Through linear constraints, the decoder captures correlated errors and the fusion rules of arbitrary TOs, which are generally inaccessible to matching-based or clustering decoders. As demonstrated for the Abelian Z2 and Z3 TOs and the non-Abelian 
+
+D4 TO, the ILP decoder achieves substantially improved error-correction thresholds under incoherent anyon noise compared with most existing decoders. Looking ahead, the underlying optimization may be further accelerated using modern machine learning techniques. Moreover, because the ILP optimization can admit degenerate op-tima, namely distinct error configurations with the same value of f (x), improved tie-breaking strategies may fur-ther enhance decoder performance. Possible approaches include methods inspired by ordered statistics decoding [50, 52, 53, 90]. An exciting direction is to apply the ILP framework to a broader range of physically and computationally inter-esting anyon models and noise channels. Recent work has analyzed the phase diagram of the D4 TO considered here when particular types of non-Abelian anyons proliferate simultaneously (namely mR and mB ), finding that their proliferation can parasitically condense a shared Abelian fusion outcome (namely eG) [91]. Because such prolif-eration is a special case of our Pauli noise model, one could revisit this phase diagram and its anyon prolifer-ation with the ILP decoder. We note that in Fig. 3 we already observed that proliferating all three non-Abelian anyons (i.e., mR, mB , and mG) leads to a completely trivial phase, and it would be interesting to understand the nature of this transition and whether it involves para-sitic condensation of the Abelian anyons. Further afield, applying the ILP framework to decoding Fibonacci TO would permit direct comparison with existing clustering decoders that incorporate information about the fusion and braiding of Fibonacci anyons [40, 41]. It would be equally interesting to study error correction in the pres-ence of proliferating fermions in the toric code [92, 93]. A broader question concerns the input to the decoder. Recent information-theoretic studies characterize recov-ery thresholds of decohered non-Abelian TOs without restricting to a specific syndrome measurement proto-col [94–97]. These results raise the possibility that local anyon-syndrome measurements may not always retain all information relevant for recovery, motivating collec-tive or even adaptive measurements and their integration with optimization-based decoders. This issue becomes especially important for continuum and chiral topologi-cal phases, which generally lack a commuting set of lo-cal syndrome observables. For example, recent work on fractional quantum Hall states under density decoher-ence finds that information encoded in the fusion space of anyons in the Moore-Read state can remain recoverable even under strong decoherence [98]. Although formu-lating experimentally accessible measurement protocols and correction operations in such systems is considerably more open-ended, the broader idea underlying the ILP approach, combining available measurement outcomes, the physical noise model, and fusion rules in a global lin-ear optimization formulation, may remain useful beyond lattice models with conventional anyon syndromes. Beyond minimum-weight decoding via deterministic optimization, the ILP formulation establishes a direct connection between error correction and classical statisti-cal mechanics. The binary decision variables in the gen-eral formulation of Sec. V, which encode anyon-string configurations, may be viewed as classical Ising degrees of freedom. Because the constraints in the general formu-lation are equalities, the admissible anyon-string configu-13 rations form a constrained subspace of the full configura-tion space spanned by all decision variables. In principle, an optimal decoder could therefore be obtained by sam-pling this constrained subspace according to the weights 
+
+wi: admissible configurations are connected ergodically by local updates, and their relative probabilities can be evaluated locally. Although the complexity of Monte Carlo sampling schemes can scale polynomially with code distance, such schemes are expected to be slow in prac-tice. It therefore remains an open question whether they provide a realistic route to optimal decoding for arbi-trary TOs with anyon-syndrome measurements. If so, the critical behavior of the corresponding optimal error correction phase transition would be an interesting direc-tion for future work. The ILP framework also extends to decoding in the presence of measurement errors and therefore provides a promising route toward spacetime decoding. Although we present the framework and formulate a just-in-time ILP decoder, its numerical implementation and perfor-mance benchmarking remain for future work. Further-more, a more careful definition of error clusters in Algo-rithm 1 may provide a route toward proving the existence of an ILP decoding threshold in the presence of measure-ment errors. 
+
+> ACKNOWLEDGEMENTS
+
+D.J. would like to acknowledge Sanket Chirame for explaining the stabilizer tableau formalism for the D4
+
+TO, Tianfu Wang for discussions on linear program-ming, Anasuya Lyons for discussions on just-in-time de-coding, Pablo Sala for discussions on non-Abelian er-ror correction, and Ramanjit Sohal for discussions on non-Abelian topological orders. A.Z. was supported by the Selove Summer Research Prize, awarded by the Department of Physics at the University of Chicago. We acknowledge support from the ARO(W911NF-23-1-0077), ARO MURI (W911NF-21-1-0325), AFOSR MURI (FA9550-21-1-0209, FA9550-23-1-0338), ONR MURI (N000142612102), DARPA (HR0011-24-9-0361), NSF (ERC-1941583, OMA-2137642, OSI-2326767, CCF-2312755, OSI-2426975). This material is based upon work supported by the U.S. Department of Energy, Of-fice of Science, National Quantum Information Science Research Centers and Advanced Scientific Computing Research (ASCR) program under contract number DE-AC02-06CH11357 as part of the InterQnet quantum net-working project. This work was completed with resources provided by the University of Chicago’s Research Com-puting Center.                                    
+
+> [1] J. M. Leinaas and J. Myrheim, Il Nuovo Cimento B (1971-1996) 37 , 1 (1977). [2] G. A. Goldin, R. Menikoff, and D. H. Sharp, Journal of Mathematical Physics 22 , 1664 (1981). [3] F. Wilczek, Phys. Rev. Lett. 49 , 957 (1982). [4] G. A. Goldin, R. Menikoff, and D. H. Sharp, Phys. Rev. Lett. 54 , 603 (1985). [5] G. Moore and N. Seiberg, Communications in Mathemat-ical Physics 123 , 177 (1989). [6] X. G. Wen, International Journal of Modern Physics B
+> 04 , 239 (1990). [7] X. G. Wen, Phys. Rev. Lett. 66 , 802 (1991). [8] G. Moore and N. Read, Nuclear Physics B 360 , 362 (1991). [9] T. Einarsson, Phys. Rev. Lett. 64 , 1995 (1990). [10] A. Kitaev, Annals of Physics 303 , 2 (2003). [11] M. H. Freedman, M. Larsen, and Z. Wang, Communica-tions in Mathematical Physics 227 , 605 (2002). [12] M. Freedman, C. Nayak, and K. Walker, Phys. Rev. B
+> 73 , 245307 (2006). [13] C. Nayak, S. H. Simon, A. Stern, M. Freedman, and S. Das Sarma, Rev. Mod. Phys. 80 , 1083 (2008). [14] E. Dennis, A. Kitaev, A. Landahl, and J. Preskill, Jour-nal of Mathematical Physics 43 , 4452 (2002). [15] B. M. Terhal, Rev. Mod. Phys. 87 , 307 (2015). [16] R. Raussendorf and J. Harrington, Phys. Rev. Lett. 98 ,190504 (2007). [17] S. Bravyi and J. Haah, Phys. Rev. Lett. 111 , 200501 (2013). [18] J. W. Harrington, PhD Thesis (2004). [19] E. Dijkstra, Numerische Mathematik 1, 269 (1959). [20] O. Higgott, ACM Transactions on Quantum Computing
+> 3, 10.1145/3505637 (2022). [21] V. Kolmogorov, Mathematical Programming Computa-tion 1, 43 (2009). [22] C. G. Brell, S. Burton, G. Dauphinais, S. T. Flammia, and D. Poulin, Phys. Rev. X 4, 031058 (2014). [23] C. Wang, J. Harrington, and J. Preskill, Annals of Physics 303 , 31 (2003). [24] P. G´ acs, Journal of Computer and System Sciences 32 ,15 (1986). [25] P. G´ acs, Adv. Comput. Res. 5, 223 (1989). [26] P. G´ acs, Journal of Statistical Physics 103 , 45 (2001). [27] J. R. Wootton and A. Hutter, Phys. Rev. A 93 , 022318 (2016). [28] G. Dauphinais and D. Poulin, Communications in Math-ematical Physics 355 , 519 (2017). [29] J. K. Pachos, Introduction to Topological Quantum Com-putation (Cambridge University Press, 2012).
+
+14 
+
+[30] M. Davydova, A. Bauer, J. C. Magdalena de la Fuente, M. Webster, D. J. Williamson, and B. J. Brown, Phys. Rev. X 16 , 031001 (2026). [31] D. Jing, P. Sala, L. Jiang, and R. Verresen, Phys. Rev. Lett. 136 , 120405 (2026). [32] J. C. M. de la Fuente, N. Feldman, J. Eisert, and A. Bauer, High-threshold decoding of non-pauli codes for 2d universality (2026), arXiv:2604.02033 [quant-ph]. [33] C. Mochon, Phys. Rev. A 69 , 032306 (2004). [34] C. F. B. Lo, A. Lyons, R. Verresen, A. Vishwanath, and N. Tantivasadakarn, Universal quantum computa-tion with the s3 quantum double: A pedagogical exposi-tion (2025), arXiv:2502.14974 [quant-ph]. [35] L. Chen, Y. Ren, R. Fan, and A. Jaffe, npj Quantum Information 11 , 112 (2025). [36] Z. K. Minev, K. Najafi, S. Majumder, J. Wang, A. Stern, E.-A. Kim, C.-M. Jian, and G. Zhu, Nature Communi-cations 16 , 6225 (2025). [37] C. F. B. Lo, A. Lyons, D. Gresh, M. Mills, P. E. Siegfried, M. D. Urmey, N. Tantivasadakarn, H. Dreyer, A. Vish-wanath, R. Verresen, and M. Iqbal, Nature 655 , 591 (2026). [38] J. R. Wootton, J. Burri, S. Iblisdir, and D. Loss, Phys. Rev. X 4, 011051 (2014). [39] A. Hutter, D. Loss, and J. R. Wootton, New Journal of Physics 17 , 035017 (2015). [40] S. Burton, C. G. Brell, and S. T. Flammia, Phys. Rev. A 
+
+95 , 022309 (2017). [41] A. Schotte, G. Zhu, L. Burgelman, and F. Verstraete, Phys. Rev. X 12 , 021012 (2022). [42] A. Lyons and B. J. Brown, Quantum computing with anyons is fault tolerant (2026), arXiv:2602.11258 [quant-ph]. [43] J. Wootton, Entropy 17 , 1946 (2015). [44] A. Schotte, L. Burgelman, and G. Zhu, Fault-tolerant error correction for a universal non-abelian topologi-cal quantum computer at finite temperature (2022), arXiv:2301.00054 [quant-ph]. [45] J. Feldman, M. J. Wainwright, and D. R. Karger (2003). [46] J. Feldman, M. J. Wainwright, and D. R. Karger, IEEE Transactions on Information Theory 51 , 954 (2005). [47] J. X. Li and P. O. Vontobel, in 2018 IEEE International Symposium on Information Theory (ISIT) (IEEE Press, 2018) p. 1306–1310. [48] O. Fawzi, L. Grou` es, and A. Leverrier, in 2020 IEEE In-formation Theory Workshop (ITW) (IEEE Press, 2021) p. 1–5. [49] S. Javed, F. Garcia-Herrero, B. Vasic, and M. F. Flana-gan, Low-complexity linear programming based decoding of quantum ldpc codes (2024), arXiv:2311.18488 [cs.IT]. [50] S. Gu and M. Soleimanifar, Power and limitations of lin-ear programming decoder for quantum ldpc codes (2025), arXiv:2508.04769 [quant-ph]. [51] J. Pearl, in Proceedings of the Second AAAI Conference on Artificial Intelligence , AAAI’82 (AAAI Press, 1982) p. 133–136. [52] J. Roffe, D. R. White, S. Burton, and E. Campbell, Phys. Rev. Res. 2, 043423 (2020). [53] P. Panteleev and G. Kalachev, Quantum 5, 585 (2021). [54] N. Tantivasadakarn, R. Verresen, and A. Vishwanath, Phys. Rev. Lett. 131 , 060405 (2023). [55] M. Iqbal, N. Tantivasadakarn, T. M. Gatterman, J. A. Gerber, K. Gilmore, D. Gresh, A. Hankin, N. Hewitt, C. V. Horst, M. Matheny, T. Mengle, B. Neyenhuis, A. Vishwanath, M. Foss-Feig, R. Verresen, and H. Dreyer, Communications Physics 7, 205 (2024). [56] S.-J. Huang, A. Warman, S. Schafer-Nameki, and Y. Chen, Hybrid lattice surgery: Non-clifford gates via non-abelian surface codes (2026), arXiv:2510.20890 [quant-ph]. [57] N. Manjunath, V. Mattei, A. Tiwari, and T. D. Elli-son, Universal quantum computation with group surface codes (2026), arXiv:2603.05502 [quant-ph]. [58] A. Schrijver, Theory of Linear and Integer Programming ,Wiley Series in Discrete Mathematics & Optimization (Wiley, 1998). [59] D. S. Wang, A. G. Fowler, A. M. Stephens, and L. C. L. Hollenberg, Quantum Info. Comput. 10 , 456–469 (2010). [60] T.-H. Lin and C.-Y. Lai, IEEE Journal on Selected Areas in Information Theory 6, 163 (2025). [61] G. Duclos-Cianci and D. Poulin, Phys. Rev. Lett. 104 ,050504 (2010). [62] D. Fitzek, M. Eliasson, A. F. Kockum, and M. Granath, Phys. Rev. Res. 2, 023230 (2020). [63] K.-Y. Kuo and C.-Y. Lai, npj Quantum Information 8,111 (2022). [64] C.-F. Kung, K.-Y. Kuo, and C.-Y. Lai, Efficient ap-proximate degenerate ordered statistics decoding for quantum codes via reliable subset reduction (2026), arXiv:2412.21118 [quant-ph]. [65] S. Bravyi, M. Suchara, and A. Vargo, Phys. Rev. A 90 ,032326 (2014). [66] B. Criger and I. Ashraf, Quantum 2, 102 (2018). [67] H. Bombin, R. S. Andrist, M. Ohzeki, H. G. Katzgraber, and M. A. Martin-Delgado, Phys. Rev. X 2, 021004 (2012). [68] M. Ohzeki, Phys. Rev. A 85 , 060301(R) (2012). [69] J. R. Wootton and D. Loss, Phys. Rev. Lett. 109 , 160503 (2012). [70] H. Anwar, B. J. Brown, E. T. Campbell, and D. E. Browne, New Journal of Physics 16 , 063038 (2014). [71] A. Hutter, D. Loss, and J. R. Wootton, New Journal of Physics 17 , 035017 (2015). [72] G. Duclos-Cianci and D. Poulin, Phys. Rev. A 87 , 062338 (2013). [73] R. S. Andrist, J. R. Wootton, and H. G. Katzgraber, Phys. Rev. A 91 , 042331 (2015). [74] R. Mukherjee and S. Trebst, Nishimori threshold estima-tion for bayesian inference and Zq surface code decoding (2026), arXiv:2607.18374 [quant-ph]. [75] Gurobi Optimization, LLC, Gurobi Optimizer Reference Manual (2026). [76] M.-H. Hsieh and F. m. c. Le Gall, Phys. Rev. A 83 ,052331 (2011). [77] K.-Y. Kuo and C.-C. Lu, in 2012 International Sympo-sium on Information Theory and its Applications (2012) pp. 208–211. [78] S. Gu, L. Wang, and A. Kubica, The color code, the surface code, and the transversal cnot: Np-hardness of minimum-weight decoding (2026), arXiv:2603.22064 [quant-ph]. [79] B. Yoshida, Phys. Rev. B 93 , 155131 (2016). [80] O. Melchert and A. Hartmann, Computer Physics Com-munications 182 , 1828 (2011), computer Physics Com-munications Special Edition for Conference on Compu-tational Physics Trondheim, Norway, June 23-26, 2010. [81] S. Chirame, A. Prem, S. Gopalakrishnan, and F. J. Bur-nell, Stabilizing non-abelian topological order against 15 
+
+heralded noise via local lindbladian dynamics (2024), arXiv:2410.21402 [quant-ph]. [82] Github repository for numerical simulations, https:// github.com/steamdou/TOPO-QC (2026). [83] H. Bombin, 2d quantum computation with 3d topological codes (2018), arXiv:1810.09571 [quant-ph]. [84] B. J. Brown, Science Advances 6, eaay4929 (2020), https://www.science.org/doi/pdf/10.1126/sciadv.aay4929. [85] T. R. Scruby, D. E. Browne, P. Webster, and M. Vasmer, Quantum 6, 721 (2022). [86] D. Beckman, D. Gottesman, A. Kitaev, and J. Preskill, Phys. Rev. D 65 , 065022 (2002). [87] B. Shi, Phys. Rev. Res. 1, 033048 (2019). [88] S. Bravyi, I. Kim, A. Kliesch, and R. Koenig, Adap-tive constant-depth circuits for manipulating non-abelian anyons (2022), arXiv:2205.01933 [quant-ph]. [89] Y.-J. Liu, K. Shtengel, A. Smith, and F. Pollmann, PRX Quantum 3, 040315 (2022). [90] B. Criger and I. Ashraf, Quantum 2, 102 (2018). [91] A. Vadali, R. Vanhove, R. Verresen, J. Alicea, and P. Sala, Statistical mechanics and symmetries of non-abelian anyon proliferation: From deformation to deco-herence (2026), arXiv:2606.12527 [quant-ph]. [92] Z. Wang, Z. Wu, and Z. Wang, PRX Quantum 6, 010314 (2025). [93] Y.-H. Chen and T. Grover, Phys. Rev. B 110 , 125152 (2024). [94] P. Sala and R. Verresen, Phys. Rev. Lett. 134 , 250403 (2025). [95] P. Sala, J. Alicea, and R. Verresen, Phys. Rev. X 15 ,031002 (2025). [96] S. W. P. Kim and M. McGinley, Mixed-state topologi-cal order and error-correction thresholds in non-abelian codes: rigorous results (2026), arXiv:2607.21706 [quant-ph]. [97] S. W. P. Kim, Optimal recovery for quantum error cor-rection (2026), arXiv:2603.06520 [quant-ph]. [98] Z. Wang, R. Fan, T. Wang, S. J. Garratt, and E. Altman, Fractional quantum hall states under density decoherence (2025), arXiv:2510.08490 [cond-mat.str-el]. 16   
+
+> Appendix A: ILP Runtime for the Abelian Z2TO under Single-Qubit Pauli Noise
+
+In this appendix, we characterize the runtime of the ILP decoder for the Abelian Z2 TO under single-qubit Pauli noise. Although the minimum-weight decoding problem in this setting is NP-hard [76–78], and polynomial-time scaling therefore cannot be guaranteed in the worst case, worst-case asymptotic complexity does not necessarily determine the runtime for physically relevant error configurations. We therefore study the distribution of solver runtimes and their finite-size behavior. We find three main features. First, for a fixed code distance d and error rate p, the runtime distribution develops a pronounced upper tail, so the mean runtime is strongly influenced by the hardest error configurations. Second, below the error-correction threshold, where quantum error-correcting codes typically operate, both the mean and median runtimes are consistent with polynomial scaling in the number of physical qubits, 
+
+N = 2 d2 for the square-lattice realization used in the main text, over the numerically accessible code distances. Third, although the runtime increases substantially near the error-correction threshold, its dependence on N remains inconsistent with a simple exponential dependence over the accessible range. Thus, these results indicate that the ILP decoder for the Abelian Z2 TO under single-qubit Pauli noise can operate efficiently over practically relevant error rates and system sizes.  
+
+> 1. Runtime Statistics
+
+We study the runtime of the ILP decoder at a subthreshold error rate p = 0 .10 for d = 7 ( N = 98) to d = 24 (N = 1152), and near the error-correction threshold, at p = 0 .18, for d = 7 ( N = 98) to d = 14 ( N = 392). The reported runtime is the wall-clock time spent in the classical optimization used to determine the minimum-weight error configuration and excludes the construction of the ILP model. The data in Fig. 5 show the median, mean, 90th percentile, and 99th percentile of the runtime obtained from 10 5 independently sampled physical error configurations for each code distance at p = 0 .10 and 10 4 configurations for each code distance at p = 0 .18. As shown in Fig. 5, the runtime varies widely among decoder instances, with the distribution broadening as N increases and causing the             
+
+> FIG. 5. Runtime distribution and upper-tail behavior. Median, mean, 90th-percentile, and 99th-percentile optimization times versus the number of physical qubits N= 2 d2at (a) the subthreshold error rate p= 0 .10 and (b) p= 0 .18, near the error-correction threshold. The lower panels enlarge the small-Nregion. The growing separation among the median, mean, and upper percentiles demonstrates substantial decoder-instance variability and a pronounced upper tail. The 99th percentile characterizes this tail and should not be interpreted as a worst-case runtime.
+
+17 
+
+FIG. 6. Subthreshold runtime scaling. Panels (a) and (b) show the median and mean solver runtime, respectively, versus 
+
+N = 2 d2 at p = 0 .10, together with quadratic fits t(N ) = aN 2 + bN + c. For the median, a = 1 .1264 × 10 −7, b = 1 .8064 × 10 −4,and c = −2.2205 × 10 −2; for the mean, a = 1 .5309 × 10 −7, b = 2 .2772 × 10 −4, and c = −2.1999 × 10 −2. Both statistics are well described by the quadratic model over the numerically accessible system sizes. Panels (c) and (d) show the same median and mean runtime data, respectively, on log-linear axes, together with fits to the simple exponential form t(N ) = Ae αN . The clear systematic deviations from the fitted curves show that a simple exponential dependence on N provides a poor description of the data. The lower panels show the residuals of the corresponding quadratic and exponential fits. 
+
+mean and upper percentiles to become increasingly sensitive to rare, difficult instances, especially near the threshold. 
+
+2. Subthreshold Runtime Scaling 
+
+To study the runtime scaling below the error-correction threshold, we fit the median and mean runtimes at p = 0 .10 to second-order polynomials in the number of physical qubits. As shown in panels (a) and (b) of Fig. 6, the fits closely follow the data across all accessible code distances, indicating that both the median and mean runtimes are consistent with polynomial scaling in the subthreshold regime. Although the fitted polynomial degree should not be interpreted as evidence that the asymptotic runtime is quadratic, these results show that the NP-hardness of the error-correction problem does not preclude the ILP decoder from remaining computationally efficient over physically relevant subthreshold error rates and code distances. 
+
+FIG. 7. Runtime scaling near threshold. Panels (a) and (b) show the median and mean solver runtime, respectively, at 
+
+p = 0 .18 versus the number of physical qubits N = 2 d2, together with degree-four polynomial fits. Panels (c) and (d) show the same median and mean runtime data, respectively, on log-linear axes, together with fits to the simple exponential form 
+
+t(N ) = Ae αN . The lower panels show the residuals of the corresponding polynomial and exponential fits. For the exponential fits, the pronounced systematic progression from negative to positive and back to negative residuals, clearly visible in both panels, is inconsistent with random scatter about a straight line, indicating that a simple exponential dependence on N does not describe the accessible range. 18 For comparison, panels (c) and (d) of Fig. 6 show the same median and mean runtime data, respectively, on log-linear axes together with fits to a simple exponential dependence, which would appear as a straight line on these axes. The pronounced systematic deviations from the fitted lines make clear that a simple exponential form does not describe the runtime statistics over the accessible code distances.  
+
+> 3. Scaling Near the Error-Correction Threshold
+
+Near the threshold, we test for simple exponential runtime scaling, t(N ) = Ae αN , by fitting straight lines to the median and mean runtime data on log-linear axes. As shown in panels (c) and (d) of Fig. 7, both statistics exhibit downward curvature, with residuals that vary systematically from negative to positive and back to negative. Thus, although the near-threshold runtime is substantially larger than the subthreshold runtime, its finite-size scaling is inconsistent with a simple exponential dependence t ∝ eαN over the numerically accessible code distances. For comparison, we also fit the near-threshold data to a fourth-degree polynomial, which closely follows the accessible data. This fit should, however, be interpreted cautiously, since it contains five free parameters for only eight data points, leaving just three residual degrees of freedom. 
+
+> Appendix B: Anyon Syndrome Measurements in Quantum Double Models as Input to the ILP Decoder
+
+In this appendix, we discuss the measurement of a maximal set of locally compatible anyon species to obtain the anyon syndrome as input to the ILP decoder for arbitrary TOs. As a concrete example, we present the protocol in the context of the quantum double model D(G) of a finite group G. The model is defined on an oriented two-dimensional lattice, with each link carrying a |G|-dimensional Hilbert space whose basis states are labeled by group elements. Anyon excitations are localized on sites s = ( u, p ), where u is a microscopic lattice site and p is an adjacent plaquette. The anyon species of D(G) are labeled by pairs ( C, ρ ). Here C is a conjugacy class of G, and ρ is an irreducible representation of the centralizer Zg0 of a fixed representative g0 ∈ C . The vacuum corresponds to the trivial conjugacy class together with the trivial representation. For a site s = ( u, p ), a complete syndrome measurement is given by the mutually orthogonal projectors Π(C,ρ ) 
+
+> s
+
+= X
+
+> g∈C
+
+Bgp
+
+ dρ
+
+|Zg |
+
+X
+
+> h∈Zg
+
+χρg (h−1)Ahs
+
+ , (B1) where Bgp projects onto states with oriented plaquette product g, and Ahs denotes the local gauge transformation by h at the microscopic lattice site u. For g = xg g0x−1 
+
+> g
+
+, the representation ρg of Zg = xg Zg0 x−1 
+
+> g
+
+is defined by 
+
+ρg (h) = ρ(x−1 
+
+> g
+
+hx g ), dρ is the dimension of ρ, and χρg is the character of ρg . These projectors satisfy Π(C,ρ ) 
+
+> s
+
+Π(C′,ρ ′) 
+
+> s
+
+= δC,C′ δρ,ρ ′ Π(C,ρ ) 
+
+> s
+
+, X
+
+> (C,ρ )
+
+Π(C,ρ ) 
+
+> s
+
+= Is, (B2) and commute with the corresponding projectors on other sites. Thus, perfect syndrome measurements assign a unique anyon label ( C, ρ ), including the vacuum label, to each site s, providing the syndrome input to the ILP decoder as discussed in Sec. V. When the commuting-projector measurements are imperfect, multiple anyon species may be reported at a given site s, although at most one of the reported species can be correct, as discussed in Sec. VII.   
+
+> Appendix C: ILP Formulation for Decoding the D4Topological Order under Single-Qubit Pauli Noise
+
+In this appendix, we present an ILP formulation for decoding the non-Abelian D4 TO under a single-qubit Pauli noise channel that generates all anyon species. This formulation is equivalent to the general formulation introduced in Sec. V, but uses fewer decision variables and constraints than a naive application of the general framework and is substantially faster in practice. We therefore use it in the numerical simulations that determine the error-correction threshold in Sec. VI. The ILP formulation presented here applies to any lattice realization of the non-Abelian D4 TO. For concreteness, however, we consider the realization on a three-colorable kagome lattice defined by the quasi-stabilizer Hamiltonian 
+
+HD4 = − X
+
+> s∈{ ✡}
+
+As − X
+
+> t∈{ ▷, ◁ }
+
+Bt, (C1) 19 where the star and triangle operators are defined as 
+
+(C2) In this realization, the TO can be viewed as a Z32 gauge theory ‘twisted’ to become non-Abelian [54, 55, 79]. Each star and triangle term in the Hamiltonian has eigenvalues ±1. Violations of the star operators create Abelian e-anyons, whereas violations of the triangle operators correspond to non-Abelian m-anyons. The anyons also carry color labels inherited from the lattice. Their fusion rules include mR × mR = 1 + eB + eG + eB eG, mR × eB = mR, mR × eG = mR,
+
+eB × eB = 1, eG × eG = 1, together with their color permutations. In particular, the fusion of two non-Abelian anyons produces only Abelian fusion outcomes, making this TO an example of an acyclic anyon model [28]. Besides the existence of multiple fusion channels for the m-anyons, the non-Abelian nature of the TO is also reflected in the commutation relation 
+
+(C3) where L and R denote adjacent stars. Although all Hamiltonian terms commute in the absence of anyon excitations, the presence of an m-anyon causes the star operator whose support overlaps with the anyon to fail to commute with three neighboring star operators. Consequently, when measuring the anyon syndrome supplied as input to the ILP decoder, any star operator whose support contains an m-anyon should not be measured.  
+
+> 1. Input
+
+Let S denote the set of sites of the syndrome lattice. In the realization of the D4 TO on the three-colorable kagome lattice, these sites correspond to star locations, each of which supports one e-anyon of the same color as the star and two m-anyons of the other two colors. For each m-anyon color a ∈ { R, B, G } and each e-anyon color b ∈ { R, B, G },we are given: 
+
+• Link sets: L(m) 
+
+> a
+
+⊆ {r, s } | r, s ∈ S, r ̸ = s and L(e) 
+
+> b
+
+⊆ {r, s } | r, s ∈ S, r ̸ = s . A Pauli ˆX error on a qubit of color a pair-creates m-anyons of color a along a link ℓ ∈ L(m) 
+
+> a
+
+, while a Pauli ˆZ error on a qubit of color b
+
+pair-creates e-anyons of color b along a link ℓ ∈ L(e) 
+
+> b
+
+.
+
+• Terminal sets: T (m) 
+
+> a
+
+⊂ S and T (e) 
+
+> b
+
+⊂ S. These sets record the measured locations of all m-anyons and of the 
+
+e-anyons on sites not occupied by an m-anyon. Unlike the lattice structure, the syndrome information varies across decoder instances. 
+
+• Link weights: w(m) 
+
+> ℓ
+
+> 0 for ℓ ∈ L(m) 
+
+> a
+
+and w(e) 
+
+> ℓ
+
+> 0 for ℓ ∈ L(e) 
+
+> b
+
+. These weights encode the local probabilities whose product gives P (σ|E)P (E). The values used in the ILP decoders for obtaining the error-correction phase diagram of the D4 TO in Sec. VI are discussed in Appendix D. For later convenience, define the incident link sets ∂(m) 
+
+> a
+
+s = {ℓ ∈ L(m) 
+
+> a
+
+| s ∈ ℓ} and ∂(e) 
+
+> b
+
+s = {ℓ ∈ L(e) 
+
+> b
+
+| s ∈ ℓ} for each site s ∈ S. The links in ∂(m) 
+
+> a
+
+s correspond to the three qubits of color a in the interior of the star at site s, as shown in Eq. C2, on which a Pauli ˆX operator creates an m-anyon of color a at site s. Similarly, the links in ∂(e) 
+
+> b
+
+s
+
+correspond to the six qubits of color b at the tips of the star at site s, on which a Pauli ˆZ operator creates an e-anyon of color b at site s. We further express the syndromes using the binary terminal indicators 
+
+τ (m) 
+
+> a,s
+
+=
+
+(
+
+1, s ∈ T (m) 
+
+> a
+
+,
+
+0, otherwise , τ (e) 
+
+> b,s
+
+=
+
+(
+
+1, s ∈ T (e) 
+
+> b
+
+,
+
+0, otherwise .20  
+
+> 2. Decision Variables
+
+In this subsection, we list the decision variables of the ILP decoder, all of which are binary. 
+
+a. m-anyon variables. 
+
+• y(m) 
+
+> a,ℓ
+
+: error-activation variable for ℓ ∈ L(m) 
+
+> a
+
+. The value y(m) 
+
+> a,ℓ
+
+= 1 indicates that a Pauli ˆX error pair-creates two 
+
+m-anyons of color a along link ℓ, whereas y(m) 
+
+> a,ℓ
+
+= 0 indicates the absence of such an error. 
+
+• x(m) 
+
+> a,s
+
+: midpoint indicator for m-anyon strings at site s. The value x(m) 
+
+> a,s
+
+= 1 indicates that two or three m-anyon strings of color a are incident on site s, or equivalently, that the error-activation variables for two or three links 
+
+ℓ ∈ ∂(m) 
+
+> a
+
+s equal 1, making s a midpoint of an m-anyon string. In contrast, x(m) 
+
+> a,s
+
+= 0 indicates that at most one 
+
+m-anyon string of color a is incident on s. On the three-colorable kagome lattice, no more than three m-anyon strings of the same color can be incident on any site, since |∂(m) 
+
+> a
+
+s| = 3. The midpoint indicator is therefore used primarily to enforce the correct number of incident m-anyon strings according to the m-anyon syndrome at site 
+
+s.
+
+b. e-anyon variables. 
+
+• y(e) 
+
+> b,ℓ
+
+: error-activation variable for ℓ ∈ L(e) 
+
+> b
+
+. The value y(e) 
+
+> b,ℓ
+
+= 1 indicates that a Pauli ˆZ error pair-creates two 
+
+e-anyons of color b along link ℓ, whereas y(e) 
+
+> b,ℓ
+
+= 0 indicates the absence of such an error. 
+
+• x(e) 
+
+> b,s
+
+: midpoint indicator for e-anyon strings at site s. The value x(e) 
+
+> b,s
+
+= 1 indicates that two or three e-anyon strings of color b are incident on site s, or equivalently, that the error-activation variables for two or three links 
+
+ℓ ∈ ∂(e) 
+
+> b
+
+s equal 1, making s a midpoint of an e-anyon string. In contrast, x(e) 
+
+> b,s
+
+= 0 indicates that at most one 
+
+e-anyon string of color b is incident on s. On the three-colorable kagome lattice, up to six e-anyon strings of the same color can be incident on a site, since |∂(e) 
+
+> b
+
+s| = 6. However, two incident e-anyon strings generated by Pauli ˆZ operators acting on adjacent tips of the star are equivalent, up to multiplication by a triangle operator 
+
+Bt, to a single Pauli ˆZ operator acting on the tip of a neighboring star. Since the link weights w(e) 
+
+> ℓ
+
+are positive for all ℓ ∈ L(e) 
+
+> b
+
+, and the ILP decoder performs minimum-weight decoding, an optimal solution never contains activated error variables corresponding to adjacent tips of the same star. It is therefore sufficient to consider at most three incident e-anyon strings and to use a single binary midpoint indicator to enforce the correct number of incident e-anyon strings according to the e-anyon syndrome at site s.
+
+• T (e) 
+
+> b,s
+
+: active e-anyon terminal indicator. The value T (e) 
+
+> b,s
+
+= 1 indicates that a measured e-anyon of color b at site 
+
+s is created solely by e-anyon strings, whereas T (e) 
+
+> b,s
+
+= 0 indicates that either the measured e-anyon arises as a fusion outcome of non-Abelian m-anyons or no such e-anyon is measured at site s.
+
+• z(e) 
+
+> b,s
+
+: inactive e-anyon terminal indicator. The value z(e) 
+
+> b,s
+
+= 1 indicates that a measured e-anyon of color b at site s arises as a fusion outcome of non-Abelian m-anyons, whereas z(e) 
+
+> b,s
+
+= 0 indicates that either the measured 
+
+e-anyon is created solely by e-anyon strings or no such e-anyon is measured at site s.
+
+c. Fusion indicators. For each e-anyon terminal s ∈ T (e) 
+
+> b
+
+and each m-anyon color a:
+
+• gma→eb,s : fusion indicator. The value gma→eb,s = 1 indicates that a site s containing a measured e-anyon of color b is also a midpoint of an m-anyon string of color a. The measured e-anyon is therefore interpreted as a fusion outcome of non-Abelian m-anyons. This indicator is defined only for sites s ∈ T (e) 
+
+> b
+
+and is used to determine the corresponding values of the e-anyon terminal indicators T (e) 
+
+> b,s
+
+and z(e) 
+
+> b,s
+
+. 
+
+> 3. Objective Function
+
+For this ILP formulation, it is sufficient to assign weights only to the error-activation variables. In Appendix D, we discuss how these weights are chosen to account for both P (σ|E) and P (E). All other decision variables therefore carry zero weight in the objective, which minimizes the total weight of the activated errors: min 
+
+" 3X
+
+> a=1
+
+X
+
+> ℓ∈L(m)
+> a
+
+w(m) 
+
+> ℓ
+
+y(m) 
+
+> a,ℓ
+
++
+
+> 3
+
+X
+
+> b=1
+
+X
+
+> ℓ∈L(e)
+> b
+
+w(e) 
+
+> ℓ
+
+y(e)
+
+> b,ℓ
+
+#
+
+. (C4) 21 
+
+4. Constraints 
+
+a. m-anyon String Constraints 
+
+For each m-anyon color a and site s, the constraint enforces an even number of incident m-anyon strings of color 
+
+a, either zero or two, when no m-anyon is measured at s, and an odd number, either one or three, when an m-anyon of color a is measured at s, consistent with the acyclic property of the non-Abelian m-anyons. This permits open strings terminating at measured anyons, closed loops, and local three-way junctions: 
+
+X 
+
+> ℓ∈∂(m)
+> as
+
+y(m) 
+
+> a,ℓ
+
+= 2 x(m) 
+
+> a,s
+
++ τ (m) 
+
+> a,s
+
+. (C5) 
+
+b. Fusion Constraints and e-Anyon Terminal Classification 
+
+The fusion indicators gma→eb,s are uniquely determined by the assignment of the error-activation variables y(m) 
+
+> a,ℓ
+
+. At a site s ∈ T (e) 
+
+> b
+
+, the condition gma→eb,s = 1 requires that the measured e-anyon of color b be located at a midpoint of an m-anyon string of color a, corresponding to an even number of incident m-anyon strings of color a. Since at most three m-anyon strings of the same color can be incident on a site of the kagome lattice, this number must be two. The decoder cannot assign either one or three incident m-anyon strings to a site with a measured e-anyon, because an odd number of incident strings would create an m-anyon at that site, whereas an e-anyon cannot be measured at the same site as an m-anyon. Such an error configuration would therefore be inconsistent with the measured m-anyon syndrome and is excluded by the constraints in Eq. C5. Consequently, for each e-anyon terminal s ∈ T (e) 
+
+> b
+
+and each 
+
+m-anyon color a, it is sufficient to impose gma→eb,s = 1 whenever at least one error-activation variable associated with a link in ∂(m) 
+
+> a
+
+s equals 1. This is enforced by 
+
+X 
+
+> ℓ∈∂(m)
+> as
+
+y(m) 
+
+> a,ℓ
+
+≤ | ∂(m) 
+
+> a
+
+s| gma→eb,s 
+
+X 
+
+> ℓ∈∂(m)
+> as
+
+y(m) 
+
+> a,ℓ
+
+≥ gma→eb,s (C6) Whenever gma→eb,s = 1 for an e-anyon at site s ∈ T (e) 
+
+> b
+
+, the measured e-anyon is interpreted as a fusion outcome of non-Abelian m-anyons and is therefore designated as inactive by setting z(e) 
+
+> b,s
+
+= 1. This is enforced by 
+
+z(e) 
+
+> b,s
+
+≤
+
+> 3
+
+X
+
+> a=1
+
+gma→eb,s z(e) 
+
+> b,s
+
+≥ gma→eb,s ∀a (C7) Otherwise, the measured e-anyon is active, with T (e)b, s = 1, indicating that it is created solely by e-anyon strings of the same color. Since a measured e-anyon must satisfy either T (e)b, s = 1 or z(e) 
+
+> b,s
+
+= 1, the following constraint is imposed at every site s and for each color b:
+
+T (e) 
+
+> b,s
+
++ z(e) 
+
+> b,s
+
+= τ (e) 
+
+> b,s
+
+(C8) This constraint also ensures that both terminal indicators vanish at sites where no e-anyon of color b is measured. 
+
+c. e-Anyon String Constraints 
+
+Since the e-anyons are Abelian and pairwise annihilate to the vacuum, an odd number of incident e-anyon strings of color b is required at a site s where an e-anyon of the same color is measured, whereas an even number is required when no such e-anyon is measured. However, this parity condition does not apply at every site. If an odd number of m-anyon strings of any color is incident on s, then the site contains an m-anyon, and any number of e-anyon strings may also be incident because of the fusion rules mR × eB = mR and mR × eG = mR, together with their color permutations. Furthermore, at a midpoint of m-anyon strings, where an even number of m-anyon strings of each color is incident, the local fusion state is a superposition of Abelian fusion outcomes according to mR × mR = 1 + eB + eG + eB eG
+
+and its color permutations. If such a midpoint corresponds to a star location of color b, the syndrome measurement yields either an e-anyon of color b or the vacuum with equal probability, 12 . Incident e-anyon strings do not alter this 22 superposition or the probability of measuring the e-anyon. Therefore, the following constraint is imposed only at sites 
+
+s with no incident m-anyon strings: 
+
+X 
+
+> ℓ∈∂(e)
+> bs
+
+y(e) 
+
+> b,ℓ
+
+= 2 x(e) 
+
+> b,s
+
++ T (e) 
+
+> b,s
+
+(C9) At sites with incident m-anyon strings, the e-anyon strings are instead allowed to terminate or branch freely. Whether an m-anyon string is incident on a site s depends on the values of the error-activation variables y(m) 
+
+> a,ℓ
+
+.Since the inclusion of an ILP constraint cannot itself depend on decision-variable assignments, Eq. C9 is implemented in practice using a big-M relaxation. The big-M relaxation is implemented by first defining 
+
+S(m) 
+
+> s
+
+= X
+
+> a∈{ R,B,G }
+
+x(m) 
+
+> a,s
+
+, T (m) 
+
+> s
+
+= X
+
+> a∈{ R,B,G }
+
+τ (m) 
+
+> a,s
+
+.
+
+Here, S(m) 
+
+> s
+
+> 0 indicates the presence of an m-anyon string midpoint at site s, while T (m) 
+
+> s
+
+> 0 indicates the presence of a measured m-anyon. Then, for each e-anyon color b and site s, we choose M ≥ max s |∂(e) 
+
+> b
+
+s| = 6 and impose 
+
+X 
+
+> ℓ∈∂(e)
+> bs
+
+y(e) 
+
+> b,ℓ
+
+− 2x(e) 
+
+> b,s
+
+− T (e) 
+
+> b,s
+
+− M S (m) 
+
+> s
+
+≤ M T (m) 
+
+> s
+
+, (C10) 
+
+− X 
+
+> ℓ∈∂(e)
+> bs
+
+y(e) 
+
+> b,ℓ
+
++ 2 x(e) 
+
+> b,s
+
++ T (e) 
+
+> b,s
+
+− M S (m) 
+
+> s
+
+≤ M T (m) 
+
+> s
+
+. (C11) When a site s has neither a measured m-anyon nor an m-anyon string midpoint, S(m) 
+
+> s
+
+= T (m) 
+
+> s
+
+= 0, and these constraints reduce exactly to Eq. C9. Otherwise, S(m) 
+
+> s
+
++ T (m) 
+
+> s
+
+≥ 1, and the constraints are relaxed so that they impose no restriction on the e-anyon degree. Indeed, they are then automatically satisfied because 
+
+X 
+
+> ℓ∈∂(e)
+> bs
+
+y(e) 
+
+> b,ℓ
+
+− 2x(e) 
+
+> b,s
+
+− T (e) 
+
+> b,s
+
+≤ X 
+
+> ℓ∈∂(e)
+> bs
+
+y(e) 
+
+> b,ℓ
+
+≤ max  
+
+> s
+
+|∂(e) 
+
+> b
+
+s| ≤ M ≤ M S (m) 
+
+> s
+
++ M T (m)
+
+> s
+
+Appendix D: MWPM and ILP Decoding Protocols for the D4 Topological Order 
+
+In this appendix, we provide the detailed protocols for the MWPM decoder and the three ILP decoders used to determine the error-correction threshold of the D4 TO with perfect anyon syndromes in Sec. VI of the main text. Since the m-anyons are acyclic non-Abelian anyons, they can be removed in a single correction step by pairwise annihilation. This process may leave behind Abelian e-anyons as fusion outcomes, which require a second round of pairwise annihilation. Therefore, all error-correction protocols considered for the D4 TO with perfect anyon syndromes consist of two steps. Simulations of the error-correction protocol, including error introduction, syndrome measurement, and correction, are performed using the stabilizer tableau formalism developed in Ref. [81]. A logical error is declared if, at the end of the protocol, a logical stabilizer of the initial state has either flipped sign or is no longer a stabilizer. 
+
+1. MWPM and ILP Decoding Protocols 
+
+a. MWPM Decoder 
+
+After a single-qubit Pauli channel with py = pxpz independently generates all three colors of m- and e-anyons on the initial state, MWPM decoding of the D4 TO proceeds as follows: 1. Measure all colors of m-anyons. 2. Perform MWPM separately for each m-anyon color, assigning uniform weight to all links. The decoder outputs a set of links on which Pauli ˆX operators are applied to pairwise annihilate the m-anyons. 3. Measure all colors of e-anyons. 23 4. Perform MWPM separately for each e-anyon color. The decoder outputs a set of links on which Pauli ˆZ
+
+operators are applied to pairwise annihilate the e-anyons. Links connecting two e-anyon locations along an 
+
+m-anyon correction path are assigned zero weight, while all other links are assigned uniform weight. On the kagome lattice, the weight assignment in Step 4 is implemented as follows. Whenever the m-anyon correction in Step 2 applies Pauli ˆX operators to both qubits of the same color (blue) on one side of an hourglass, the e-anyon link corresponding to the central (green) qubit of that hourglass is assigned zero weight: 
+
+(D1) Because the correction of non-Abelian m-anyons in Step 2 is implemented by finite-depth Pauli ˆX strings, it can create additional e-anyons along the correction paths. The e-anyons should therefore be pairwise annihilated preferentially along the same paths. This zero-weight assignment is thus adopted to allow the e-anyons to propagate freely along the 
+
+m-anyon correction paths. Since the same consideration applies to any two-step error-correction scheme for the D4
+
+TO, we use the same weight assignment for all three ILP decoders described below. In practice, this choice improves the error-correction threshold of both the MWPM and ILP decoders.    
+
+> b. ILP Decoder for Maximizing P(E)
+
+After a single-qubit Pauli channel with py = pxpz independently generates all three colors of m- and e-anyons on the initial state, ILP decoding that maximizes P (E) proceeds as follows: 1. Measure all colors of m-anyons. Then, measure all e-anyons at sites where no m-anyon is measured. 2. Perform ILP decoding using the formulation in Appendix C, with w(m) 
+
+> ℓ
+
+= ln 1−px 
+
+> px
+
+and w(e) 
+
+> ℓ
+
+= ln 1−pz 
+
+> pz
+
+. This weight assignment accounts only for P (E). The decoder outputs a set of links with y(m) 
+
+> a,ℓ
+
+= 1 and y(e) 
+
+> b,ℓ
+
+= 1. However, only Pauli ˆX operators are applied to the qubits corresponding to links with y(m) 
+
+> a,ℓ
+
+= 1; no correction is applied to those corresponding to links with y(e) 
+
+> b,ℓ
+
+= 1. 3. Measure all colors of e-anyons. 4. Perform MWPM separately for each e-anyon color. The decoder outputs a set of links on which Pauli ˆZ
+
+operators are applied to pairwise annihilate the e-anyons. Links connecting two e-anyon locations along an 
+
+m-anyon correction path are assigned zero weight, while all other links are assigned uniform weight. The protocol described above yields a higher error-correction threshold than the variant in which Step 2 also applies Pauli ˆZ operators to the links with y(e) 
+
+> b,ℓ
+
+= 1, in addition to applying Pauli ˆX operators to the links with y(m) 
+
+> a,ℓ
+
+= 1. This behavior is also observed for the other two ILP decoders described below and is justified in the next subsection.    
+
+> c. ILP Decoder for Maximizing P(E|σ)
+
+After a single-qubit Pauli channel with py = pxpz independently generates all three colors of m- and e-anyons on the initial state, ILP decoding that maximizes P (E|σ) proceeds as follows: 1. Measure all colors of m-anyons. Then, measure all e-anyons at sites where no m-anyon is measured. 2. Perform ILP decoding using the formulation in Appendix C with w(e) 
+
+> ℓ
+
+= ln 1−pz 
+
+> pz
+
+. The m-anyon link weights depend on the measured non-Abelian m-anyon syndromes at the two sites connected by ℓ. If both sites contain an m-anyon of any color, assign w(m) 
+
+> ℓ
+
+= ln 1−px 
+
+> px
+
+. If exactly one of the two sites contains an m-anyon of any color, assign w(m) 
+
+> ℓ
+
+= ln  
+
+> √2(1 −px)
+> px
+
+. If neither site contains an m-anyon, assign w(m) 
+
+> ℓ
+
+= ln 2(1 −px) 
+
+> px
+
+. The decoder outputs a set of links with y(m) 
+
+> a,ℓ
+
+= 1 and y(e) 
+
+> b,ℓ
+
+= 1. Pauli ˆX operators are applied only to the qubits corresponding to links with y(m) 
+
+> a,ℓ
+
+= 1, while no correction is applied to those corresponding to links with y(e) 
+
+> b,ℓ
+
+= 1. 24 3. Measure all colors of e-anyons. 4. Perform MWPM separately for each e-anyon color. The decoder outputs a set of links on which Pauli ˆZ
+
+operators are applied to pairwise annihilate the e-anyons. Links connecting two e-anyon locations along an 
+
+m-anyon correction path are assigned zero weight, while all other links are assigned uniform weight. At each site along a string of Pauli ˆX errors, m-anyons fuse into a superposition of the vacuum and an e-anyon. Measuring the e-anyon syndrome at such a site collapses this superposition, yielding either the vacuum or an e-anyon with equal probability pf →a = 12 , where a denotes either outcome. Therefore, requiring the intermediate fusion outcomes along an m-anyon string to be consistent with the measured syndromes contributes an additive factor of ln 2 to the objective for each site along the string that does not contain an m-anyon and at which an e-anyon measurement is therefore performed. Equivalently, since each midpoint of an m-anyon string has exactly two incident 
+
+m-anyon links of the corresponding color, this factor can be split between the two links, giving a penalty of ln √2 to each link-activation variable y(m) 
+
+> a,ℓ
+
+. This reproduces the weight assignment in Step 2 of the protocol described above. In this way, weights are assigned only to link-activation variables while still accounting for P (E|σ) ∝ P (σ|E)P (E). If the error creates an isolated, homologically trivial, closed m-anyon loop, no m-anyons can be measured on the loop because of the acyclic fusion structure. However, requiring such an isolated component to fuse to the vacuum imposes an additional global consistency condition in which the parity of the measured e-anyons of each color on the loop must be even. Admittedly, this condition is not incorporated into the weight assignment in Step 2. However, a related study [31] found that such isolated, homologically trivial, closed m-anyon loops occur only rarely, and neglecting them has a minimal effect on the numerical error-correction threshold.  
+
+> d. ILP Decoder with Effective Weight Ratio
+
+After a single-qubit Pauli channel with py = pxpz independently generates all three colors of m- and e-anyons on the initial state, ILP decoding with effective weight ratio proceeds as follows: 1. Measure all colors of m-anyons. Then, measure all e-anyons at sites where no m-anyon is measured. 2. Perform ILP decoding using the formulation in Appendix C, with a constant effective weight ratio reff =
+
+w(m) 
+
+> ℓ
+
+/w (e) 
+
+> ℓ
+
+. The optimal value of reff is determined by trial and error. The decoder outputs a set of links with 
+
+y(m) 
+
+> a,ℓ
+
+= 1 and y(e) 
+
+> b,ℓ
+
+= 1. Pauli ˆX operators are applied only to the qubits corresponding to links with y(m) 
+
+> a,ℓ
+
+= 1, while no correction is applied to those corresponding to links with y(e) 
+
+> b,ℓ
+
+= 1. 3. Measure all colors of e-anyons. 4. Perform MWPM separately for each e-anyon color. The decoder outputs a set of links on which Pauli ˆZ
+
+operators are applied to pairwise annihilate the e-anyons. Links connecting two e-anyon locations along an 
+
+m-anyon correction path are assigned zero weight, while all other links are assigned uniform weight.   
+
+> 2. Deferred Correction of e-Anyons
+
+In this subsection, we justify why the D4 QEC threshold is higher when only Pauli ˆX operators are applied in Step 2 of the ILP protocols to correct the m-anyons, while all correction of the e-anyons is deferred to Step 4. The relevant quantum channels in the ILP decoding protocols are: 
+
+• the single-qubit Pauli channel describing physical noise, P;
+
+• the m- and e-anyon syndrome measurements in Step 1, MILP ;
+
+• the application of Pauli ˆX operators to correct the m-anyons in Step 2, Em,ILP ;
+
+• the optional application of Pauli ˆZ operators to correct the e-anyons in Step 2, Ee,ILP ;
+
+• the e-anyon syndrome measurement in Step 3, Me.25 Whether Pauli ˆZ operators are applied in Step 2 does not affect the correction of the m-anyons by Pauli ˆX operators. Indeed, our numerical simulations show that the threshold improvement obtained by deferring e-anyon correction to Step 4 arises entirely from suppressing the proliferation of e-anyons, while the proliferation of m-anyons remains unchanged. It therefore suffices to consider only the e-anyon threshold in the argument below. If the correction of e-anyons is deferred from Step 2 to Step 4, the density matrix immediately before Step 4 is 
+
+Eeeff 1 (ˆ ρ) = Me ◦ E m,ILP ◦ M ILP ◦ P (ˆ ρ) , (D2) where ˆ ρ denotes the density matrix of the initial state. Optimal correction of the e-anyons then selects the homology class with the largest diagonal weight in this density matrix. In contrast, if e-anyon correction is applied in Step 2, the density matrix immediately before Step 4 is 
+
+Eeeff 2 (ˆ ρ) = Me ◦ E e,ILP ◦ E m,ILP ◦ M ILP ◦ P (ˆ ρ) . (D3) The order of Ee,ILP and Em,ILP is arbitrary because the two channels commute, Ee,ILP ◦ E m,ILP = Em,ILP ◦ E e,ILP .Furthermore, the e-anyon correction channel Ee,ILP commutes with the e-anyon syndrome measurement channel 
+
+Me. Measuring the e-anyon syndromes first, thereby collapsing coherence between e-anyons and the vacuum, and then applying Pauli ˆZ operators yields the same final state as applying the Pauli ˆZ operators before the measurement. Hence, 
+
+Eeeff 2 (ˆ ρ) = Ee,ILP ◦ M e ◦ E m,ILP ◦ M ILP ◦ P (ˆ ρ) = Ee,ILP ◦ E eeff 1 (ˆ ρ) . (D4) Optimal decoding based on Eeeff 2 (ˆ ρ) selects the e-anyon homology class with the largest diagonal element. Viewed instead as a decoder acting on Eeeff 1 (ˆ ρ), this procedure is generally non-optimal, since the additional channel Ee,ILP 
+
+can alter the relative weights of the homology classes. Its threshold therefore cannot exceed that of the optimal decoder acting directly on Eeeff 1 (ˆ ρ). It is reasonable to expect the same argument to apply to minimum-weight decoding implemented by the ILP decoders. Correcting the e-anyons in Step 2 amounts to performing minimum-weight decoding based on Eeeff 2 (ˆ ρ), which is expected to have a lower threshold than minimum-weight decoding performed directly on Eeeff 1 (ˆ ρ), for which the optional e-anyon correction channel Ee,ILP is absent.

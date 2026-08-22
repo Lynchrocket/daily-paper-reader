@@ -1,0 +1,1065 @@
+Title: Architecture and Compilation Co-Design for High-Rate Quantum Product Codes on Neutral Atom Arrays
+
+URL Source: https://arxiv.org/pdf/2608.20164v1
+
+Published Time: Fri, 21 Aug 2026 01:02:49 GMT
+
+Number of Pages: 20
+
+Markdown Content:
+# Architecture and Compilation Co-Design for High-Rate Quantum Product Codes on Neutral Atom Arrays 
+
+# Adrian Liu 
+
+adrianliu@ucla.edu University of California, Los Angeles Los Angeles, CA, USA 
+
+# Wan-Hsuan Lin 
+
+wlin@quera.com QuEra Computing Inc. Boston, MA, USA 
+
+# Daniel Bochen Tan 
+
+danieltan@g.harvard.edu Harvard University Cambridge, MA, USA 
+
+# Qian Xu 
+
+qianxu@caltech.edu California Institute of Technology Pasadena, CA, USA 
+
+# Jason Cong 
+
+cong@cs.ucla.edu University of California, Los Angeles Los Angeles, CA, USA 
+
+## Abstract 
+
+Achieving fault-tolerant quantum computing at a practical scale demands quantum error correction (QEC) codes with high encoding rates. Quantum low-density parity-check (qLDPC) codes emerge as a promising candidate, especially given the rise of neutral atom ar-rays that provide dynamic long-range connectivity via atom move-ments. In general, synthesizing valid and efficient physical exe-cution plans for QEC is a provably hard combinatorial problem, forming a critical compilation bottleneck that worsens as code sizes grow. To overcome this complexity, we focus on an important prod-uct family of qLDPC codes with dimension-reduction properties, and propose ONEX. This framework decomposes complex 2D phys-ical execution planning into independent 1D subproblems, each solved to optimal execution depth within practical compilation time. First, we formulate the 1D execution plan with an explicit satisfiability modulo theories (SMT) encoding. This protocol pro-duces provably depth-optimal solutions with substantial duration reduction. Second, we develop a multi-stage compilation pipeline featuring anytime optimization, movement compaction, and itera-tive feedback. This pipeline maintains practical wall-clock times while providing progressive refinement and on-demand retrieval of quality solutions. Third, we evaluate ONEX in the application of hypergraph product (HGP) code memory mapped onto neutral atom arrays, achieving 3.7 × to 6.1 × and 29.8 × to 42.1 × higher clock rates than the constructive 1D algorithm and the general 2D com-piler, respectively, while scaling efficiently to codes with 2,500 data qubits. Finally, we extend ONEX to zoned layouts, revealing archi-tectural insights into the associated trade-offs, and demonstrate its applicability to the broader lifted-product (LP) code family through a representative example. 
+
+## Keywords 
+
+Quantum Error Correction, Neutral Atom Arrays 
+
+## 1 Introduction 
+
+Fault-tolerant quantum computing (FTQC) demands quantum er-ror correction (QEC) to protect logical information from physical noise [1–3, 24, 33]. The well-known surface code [11] achieves a high error threshold but yields an encoding rate that vanishes as O( 1/𝑑 2) with code distance 𝑑 . This poor encoding efficiency implies enormous resource overhead, suggesting that millions of physical qubits may be necessary to execute algorithms of prac-tical interest [13, 14]. In contrast, high-rate quantum low-density parity-check (qLDPC) codes offer a fundamentally different scaling trajectory [5, 19, 26, 42]. By combining constant encoding rates with large code distances, these qLDPC codes have the potential to reduce the physical overhead by orders of magnitude, thereby making practical applications promising even with around 10,000 physical qubits [6]. As such, high-rate qLDPC codes represent a viable path toward resource-efficient QEC at a practical scale and arise as a major focus of recent research. Distinct from geometrically local topological codes, prominent qLDPC codes require non-local qubit interactions beyond nearest-neighbor connectivity to implement syndrome extraction. Neu-tral atom arrays have emerged as one of the most promising plat-forms for meeting this requirement. By trapping individual atoms in reconfigurable optical tweezer arrays, these systems provide dy-namic, long-range connectivity through physical atom rearrange-ment [4, 16, 31]. Recent experiments have demonstrated processors with several thousand qubits [23, 25, 27], positioning this platform at the forefront of large-scale quantum computation. However, the flexibility of atom rearrangement introduces a for-midable compilation challenge to achieving efficient execution of QEC, particularly the syndrome extraction. Physical constraints of acousto-optic deflector (AOD) control render rearrangement synthesis a provably NP-hard combinatorial problem even in one dimension [18, 20]. To manage such complexity, existing general compilation workflows often compromise by partitioning the re-arrangement problem into separate placement and routing stages that converge prematurely to local minima [21, 35, 41]. For many qLDPC instances, even with near-optimal scheduling that mini-mizes circuit depth [41], general-purpose compilations can still produce solutions more than 40 × slower than the highly optimized solutions from this work (see Section 4.2.1). As the dominant com-ponent of execution duration, suboptimal rearrangement directly limits the clock rate of the quantum processor. Other studies design code-specific layouts that leverage particular symmetries to achieve efficient rearrangement under restricted patterns [22, 44, 45, 47, 52] but do not generalize to instances outside these assumptions, includ-ing those studied here, yet a vast design space of broader qLDPC code classes still remains as an open challenge to be explored. Within this landscape, a notable structural commonality among many prominent qLDPC code families is their construction from 
+
+> 1arXiv:2608.20164v1 [quant-ph] 20 Aug 2026 Adrian Liu, Wan-Hsuan Lin, Daniel Bochen Tan, Qian Xu, and Jason Cong
+
+( )(a) (b)    
+
+> Data qubit Quantum X check Quantum Z check Compatible horizontal group Compatible vertical group
+> row column  Classical check Classical bit
+
+# Non-Local qLDPC Codes Lifted-Product 
+
+# HGP BB 
+
+# ... 
+
+Figure 1: Motivation. (a) Product construction underpins many high-rate qLDPC families, with HGP codes as a primary showcase. (b) HGP syndrome extraction on a product-aligned neutral-atom layout. Purple circles are data-qubit atoms; red/blue diamonds are 𝑋 /𝑍 check-ancilla atoms. Each classical seed code is replicated along one product coordinate, yielding horizontal groups (gray) and vertical groups (pink). The right panels show the corresponding 1D row/column subproblems; small bars denote a 1D execution plan with rearrangement steps. Compatible groups execute in parallel. 
+
+generalized products of classical component codes [5, 26, 42] (Fig. 1a). Critically, the product construction induces a natural decomposi-tion of stabilizer interactions into independent groups aligned along orthogonal dimensions. This decomposition has direct architectural implications, as it determines how two-qubit gates can be organized and parallelized during syndrome extraction. Nevertheless, no ex-isting framework fully leverages these structural opportunities for holistic physical execution synthesis, which requires co-optimizing qubit mapping and gate execution alongside atom rearrangement. Existing heuristics generate rearrangements locally without global coordination, limiting solution quality; even under the same struc-tural decomposition, the asymptotically optimal local heuristic [50], can still require up to 9 × as many rearrangement steps in practice as the exact depth optimum obtained in this work (see Section 4.2.2). In this paper, we propose ONEX (Optimal dimensional Neutral-atom Execution compiler), an architecture and compilation co-design framework for scalable high-rate quantum error correction on neutral atom arrays. ONEX exploits the structure of product qLDPC code families, by naturally decomposing stabilizer inter-actions into two independent groups that map directly onto the Cartesian control axes of AODs, as illustrated with hypergraph product (HGP) codes [42] in Fig. 1b. Our key insight is that this correspondence allows the complex 2D physical execution plan-ning to be decomposed into orthogonal parallel 1D subproblems that are solvable optimally, enabling us to reduce the compilation complexity from O( 2𝑛 2
+
+) to O( 2𝑛 ). This approach also aligns with re-cent practical efforts to treat structural decomposability as a design criterion for ultra-high-rate codes [54]. Our focus on qLDPC codes with product structure is analogous to the choice of slicing floorplans in VLSI layout design in the 1980s. Despite being a subset of general floorplans, slicing floorplans offered an efficient encoding and a compact search space [37], which often produced solutions superior to those from general floorplans and became widely adopted in practice [49, 53]. Particularly, this paper makes the following contributions: 
+
+• A highly efficient 1D execution protocol. We formulate the optimal 1D atom execution planning into formal Satisfiability Modulo Theories (SMT) abstraction. This protocol produces depth-optimal solutions with an 8.4 × improvement in duration compared to the baseline [50], enabling higher clock rates and suppressed error accumulation. 
+
+• A multi-stage compilation framework. We develop a three-phase pipeline that integrates anytime solving, movement com-paction, and iterative feedback with multi-level parallelism. This framework ensures progressive solution refinement with on-demand retrieval and practical wall-clock compilation times. 
+
+• Application-level QEC mapping and evaluation. We demon-strate high-rate HGP memory architectures on neutral atom arrays, achieving clock rates 3.7 × to 6.1 × above the 1D con-structive routing algorithm and 29.8 × to 42.1 × above the gen-eral 2D compiler, while scaling to codes exceeding 2,500 data qubits with broadly improved logical error rates. Generalization to the broader lifted-product (LP) code family is also studied and demonstrated on a recent advance [6]. 
+
+• Architectural adaptation to zoned layouts. We extend ONEX to zoned layouts and compare multiple execution strategies against existing zoned compilers. To the best of our knowledge, this is the first study to analyze the inter- and intra-zone trade-off for QEC execution on zoned neutral-atom processors. 
+
+## 2 Preliminaries 
+
+This section introduces the neutral-atom hardware model and the structured quantum error correction codes that together motivate the co-design approach of ONEX. 
+
+> 2Architecture and Compilation Co-Design for High-Rate Quantum Product Codes on Neutral Atom Arrays 2Q gate 2Q gate
+
+rb       
+
+> q0
+> q1
+> q2
+> q3
+> q4
+> q0q1
+> q2
+> q3
+> q4
+> AOD
+> c' 0c0
+> r0
+> r' 0
+> r101230123
+> 0101
+> (a) (b)
+> Rydberg range
+
+Figure 2: Neutral-atom hardware model. (a) A 2D optical tweezer array with atoms (dots) held at traps (circles). Ad-jacent trap pairs form interaction sites (dashed box) where Rydberg entangling gates execute. (b) Intersectional atom transport via row- and column-axis AODs. 
+
+## 2.1 Neutral-Atom Quantum Computing 
+
+Neutral-atom quantum processors trap individual atoms in tightly focused laser beams known as optical tweezers, arranged in a two-dimensional grid (Fig. 2a). Static tweezers generated by a spatial light modulator (SLM) define fixed traps, while dynamic tweez-ers driven by AODs transport atoms between traps. Entangling gates are executed via Rydberg blockade by positioning two atoms within a shared interaction site , where adjacent traps reside within each other’s illumination zone to enable controlled operations [32]. Based on the presence of dedicated storage zones, neutral-atom processors are categorized into monolithic and zoned architectures, each requiring specialized compilation efforts [17, 21, 30, 34–36, 38– 41, 46]. Here, ONEX first focuses on the monolithic case and then discusses its adaptation to zoned layouts in Section 5. The AOD control geometry is illustrated in Fig. 2b. Each AOD channel deflects atoms along a single axis (row or column), with mobile traps formed at the intersection of active row and column channels. All atoms sharing a channel move simultaneously and the coordination of multiple AODs imposes a strict no-crossing constraint . Specifically, AOD channels in the same dimension ( e.g. ,
+
+𝑟 0 and 𝑟 1) cannot cross each other. This ordering-preservation rule prevents atoms from heating up. This requirement distinguishes neutral-atom rearrangement from general permutation and is the primary source of the problem’s combinatorial complexity. The rearrangement of atoms between gate stages incurs two primary costs. Execution depth counts the number of discrete re-arrangement steps, each consisting of a three-phase sequence: (1) activate : atoms transfer from static SLM traps to the dynamic AOD control grid, enabling associated movement; (2) move : all atoms move in parallel to their target positions, with duration determined by the maximum displacement; (3) deactivate : atoms transfer back to the static SLM traps. Increased depth necessitates more frequent atom transfers, which elevates the probability of atom loss and decoherence. Moreover, physical execution duration captures the total wall-clock time in-cluding both the rearrangements and gate operations, which is dominated by the physical displacement in each cycle. This dura-tion directly governs the processor’s clock rate and idling error accumulation during transport, making its minimization critical for high-fidelity, large-scale computation. 
+
+## 2.2 Structured Quantum Error Correction 
+
+Fault-tolerant quantum computing requires QEC to protect logical information from physical noise. A stabilizer code J𝑛, 𝑘, 𝑑 K encodes 
+
+𝑘 logical qubits into 𝑛 physical qubits with code distance 𝑑 by spec-ifying a set of stabilizer generators [7, 15]. Each round of syndrome extraction measures every stabilizer via a sequence of two-qubit entangling gates between check and data qubits. QLDPC codes are a family of stabilizer codes in which each stabilizer acts on a bounded number of qubits and each qubit par-ticipates in a bounded number of stabilizers. This sparsity enables syndrome extraction with O( 𝑛 ) gates per round and makes these codes attractive for scalable QEC. Among them, HGP codes [19, 42] construct a quantum code from two classical seed codes 𝐻 1 ∈ F𝑟 1 ×𝑛 1
+
+> 2
+
+and 𝐻 2 ∈ F𝑟 2 ×𝑛 2 
+
+> 2
+
+via the product: 
+
+H𝑋 =  𝐻 1 ⊗𝐼 𝑛 2 𝐼 𝑟 1 ⊗𝐻 T
+
+> 2
+
+, H𝑍 =  𝐼 𝑛 1 ⊗𝐻 2 𝐻 T 
+
+> 1
+
+⊗𝐼 𝑟 2
+
+ . (1) The resulting code achieves high coding rate and large distance with bounded-weight stabilizers, offering favorable overhead scaling compared to surface codes [50]. The decomposition can be read directly from Eq. (1). Let the two HGP data-qubit blocks be indexed as 𝑞 𝐴 𝑗,ℓ for ( 𝑗, ℓ ) ∈ [ 𝑛 1] × [ 𝑛 2] and 
+
+𝑞 𝐵 𝑖,𝑚 for (𝑖, 𝑚 ) ∈ [ 𝑟 1]×[ 𝑟 2]; let 𝑋 - and 𝑍 -check ancillas be indexed as 
+
+𝑥 𝑖,ℓ and 𝑧 𝑗,𝑚 . The nonzero entries induce exactly four edge types: 
+
+𝐻 1 (𝑖, 𝑗 ) = 1 ⇒ {( 𝑥 𝑖,ℓ , 𝑞 𝐴 𝑗,ℓ ), (𝑧 𝑗,𝑚 , 𝑞 𝐵 𝑖,𝑚 )} ,𝐻 2 (𝑚, ℓ ) = 1 ⇒ {( 𝑥 𝑖,ℓ , 𝑞 𝐵 𝑖,𝑚 ), (𝑧 𝑗,𝑚 , 𝑞 𝐴 𝑗,ℓ )} .
+
+The first two relations are copies of the 𝐻 1 Tanner graph at fixed 
+
+ℓ or 𝑚 , while the last two are copies of the 𝐻 2 Tanner graph at fixed 𝑖 or 𝑗 . Thus every syndrome-extraction edge fixes one product coordinate and varies only the other; no edge has diagonal support. Placing these index sets as the four quadrants in Fig. 1b maps the 
+
+𝐻 1 edges to horizontal 1D subproblems and the 𝐻 2 edges to vertical 1D subproblems. This exact edge partition, rather than a heuristic graph cut, is the structural guarantee that enables ONEX to solve each 1D subproblem independently and compose the row/column phases on the Cartesian AOD geometry. Related product-form code families, including general LP codes [26], share analogous factorization structure. While we focus on HGP codes for concreteness and simplicity, ONEX’s approach has broader applicability to these codes to address similar underlying product structure as a critical subroutine, as discussed in Section 6 with a representative case study. 
+
+## 3 Overview 
+
+This section provides an overview of ONEX: the architecture proto-col that enables layout synthesis on neutral-atom processors with a sequence of 1D execution plans, and the multi-phase optimization pipeline that produces optimized depth-optimal solutions. 
+
+## 3.1 Architecture Protocol 
+
+Motivated by the native compatibility of product-structure qLDPC codes and orthogonal neutral-atom control, we decompose each product factor into a 1D atom execution plan with sequences of 1D 
+
+> 3Adrian Liu, Wan-Hsuan Lin, Daniel Bochen Tan, Qian Xu, and Jason Cong
+
+# (b) (a) (c) 
+
+Gate Execution      
+
+> Rydberg gate idle qubit Rydberg gate
+> Rearr. 0 Rearr. 1 Rearr. TDuration
+> activate move
+> deactivate
+> Gate s 0
+> activate move
+> deactivate
+> Gate s L-1
+> activate move
+> deactivate
+> Row Column
+
+Physical Substrate  
+
+> dtrap dsite
+> Time
+> order preserved
+
+no cross 
+
+> order violated
+
+cross 
+
+> Time
+
+Figure 3: Architecture protocol of 1D physical execution. (a) 1D interaction model: gate pairs co-locate for Rydberg execution, while idle qubits remain isolated. (b) No-crossing constraint: simultaneous AOD movements must preserve atom order. (c) Execution timeline: rearrangement steps are interleaved with scheduled gate stages and composed across rows/columns for product-code execution. 
+
+rearrangements and gate operations along row or column dimen-sions. This dimensional simplification from 2D to 1D substantially alleviates the complexity of the constraint space. Combined with the O( 𝑛 2) reduction in problem size, this transformation enables the depth-optimal solution to each subproblem and defines our formal 1D execution protocol. Fig. 3a depicts the physical substrate and interaction model of our protocol. Qubits are trapped in a 1D array, where every pair of consecutive traps defines an interaction site. During the Rydberg blockade to achieve entanglement, any two qubits co-occupying the same site interact and perform a two-qubit gate. The central no-crossing constraint of neutral-atom hardware, as detailed in Section 2.1, is dimensionally simplified within our 1D protocol (Fig. 3b). In contrast to the complex 2D coordination in prior studies [21, 41, 46], 1D rearrangement only requires that co-moving atoms do not bypass one another. Formally, any two atoms moving during the same time step must maintain their relative spatial order. Fig. 3c (left) illustrates the execution timeline. Given an input gate schedule (an ordered sequence of parallel gate stages), ONEX produces a valid execution plan that specifies the atom rearrange-ments required for each time step interleaved with gate operations. After rearrangement steps bring the target qubits together, two-qubit gates are performed. The total execution duration is the sum of rearrangement and gate-operation durations, which is dominated by the former. These derived 1D physical execution plans naturally extend to 2D architectures for product QEC codes through orthogo-nal decomposition. Specifically, the protocol executes all row-wise 1D rearrangements in parallel for one factor and then proceeds to the column-wise phase for the other, as aforementioned in Fig. 1b and displayed in Fig. 3c (right). Significantly, the flexibility of our protocol in qubit placement re-veals a deeper architectural insight: rather than merely generating a rearrangement schedule, ONEX actively explores the mapping from the QEC code to the physical hardware. This formulation optimizes both the qubit-to-trap assignment and the resulting re-arrangement, addressing the physical mapping and the logical inter-action pattern as a single, unified planning problem. Such integrated co-optimization captures a vital advantage frequently neglected by prior works focused on isolated movement heuristics. 
+
+## 3.2 Compilation Pipeline 
+
+The duration of physical execution determines the clock rate of the neutral-atom processor. However, optimizing this duration in-volves a complex interplay of rearrangement depth, combinatorial topology, and physical displacement, making single-step optimiza-tion intractable. To address this challenge, ONEX transforms a gate schedule as input into a fully optimized physical execution through three successive phases, each with a distinct optimization focus 
+
+> 4Architecture and Compilation Co-Design for High-Rate Quantum Product Codes on Neutral Atom Arrays Compilation flow
+
+## P(1) P(2) P(3) S ~10s for n=225 HGP code ~50ms  hours budget  per iteration 
+
+~10hours for n=2,500  HGP code  on-demand solution retrival fast post-process 
+
+(b) Phase 2: Movement Compaction (MILP)       
+
+> Input: P(1)
+> 2a: Minimax displacement
+> 2b: Total distance
+> Compact
+> same depth
+> P(1) P(2)
+> Output: P(2) compact solution
+
+(a) Phase 1: Depth 
+
+Optimization (SMT)    
+
+> Input: schedule Output: P(1)
+> UNKNOWN
+
+SAT found! 
+
+> Phase A:
+> Explore
+
+T=L+1,L+2, ... 
+
+> UNSAT
+> Phase B:
+> Prove
+
+T*-1  
+
+> first optimal
+> QF_BV
+> time
+
+optimal depth T* 
+
+> depth-optimal solution
+
+(c) Phase 3: Iterative Refinement (SMT  MILP)    
+
+> Input: P(2) Output: P(3)
+
+SMT MILP    
+
+> Tigten displacement /
+> duration bounds Re-compact
+> & evaluate
+> (i) Local : per-layer displacement tightening (ii) Global : total duration tightening
+> time quality Progressive Improvement
+> local/global optima
+> Parallelism Overlay
+
+L1: Seed Portfolio L2: Bound Speculation 
+
+> Race multiple setting seeds per SMT call; fastest wins. Explore multiple depth/duration targets with adaptive steps Sliding-window scheduler to manage concurrency and prune on early results
+> L1 L2 compose hierarchically
+
+(d) 
+
+Figure 4: Overview of the ONEX compilation pipeline with runtime dataflow highlighted. (a) Depth optimization via SMT. (b) Movement compaction via MILP. (c) Iterative refinement with feedback loop. (d) Parallelism overlay. 
+
+and leveraging different algorithmic techniques. The input gate schedule is derived from edge coloring for the near-optimal cir-cuit depth [41]. To further accelerate compilation, these phases are augmented with two-level parallelism to ensure practical utility. Fig. 4 provides a complete view of this pipeline, with the three optimization phases in the main flow and the parallelism overlay below. Our multi-stage runtime profile highlights a progressive re-finement strategy, where more expensive but fine-grained optimiza-tions are executed in later phases, providing a robust foundation for anytime solving and on-demand solution retrieval. 
+
+Phase 1: Depth optimization via SMT. As the critical deter-minant of execution duration, we first optimize the depth 𝑇 of the protocol, defined as the total number of discrete time steps. To leverage the reasoning capabilities of modern SMT solvers, we formulate the physical execution planning as a quantifier-free bit-vector (QF_BV) satisfiability instance [9, 39] and search for the minimal depth 𝑇 ∗ via bidirectional deepening. As shown in the inset of Fig. 4a, this search proceeds in two directions: an upward exploration phase probes increasing depths for a rapid satisfying assignment, followed by a downward proof phase that verifies opti-mality by demonstrating the infeasibility of 𝑇 ∗ −1. As a result, Phase 1 yields a provably depth-optimal execution plan that favorably maximizes the number of parallel rearrangement steps, reducing execution duration by more than 80% relative to the baseline. See Appendix A.1 for formulation details of Phase 1. 
+
+Phase 2: Movement compaction via MILP. The depth-optimal solution maximizes parallelism but disregards physical distances. Phase 2 compacts trap-site assignments to minimize the maximum physical displacement per rearrangement step, and secondarily the total displacement across all qubits. Given that these objectives align perfectly with the strengths of mixed-integer linear programming (MILP) in minimax problems, we utilize an MILP formulation in Phase 2, as annotated in Fig. 4b, delivering solutions with 11% to 16% tighter total displacement than the Phase 1 output per compaction. Crucially, the MILP preserves the discovered topology, thereby maintaining the depth optimality while significantly decreasing the complexity itself. See Appendix A.2 for details of Phase 2. 
+
+Phase 3: Iterative refinement via feedback. Phase 1 and 2 operate in a feedforward manner: the SMT solver finds one depth-optimal combinatorial topology, and the MILP compresses it. How-ever, among the potentially vast space of depth-optimal topologies, some are inherently more amenable to compaction than others. Phase 3 closes this gap through the iterative feedback loop depicted in Fig. 4c, which alternately (a) tightens physical displacement or duration bounds in the SMT formulation, and (b) re-compacts the solution via MILP. This refinement yields an additional duration reduction of up to 27%. Specifically, two strategies are employed: (1) Local duration tightening identifies the current bottleneck re-arrangement step and reduces its maximum displacement bound, terminating once no further improvement is possible; (2) Global duration tightening encodes the total duration directly into the SMT formulation, and adaptively tightens this bound until convergence. See Appendix A.3 for more details of Phase 3. 
+
+Parallelism overlay. Coupled with the three-phase pipeline, ONEX exploits two levels of parallelism to reduce compilation wall-clock time, summarized in Fig. 4d. Seed portfolio parallelism (L1) races multiple random-seed variants of each SMT call to exploit the inherent runtime variance. Bound speculation parallelism (L2) explores multiple depth or duration targets simultaneously, man-aged via a sliding-window scheduler. This scheduler dynamically prunes candidates rendered irrelevant or infeasible by early results, thereby accelerating convergence. These schemes compose hier-archically, with each instance internally employing seed portfolio and bound speculation. Incremental solving is also leveraged to retain learned clauses across iterations for single-seed scenarios. See Appendix A.4 for details of compilation-time parallelism. 
+
+> 5Adrian Liu, Wan-Hsuan Lin, Daniel Bochen Tan, Qian Xu, and Jason Cong
+
+Table 1: High-rate HGP code demonstration. Comparison among Xu et al. [50], Enola [41], and ours. Clock Rate denotes the syndrome extraction frequency as 1/duration (Hz). For depth, Δ is baseline/ours; for clock rate, Δ is ours/baseline. 
+
+𝑛 Exec. Depth Duration (ms) Clock Rate (Hz) Xu et al. Δ Enola Δ Ours Xu et al. Enola Ours Xu et al. Δ Enola Δ Ours 
+
+225 96 8.0× 366 30 .5× 12 13.34 88.13 2.20 74.97 6.1× 11.35 40 .1× 455.23 
+
+625 108 6.8× 450 28 .1× 16 17.13 133.90 4.50 58.39 3.8× 7.47 29 .8× 222.46 
+
+1225 112 7.0× 568 35 .5× 16 20.20 200.12 5.18 49.52 3.9× 5.00 38 .6× 192.99 
+
+2500 126 7.0× 684 38 .0× 18 24.39 280.36 6.66 41.01 3.7× 3.57 42 .1× 150.10 
+
+## 4 Evaluation 4.1 Experimental Setup 
+
+ONEX is implemented in Python, with the core compilation pipeline built on top of two solver backends. The SMT-based phases employ the Z3 solver (v4.16.0) [9], invoked through its Python API. The MILP-based compaction phase is solved by HiGHS in SciPy (v1.14.1) [43]. For QEC evaluation, we simulate syndrome extraction circuits using Stim (v1.15.0) [12], and decode syndromes with the belief-propagation plus ordered-statistics decoding (BP-OSD) decoder [28, 29]. All experiments are conducted on a server equipped with an AMD EPYC 9654 Processor at 2.4 GHz with 192 cores, with maximum 5GB of RAM allocated for each SMT instance. 
+
+Benchmarks. We evaluate ONEX on two categories of bench-marks, with the same approach used in prior work [50]. For high-rate HGP code application , we adopt existing hypergraph product codes with favorable parameters, spanning a range of code sizes from J225 , 9, 4K to J2500 , 100 , 12 K. For 1D physical execution analysis ,we construct gate schedules with edge-coloring from randomly gen-erated classical (3, 4)-regular Tanner graphs, which define bipartite connectivity between variable and check nodes and are widely used for qLDPC code syndrome extraction patterns. 
+
+Baseline. We compare against the state-of-the-art heuristic by Xu et al. [50], which operates on arbitrary 1D rearrangements with O( log 𝑛 ) scaling depth. Additionally, considering our architec-tural model here as a monolithic layout, we also compare against Enola [41], the leading compiler designed delicately for the 2D monolithic layout synthesis with similar scheduling. Baselines and our work are evaluated under the same neutral atom array archi-tecture for a fair comparison, with 𝑁 interaction sites per row or column for an 𝑁 -qubit subproblem per dimension. 
+
+Physical Model and Parameters. The rearrangement dura-tion is obtained by the kinematic model introduced in Eq. (3). We adopt the physical parameters from [3, 21]: Rydberg entangling gate duration 𝑡 gate =0.36 μs, trap-transfer time 𝑡 transfer =15 μs, atom acceleration 𝛼 =2.75 × 10 −3 μm /μs 2, inter-site spacing 𝑑 site =12 μm, and intra-site trap spacing 𝑑 trap =2 μm. The total syndrome extrac-tion cycle duration is the primary compilation-quality metric and directly governs the clock rate and error budget for fault-tolerant operation. Specifically, following the approach in [50], we inherit the same circuit-level noise model and non-idling error channels, and model idling error accumulated during atom rearrangement as a linear approximation with gate error 𝑝 𝑔 :
+
+𝑝 𝑖 = 𝑡 rearrange /𝑇 𝑐 × 𝑝 𝑔 /𝑝 0,
+
+where 𝑇 𝑐 = 10 s is the atom coherence time and 𝑝 0 = 0.005 is the current CZ gate infidelity demonstrated in [10]. 
+
+## 4.2 Main Results 
+
+4.2.1 High-Rate HGP Code Application. We apply ONEX to com-pile the full syndrome extraction cycle of HGP codes mapped onto neutral atom arrays, ranging from J225 , 9, 4K to J2500 , 100 , 12 K.Table 1 compares the key performance metrics for the high-rate HGP code demonstrations. Compared with Enola’s general 2D com-pilation, ONEX reduces execution depth by 28.1 × to 38.0 × across all code sizes. Even under dimensional decomposition, ONEX still achieves a 6.8 × to 8.0 × reduction over the asymptotic 1D construc-tive algorithm of Xu et al., bringing the syndrome extraction cycle down to single-digit milliseconds. The absolute duration gap also widens with code size, from 11.1 ms at 𝑛 =225 to 17.7 ms at 𝑛 =2,500, reflecting the growing advantage of ONEX’s near-constant-depth solutions over the baseline’s logarithmically scaling depth. Critically, the reduction in cycle duration directly translates to higher clock rates for the quantum processors, enabling a 3.7 × to 6.1 × improvement over the routing-centric algorithm of Xu et al. and 29.8 × to 42.1 × over Enola’s general solutions. These results con-firm that co-optimizing atom rearrangement with global considera-tion and code property drives FTQC performance on neutral-atom architectures substantially, as rearrangements dominate over 99% of the syndrome extraction duration here. This product-aware co-optimization naturally generalizes beyond HGP codes, as illustrated by the representative case study later in Section 6. In terms of scaling, by decomposing row and column sub-problems, ONEX ensures that computational costs depend only on the 1D problem size rather than the total qubit count. This decomposi-tion enables the efficient compilation of systems exceeding 2,500 data qubits within hours (Section 4.4), a runtime well within the acceptable range for one-time offline QEC processes. 
+
+4.2.2 1D Physical Execution Analysis. In addition to the specific HGP code application, we also evaluate ONEX on the 1D physical execution subroutine to analyze its performance across various scales and topologies. Table 2 summarizes the comparison among the Xu et al. baseline [50], the leading 2D monolithic compiler Enola [41], and ONEX across all five benchmark sizes. 
+
+Execution depth. Minimizing the number of rearrangement steps 𝑇 is the essential objective in our compilation. Fewer steps 
+
+> 6Architecture and Compilation Co-Design for High-Rate Quantum Product Codes on Neutral Atom Arrays
+
+Table 2: 1D physical execution quality comparison among Xu et al. [50], Enola [41], and ours. Δ denotes baseline/ours. Size Exec. Depth (𝑇 ) Exec. Duration (ms) Xu et al. Δ Enola Δ Ours Xu et al. Δ Enola Δ Ours 
+
+14 30.4 7.6× 14.4 3.6× 4.0 3.74 8.0× 2.05 4.4× 0.47 
+
+21 37.0 9.0× 18.2 4.4× 4.1 4.98 8.9× 3.06 5.5× 0.56 
+
+28 37.0 8.6× 21.9 5.1× 4.3 5.57 8.3× 4.34 6.5× 0.67 
+
+35 41.0 8.7× 24.5 5.2× 4.7 6.37 8.6× 5.39 7.3× 0.74 
+
+42 42.5 8.5× 29.2 5.8× 5.0 7.06 8.4× 7.31 8.7× 0.84 
+
+Δ Avg. — 8.5× — 4.8× — — 8.4× — 6.5× —800 1000 Baseline Enola Ours                                  
+
+> 0100 200 300 400 500
+> Movement Distance ( μm)
+> 050 100 150 200
+> # Movements  N=14 N=21 N=28 N=35 N=42
+> 0100 200 300 400 500
+> Movement Distance ( μm) N=14 N=21 N=28 N=35 N=42
+> 0100 200 300 400 500
+> Movement Distance ( μm) N=14 N=21 N=28 N=35 N=42
+> 010 20 30 40
+> Rearrangement Step
+> 0100 200 300 400 500
+> Movement Distance ( μm)
+> 0.0 0.5 1.0 Density
+> Max dist (41 steps)
+> 0510 15 20 25
+> Rearrangement Step
+> 0.0 0.5 1.0 Density
+> Max dist (30 steps)
+> 0123
+> Rearrangement Step
+> 0.0 0.5 1.0 Density
+> Max dist (4 steps)
+
+Figure 5: Movement profile for the Xu et al. baseline, Enola, and ours on 1D execution benchmarks. Top row: distribution of individual atom displacement distances across all problem sizes. Bottom row: per-step movement profile for a representative 
+
+𝑁 =42 instance, where color intensity indicates the density of movements at a given distance and the black envelope traces the maximum displacement per step. 
+
+imply higher parallelism, enabling more simultaneous atom move-ments and thereby reducing the overall execution duration. Con-versely, more steps increase atom transfers, resulting in higher atom loss error accumulation and greater transfer time overhead. The Xu et al. constructive algorithm produces 30 to 43 steps, growing as O( log 𝑁 ) with problem size. Enola achieves 14 to 29 steps via separated placement and routing compilation. ONEX achieves a near-constant depth of 4–5 steps across all tested sizes, representing an 86.8–88.9% reduction over Xu et al. This near-constant depth is produced by ONEX’s SMT formulation with global consideration, which discovers maximally parallel topologies that fully unleash the potential for simultaneous movements. Notably, the 1D subroutine shows an even wider performance margin than the full HGP application, where multi-round syndrome extraction imposes strict cyclic scheduling constraints that we address with a lightweight solver for returning to the initial placement. 
+
+Execution duration. As the primary performance metric, ex-ecution duration determines the interval between operations and directly dictates the clock rate of the neutral-atom system. Across all sizes, ONEX achieves an 8.0 × to 8.9 × speedup over the Xu et al. baseline and a 4.4 × to 8.7 × speedup over Enola. This reduction translates directly into higher clock rates, addressing the architec-tural bottleneck and improving execution efficiency. Moreover, the reduction in duration mitigates both idling noise and atom loss, thereby enhancing overall system fidelity. This significant duration reduction stems from both depth reduc-tion and compaction of movement distances. Fig. 5 illustrates this via displacement distributions (top row) and per-step movement profiles (bottom row) for a representative instance. The top row reveals a clear contrast in how each approach dis-tributes displacement. The Xu et al. baseline is characterized by a high volume of short-distance movements below 100 𝜇 m, and Enola    
+
+> 7Adrian Liu, Wan-Hsuan Lin, Daniel Bochen Tan, Qian Xu, and Jason Cong 010 20 30 40
+> Total Movement Distance (mm)
+> N/A N/A
+> 4.46 9.77 18.9 28.3 41.9
+> 1.41 1.22 0.980.95
+> N=14
+> +13% +19% +3%
+> 3.00 2.53 2.112.07
+> N=21
+> +16% +17% +2%
+> 5.49 4.74 3.633.63
+> N=28
+> +14% +23%
+> 8.80 7.79 4.75
+> N=35
+> +12% +39%
+> 12.6 11.2 6.69
+> N=42
+> +11% +40%
+> -68% -69% -71% -69% -70%
+
+# (a) Total Movement Distance 
+
+## N=14 N=21 N=28 N=35 N=42  
+
+> 012345678
+> Total Duration (ms)
+> N/A N/A
+> 3.74 4.98 5.57 6.37 7.06
+> 0.58 0.53 0.480.47
+> N=14
+> +8% +9% +3%
+> 0.71 0.64 0.570.56
+> N=21
+> +9% +11% +2%
+> 0.87 0.80 0.680.67
+> N=28
+> +8% +14% +2%
+> 1.05 0.98 0.74
+> N=35
+> +7% +24%
+> 1.22 1.15 0.84
+> N=42
+> +6% +27%
+
+Baseline Phase 1: Depth Opt. Phase 2: Compact Phase 3.1: Local Phase 3.2: Global     
+
+> -85% -86% -84% -84% -83%
+
+# (b) Total Execution Duration 
+
+Figure 6: Pipeline stage contribution: (a) total movement distance, and (b) execution duration. Main bars compare the baseline with each pipeline stage across five problem sizes. Inset panels zoom into per-stage improvement. 
+
+reduces the number of movements but suffers from a heavy tail be-yond 400 𝜇 m. In contrast, ONEX maintains a compact distribution that remains tightly concentrated below 150 𝜇 m with no heavy tail. The bottom row exposes why depth reduction alone can be insufficient. Although Enola reduces depth from 41 to 30 steps, its maximum per-step displacement jumps from 252 𝜇 m to 482 𝜇 m and its critical-path displacement indicates these long-range shuttles are not well organized to overlap, offsetting the depth savings entirely. By comparison, compressing the schedule to 4 steps with a controlled maximum displacement, ONEX achieves a total duration 7.8 × better than Xu et al. and 8.8 × better than Enola, demonstrating the effectiveness of our joint depth-displacement optimization. 
+
+## 4.3 Ablation Study 
+
+4.3.1 Pipeline Stage Contribution. To isolate the contribution of each compilation phase, we evaluate the intermediate outputs at every stage of the ONEX pipeline: Phase 1 (SMT depth optimization), Phase 2 (MILP movement compaction), Phase 3.1 (local duration tightening), and Phase 3.2 (global duration tightening). 
+
+Displacement compaction. Fig. 6a presents the total move-ment distance after each pipeline stage. Phase 1 already achieves a substantial reduction over the Xu et al. baseline (68–71%) by virtue of the depth-optimal topology, which eliminates unnecessary long-range shuttles inherent in the baseline’s recursive strategy. Phase 2 contributes an additional 11–16% reduction by re-assigning posi-tions within the fixed topology to minimize per-cycle displacement. Phase 3.1 provides a further 17–40% improvement, particularly at larger sizes where more transitions have room for tightening. The inset panels of Fig. 6a zoom into the pipeline stages for each problem size, annotating the incremental percentage reduction at each step. A clear trend emerges: the MILP compaction and local feedback are complementary; the former optimizes within a fixed topology, while the latter steers the SMT solver toward topologies that are inherently more compact. 
+
+Duration progression. Fig. 6b shows the total physical exe-cution duration following the same decomposition. The qualita-tive pattern mirrors the observed reduction in movement distance, though the square-root model modulates the specific impact on du-ration. Given that the duration is sensitive to the longest movement in each step, the compatible improvement to total distance reduc-tion indicates that ONEX successfully optimizes the bottleneck movement rather than merely improving average case metrics. Experimental results demonstrate that the global search in Phase 3.2 contributes only a marginal reduction in both distance and duration. This outcome validates the effectiveness of the preceding local search, which maintains a narrow optimality gap relative to the global optimum. Furthermore, the limited gains with high runtime overhead highlight the inherent challenges of direct global           
+
+> 8Architecture and Compilation Co-Design for High-Rate Quantum Product Codes on Neutral Atom Arrays n=225 n=625 n=1225 n=2500
+> 025 50 75 100 125 150
+> Rearrangement Depth
+> 96 108 112 126 28 30 32 32 12 16 16 18
+
+## (a) Rearrangement Depth        
+
+> n=225 n=625 n=1225 n=2500
+> 0510 15 20 25
+> Execution Duration (ms)
+> 13.3 17.1 20.2 24.4 6.33 7.97 10.5 11.8 2.20 4.50 5.18 6.66
+
+## (b) Execution Duration 
+
+Xu et al. Original Solver-Enhanced ONEX 
+
+Figure 7: Formulation contribution breakdown: (a) rearrangement depth, and (b) execution duration. Bars compare Xu et al.’s constructive baseline, a solver-enhanced baseline w/o global formulation, and ONEX across four HGP codes. N=14 
+
+n=100 
+
+N=21 
+
+n=225 
+
+N=28 
+
+n=400 
+
+N=35 
+
+n=625 
+
+N=42 
+
+n=900 
+
+N=49 
+
+n=1225 
+
+N=56 
+
+n=1600 
+
+N=63 
+
+n=2025 
+
+N=70 
+
+n=2500 
+
+N=77 
+
+n=3025 
+
+N=84 
+
+n=3600 
+
+N=91 
+
+n=4225 0.1s 1s 10s 1 min 10 min 1 hr 10 hr 24 hr 
+
+0.3s 0.2s 10s 2s 1.9m 7s 15m 1.4m 9m 46m 38m 1.7h 13h 2.6h 12h 10.0h 18h 
+
+## T = 4 
+
+## T = 5 
+
+## T = 6 
+
+## T = 7 
+
+## T = 8 
+
+Figure 8: Phase 1 solving time versus problem size 𝑁 (lower label: corresponding HGP data qubit counts 𝑛 ); bars within a group represent different execution depths 𝑇 . Dashed lines mark reference time budgets. 
+
+optimization at larger scales, thereby confirming that our efficient feedforward approach is practical and crucial. 
+
+4.3.2 Formulation Breakdown. Beyond the compilation pipeline itself, we further isolate the contribution of ONEX’s formulation under the same dimensional decomposition. To this end, we construct a solver-enhanced baseline on top of Xu et al. by replacing its constructive algorithm with the SMT and MILP solving, while retaining its local, routing-centric formulation. In contrast, ONEX treats compilation as a global optimization problem: it jointly explores qubit mapping, placement, and rearrangement to optimize the complete execution plan. Fig. 7 presents this formulation-level breakdown in solution quality. The solver-enhanced baseline improves over the original baseline by 3.43 ×–3.94 × in depth and 1.93 ×–2.15 × in duration, demonstrating the benefit of locally optimal solving alone. ONEX further improves over this enhanced baseline by 1.78 ×–2.33 × in depth and 1.77 ×–2.88 × in duration. This multiplicative breakdown shows that both the solver-based optimization and the global for-mulation make substantial, complementary contributions to the final solution quality. 
+
+## 4.4 Scalability Analysis 
+
+We analyze the scalability based on two experiments: compilation time as a function of problem size and the convergence behavior of solution quality during the feedback phases. Since MILP-based compaction consistently finishes in under 100 ms, our scalability analysis focuses on Phase 1 solving time and the feedback process. 
+
+Compilation time versus problem size. Fig. 8 reports the Phase 1 solving time to obtain the feasible solution at different depths across 1D problem sizes from 𝑁 =14 to 𝑁 =91, corresponding to HGP codes with 100 to 4,225 qubits. As expected for an NP-hard combinatorial formulation, compilation time grows exponentially with problem size. The practical compilation boundary lies near 
+
+𝑁 =70 (HGP 𝑛 =2,500), where depth-𝑇 =6 solutions require a mean of 12.8 hours; at 𝑁 =91 (HGP 𝑛 =4,225), non-speculative compilation averages 17.6 hours for 𝑇 =8. However, given that QEC compilation is a one-time offline task, these time scales are acceptable to achieve superior solution quality. In practical applications, the anytime solving property and speculation parallelism of ONEX also temper this exponential growth, facilitating a fast first-solution turnaround. 
+
+Solution quality versus compilation time. Fig. 9 shows the physical execution duration as a function of wall-clock time during      
+
+> 9Adrian Liu, Wan-Hsuan Lin, Daniel Bochen Tan, Qian Xu, and Jason Cong 0.0 2.5 5.0 7.5 10.0 12.5
+
+## Wall-clock Time (hours) 
+
+> 560 640 720 800
+> Duration ( μs)
+
+90% Impr. Budget: 0.3h 
+
+> Local SAT Local UNK Global SAT Global UNK
+
+# N=21       
+
+> 0510 15 20 25 30
+
+## Wall-clock Time (hours) 
+
+> 600 700 800 900 1000
+
+90% Impr. Budget: 0.9h 
+
+> Local SAT Local UNK Global SAT Global UNK
+
+# N=28       
+
+> 0510 15 20 25 30
+
+## Wall-clock Time (hours) 
+
+> 750 900 1050
+> Duration ( μs)
+
+90% Impr. Budget: 4.1h 
+
+> Local SAT Local UNK
+
+# N=35    
+
+> 010 20 30
+
+## Wall-clock Time (hours) 
+
+> 800 900 1000 1100 1200
+
+90% Impr. Budget: 10.8h 
+
+> Local SAT Local UNK
+
+# N=42 
+
+Figure 9: Solution quality evolution during the feedback phases with solver outcome decomposition across four problem sizes (𝑁 =21 to 42 ). Segment color encodes the solver outcome (blue: sat, red: unsat/timeout); line style encodes the search phase (solid: local, dashed: global). The green shaded region marks the per-size 90% improvement budget. 
+
+the iterative feedback phases across four benchmark sizes, decom-posing each iteration segment by its solver outcome. The convergence profiles exhibit a characteristic diminishing-returns shape. Local search captures the majority of improvement early with a sharp initial drop in the feedback process. Subsequent iterations encounter increasingly tight bounds that resolve as unsat or timeout, yielding progressively smaller gains. Moreover, global search only provides minor additional benefit primarily at smaller sizes, where the solver completes enough iterations within its time budget to explore the bound space effectively. This convergence behavior further justifies the time management of the anytime strategy, which helps to capture the most significant improvements early while avoiding the long tail of the optimization plateau. Specifically, we calculate the 90% improvement budgets (green shaded region), offering a practical balance between solution quality and compilation time. These budgets achieve 90% of the total gain with only a moderate fraction of the time, spanning from 0.3 hours at 𝑁 =21 to 10.8 hours at 𝑁 =42. 
+
+## 5 Architecture Adaptation: Zoned Layouts 
+
+Beyond the monolithic architecture used in the main evaluation, ONEX also provides a natural path toward zoned architectures [3], aligning with the current trajectory of neutral-atom hardware. Fig. 10a illustrates the typical zoned architecture, featuring dis-tinct regions for entangling gates and qubit storage. The Rydberg laser is restricted to the entanglement zone to activate qubits in the same interaction site for gate operations, while qubits in the storage zone remain densely packed to maximize capacity. Fig. 10b depicts the hardware layouts for different compilation strategies in our exploration. With the aligned physical substrate, ONEX’s execution plans can be directly applied to the entanglement zone without the need for the storage zone, so we preserve the original ONEX notation for this strategy. To adapt ONEX to the full zoned architecture and leverage the benefits of the storage zone, we also implement a zoned execution strategy, ONEX-Z, which maps the rearrangements to the dense storage zone and incorporates additional loading and unloading steps to shuttle qubits between the storage and entanglement zones for gate execution. As baselines, we consider existing state-of-the-art compilers for zoned architectures, PowerMove [30] (PM) and ZAC [21], which rely on heuristic methods to generate valid circuit execution plans by rearranging qubits between zones for gate execution. In addition to their original general 2D compilation flows, we apply the same decomposition strategy used by ONEX to these baselines, denoted as PM-D and ZAC-D, to isolate the impact of dimensional simplifi-cation. Under this decomposition, we propose a new diagonal-fold zoned layout for natively mapping their solutions, where each type 
+
+> 10 Architecture and Compilation Co-Design for High-Rate Quantum Product Codes on Neutral Atom Arrays
+
+Entanglement Zone Storage Zone Storage Zone Entanglement Zone 
+
+# (a) (b) 
+
+Entanglement  Zone Storage  Zone 
+
+> dsite
+> dstorage
+> Rydberg Laser interaction site
+
+ONEX ONEX-Z PM/ZAC PM-D ZAC-D 
+
+Diagonal-Fold Zoned Layout 
+
+Inter-Zone Shuttling 
+
+Figure 10: Zoned architecture for neutral-atom quantum computing. (a) Distinct regions for entanglement and storage. (b) Layouts for different compilation strategies. 10 100 1000 10000              
+
+> Rearrangement Depth
+> 68810 22 24 24 26 42 54 68 80 50 66 82 94 757 2906 6127 15130 978 1996 3361 5793
+
+## (a) Rearrangement Depth 
+
+n=225 n=625 n=1225 n=2500          
+
+> 110 100 1000
+> Execution Duration (ms)
+> 1.10 2.45 2.99 3.67 6.29 8.78 10.4 12.5 14.0 22.8 33.7 46.9 43.6 90.8 183 263 189 773 1753 4741 467 1211 2403 4957
+
+## (b) Execution Duration 
+
+ONEX ONEX-Z ZAC-D PM-D ZAC PM 
+
+Figure 11: Zoned-architecture adaptation: (a) rearrangement depth, and (b) execution duration. Both y-axes use logarithmic scale; dashed lines mark decade reference levels. 
+
+of zone is placed along the diagonal to provide symmetric access to both directions and directly support the resulting 1D solutions. Fig. 11 compares the aforementioned zoned strategies across problem sizes. Since PM and ZAC do not natively support multi-round rearrangement, results are collected on single-round syn-drome extraction circuits. Compared with the general 2D zoned compilation flows of PM and ZAC, ONEX achieves substantial speedups, reducing duration by over 1,000 × when the problem size reaches 𝑛 =2,500. By leveraging the decomposition strategy together with the diagonal-fold layout, PM-D and ZAC-D also achieve sig-nificant improvements over their original versions, confirming the effectiveness of dimensional simplification and delicate layout de-sign in zoned scenarios. Notably, ONEX still outperforms PM-D and ZAC-D by 37.1 ×–71.5 × and 9.3 ×–12.8 ×, respectively, demon-strating that ONEX’s entanglement-zone-only execution can still produce superior solutions. 
+
+> 11 Adrian Liu, Wan-Hsuan Lin, Daniel Bochen Tan, Qian Xu, and Jason Cong
+
+# (a)    
+
+> Data Lift Z Check Lift X Check Lift Data Z Check X Check
+
+# (b) 
+
+> Gate Execution
+> Time
+
+shift 
+
+> compatible in-bounds shift compatible overflow shift
+
+# (c) 
+
+## interaction site 
+
+> align in the same row
+
+# (d) 
+
+> to-diagnoal movements from-diagnoal movements
+
+Directional Transfer 
+
+Figure 12: LP-code lifting and product-aligned execution. (a) An inter-lift interaction graph connects lifted data, 𝑋 -check, and 
+
+𝑍 -check qubits. (b) Each polynomial entry 𝑥 𝑘 induces a cyclic shift among ℓ lifted copies. (c) Lifted data and check qubits are aligned at interaction sites for parallel gate execution. (d) Diagonal parking enables directional transfer between row- and column-oriented layouts. 
+
+The comparison between ONEX and ONEX-Z provides direct ar-chitectural insight into the trade-off between intra-zone rearrange-ment and inter-zone shuttling. ONEX-Z leverages high-density storage zones for intra-zone rearrangement, reducing movement distance by more than 50% compared with ONEX. However, the additional loading and unloading steps required to shuttle qubits between zones introduce significant overhead, increasing the total duration by 3.4 ×–5.7 × over ONEX. This overhead stems from two intrinsic factors. First, syndrome extraction circuits here have a high density of gate operations, which require frequent shuttling between zones, especially under our depth-optimal solutions. Sec-ond, the decomposition induces a tile-based placement to maximize parallelism, limiting the opportunity to group qubits near zone interfaces and further amplifying the shuttling cost. We expect workloads with lower gate density to benefit more from compact intra-zone rearrangement, even after accounting for inter-zone shuttling overhead. The fidelity impact of zoned execution is be-yond the scope of this work and is left for future study. 
+
+## 6 Code Generalization: Lifted Product 
+
+To further demonstrate the generality and extensibility of ONEX beyond HGP codes, we deliver an example solution for a specific LP code. The example uses the J2610 , 744 , 𝑑 ≤ 16 K LP code (2) from [6] with lift size 𝑙 = 45, which has been proposed as a promising high-rate memory code to enable practical applications for Shor’s algorithm. To the best of our knowledge, no concrete execution strategy for this code has been presented before. 
+
+𝐴 = ©«
+
+𝑥 29 𝑥 21 𝑥 31 𝑥 15 𝑥 37 𝑥 25 𝑥 27 
+
+𝑥 13 𝑥 25 𝑥 19 𝑥 26 𝑥 11 𝑥 18 𝑥 29 
+
+𝑥 31 𝑥 2 𝑥 27 𝑥 32 𝑥 41 𝑥 41 𝑥 18 
+
+ª®¬
+
+(2) Briefly, our execution framework for general LP codes comprises four phases, illustrated through the above example in Fig. 12: (a) Inter-lift rearrangement. Starting from the seed base matrix, we treat each data or check lift as a scheduling unit and obtain a schedule through edge coloring. ONEX is then applied to these units to determine the meta-level movements, which constitute the inter-lift rearrangement of the LP code. (b) Intra-lift rearrangement. Within each active data lift, we use the corresponding polynomial elements of the base matrix to perform heuristic two-dimensional cyclic movements, thereby generating an intra-lift rearrangement. For the example LP code (2), the polynomial elements are just monomials and can therefore be mapped directly to one-dimensional shifts. (c) Gate execution. Following the inter- and intra-lift rearrange-ments, all data and check qubits are aligned at their designated positions for gate execution. Gates within compatible groups can then be executed in parallel, as in HGP demonstrations. (d) Directional transfer and phase repetition. After completing execution along one dimension, we transfer the layout to the other dimension and repeat the preceding three phases. In the example considered here, we use a two-layer transfer scheme with diagonal parking to adapt the full layout between the horizontal and vertical dimensions. This framework reflects the theoretical construction of lifted prod-uct by addressing the inter- and intra-lift structure hierarchically. Together with the decomposition across product dimensions, it enables a feasible execution plan for general LP codes. Building on the above framework, we obtain a concrete execu-tion pipeline for the J2610 , 744 , 𝑑 ≤ 16 K LP code, with performance estimates summarized in Table 3. Unlike dense HGP syndrome 
+
+> 12 Architecture and Compilation Co-Design for High-Rate Quantum Product Codes on Neutral Atom Arrays
+
+Table 3: Estimated execution-time breakdown for the 
+
+J2610 , 744 , 𝑑 ≤ 16 K LP code. All values are in milliseconds. Method Total Inter-lift Intra-lift Gate Transfer Shuttle             
+
+> ONEX 23.731 10.573 11.280 0.005 1.873 0
+> ONEX-Z 21.405 7.560 6.060 0.005 0.996 6.783
+
+extraction, the repeated intra-lift rearrangements in this LP-code example lower the effective gate-execution density. Consequently, zoned execution reduces the intra-lift and inter-lift rearrangement times by approximately 46% and 28%, respectively. Even after ac-counting for the additional inter-zone shuttling overhead, ONEX-Z reduces the total cycle duration by approximately 10%. Notably, ONEX remains a critical execution backbone of this framework by providing the core lift-level execution plan. Owing to the hierarchical construction of LP codes, each isolated lift-level subproblem is substantially smaller than that of an HGP code with the same size. This reduced problem size further alleviates scaling pressure on ONEX while enabling high-quality execution plans. Moreover, this exploration demonstrates that the constituent units of ONEX can themselves represent intricate two-dimensional pat-terns rather than just single qubits. This perspective also creates opportunities to integrate more sophisticated intra-lift designs, which we discuss further in Section 7. 
+
+## 7 Discussion 
+
+Integration with Diverse Code Structures. ONEX is designed to exploit the outer product structure shared by a wide range of qLDPC codes. Its product-structure-oriented optimization is there-fore orthogonal to techniques that leverage inner code structure, such as cyclic symmetry or group-algebraic regularity [44, 45, 47]. These methods operate at different levels of the code hierarchy and do not conflict in their optimization targets. A natural direction for future work is therefore to compose product-structure decomposi-tion with inner-structure-aware compilation. Such a compositional approach would extend the applicability to broader code families while preserving the benefits of each constituent technique. A favorable inner-code structure is characterized by both a dense layout and efficient cyclic rearrangements. Taking the LP code in Section 6 as an example, qubits within each lift interact along only one direction and therefore map naturally to a linear layout rather than a compact two-dimensional patch. This mapping increases inner-lift displacement and incurs substantial duration overhead. In contrast, codes admitting dense patches can use the available space more efficiently. Additionally, shift-based cyclic rearrangements for a linear layout can be implemented using two opposing parallel movements, whereas more complex two-dimensional cycles may require additional heuristics or AOD resources to preserve efficient rearrangements among compatible groups. 
+
+Generalization to Fault-Tolerant Logic. Fault-tolerant quan-tum computation requires not only memory but also logic opera-tions, such as lattice surgery and transversal gates, to manipulate logical information. Many of these operations, particularly surgery protocols for some product code families, retain the underlying product structure in their gate interaction patterns [8, 48, 51]. More-over, logic layouts are typically less regular than memory layouts, lacking the common cyclic structure that admits trivial parallelism in syndrome extraction. This irregularity increases the gap between naive and optimized execution, presenting precisely the scenario where ONEX’s solver-based approach provides the greatest lever-age. Extending ONEX to compile logic operations would therefore enable a more complete characterization of the fault-tolerant com-pilation stack and demonstrate the framework’s utility across the full spectrum of FTQC architectural primitives. 
+
+Versatility for Near-Term Architectures. While developed for fault-tolerant QEC, our protocol generates physical execution plans directly from gate scheduling, making it broadly applicable to gen-eral quantum circuit compilation. Its efficiency in managing dozens of qubits makes it particularly well-suited for the smaller-scale cir-cuits of noisy intermediate-scale quantum (NISQ) devices. Moreover, since many quantum algorithms require high-count measurement shots, our 1D protocol enables parallel execution by duplicating circuits across multiple rows. This native support for compatible physical execution significantly reduces total hardware runtime, a critical advantage for practical utility of NISQ applications. 
+
+## 8 Conclusion 
+
+Scaling fault-tolerant quantum computing with high-rate qLDPC codes on neutral atom arrays requires efficient compilation of phys-ical execution plans. In this work, we proposed ONEX, a structure-aware compilation framework for qLDPC codes with dimension-reduction properties. By exploiting the product structure and de-composing the 2D physical planning into orthogonal 1D subprob-lems, ONEX enables optimized depth-optimal solutions through a practical multi-stage compilation pipeline. Across HGP mem-ory benchmarks with up to 2,500 data qubits, ONEX substantially reduces syndrome extraction cycle duration, yielding clock rates 3.7 ×–6.1 × and 29.8 ×–42.1 × higher than those of the existing 1D constructive algorithm and general 2D compiler, respectively. More-over, its adaptation to zoned layouts reveals the associated architec-tural trade-offs. Finally, a representative case study further extends the framework to the broader LP code family. 
+
+## Acknowledgments 
+
+This work is supported by the U.S. National Science Foundation under Award No. 2533041 for NQVL:QSTD Phase II—ORAQL: Open-Stack Rydberg Atom Quantum Computing Laboratory, a Phase II continuation of DLPQC (Award No. 2410716), and under Award No. 2016245 for the Challenge Institute for Quantum Computation. 
+
+> 13 Adrian Liu, Wan-Hsuan Lin, Daniel Bochen Tan, Qian Xu, and Jason Cong
+
+## A Algorithm Details 
+
+This section presents the formal problem formulation and the three successive optimization phases of ONEX’s compilation pipeline. We describe the SMT encoding for depth-optimal search (Section A.1), the MILP formulation for movement compaction (Section A.2), the iterative feedback strategies for duration refinement (Section A.3), and the multi-level parallelism overlay (Section A.4). 
+
+## A.1 Depth-Optimal SMT Encoding 
+
+A.1.1 Problem Statement. Given 𝑁 qubits Q on 𝑀 traps across 
+
+𝑇 discrete time steps, and a gate schedule S = [𝑠 0, . . . , 𝑠 𝐿 −1] of 𝐿 
+
+stages, where each stage 𝑠 𝑘 is a set of qubit pairs {( 𝑢, 𝑣 )} to be executed as simultaneous 2-qubit gates, the compilation should determine: 
+
+• Qubit placements 𝜋 𝑡 𝑞 ∈ { 0, 1, . . . , 𝑀 − 1}: the trap-site index of qubit 𝑞 at time step 𝑡 . Each trap index can also be decomposed as 𝜋 𝑡 𝑞 = 2 𝜎 𝑡 𝑞 + ˆℓ𝑡 𝑞 , where 𝜎 𝑡 𝑞 = ⌊𝜋 𝑡 𝑞 /2⌋ is the interaction site index and ˆ ℓ𝑡 𝑞 = 𝜋 𝑡 𝑞 mod 2 is the intra-site offset. 
+
+• Execution stage times t = [𝑡 0, 𝑡 1, . . . , 𝑡 𝐿 −1]: the time step at which each gate stage executes. Any valid rearrangement must satisfy the following constraints. (1) Injectivity : two qubits cannot occupy the same trap at any time step: 
+
+∀ 𝑡, ∀ 𝑞 1 ≠ 𝑞 2 ∈ Q : 𝜋 𝑡 𝑞 1 ≠ 𝜋 𝑡 𝑞 2 .
+
+(2) Scheduling precedence : gate stages must execute in the pre-scribed order of the given schedule S:
+
+∀ 𝑘 ∈ { 0, . . . , 𝐿 − 2} : 𝑡 𝑘 < 𝑡 𝑘 +1.
+
+(3) Gate execution : paired qubits must share an interaction site at the scheduled time for entangling gates: 
+
+∀ 𝑡, ∀ 𝑘, ∀ ( 𝑢, 𝑣 ) ∈ 𝑠 𝑘 : (𝑡 𝑘 = 𝑡 ) =⇒ (𝜎 𝑡 𝑢 = 𝜎 𝑡 𝑣 ).
+
+(4) Site exclusivity : idle qubits must occupy distinct interaction sites at gate stages to prevent unintended interaction, with 
+
+I𝑘 = Q \ Ð(𝑢,𝑣 ) ∈ 𝑠 𝑘 {𝑢, 𝑣 } as the set of idle qubits at stage 𝑠 𝑘 :
+
+∀ 𝑡, ∀ 𝑘, ∀ 𝑖 ≠ 𝑗 ∈ I 𝑘 : (𝑡 𝑘 = 𝑡 ) =⇒ (𝜎 𝑡 𝑖 ≠ 𝜎 𝑡 𝑗 ).
+
+(5) Ordering preservation : co-moving qubits cannot cross each other during parallel transport, with 𝑚 𝑡 𝑞 = 1[𝜋 𝑡 𝑞 ≠ 𝜋 𝑡 +1 
+
+> 𝑞
+
+] denoting the movement of 𝑞 from 𝑡 to 𝑡 + 1: 
+
+∀ 𝑡, ∀ 𝑞 𝑖 , 𝑞 𝑗 :
+
+
+
+𝑚 𝑡 𝑞 𝑖 ∧ 𝑚 𝑡 𝑞 𝑗 
+
+
+
+=⇒
+
+
+
+𝜋 𝑡 𝑞 𝑖 > 𝜋 𝑡 𝑞 𝑗 ⇐⇒ 𝜋 𝑡 +1 
+
+> 𝑞 𝑖
+
+> 𝜋 𝑡 +1
+
+> 𝑞 𝑗
+
+
+
+.
+
+We encode the full constraint sets as a QF_BV satisfiability prob-lem to exploit the optimized bit-blasting decision procedures in modern SMT solvers. 
+
+A.1.2 Bidirectional Deepening. Rather than solving a complex one-shot problem, we perform deepening over the depth parameter 
+
+𝑇 , exploiting the monotonic structure of the problem: if no valid rearrangement exists at depth 𝑇 , then no solution exists for any 
+
+𝑇 ′ < 𝑇 . We perform a bidirectional search, starting with a quick upward search to find a feasible solution, and then an iterative downward search to obtain the optimal depth. Specifically, there is a lower bound 𝑇 lb = 𝐿 for 𝐿 stages, since each gate stage requires at least one dedicated time step by scheduling constraint. In practice, we start from 𝑇 = 𝑇 lb +𝑐 for some small 𝑐 (e.g., 
+
+𝑐 = 2) and keep incrementing the depth with a quick timeout until delivering a feasible solution. Afterwards, we deepen downwards with a greater time budget to find either a better solution or to confirm optimality. This deepening will terminate when the solver returns unsatisfiable, or reaches the theoretical lower bound 𝑇 lb . In any case, a depth-optimal placement P(1) and stage times t(1) with 
+
+𝑇 ∗ time steps will be obtained at the end of this phase. 
+
+## A.2 Movement Compaction via MILP 
+
+The depth-optimal solution from phase 1 may not be duration-optimal due to unnecessary long movements, as shown in Fig-ure 13a. In this phase, ONEX takes the depth-optimal solution as a starting point and re-assigns trap-site positions to minimize physi-cal displacement while preserving the combinatorial topology to re-duce the search space and enable efficient solving (Figure 13b). Since duration is dominated by the longest displacement, this compaction naturally forms a minimax problem suitable for MILP solvers. 
+
+A.2.1 Invariant Topology Extraction. There are two key structural invariants from P(1) that the MILP must preserve. First, the permutation order 𝜌 𝑡 , which denotes the sequence of qubit indices sorted by Phase 1 placement for each time step 𝑡 . It implicitly preserves injectivity and the no-crossing property. Second, the stationary pattern S𝑡 = {𝑞 | 𝜋 𝑡 𝑞 = 𝜋 𝑡 +1 
+
+> 𝑞
+
+}, which indicates for each transition 𝑡 → 𝑡 + 1, the set of qubits that do not move. This pattern prevents introducing unnecessary movements that potentially break the current compatibility. 
+
+A.2.2 MILP Formulation. We formulate the compaction as a MILP over the placement variables 𝜋 𝑡 𝑞 (integer), 𝜎 𝑡 𝑞 (integer), and ˆ ℓ𝑡 𝑞 (bi-nary). To encode the maximum physical displacement, we introduce a continuous variable 𝐷 𝑡 for each transition 𝑡 → 𝑡 +1. In addition to the basic validity constraints (e.g., injectivity, gate execution, etc.) similar to SMT encoding, the general no-crossing constraint is replaced with more specific permutation order preser-vation and stationarity constraints to maintain the previously men-tioned invariant topology. (1) Permutation order preservation : For consecutive qubits 𝜌 𝑡 (𝑖 ) and 
+
+𝜌 𝑡 (𝑖 + 1) in the sorted order at time 𝑡 :
+
+𝜋 𝑡 𝜌 𝑡 (𝑖 ) − 𝜋 𝑡 𝜌 𝑡 (𝑖 +1) ≤ − 1.
+
+This constraint enforces injectivity and no-crossing. (2) Stationarity : stationary qubits must remain at the same trap across the transition: 
+
+∀𝑞 ∈ S 𝑡 : 𝜋 𝑡 𝑞 = 𝜋 𝑡 +1 
+
+> 𝑞
+
+.
+
+The compaction objective is the movement distance. Due to the non-uniform trap spacing, movement distance is not simply propor-tional to trap-index difference. The physical displacement of qubit 𝑞 
+
+during one transition is a linear function of the decomposed compo-nents, where 𝑑 site and 𝑑 trap denote the physical distances between adjacent sites and between the two traps within one site, respec-tively. We bound the maximum displacement for each transition as: 
+
+𝐷 𝑡 ≥ 𝑑 site 
+
+
+
+𝜎 𝑡 𝑞 − 𝜎 𝑡 +1
+
+> 𝑞
+
+
+
++ 𝑑 trap 
+
+ ˆℓ𝑡 𝑞 − ˆℓ𝑡 +1
+
+> 𝑞
+
+
+
+, ∀𝑞 ∈ Q ,
+
+linearized as two standard inequalities. 
+
+> 14 Architecture and Compilation Co-Design for High-Rate Quantum Product Codes on Neutral Atom Arrays
+
+(b) (a) Large movement Sparse mapping Same topology but compact 
+
+> Time  T*=4
+> Time  T*=4
+
+Figure 13: Example solution evolution in the feedforward manner of ONEX. (a) A depth-optimal combinatorial topology. (b) The physical displacement compaction. 
+
+This MILP carries a comprehensive compaction: first minimize the sum of maximum displacement across the rearrangement, and then minimize the total displacement as a secondary objective: 
+
+𝑂 1 = min  
+
+> 𝑇 −2
+
+∑︁ 
+
+> 𝑡 =0
+
+𝐷 𝑡 , 𝑂 2 = min  
+
+> 𝑇 −2
+
+∑︁  
+
+> 𝑡 =0
+> 𝑁 −1
+
+∑︁ 
+
+> 𝑞 =0
+
+𝑎 𝑡 𝑞 ,
+
+where 𝑎 𝑡 𝑞 introduces per-qubit displacement as auxiliary variables under the cap of 𝐷 𝑡 derived from the first objective. Note that the MILP minimizes the linear displacement rather than the actual duration computed with the kinematic model [21]: 
+
+𝜏 𝑡 = 2𝑡 transfer +√︁ 𝐷 𝑡 /𝛼, (3) where 𝑡 transfer is the fixed time for trap-to-trap transfer, and 𝛼 is the acceleration parameter. Thus, we update the solution only if compaction improves the duration. 
+
+## A.3 Iterative Refinement via Feedback 
+
+During the feedforward execution of the first two phases, a compact solution is obtained within the given depth-optimal structure. How-ever, among the potentially vast space of depth-optimal solutions, some combinatorial topologies are inherently more amenable to compaction than others. Phase 3 therefore bridges this gap through iterative feedback between SMT and MILP, alternately tightening physical bounds and re-compacting until convergence. 
+
+A.3.1 Local Duration Tightening. This strategy iteratively identi-fies the bottleneck transition in the rearrangement and tightens its displacement bound. By iteratively reducing the maximum displace-ment, the search is guided towards more compact and duration-efficient solutions. Specifically, the displacement bound is encoded with a cap Δmax  
+
+> 𝑡
+
+for a target transition 𝑡 :
+
+∀ 𝑞 ∈ Q : |𝜋 𝑡 +1 
+
+> 𝑞
+
+− 𝜋 𝑡 𝑞 | ≤ Δmax  
+
+> 𝑡
+
+.
+
+ONEX constructs the local search on top of the base solver from Phase 1 with all structural constraints once, and then uses incre-mental solving to add different displacement constraints across iterations. This allows the solver to retain learned clauses and in-ternal heuristic state, avoiding duplicated work. At each iteration, the monotonic local search selects the tran-sition with the largest displacement and proposes a reduced cap using an adaptive step function based on its current value. To avoid re-exploring infeasible bounds, each transition maintains a floor, which denotes the infeasible bound so far. The tightened bounds are then asserted incrementally into the solver. On SAT, the new solution is recorded and serves as the basis for the next iteration. On UNSAT, this over-tightened bound constraint is popped from the solver, and its floor is raised accordingly. If no steps can be taken for tightening, the transition is pruned for the rest of the search. The loop terminates when all transitions are saturated or the time budget is exhausted. 
+
+A.3.2 Global Duration Tightening. While the local search tightens individual transitions and potentially stalls on local minima, the global search directly targets the aggregate rearrangement duration by encoding an explicit upper bound into the SMT instance. Direct encoding of the non-linear kinematic model (3) within bit-vector arithmetic is not available. To address this, ONEX adopts an offline pre-compute approach to bypass the complexity of non-linear constraints. We pre-compute the movement duration 𝜏 𝛿 based on the trap-index difference 𝛿 and a parity bit, which indicates whether the movement crosses an interaction site boundary and thus alters the distance calculation. These values are stored as a look-up table: 
+
+L : (𝛿, parity ) → ⌈ 𝜏 𝛿 ⌉,
+
+where ⌈𝜏 𝛿 ⌉ represents the discretized and quantized duration for a given index displacement and parity. Instead of 𝑁 independent lookups per layer, ONEX identifies the transition with the largest displacement and performs a single lookup based on this bottleneck element and its parity. By per-forming only one table lookup, the formulation streamlines the if-then-else (ITE) chain complexity from O( 𝑁 · |L|) to O( 𝑁 + |L|) 
+
+per layer. The total encoded duration Ttotal = Í𝑡 L𝑡 is represented as a zero-extended bit-vector sum. Similar to the local search, the global search maintains an un-achievable floor 𝑈 for the duration bound. For each iteration, an adaptive step function proposes a tighter duration bound 𝜏 target ,which is then encoded into the solver as an upper bound constraint. On SAT, the new solution is evaluated and adopted as the new best. On UNSAT, the proposed bound is proven infeasible and will be popped from the solver, and the floor will be raised accordingly. 
+
+> 15 Adrian Liu, Wan-Hsuan Lin, Daniel Bochen Tan, Qian Xu, and Jason Cong
+
+10 4 3×10 4 10 3 3×10 3 10 2
+
+# Physical Error Rate p
+
+10 7
+
+10 6
+
+10 5
+
+10 4
+
+10 3
+
+10 2
+
+10 1
+
+> Logical Error Rate
+
+## Current p = 0.005 
+
+Baseline 
+
+pth =0.0126 Ours 
+
+pth =0.0151 
+
++19.5% 
+
+[[225,9,4]] Ours [[225,9,4]] Baseline [[625,25,6]] Ours [[625,25,6]] Baseline [[1225,49,8]] Ours [[1225,49,8]] Baseline [[2500,100,12]] Ours [[2500,100,12]] Baseline 
+
+Figure 14: Logical error rate (single round) versus physical error rate 𝑝 for four HGP codes. Solid lines denote ONEX; dashed lines denote the baseline [50]. Vertical lines indicate reference physical error rates (beige: estimated thresholds, gray: current representative value). 
+
+Convergence is declared when the gap between the best duration and the floor narrows to within the precision. Note that although the global search could work individually to obtain duration optimization, it is more effective when used in conjunction with the local search, as the local search can quickly tighten the transitions and provide a better starting point. 
+
+## A.4 Compilation-Time Parallelism 
+
+Solver-based approaches are often criticized for their long runtimes, especially when dealing with large and complex instances. To alle-viate this concern, ONEX incorporates multi-level parallelism to significantly accelerate the compilation process, making it more practical for real-world applications. 
+
+A.4.1 Seed portfolio parallelism. The solver decision procedure is highly sensitive to the solving seed, with solver heuristics and branching strategies leading to vastly different search trajectories. ONEX therefore launches multiple independent solver processes in parallel with identical constraints but distinct seeds. The first decisive result wins and all others are terminated. This well-known portfolio approach helps mitigate solver variability and improve overall performance. 
+
+A.4.2 Bound speculation parallelism. Iterative efforts happen in both Phases 1 and 3. Rather than probing bounds sequentially, ONEX speculatively launches parallel calls for multiple candidate bounds, utilizing dynamic pruning and a sliding-window scheduler to reduce overall makespan. For depth speculation (Phase 1), ONEX simultaneously probes a window of candidates, e.g. , {𝑇 −1,𝑇 ,𝑇 +1}. When any depth returns SAT, all higher depths are cancelled; when a depth returns UNSAT one below the current best, optimality is immediately certified. For duration speculation (Phase 3), ONEX launches multiple du-ration targets spaced adaptively between the best known duration 
+
+𝐵 and the unachievable floor 𝑈 . On each 𝐵 or 𝑈 update, stale tasks (targets ≥ 𝐵 or ≤ 𝑈 ) are pruned and fresh targets are submitted. This speculation process terminates when the gap 𝐵 −𝑈 falls within the convergence tolerance. 
+
+## B Fidelity Analysis 
+
+Beyond direct performance gains reported in the main text, efficient physical execution in the QEC context also preserves and can even improve the logical error rate (LER) under realistic noise conditions. Shorter rearrangement duration directly reduces the idling error accumulated during atom transport, a factor that otherwise man-ifests as depolarizing noise on all qubits awaiting their next gate. To demonstrate this, we simulate syndrome extraction circuits for four HGP codes ( 𝑛 ∈ { 225 , 625 , 1,225 , 2,500 }) under a circuit-level noise model and an additive idling error channel associated with rearrangement. Fig. 14 plots the single-round LER versus physical error rate 𝑝 for both Xu et al. baseline and ONEX.     
+
+> 16 Architecture and Compilation Co-Design for High-Rate Quantum Product Codes on Neutral Atom Arrays 0.0 0.5 1.0 1.5 2.0 2.5
+> Solving Time (hours)
+> Seed 42 Seed 43 Seed 44 Seed 45 Seed 46
+
+2.0 × 2.5 ×
+
+1.6 × 4.2 ×
+
+2.1 ×
+
+# 11 .4 × 7.7 ×
+
+3.8 ×
+
+3.8 ×
+
+3.0 ×
+
+Figure 15: Seed-sensitivity analysis for the SMT solver. Each dot represents the solving time for one seed on one instance; double-headed arrows annotate the max/min ratio. 
+
+By reducing the rearrangement duration per gate stage from 
+
+∼1.7–3 ms to ∼0.3–0.8 ms, ONEX proportionally suppresses idling noise, yielding favorably consistent LER improvements across all codes and physical error rates. In the near-term fit, this more ef-ficient execution raises the estimated threshold by 19.5%, from 
+
+𝑝 = 1.26 × 10 −2 to 𝑝 = 1.51 × 10 −2. The advantage also persists in the future low-error regime, down to LERs below 10 −7. At the representative physical error rate 𝑝 = 0.005, ONEX reduces LER by 1.23 ×–1.85 × relative to the baseline. The improvement is most pronounced for larger codes operat-ing with more complex syndrome extraction, where idling noise accounts for a larger fraction of the total error budget. For the HGP J2500 , 100 , 12 K code, ONEX achieves a median 43.7% LER re-duction across the swept physical error rates, while the smaller 
+
+J225 , 9, 4K code shows a more modest 17.9% improvement. This trend underscores a critical architectural implication: as QEC codes scale to thousands of data qubits, the rearrangement overhead ex-erts a growing influence on the error budget. Note that LER remains fundamentally constrained by the code properties. Therefore, we view the consequent LER improvement as an additional benefit beyond ONEX’s primary gain in execution frequency. Decoder behavior is also observed to affect the realized improvement, as local non-monotonic effects may diminish the apparent gain from reduced idling noise. We leave this interaction as an interesting topic for decoder-focused research. 
+
+## C Parallelism Analysis 
+
+Beyond fundamental performance metrics, we examine the specific impact of our parallelism strategies on the compilation characteris-tics of ONEX. 
+
+## C.1 Parallelism Configuration. 
+
+Table 4 summarizes the key parallelism parameters in the compi-lation experiments. For seed portfolio, each SMT invocation races 
+
+𝐾 port independent processes. For bound speculation, 𝐾 spec candidate depth or duration targets are probed simultaneously. These two levels compose hierarchically, so a single benchmark invocation can utilize up to 𝐾 port × 𝐾 spec concurrent solver processes internally. 
+
+Table 4: Parallelism configuration for depth (Phase 1), local (Phase 3.1), and global (Phase 3.2) optimization. Parameter Symbol Depth Local Global  
+
+> Portfolio seeds per call
+
+𝐾 port 10 10 3 
+
+> Speculation window size
+
+𝐾 spec 2 – 5 
+
+> Processes per benchmark
+
+– 20 10 15  
+
+> Max. RAM Allocation (GB)
+
+– 100 50 75 
+
+## C.2 Portfolio Parallelism. 
+
+SMT solver runtime is notoriously sensitive to the random seed used for internal branching heuristics. Fig. 15 quantifies this variance by running five seeds on each of 10 instances at problem size 𝑁 =56. At 𝑁 =56, the maximum-to-minimum runtime ratio across seeds reaches 11.4 ×, with an average ratio of 4.2 ×. The absolute runtime discrepancy can be as high as 1.9 hours, a gap that widens further as the scale increases. Additionally, there is no consistent ranking of seed performance across instances, indicating that heuristic per-formance is not intrinsically consistent but is highly sensitive to the specific underlying problem structure. This high variance confirms that portfolio parallelism is an ef-fective strategy for mitigating worst-case solver behavior. Racing multiple seeds and taking the first decisive solution pushes the expected wall-clock time toward the lower end of the distribution, potentially yielding an order-of-magnitude speedup and saving hours over a single-seed approach. 
+
+## C.3 Speculation Parallelism. 
+
+The iterative global search requires sequential probing of candidate duration bounds. Bound speculation parallelism accelerates conver-gence by launching multiple solver calls at different target bounds simultaneously. Experimental results show that speculation achieves an average speedup of 1 .9× from window size 𝑊 =1 to 𝑊 =5, with individual cases reaching up to 3 .0×. Fig. 16 provides a Gantt-style visualiza-tion of the speculation scheduling for a representative instance, 
+
+> 17 Adrian Liu, Wan-Hsuan Lin, Daniel Bochen Tan, Qian Xu, and Jason Cong
+
+Ch 0 
+
+> 587.6
+
+561.2 563.2 565.2 567.2 569.2 
+
+> 570.7
+
+# W=1 (Sequential), 1.73 h 
+
+> 560 580 600 620
+> Best  B (μs)
+
+0.0 0.2 0.4 0.6 0.8 
+
+Wall-Clock Time (hours) 
+
+Ch 0 Ch 1 Ch 2 
+
+> 609.2  596.8  584.4
+
+563.1 551.6 567.9 
+
+> 571.4 572.6
+
+568.6 
+
+# W=3, 0.79 h 
+
+> 560 570 580 590 600 610 620
+
+0.0 0.2 0.4 0.6 
+
+Wall-Clock Time (hours) 
+
+Ch 0 Ch 1 Ch 2 Ch 3 Ch 4 
+
+> 571.9 609.2  596.8  584.4
+
+559.5 547.1 535.7 524.3 512.9 559.9 565.9 563.9 561.9 567.9 
+
+# W=5, 0.68 h 
+
+> 560 570 580 590 600 610 620
+> Best  B (μs)
+
+SAT (improved) UNSAT / UNKNOWN Pruned (cancelled) Best bound B
+
+Figure 16: Speculation scheduling profile for a representative instance. Block color denotes solver outcome (green: sat, gray: unsat/unknown, amber hatched: pruned). The dashed red line tracks the best-known duration bound 𝐵 .
+
+showing the three swim-lanes on a shared time axis. The sequential baseline ( 𝑊 =1) exhibits a strictly serial pattern to probe each candi-date, while wider windows overlap solver tasks on parallel channels, allowing early SAT results to prune stale tasks and refill with tighter targets. The overall descent of the best-known bound 𝐵 remains consistent in all three configurations, but the wider windows reach convergence sooner by eliminating sequential bottlenecks. 
+
+> 18
+
+Architecture and Compilation Co-Design for High-Rate Quantum Product Codes on Neutral Atom Arrays 
+
+## References 
+
+[1] Rajeev Acharya, Igor Aleiner, Richard Allen, Trond I. Andersen, Markus Ans-mann, Frank Arute, Kunal Arya, Abraham Asfaw, Juan Atalaya, Ryan Bab-bush, Dave Bacon, Joseph C. Bardin, Joao Basso, Andreas Bengtsson, Sergio Boixo, Gina Bortoli, Alexandre Bourassa, Jenna Bovaird, Leon Brill, Michael Broughton, Bob B. Buckley, David A. Buell, Tim Burger, Brian Burkett, Nicholas Bushnell, Yu Chen, Zijun Chen, Ben Chiaro, Josh Cogan, Roberto Collins, Paul Conner, William Courtney, Alexander L. Crook, Ben Curtin, Dripto M. Debroy, Alexander Del Toro Barba, Sean Demura, Andrew Dunsworth, Daniel Eppens, Catherine Erickson, Lara Faoro, Edward Farhi, Reza Fatemi, Leslie Flores Burgos, Ebrahim Forati, Austin G. Fowler, Brooks Foxen, William Giang, Craig Gidney, Dar Gilboa, Marissa Giustina, Alejandro Grajales Dau, Jonathan A. Gross, Steve Habegger, Michael C. Hamilton, Matthew P. Harrigan, Sean D. Harrington, Os-car Higgott, Jeremy Hilton, Markus Hoffmann, Sabrina Hong, Trent Huang, Ashley Huff, William J. Huggins, Lev B. Ioffe, Sergei V. Isakov, Justin Iveland, Evan Jeffrey, Zhang Jiang, Cody Jones, Pavol Juhas, Dvir Kafri, Kostyantyn Kechedzhi, Julian Kelly, Tanuj Khattar, Mostafa Khezri, Mária Kieferová, Seon Kim, Alexei Kitaev, Paul V. Klimov, Andrey R. Klots, Alexander N. Korotkov, Fedor Kostritsa, John Mark Kreikebaum, David Landhuis, Pavel Laptev, Kim-Ming Lau, Lily Laws, Joonho Lee, Kenny Lee, Brian J. Lester, Alexander Lill, Wayne Liu, Aditya Locharla, Erik Lucero, Fionn D. Malone, Jeffrey Marshall, Orion Martin, Jarrod R. McClean, Trevor McCourt, Matt McEwen, Anthony Megrant, Bernardo Meurer Costa, Xiao Mi, Kevin C. Miao, Masoud Mohseni, Shirin Montazeri, Alexis Morvan, Emily Mount, Wojciech Mruczkiewicz, Ofer Naaman, Matthew Neeley, Charles Neill, Ani Nersisyan, Hartmut Neven, Michael Newman, Jiun How Ng, Anthony Nguyen, Murray Nguyen, Murphy Yuezhen Niu, Thomas E. O’Brien, Alex Opremcak, John Platt, Andre Petukhov, Rebecca Potter, Leonid P. Pryadko, Chris Quintana, Pedram Roushan, Nicholas C. Rubin, Negar Saei, Daniel Sank, Kannan Sankaragomathi, Kevin J. Satzinger, Henry F. Schurkus, Christopher Schuster, Michael J. Shearn, Aaron Shorter, Vladimir Shvarts, Jindra Skruzny, Vadim Smelyanskiy, W. Clarke Smith, George Ster-ling, Doug Strain, Marco Szalay, Alfredo Torres, Guifre Vidal, Benjamin Villa-longa, Catherine Vollgraff Heidweiller, Theodore White, Cheng Xing, Z. Jamie Yao, Ping Yeh, Juhwan Yoo, Grayson Young, Adam Zalcman, Yaxing Zhang, Ningfeng Zhu, and Google Quantum AI. 2023. Suppressing quantum errors by scaling a surface code logical qubit. Nature 614, 7949 (Feb. 2023), 676–681. https://doi.org/10.1038/s41586-022-05434-1 [2] D. Aharonov and M. Ben-Or. 1997. Fault-tolerant quantum computation with constant error. In Proceedings of the Twenty-Ninth Annual ACM Symposium on Theory of Computing (El Paso, Texas, USA) (STOC ’97) . Association for Computing Machinery, New York, NY, USA, 176–188. https://doi.org/10.1145/258533.258579 [3] Dolev Bluvstein, Simon J. Evered, Alexandra A. Geim, Sophie H. Li, Hengyun Zhou, Tom Manovitz, Sepehr Ebadi, Madelyn Cain, Marcin Kalinowski, Dominik Hangleiter, J. Pablo Bonilla Ataides, Nishad Maskara, Iris Cong, Xun Gao, Pedro Sales Rodriguez, Thomas Karolyshyn, Giulia Semeghini, Michael J. Gullans, Markus Greiner, Vladan Vuletić, and Mikhail D. Lukin. 2024. Logical quantum processor based on reconfigurable atom arrays. Nature 626, 7997 (Feb. 2024), 58–65. https://doi.org/10.1038/s41586-023-06927-3 [4] Dolev Bluvstein, Harry Levine, Giulia Semeghini, Tout T. Wang, Sepehr Ebadi, Marcin Kalinowski, Alexander Keesling, Nishad Maskara, Hannes Pichler, Markus Greiner, Vladan Vuletić, and Mikhail D. Lukin. 2022. A quantum pro-cessor based on coherent transport of entangled atom arrays. Nature 604, 7906 (April 2022), 451–456. https://doi.org/10.1038/s41586-022-04592-6 [5] Sergey Bravyi, Andrew W. Cross, Jay M. Gambetta, Dmitri Maslov, Patrick Rall, and Theodore J. Yoder. 2024. High-threshold and low-overhead fault-tolerant quantum memory. Nature 627, 8005 (March 2024), 778–782. https: //doi.org/10.1038/s41586-024-07107-7 [6] Madelyn Cain, Qian Xu, Robbie King, Lewis R. B. Picard, Harry Levine, Manuel Endres, John Preskill, Hsin-Yuan Huang, and Dolev Bluvstein. 2026. Shor’s algorithm is possible with as few as 10,000 reconfigurable atomic qubits. arXiv:2603.28627 [quant-ph] https://arxiv.org/abs/2603.28627 [7] A. R. Calderbank, E. M. Rains, P. W. Shor, and N. J. A. Sloane. 1997. Quantum Error Correction and Orthogonal Geometry. Phys. Rev. Lett. 78 (Jan 1997), 405–408. Issue 3. https://doi.org/10.1103/PhysRevLett.78.405 [8] Kathleen Chang, Zhiyang He, Theodore J. Yoder, Guanyu Zhu, and Tomas Jochym-O’Connor. 2026. Constant-Time Surgery on 2D Hypergraph Product Codes with Near-Constant Space Overhead. https://doi.org/10.48550/arXiv.2603. 02157 arXiv:2603.02157 [quant-ph]. [9] Leonardo De Moura and Nikolaj Bjørner. 2008. Z3: an efficient SMT solver. In 
+
+Proceedings of the Theory and Practice of Software, 14th International Conference on Tools and Algorithms for the Construction and Analysis of Systems (Budapest, Hungary) (TACAS’08/ETAPS’08) . Springer-Verlag, Berlin, Heidelberg, 337–340. [10] Simon J. Evered, Dolev Bluvstein, Marcin Kalinowski, Sepehr Ebadi, Tom Manovitz, Hengyun Zhou, Sophie H. Li, Alexandra A. Geim, Tout T. Wang, Nishad Maskara, Harry Levine, Giulia Semeghini, Markus Greiner, Vladan Vuletić, and Mikhail D. Lukin. 2023. High-fidelity parallel entangling gates on a neutral-atom quantum computer. Nature 622, 7982 (Oct. 2023), 268–272. https://doi.org/10.1038/s41586-023-06481-y [11] Austin G. Fowler, Matteo Mariantoni, John M. Martinis, and Andrew N. Cleland. 2012. Surface codes: Towards practical large-scale quantum computation. Phys. Rev. A 86 (Sep 2012), 032324. Issue 3. https://doi.org/10.1103/PhysRevA.86.032324 [12] Craig Gidney. 2021. Stim: a fast stabilizer circuit simulator. Quantum 5 (July 2021), 497. https://doi.org/10.22331/q-2021-07-06-497 [13] Craig Gidney. 2025. How to factor 2048 bit RSA integers with less than a million noisy qubits. https://doi.org/10.48550/arXiv.2505.15917 arXiv:2505.15917 [quant-ph]. [14] Craig Gidney and Martin Ekerå. 2021. How to factor 2048 bit RSA integers in 8 hours using 20 million noisy qubits. Quantum 5 (April 2021), 433. https: //doi.org/10.22331/q-2021-04-15-433 arXiv:1905.09749 [quant-ph]. [15] Daniel Gottesman. 1997. Stabilizer Codes and Quantum Error Correction. arXiv:quant-ph/9705052 [quant-ph] https://arxiv.org/abs/quant-ph/9705052 [16] Loïc Henriet, Lucas Beguin, Adrien Signoles, Thierry Lahaye, Antoine Browaeys, Georges-Olivier Reymond, and Christophe Jurczak. 2020. Quantum computing with neutral atoms. Quantum 4 (Sept. 2020), 327. https://doi.org/10.22331/q-2020-09-21-327 [17] Yunqi Huang, Dingchao Gao, Shenggang Ying, and Sanjiang Li. 2025. DasAtom: A Divide-and-Shuttle Atom Approach to Quantum Circuit Transformation. IEEE Transactions on Computer-Aided Design of Integrated Circuits and Systems 44, 8 (2025), 2966–2978. https://doi.org/10.1109/TCAD.2025.3532818 [18] Michael Jünger and Petra Mutzel. 1997. 2-Layer Straightline Crossing Minimiza-tion: Performance of Exact and Heuristic Algorithms. Journal of Graph Algorithms and Applications 1, 1 (Jan. 1997), 1–25. https://doi.org/10.7155/jgaa.00001 [19] Anirudh Krishna and David Poulin. 2021. Fault-Tolerant Gates on Hypergraph Product Codes. Phys. Rev. X 11 (Feb 2021), 011023. Issue 1. https://doi.org/10. 1103/PhysRevX.11.011023 [20] Manuel Laguna and Rafael Marti. 1999. GRASP and Path Relinking for 2-Layer Straight Line Crossing Minimization. INFORMS Journal on Computing 11, 1 (Feb. 1999), 44–52. https://doi.org/10.1287/ijoc.11.1.44 [21] Wan-Hsuan Lin, Daniel Bochen Tan, and Jason Cong. 2025. Reuse-Aware Compi-lation for Zoned Quantum Architectures Based on Neutral Atoms. In 2025 IEEE International Symposium on High Performance Computer Architecture (HPCA) .127–142. https://doi.org/10.1109/HPCA61900.2025.00021 [22] Pengyu Liu, Mingkuan Xu, Hengyun Zhou, Hanrui Wang, Umut A. Acar, and Yunong Shi. 2025. Coniq: Enabling Concatenated Quantum Error Correction on Neutral Atom Arrays. In 2025 IEEE International Conference on Quantum Computing and Engineering (QCE) , Vol. 01. 615–626. https://doi.org/10.1109/ QCE65121.2025.00073 [23] Hannah J. Manetsch, Gyohei Nomura, Elie Bataille, Xudong Lv, Kon H. Leung, and Manuel Endres. 2025. A tweezer array with 6,100 highly coherent atomic qubits. 
+
+Nature 647, 8088 (Nov. 2025), 60–67. https://doi.org/10.1038/s41586-025-09641-4 [24] Michael A. Nielsen and Isaac L. Chuang. 2010. Quantum Computation and Quantum Information: 10th Anniversary Edition . Cambridge University Press. [25] M. A. Norcia, H. Kim, W. B. Cairncross, M. Stone, A. Ryou, M. Jaffe, M. O. Brown, K. Barnes, P. Battaglino, T. C. Bohdanowicz, A. Brown, K. Cassella, C.-A. Chen, R. Coxe, D. Crow, J. Epstein, C. Griger, E. Halperin, F. Hummel, A. M. W. Jones, J. M. Kindem, J. King, K. Kotru, J. Lauigan, M. Li, M. Lu, E. Megidish, J. Marjanovic, M. McDonald, T. Mittiga, J. A. Muniz, S. Narayanaswami, C. Nishiguchi, T. Paule, K. A. Pawlak, L. S. Peng, K. L. Pudenz, D. Rodríguez Pérez, A. Smull, D. Stack, M. Urbanek, R. J. M. van de Veerdonk, Z. Vendeiro, L. Wadleigh, T. Wilkason, T.-Y. Wu, X. Xie, E. Zalys-Geller, X. Zhang, and B. J. Bloom. 2024. Iterative Assembly of 171 Yb Atom Arrays with Cavity-Enhanced Optical Lattices. PRX Quantum 5(Jul 2024), 030316. Issue 3. https://doi.org/10.1103/PRXQuantum.5.030316 [26] Pavel Panteleev and Gleb Kalachev. 2022. Quantum LDPC Codes With Almost Linear Minimum Distance. IEEE Transactions on Information Theory 68, 1 (2022), 213–229. https://doi.org/10.1109/TIT.2021.3119384 [27] Lars Pause, Lukas Sturm, Marcel Mittenbühler, Stephan Amann, Tilman Preuschoff, Dominik Schäffner, Malte Schlosser, and Gerhard Birkl. 2024. Su-percharged two-dimensional tweezer array with more than 1000 atomic qubits. 
+
+Optica 11, 2 (Feb 2024), 222–226. https://doi.org/10.1364/OPTICA.513551 [28] Joschka Roffe. 2022. LDPC: Python tools for low density parity check codes . https: //pypi.org/project/ldpc/ [29] Joschka Roffe, David R. White, Simon Burton, and Earl Campbell. 2020. Decoding across the quantum low-density parity-check code landscape. Physical Review Research 2, 4 (Dec 2020). https://doi.org/10.1103/physrevresearch.2.043423 [30] Jixuan Ruan, Xiang Fang, Hezi Zhang, Ang Li, Travis Humble, and Yufei Ding. 2025. PowerMove: Optimizing Compilation for Neutral Atom Quantum Comput-ers with Zoned Architecture. In Proceedings of the 30th ACM International Confer-ence on Architectural Support for Programming Languages and Operating Systems, Volume 3 (Rotterdam, Netherlands) (ASPLOS ’25) . Association for Computing Ma-chinery, New York, NY, USA, 163–178. https://doi.org/10.1145/3676642.3736128 [31] Mark Saffman. 2018. Quantum computing with neutral atoms. National Science Review 6, 1 (Sept. 2018), 24–25. https://doi.org/10.1093/nsr/nwy088 _eprint: https://academic.oup.com/nsr/article-pdf/6/1/24/38915067/nwy088.pdf. 19 Adrian Liu, Wan-Hsuan Lin, Daniel Bochen Tan, Qian Xu, and Jason Cong 
+
+[32] M. Saffman, T. G. Walker, and K. Mølmer. 2010. Quantum information with Rydberg atoms. Rev. Mod. Phys. 82 (Aug 2010), 2313–2363. Issue 3. https: //doi.org/10.1103/RevModPhys.82.2313 [33] V. V. Sivak, A. Eickbusch, B. Royer, S. Singh, I. Tsioutsios, S. Ganjam, A. Miano, B. L. Brock, A. Z. Ding, L. Frunzio, S. M. Girvin, R. J. Schoelkopf, and M. H. Devoret. 2023. Real-time quantum error correction beyond break-even. Nature 
+
+616, 7955 (April 2023), 50–55. https://doi.org/10.1038/s41586-023-05782-6 [34] Yannick Stade, Lukas Burgholzer, and Robert Wille. 2025. Search Smarter, Not Harder: A Scalable, High-Quality Zoned Neutral Atom Compiler. arXiv preprint arXiv:2512.13790 (2025). [35] Yannick Stade, Wan-Hsuan Lin, Jason Cong, and Robert Wille. 2025. Routing-Aware Placement for Zoned Neutral Atom-based Quantum Computing. In 2025 IEEE/ACM International Conference On Computer Aided Design (ICCAD) . 1–9. https://doi.org/10.1109/ICCAD66269.2025.11240721 [36] Yannick Stade, Ludwig Schmid, Lukas Burgholzer, and Robert Wille. 2024. An Abstract Model and Efficient Routing for Logical Entangling Gates on Zoned Neutral Atom Architectures. In 2024 IEEE International Conference on Quantum Computing and Engineering (QCE) , Vol. 01. 784–795. https://doi.org/10.1109/ QCE60285.2024.00098 [37] Larry Stockmeyer. 1984. Optimal orientations of cells in slicing floorplan designs. 
+
+Inf. Control 57, 2–3 (May 1984), 91–101. https://doi.org/10.1016/S0019-9958(83) 80038-2 [38] Bochen Tan, Dolev Bluvstein, Mikhail D. Lukin, and Jason Cong. 2022. Qubit Mapping for Reconfigurable Atom Arrays. In Proceedings of the 41st IEEE/ACM International Conference on Computer-Aided Design (San Diego, California) (IC-CAD ’22) . Association for Computing Machinery, New York, NY, USA, Article 107, 9 pages. https://doi.org/10.1145/3508352.3549331 [39] Daniel Bochen Tan, Dolev Bluvstein, Mikhail D. Lukin, and Jason Cong. 2024. Compiling Quantum Circuits for Dynamically Field-Programmable Neutral Atoms Array Processors. Quantum 8 (March 2024), 1281. https://doi.org/10. 22331/q-2024-03-14-1281 [40] Daniel Bochen Tan, Dolev Bluvstein, Mikhail D. Lukin, and Jason Cong. 2024. Compiling Quantum Circuits for Dynamically Field-Programmable Neutral Atoms Array Processors. Quantum 8 (March 2024), 1281. https://doi.org/10. 22331/q-2024-03-14-1281 arXiv:2306.03487 [quant-ph]. [41] Daniel Bochen Tan, Wan-Hsuan Lin, and Jason Cong. 2025. Compilation for Dynamically Field-Programmable Qubit Arrays with Efficient and Provably Near-Optimal Scheduling . Association for Computing Machinery, New York, NY, USA, 921–929. https://doi.org/10.1145/3658617.3697778 [42] Jean-Pierre Tillich and Gilles Zémor. 2014. Quantum LDPC Codes With Positive Rate and Minimum Distance Proportional to the Square Root of the Blocklength. 
+
+IEEE Transactions on Information Theory 60, 2 (2014), 1193–1202. https://doi.org/ 10.1109/TIT.2013.2292061 [43] Pauli Virtanen, Ralf Gommers, Travis E. Oliphant, Matt Haberland, Tyler Reddy, David Cournapeau, Evgeni Burovski, Pearu Peterson, Warren Weckesser, Jonathan Bright, Stéfan J. van der Walt, Matthew Brett, Joshua Wilson, K. Jar-rod Millman, Nikolay Mayorov, Andrew R. J. Nelson, Eric Jones, Robert Kern, Eric Larson, C. J. Carey, İlhan Polat, Yu Feng, Eric W. Moore, Jake VanderPlas, Denis Laxalde, Josef Perktold, Robert Cimrman, Ian Henriksen, E. A. Quintero, Charles R. Harris, Anne M. Archibald, Antônio H. Ribeiro, Fabian Pedregosa, Paul van Mulbregt, Aditya Vijaykumar, Alessandro Pietro Bardelli, Alex Rothberg, Andreas Hilboll, Andreas Kloeckner, Anthony Scopatz, Antony Lee, Ariel Rokem, C. Nathan Woods, Chad Fulton, Charles Masson, Christian Häggström, Clark Fitzgerald, David A. Nicholson, David R. Hagen, Dmitrii V. Pasechnik, Emanuele Olivetti, Eric Martin, Eric Wieser, Fabrice Silva, Felix Lenders, Florian Wilhelm, G. Young, Gavin A. Price, Gert-Ludwig Ingold, Gregory E. Allen, Gregory R. Lee, Hervé Audren, Irvin Probst, Jörg P. Dietrich, Jacob Silterra, James T. Webber, Janko Slavič, Joel Nothman, Johannes Buchner, Johannes Kulick, Johannes L. Schönberger, José Vinícius de Miranda Cardoso, Joscha Reimer, Joseph Harring-ton, Juan Luis Cano Rodríguez, Juan Nunez-Iglesias, Justin Kuczynski, Kevin Tritz, Martin Thoma, Matthew Newville, Matthias Kümmerer, Maximilian Bol-ingbroke, Michael Tartre, Mikhail Pak, Nathaniel J. Smith, Nikolai Nowaczyk, Nikolay Shebanov, Oleksandr Pavlyk, Per A. Brodtkorb, Perry Lee, Robert T. McGibbon, Roman Feldbauer, Sam Lewis, Sam Tygier, Scott Sievert, Sebastiano Vigna, Stefan Peterson, Surhud More, Tadeusz Pudlik, Takuya Oshima, Thomas J. Pingel, Thomas P. Robitaille, Thomas Spura, Thouis R. Jones, Tim Cera, Tim Leslie, Tiziano Zito, Tom Krauss, Utkarsh Upadhyay, Yaroslav O. Halchenko, Yoshiki Vázquez-Baeza, and SciPy 1.0 Contributors. 2020. SciPy 1.0: fundamental algorithms for scientific computing in Python. Nature Methods 17, 3 (March 2020), 261–272. https://doi.org/10.1038/s41592-019-0686-2 [44] Joshua Viszlai, Willers Yang, Sophia Lin, Junyu Liu, Natalia Nottingham, Jonathan Baker, and Frederic Chong. 2026. qSIEVE: Efficient qLDPC Memory via Systolic Movement in Atom Arrays. ACM Transactions on Quantum Computing 7, 2, Article 9 (Jan. 2026), 26 pages. https://doi.org/10.1145/3779066 [45] Joshua Viszlai, Willers Yang, Sophia Fuhui Lin, Junyu Liu, Natalia Nottingham, Jonathan M Baker, and Frederic T Chong. 2025. Matching Generalized-Bicycle Codes to Neutral Atoms for Low-Overhead Fault-Tolerance. In 2025 IEEE Interna-tional Conference on Quantum Computing and Engineering (QCE) . IEEE, 688–699. https://doi.org/10.1109/qce65121.2025.00080 [46] Hanrui Wang, Pengyu Liu, Daniel Bochen Tan, Yilian Liu, Jiaqi Gu, David Z. Pan, Jason Cong, Umut A. Acar, and Song Han. 2024. Atomique: A Quantum Compiler for Reconfigurable Neutral Atom Arrays. In 2024 ACM/IEEE 51st Annual International Symposium on Computer Architecture (ISCA) . 293–309. https: //doi.org/10.1109/ISCA59077.2024.00030 [47] Ming Wang and Frank Mueller. 2026. Coprime Bivariate Bicycle Codes and Their Layouts on Cold Atoms. Quantum 10 (Feb. 2026), 2009. https://doi.org/10.22331/ q-2026-02-23-2009 arXiv:2408.10001 [quant-ph]. [48] Paul Webster, Samuel C. Smith, and Lawrence Z. Cohen. 2025. Explicit con-struction of low-overhead gadgets for gates on quantum LDPC codes. https: //doi.org/10.48550/arXiv.2511.15989 arXiv:2511.15989 [quant-ph]. [49] D.F. Wong and C.L. Liu. 1986. A New Algorithm for Floorplan Design. In 23rd ACM/IEEE Design Automation Conference . 101–107. https://doi.org/10.1109/DAC. 1986.1586075 [50] Qian Xu, J. Pablo Bonilla Ataides, Christopher A. Pattison, Nithin Raveendran, Dolev Bluvstein, Jonathan Wurtz, Bane Vasić, Mikhail D. Lukin, Liang Jiang, and Hengyun Zhou. 2024. Constant-overhead fault-tolerant quantum computation with reconfigurable atom arrays. Nature Physics 20, 7 (July 2024), 1084–1090. https://doi.org/10.1038/s41567-024-02479-z [51] Qian Xu, Hengyun Zhou, Guo Zheng, Dolev Bluvstein, J. Pablo Bonilla Ataides, Mikhail D. Lukin, and Liang Jiang. 2025. Fast and Parallelizable Logical Com-putation with Homological Product Codes. Phys. Rev. X 15 (May 2025), 021065. Issue 2. https://doi.org/10.1103/PhysRevX.15.021065 [52] Willers Yang, Jason Chadwick, Mariesa H. Teo, Joshua Viszlai, and Fred Chong. 2026. RASCqL: Reaction-time-limited Architecture for Space-time-efficient Com-plex qLDPC Logic. https://doi.org/10.48550/arXiv.2602.14273 arXiv:2602.14273 [quant-ph]. [53] F. Y. Young and D. F. Wong. 1999. Slicing floorplans with range constraint. In 
+
+Proceedings of the 1999 International Symposium on Physical Design (Monterey, California, USA) (ISPD ’99) . Association for Computing Machinery, New York, NY, USA, 97–102. https://doi.org/10.1145/299996.300033 [54] Chen Zhao, Casey Duckering, Andi Gu, Nishad Maskara, and Hengyun Zhou. 2026. Towards Ultra-High-Rate Quantum Error Correction with Reconfigurable Atom Arrays. arXiv:2604.16209 [quant-ph] https://arxiv.org/abs/2604.16209 20

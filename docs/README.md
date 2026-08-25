@@ -6,27 +6,27 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-08-24
-- 运行时间：2026-08-24 20:53:10 UTC
+- 最新运行日期：2026-08-25
+- 运行时间：2026-08-25 20:50:52 UTC
 - 运行状态：成功
 - 本次总论文数：2
-- 精读区：2
-- 速读区：0
+- 精读区：0
+- 速读区：2
 
 ### 今日简报（AI）
-今日精读2篇，聚焦CSS码的逻辑对角门实现与任意维度平移不变量子码分类。最值得关注的是横向物理Z旋转可构造逻辑对角门，以及高维量子码的系统性分类框架。建议优先阅读第一篇，掌握通用门实现技术；第二篇适合深入理论分类时参考。
-- 详情：[/202608/24/README](/202608/24/README)
+今日速读2篇量子信息论文，均获7.0分。值得关注量子纠错码的构造与量子网络的路径优化两个方向。建议从“小域上的循环码”这一篇入手，理解更基础的编码思想。
+- 详情：[/202608/25/README](/202608/25/README)
 
 ### 精读区论文标签
-1. [Realizing Logical Diagonal Gates via Transversal Physical $Z$-Rotations in CSS Codes](/202608/24/2608.19094v3-realizing-logical-diagonal-gates-via-transversal-physical-z-rotations-in-css-codes)  
-   标签：评分：8.0/10、query:qec-code
-   evidence：刻画CSS稳定子码的横向对角门实现条件
-2. [A Classification of Translation-Invariant Quantum Codes in Any Dimension](/202608/24/2608.20981v1-a-classification-of-translation-invariant-quantum-codes-in-any-dimension)  
-   标签：评分：8.0/10、query:qec-code
-   evidence：拓扑量子纠错研究进展，平移不变量子码分类
+- 本次无精读推荐。
 
 ### 速读区论文标签
-- 本次无速读推荐。
+1. [Quantum Locally Repairable Codes from Negacyclic and Repeated-Root Cyclic Codes over Small Fields](/202608/25/2608.21852v1-quantum-locally-repairable-codes-from-negacyclic-and-repeated-root-cyclic-codes-over-small-fields)  
+   标签：评分：7.0/10、query:qec-code
+   evidence：由循环码构造量子局部可修复码，推进量子纠错码理论
+2. [Spatio-temporal Path Optimization for Stabilizer-Code-Protected Quantum Networks](/202608/25/2608.22766v1-spatio-temporal-path-optimization-for-stabilizer-code-protected-quantum-networks)  
+   标签：评分：7.0/10、query:qec-code
+   evidence：稳定子码保护的量子网络路径优化与QEC恢复
 
 
 <div class="dpr-home-promo-card">

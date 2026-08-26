@@ -1,0 +1,2346 @@
+Title: Improved Quantum Codes with Transversal T Gates
+
+URL Source: https://arxiv.org/pdf/2608.24000v1
+
+Published Time: Wed, 26 Aug 2026 00:34:27 GMT
+
+Number of Pages: 33
+
+Markdown Content:
+# Improved Quantum Codes with Transversal T Gates 
+
+## Adam Wills *1,2 1Center for Theoretical Physics — a Leinweber Institute, Massachusetts Institute of Technology, Cambridge, MA 
+
+2IBM Research, IBM T. J. Watson Research Center, NY August 26, 2026 
+
+Abstract 
+
+In this work, we study quantum CSS codes with transversal T gates. Here, T gate transversality is meant in the strongest sense; the application of physical T to every physical qubit yields logical T on every logical qubit, without Clifford corrections. Despite the importance of the T gate in fault-tolerant quantum computation, the parameters of asymptotic families of such codes have not been improved since the work of Hastings and Haah in 2017 [HH17], and Haah in 2018 [Haa18]. In this work, we significantly broaden the achievable parameters of quantum code families with transversal T gates, both expanding the regime of achievable polynomial rate and distance, and constructing such codes with constant rate and growing distance; this is the first time the latter has been achieved, even when allowing Clifford corrections after the transversal T gate. These are also the first codes achieving γ → 0 for a code with a transversal T gate, where γ is the overhead exponent of magic state distillation. To do this, we develop a framework of divisible decreasing monomial codes, punctured at a downward-closed set on the Boolean hypercube to create logical qubits. We prove a closed-form expression for the distance of such a code punctured at such a set, which may be of independent interest. We first instantiate this with an explicit construction based on weighted Reed-Muller codes, puncturing at low Hamming-weight points, and then with a randomised construction, where a small random set of points is protected from the puncturing to save quantum code distance, achieving improved parameters. 
+
+> *
+
+a_wills@mit.edu 
+
+1arXiv:2608.24000v1 [quant-ph] 25 Aug 2026 Contents 
+
+1 Introduction 2
+
+1.1 Overview of Results . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 31.2 Overview of Techniques . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 61.2.1 T Gate Transversality from Classical Divisibility . . . . . . . . . . . . . . . . . . . . . . . . 61.2.2 Decreasing Monomial Codes, Downset Punctures, and Protected Points . . . . . . . . . . . 91.3 Relation to Prior Works . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 11 
+
+2 Preliminaries 11 
+
+2.1 Classical Decreasing Monomial Codes . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 11 2.2 Divisibility of Classical Codes . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 13 2.3 Classical Weighted Reed-Muller Codes . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 14 2.4 Quantum CSS Codes from X-Generator Matrices . . . . . . . . . . . . . . . . . . . . . . . . . . . . 15 
+
+3 Quantum Codes from Decreasing Monomial Codes Punctured at a Downset 16 
+
+3.1 The Distance of Classical Decreasing Monomial Codes Punctured at a Downset . . . . . . . . . . . 16 3.2 Classical to Quantum Codes . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 18 
+
+4 Explicit Construction 20 
+
+4.1 Weighting with One Heavy Variable . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 20 4.2 Explicit Asymptotic Parameters: Sub-Constant-Rate Regime . . . . . . . . . . . . . . . . . . . . . 21 4.3 Explicit Asymptotic Parameters: Constant-Rate Regime . . . . . . . . . . . . . . . . . . . . . . . . 23 
+
+5 Randomised Construction 24 
+
+5.1 Hypergraphs and Protected Points . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 24 5.2 Puncturing the Reed-Muller Code with Protected Points . . . . . . . . . . . . . . . . . . . . . . . . 27 5.3 Puncturing the Weighted Reed-Muller Code with Protected Points . . . . . . . . . . . . . . . . . . 27 5.4 Concatenating with Haah’s Divisible Tower . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 28 
+
+Acknowledgements 29 
+
+# 1 Introduction 
+
+The theory of quantum error correction [Sho95], and the related field of fault-tolerant quantum computing [AB97], attempt to design quantum codes, and quantum fault tolerance protocols, with a mind to the eventual construction of a large-scale fault-tolerant quantum computer with low spacetime overhead. To support this effort, theoretical work has sought to understand what quantum codes, and quantum fault tolerance protocols, can and cannot achieve, in various well-motivated settings. A central notion in these fields is that of transversality. The most general notion of transversality is as follows: on some quantum codes with the right structure, one may act on the physical qubits with a constant-depth circuit, and in doing so execute some useful logical operation on the logical qubits. The operation is inherently fault tolerant, since errors on the physical qubits may only spread by a constant amount in the operation, and is naturally low-overhead in space and time. Unfortunately, the Eastin-Knill theorem [EK09] says that no quantum code may support a universal transversal gateset. In other words, universal fault-tolerant logic will at some stage require some more expensive operation. Many natural quantum codes such as the Steane 7-qubit code [Ste96b], and the 2D colour code [BM06], support transversal gates restricted to the Clifford group. It is found to be much harder to construct quantum codes supporting non-Clifford transversal gates. Such codes are well-motivated, since the remaining fault-tolerant operation to achieve universality would be some Clifford operation, for which the corresponding fault-tolerant operation would generally be more lightweight: distilling and teleporting a Hadamard gate, for example. In this direction, recent works constructed the first asymptotically good families of quantum codes with transversal non-Clifford gates. However, the gates that make up the physical transversal operation, and get implemented at the logical level, were multi-qubit gates such as CCZ [GG25a; Ngu25], or larger gates [WHY25]. This is not ideal, as such multi-qubit gates are typically more difficult to execute at high fidelity in hardware, and the corresponding logical operation may be less directly useful. Moreover, multi-qubit transversal gates do not imply transversally addressable gates at lower levels in the Clifford hierarchy, for which additional structure 2is required [He+25b; He+25a]. 1 While the codes constructed in the works [WHY25; GG25a; Ngu25] were not LDPC, and so are challenging to implement at the physical level, the lessons learned therein inspired an active, ongoing line of work seeking to construct better quantum LDPC codes with transversal non-Clifford gates [GL25; SPW24; Zhu25; GG25b; Zhu+25; ZKH26; KZH26; Bre+26; Li+25; LLL26], which could be run at the physical level: a highly desirable prospect. Like the earlier works [WHY25; GG25a; Ngu25], we aim to develop the theory around quantum codes with non-Clifford transversal gates. However, we make the crucial restriction that the non-Clifford gate we want our quantum codes to support transversally is the one-qubit gate T := diag (1 , e iπ/ 4): the most widely-considered non-Clifford gate in fault-tolerant quantum computing given its simplicity, ease of consumption, how easily it may be executed in many hardware modalities, and the fact that its transversality implies the transversal addressability of gates in lower levels of the Clifford hierarchy. Concretely, we wish to study asymptotic families of quantum stabiliser codes 2 [Got97] for which the application of the T gate separately on each physical qubit (the physical transversal T gate) executes the logical T gate separately on each logical qubit (the logical transversal T gate). While our main motivation is simply theory development, especially informing potential development of quan-tum LDPC codes with transversal T gates, there are several other possible impacts of this work. First, non-LDPC codes like ours can be run at the logical level of some LDPC code, for example as a magic state distillation scheme [BK05]. Because we do not allow Clifford corrections after the transversal T gate, our protocols imply particularly fast protocols for distilling T gates to T gates. It will also turn out that the codes we construct with transversal T gates will have the best known parameters, even when allowing Clifford corrections. More generally than magic state distillation, concatenation is emerging as a promising candidate for building quantum architectures [PKP25; Gid+25; Wil+26]. To perform computation with low overhead on such architectures, high-performance quantum codes with transversal non-Clifford gates may be desirable, where there is no restriction on the codes being LDPC. There are two further impacts we envision of this work, which are specific to the way we go about constructing our codes. First, we construct our codes using punctured decreasing monomial codes. To establish the distance of the resulting quantum code, we provide a closed-form expression for the distance of a classical Boolean decreasing monomial code after puncturing at a downward-closed set on the Boolean hypercube, see Lemma 3.2, which is new to the best of our knowledge. Given how widely-considered decreasing monomial codes are for classical communication (when considered as polar codes) [Ari09; Bar+16; BCL20], this may be of independent interest. There is a further place, this time in the quantum literature, where the study of punctured multivariate evaluation codes may be of interest. Indeed, a key ingredient of the recent construction in [LLL26] was the proof that tensor products of randomly-punctured Reed-Solomon codes are two-way product expanding. However, the achieved field size is very large. One natural approach for reducing the field size is to consider punctured multivariate evaluation codes such as algebraic geometry or Reed-Muller/monomial codes. The key technical observation of this work is that the distance of punctured multivariate decreasing monomial codes is particularly well behaved when the puncture set is itself a downward-closed set. Thus, it is possible that our work on punctured decreasing monomial codes could influence that line of work. 
+
+## 1.1 Overview of Results 
+
+The main results of this work are to significantly expand the regime of parameters achievable by asymptotic families of quantum codes supporting transversal T gates, both in the regime of polynomial rate and distance (see Theorem 1 for the parameters we achieve with explicit families and Theorem 4 for the parameters we achieve with not necessarily explicit families), and constructing such codes in the regime of constant rate and growing distance for the first time (see Theorem 2 — these code families are explicit). For concreteness, we state our notion of T gate transversality in a definition here. 
+
+Definition 1.1 (T gate transversality) . We say that a quantum code supports a transversal T gate if the applica-tion of the physical T gate separately on every physical qubit (the physical transversal T gate) executes the logical 
+
+T gate separately on every logical qubit (the logical transversal T gate).    
+
+> 1By contrast, for the single-qubit non-Clifford gates we are going to study, the implication is immediate; see Remark 1.3.
+> 2We restrict ourselves to stabiliser codes as it is often possible to construct non-stabiliser codes supporting exotic transversal gates [KT23; PR04; KT24a; KT24b; Zha+25], and in particular we suspect it should be possible to construct even further improved quantum codes with transversal Tgates by relaxing our restriction. However, stabiliser codes are almost exclusively considered in practice because it is not clear how crucial fault tolerance procedures, such as fault-tolerant syndrome extraction, may be executed on non-stabiliser codes. These are well-developed and well-understood procedures for stabiliser codes [Got24]. All codes constructed in this work will in fact be quantum CSS codes [CS96; Ste96a]
+
+3Figure 1: The boundary of the achievable dimension and distance exponents (α, β ) in the polynomial rate and distance regime k = Ω  nα+o(1) , d = Ω  nβ+o(1) , for quantum CSS codes with transversal T gates. We show both explicit constructions, and not necessarily explicit constructions, both new in this work, and previously known. We give the exact formulae for the boundaries of explicitly achievable exponents β(α), both new and existing, in Theorem 1 and Remark 1.5, and for not necessarily explicit families in Theorem 4 and Remark 1.6, respectively. 
+
+Figure 2: The boundary of the achievable asymptotic parameters in the constant-rate regime. For a given constant rate R ∈ (0 , 1/3) , we plot cR, where the achievable distance scaling is the growing sub-polynomial expression d = Ω 
+
+
+
+2(cR+o(1)) √log 2 n
+
+. We do not find a difference between explicit families and not necessarily explicit families in the constant-rate regime, and this constant-rate/growing distance parameter regime was not accessible before this work, hence the single line on the figure. The exact formula for the achievable parameters in this regime is given in Theorem 2. 4Remark 1.2. Note that it is common to consider T gate transversality as the situation where physical T on each physical qubit executes logical T † on each logical qubit [HH18]. We consider this situation to be the same as Definition 1.1, and do not distinguish between them throughout the paper. The reason is that one may move from one notion to the other in the same quantum CSS code, with a different choice of logical basis. Concretely, one may make the necessary basis change by imagining acting with the X operator on every logical qubit; this makes the necessary change because XT †X ∝ T .
+
+Remark 1.3. With straightforward generalisations of the notions considered in this paper, we may also construct improved quantum codes with transversal Rℓ := diag (1 , e 2πi/ 2ℓ
+
+) = T 12ℓ−3 gates, for all ℓ ≥ 3. Rℓ is in the ℓ-th level of the Clifford hierarchy. Moreover, since Rℓ is a single-qubit gate, and RℓXR † 
+
+> ℓ
+
+X = Rℓ−1 (up to a global phase), a code with a transversal Rℓ gate implies a code with a transversally addressable Rℓ−1 gate. An analogous implication does not hold for transversal, and transversally addressable multi-qubit gates, for which additional structure is required [He+25b; He+25a]. 
+
+Remark 1.4. An explicit family of quantum codes is one for which there is a polynomial time algorithm con-structing the code (more concretely, a generator matrix for the code). Such constructions are usually arrived at via constructive means. By contrast, one may show the existence of not necessarily explicit families via some randomised argument; see Section 5. 
+
+Turning to our main results, we begin by stating our result on the parameters we may achieve in the polynomial rate and distance regime with explicit families. The new and prior boundary of parameters achievable by explicit families is shown in Figure 1. 
+
+Theorem 1. Consider 
+
+βexplicit (α) = 
+
+( 13 if 0 < α ≤ H2(1 /6)  
+
+> 1−2q∗(α)3
+
+if H2(1 /6) < α < 1 , (1) 
+
+where 
+
+q∗(α) is the unique positive solution to 1 − 2q = (1 + q)H2
+
+ 3H−12 (α)1 + q
+
+
+
+, (2) 
+
+where H2 is the binary entropy function, and H−12 : (0 , 1) → (0 , 1/2) is its inverse. For any constant α ∈ (0 , 1) ,there exists an explicit family of quantum CSS codes with transversal T gates with parameters 
+
+[[ n, Ω( nα+o(1) ), Ω( nβexplicit (α)+ o(1) )]] . (3) 
+
+Remark 1.5. Before this work, the boundary of the achievable exponents for explicit codes was given by 
+
+βexplicit, old (α) = 
+
+ 
+
+> 13
+
+if 0 < α ≤ H2(1 /6)  
+
+> 13
+
+H2(3 H−12 (α)) if H2(1 /6) < α ≤ α∗ 
+
+> 1−αγ∗
+
+if α∗ ≤ α < 1,
+
+(4) 
+
+instead of Equation (1) , where α∗ = H2(p∗) ≈ 0.842 , p∗ = argmin p∈[1 /6,1/3) 3(1 −H2(p))  
+
+> H2(3 p)
+
+≈ 0.271 and γ∗ =min p∈[1 /6,1/3) 3(1 −H2(p))  
+
+> H2(3 p)
+
+≈ 0.678 . This function is obtained by considering Hastings and Haah’s codes [HH18], and taking polynomially many copies thereof. Note that Haah’s codes [Haa18] are not included here since they are not explicit. 
+
+Theorem 1 will be proved in Subsection 4.2 using the preceding construction and results. We next state our second main result on the parameters we may achieve in the constant rate, growing distance regime with explicit families. The achievable parameters in this regime are plotted in Figure 2. 
+
+Theorem 2. For every constant R ∈ (0 , 1/3) , there exists an explicit family of quantum CSS codes with transversal 
+
+T gates and parameters hh 
+
+n, (R + o(1)) n, Ω
+
+
+
+2(cR+o(1)) √log 2(n)ii 
+
+, (5) 
+
+cR = −Φ−1
+
+ 2R
+
+> 1+ R
+
+
+
+> 0, where Φ is the cumulative distribution function of the standard Gaussian. 
+
+5Theorem 2 will be proved in Subsection 4.3 using the preceding construction and results. It is the first result to establish that the overhead exponent of magic state distillation [BH12] γ = log( n/k )log( d) → 0 using a quantum code with a transversal T gate (or even a transversal T gate that allows Clifford corrections), 3 improving upon the value of γ ≈ 0.678 in Hastings and Haah’s paper [HH18]. Previously, γ → 0 had only been achieved with codes supporting larger multi-qubit or qudit gates [KT18b; WHY25; GG25a; Ngu25; NP25]. 4
+
+Corollary 3. There exists an explicit family of quantum codes supporting a transversal T gate whose magic state distillation exponent γ = log( n/k )log( d) tends to zero. 
+
+By relaxing the requirement for the family to be explicit, we find that we obtain further new parameters in the polynomial rate and distance regime. The new and prior boundary of achievable parameters is shown in Figure 1. 
+
+Theorem 4. Consider 
+
+βexist (α) = 
+
+
+
+1/2 if 0 < α ≤ 1/21/2 − α−1/26( H2(1 /3) −1/2) if 1/2 ≤ α ≤ H2(1 /3) 1 − 2H−12 (α) if H2(1 /3) ≤ α < 1
+
+, (6) 
+
+where H2 is the binary entropy function and H−12 : (0 , 1) → (0 , 1/2) is its inverse. For any constant α ∈ (0 , 1) ,there exists a family of quantum CSS codes with transversal T gates with parameters 
+
+[[ n, Ω( nα+o(1) ), Ω( nβexist (α)+ o(1) )]] . (7) 
+
+Remark 1.6. Before this work, the boundary of the achievable exponents for not necessarily explicit codes was given by 
+
+βexist, old (α) = 
+
+ 
+
+> 12
+
+if 0 < α ≤ 1212 + s†  α − 12
+
+ if 12 < α ≤ α† 
+
+> 13
+
+H2(3 H−12 (α)) if α† < α ≤ α∗ 
+
+> 1−αγ∗
+
+if α∗ ≤ α < 1,
+
+(8) 
+
+instead of Equation (6) , where α† = H2(p†) ≈ 0.785 , p† ≈ 0.234 is the unique solution in (1 /6, 1/3) to  
+
+> 13
+
+H2(3 p) − 12
+
+H2(p) − 12
+
+= H′
+
+> 2
+
+(3 p)
+
+H′
+
+> 2
+
+(p) , (9) 
+
+and 
+
+s† = 
+
+> 13
+
+H2(3 p†) − 12
+
+H2(p†) − 12
+
+≈ − 0.727 . (10) 
+
+Moreover, α∗ = H2(p∗) ≈ 0.842 , p∗ = argmin p∈[1 /6,1/3) 3(1 −H2(p))  
+
+> H2(3 p)
+
+≈ 0.271 and γ∗ = min p∈[1 /6,1/3) 3(1 −H2(p))  
+
+> H2(3 p)
+
+≈
+
+0.678 . This function is obtained by considering Hastings and Haah’s codes [HH18], Haah’s divisible tower codes [Haa18], concatenating the two constructions, and taking polynomially many copies thereof. 
+
+Remark 1.7. We found that our randomised construction (see Section 5) did not improve on the parameters of our explicit construction in the constant-rate regime (see Theorem 2). 
+
+## 1.2 Overview of Techniques 
+
+We will now overview the techniques we use to construct quantum codes with transversal T gates. 
+
+1.2.1 T Gate Transversality from Classical Divisibility 
+
+We will begin with an overview of the so-called “ X-generator matrix” formalism in which we work, which is standard in the literature [BH12; HH18], and show how it may be instantiated with classical divisible codes to obtain quantum codes with transversal T gates.        
+
+> 3This includes results where the physical transversal Tgate induces a logical Tgate on some subset of the logical qubits [RK26b].
+> 4Since it is possible to make those codes asymptotically good, for those larger gates it is possible to obtain γ= 0 [WHY25; GG25a; Ngu25].
+
+6One considers a binary matrix G ∈ Fs×n 
+
+> 2
+
+with s ≤ n, and some integer k ∈ { 1, . . . , s − 1}; usually one would make the restriction that G is full-rank. The first k rows of G are called the logical rows of G, and the latter s − k
+
+rows of G are called the stabiliser rows of G. We use G1 and G0 to denote the sub-matrices formed by the logical rows and stabiliser rows, respectively, and G1, G0, G to denote the binary vector spaces spanned by the logical rows, stabiliser rows, and all rows of G, respectively. From G, we define a quantum CSS code [CS96; Ste96a] Q[G]
+
+of length n, whose X stabilisers are given by G0, and whose Z stabilisers are given by G⊥. By placing different requirements on G, one is able to obtain that Q[G] has different, desirable transversality properties. We denote the rows of G by (ga)sa=1 , by |v| the usual Hamming weight of a binary vector v, and by v1 ∗ v2 the overlap of two binary vectors v1 and v2, that is, their componentwise multiplication. We consider the following properties. For all a, b, c ∈ [s],
+
+|ga| ≡ 
+
+(
+
+7 (mod 8) if 1 ≤ a ≤ k
+
+0 (mod 8) if k + 1 ≤ a ≤ s , (11) 
+
+|ga ∗ gb| ≡ 0 (mod 4) for all 1 ≤ a < b ≤ s, (12) 
+
+|ga ∗ gb ∗ gc| ≡ 0 (mod 2) for all 1 ≤ a < b < c ≤ s. (13) In words, we want the overlap of any three rows to have even Hamming weight, the overlap of any two rows to have Hamming weight divisible by 4, and any row to have Hamming weight divisible by 8, unless it is a logical row, in which case it must have Hamming weight equivalent to 7 (mod 8) . Given these conditions, one can show [HH18; BH12] that Q[G] has k logical qubits, and that (under a natural choice of logical basis) the physical transversal 
+
+T gate T ⊗n implements the logical transversal T †, that is, T †⊗ k. As stated in Remark 1.2, we do not distinguish between the situation where T ⊗n implements T †⊗ k and T ⊗k; it is actually easier to consider the former in this exposition. Note that the construction of Q[G] from the matrix G, and the conditions being placed on G, turn out to be necessary and sufficient for a quantum CSS code to have a transversal T gate [Ren+20; HLC22]. 5
+
+Remark 1.8. Weaker, but more easily attained, constraints can be placed on G, to obtain weaker properties on 
+
+Q[G]. For example, the triorthogonality condition [BH12] is a strict weakening, namely, for all a, b, c ∈ [s],
+
+|ga ∗ gb ∗ gc| ≡ 
+
+(
+
+1 (mod 2) if 1 ≤ a = b = c ≤ k
+
+0 (mod 2) otherwise . (14) 
+
+This leads to Q[G] again having k logical qubits, and having a transversal T gate up to Clifford corrections, meaning that there is some (generally non-transversal) Clifford operator on n qubits, U , for which U T ⊗n implements T ⊗k.Interestingly, while the triorthogonality condition is mathematically much weaker than the full requirements above for a transversal T gate, the best asymptotic families of quantum codes satisfying the triorthogonality condition also satisfy the stronger condition for a transversal T gate, both prior to this work [HH18; Haa18], and in this work. In particular, asymptotically good triorthogonal codes for qubits are not known. One may weaken the condition on G further. Indeed, given two permutations π1, π 2 on n elements, suppose that for all a, b, c ∈ [s],
+
+|ga ∗ π1(gb) ∗ π2(gc)| ≡ 
+
+(
+
+1 (mod 2) if 1 ≤ a = b = c ≤ k
+
+0 (mod 2) otherwise . (15) 
+
+If G satisfies this condition, then Q[G] supports a transversal CCZ gate between three codeblocks. This condition is weaker still, and in this case that is reflected in the parameters known to be achievable by quantum codes; [GG25a; Ngu25] constructed asymptotically good quantum codes satisfying this condition. Before moving on, we comment that when G is a matrix over a larger field Fq , and the quantum code Q[G]
+
+is for Galois qudits [Wil26], there is a much richer array of conditions that G can satisfy to achieve different transversality properties on Q[G] [WHY25; Gon+26]. 
+
+The most common way, and the way we pursue in this paper, to obtain matrices G with the conditions in Equations (11) to (13), is to consider a binary classical linear code C, for which dim C = s, and write down a generator matrix ˆG ∈ Fs×N 
+
+> 2
+
+for it. We then choose a set of its coordinates Γ ⊆ [N ] of size k = |Γ|. We make such a choice that C⊥ does not have any non-zero codewords supported entirely inside Γ. In other words, the columns 
+
+> 5Strictly speaking, this is the necessary and sufficient condition for a “positively-signed CSS code” [Ren+20; HLC22], but very similar conditions hold for other signs.
+
+7of ˆG corresponding to Γ are linearly independent, and after row operations and column permutations, ˆG may be rewritten as 
+
+ˆG =
+
+Ik G1
+
+0 G0
+
+
+
+, (16) where Ik is the k × k identity matrix, and we obtain the matrix G =   G1
+
+> G0
+
+, with k logical rows, s − k stabiliser rows, and n := N − k columns. Usually, we require that C has some algebraic properties, which will translate into the desired properties of 
+
+G, and the transversality properties of Q[G]. For our case, suppose that C is an 8-divisible code, meaning that all of its codewords have Hamming weight divisible by 8. Then, by the Ward identities [War90], any overlap of two of its codewords have weight divisible by 4, and any overlap of three of its codewords have weight divisible by 2, and it follows that the resulting G satisfies Equations (11) to (13). While we know that the quantum code has k logical qubits, it in fact turns out that its distance is equal to its Z-distance; see [BH12] or the preliminary material in Subsection 2.4. The distance of the quantum code Q[G]
+
+is thus 
+
+d = dZ = min  
+
+> v∈G ⊥
+> 0\G ⊥
+
+|v|. (17) Often, we use the lower bound 
+
+d = dZ ≥ d  G⊥
+
+> 0
+
+ , (18) where d  G⊥
+
+> 0
+
+ is the classical distance of the classical code G⊥ 
+
+> 0
+
+. In this paper, we will take this lower bound, and it will turn out to be tight; see Proposition 3.7 and its proof. Notice that, because G0 is nothing more than the code 
+
+C shortened at the coordinates Γ, the code G⊥ 
+
+> 0
+
+is nothing more than the code C⊥ punctured at the coordinates 
+
+Γ, that is, G⊥ 
+
+> 0
+
+= punc Γ(C⊥).Since we require C to be an 8-divisible binary linear code, it is natural to look to binary Reed-Muller codes for C; for example, this is how one may construct the [[15 , 1, 3]] code [KLZ96; Ste99; BK05]. The Reed-Muller code RM( m, r ) is 8-divisible if 3r < m . It is instructive to consider why. The codewords of the code RM( m, r ) are in one-to-one correspondence with m-variate polynomials over F2 of degree at most r; each variable satisfies x2 
+
+> i
+
+= xi in these polynomials, meaning that each term in each polynomial is some product of a distinct collection of xi.6 To pass from a polynomial to a codeword, the polynomial is evaluated over the entire Boolean hypercube Fm 
+
+> 2
+
+(in particular, the code has length 2m), but it is helpful to think of the codewords themselves directly as polynomials. The set of monomials of degree at most r, xA : A ⊆ [m] : |A| ≤ r
+
+(where we use the shorthand xA := Q 
+
+> i∈A
+
+xi), forms a basis for RM( m, r ) under this correspondence. It is clear that the Hamming weight of a codeword corresponding to Q 
+
+> i∈S
+
+xi is 2m−| S|, for every S ⊆ [m].Now, the Ward identities [War90] tell us that a (binary, linear) classical code C is 8-divisible if and only if it has a basis, all of whose elements have Hamming weight divisible by 8, for which any pair have overlap with Hamming weight divisible by 4, and for which any triple have Hamming weight divisible by 2; we prove this in Lemma 2.11 for completeness. If f and g are polynomials, and ev( f ) and ev( g) are the corresponding codewords (formed by evaluating them), the crucial fact is that ev( f ) ∗ ev( g) = ev( f g ), that is, the overlap of the two codewords is the evaluation of the product of the polynomials. As a concrete example, given A, B ⊆ [m],we have ev( xA) ∗ ev( xB ) = ev( xA∪B ). Given the above facts, one can see that RM( m, r ) is 8-divisible for 
+
+3r < m ; in particular, given any A, B, C ⊆ [m] for which |A|, |B|, |C| ≤ r, we have |A ∪ B ∪ C| ≤ m − 1, and 
+
+| ev( xA) ∗ ev( xB ) ∗ ev( xC )| is even. Before the present work, the best-known quantum codes with transversal T gates were given by both the work of Hastings and Haah [HH18] and Haah [Haa18], which were optimal in different parameter regimes. Our main inspiration in this paper comes from the work of Hastings and Haah [HH18]. Therein, the authors consider the classical code RM( m, r ), for 3r < m , and consider applying the construction above. Now, the naive thing to do would be to take C = RM( m, r ) for r =  m−13
+
+, for which C⊥ = RM( m, m − r − 1) , and consider any set of its coordinates Γ ⊆ [2 m] of size k = |Γ| < 2r+1 . Since C⊥ has distance 2r+1 , the coordinates Γ cannot entirely contain a non-zero codeword of C⊥, and so the generator matrix ˆG for RM( m, r ) may be written into the form of Equation (16). One then forms the resulting G, and Q[G]. We may then form a lower bound for the quantum code 
+
+d ≥ d  G⊥
+
+> 0
+
+ = d  punc Γ
+
+ C⊥ ≥ d  C⊥ − k = 2 r+1 − k. (19) Of the two lower bounds in Equation (19), the first was mentioned above in Equation (18), and the second is a standard fact that puncturing a code in k positions cannot drop its distance by more than k. For the construction         
+
+> 6Formally, the codewords are in one-to-one correspondence with elements of the polynomial ring F2[x1, x 2, . . . , x m]/(x21−x1, x 22−
+> x2, . . . , x 2
+> m−xm)of degree at most r.
+
+8in [HH18], the first bound is tight (and the corresponding bound in our work will be tight), but the second bound is not, at least when one makes a good choice of Γ.7 The breakthrough made in [HH18] is based on making a careful choice for Γ, and accordingly getting a better value of d. Indeed, Hastings and Haah [HH18] make the particular choice Γ = {A ⊆ [m] : |A| ≤ w} for some integer 0 ≤ w < r ,8 and are able to show that the resulting quantum code has distance Pr+1 
+
+> i=w+1
+
+  r+1 
+
+> i
+
+. This can strictly improve the general lower bound in Equation (19), which is 2r+1 − Pwi=0 ( mi ) for this Γ.
+
+1.2.2 Decreasing Monomial Codes, Downset Punctures, and Protected Points 
+
+To improve upon the construction in Hastings and Haah, we first revisit the Reed-Muller code RM( m, r ). While it is 8-divisible for 3r < m , we note that it has a relatively low dimension for an 8-divisible code. Our simple starting intuition is that we would want to obtain an 8-divisible code C with as large a dimension as possible, because we cannot puncture more than dim( C) points ( k < s above), and since the number of logical qubits will equal the size of the punctured set Γ, we should start by obtaining as large an 8-divisible code C as possible. To do this, we turn to binary monomial codes: natural generalisations of Reed-Muller codes. We give an intuitive overview here; the formal overview is given in the preliminaries. With 2[m] the set of subsets of [m], a binary monomial code is specified by a set ∆ ⊆ 2[m]. The code, denoted C(∆) , is the code spanned by (the evaluations of) the monomials xA, over A ∈ ∆; these monomials form a basis for the code. We will restrict ourselves to the well-behaved and widely-studied sub-class of decreasing monomial codes, for which ∆ is a downward-closed set, meaning that if A ∈ ∆, and B ⊆ A, then B ∈ ∆. For brevity, we refer to such a subset of 2[m] as a downset [STV19]. As one example of decreasing monomial codes being nicely behaved, their dual codes are easy to characterise, and are also decreasing monomial codes; one can convince oneself that 
+
+C(∆) ⊥ = C(∆ ⊥), where 
+
+∆⊥ = {A ⊆ [m] : A ∪ B̸ = [ m] for all B ∈ ∆} (20) 
+
+= {A ⊆ [m] : ¯A / ∈ ∆}, (21) where ¯A = [ m] \ A in the latter expression. We call ∆⊥ the downset dual to ∆.Clearly, RM( m, r ) is an example of a decreasing monomial code. However, it is possible to construct very large, in fact constant rate, decreasing monomial codes with the 8-divisibility property. Indeed, let ∆ = 2 [m−3] ,that is, ∆ is formed of all subsets of {1, 2, . . . , m − 3}. By the same considerations that showed that RM( m, r )
+
+was an 8-divisible code for 3r < m , one can check that C(∆) is 8-divisible with this choice of ∆, and moreover 
+
+C(∆) is a classical code of length 2m and dimension 2m−3, and therefore has constant rate. Such an extreme choice as ∆ = 2 [m−3] would, however, lead to bad quantum code parameters. The reason is that the code dual to C(∆) contains the codeword corresponding to x1x2 . . . x m−1, which has weight two. Puncturing cannot increase this distance, 9 and so the quantum code has distance at most two, because the quantum code has distance equal to that of the punctured form of C(∆) ⊥; see Proposition 3.7. A different, less extreme choice than ∆ = 2 [m−3] , namely weighted Reed-Muller codes [Sor92; GT13], will work out well, however. For these codes, one picks a vector of weights s, a vector of positive integers of length m, and given an integer “total weight” r, one forms a decreasing monomial code from ∆ = {A ⊆ [m] : P 
+
+> i∈A
+
+si ≤ r}. We will return to this below, where we make the simple choice s = (1 , 1, . . . , 1
+
+| {z }
+
+> m−1
+
+, h ), for some positive integer h.Motivated by the desire to use decreasing monomial codes for this problem, we need to understand their distance, and their minimum weight codewords. This is well understood (see Theorem 3.9 of [Cam+20]), and the distance can be seen as a special case of the much more general footprint bound [Høh98; GH00]). Indeed, the distance of C(∆) is simply 
+
+d(C(∆)) = min  
+
+> B∈∆
+
+2m−| B| : (22) a direct generalisation of the distance of Reed-Muller codes. Moreover, one can write down examples of minimum-weight codewords. For example, letting A = argmax B∈∆|B| (picking arbitrarily if there are multiple B giving the       
+
+> 7It is interesting to note that, for the construction of asymptotically good quantum codes with non-Clifford transversal gates such as CCZ , and larger gates [WHY25; GG25a; Ngu25], the actual choice of Γdoes not matter, beyond its size. In this work, we must ensure that Γhas the right structure, not just size.
+> 8In words, they puncture the points on the Boolean hypercube whose Hamming weights are at most w.
+> 9In this work, we do not consider situations where entire codewords (of the dual code) can be punctured away, that is, we only consider situations where puncturing is an injective operation; this means that puncturing cannot increase distance. We discuss this more below, and call the condition that no entire codeword is punctured (that puncturing is injective) the non-annihilation condition.
+
+9maximum), the polynomial Y
+
+> i∈A
+
+(1 + xi) = X
+
+> B⊆A
+
+xB (23) yields a codeword of C(∆) of weight 2m−| A|.At this point, the key observation we will make will be that the distance of punctured decreasing monomial codes is particularly well-behaved, when the puncture set Γ is itself a downset . In other words, we want to specify two downsets ∆, Γ ⊆ 2[m], and consider punc Γ (C(∆)) . We show a closed-form expression for the distance of this code in Lemma 3.2, under a natural (also closed form) restriction that says that no codewords of C(∆) are completely contained inside the set of punctured points Γ, so that puncturing is an injective code operation; let us refer to this as the non-annihilation condition. Under the non-annihilation condition, we will prove that 
+
+d (punc Γ (C(∆))) = min  
+
+> A∈∆
+
+{V ⊆ ¯A : V ∈ ¯Γ} .10 (24) We can provide intuition here by showing that the distance is at most the right-hand side. Indeed, suppose that A ∈ ∆ is a choice saturating the minimum on the right-hand side. We consider the polynomial as above, Q
+
+> i∈A
+
+(1 + xi). Before puncturing, its support is exactly 2 ¯A, that is, the set of subsets of ¯A. After puncturing the points Γ, its remaining support is {V ⊆ ¯A : V ∈ ¯Γ}.With this exposition, we may finally present the explicit construction of quantum codes with transversal T
+
+gates developed in Section 4. We let ∆ be a downset corresponding to a weighted Reed-Muller code with weights 
+
+s = (1 , 1, . . . , 1
+
+| {z }
+
+> m−1
+
+, h ) and some total weight r. By taking h larger, we may construct increasingly high-rate decreasing monomial codes with the 8-divisibility property. 11 The distance of our quantum code is at least 12 
+
+d  punc Γ(C(∆) ⊥) = min 
+
+> A∈∆⊥
+
+{V ⊆ ¯A : V ∈ ¯Γ} (25) 
+
+= min  
+
+> A / ∈∆
+
+{V ⊆ A : V ∈ ¯Γ} , (26) where going into the second line we use the expression for the dual downset in Equation (21). For this expression to be valid, we need the non-annihilation condition on C(∆ ⊥), but this turns out to be easily satisfied by enforcing 
+
+Γ ⊆ ∆. We will go on to show that with the simple choice of 
+
+Γ = {A ⊆ [m − 1] : |A| ≤ w}, (27) for some 0 ≤ w < r , which ensures Γ ⊆ ∆, we can obtain improved explicit quantum codes with transversal T
+
+gates, including those with constant rate and growing distance. In Section 5, we will improve on the parameters in our explicit construction (at least in the regime of polynomial rate and distance), by making the same choice for ∆, but a slightly more fine-grained choice for Γ. We will still start from a Γ of the form of Equation (27), for some w, but we will “protect” some points from this puncture set. The intuition for this is as follows. One may rewrite the distance of the quantum code from Equation (26) succintly as 
+
+d = min  
+
+> A / ∈∆
+
+2A \ Γ , (28) where 2A is the set of subsets of A ⊆ [m]. We consider a hypergraph H on the first m − 1 variables, where each hyperedge has size t, for some integer t ≤ w. For some integer y > t , we will say that H protects the y-sets if, for every subset L of [m − 1] of size y, L ⊇ E for some hyperedge E of H. The more fine-grained choice of Γ we make is 
+
+Γ = {A ⊆ [m − 1] : |A| ≤ w and E̸ ⊆ A for all hyperedges E of H} . (29) In other words, H “protects” certain points from being punctured by Γ. Note that Γ is still a downset. If A is a set not in ∆ of size |A| ≥ y with A ⊆ [m − 1] , then A is protected from the puncturing, since there is some hyperedge E of H (of size t) for which E ⊆ A. Every set contained in A that contains E is protected from the puncture, of which there are 2|A|−| E|, and we establish that 2A \ Γ ≥ 2|A|−| E|. On the other hand, if A is     
+
+> 10 The non-annihilation condition in fact exactly says that this right-hand side is positive, which is sensible since we are claiming it as the distance of a code.
+> 11 Note that we in fact found that taking hlarger than 1only helped for relatively high quantum code rates; for relatively low rates, we do not improve on the parameters of [HH18; Haa18]; see Figure 1.
+> 12 This will in fact turn out to be an equality in our constructions, in other words, the lower bound of Equation (18) will always be tight for us.
+
+10 a minimal set not in ∆ for which A̸ ⊆ [m − 1] , i.e., m ∈ A, then A has at least 2|A|− 1 subsets not in Γ, namely, those containing m, and we have 2A \ Γ ≥ 2|A|− 1. Bounding the distance of the quantum code then becomes a case of arguing the lower bound on 2A \ Γ over every set A / ∈ ∆; see Section 5. For our choice of the hypergraph H, we make a simple existence argument based on choosing hyperedges randomly. We find that doing so allows us to choose a relatively small number of hyperedges to protect the y-sets for a relatively large y. Because the number of hyperedges is relatively small, we retain a relatively large puncture set, and therefore a high-rate quantum code, but now with an improved distance in certain cases. 
+
+## 1.3 Relation to Prior Works 
+
+The first quantum code to support a transversal T gate was the [[15 , 1, 3]] quantum (punctured) Reed-Muller code [KLZ96; Ste99; BK05]. It was later realised that 3-dimensional topological codes could support non-Clifford transversal gates like the T gate [BM07; KB15]. In 2012, Bravyi and Haah developed the triorthogonality framework [BH12]. This allows one to construct codes for which the physical transversal T gate, followed by some physical Clifford correction, executes the logical transversal T gate: a weaker notion than that in this paper. Necessary and sufficient conditions for several related notions of T-gate transversality, including codespace preservation and specified logical actions, were subsequently developed [Ren+20; HLC22]. For example, a CSS-T code [Ren+20; Cam+24a; Cam+24c; Cam+24b; Bod+26] is a quantum CSS code for which the T gate on every physical qubit only preserves the codespace, where there is no requirement on the corresponding logical action; in general the logical action may be the identity. Indeed, [Ber+25] constructed the first asymptotically good CSS-T codes, and the logical action is the identity. [RK26a] then constructed an asymptotically good family for which the physical transversal T gate induces the Clifford operator S† on every logical qubit. Further recent works [CL26; RK26b] have used novel methods to construct new families of codes for which transversal physical 
+
+T realises novel logical non-Clifford operations, for example T and T † on specified sets of logical qubits. Bravyi and Haah’s paper [BH12] was also part of a line of work reducing the magic state distillation exponent 
+
+γ [BK05; MEK13; Jon13; Haa+17; HH18; KT18b; WHY25; GG25a; Ngu25; NP25], eventually achieving γ = 0 
+
+with codes supporting transversal multi-qubit or qudit gates. Of these, the codes in [HH18] support a transversal 
+
+T gate in the sense of this paper, up to the equivalence mentioned in Remark 1.2. Another key work from a similar time was that of Haah [Haa18], and together these two papers constitute the best asymptotic families of quantum codes with transversal T gates prior to this work. A work that derives different results, but is closely related to ours in some of its techniques, is [KT18a], which studies magic state distillation protocols by using punctured polar codes, that is, punctured decreasing monomial codes; we also use punctured decreasing monomial codes for this purpose in this paper. Many works are also studying non-Clifford transversal gates on quantum LDPC codes [GL25; SPW24; Zhu25; GG25b; Zhu+25; ZKH26; KZH26; Bre+26; Li+25; LLL26]. Here, the primary focus is on transversal CCZ gates because the theory is more mature than that for T gates, and in particular the logical action in all of these constructions is some product of CCZ gates, as far as we know. 13 
+
+Finally, further recent works have studied quantum codes with transversal non-Clifford gates in the finite-length regime. Notably, [JA25] studies quantum codes supporting transversal T gates in this setting, with some asymptotic families. Other works have studied and classified quantum codes with other notions of non-Clifford gate transversality, some allowing Clifford corrections, in the finite-length regime [NH22; Cer+25; Jac+26; SGJ26; Gon+26], with the primary motivation being to construct or classify small magic state distillation protocols. 
+
+# 2 Preliminaries 
+
+## 2.1 Classical Decreasing Monomial Codes 
+
+Throughout, we consider the Boolean hypercube in m variables, that is, Fm 
+
+> 2
+
+. We identify points on the Boolean hypercube with subsets of [m] := {1, 2, . . . , m }, that is, Fm 
+
+> 2
+
+≡ 2[m], in the natural way. Accordingly, we will think of a subset ∆ ⊆ 2[m] as both a set of subsets of [m], and as a set of points in the Boolean hypercube. We work with the polynomial ring F2[x1, x 2, . . . , x m]/(x21 − x1, x 22 − x2, . . . , x 2 
+
+> m
+
+− xm), whose elements are the polynomials in m variables, with coefficients in F2, for which each variable satisfies x2 
+
+> i
+
+= xi. The set of polynomials in this ring is then in one-to-one correspondence with the set of functions f : Fm 
+
+> 2
+
+→ F2. In turn, these are in one-to-one correspondence with the subsets of Fm 
+
+> 2
+
+, where a polynomial f : Fm 
+
+> 2
+
+→ F2 is uniquely specified by its support                
+
+> 13 For most of these constructions, the physical gate is transversal CCZ , and for all as far as we know the logical action is some product of CCZ gates. Nevertheless, if the physical gate is transversal CCZ , one can concatenate with the [[8 ,3,2]] quantum code, for which physical transversal Timplements logical CCZ , to obtain an LDPC code for which physical transversal Timplements the same logical product of CCZ gates.
+
+11 supp( f ). Given a point A ∈ Fm 
+
+> 2
+
+, we write xA for the monomial corresponding to A, which is an element of the above polynomial ring. We write ev : F2[x1, x 2, . . . , x m]/(x21 − x1, x 22 − x2, . . . , x 2 
+
+> m
+
+− xm) → F2m 
+
+> 2
+
+for the evaluation map, which evaluates a function f at all points in the hypercube Fm 
+
+> 2
+
+. More formally, we identify the 2m coordinates in 
+
+F2m 
+
+> 2
+
+with bit strings x ∈ Fm 
+
+> 2
+
+(in some fixed ordering). Then, ev( f ) is a bit string of length 2m, where for each 
+
+x ∈ Fm 
+
+> 2
+
+, the x’th entry of ev( f ) is f (x). Given two bit strings x and y of the same length, x ∗ y denotes the componentwise multiplication of x and y, otherwise known as their overlap. We will make use of the fact that 
+
+ev( f ) ∗ ev( g) = ev( f g ).
+
+Definition 2.1 (Downset) . A set of points in the hypercube ∆ ⊆ 2[m] ≡ Fm 
+
+> 2
+
+is called downward-closed if, given 
+
+A ∈ ∆, and given some B ∈ Fm 
+
+> 2
+
+for which B ⊆ A, we have B ∈ ∆. For the sake of brevity, we also call such a ∆
+
+a downset, using the language of [STV19]. 
+
+Definition 2.2 ((Decreasing) Monomial Codes) . Given a non-empty set of points ∆ ⊆ 2[m], the binary affine monomial code corresponding to ∆ is 
+
+C(∆) := span F2 {ev( xA) : A ∈ ∆}. (30) 
+
+If ∆ is empty, then C(∆) = {0}. Since we only study binary affine monomial codes, we will sometimes simply call C(∆) the monomial code corresponding to ∆ for brevity. If ∆ is a downset, the corresponding code is called a decreasing (binary affine) monomial code. 
+
+It is easy to characterise the weight of a codeword corresponding to a monomial. 
+
+Proposition 2.3. Given A ∈ 2[m], the weight of the codeword ev( xA) is 
+
+2m−| A|. (31) 
+
+In particular, ev( xA) has even Hamming weight if and only if A̸ = [ m].Proof. The function xA is supported at a point in Fm 
+
+> 2
+
+if and only if all variables corresponding to A take the value 1; the remaining m − | A| variables are arbitrary. 
+
+Lemma 2.4 (Parameters of Binary Monomial Codes) . Given ∅̸ = ∆ ⊆ Fm 
+
+> 2
+
+, C(∆) is a linear code of length 2m
+
+with dimension |∆|. Its minimum distance is 
+
+d(C(∆)) = min  
+
+> A∈∆
+
+2m−| A|. (32) 
+
+Proof. The length of C(∆) is immediate from its definition. Its dimension is also immediate since monomials are linearly independent functions, and the evaluation map is a linear bijection. For the distance, let r := max A∈∆ |A|.Then, C(∆) is contained in RM( m, r ), which has minimum distance 2m−r , and so the claimed distance is indeed a lower bound. The upper bound follows from Proposition 2.3. 
+
+Remark 2.5. It turns out that the parameters of binary monomial codes are much easier to prove than general 
+
+q-ary codes, for which one must use the footprint bound from Gröbner basis theory [Høh98; GH00]. 
+
+Next, we study the dual code to decreasing monomial codes. First, we make a definition. 
+
+Definition 2.6 (Dual Downset) . Given a downset ∆ ⊆ Fm 
+
+> 2
+
+, its dual downset is 
+
+∆⊥ := {A ⊆ [m] : A ∪ B̸ = [ m] for all B ∈ ∆}. (33) 
+
+Remark 2.7. An equivalent, and sometimes convenient characterisation of the dual downset is 
+
+∆⊥ = {A ⊆ [m] : ¯A / ∈ ∆}. (34) 
+
+Lemma 2.8 (Dual of Decreasing Monomial Codes) . Given a downset ∆, its dual ∆⊥ is a downset, and moreover the dual of the corresponding decreasing monomial code is the decreasing monomial code 
+
+C(∆) ⊥ = C(∆ ⊥). (35) 
+
+Remark 2.9. This fact is well-known, see for example Proposition 6 of [Bar+16], although we use language here that we feel to be most appropriate for our purposes. 
+
+12 Proof. Given A ∈ ∆⊥, we have A ∪ B̸ = [ m] for all B ∈ ∆. For all C ⊆ A, for all B ∈ ∆, we have C ∪ B ⊆
+
+A ∪ B̸ = [ m], and so ∆⊥ is a downset. To see the code duality, we start by showing that |∆⊥| = 2 m − | ∆|. To see this, first notice the simple case 
+
+∆ = {(0 , 0, . . . , 0) }, we have ∆⊥ = 2 [m] \ { (1 , 1, . . . , 1) }, in which case we have |∆| = 1 and |∆⊥| = 2 m − 1. Then, consider building up ∆ by adding elements one-by-one, ensuring ∆ is a downset at each step. Every time the size of ∆ increases by one, the size of ∆⊥ decreases by one, and so we indeed have |∆⊥| = 2 m − | ∆|.
+
+|∆⊥| = 2 m − | ∆| implies dim C(∆) ⊥ = dim C(∆ ⊥), and so we must only show one side is contained in the other. We conclude the proof by noting that if A ∈ ∆ and B ∈ ∆⊥, we have 
+
+ev( xA) · ev( xB ) = | ev( xA) ∗ ev( xB )| (36) 
+
+= | ev( xAxB )| (37) 
+
+= | ev( xA∪B )| (38) 
+
+≡ 0 (mod 2) . (39) In the first line, we recall the notation ∗ for the componentwise multiplication of two bit strings. Going into the second line, we have used the fact that, given any two functions f, g , we have ev( f g ) = ev( f ) ∗ ev( g). Going into the final line, we have used the fact that A ∪ B̸ = [ m]; see Proposition 2.3. 
+
+## 2.2 Divisibility of Classical Codes 
+
+Above, in Proposition 2.3, we established the weight of any codeword corresponding to a monomial. It is much harder in general to characterise the weights of codewords corresponding to more general polynomials. However, we can get a handle on their properties using the Ward criteria, as follows. 
+
+Definition 2.10 (8-Divisibility of a Binary Code) . A binary linear code C is called 8-divisible if all its codewords have Hamming weight divisible by 8.
+
+Lemma 2.11 (Ward Criteria for Divisibility) . Given a binary linear code C, we consider a basis for it; call the basis c1, c 2, . . . , c s, where s = dim C. C being 8-divisible is equivalent to the following conditions all being true simultaneously: 1. For each α ∈ [s], |cα| is divisible by 8;2. For each α, β ∈ [s] with α < β , |cα ∗ cβ | is divisible by 4;3. For each α, β, γ ∈ [s] with α < β < γ , |cα ∗ cβ ∗ cγ | is divisible by 2.
+
+Remark 2.12. Notice that if the Ward criteria hold for a particular basis of C, the code C is 8-divisible, and therefore the Ward criteria hold for all bases of C.
+
+The proof may be found in [War90]. Indeed, that reference proves the natural generalisation of the above statement for all 2e-divisibility. We provide a sketch here for completeness. 
+
+Proof. Any codeword c of C is uniquely specified by some set of basis elements B ⊆ [s] and equals 
+
+c = X
+
+> b∈B
+
+cb, (40) where c = 0 if B = ∅. The inclusion-exclusion formula then gives us 
+
+|c| ≡ X
+
+> b∈B
+
+|cb| − 2 X
+
+> {b,c }⊆ B
+
+|cb ∗ cc| + 4 X
+
+> {b,c,d }⊆ B
+
+|cb ∗ cc ∗ cd| (mod 8) . (41) If the Ward criteria hold for this basis at e = 3 , then the code C is 8-divisible. On the other hand, if the code C is 8-divisible, given a basis c1, c 2, . . . , c s, their weights must be divisible by 
+
+8. We then have that the weight of the overlap of any two/three basis elements is divisible by four/two from a similar inclusion/exclusion principle. For example, 
+
+2|c1 ∗ c2| = |c1| + |c2| − | c1 + c2|, (42) and the right-hand side is divisible by 8.13 Using the above lemma, it is possible to provide simple sufficient conditions under which a (decreasing) monomial code is 2e-divisible. Since the transversality of T gates is our main focus ( e = 3 in the previous lemma), we only show this case for simplicity. 
+
+Proposition 2.13 (8-Divisibility of (Decreasing) Monomial Codes) . Consider a set of points ∆ ⊆ 2[m], the binary affine monomial code corresponding to ∆, C(∆) , is 8-divisible if the following conditions hold simultaneously: 1. For each A ∈ ∆, |A| ≤ m − 3;2. For each A, B ∈ ∆, |A ∪ B| ≤ m − 2;3. For each A, B, C ∈ ∆, |A ∪ B ∪ C| ≤ m − 1.Proof. For A ∈ ∆, ev( xA) form a basis for the code C(∆) . Noting that we have ev( xA) ∗ ev( xB ) = ev( xA∪B ) and 
+
+ev( xA) ∗ ev( xB ) ∗ ev( xC ) = ev( xA∪B∪C ), the statement follows from Proposition 2.3 and Lemma 2.11. 
+
+Remark 2.14. While we only proved sufficiency of the conditions in Proposition 2.13, the conditions turn out to be necessary and sufficient. 
+
+## 2.3 Classical Weighted Reed-Muller Codes 
+
+Let us now introduce a generalisation of Reed-Muller codes which will be important throughout the paper. 
+
+Definition 2.15 (Weighted Reed-Muller Codes) . Let s = ( s1, s 2, . . . , s m) be a vector of positive integers. Given a bit string A ∈ Fm 
+
+> 2
+
+, or equivalently a subset A ⊆ [m], we define a generalised weight 
+
+|A|s =
+
+> m
+
+X
+
+> i=1
+
+Aisi, (43) 
+
+viewing A as a bit string, or 
+
+|A|s = X
+
+> i∈A
+
+si, (44) 
+
+viewing A as a subset of [m]. Given a choice of s, and a positive integer r, we have a classical weighted Reed-Muller code [Sor92; GT13] defined as C(Ws,r ), where Ws,r := {A ⊆ [m] : |A|s ≤ r}, in the notation of Definition 2.2. 
+
+The following is a known result [Sor92], but we prove it here for completeness. 
+
+Proposition 2.16 (Dual of a Weighted Reed-Muller Code) . Consider a classical weighted Reed-Muller code 
+
+C(Ws,r ) as in Definition 2.15. Let S = Pmi=1 si, and assume S ≥ r + 1 . The dual of C(Ws,r ) is C(Ws,S −r−1).Proof. Since Ws,r is a downset, by Lemma 2.8, it is enough to prove that W⊥ 
+
+> s,r
+
+= Ws,S −r−1. To do this, we use the alternative characterisation of the dual downset, as in Remark 2.7. For any set B ⊆ [m], we have B / ∈ W s,r 
+
+if and only if |B|s > r . Moreover, for any B ⊆ [m], |B|s > r if and only if | ¯B|s ≤ S − r − 1, and the result follows. We give sufficient conditions for weighted Reed-Muller codes to be 8-divisible. 
+
+Lemma 2.17 (8-Divisibility of Weighted Reed-Muller Codes) . Consider a classical weighted Reed-Muller code 
+
+C(Ws,r ) as in Definition 2.15. Let S = Pmi=1 si, s(1) be the largest of the si, breaking ties arbitrarily, and let s(2) 
+
+be the second-largest of the si, again breaking ties arbitrarily, and where we may have s(2) = s(1) . Suppose 
+
+3r < S (45) 
+
+2r < S − s(1) (46) 
+
+r < S − s(1) − s(2) . (47) 
+
+Then, C(Ws,r ) is 8-divisible. 
+
+14 Proof. Since Ws,r is a downset, it suffices to check that it satisfies the conditions of Proposition 2.13. Given 
+
+A, B, C ∈ W s,r , we have |A ∪ B ∪ C|s ≤ | A|s + |B|s + |C|s ≤ 3r < S . Since [m] is the unique set of weight S, we cannot have A ∪ B ∪ C = [ m]. Moreover, we have 
+
+min 
+
+> D⊆[m]
+> |D|=m−1
+
+|D|s = S − s(1) . (48) For every A, B ∈ W s,r , we have |A ∪ B|s ≤ 2r < S − s(1) , and so A ∪ B cannot contain a subset of [m] of size 
+
+m − 1; in other words, |A ∪ B| ≤ m − 2. Finally, 
+
+min 
+
+> D⊆[m]
+> |D|=m−2
+
+|D|s = S − s(1) − s(2) , (49) and it follows that every A ∈ W s,r has |A| ≤ m − 3.
+
+## 2.4 Quantum CSS Codes from X-Generator Matrices 
+
+We now review a standard construction for developing quantum CSS codes, where X stabilisers and X logicals are developed from a single classical code, often with algebraic properties, in order to ensure the quantum code has some desirable transversal gates. See [NC+00] for the preliminary material on quantum CSS codes. Let C be some classical linear code. We write down a generator matrix for C, call it ˆG, that is, a matrix whose rows form a basis for C. Consider some set of columns of ˆG that are linearly independent. We permute the columns of ˆG such that these become the k left-most columns of ˆG, and after row operations, we write ˆG into the form 
+
+ˆG =
+
+Ik G1
+
+0 G0
+
+
+
+, (50) where Ik is the k × k identity matrix. It is convenient to write 
+
+G := 
+
+G1
+
+G0
+
+
+
+, (51) and we let G, G1, and G0 denote the row spans of the matrices G, G1 and G0, respectively. We then form a quantum CSS code Q, whose X stabilisers are given by G0, and whose Z stabilisers are given by G⊥. We then have the following. 
+
+Proposition 2.18. Let C be a self-orthogonal classical code, that is, C ⊆ C⊥. The resulting quantum CSS code 
+
+Q from the above construction satisfies the following: 1. Q has k logical qubits; 2. The distance of Q is equal to its Z-distance, which is 
+
+dZ (Q) = min   
+
+> f∈G ⊥
+> 0\G ⊥
+
+|f |; (52) 
+
+3. The rows of G1 may be used as a canonical basis of non-trivial X and Z-logical operators. 
+
+Remark 2.19. This proof is quite standard; see Lemma 1 of [BH12], although we include it here for completeness. Proof. Let G have s rows and n columns. Let the rows of G be (gi)si=1 . The self-orthogonality of C, as well as the structure of the matrix in Equation (50) imply that 
+
+gi · gj =
+
+(
+
+1 if 1 ≤ i = j ≤ k
+
+0 otherwise. (53) We then consider any linear relation kX
+
+> i=1
+
+cigi =
+
+> s
+
+X
+
+> i=k+1
+
+cigi (54) 15 for any (ci)si=1 ∈ Fs
+
+> 2
+
+. Taking the inner product with gj , for each j = 1 , . . . , k in turn, yields cj = 0 for each 
+
+j = 1 , . . . , k . This tells us that G0 ∩ G 1 = 0 , and that the rows of G1 are linearly independent. The number of logical qubits of Q is therefore 
+
+dim G − dim G0 = k. (55) Next, let us show that G⊥ 
+
+> 0
+
+= G1 + G⊥. Given Equation (53), we have G1 ∩ G ⊥ = 0 , and therefore 
+
+dim( G1 + G⊥) = dim G1 + dim G⊥ (56) 
+
+= k + n − dim G (57) 
+
+= k + n − k − dim G0 (58) 
+
+= n − dim G0 (59) 
+
+= dim G⊥ 
+
+> 0
+
+. (60) Moreover, G1 ⊆ G ⊥ 
+
+> 0
+
+by Equation (53), and G⊥ ⊆ G ⊥ 
+
+> 0
+
+by definition, giving G1 + G⊥ ⊆ G ⊥ 
+
+> 0
+
+, and we indeed have 
+
+G⊥ 
+
+> 0
+
+= G1 + G⊥.This fact, along with G1 ∩ G ⊥ = 0 give us 
+
+G⊥ 
+
+> 0
+
+\ G ⊥ = {x + y : x ∈ G 1 \ { 0}, y ∈ G ⊥}. (61) However, because G⊥ ⊇ G 0, we have 
+
+G⊥ 
+
+> 0
+
+\ G ⊥ ⊇ { x + y : x ∈ G 1 \ { 0}, y ∈ G 0} = G \ G 0, (62) where in the equality we have used G0 ∩ G 1 = 0 . Since the X and Z-distances are 
+
+dX = min  
+
+> f∈G\G 0
+
+|f | (63) 
+
+dZ = min   
+
+> f∈G ⊥
+> 0\G ⊥
+
+|f |, (64) respectively, we have dX ≥ dZ , and the distance of the quantum code is equal to its Z distance, which has the given expression. Finally, the rows of G1 satisfy the correct orthogonality relation, both with themselves, and with the stabilisers to form a canonical basis of both X and Z non-trivial logical operators. Moreover, G0 ∩ G 1 = 0 and G = G0 + G1
+
+implies that (gi + G0)ki=1 forms a basis for G/G0, whereas G⊥ 
+
+> 0
+
+= G1 + G⊥ and G1 ∩ G ⊥ = 0 imply that (gi + G⊥)ki=1 
+
+forms a basis for G⊥ 
+
+> 0
+
+/G⊥.We omit the proof of the following proposition linking the divisibility of the classical code C to its transversality properties, since it is a standard calculation [HH18; BH12]. In the statement, we consider the one-qubit gate which is in exactly the third level of the Clifford hierarchy [GC99]: 
+
+T =
+
+1 00 e iπ 
+
+> 4
+
+
+
+. (65) 
+
+Proposition 2.20. Suppose that the classical linear code C in the above construction is 8-divisible, and suppose that we make a choice of logical basis for the quantum CSS code Q as given in Proposition 2.18. The physical oper-ator acting transversally with T on each physical qubit executes the operator T † on each logical qubit transversally, that is, 
+
+T ⊗n = ( T †)⊗k. (66) 
+
+In short, Q supports a transversal T gate (without Clifford corrections). 
+
+Remark 2.21. Given a quantum CSS code with a choice of logical basis for which T ⊗n = ( T †)⊗k, one can change its logical basis so that T ⊗n = T ⊗k; see Remark 1.2. 
+
+# 3 Quantum Codes from Decreasing Monomial Codes Punctured at a Downset 
+
+## 3.1 The Distance of Classical Decreasing Monomial Codes Punctured at a Downset 
+
+To construct improved quantum codes with transversal T gates, we will need to be able to establish the distance of classical decreasing monomial codes punctured at a downset; we find a closed-form expression for this quantity in this section. 16 Definition 3.1 (Punctured Monomial Codes) . Given some ∆ ⊆ 2[m], the coordinates of the code C(∆) may themselves be identified with the coordinates of the Hamming cube Fm 
+
+> 2
+
+≡ 2[m]. Given some set Γ ⊆ Fm 
+
+> 2
+
+, we let 
+
+C(∆ , Γ) be the monomial code C(∆) punctured at the points Γ, that is, 
+
+C(∆ , Γ) := punc Γ C(∆) . (67) 
+
+This is a code of length 2m − | Γ|. When ∆ and Γ are both downsets, we call C(∆ , Γ) a decreasing monomial code punctured at a downset. 
+
+The following lemma on the distance of a decreasing monomial code punctured at a downset is new as far as we know. 
+
+Lemma 3.2 (Distance of a Decreasing Monomial Code Punctured at a Downset) . Let ∆, Γ ⊆ 2[m] be downsets. Suppose that ¯A ∈ ¯Γ for every A ∈ ∆.14 (68) 
+
+Let C(∆ , Γ) be the corresponding decreasing monomial code punctured at a downset. The minimum distance of 
+
+C(∆ , Γ) is 
+
+d(C(∆ , Γ)) = min  
+
+> A∈∆
+
+|{ V ⊆ ¯A : V ∈ ¯Γ}| . (69) 
+
+Remark 3.3. Note that the assumption ¯A ∈ ¯Γ for every A ∈ ∆ implies that |{ V ⊆ ¯A : V ∈ ¯Γ}| is positive for every A ∈ ∆, and thus we are not claiming a distance of zero, which would be meaningless. Moreover, the condition of Equation (68) is a natural one, because it says that in our puncturing, we are not removing an entire codeword of the original code C(∆) ; in other words, we are only considering the situation that puncturing is an injective code operation; we referred to this in the discussion in Section 1.2.2 as the non-annihilation condition, because it says that no codeword is “annihilated” by the puncturing. Proof. First, we show the distance upper bound. For any A ∈ ∆, consider the polynomial 
+
+f = Y
+
+> i∈A
+
+(1 + xi). (70) By expanding out the product, this polynomial is equal to 
+
+f = X
+
+> B⊆A
+
+xB . (71) Because ∆ is a downset, the evaluation of this polynomial is a member of C(∆) . On Fm 
+
+> 2
+
+, the polynomial evaluates to 1 if and only if xi = 0 for all i ∈ A, meaning that its support is exactly the set of points with the variables in 
+
+A set to 0, and the variables in ¯A allowed to vary. In other words, the support of f is exactly 
+
+supp( f ) = {V ⊆ ¯A} ⊆ Fm 
+
+> 2
+
+. (72) Puncturing the points Γ, the support of f is now supp (f |¯Γ) = {V ⊆ ¯A : V ∈ ¯Γ}, (73) which is non-empty by the assumption in Equation (68). This means that, for every A ∈ ∆, we have 
+
+d(C(∆ , Γ)) ≤ |{ V ⊆ ¯A : V ∈ ¯Γ}| , (74) and so 
+
+d(C(∆ , Γ)) ≤ min  
+
+> A∈∆
+
+|{ V ⊆ ¯A : V ∈ ¯Γ}| . (75) For the distance lower bound, let us consider any non-zero polynomial 
+
+f = X
+
+> B∈∆
+
+cB xB : cB ∈ F2. (76) We begin by lower bounding the size of the support of f on the whole Boolean hypercube Fm 
+
+> 2
+
+, before considering the size of its support on ¯Γ. Let A be any maximal monomial in the support of f , that is, let A be any element              
+
+> 14 For clarity, note that A⊆[m], and so ¯A:= [ m]\A, whereas Γ⊆2[m], and so ¯Γ := 2 [m]\Γ.
+
+17 in ∆ for which cA = 1 and for which B ∈ ∆ with A ⊊ B =⇒ cB = 0 . For every V ⊆ ¯A, we define a set of points 
+
+SV ⊆ Fm 
+
+> 2
+
+:
+
+SV := {U ⊔ V : U ⊆ A}. (77) We will show that for every V , f must be supported at some point in SV . Since the SV are disjoint, and there are 2m−| A| possible choices for V , the weight of f must be at least 2m−| A|. Indeed, for any V , consider the sum 
+
+X
+
+> y∈S V
+
+f (y) = X
+
+> y∈S V
+
+X
+
+> B∈∆
+
+cB xB (y) (78) 
+
+= X
+
+> B∈∆
+
+cB
+
+X
+
+> y∈S V
+
+xB (y). (79) Given B ∈ 2[m] and y ∈ Fm 
+
+> 2
+
+, we have xB (y) = 1 if and only if B ⊆ y, where we recall the natural identification of 2[m] with Fm 
+
+> 2
+
+as in Subsection 2.1. For each B ∈ ∆ for which cB = 1 , we will now evaluate P 
+
+> y∈S V
+
+xB (y). We first note that if B \ A̸ ⊆ V then xB (y) = 0 for all y ∈ S V , because y \ A = V for all y ∈ S V . On the other hand, suppose that B \ A ⊆ V , and suppose for the moment that B̸ = A. Since A was chosen to be maximal among the sets for which cA = 1 , the only possibility is that B ∩ A̸ = A. There are therefore an even number of points 
+
+y ∈ S V for which B ⊆ y, meaning that P 
+
+> y∈S V
+
+xB (y) = 0 . The only remaining possibility is B = A, for which we have P 
+
+> y∈S V
+
+xB (y) = 1 , and we conclude that 
+
+X
+
+> y∈S V
+
+f (y) = cA = 1 . (80) This implies that f is supported somewhere in SV , as required. We have established that f has weight at least 2m−| A| on the whole Boolean hypercube by establishing that it is supported somewhere in the 2m−| A| disjoint sets SV , for each V ⊆ ¯A. Given any V ⊆ ¯A for which V ∈ ¯Γ, we have SV ⊆ ¯Γ, which follows from the fact that Γ is a downset. We conclude that the weight of f on ¯Γ is at least the number of subsets V ⊆ ¯A for which V ∈ ¯Γ, which is at least the claimed distance. 
+
+Example 3.4. The choices in Hastings and Haah [HH18] can be reproduced with the downsets 
+
+∆ = {A ⊆ [m] : |A| ≤ r} (81) 
+
+Γ = {A ⊆ [m] : |A| ≤ w} (82) 
+
+for some integers 0 ≤ w < r < m/ 2. Note that making this choice of ∆ means that the un-punctured code C(∆) in this case is simply the Reed-Muller code RM (m, r ). Our formula for the distance of the resulting punctured Reed-Muller code C(∆ , Γ) reproduces their computed formula, which is Pm−ri=w+1 
+
+  m−ri
+
+. Interestingly, they establish this particular formula using a different, inductive proof; see Lemma 1 in [HH18]. 
+
+## 3.2 Classical to Quantum Codes 
+
+We will now instantiate the construction of Section 2.4 with the classical code C(∆) , and a puncture set Γ.Let ∆, Γ ⊆ 2[m] be downsets. Write a generator matrix ˆG(∆) for the code C(∆) , that is, ˆG(∆) ∈ F|∆|× 2m 
+
+> 2
+
+,and the rows of ˆG(∆) form a basis for C(∆) . Permute the columns of ˆG(∆) such that the columns corresponding to Γ are the left-most |Γ| columns. 
+
+Claim 3.5. Suppose Γ ⊆ ∆. Then, the columns of ˆG(∆) corresponding to Γ are linearly independent. Proof. Choose the first |Γ| rows of ˆG(∆) to correspond to the monomials {xγ : γ ∈ Γ}. Consider the |Γ| × | Γ|
+
+top-left sub-matrix of ˆG(∆) . We may further pick an order for the monomials of Γ, say, Γ = {γ1, γ 2, . . . , γ |Γ|}
+
+such that if j > i then γj̸ ⊆ γi (this may be achieved by simply writing ∅ ∈ Γ first, then all of the sets γ ∈ Γ of size one, then all of the sets of size two, and so on). We have that xγj (γi) = 0 if γj̸ ⊆ γi, and xγi (γi) = 1 , and therefore this |Γ| × | Γ| sub-matrix is upper-triangular with ones on the diagonal. It follows that this sub-matrix is full-rank, and thus that the first |Γ| columns of ˆG(∆) are linearly independent. Because of Claim 3.5, under the assumption that Γ ⊆ ∆, we may perform row operations on ˆG(∆) such that its left-most |Γ| columns take the form I|Γ|
+
+0
+
+
+
+, (83) 18 where I|Γ| is the |Γ| × | Γ| identity matrix. We write ˆG(∆) as 
+
+ˆG(∆) = 
+
+I|Γ| G1(∆ , Γ) 0 G0(∆ , Γ) 
+
+
+
+, (84) where we have defined matrices G1(∆ , Γ) and G0(∆ , Γ) . We write 
+
+G(∆ , Γ) := 
+
+G1(∆ , Γ) 
+
+G0(∆ , Γ) 
+
+
+
+. (85) 
+
+Definition 3.6 (Quantum Code from a Decreasing Monomial Code Punctured at a Downset) . Given downsets 
+
+∆, Γ ⊆ Fm 
+
+> 2
+
+such that ∅ ∈ Γ ⊆ ∆, with the notation of the matrices in Equations (50) and (51) , let G1(∆ , Γ) be the row span of G1(∆ , Γ) , let G0(∆ , Γ) be the row span of G0(∆ , Γ) , and let G(∆ , Γ) be the row span of G(∆ , Γ) .The quantum CSS code corresponding to the downsets ∆, Γ is denoted Q(∆ , Γ) . It is the quantum CSS code with 
+
+X-stabiliser space G0(∆ , Γ) , and Z-stabiliser space G(∆ , Γ) ⊥; see Section 2.4. 
+
+Proposition 3.7. Consider downsets ∆, Γ ⊆ Fm 
+
+> 2
+
+for which ∅ ∈ Γ ⊆ ∆ and for which ∆ ⊆ ∆⊥, using the notation of Definition 2.6. Then, Q(∆ , Γ) has |Γ| logical qubits, and moreover its distance is equal to its Z-distance, which is in turn 
+
+dZ (Q(∆ , Γ)) = min 
+
+> A∈∆⊥
+
+|{ V ⊆ ¯A : V ∈ ¯Γ}| . (86) 
+
+Moreover, if C(∆) is an 8-divisible classical code, the quantum code Q(∆ , Γ) has a transversal T gate (without Clifford corrections), with the natural choice of logical basis as in Proposition 2.18. Proof. ∆ ⊆ ∆⊥ implies that C(∆) ⊆ C(∆ ⊥) = C(∆) ⊥, i.e., the code C(∆) is self-orthogonal. The fact that the code has |Γ| logical qubits, and its distance is equal to its Z-distance, follows from Proposition 2.18. Its 
+
+Z-distance is then 
+
+dZ = min  
+
+> f∈G 0(∆ ,Γ) ⊥\G (∆ ,Γ) ⊥
+
+|f | ≥ min  
+
+> f∈G 0(∆ ,Γ) ⊥\{ 0}
+
+|f |, (87) the classical distance of the code G0(∆ , Γ) ⊥. Since G0(∆ , Γ) is the classical code C(∆) shortened at the points 
+
+Γ, G0(∆ , Γ) ⊥ is the classical code C(∆) ⊥ = C(∆ ⊥) punctured at the points Γ, which we denoted C(∆ ⊥, Γ) in Definition 3.1. Given A ∈ ∆⊥, we must have ¯A ∈ ¯Γ, since if ¯A ∈ Γ, then Γ ⊆ ∆ implies ¯A ∈ ∆: a contradiction. The fact that dZ is lower-bounded by the claimed expression then follows from Lemma 3.2. Finally, let us show that the Z-distance is actually equal to the claimed expression, i.e., the inequality is an equality. Let A ∈ ∆⊥ be such that 
+
+|{ V ⊆ ¯A : V ∈ ¯Γ}| = min 
+
+> A′∈∆⊥
+
+|{ V ⊆ ¯A′ : V ∈ ¯Γ}| , (88) and consider 
+
+f = Y
+
+> i∈A
+
+(1 + xi), (89) for which ev( f ) is in C(∆ ⊥) = C(∆) ⊥ since ∆⊥ is a downset. Its evaluation vector restricted to ¯Γ, ev( f |¯Γ), has weight |{ V ⊆ ¯A : V ∈ ¯Γ}| , and lies in punc Γ C(∆ ⊥) = G0(∆ , Γ) ⊥, and thus corresponds to an undetectable Z
+
+operator. To see it is not a Z-stabiliser, we must show that ev( f |¯Γ) does not lie in G(∆ , Γ) ⊥, which we do by showing that it is not orthogonal to some row of G. Given ∅ ∈ Γ,15 looking at the form of ˆG(∆) in Equation (50), there is a function h, whose evaluation over Fm 
+
+> 2
+
+is in C(∆) , whose support on ¯Γ is equal to a row of G1(∆ , Γ) ,and whose support on Γ has weight one: supported exactly at ∅. Since f (∅) = 1 , we have 
+
+0 = f (∅) · h(∅) + ev( f |¯Γ) · ev( h|¯Γ) (90) 
+
+= 1 + ev( f |¯Γ) · ev( h|¯Γ), (91) and so 1 = ev( f |¯Γ) · ev( h|¯Γ), meaning that indeed ev( f |¯Γ) is not orthogonal to some row of G1(∆ , Γ) .The transversality of the T gate follows from Proposition 2.20. 
+
+Example 3.8. The choices for the quantum code in Hastings and Haah [HH18] can be reproduced with the choices of the downsets ∆ and Γ as in Example 3.4. It is easy to see that the dual downset to ∆ is 
+
+∆⊥ = {A ⊆ [m] : |A| ≤ m − r − 1}. (92)        
+
+> 15 Since Γis a downset, saying ∅ ∈ Γis equivalent to saying Γis non-empty.
+
+19 Then, as long as we choose w < r (to get Γ ⊆ ∆) and 2r < m (to get r ≤ m − r − 1, and thus ∆ ⊆ ∆⊥), Proposition 3.7 gives us that the quantum code Q(∆ , Γ) has a number of logical qubits 
+
+|Γ| =
+
+ m
+
+≤ w
+
+
+
+:= 
+
+> w
+
+X
+
+> i=0
+
+mi
+
+
+
+, (93) 
+
+which reproduces [HH18]. Moreover, the distance of Q(∆ , Γ) is then 
+
+min 
+
+> A∈∆⊥
+
+|{ V ⊆ ¯A : V /∈ Γ}| . (94) 
+
+Considering any A ∈ ∆⊥, A is a set of size |A| ≤ m − r − 1, and ¯A is a set of size m − | A|. The number of its subsets that are then not in Γ is then 
+
+m − | A|
+
+> w 
+
+
+
+:= 
+
+> m−| A|
+
+X
+
+> i=w+1
+
+m − | A|
+
+i
+
+
+
+. (95) 
+
+This is minimised by taking |A| = m − r − 1, which reproduces the distance in [HH18]. Moreover, if 3r < m , then 
+
+∆ satisfies the conditions of Proposition 2.13, and Q(∆ , Γ) has a transversal T gate, also reproducing [HH18]. 
+
+# 4 Explicit Construction 
+
+## 4.1 Weighting with One Heavy Variable 
+
+We now consider a very particular choice of the above weights, and a deliberate choice of downsets. 
+
+Lemma 4.1. Let s be a vector of length m, where 
+
+s = (1 , 1, 1, . . . , 1, 1
+
+| {z }
+
+> m−1
+
+, h ), (96) 
+
+for some positive integer h. In words, s has a 1 in every entry, except the last, where it has entry h. We further consider positive integers w, r for which w, h ≤ r and 2r ≤ m − 2 + h. With these choices, we consider the downsets 
+
+∆ = Ws,r (97) 
+
+Γ = {A ⊆ [m − 1] : |A| ≤ w}. (98) 
+
+In particular, Γ is a subset of 2[m−1] , the set of subsets of [m − 1] . Then, the corresponding quantum code arising from Proposition 3.7 is well-defined, and has parameters [[ n, k, d ]] , where 
+
+n = 2 m − k (99) 
+
+k =
+
+> w
+
+X
+
+> i=0
+
+m − 1
+
+i
+
+
+
+(100) 
+
+d = min 
+
+ r + 1 
+
+> w 
+
+
+
+, 2r−h+1 +
+
+r − h + 1 
+
+> w 
+
+ 
+
+, (101) 
+
+where   A>B 
+
+ := PAi=B+1 ( Ai ), and the sum is taken to be zero if B + 1 > A .Moreover, if the three conditions 
+
+3r < m − 1 + h, (102) 
+
+2r < m − 1, (103) 
+
+r < m − 2 (104) 
+
+all hold, then the corresponding quantum code supports a transversal T gate. 
+
+20 Proof. The downset ∆ contains two types of points: those that are subsets of [m−1] , and have size at most r, and those that contain the final variable m, and at most r − h out of the variables in [m − 1] . Thus, the requirement that w ≤ r gives us Γ ⊆ ∆. By Proposition 2.16, we have ∆⊥ = Ws,m −2+ h−r , and so the requirement that 
+
+2r ≤ m − 2 + h gives r ≤ m − 2 + h − r, and therefore ∆ ⊆ ∆⊥. Proposition 3.7 gives a well-defined quantum code Q(∆ , Γ) with |Γ| =   m−1
+
+> ≤w
+
+ := Pwi=0 
+
+  m−1
+
+> i
+
+ logical qubits. Let us now establish the distance of the quantum code via Equation (86). Consider any A ∈ ∆⊥ =
+
+Ws,m −2+ h−r . First, suppose that A does not contain the last variable of weight h, that is, m / ∈ A. Then, 
+
+A is some subset of {1, 2, . . . , m − 1} of size |A| ≤ m − 2 + h − r. We then have 
+
+¯A = A′ ⊔ { m}, (105) where A′ is some subset of {1, 2, . . . , m − 1} of size |A′| = ( m − 1) − | A| ≥ r − h + 1 . Consider a subset V ⊆ ¯A that does not contain m. We have V ∈ ¯Γ if and only if V has size greater than w. There are 
+
+ |A′|
+
+> >w
+
+
+
+:= P|A′|
+
+> i=w+1
+
+ |A′|
+
+> i
+
+
+
+such subsets V , where we define the sum to be zero if w + 1 > |A′|. On the other hand, a subset V ⊆ ¯A that does contain m is automatically in ¯Γ. There are 2|A′| such subsets V . In total, we have the number of subsets 
+
+V ⊆ ¯A for which V ∈ ¯Γ as 2|A′| +
+
+ |A′|
+
+> >w
+
+
+
+, whose attained minimum value is 2r−h+1 +   r−h+1 
+
+> >w
+
+.On the other hand, suppose that A ∈ ∆⊥ = Ws,m −2+ h−r does contain the last variable of weight h, that is, 
+
+m ∈ A. Then, A contains at most m − 2 − r of the variables {1, . . . , m − 1}, as well as m. We then have that 
+
+¯A ⊆ { 1, . . . , m − 1}, and | ¯A| ≥ r + 1 . We then consider a subset V ⊆ ¯A. V does not contain m, and so V ∈ ¯Γ
+
+if and only if it has size greater than w. There are 
+
+ | ¯A|
+
+> >w
+
+
+
+such subsets V . Here, the attained minimum value is 
+
+  r+1 
+
+> >w
+
+, and we have the claimed distance. The transversality of the T gate follows from Lemma 2.17, since one notes that Equations (102) to (104) give the conditions of that lemma, with the given choice of s.
+
+## 4.2 Explicit Asymptotic Parameters: Sub-Constant-Rate Regime 
+
+We will now prove our results on the asymptotic parameters of explicit families of quantum CSS codes with transversal T gates in the sub-constant-rate regime by developing the codes in Lemma 4.1 into asymptotic families. Specifically, in this subsection, we will prove Theorem 1. We consider families of codes in Lemma 4.1 indexed by the variable m. A given family will then be specified by choices of w and h for each m, that is, functions w(m) and h(m). One could choose to independently vary the value of r for each m, that is, the choice of r(m). However, we always let r(m) be the largest integer such that Equations (102) to (104) are satisfied. Notice that if those equations are satisfied, then 2r ≤ m − 2 + h is automatic. We begin by considering a setup to achieve the best asymptotic parameters we can with this construction for which the rate is sub-constant. w and h are chosen to have a linear relation with m. That is, we let w(m) and 
+
+h(m) be positive integers such that 
+
+w(m) = p · m + O(1) , (106) 
+
+h(m) = q · m + O(1) , (107) for constants p ∈ (0 , 1/2) and q ∈ [0 , 1] . In this setup, a given family is specified exactly by our choices of the constants p and q. We also write r(m) as a sequence of positive integers, where 
+
+r(m) = q′ · m + O(1) , (108) for q′ = min  12 , 1+ q 
+
+> 3
+
+, which ensures Equations (102) to (104) (by taking the O(1) term in r(m) small enough). We require p, q < q ′ to ensure w, h ≤ r. Given that, we see that we must have q < 12 , and therefore 
+
+q′ = 1 + q
+
+3 . (109) Turning to the quantum code parameters, we have the length of the code 
+
+n = 2 m − k, (110) where the dimension is 
+
+k ≥
+
+m − 1
+
+w
+
+
+
+= 2 m(H2(p)+ o(1)) , (111) 21 where H2(·) is the binary entropy function, and we use the standard estimate for the asymptotic scaling of the binomial coefficient. Since n ≤ 2m, we obtain the dimension scaling 
+
+k = Ω 
+
+
+
+nH2(p)+ o(1) 
+
+. (112) For the distance, we consider the two terms in the minimum in Equation (101). First considering   r+1 
+
+> >w
+
+, we note that if p > q′ 
+
+> 2
+
+, the sum does not contain the centre of the binomial distribution, and so we have   r+1 
+
+> >w
+
+ =2m(q′H2(p/q ′)+ o(1) ). On the other hand, if p ≤ q′ 
+
+> 2
+
+, the sum does contain the centre of the binomial distribution, and we have   r+1 
+
+> >w
+
+ = 2 m(q′+o(1) ). It is convenient to define the function Ψ given by 
+
+Ψ( x) := 
+
+(
+
+1 if x ∈ [0 , 1/2] 
+
+H2(x) if x ∈ [1 /2, 1] . (113) We then have r + 1 
+
+> w 
+
+
+
+= 2 m(q′Ψ( p/q ′)+ o(1) ). (114) For the other term, we have 
+
+2r−h+1 +   r−h+1 
+
+> >w
+
+ ≥ 2r−h+1 = 2 m(q′−q+o(1) ). (115) The aim then becomes, for a fixed p (specifying the scaling of the dimension) to pick the q giving the optimum distance scaling, that is, to choose q maximising 
+
+min {q′ − q, q ′Ψ( p/q ′)} = min 
+
+ 1 − 2q
+
+3 , 1 + q
+
+3 Ψ
+
+ 3p
+
+1 + q
+
+ 
+
+(116) subject to 
+
+0 ≤ q < 12 and 3p − 1 < q. (117) We denote by q∗(p) the optimum choice of q given a value of p. Let 
+
+A(q) := 1 − 2q
+
+3 (118) 
+
+B(q) := 1 + q
+
+3 Ψ
+
+ 3p
+
+1 + q
+
+
+
+. (119) We have that A(q) is a strictly decreasing function of q, whereas B(q) is strictly increasing in q, for any p, and so the optimum choice of q is that with A(q) = B(q), as long as that solution satisfies Equation (117). We will show that this is 
+
+q∗(p) = 
+
+(0 if 0 < p ≤ 1/6
+
+The unique positive solution to 1 − 2q = (1 + q)H2
+
+ 3p
+
+> 1+ q
+
+
+
+if 1/6 < p < 1/2 . (120) Indeed, for p ∈ (0 , 1/6] , A(0) = B(0) , and q = 0 satisfies Equation (117). Now suppose that p > 1/6. If, in addition, p < 13 , then q = 0 is still a feasible solution, i.e., it satisfies Equation (117). We have A(0) = 13 > B (0) .On the other hand, if p ≥ 13 , then 0 is not a feasible solution, but we may check that as q tends to 3p − 1 from above, we have A(q) → 1 − 2p > 0, and B(q) → 0. For all p ∈ ( 16 , 12 ), as q tends to 12 from below, A(q) tends to 
+
+0, and B(q) tends to a positive value. Thus, A(q) = B(q) for a unique positive value of q. Moreover, it must be at a value for which Ψ( x) = H2(x), since otherwise one would have 1−2q 
+
+> 3
+
+= 1+ q 
+
+> 3
+
+, giving q = 0 .We conclude that we may obtain parameters 
+
+k = Ω 
+
+
+
+nα+o(1) 
+
+(121) 
+
+d = Ω 
+
+
+
+nβexplicit (α)+ o(1) 
+
+, (122) where 
+
+βexplicit (α) = 
+
+( 13 if 0 < α ≤ H2(1 /6)  
+
+> 1−2q∗(α)3
+
+if H2(1 /6) < α < 1 , (123) 22 where 
+
+q∗(α) is the unique positive solution to 1 − 2q = (1 + q)H2
+
+ 3H−12 (α)1 + q
+
+
+
+, (124) where H−12 : (0 , 1) → (0 , 1/2) is the inverse binary entropy function. This concludes the proof of Theorem 1. 
+
+Remark 4.2. Note that the parameters obtained with this weighted Reed-Muller construction coincide with the Hastings-Haah construction [HH18] when q = 0 . In our construction, this is found to be the optimal choice in the regime α ≤ H2(1 /6) ≈ 0.650 , but not for α > H 2(1 /6) . Furthermore, we will shortly see that choosing q > 0
+
+will allow us to obtain codes with constant rate and growing distance. 
+
+## 4.3 Explicit Asymptotic Parameters: Constant-Rate Regime 
+
+In this subsection, we will prove Theorem 2 on the parameters we can achieve with explicit families in the constant-rate regime. This is essentially a more careful handling of the edge case p, q → 12 in the previous subsection. Once again, we will specify a family indexed by m with functions w(m) and h(m), since r(m) will always be chosen to be the maximum choice for which the transversality conditions, Equations (102) to (104), are satisfied. As in the previous case, 2r ≤ m − 2 + h will be satisfied automatically. Let us suppose that R ∈ (0 , 1/3) is the target constant rate we wish for our quantum code to achieve. Let 
+
+κR := 2R 
+
+> 1+ R
+
+and cR := −Φ−1(κR) > 0, where Φ is the cumulative distribution function of the standard Gaussian, noting that cR > 0. We let w(m) and h(m) be positive integers satisfying 
+
+w(m) = m
+
+2 − cR
+
+2
+
+√m − 1 + O(1) , (125) 
+
+h(m) = m
+
+2 − 3cR
+
+√m − 1
+
+ 12 − 2log 2(m − 1) 
+
+
+
++ O(1) . (126) On the other hand, in order to ensure Equations (102) to (104), we may let r(m) be positive integers satisfying 
+
+r(m) = m
+
+2 − cR
+
+√m − 1
+
+ 12 − 2log 2(m − 1) 
+
+
+
++ O(1) . (127) One can check that this gives the conditions of Equations (102) to (104), as long as the O(1) term in r(m) is taken to be small enough. Moreover, one can see that w, h ≤ r are automatic. Turning to the code parameters, we have n = 2 m − k, where the dimension k is 
+
+k
+
+2m = 12mwX
+
+> i=0
+
+m − 1
+
+i
+
+
+
+= κR
+
+2 + o(1) , (128) using the central limit theorem for the binomial distribution. We then have 
+
+kn = k
+
+2m − k = 1 
+
+> 2m
+> k
+
+− 1 = 1 
+
+> 2
+> κR
+
+− 1 + o(1) = R + o(1) . (129) On the other hand, for the distance, we must again separately consider the two terms in the minimum of Equa-tion (101). We begin with the first term. We have 
+
+r + 1 
+
+> w 
+
+
+
+=
+
+> r−w
+
+X
+
+> i=0
+
+r + 1 
+
+i
+
+
+
+≥
+
+ r + 1 
+
+r − w
+
+
+
+. (130) Therefore, 
+
+log 2
+
+r + 1 
+
+> w 
+
+
+
+≥ log 2
+
+ r + 1 
+
+r − w
+
+
+
+≥ (r − w) log 2
+
+ r + 1 
+
+r − w
+
+
+
+= 2cR
+
+√m − 1log 2(m − 1) 
+
+ 12 log 2(m) + o(log 2(m)) 
+
+
+
+(131) and so 
+
+log 2
+
+r + 1 
+
+> w 
+
+
+
+≥ √m (cR + o(1)) . (132) 23 The second term in the minimum is 2r−h+1 +   r−h+1 
+
+> >w
+
+, where we note the second term in this expression is zero for all m large enough. On the other hand, we have 
+
+r − h + 1 = √m (cR + o(1)) , (133) and so in total we obtain the distance scaling 
+
+d ≥ 2(cR+o(1)) √m. (134) We have log 2(n) = m + O(1) , and so √m = plog 2(n) + o(1) , which gives the desired distance scaling, and the proof of Theorem 2. 
+
+# 5 Randomised Construction 
+
+In this section, we will develop our randomised construction. In the last section, we developed our explicit constructions by taking the downset ∆ to come from a weighted Reed-Muller code, where the weighted Reed-Muller code uses the weights 
+
+s = (1 , 1, 1, . . . , 1, 1
+
+| {z }
+
+> m−1
+
+, h ), (135) for some integer h ≥ 1. That is, the first m − 1 variables all have weight 1, whereas the last variable can be heavier. In particular, we chose ∆ = Ws,r in the notation of Definition 2.15. We then punctured at some downset 
+
+Γ ⊆ 2[m−1] : in particular 
+
+Γ = {A ⊆ [m − 1] : |A| ≤ w} (136) for some w ≤ r so that Γ ⊆ ∆. In this section, we will use the same form for the downset ∆, but show that a more careful choice of the form of Γ can yield improved parameters. 
+
+## 5.1 Hypergraphs and Protected Points 
+
+Definition 5.1 (Hypergraph protecting the y-sets) . Let H be a t-uniform hypergraph on m − 1 points for some positive integer t. Let y ≥ t be a positive integer. We say that H protects the y-sets if every subset of [m − 1] of size y contains some edge of H. We let |H| denote the number of hyperedges in a hypergraph H.
+
+Lemma 5.2 (Existence of a hypergraph protecting the y-sets) . Given positive integers m, y, t such that m − 1 ≥
+
+y ≥ t, there exists a t-uniform hypergraph on m − 1 points protecting the y-sets for which 
+
+|H| ≤ 
+
+m − 1
+
+t
+
+yt
+
+
+
+ln 
+
+m − 1
+
+y
+
+
+
++ 1 
+
+
+
+. (137) 
+
+Proof. Suppose we define H by picking L hyperedges, each of size t, by choosing each uniformly from the   m−1
+
+> t
+
+
+
+possibilities. Now, fix some Y ⊆ [m − 1] of size y. Y contains ( yt ) sets of size t. The probability that a given random subset of size t lies inside Y is 
+
+p := 
+
+yt
+
+m − 1
+
+t
+
+ . (138) Given L independently chosen hyperedges, the probability that Y contains none of them is 
+
+(1 − p)L ≤ e−pL . (139) Union bounding over all possible Y , the probability that some Y contains none of the L hyperedges is at most 
+
+m − 1
+
+y
+
+
+
+e−pL . (140) 24 This quantity is less than 1 if 
+
+L =
+
+m − 1
+
+t
+
+yt
+
+
+
+ln 
+
+m − 1
+
+y
+
+
+
++ 1 
+
+
+
+. (141) The size of |H| in the statement of the lemma is an upper bound rather than an equality since the random sampling can sample the same hyperedge multiple times. We let E ∈ H denote the situation where E is a hyperedge of H.
+
+Definition 5.3 (Punctured set with hypergraph protection) . Given a non-negative integer w and a t-uniform hypergraph H on m − 1 points, define 
+
+Γw, H = {A ⊆ [m − 1] : |A| ≤ w and E̸ ⊆ A for all E ∈ H} . (142) We will think of H as protecting various points, like y-sets as in Definition 5.1. Then, Γw, H will be used as a puncture set, which does not puncture protected points. Note that Γw, H is a downset by definition. 
+
+Definition 5.4 (Subcubes of the Boolean Hypercube) . Given a point L ⊆ [m − 1] , the subcube defined by L is denoted 2L ⊆ 2[m−1] , and is the set of subsets of L. Given points E, L for which E ⊆ L ⊆ [m − 1] , the cube defined by E and L is [E, L ] := {V : E ⊆ V ⊆ L}.
+
+We can see that 2L and [E, L ] may be viewed geometrically as subcubes of the Boolean hypercube. 2L has size 2|L|, and [E, L ] has size 2|L|−| E|.
+
+Lemma 5.5. Let H be a t-uniform hypergraph on m − 1 points and y ≥ t be an integer. Suppose H protects the 
+
+y-sets, and |H| is as in Lemma 5.2. Let w < y be a positive integer. 1. Suppose L ⊆ [m − 1] has |L| ≥ y. Then 
+
+2L \ Γw, H ≥ 2|L|− t. (143) 
+
+2. We have 
+
+|Γw, H| ≥ 
+
+> w
+
+X
+
+> i=0
+
+m − 1
+
+i
+
+1 −
+
+
+
+ln 
+
+m − 1
+
+y
+
+
+
++ 2 
+
+wt
+
+yt
+
+ . (144) 
+
+Proof. On the first point, H contains an edge E ⊆ L for which |E| = t. We then have [E, L ] ⊆ 2L \ Γw, H, and 
+
+[E, L ] has size 2|L|− t.On the second point, we have that {A ⊆ [m − 1] : |A| ≤ w} has size Pwi=0 
+
+  m−1
+
+> i
+
+. One edge E ∈ H excludes  (m−1) −ti−t
+
+
+
+points from membership in Γw, H of size i, for each i = t, . . . , w . This is true because there are this many sets A ⊆ [m − 1] of size i that contain E. One edge E ∈ H on its own thus excludes 
+
+> w
+
+X
+
+> i=t
+
+(m − 1) − ti − t
+
+
+
+(145) points from membership in Γw, H. Then, 
+
+> w
+
+X
+
+> i=t
+
+(m − 1) − ti − t
+
+
+
+≤
+
+wt
+
+m − 1
+
+t
+
+
+
+> w
+
+X
+
+> i=t
+
+m − 1
+
+i
+
+
+
+(146) 
+
+≤
+
+wt
+
+m − 1
+
+t
+
+
+
+> w
+
+X
+
+> i=0
+
+m − 1
+
+i
+
+
+
+(147) 25 Noting that Pwi=0 
+
+  m−1
+
+> i
+
+ is the size of the puncture set if no points are protected, one edge E ∈ H on its own thus excludes a fraction at most ( wt ) m−1 
+
+> t
+> 
+
+from membership in Γw, H. By a union bound, we thus have 
+
+|Γw, H| ≥ 
+
+> w
+
+X
+
+> i=0
+
+m − 1
+
+i
+
+1 − |H| 
+
+wt
+
+m − 1
+
+t
+
+ , (148) and substituting in |H| , we derive the claimed bound. In the next two subsections, we will construct quantum codes with transversal T gates by choosing a downset 
+
+∆ to define the original code, and then choosing the puncture set to be Γw, H for a given choice of w and H. Just as in the previous subsection, there will be a parameter range in which we want to consider ∆ to be a downset associated with a typical Reed-Muller code, that is, h = 1 in the weighted Reed-Muller construction, and there will be a parameter range in which we want to take a truly weighted Reed-Muller code, that is, h > 1. Whereas these were considered in the same analysis in the explicit construction (see Subsection 4.2), we will consider them separately now. The two points in Lemma 5.5 will be used to establish the distance and dimension of the quantum codes in question. Indeed, since the number of logical qubits in our code construction (see Proposition 3.7) is equal to the size of Γw, H, it is clear that the second point of Lemma 5.5 will help us there. On the other hand, referring back to Proposition 3.7, the expression for the distance of the quantum code may be succinctly rewritten 
+
+d = min  
+
+> L / ∈∆
+
+2L \ Γ , (149) and so the first point of Lemma 5.5 will be used to bound the distance. Before moving to the actual constructions, the following Lemma will be useful in bounding the size of |Γw, H|, showing that it has essentially the same size as the unprotected set {A ⊆ [m − 1] : |A| ≤ w}, in a sensible asymptotic regime. 
+
+Lemma 5.6. For positive integers m tending to infinity, let t(m), w (m), y (m) be sequences of positive integers satisfying 
+
+1 ≤ t(m) ≤ w(m) < y (m) < m − 1. (150) 
+
+Let H(m) be a t(m)-uniform hypergraph on m−1 points protecting the y(m)-sets of size as in Lemma 5.2. Suppose 
+
+t(m) ln 
+
+ y(m)
+
+w(m)
+
+
+
+− ln( m) → ∞ as m → ∞ . (151) 
+
+Then, 
+
+|Γw(m),H(m)| = (1 − o(1)) 
+
+> w(m)
+
+X
+
+> i=0
+
+m − 1
+
+i
+
+
+
+. (152) 
+
+A sufficient condition for Equation (151) is 
+
+t(m)( y(m) − w(m)) 
+
+m − ln m → ∞ . (153) 
+
+Proof. We drop the m-dependence in this proof for brevity. 
+
+Γw, H is contained in {A ⊆ [m − 1] : |A| ≤ w} whose size is Pwi=0 
+
+  m−1
+
+> i
+
+, and so it suffices to show that the term 
+
+
+
+ln 
+
+m − 1
+
+y
+
+
+
++ 2 
+
+wt
+
+yt
+
+ (154) in Lemma 5.5 is o(1) . We have ln   m−1
+
+> y
+
+ + 2 ≤ m + O(1) , and so it suffices to show that ( wt )( yt ) is o(1 /m ). We have 
+
+wt
+
+yt
+
+ =
+
+> t−1
+
+Y
+
+> i=0
+
+w − iy − i ≤
+
+ wy
+
+t
+
+. (155) 26 Equation (151) says that the right-hand side is o(1 /m ).Finally, we show that Equation (153) implies (151). Indeed, 
+
+ln 
+
+ yw
+
+
+
+= − ln 
+
+
+
+1 − y − wy
+
+
+
+≥ y − wy ≥ y − wm , (156) and therefore 
+
+t ln 
+
+ yw
+
+
+
+− ln( m) ≥ t(y − w)
+
+m − ln( m) → ∞ . (157) 
+
+## 5.2 Puncturing the Reed-Muller Code with Protected Points 
+
+We again consider an asymptotic family of quantum codes indexed by m. In this subsection, we take the downset defining the un-punctured monomial code to be 
+
+∆( m) := {A ⊆ [m] : |A| ≤ r(m)} (158) 
+
+r(m) := 
+
+ m − 13
+
+
+
+, (159) that is, the un-punctured monomial code is the maximal 8-divisible Reed-Muller code. Now fix some constant 
+
+p ∈ (0 , 1/3] . Let t(m), w (m), y (m) be sequences of positive integers satisfying 
+
+t(m) = m1/2 + O(1) , (160) 
+
+w(m) = p · m − m3/4 + O(1) , (161) 
+
+y(m) = r(m) + 1 . (162) We let H(m) be a t(m)-uniform hypergraph protecting the y(m)-sets, with size as given in Lemma 5.2; we will puncture the set Γw(m),H(m). Turning to Proposition 3.7, we note that we have Γ ⊆ ∆, ∆ ⊆ ∆⊥, and C(∆) 
+
+is 8-divisible. The code thus has |Γw(m),H(m)| logical qubits. Noting that Equation (153) holds, and we have 
+
+1 ≤ t(m) ≤ w(m) < y (m) < m − 1, we have 
+
+|Γw(m),H(m)| = Ω 
+
+
+
+2(H2(p)+ o(1)) m
+
+(163) by Lemma 5.6. As discussed in the previous subsection, an alternative expression for the distance of the quantum code from Proposition 3.7 is 
+
+d = min  
+
+> L / ∈∆
+
+2L \ Γ . (164) Since y(m) = r(m) + 1 , we know that every L / ∈ ∆( m) has |L| ≥ y(m). If L ⊆ [m − 1] , by the first point of Lemma 5.5, we have 
+
+2L \ Γw(m),H(m) ≥ 2y(m)−t(m). (165) On the other hand, if m ∈ L, then every element in 2L containing m is not in Γw(m),H(m), and there are at least 
+
+2y(m)−1 such subsets. We thus find that the distance of the quantum code is 
+
+d ≥ 2y(m)−t(m) = 2 m( 13 +o(1) ). (166) As always, n ≤ 2m, and so we obtain the asymptotic parameters of the quantum code 
+
+k = Ω 
+
+
+
+nH2(p)+ o(1) 
+
+, (167) 
+
+d = Ω 
+
+
+
+n 13 +o(1) 
+
+. (168) 
+
+## 5.3 Puncturing the Weighted Reed-Muller Code with Protected Points 
+
+Whereas in the last subsection we punctured the ordinary Reed-Muller code with protected points to consider the dimension scaling k = Ω  nα+o(1)  for α ∈ (0 , H 2(1 /3)] , here we will consider puncturing the weighted Reed-Muller code ( h > 1) to consider α ∈ (H2(1 /3) , 1) . To this end, we fix some constant p ∈ (1 /3, 1/2) , and let h(m)
+
+and r(m) be sequences of positive integers satisfying 
+
+r(m) = p · m + m3/4 + O(1) , (169) 
+
+h(m) = (3 p − 1) · m + 3 · m3/4 + O(1) . (170) 27 As always, we consider m weights 
+
+s = (1 , 1, . . . , 1
+
+| {z }
+
+> m−1
+
+, h ) (171) and the corresponding choice of ∆ is Ws,r , as in Definition 2.15 where we have dropped m-dependence here for clarity. We can see that C(∆) is 8-divisible from Lemma 2.17, as long as we take the O(1) term in r(m) small enough (we also have ∆ ⊆ ∆⊥). Next, we let t(m) and y(m) be sequences of positive integers satisfying 
+
+t(m) = m1/2 + O(1) , (172) 
+
+y(m) = r(m) + 1 . (173) We then let H(m) be a t(m)-uniform hypergraph protecting the y(m)-sets, whose size is as in Lemma 5.2. We also choose a sequence of positive integers w(m) satisfying 
+
+w(m) = p · m + O(1) , (174) and we will puncture the set Γw(m),H(m) ⊆ ∆( m). Noting that 1 ≤ t(m) ≤ w(m) < y (m) < m − 1, we note that Equation (153) holds, and using Lemma 5.6, we obtain 
+
+k = Ω 
+
+
+
+nH2(p)+ o(1) 
+
+, (175) just as in the last subsection. Again, we use the expression for the distance d = min L / ∈∆ 2L \ Γ , dropping 
+
+m-dependence for clarity. To compute this, we must consider two types of points L not in ∆( m). First, if L does not contain the last variable of weight h(m), then it is a subset of [m − 1] of size at least r + 1 , and the first point of Lemma 5.5 gives us 2L \ Γw(m),H(m) ≥ 2r(m)−t(m)+1 . On the other hand, suppose that L does contain the last variable of weight h(m). Then its support on [m − 1] has size at least r(m) − h(m) + 1 , and since Γ ⊆ 2[m−1] ,we can guarantee that 2L \ Γw(m),H(m) ≥ 2r(m)−h(m)+1 in this case. Since h(m) > t (m), we obtain a distance lower bound 2r(m)−h(m)+1 , i.e., 
+
+d = Ω 
+
+
+
+2m(1 −2p+o(1)) 
+
+. (176) In conclusion, we obtain the distance scaling 
+
+d = Ω 
+
+
+
+n1−2H−12 (α)+ o(1) 
+
+, (177) where H−12 : (0 , 1) → (0 , 1/2) is the inverse binary entropy function. 
+
+## 5.4 Concatenating with Haah’s Divisible Tower 
+
+In subsections 5.2 and 5.3, we established the existence of asymptotic families of quantum codes with transversal 
+
+T gates and parameters hh 
+
+n, Ω
+
+
+
+nα+o(1) 
+
+, Ω
+
+
+
+nβexist, WRM (α)+ o(1) ii 
+
+, (178) where 
+
+βexist, WRM (α) = min 
+
+ 13 , 1 − 2H−12 (α)
+
+
+
+, (179) and H−12 : (0 , 1) → (0 , 1/2) is the inverse binary entropy function. In this subsection, we will complete the proof of Theorem 4 by concatenating our construction with Haah’s construction [Haa18]. Haah demonstrates the existence of quantum CSS codes with transversal T gates with parameters [[ n, Ω( n1/2), Ω( n1/2)]] .In that work, the notion of T gate transversality is as follows: for each physical qubit i ∈ [n], the gate T ai is executed on qubit i for some integer ai ∈ { 1, 3, 5, 7} and (without Clifford corrections), the logical T gate is executed separately on each logical qubit. From this, one may construct a code with the same notion of T gate transversality that we consider in this paper, without changing the asymptotic parameters up to constants. In-deed, we may “repeat” the i’th qubit ai times in each of its codestates. Slightly more formally, we may encode the i’th physical qubit of the code into the repetition code of length ai in the Z-basis. The resulting code has a transversal T gate in the sense of this paper, that is, physical T executed on each physical qubit separately leads to logical T on each logical qubit separately, without Clifford corrections. 28 Now, if we have two quantum CSS codes with parameters [[ n1, k 1, d 1]] and [[ n2, k 2, d 2]] , both with transversal 
+
+T gates, we may concatenate them to form quantum CSS codes with parameters [[ n1n2, k 1k2, ≥ d1d2]] , with a transversal T gate. Suppose that the first two codes come from asymptotic families where ki = nαi 
+
+> i
+
+and di = nβi
+
+> i
+
+for i = 1 , 2 and for some constants αi, β i ∈ (0 , 1) . Moreover, for some constant θ ∈ (0 , 1) , suppose we choose 
+
+n1 = N θ and n2 = N 1−θ . One checks that the resulting concatenated code has parameters [[ N, N α, N β ]] , where 
+
+α = θα 1 + (1 − θ)α2 (180) 
+
+β ≥ θβ 1 + (1 − θ)β2. (181) That is, considering achievable points in the (α, β )-plane, concatenation allows us to draw line segments between them to construct more achievable points. Haah’s code gives an achievable point at (1 /2, 1/2) , and we may therefore achieve the exponents (α, 1/2) for any α < 1/2 by hard-coding logical qubits to fixed states to reduce the dimension. We may also consider the boundary of achievable exponent pairs in Equation (179) above. With this, and the achievable point (1 /2, 1/2) ,the boundary of achievable exponent pairs that we may achieve is formed by joining the point (1 /2, 1/2) to 
+
+(H2(1 /3) , 1/3) , giving the expression βexist (α) in Theorem 4. 
+
+# Acknowledgements 
+
+The author is grateful for the encouragement of Isaac Chuang in pursuing this project. The author acknowledges Anqi Gong for pointing them to the footprint bound, which led to the results in this work. The author acknowledges support from the MIT Department of Physics, from the MIT-IBM Watson AI Lab, and from NSF grant PHY-2325080. This preprint is assigned number MIT-CTP/6093. 
+
+## Statement on AI Usage 
+
+All quantum code constructions were conceived by the author. The author acknowledges the use of ChatGPT 5.6 Sol for assistance in analysing the randomised construction in Section 5, for generating code to make Figures 1 and 2, and for reviewing the paper. The author takes responsibility for all content. 
+
+# References 
+
+[AB97] Dorit Aharonov and Michael Ben-Or. “Fault-tolerant quantum computation with constant error”. In: Proceedings of the twenty-ninth annual ACM symposium on Theory of computing . 1997, pp. 176– 188 (cit. on p. 2). [Ari09] Erdal Arikan. “Channel polarization: A method for constructing capacity-achieving codes for sym-metric binary-input memoryless channels”. In: IEEE Transactions on information Theory 55.7 (2009), pp. 3051–3073 (cit. on p. 3). [Bar+16] Magali Bardet, Vlad Dragoi, Ayoub Otmani, and Jean-Pierre Tillich. “Algebraic properties of polar codes from a new polynomial formalism”. In: 2016 IEEE International Symposium on Information Theory (ISIT) . IEEE. 2016, pp. 230–234 (cit. on pp. 3, 12). [Ber+25] Elena Berardini, Reza Dastbasteh, Josu Etxezarreta Martinez, Shreyas Jain, and Olatz Sanz Lar-rarte. “Asymptotically Good CSS-T Codes and a New Construction of Triorthogonal Codes”. In: 
+
+IEEE Journal on Selected Areas in Information Theory 6 (2025), pp. 189–198. arXiv: 2412.08586 [quant-ph] (cit. on p. 11). [BCL20] Valerio Bioglio, Carlo Condo, and Ingmar Land. “Design of polar codes in 5G new radio”. In: IEEE Communications Surveys & Tutorials 23.1 (2020), pp. 29–40 (cit. on p. 3). [Bod+26] Şeyma Bodur, Fernando Hernando, Edgar Martínez-Moro, and Diego Ruano. “The Schur product of evaluation codes and its application to CSS-T quantum codes and private information retrieval: Ş. Bodur et al.” In: Computational and Applied Mathematics 45.7 (2026), p. 293 (cit. on p. 11). [BM06] Hector Bombin and Miguel Angel Martin-Delgado. “Topological quantum distillation”. In: Physical review letters 97.18 (2006), p. 180501 (cit. on p. 2). [BM07] Hector Bombin and Miguel-Angel Martin-Delgado. “Topological computation without braiding”. In: 
+
+Physical review letters 98.16 (2007), p. 160502 (cit. on p. 11). 29 [BH12] Sergey Bravyi and Jeongwan Haah. “Magic-state distillation with low overhead”. In: Physical Review A—Atomic, Molecular, and Optical Physics 86.5 (2012), p. 052329 (cit. on pp. 6–8, 11, 15, 16). [BK05] Sergey Bravyi and Alexei Kitaev. “Universal quantum computation with ideal Clifford gates and noisy ancillas”. In: Physical Review A 71.2 (Feb. 2005). issn : 1094-1622 (cit. on pp. 3, 8, 11). [Bre+26] Nikolas P Breuckmann, Margarita Davydova, Jens N Eberhardt, and Nathanan Tantivasadakarn. “Cups and Gates I: Cohomology Invariants and Logical Quantum Operations: NP Breuckmann, M. Davydova, N. Tantivasadakarn”. In: Communications in Mathematical Physics 407.5 (2026), p. 86 (cit. on pp. 3, 11). [CS96] A Robert Calderbank and Peter W Shor. “Good quantum error-correcting codes exist”. In: Physical Review A 54.2 (1996), p. 1098 (cit. on pp. 3, 7). [Cam+20] Eduardo Camps, Hiram H López, Gretchen L Matthews, and Eliseo Sarmiento. “Polar decreasing monomial-Cartesian codes”. In: IEEE Transactions on Information Theory 67.6 (2020), pp. 3664– 3674 (cit. on p. 9). [Cam+24a] Eduardo Camps-Moreno, Hiram H López, Gretchen L Matthews, and Emily McMillon. “Toward quantum CSS-T codes from sparse matrices”. In: 2024 IEEE International Symposium on Informa-tion Theory Workshops (ISIT-W) . IEEE. 2024, pp. 1–6 (cit. on p. 11). [Cam+24b] Eduardo Camps-Moreno, Hiram H López, Gretchen L Matthews, Diego Ruano, Rodrigo San–José, and Ivan Soprunov. “Binary Triorthogonal and CSS-T codes for quantum error correction”. In: 2024 60th Annual Allerton Conference on Communication, Control, and Computing . IEEE. 2024, pp. 01– 06 (cit. on p. 11). [Cam+24c] Eduardo Camps-Moreno, Hiram H López, Gretchen L Matthews, Diego Ruano, Rodrigo San-José, and Ivan Soprunov. “An algebraic characterization of binary CSS-T codes and cyclic CSS-T codes for quantum fault tolerance: E. Camps-Moreno et al.” In: Quantum Information Processing 23.6 (2024), p. 230 (cit. on p. 11). [CL26] ChunJun Cao and Brad Lackey. “Quantum Lego Power-up: Designing Transversal Gates with Tensor Networks”. In: arXiv preprint arXiv:2603.03542 (2026) (cit. on p. 11). [Cer+25] Michael J Cervia, Henry Lamm, Diyi Liu, Edison M Murairi, and Shuchen Zhu. “Magic State Distillation using Asymptotically Good Codes on Qudits”. In: arXiv preprint arXiv:2512.21874 
+
+(2025) (cit. on p. 11). [EK09] Bryan Eastin and Emanuel Knill. “Restrictions on transversal encoded quantum gate sets”. In: 
+
+Physical review letters 102.11 (2009), p. 110502 (cit. on p. 2). [GH00] Olav Geil and Tom Hoholdt. “Footprints or generalized Bezout’s theorem”. In: IEEE Transactions on information theory 46.2 (2000), pp. 635–641 (cit. on pp. 9, 12). [GT13] Olav Geil and Casper Thomsen. “Weighted Reed–Muller codes revisited”. In: Designs, codes and cryptography 66.1 (2013), pp. 195–220 (cit. on pp. 9, 14). [Gid+25] Craig Gidney, Michael Newman, Peter Brooks, and Cody Jones. “Yoked surface codes”. In: Nature Communications 16.1 (2025), p. 4498 (cit. on p. 3). [GG25a] Louis Golowich and Venkatesan Guruswami. “Asymptotically good quantum codes with transversal non-clifford gates”. In: Proceedings of the 57th Annual ACM Symposium on Theory of Computing .2025, pp. 707–717 (cit. on pp. 2, 3, 6, 7, 9, 11). [GG25b] Louis Golowich and Venkatesan Guruswami. “Near-Asymptotically-Good Quantum Codes with Transversal CCZ Gates and Sublinear-Weight Parity-Checks”. In: 2025 IEEE 66th Annual Sym-posium on Foundations of Computer Science (FOCS) . IEEE. 2025, pp. 1561–1569 (cit. on pp. 3, 11). [GL25] Louis Golowich and Ting-Chun Lin. “Quantum ldpc codes with transversal non-clifford gates via products of algebraic codes”. In: Proceedings of the 57th Annual ACM Symposium on Theory of Computing . 2025, pp. 689–696 (cit. on pp. 3, 11). [Gon+26] Anqi Gong, Christopher A. Pattison, Patrick Rall, and Adam Wills. Magic State Distillation via Codes over Binary Extension Fields . 2026. arXiv: 2608.09727 [quant-ph] (cit. on pp. 7, 11). [Got97] Daniel Gottesman. Stabilizer codes and quantum error correction . California Institute of Technology, 1997 (cit. on p. 3). 30 [Got24] Daniel Gottesman. Surviving as a Quantum Computer in a Classical World . 2024 (cit. on p. 3). [GC99] Daniel Gottesman and Isaac L Chuang. “Demonstrating the viability of universal quantum com-putation using teleportation and single-qubit operations”. In: Nature 402.6760 (1999), pp. 390–393 (cit. on p. 16). [Haa18] Jeongwan Haah. “Towers of generalized divisible quantum codes”. In: Physical Review A 97.4 (2018), p. 042327 (cit. on pp. 1, 5–8, 10, 11, 28). [Haa+17] Jeongwan Haah, Matthew B. Hastings, D. Poulin, and D. Wecker. “Magic state distillation with low space overhead and optimal asymptotic input count”. In: Quantum 1 (2017), p. 31. arXiv: 
+
+1703.07847 [quant-ph] (cit. on p. 11). [HH17] M. B. Hastings and J. Haah. “Distillation with sublogarithmic overhead”. In: arXiv preprint arXiv:1709.03543 
+
+(2017). arXiv: 1709.03543 [quant-ph] (cit. on p. 1). [HH18] Matthew B Hastings and Jeongwan Haah. “Distillation with sublogarithmic overhead”. In: Physical review letters 120.5 (2018), p. 050504 (cit. on pp. 5–11, 16, 18–20, 23). [He+25a] Zhiyang He, Vinod Vaikuntanathan, Adam Wills, and Rachel Yun Zhang. “Asymptotically good quantum codes with addressable and transversal non-Clifford gates”. In: arXiv preprint arXiv:2507.05392 
+
+(2025) (cit. on pp. 3, 5). [He+25b] Zhiyang He, Vinod Vaikuntanathan, Adam Wills, and Rachel Yun Zhang. “Quantum codes with addressable and transversal non-Clifford gates”. In: arXiv preprint arXiv:2502.01864 (2025) (cit. on pp. 3, 5). [Høh98] Tom Høholdt. “On (or in) the Blahut footprint”. In: Codes, Curves, and Signals: Common Threads in Communications . Springer, 1998, pp. 3–7 (cit. on pp. 9, 12). [HLC22] Jingzhen Hu, Qingzhong Liang, and Robert Calderbank. “Designing the quantum channels induced by diagonal gates”. In: Quantum 6 (2022), p. 802 (cit. on pp. 7, 11). [Jac+26] Hugo Jacinto, Xavier Valcarce, Victor Barizien, Élie Gouzien, and Nicolas Sangouard. Exploring the Landscape of Compact Magic-State Distillation Factories . 2026. arXiv: 2606.07734 [quant-ph] 
+
+(cit. on p. 11). [JA25] Shubham P. Jain and Victor V. Albert. “Transversal Clifford and T-Gate Codes of Short Length and High Distance”. In: IEEE Journal on Selected Areas in Information Theory 6 (2025), pp. 127–137. arXiv: 2408.12752 [quant-ph] (cit. on p. 11). [Jon13] Cody Jones. “Multilevel distillation of magic states for quantum computing”. In: Physical Review A 
+
+87.4 (2013), p. 042305. arXiv: 1210.3388 [quant-ph] (cit. on p. 11). [KLZ96] Emanuel Knill, Raymond Laflamme, and Wojciech Zurek. “Threshold accuracy for quantum com-putation”. In: arXiv preprint quant-ph/9610011 (1996) (cit. on pp. 8, 11). [KZH26] Ryohei Kobayashi, Guanyu Zhu, and Po-Shen Hsin. “Clifford hierarchy stabilizer codes: transversal non-Clifford gates and magic states”. In: Physical Review Letters 136.25 (2026), p. 250802 (cit. on pp. 3, 11). [KT18a] Anirudh Krishna and Jean-Pierre Tillich. “Magic state distillation with punctured polar codes”. In: 
+
+arXiv preprint arXiv:1811.03112 (2018) (cit. on p. 11). [KT18b] Anirudh Krishna and Jean-Pierre Tillich. “Towards low overhead magic state distillation”. In: arXiv preprint arXiv:1811.08461 (2018) (cit. on pp. 6, 11). [KB15] Aleksander Kubica and Michael E Beverland. “Universal transversal gates with color codes: A simplified approach”. In: Physical Review A 91.3 (2015), p. 032330 (cit. on p. 11). [KT23] Eric Kubischta and Ian Teixeira. “Family of quantum codes with exotic transversal gates”. In: 
+
+Physical Review Letters 131.24 (2023), p. 240601 (cit. on p. 3). [KT24a] Eric Kubischta and Ian Teixeira. “Permutation-invariant quantum codes with transversal generalized phase gates”. In: IEEE Transactions on Information Theory 71.1 (2024), pp. 485–498 (cit. on p. 3). [KT24b] Eric Kubischta and Ian Teixeira. “Quantum codes from twisted unitary t-groups”. In: Physical Review Letters 133.3 (2024), p. 030602 (cit. on p. 3). [LLL26] Yiming Li, Zimu Li, and Zi-Wen Liu. “Transversal non-Clifford gates on almost-good quantum LDPC and quantum locally testable codes”. In: arXiv preprint arXiv:2604.01874 (2026) (cit. on pp. 3, 11). 31 [Li+25] Yiming Li, Zimu Li, Zi-Wen Liu, and Quynh T Nguyen. “Poincar \’e Duality and Multiplicative Structures on Quantum Codes”. In: arXiv preprint arXiv:2512.21922 (2025) (cit. on pp. 3, 11). [MEK13] Adam M. Meier, Bryan Eastin, and Emanuel Knill. “Magic-state distillation with the four-qubit code”. In: Quantum Information & Computation 13.3–4 (2013), pp. 195–209. arXiv: 1204 . 4221 [quant-ph] (cit. on p. 11). [NH22] Sepehr Nezami and Jeongwan Haah. “Classification of small triorthogonal codes”. In: Physical Review A 106.1 (2022), p. 012437 (cit. on p. 11). [Ngu25] Quynh T Nguyen. “Good binary quantum codes with transversal CCZ gate”. In: Proceedings of the 57th Annual ACM Symposium on Theory of Computing . 2025, pp. 697–706 (cit. on pp. 2, 3, 6, 7, 9, 11). [NP25] Quynh T Nguyen and Christopher A Pattison. “Quantum fault tolerance with constant-space and logarithmic-time overheads”. In: Proceedings of the 57th Annual ACM Symposium on Theory of Computing . 2025, pp. 730–737 (cit. on pp. 6, 11). [NC+00] Michael A Nielsen, Isaac L Chuang, et al. Quantum computation and quantum information . Vol. 1. Cambridge university press Cambridge, 2000 (cit. on p. 15). [PKP25] Christopher A Pattison, Anirudh Krishna, and John Preskill. “Hierarchical memories: Simulating quantum LDPC codes with local gates”. In: Quantum 9 (2025), p. 1728 (cit. on p. 3). [PR04] Harriet Pollatsek and Mary Beth Ruskai. “Permutationally invariant codes for quantum error cor-rection”. In: Linear algebra and its applications 392 (2004), pp. 255–288 (cit. on p. 3). [RK26a] K. Sai Mineesh Reddy and Navin Kashyap. Asymptotically Good CSS Codes that Realize the Logical Transversal Clifford Group Fault-Tolerantly . 2026. arXiv: 2601.08568 [quant-ph] (cit. on p. 11). [RK26b] K. Sai Mineesh Reddy and Navin Kashyap. Realizing Logical Diagonal Gates via Transversal Physical Z-Rotations in CSS Codes . 2026. arXiv: 2608.19094 [quant-ph] . url : https://arxiv.org/abs/ 2608.19094 (cit. on pp. 6, 11). [Ren+20] Narayanan Rengaswamy, Robert Calderbank, Michael Newman, and Henry D Pfister. “On optimal-ity of CSS codes for transversal T”. In: IEEE Journal on Selected Areas in Information Theory 1.2 (2020), pp. 499–514 (cit. on pp. 7, 11). [SPW24] Thomas R Scruby, Arthur Pesah, and Mark Webster. “Quantum rainbow codes”. In: arXiv e-prints 
+
+(2024), arXiv–2408 (cit. on pp. 3, 11). [Sho95] Peter W Shor. “Scheme for reducing decoherence in quantum computer memory”. In: Physical review A 52.4 (1995), R2493 (cit. on p. 2). [SGJ26] Shraddha Singh, Craig Gidney, and Cody Jones. Borrowed Identities: Malleable Distillation Facto-ries and a Unified Numerical Search . 2026. arXiv: 2606.28518 [quant-ph] (cit. on p. 11). [Sor92] Anders Bjaert Sorensen. “Weighted Reed-Muller codes and algebraic-geometric codes”. In: IEEE transactions on information theory 38.6 (1992), pp. 1821–1826 (cit. on pp. 9, 14). [STV19] Srikanth Srinivasan, Utkarsh Tripathi, and S Venkitesh. “Decoding Downset codes over a finite grid”. In: arXiv preprint arXiv:1908.07215 (2019) (cit. on pp. 9, 12). [Ste96a] Andrew Steane. “Multiple-particle interference and quantum error correction”. In: Proceedings: Mathematical, Physical and Engineering Sciences (1996), pp. 2551–2577 (cit. on pp. 3, 7). [Ste96b] Andrew M Steane. “Error correcting codes in quantum theory”. In: Physical Review Letters 77.5 (1996), p. 793 (cit. on p. 2). [Ste99] Andrew M Steane. “Quantum reed-muller codes”. In: IEEE Transactions on Information Theory 
+
+45.5 (1999), pp. 1701–1703 (cit. on pp. 8, 11). [War90] Harold N Ward. “Weight polarization and divisibility”. In: Discrete Mathematics 83.2-3 (1990), pp. 315–326 (cit. on pp. 8, 13). [Wil26] Adam Wills. “A Review of Galois Qudits”. In: arXiv preprint arXiv:2605.18981 (2026) (cit. on p. 7). [Wil+26] Adam Wills, Michael E Beverland, Lev S Bishop, Jay M Gambetta, Patrick Rall, Vikesh Siddhu, and Andrew W Cross. “Concatenating Algebraic Codes over High-Rate Quantum LDPC Codes”. In: arXiv preprint arXiv:2605.21898 (2026) (cit. on p. 3). 32 [WHY25] Adam Wills, Min-Hsiu Hsieh, and Hayata Yamasaki. “Constant-overhead magic state distillation”. In: Nature Physics 21.11 (2025), pp. 1842–1846 (cit. on pp. 2, 3, 6, 7, 9, 11). [Zha+25] Chao Zhang, Zipeng Wu, Shilin Huang, and Bei Zeng. “Transversal gates in nonadditive quantum codes”. In: arXiv preprint arXiv:2504.20847 (2025) (cit. on p. 3). [Zhu25] Guanyu Zhu. “Transversal non-Clifford gates on qLDPC codes breaking the sqrtN distance barrier and quantum-inspired geometry with Z2 systolic freedom”. In: arXiv preprint arXiv:2507.15056 
+
+(2025) (cit. on pp. 3, 11). [ZKH26] Guanyu Zhu, Ryohei Kobayashi, and Po-Shen Hsin. “Non-Abelian qLDPC: TQFT Formalism, Ad-dressable Gauging Measurement and Application to Magic State Fountain on 2D Product Codes”. In: arXiv preprint arXiv:2601.06736 (2026) (cit. on pp. 3, 11). [Zhu+25] Guanyu Zhu, Shehryar Sikander, Elia Portnoy, Andrew W Cross, and Benjamin J Brown. “Non-Clifford and parallelizable fault-tolerant logical gates on constant and almost-constant rate homolog-ical quantum low-density parity-check codes via higher symmetries”. In: PRX Quantum 6.4 (2025), p. 040361 (cit. on pp. 3, 11). 33

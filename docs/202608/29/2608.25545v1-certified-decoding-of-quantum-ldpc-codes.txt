@@ -1,0 +1,664 @@
+Title: Certified decoding of quantum LDPC codes
+
+URL Source: https://arxiv.org/pdf/2608.25545v1
+
+Published Time: Thu, 27 Aug 2026 00:43:11 GMT
+
+Number of Pages: 18
+
+Markdown Content:
+# Certified decoding of quantum LDPC codes 
+
+Ragavi Krishnamoorthy 1, Florian Gerhardt 2, Johannes Knaute 2, Thomas Klir 3,Stefan Raimund Maschek 4, Erik Schulze 4, Tomislav Maras 2, Alexander Dotterweich 2,Loong Kuan Lee 1, Christian Bauckhage 1, and Nico Piatkowski 1
+
+> 1Hybrid Intelligence, Fraunhofer IAIS
+> 2Actuarial Risk Modeling, Quantum Computing Algorithms & Applications, PricewaterhouseCoopers GmbH
+> 3Cyber Security, PricewaterhouseCoopers GmbH
+> 4Quantum Computing, Bull GmbH
+
+Quantum low-density parity-check (qLDPC) codes reduce the qubit overhead of fault-tolerant quantum computation by an order of magnitude, but their decoding is harder than its classical counterpart: because many physical errors are equiv-alent up to stabilizers, the degenerate maximum-likelihood (ML) decoder must compare the probabilities of entire equiv-alence classes of errors, that is, partition functions, rather than single errors. The workhorse decoder BP+OSD sidesteps degeneracy heuristically and offers no guarantees. We treat degenerate decoding as probabilistic inference in an undirected graphical model: the probability of each logical class is the partition function of an unconstrained, strictly positive Markov random field over the code’s check vari-ables, a construction that generalizes the random-bond Ising mapping of the surface code to arbitrary CSS codes and to spacetime decoding with measurement errors and circuit-level noise. On this model we build two decoders. The first estimates all class partition functions by annealed importance sampling with common random numbers and attaches to every decision a certificate of optimality: a paired bootstrap test, or, composed with constant-factor estimators such as WISH, an exact optimality proof. The second is region-based: the Bethe free en-ergy , whose bias cancels between classes, reproduces exact ML decoding on every tested surface-code instance at millisecond cost, and enlarging the regions to elim-ination clusters makes exact degenerate ML decoding of the [[72 , 12 , 6]] bivariate bicycle code feasible. Across surface codes and the bivariate bicycle codes [[72 , 12 , 6]] 
+
+and [[144 , 12 , 12]] , under code-capacity, phenomenological, and circuit-level noise, the sampling decoder matches or exceeds BP+OSD while certifying the bulk of its decisions, and the certificate flags exactly the syndromes on which any fast decoder should be distrusted. 
+
+# 1 Introduction 
+
+Large-scale quantum computation requires quan-tum error correction (QEC), because physical qubit error rates ( ∼ 10 −3–10 −2 in current hard-ware) exceed the requirements of useful algo-rithms by many orders of magnitude. For over a decade, the surface code [1, 2, 3] has been the de facto standard: it tolerates comparatively high physical error rates ( ∼ 1% threshold) and requires only nearest-neighbor interactions on a two-dimensional (2D) qubit lattice. Its main drawback is overhead: a single well-protected log-ical qubit may consume on the order of 10 3 phys-ical qubits. Quantum low-density parity-check (qLDPC) codes attack precisely this bottleneck. By encoding many logical qubits into a single sparse code block, they promise a reduction of the physical-to-logical qubit ratio by an order of magnitude or more [4, 5, 6, 7], with the bivariate bicycle (BB) codes of Bravyi et al. [8] as the cur-rently most prominent hardware-motivated con-struction. The price of dense encoding is paid, in part, at the decoder. Decoding a qLDPC code is markedly harder than decoding either classical LDPC codes or the surface code, for a reason 
+
+1arXiv:2608.25545v1 [quant-ph] 26 Aug 2026 that is structural rather than incidental: quan-tum codes are degenerate . Errors that differ by a stabilizer act identically on the code space, so the optimal degenerate maximum-likelihood 
+
+(ML) decoder must identify the most probable 
+
+equivalence class of errors, a sum over expo-nentially many configurations, rather than the most probable single error. The de facto stan-dard decoder, belief propagation with ordered-statistics post-processing (BP+OSD) [9, 10], han-dles degeneracy heuristically: it estimates single-error marginals by loopy message passing and repairs their inconsistencies by a greedy matrix-elimination step. It performs well in practice but offers no optimality statement, no error bound, and no indication of which of its decisions are trustworthy. This paper develops a decoder that takes the structure of the problem seriously. Our starting point is the observation, made precise in Sec-tion 3, that syndrome decoding is probabilistic inference in an undirected graphical model (a Markov random field, MRF) whose factor graph is the code’s Tanner graph, and that degeneracy moves the relevant inference task from maximum-a-posteriori estimation to partition-function eval-uation . Partition-function estimation is a mature subfield of probabilistic machine learning, with estimators whose statistical behavior is well un-derstood [11, 12, 13]. We import this machinery into qLDPC decoding. 
+
+Contributions. 
+
+• The coset MRF. The probability of each log-ical class is the partition function of an un-constrained, strictly positive MRF over the code’s X-check variables (Proposition 1). The construction applies to any CSS code and generalizes the classical mapping of surface-code decoding to the random-bond Ising model [2] (for the surface code it repro-duces exactly that Ising model, for BB codes it yields a three-body analogue), and it ex-tends verbatim to spacetime decoding prob-lems with faulty measurements and circuit-level noise (Section 7.7). Crucially, the hard parity constraints of the syndrome posterior are eliminated by the parametrization, so ev-ery standard sampler and message-passing scheme applies without modification. • A certified sampling decoder. Annealed im-portance sampling (AIS) [11] with common random numbers (CRN) [14] across classes estimates all class partition functions on one shared randomness stream, turning the de-cision into a paired comparison. A paired bootstrap test on the coupled estimates cer-tifies each decision; composed with constant-factor estimators such as WISH [12], whose optimization oracles are QUBOs, hence na-tive to quantum annealers [15], the cer-tificate becomes an exact optimality proof (Lemma 1). We also report two natural “sharper” ratio estimators that fail instruc-tively: direct inter-class annealing and Ben-nett’s acceptance ratio both collapse on the low-overlap coset pairs, pinning down why the anneal through infinite temperature is the right bridge (Section 7.4). • Region-based decoders, from Bethe to ex-act. The Bethe free energy of each coset MRF, computed by loopy belief propagation in a tanh parametrization, is a biased esti-mate of log Z λ, but the bias is shared across classes and cancels in the comparison: the Bethe decoder reproduces the exact ML de-cision on every tested surface-code instance at millisecond cost (Section 7.5). One level up, Kikuchi-size regions realized by (mini-)bucket elimination [16] exploit a structural windfall: the coset graph of the [[72 , 12 , 6]] 
+
+BB code has induced width ≈ 23 , so exact degenerate ML decoding of a qLDPC code be-comes feasible, and bounded clusters yield upper bounds that, paired with configura-tion lower bounds, give deterministic opti-mality certificates and provable class pruning (Section 7.6). • Validation from code capacity to circuit level. 
+
+We evaluate against exact degenerate ML de-coding on rotated surface codes, and against BP+OSD [9, 10] and MWPM [17] on the BB codes [[72 , 12 , 6]] and [[144 , 12 , 12]] [8] and on spacetime problems (phenomenological noise for the BB code and stim-generated circuit-level noise for the surface code), reporting logical error rates, certified fractions, calibra-tion of the certificates against ground truth, and runtimes (Section 8). Related approaches to degeneracy-aware de-
+
+2coding exist for the surface code, where 2D structure makes coset sums accessible to tensor-network contraction [18] and to tailored Metropo-lis dynamics [19]. Our construction requires no geometric structure, only sparsity, and therefore covers the expander-like codes at the center of current fault-tolerance road maps; its guarantees come from the estimator, not from the code fam-ily. The paper is self-contained. Sections 2–5 re-view the three ingredients (classical LDPC codes, undirected graphical models, and the qLDPC program), and Section 6 explains why decoding is the binding constraint. Sections 7 and 8 develop and evaluate the proposed decoders. Section 9 concludes. 
+
+# 2 Classical LDPC Codes 
+
+A binary linear code C ⊆ Fn 
+
+> 2
+
+is defined by a parity-check matrix H ∈ Fm×n 
+
+> 2
+
+via C = {x ∈
+
+Fn 
+
+> 2
+
+: Hx = 0 }. The code has parameters [n, k, d ],where k = n − rank( H) is the number of encoded bits and d is the minimum Hamming weight of a nonzero codeword. A code family is called low-density parity-check (LDPC) if H is sparse: every row and every column contains at most a con-stant number of ones, independent of n. Equiv-alently, in the bipartite Tanner graph connecting bit nodes to check nodes, all node degrees are bounded by a constant. LDPC codes were introduced by Gallager in 1962 [20] and rediscovered in the 1990s [21], when it became clear that random sparse codes decoded with iterative message passing (belief propaga-tion, BP) operate remarkably close to the Shan-non limit [22]. Two properties drive their prac-tical dominance in modern communication stan-dards (e.g., 5G-NR and IEEE 802.11): (i) spar-sity makes each decoding iteration cheap and massively parallelizable, which is why LDPC de-coders are a classic target for FPGA and ASIC implementation; and (ii) random sparse construc-tions achieve linear distance d = Θ( n) at constant rate k/n , i.e., they are asymptotically good .The central question of the qLDPC program is whether these two properties, sparse checks and good asymptotic parameters, can coexist in the quantum setting, where the answer turned out to be far less obvious. 
+
+# 3 Undirected Probabilistic Graphical Models 
+
+Iterative decoding is best understood as proba-bilistic inference . This section fixes notation for undirected probabilistic graphical models, also called Markov random fields (MRFs) [23, 24, 13], in which the decoding problems appearing throughout this paper are instances of standard inference tasks. 
+
+3.1 Markov Random Fields and Inference 
+
+An MRF over variables X1, . . . , X N with Xv ∈{0, . . . , Y v − 1} and clique set C (m = |C| ) factor-izes as P(x) = 1Z 
+
+> ∏
+> C∈C
+
+ψC (xC ) with clique poten-tials ψC ≥ 0, where xC denotes the restriction of 
+
+x to the variables in C. Writing ψC = exp( θC )
+
+in log-domain, the partition function 
+
+Z = ∑
+
+> x
+> ∏
+> C∈C
+
+ψC (xC ) = ∑
+
+> x
+
+exp  
+
+> ( ∑
+> C∈C
+
+θC (xC )
+
+> )
+
+(1) 
+
+normalizes the distribution. The three canon-ical inference tasks are (i) marginal inference, computing P(xv) or, more generally, the proba-bility of a subset of variables by summing out the rest; (ii) maximum-a-posteriori (MAP) infer-ence, x⋆ = arg max x P(x); and (iii) evaluation of 
+
+Z itself. All three are computationally hard in general: computing Z is #P-hard, and even ap-proximate marginal inference is intractable in the worst case [25]. Exact inference via the junction-tree algorithm runs in time exponential in the 
+
+treewidth of the underlying graph [26], which con-fines it to suitably sparse, tree-like models; be-yond that regime one resorts to Monte-Carlo sam-pling [27] or to variational approximations [13]. 
+
+3.2 Factor Graphs and Belief Propagation 
+
+The factorization is conveniently drawn as a fac-tor graph : a bipartite graph with one variable node per Xv, one factor node per clique C, and an edge whenever Xv ∈ C [28]. Belief propa-gation (BP) [23] computes marginals by passing messages along its edges, 
+
+μC→v(xv) = ∑
+
+> xC\v
+
+ψC (xC ) ∏
+
+> u∈C\v
+
+μu→C (xu), (2) 
+
+μv→C (xv) = ∏ 
+
+> C′∋v, C ′̸=C
+
+μC′→v(xv),
+
+3with marginals obtained as normalized products of incoming messages. On tree-structured fac-tor graphs BP is exact; on graphs with cycles, iterating (2) to a fixed point ( loopy BP) yields approximate marginals that correspond to sta-tionary points of the Bethe free energy [29]. Re-placing the sum in (2) by a maximization gives max-product BP, the analogous approximation for MAP inference. 
+
+3.3 Decoding as Inference 
+
+Syndrome decoding is precisely such an inference problem. Let e ∈ Fn 
+
+> 2
+
+be the error of a memory-less channel with flip probability p, so that the prior factorizes into unary potentials ψv(ev) = 
+
+pev (1 − p)1−ev , and let s = He be the observed syndrome. Conditioning on s attaches to each check c the hard factor ψc(ec) = ⊮[⊕ 
+
+> v∈c
+
+ev = sc],yielding the posterior 
+
+P(e | s) = 1Z( s)
+
+> n∏
+> v=1
+
+ψv(ev)
+
+> m∏
+> c=1
+
+ψc(ec), (3) 
+
+an MRF whose factor graph is the Tanner graph of the code. Bitwise MAP decoding (arg max ev P(ev | s) for each v) is marginal infer-ence in (3) , and iterative LDPC decoding, from Gallager’s original algorithm [20] onward, is loopy BP on this model [30]; blockwise MAP decod-ing is MAP inference. The sparsity that defines LDPC codes is exactly the sparsity that makes each BP iteration cheap. The quantum setting adds a characteristic twist. Because errors that differ by a stabilizer act identically on the code space, the optimal ( de-generate maximum-likelihood ) decoder does not seek the single most probable error but the most probable equivalence class : it maximizes the total posterior mass ∑ 
+
+> e∈¯e+S
+
+P(e | s) of a coset, a sum over exponentially many configurations, that is, a constrained partition function (1) rather than a point estimate. For the surface code this coset sum is the partition function of a random-bond Ising model [2]. Degeneracy thus moves quan-tum decoding from MAP inference to the strictly harder task of partition-function evaluation, afact that resurfaces as a central decoding obsta-cle in Section 6 and that our method (Section 7) confronts head-on. 
+
+# 4 Stabilizer Codes and the CSS Con-struction 
+
+Quantum error correction must protect against both bit-flip ( X) and phase-flip ( Z) errors with-out measuring, and thereby destroying, the en-coded state. The stabilizer formalism [31] achieves this by defining the code space as the joint +1 eigenspace of an abelian group S of n-qubit Pauli operators. Measuring a generating set of S yields a classical syndrome that reveals information about errors while leaving the logical state intact. An [[ n, k, d ]] stabilizer code encodes k
+
+logical qubits into n physical qubits; d is the min-imum weight of a Pauli operator that commutes with all stabilizers without being a stabilizer it-self, i.e., of a nontrivial logical operator. The Calderbank–Shor–Steane (CSS) construc-tion [32, 33] builds a stabilizer code from two clas-sical codes with parity-check matrices HX and 
+
+HZ satisfying the orthogonality condition 
+
+HX HT 
+
+> Z
+
+= 0 , (4) 
+
+which guarantees that all X-type and Z-type sta-bilizers commute. The X-checks detect phase-flip errors and the Z-checks detect bit-flip errors, so decoding partially reduces to two classical decod-ing problems, with the important caveat of degen-eracy : many distinct physical errors are equiv-alent up to stabilizers and need not be distin-guished, which classical decoders are not designed to exploit. A stabilizer code family is qLDPC if every sta-bilizer generator acts on at most a constant num-ber of qubits and every qubit participates in at most a constant number of generators [5]. Spar-sity is even more critical here than classically: syndrome extraction is an active quantum circuit, and high-weight stabilizers require deep measure-ment circuits that themselves spread errors, de-grading fault tolerance. Constraint (4) is precisely what makes good quantum codes hard to find. Random sparse ma-trices, the workhorse of classical LDPC theory, essentially never satisfy it; qLDPC constructions therefore require heavy algebraic or topological structure, and this structure tends to depress ei-ther the rate or the distance. 
+
+45 From the Surface Code to Quantum LDPC Codes 
+
+5.1 The Surface Code as a qLDPC Code 
+
+The surface code [1, 2, 3] is itself a CSS qLDPC code: all stabilizers have weight four and each qubit participates in at most four checks. Its Tanner graph is, moreover, geometrically local in 2D, which is the key to its popularity on pla-nar superconducting chips. It also enjoys a high circuit-level threshold near 1% and an efficient, well-understood decoder (minimum-weight per-fect matching on the syndrome graph). Its parameters, however, are poor: a distance-d
+
+surface code patch uses n = Θ( d2) physical qubits to encode k = 1 logical qubit, i.e., 
+
+k = 1 , d = Θ( √n), kn → 0. (5) 
+
+Suppressing logical error rates to the 10 −10 –10 −12 
+
+regime needed for large algorithms requires d ≈
+
+25 –35 , hence roughly 10 3 physical qubits per log-ical qubit before accounting for magic-state dis-tillation. This vanishing rate is not an accident of the construction: Bravyi, Poulin, and Terhal proved that any 2D-local stabilizer code obeys 
+
+kd 2 = O(n), (6) 
+
+so the surface code is essentially optimal within its locality class [34]. Better parameters therefore 
+
+require long-range connectivity. 
+
+5.2 Asymptotically Good qLDPC Codes 
+
+For nearly twenty years after the CSS construc-tion, the best known qLDPC distance scaling barely exceeded √n. The hypergraph product of Tillich and Zémor [35] was a milestone: it turns any pair of classical codes into a CSS code satis-fying (4) by construction and yields constant-rate families with d = Θ( √n): constant rate, but still square-root distance. Gottesman showed that constant-rate qLDPC codes would enable fault-tolerant computation with constant space over-head [4], sharpening the motivation to push dis-tance further. The breakthrough came in rapid succession. Panteleev and Kalachev introduced lifted product 
+
+codes, first achieving almost-linear distance [36] and then proving the existence of asymptotically good qLDPC codes with k = Θ( n) and d = Θ( n)
+
+via lifted products of Tanner codes over non-abelian group algebras [6]. Shortly thereafter, Leverrier and Zémor gave an elegant alterna-tive construction, the quantum Tanner codes [7], based on expander graphs equipped with local codes on squares of a group. Conceptually, both constructions replace geometric locality with ex-pansion : the Tanner graph is sparse yet highly connected, so that small errors cannot conspire to form low-weight logical operators. The price is exactly the long-range connectivity forbidden by (6) [37]. The good constructions are, at present, primarily existence results, which moti-vates the intermediate-scale constructions of the next subsection. 
+
+5.3 Bivariate Bicycle Codes 
+
+The bivariate bicycle (BB) codes of Bravyi et al. [8] are the currently most prominent attempt to bring qLDPC advantages into the practically relevant regime of hundreds of qubits. BB codes are CSS codes defined by two sparse polynomials 
+
+A and B over the group algebra of Zℓ × Zm, with check matrices HX = [ A | B] and HZ = [ BT |
+
+AT], which satisfies (4) because A and B com-mute. All stabilizers have weight six, and each qubit couples to six others, only marginally more demanding than the surface code’s degree four. The flagship instance is the [[144 , 12 , 12]] “gross” code 1: 144 data qubits (plus 144 ancilla qubits for syndrome extraction) encode 12 logical qubits at distance 12. Circuit-level simulations show a pseudo-threshold near 0.7% , and at a physical error rate of 10 −3 the code reaches logical er-ror rates for which a surface-code implementa-tion of equal performance would require roughly ten times as many physical qubits [8]. Crucially, the required connectivity, while not 2D-local, is 
+
+almost planar: the Tanner graph decomposes into two planar layers plus a bounded number of long-range couplers per qubit, a topology con-sidered realistic for superconducting chips with through-substrate vias or long-range resonators. The headline factor-of-ten saving applies to quan-tum memory ; the comparison becomes less clear-cut once logical operations are included, and the twelve logical qubits of a gross-code block share correlated failure mechanisms.   
+
+> 1The name derives from the unit gross = 144.
+
+56 The Decoding Bottleneck 
+
+Deploying qLDPC codes faces three obstacles. Two of them are outside the scope of this pa-per and we only note them: the long-range con-nectivity mandated by (6) must be engineered or provided natively [34, 37, 38, 39], and fault-tolerant logical gates on densely packed code blocks are far less mature than surface-code lat-tice surgery [38, 8]. The third obstacle is decod-ing, and it is the subject of everything that fol-lows. Decoding qLDPC codes is markedly harder than decoding either classical LDPC codes or the surface code. Plain BP fails on quantum Tanner graphs for two reasons: unavoidable short cycles (four-cycles are built into CSS constructions) and error degeneracy, which splits the posterior prob-ability mass over many equivalent errors and pre-vents BP from converging to any one of them. In the language of Section 3: the syndrome-conditioned posterior (3) has many symmetric modes, so its sum-product marginals are unin-formative, and the quantity a degenerate decoder must compare is a coset partition function rather than a MAP configuration. The current stan-dard is BP with ordered-statistics post-processing (BP+OSD) [9, 10]: when BP fails to converge, an OSD step solves a most-likely-error problem on a reliability-sorted, reduced system via Gaussian elimination. BP+OSD performs well across the qLDPC landscape but its post-processing has cu-bic worst-case cost, which conflicts with the real-time requirement that syndrome information be processed within microseconds on superconduct-ing hardware, and it comes with no optimality or error guarantee whatsoever. 
+
+# 7 Degenerate ML Decoding as Partition-Function Estimation 
+
+We now develop the proposed decoders. Throughout, we consider a CSS code with check matrices HX ∈ FmX ×n 
+
+> 2
+
+, HZ ∈ FmZ ×n
+
+> 2
+
+and independent bit-flip ( X-type) noise of rate 
+
+p < 12 ; the phase-flip problem is identical with the roles of HX and HZ exchanged. 
+
+7.1 The Decision Problem 
+
+An error e ∈ Fn 
+
+> 2
+
+with prior P(e) = (1 − p)nw|e|,
+
+w = p/ (1 − p), produces the syndrome s = HZ e.Fix any particular solution e0 of HZ e0 = s and a basis LX ∈ Fk×n 
+
+> 2
+
+of logical X representatives (a basis of ker HZ modulo the rowspace of HX ). The solution set of the syndrome equation decomposes into 2k logical classes with representatives eλ =
+
+e0 ⊕ λTLX , λ ∈ Fk 
+
+> 2
+
+, each class being the coset 
+
+eλ ⊕ rowspace( HX ). The degenerate ML decoder returns 
+
+ˆλ = arg max 
+
+> λ∈Fk
+> 2
+
+Zλ(s), Zλ(s) = ∑
+
+> u∈FmX
+> 2
+
+w|eλ⊕uTHX |,
+
+(7) 
+
+and any representative of the winning class is an optimal correction: the decoder succeeds if and only if the residual e ⊕ ˆe is an X-stabilizer. (If 
+
+HX contains redundant rows, every coset element is counted 2mX −rank HX times in (7) ; this con-stant is identical across classes and cancels from all comparisons.) 
+
+7.2 The Coset MRF 
+
+The sum (7) is not merely analogous to (1) ; it is literally a partition function of an MRF, and of a remarkably benign one. 
+
+Proposition 1 (Coset probabilities are positive MRF partition functions) . Fix a class represen-tative r = eλ and introduce one binary variable 
+
+uc per X-check, c = 1 , . . . , m X . For each qubit 
+
+v let N (v) = {c : ( HX )cv = 1 } and define the clique potential 
+
+ψv(uN (v)) = w rv ⊕ ⊕   
+
+> c∈N(v)uc
+
+∈ { w, 1}. (8) 
+
+Then Zλ(s) = ∑ 
+
+> u
+> ∏nv=1
+
+ψv(uN (v)) is the par-tition function (1) of the MRF with variables 
+
+u1, . . . , u mX and clique set {N (v) : v = 1 , . . . , n }.Its potentials are strictly positive, and the model is unconstrained : every u ∈ FmX 
+
+> 2
+
+is a valid con-figuration. Proof. Immediate from (7): the coset element as-sociated with u is r ⊕ uTHX , whose v-th bit is 
+
+rv ⊕ ⊕  
+
+> c∈N(v)
+
+uc, and its prior weight w|·| factor-izes over qubits into the potentials (8). 
+
+Three structural remarks. First, the factor graph of the coset MRF is the transpose of the Tanner graph of HX : variables are checks, factors 
+
+6are qubits, and the clique size equals the qubit’s check-degree: at most 2 for the surface code (giv-ing exactly the random-bond Ising model of [2]) and 3 for BB codes (a three-body Ising ana-logue). Sparsity of the code is inherited as spar-sity of the inference problem. Second, and in sharp contrast to the syndrome posterior (3) , the coset MRF has no hard constraints : the par-ity checks were absorbed into the parametriza-tion. The rugged, disconnected landscape that traps single-site samplers on constrained models is replaced by a smooth landscape on which any standard MCMC kernel is irreducible. Third, the potentials are strictly positive, so the en-tire nonnegative-inference toolbox applies with-out further transformation; the negativity obsta-cle that governs, e.g., quasiprobability methods in quantum simulation is absent here by construc-tion. 
+
+7.3 Annealed Importance Sampling with Com-mon Random Numbers 
+
+Among partition-function estimators we use an-nealed importance sampling (AIS) [11], which in-terpolates from the uniform distribution π0(u) ∝
+
+1 (with known Z0 = 2 mX ) to the target π1(u) ∝
+
+wE(u), E(u) = |r ⊕ uTHX |, along the geomet-ric path πβ ∝ wβE with inverse temperatures 
+
+0 = β0 < β 1 < · · · < β T = 1 . A chain is initial-ized uniformly and, at each stage, accumulates the importance increment (βt − βt−1) E(u) ln w
+
+before one Metropolis sweep over the check vari-ables at βt (flipping uc toggles the parities of the qubits in check c, so the energy change is lo-cal and cheap). The resulting weight W satis-fies E[W ] = Z λ exactly , for any T ; averaging K
+
+independent chains gives the unbiased estimate 
+
+ˆZλ. The decision (7) then reduces to an argmax over the 2k estimates, or, when k is large, over a candidate set centered at the BP+OSD solution (identity, all single-, and all double-logical shifts; 
+
+1 + k + (k 
+
+> 2
+> )
+
+classes), which recovers the exact de-cision whenever BP+OSD errs by at most two logical operators. The decision depends only on ratios of par-tition functions. All class representatives share the same coupling structure and differ only in the unary offsets rv in (8) , so we run AIS for all classes with common random numbers [14] (iden-tical initial states and identical per-step uniform variates), making the estimates ˆZλ positively cor-related, so that 
+
+Var (ˆZλ−ˆZλ′ 
+
+> )
+
+= Var ˆZλ+Var ˆZλ′ −2 Cov (ˆZλ, ˆZλ′
+
+> )
+
+(9) 
+
+falls below its independent-randomness value, by up to a factor of two in variance in our experi-ments (Section 8.1). The deeper benefit of the coupling is structural: it turns the class compar-ison into a paired comparison on a shared ran-domness stream, which is what the per-decision certificates below are built on. 
+
+7.4 Certificates 
+
+A decoder that estimates rather than computes should say when it is sure. We provide two mech-anisms. 
+
+Lemma 1 (Certified ML decision from constan-t-factor estimates) . Suppose ˆZλ ∈ [Z λ/κ, κ Zλ]
+
+for all λ and some κ ≥ 1. If ˆZˆλ > κ 2 ˆZλ for all 
+
+λ̸ = ˆλ, then ˆλ is the exact degenerate ML class. Proof. Zˆλ ≥ ˆZˆλ/κ > κ ˆZλ ≥ Zλ for every com-petitor λ.
+
+Lemma 1 is designed to compose with estima-tors that come with relative guarantees. The WISH estimator [12] returns every Zλ within a factor κ = 16 (with probability 1 − δ) using only 
+
+O(mX log mX ) MAP queries under random par-ity constraints, and each such query on the coset MRF is a quadratic unconstrained binary opti-mization (QUBO) problem, the native input of a quantum annealer [15]. A decoding architecture in which an annealer serves as the MAP oracle of a WISH-certified qLDPC decoder is therefore a concrete, if currently speculative, possibility; Sec-tion 8.1 validates the WISH route with an exact oracle. For the AIS decoder we use a cheaper statisti-cal certificate. With CRN, the per-chain weights of the best class and of each competitor form 
+
+paired samples (W (i)ˆλ , W (i) 
+
+> λ
+
+) whose mean differ-ence is Zˆλ−Zλ. The naive test, a one-sided paired 
+
+t-test on the raw weight differences, is crippled by the heavy right tail of AIS weights: on large codes its standard error is dominated by the largest weight and it fails to certify even decisions whose true class gap is tens of nats. The operational cer-tificate is instead a paired bootstrap : resample the 
+
+K chains (the same indices for all classes, preserv-ing the CRN pairing), recompute the log-ratio 
+
+7log ˆZˆλ − log ˆZλ on each resample, and certify if the Bonferroni-corrected lower percentile exceeds zero for every competitor. The bootstrap statis-tic is a smooth functional of the weights rather than their raw mean, and the improvement is dramatic: on the gross code the t-test certifies almost nothing while the bootstrap certifies the large majority of decisions at identical sampling cost (Section 8.3). Both certificates are asymp-totic in K; their calibration against exact ground truth is measured in Section 8.1. Certified de-cisions can be trusted; uncertified ones identify exactly the syndromes deserving a slower second look, a triage capability no standard qLDPC de-coder currently offers. 
+
+Two sharper ratio estimators that fail, in-structively. Since only ratios Zλ/Zˆλ matter, one is tempted to estimate them directly. We im-plemented two textbook candidates. Inter-class annealing shares one anneal to the reference class and then bridges to each competitor at β = 1 by interpolating the unary offsets on the support of the logical shift; the composite path is a valid AIS sequence, unbiased for every Zλ. Bennett’s ac-ceptance ratio [40] post-processes the equilibrated endpoints of the per-class anneals, which differ only on the shift support. Both are an order of magnitude worse than the plain paired difference of per-class anneals (Section 8.1): the two cosets’ typical sets are nearly disjoint at low tempera-ture, so the direct bridge crosses a free-energy bottleneck that the per-class path through infi-nite temperature simply walks around, and the same lack of overlap starves BAR of usable cross-energy samples. The lesson is structural: for coset comparison, the infinite-temperature man-ifold is the bridge, and sharpening should target the test statistic (the bootstrap above), not the path. 
+
+Related work. Degeneracy-aware decoders exist for the surface code, exploiting its pla-nar structure: tensor-network contraction of the coset sum [18] and single-temperature Metropo-lis sampling over stabilizer deformations [19]. Renormalization-group and matrix-product de-coders inherit similar geometric requirements. Our construction differs in that Proposition 1 re-quires only CSS structure and sparsity (it cov-ers expander-like codes where no planar contrac-tion order exists), and in that the estimators we employ carry statistical guarantees that convert into per-decision certificates via Lemma 1. On the classical side, the coset MRF is the natural quantum generalization of the weight-enumerator MRFs of classical coding theory; we are not aware of prior work using guarantee-carrying partition-function estimators (AIS, WISH) as qLDPC de-coders. 
+
+7.5 A Region-Based Surrogate: Bethe Decod-ing 
+
+Sampling is not the only route to log Z λ. The coset MRF is an ideal target for the region-based free-energy approximations of Section 3: its potentials (8) depend on their arguments only through a parity , so sum-product messages close in the difference parametrization d = μ(0) − μ(1) 
+
+(the classical “tanh rule”). A qubit factor v con-tributes δv = ( −1) rv 1−w 
+
+> 1+ w
+
+, factor-to-variable mes-sages multiply the incoming differences of the other checks in N (v) by δv, and variable-to-factor messages combine as tanh ( ∑ artanh d). At a BP fixed point the Bethe free energy FB is evalu-ated from the beliefs in closed form, and −FB(λ)
+
+serves as a variational surrogate for log Z λ: the 
+
+Bethe decoder returns the class of minimal Bethe free energy. On a loopy graph −FB is a biased estimate of 
+
+log Z , and this is where the class structure helps: all 2k coset MRFs share the same graph and cou-plings and differ only in the unary signs rv, so the Bethe bias is strongly correlated across classes and largely cancels in the differences that de-termine the decision, the variational analogue of common random numbers. Empirically the can-cellation is almost perfect (Section 8.1): on sur-face codes the Bethe class ratios track the exact ones to ≈ 0.1 nats and the Bethe decoder re-produces the exact ML decision on every tested instance, at a cost of milliseconds for all 79 can-didate classes of a BB code. Two caveats delimit the surrogate. First, BP on the coset MRF has multiple fixed points at strong coupling ( w → 0): a paramagnetic fixed point ( d ≡ 0) always exists and its free energy is class-independent: a decoder stuck there ranks classes by numerical noise. Initializing the mes-sages polarized toward the representative config-uration u = 0 selects the ordered branch instead; which branch BP reaches, and whether it con-
+
+8verges at all, depends on the noise rate, and we report both initializations. Second, the Bethe ap-proximation ignores the short cycles of the coset graph. Interestingly, these are not the CSS four-cycles of the syndrome Tanner graph: we verified that in the coset graphs of all our codes no two qubits share two checks, so the girth-limiting cy-cles have length six and larger. Enlarging the re-gions beyond factor scopes, the Kikuchi/cluster-variation hierarchy [29], is the systematic cure; the next subsection realizes it through cluster elimination. 
+
+7.6 Kikuchi-Level Regions: Cluster Elimina-tion, Exact ML, and Interval Certificates 
+
+The Bethe surrogate uses the smallest possible regions. To enlarge them we work with the elimination-based face of the region hierarchy: 
+
+bucket elimination along a variable ordering mul-tiplies all factors mentioning the current variable and sums it out, which is exact junction-tree in-ference with clusters given by the induced elim-ination scopes [26]; capping the cluster size at 
+
+i variables and splitting oversized buckets gives 
+
+mini-bucket elimination MBE( i) [16], whose re-gions grow with i and recover exactness at the treewidth. On the coset MRF this hierarchy is unusually powerful, for a structural reason: the coset graph of the [[72 , 12 , 6]] BB code has just 
+
+36 variables and induced width ≈ 23 under a min-fill ordering. Exact evaluation of log Z λ, and hence exact degenerate ML decoding of a quan-tum LDPC code , is therefore feasible at a few seconds per class, something previously available only for surface codes via planar contraction [18]. The gross code (width ≈ 40 ) remains out of exact reach and is served by the bounded-cluster levels. Mini-buckets do more than approximate: sum-ming out in one mini-bucket and maximizing in the others yields an upper bound Uλ ≥ log Z λ,while the log-potential of any single coset config-uration (we use a greedy generator descent from the representative) yields a lower bound Lλ. Two consequences follow immediately. First, a deter-ministic optimality certificate: if Lˆλ > U λ for ev-ery competitor, the decision is provably the ML class: no sampling, no confidence level. Second, 
+
+provable pruning : any class with Uλ < max λ′ Lλ′
+
+cannot be optimal and is discarded exactly, which lets the exact junction-tree decoder run on the handful of surviving classes instead of all candi-dates; in practice this reduces exact ML decoding of the [[72 , 12 , 6]] code to seconds per syndrome, and makes even the global optimum over all 212 
+
+classes computable (Section 8.5). 
+
+7.7 Noisy Syndromes: Spacetime Decoding Problems 
+
+Everything so far assumed perfect syndrome ex-traction, but nothing in the construction depends on it. Consider the general decoding problem: binary error mechanisms x ∈ FN 
+
+> 2
+
+with indepen-dent priors pv, a detector matrix H with observed outcome s = Hx, and a logical matrix L whose value Lx is the quantity a decoder must recover. Code-capacity CSS decoding is the special case 
+
+(H, L ) = ( HZ , L Z ); a phenomenological model (fresh data errors and measurement flips over 
+
+r rounds, final perfect round) and a stim-style 
+
+circuit-level detector error model are others. The role of the stabilizer group is played by the trivial kernel {x : Hx = 0 , L x = 0 }: with S a basis of it and per-variable weights wv = pv/(1 − pv),Proposition 1 holds verbatim: each class proba-bility is the partition function of an unconstrained positive MRF over the generator variables, with clique potentials ψv ∈ { wv, 1} indexed by the columns of S.Three practical devices make the general de-coder work at circuit level. (i) Sparse genera-tor bases. A generic kernel basis is dense, and a dense generator freezes the Metropolis dynam-ics (each move crosses an enormous energy bar-rier). For structured models a sparse basis is explicit (per-round code stabilizers plus data-measurement pairs); for detector error models a greedy pairwise reduction sparsifies the ba-sis to mean weight ≈ 3. (ii) Lightened repre-sentatives. Class representatives obtained from generic kernel vectors are heavy, which biases the annealing difficulty between classes; greedily re-ducing each representative to a local weighted-weight minimum within its coset makes u = 0 
+
+the local mode of every class MRF, at no cost to exactness. (iii) A concentrated base measure. 
+
+Annealing from the uniform distribution pays a path of m log 2 nats in free energy; for spacetime problems ( m ≈ 200 –600 generators) this path dwarfs the few-nat class gaps and the estimator drowns in its own variance; we observed both the circuit-level and the phenomenological models fail completely in this mode, with near-random deci-
+
+9sions and 0% certified. Annealing instead from an i.i.d. Bernoulli (q0) product base concentrated near u = 0 (exactly normalized, so unbiasedness is untouched) shortens the path to a few nats and restores both accuracy and certification. The de-ciding quantity is the path length, i.e. the genera-tor count: the small coset MRFs of code-capacity decoding ( m ≤ 72 ) tolerate the uniform base, while spacetime problems require q0 ≈ 0.02 ; we calibrate on instances with exact ground truth, and the certificate rate acts as an on-line warn-ing when the base is mismatched. With these three devices the certified decoder runs at circuit level with sub-second decodes (Section 8.4). 
+
+# 8 Experiments 
+
+Four experiments evaluate the method, all run on a 64-core commodity server. Experiments 1–3 use code-capacity independent bit-flip noise at rate p
+
+and decode X-errors from the Z-syndrome; Ex-periment 4 adds faulty syndrome extraction (phe-nomenological and circuit-level noise). Reported logical error rates are block error rates (any non-trivial residual logical class counts as failure). Baselines are plain BP (product-sum), BP+OSD-0 and BP+OSD-CS (combination-sweep, order 7) from the ldpc package [10], and minimum-weight perfect matching (PyMatching [17]) where appli-cable. The AIS decoder uses T = 32 annealing sweeps and K = 128 chains per class on the sur-face codes and T = K = 128 on the BB codes (Section 8.3 reports a sweep-budget ablation); certificates are the paired bootstrap at δ = 0 .05 
+
+unless stated otherwise. All estimator-based de-coders are seeded from the BP+OSD-0 solution 
+
+e0. Code, scripts, and raw results are available upon request. 
+
+8.1 Estimator Validation Against Exact Coset Sums 
+
+On the rotated surface code of distance 5 (n = 25 ,
+
+mX = 12 ), the coset sums (7) can be enumerated exactly ( 212 terms per class), providing ground truth for every component of the method. For 
+
+200 syndromes sampled at each p ∈ { 0.05 , 0.10 }
+
+we compute exact and estimated log Z λ for both logical classes, varying the number of AIS sweeps 
+
+T ∈ { 4, 8, 16 , 32 , 64 }; we compare the error of the class log-ratio under CRN against independent 4 8 16 32 64               
+
+> AIS sweeps T
+> 10 1
+> 10 0
+> |log Z  log Z|
+> (a) estimator accuracy
+> p= 0.05 (mean)
+> p= 0.05 (95th pct.)
+> p= 0.1 (mean)
+> p= 0.1 (95th pct.) 4816 32 64
+> AIS sweeps T
+> 10 1
+> std of  log Z error
+> (b) class log-ratio, p= 0.10
+> independent randomness common random numbers
+
+Figure 1: Estimator validation on the rotated surface code d = 5 against exact coset sums ( 200 syndromes per point, K = 128 chains). (a) Absolute error of 
+
+log ˆZλ versus the number of AIS sweeps T : the error decays as roughly T −1 and is ≈ 0.1 nats at T = 32 .(b) Standard deviation of the error of the class log-ratio 
+
+log ˆZ0 − log ˆZ1: common random numbers dominate in-dependent randomness uniformly in T (variance reduc-tion 1.2×–2.2×, growing with T ). 
+
+randomness; we measure the calibration of both certificates ( δ = 0 .05 ); we evaluate the Bethe sur-rogate of Section 7.5 against the exact free ener-gies; and we run WISH with an exact MAP oracle to verify its constant-factor guarantee end-to-end. Figure 1 summarizes the accuracy results. The AIS estimate of each class log-partition function converges cleanly: the mean absolute error falls from 0.82 nats ( T = 4 , p = 0 .05 ) to 0.068 nats (T = 64 ), with the 95 th percentile below 0.18 
+
+nats, to be compared with class log-ratios that are typically of order one or larger. CRN reduces the variance of the ratio error at every sweep count, by a factor 1.2–2.2 in variance. Both certificates (δ = 0 .05 , T = 32 ) fired on all 400 decisions ( 200 
+
+syndromes at each of p ∈ { 0.05 , 0.10 }), and ev-ery certified decision agreed with the exact ML class, an empirical error of zero, consistent with the nominal level. The Bethe surrogate performs remarkably: its class log-ratio deviates from the exact one by 0.10 nats on average (the same ac-curacy as AIS at T = 32 , obtained in a few milliseconds without any sampling), and its deci-sion agrees with exact ML on all 400 syndromes, confirming that the Bethe bias cancels between classes. The failed ratio estimators of Section 7.4 are quantified on the same instances: at matched compute, direct inter-class annealing inflates the ratio-error standard deviation from 0.15 to 1.47 
+
+nats ( p = 0 .05 ) and BAR to 1.67 nats, an order of magnitude worse than the coupled per-class an-neals they were meant to sharpen. Finally, WISH with an exact MAP oracle estimated all 400 coset partition functions within a maximal absolute log-error of 1.56 (mean 0.43 ), comfortably in-
+
+10 0.02 0.04 0.06 0.08 0.10 0.12             
+
+> physical error rate p
+> 10 3
+> 10 2
+> 10 1
+> logical error rate
+> d= 3
+> 0.02 0.04 0.06 0.08 0.10 0.12
+> physical error rate p
+> d= 5
+> BP BP+OSD-0 MWPM exact ML AIS-ML (ours)
+
+Figure 2: Logical error rate versus physical bit-flip rate on rotated surface codes ( d = 3 left, d = 5 right; Wilson 
+
+95% intervals). The BP+OSD-0, MWPM, and exact-ML curves coincide to within statistical resolution at these distances; the AIS decoder (dashed) reproduces the decisions of the exact degenerate ML decoder al-most perfectly (see text). Plain BP fails at all rates, as expected from the degenerate posterior of Section 6. 
+
+side its guaranteed factor 16 (log 16 ≈ 2.77 ): by Lemma 1, any class gap exceeding κ2 = 256 is thereby provably decided. At p = 0 .05 this con-dition holds for 79% of syndromes (median exact class gap 7.0 nats); at p = 0 .10 the gaps shrink (median 2.7 nats) and the worst-case factor certi-fies only 9% , although the observed WISH accu-racy ( κemp ≈ e1.56 ) would certify 48% , illustrat-ing the usual looseness of worst-case constants. 
+
+8.2 Surface Codes: Matching the Exact ML Decoder 
+
+On rotated surface codes of distance 3 and 5 we compare, on identical error samples, plain BP, BP+OSD-0, MWPM, the exact degenerate ML decoder (full coset enumeration; the optimum any decoder can achieve), and the AIS decoder, across 
+
+p ∈ { 0.02 , 0.04 , 0.06 , 0.08 , 0.10 , 0.12 } with 2 × 10 4
+
+trials per point ( 2 × 10 3 for the AIS decoder). Figure 2 shows the logical error rates. Three observations matter. First, the AIS decoder is statistically indistinguishable from the exact de-generate ML decoder: comparing decisions on 
+
+identical syndromes (10 3 per point), the two agree on every single trial at d = 3 (all p) and at d = 5 up to p = 0 .06 ; at p ∈ { 0.08 , 0.10 , 0.12 }
+
+they differ on at most 0.3% of decisions, with no measurable difference in logical error rate. The certificate again tracks reality: the certified frac-tion is 100% for p ≤ 0.06 and decreases only to 98% at p = 0 .12 , where class gaps become genuinely small. Second, the Bethe decoder (not plotted, because its curve would lie on top of the exact-ML curve) produces failure counts identi-cal to exact ML at every d = 3 point and within 0.01 0.02 0.03 0.04 0.05         
+
+> physical error rate p
+> 10 2
+> 10 1
+> logical block error rate
+> [[72, 12, 6]]
+> BP+OSD-0 BP+OSD-CS-7 AIS-ML (ours) 0.04 0.05 0.06
+> physical error rate p
+> 10 2
+> 10 1
+> [[144, 12, 12]] (gross)
+
+Figure 3: Block logical error rates on the bivariate bi-cycle codes (Wilson 95% intervals; zero-failure points at p = 0 .01 omitted from the log axis, see Table 1). On [[72 , 12 , 6]] the three decoders are statistically in-distinguishable; on the gross code BP+OSD-CS-7 re-tains an edge over both BP+OSD-0 and the (candidate-restricted) AIS decoder. 
+
+0.03% at d = 5 across the 2 × 10 4-trial grid, at millisecond cost: on surface codes the variational surrogate is, for all practical purposes, the ML decoder. Third, at these code-capacity param-eters degeneracy buys little on the surface code (BP+OSD-0, MWPM, and exact ML coincide), which is consistent with known results at low dis-tance [18, 19] and is precisely why the qLDPC regime of the next experiments, where no exact reference exists and BP+OSD is uncontrolled, is where a certified decoder is actually needed. Plain BP, by contrast, fails on 8% –71% of syn-dromes, the known signature of the degenerate posterior (3) .
+
+8.3 Bivariate Bicycle Codes 
+
+For the BB codes [[72 , 12 , 6]] and [[144 , 12 , 12]] ex-act ML decoding by coset enumeration is out of reach ( 236 resp. 272 terms), so this exper-iment compares against the BP+OSD family, with the AIS and Bethe decoders searching the 
+
+1 + 12 + (12 2
+
+) = 79 candidate classes around the BP+OSD-0 solution; Section 8.5 then revisits the 
+
+[[72 , 12 , 6]] code with the exact junction-tree refer-ence of Section 7.6. We report block logical error rates, the certified fractions of both certificates on identical runs, the win/loss balance on the in-stances where AIS and BP+OSD-0 disagree, and wall-clock times. Table 1 and Figure 3 contain the results; four observations. First , the AIS decoder is never worse than BP+OSD-0: on [[72 , 12 , 6]] it repairs more decisions than it damages (eight versus three across all rates) and reaches the stronger BP+OSD-CS-7 at p ∈ { 0.02 , 0.05 }; on the gross code it consistently edges out BP+OSD-0 (four 
+
+11 Table 1: Bivariate bicycle codes under code-capacity noise: block logical error rates of the BP+OSD baselines, the Bethe decoder (uniform and polarized initialization), and the AIS decoder ( T = K = 128 ); certified fractions of the paired bootstrap and the paired t-test on identical runs; repaired/broken decisions relative to BP+OSD-0, also for the under-resolved ablation ( T = 32 , K = 64 ). Trials per point: 960 ( [[72 , 12 , 6]] ) and 480 ( [[144 , 12 , 12]] ). 
+
+Bethe certified fix/break Code p OSD-0 OSD-CS unif. polar. AIS-ML boot t T =128 T =32 [[72 , 12 , 6]] 0.01 0.0000 0.0000 0.8375 0.0990 0.0000 100% 58% 0/0 0/0 0.02 0.0104 0.0094 0.9990 0.2385 0.0094 100% 75% 1/0 1/0 0.03 0.0437 0.0417 0.0427 0.2927 0.0437 99% 88% 0/0 0/1 0.04 0.0906 0.0885 0.0906 0.3406 0.0906 98% 89% 2/2 3/1 0.05 0.1583 0.1542 0.3396 0.4990 0.1542 98% 92% 5/1 3/2 [[144 , 12 , 12]] 0.04 0.0146 0.0083 0.0146 0.0292 0.0125 99% 0% 1/0 1/1 0.05 0.0375 0.0312 0.1125 0.0604 0.0354 98% 0% 1/0 1/3 0.06 0.1083 0.0833 0.1083 0.1417 0.1062 94% 1% 2/1 1/8 
+
+repairs, one break) but does not reach BP+OSD-CS-7 within its two-logical candidate set. Per-point differences are within statistical error, indi-cating that BP+OSD is already close to ML for these codes under code-capacity noise, a state-ment that, absent an exact reference, only a de-coder of the present kind can support. Sec-ond , the certificate: the paired bootstrap certifies 
+
+94% –100% of decisions across both codes and all rates ( δ = 0 .05 , Bonferroni over 78 competitors), where the paired t-test on the same runs collapses from 58% –92% on [[72 , 12 , 6]] to essentially 0% on the gross code: the heavy tail of the AIS weights at mX = 72 destroys the t-statistic while leav-ing the bootstrap log-ratios intact, exactly the failure mode Section 7.4 anticipates. (A certi-fied decision asserts ML-optimality of the class ,not decoding success: at p = 0 .05 about 14% 
+
+of certified decisions still fail, matching the irre-ducible ML failure rate; the certificate’s calibra-tion against exact ground truth was established in Section 8.1.) Third , the Bethe decoder on BB codes is regime-sensitive, unlike on surface codes. With uniform initialization it is catastrophic at 
+
+p ≤ 0.02 (the class-degenerate paramagnetic fixed point of Section 7.5), then matches the BP+OSD family in a middle window ( 0.0427 versus OSD-CS’s 0.0417 at p = 0 .03 ) before degrading again at p = 0 .05 ; the polarized initialization covers the low-p regime ( 0.099 versus 0.838 at p = 0 .01 )but is weaker elsewhere. At 22 –26 ms for all 79 
+
+classes it is a candidate fast filter, but on BB codes the Bethe rung of the region hierarchy is not yet a standalone decoder; this is the sharpest concrete motivation for Kikuchi regions we know. 
+
+Fourth , the sweep-budget ablation is cautionary: at T = 32 , K = 64 the estimator is noisy enough to break BP+OSD decisions it should confirm (eight breaks versus one repair on the gross code at p = 0 .06 ), while T = K = 128 eliminates the imbalance ( 13 –30 s per decode on one core). An under-resolved partition-function decoder is worse than no partition-function decoder; the cer-tificate rate is the built-in warning light. 
+
+8.4 Noisy Syndromes: Phenomenological and Circuit-Level Noise 
+
+The final experiment exercises the spacetime gen-eralization of Section 7.7. Part A is true circuit-level noise on the rotated surface code: stim’s standard depolarizing memory-Z experiment at distance 3 with 3 rounds, whose flattened detec-tor error model yields a decoding problem with 
+
+≈ 220 heterogeneous error mechanisms and a sparsified trivial-kernel basis of ≈ 190 generators. Baselines are MWPM on the detector error model and BP+OSD-0 on its check matrix with the per-mechanism priors; our decoder uses T = 64 ,
+
+K = 128 , and the concentrated base q0 = 0 .02 .
+
+Part B is phenomenological noise on the BB code 
+
+[[72 , 12 , 6]] : r = 6 noisy rounds (independent data and measurement errors at equal rate p) followed by a perfect readout round, giving 648 error vari-ables, 252 detectors, and a structurally sparse stabilizer basis of 576 generators; the AIS de-coder ( T = K = 64 , q0 = 0 .02 ) searches the 
+
+1 + 12 single-logical candidate classes around the 
+
+12 spacetime BP+OSD-0 solution. Part C is true circuit-level noise on the [[72 , 12 , 6]] code itself: we port the syndrome-measurement cycle of Bravyi 
+
+et al. [8] verbatim (their published seven-round CNOT schedule, one ancilla per check) and enu-merate all single-X-fault locations of the stan-dard depolarizing model ( 9072 locations for 6
+
+noisy cycles plus two noiseless ones), propagat-ing each fault through the circuit to obtain its detector and logical signature. Merging iden-tical signatures yields a decoding problem with 
+
+2269 mechanisms, 288 detectors, and a sparsi-fied trivial-kernel basis of 1975 generators (mean weight 4.1); the AIS decoder uses T = K = 64 
+
+and q0 = 0 .02 . The sampled noise follows the same independent-component approximation of depolarizing noise as the reference implementa-tion, so decoder and channel are consistent. Table 2 contains the results. At circuit level the AIS decoder is at least as accurate as both base-lines at every rate while certifying 99% –100% of its decisions at 0.8 s per decode: on the paired shots it beats BP+OSD-0 clearly at p = 0 .004 
+
+(0.0133 versus 0.0183 ), ties it at p = 0 .008 , and is statistically indistinguishable at p = 0.012 .To our knowledge these are the first degeneracy-aware, certificate-carrying decoding results un-der circuit-level noise on any code. On the phe-nomenological BB problem the result is of a dif-ferent but equally useful kind: the AIS decoder 
+
+never disagrees with spacetime BP+OSD-0 and certifies 100% of decisions at every rate, turn-ing the heuristic’s output into a certified ML decision (within the single-logical candidate set) on 720 out of 720 trials. The reference-decoder role advertised in the introduction is thus con-crete: BP+OSD on this code and noise model is not merely plausible, it is certified optimal on essentially every syndrome it sees. We also record a failed configuration for completeness: with the uniform base measure ( q0 = 12 ) the same phenomenological decoder breaks 58% –64% 
+
+of BP+OSD’s correct decisions and certifies none: the path-length failure anticipated in Section 7.7, and a reminder that the certificate rate is the practical mismatch alarm. The circuit-level BB results (Table 2, bottom block) complete the picture. Logical block error rates scale as expected for a distance-6 code under circuit noise ( 0.003 at p = 0 .001 rising to 0.34 at 
+
+p = 0 .006 in a preparatory BP+OSD scan; we run the full comparison at p ∈ { 0.002 , 0.003 , 0.004 }), and on all 720 decoded syndromes the AIS de-coder never disagrees with spacetime BP+OSD-0 while certifying 100% of the decisions at 52 sper decode. Under the very noise model and syn-drome schedule in which these codes are proposed to operate [8], BP+OSD-0 on the [[72 , 12 , 6]] code is thus not merely a good heuristic: within the single-logical candidate set, its decisions are cer-tified maximum-likelihood on every syndrome we examined. 
+
+8.5 Region Hierarchy and Exact ML on BB Codes 
+
+The final experiment exercises Section 7.6 on the [[72 , 12 , 6]] code (code-capacity noise, p ∈{0.03 , 0.05 }, 120 syndromes per rate) and the gross code. The exact junction-tree decoder with mini-bucket pruning provides, for the first time on a qLDPC code, an exact degenerate-ML reference against which every other decoder of this paper is scored: BP+OSD-0 and CS, both Bethe initializations, and the AIS decoder with its bootstrap certificate, whose true violation rate (certified decisions that disagree with the exact ML class) is now directly measurable on a BB code. We additionally compute the global ML class over all 212 logical classes on a subsample (mini-bucket screening plus exact evaluation of the survivors) to validate the two-logical candi-date restriction, sweep the region sizes MBE( i), 
+
+i ∈ { 8, 12 , 16 , 20 }, against the exact reference, and run MBE( 20 ) with deterministic interval cer-tificates on the gross code. The exact reference changes what can be said. 
+
+First , exact degenerate ML is now practical: with mini-bucket pruning ( 110 /120 resp. 85 /120 syn-dromes decided by the intervals alone), exact de-coding costs 5 s ( p = 0 .03 ) to 26 s ( p = 0 .05 )per syndrome, and at p = 0.03 it is strictly better than both BP+OSD variants ( 0.0417 ver-sus 0.0500 ): BP+OSD is provably suboptimal on 2 of 120 syndromes there, while at p = 0 .05 
+
+its errors happen to balance and the rates coin-cide. Second , the AIS decoder is validated at the strongest possible standard: it agrees with exact ML on 238 of 240 syndromes, and among its 231 
+
+bootstrap-certified decisions there are zero true violations: the certificate’s empirical error rate against exact ground truth on a qLDPC code is 0/231 . The Bethe decoder agrees with exact 
+
+13 Table 2: Noisy-syndrome decoding. Surface code: stim circuit-level depolarizing noise ( d = 3 , 3 rounds; MWPM and BP+OSD-0 on 19980 shots, AIS on 600 shots, with the BP+OSD rate on those same shots for pairing). BB code: phenomenological noise ( r = 6 rounds, measurement-error rate q = p, 240 trials) and true circuit-level noise (Bravyi et al. syndrome cycle, 6 noisy cycles, 240 trials). Certificates are the paired bootstrap ( δ = 0 .05 ); t is wall-clock per AIS decode on one core. 
+
+Problem p MWPM BP+OSD AIS-ML BP+OSD (paired) certified t [s] surface d=3, circuit 0.004 0.0134 0.0140 0.0133 0.0183 99% 0.8 0.008 0.0410 0.0391 0.0383 0.0383 100% 0.8 0.012 0.0785 0.0795 0.0767 0.0733 99% 0.8 [[72 , 12 , 6]], pheno. 0.010 – 0.0083 0.0083 0.0083 100% 14.2 0.020 – 0.0333 0.0333 0.0333 100% 14.6 0.030 – 0.2417 0.2417 0.2417 100% 15.0 [[72 , 12 , 6]], circuit 0.002 – 0.0125 0.0125 0.0125 100% 52 0.003 – 0.0375 0.0375 0.0375 100% 52 0.004 – 0.0917 0.0917 0.0917 100% 53 
+
+ML on 118 /120 at p = 0 .03 (uniform initializa-tion) and degrades to 87 /120 at p = 0 .05 , quan-tifying precisely where the smallest regions stop sufficing. Third , the candidate restriction is val-idated globally: on all tested syndromes the ex-act optimum over the full 212 classes (mini-bucket screening plus exact evaluation of survivors) lies within the two-logical candidate set. Fourth , the region sweep: MBE( 16 ) and MBE( 20 ) reproduce the exact decision on 40 /40 syndromes and deter-ministically certify 37 resp. 38 of them (machine-checkable optimality proofs at a fraction of the exact cost), while MBE( 8) and MBE( 12 ) still de-cide well ( 38 /40 , 26 /40 ) but certify nothing; the dip at i = 12 is an artifact of the greedy mini-bucket partition, whose cluster choices are not monotone in i.The gross code marks the hierarchy’s current boundary, and we report it as such: at induced width ≈ 40 , the MBE( 20 ) upper bounds are loose by far more than the class gaps, and rank-ing classes by them is worse than BP+OSD ( 49 
+
+of 60 correct decisions broken, no determinis-tic certificates, at 272 s per decode): a loose bound is not a decision rule. Where the width exceeds the tractable cluster size by this mar-gin, the sampling decoder with its statistical cer-tificate remains the only degeneracy-aware op-tion we can recommend; closing the gap with tighter bounded-cluster bounds (weighted mini-buckets, join-graph propagation) is a concrete open problem the coset MRF now poses to the approximate-inference community. 
+
+8.6 Certified Decoding of Hardware Syn-dromes: A Pilot 
+
+As a first step beyond simulation, we ran apilot memory experiment on IBM hardware (ibm_kingston , Heron r2; median CZ error 2.0 ×
+
+10 −3, readout 8 × 10 −3): the distance-3 ro-tated surface code, memory-Z, three syndrome rounds with mid-circuit measurement and reset, 
+
+10 4 shots. The circuit is generated by stim (fixing schedule, detectors, and the logical observable), transpiled to the heavy-hex architecture (rout-ing expands it to 26 active qubits and 273 CZ gates), and converted back, gate by gate with per-gate calibration errors attached, into a stabilizer noise model whose flattened detector error model is the decoding problem ( 413 mechanisms, 24 de-tectors). Correctness of the round trip is verified by a determinism check: the noiseless converted circuit fires no detector on any sample. Decoding is performed under two models on identical data: the calibration model above, and a learned model on the same graph whose priors are re-fitted from the recorded detector statistics by the standard two-point correlation estimator: MRF parameter estimation from syndrome data, as anticipated in the outlook of earlier sections. The pilot delivers three measurements, re-ported with the candor a pilot deserves. First, the regime : the routed circuit is far above threshold: the measured mean detector rate is 0.229 against the calibration model’s prediction of 0.076 , afactor-three mismatch dominated by idle deco-
+
+14 herence that the per-gate model omits. In this regime decoding barely helps, as it cannot: the raw logical flip rate is 0.253 and the best de-coder reaches 0.246 (BP+OSD on 10 4 shots; AIS 0.260 ± 0.025 on a 300 -shot subsample, sta-tistically indistinguishable). Second, certificates on real data : the AIS decoder certifies 96% of its decisions; correctly interpreted, these assert ML-optimality under the assumed model ; the detector-rate gap above, not the certificate, is what flags that the model itself is off. Third ,re-fitting the priors from the recorded detector statistics with the standard two-point estima-tor makes matters slightly worse (0.253 ), and the reason is structural: transpiled-circuit er-ror models are dominated by hyperedge mech-anisms (three or more detectors) that a pairwise estimator cannot see and must floor. Learning hyperedge-rich detector error models from data, MRF parameter estimation in earnest, is the concrete methodological gap this pilot isolates, and the natural next step for the hardware pro-gram, together with an idle-noise-aware calibra-tion model. 
+
+First BB-code syndrome data. Finally, we ran the [[72 , 12 , 6]] code itself on hardware, to our knowledge the first bivariate-bicycle syndrome data from any device. Full syndrome cycles need degree-6 connectivity that no current pro-cessor offers, but one round is well posed with only terminal measurements: on ibm_berlin 
+
+(Nighthawk r1, 120-qubit square lattice, no mid-circuit operations) we prepared |0⟩⊗108 (72 data qubits, 36 Z-ancillas), executed the six Tanner-monomial CNOT layers, and measured every-thing once ( 2 × 10 4 shots); final checks and all twelve logical ¯Z’s are computed classically from the data readout. The routed circuit (1422 CZ gates on dead-coupler-free edges; both determin-ism audits pass) is deep, and the data sit near saturation: mean detector rate 0.355 (calibration model: 0.238 ), raw per-logical flip rate 0.439 . De-coding still extracts real structure (per-logical er-ror drops to 0.349 and the block error rate from 
+
+0.983 to 0.709 , the large block-level gain reveal-ing strongly correlated logical failures), and the AIS decoder certifies 100% of its decisions while agreeing with spacetime BP+OSD on all 200 de-coded syndromes ( 8 s per decode, 695-mechanism model). The experiment is a decoding study, not error suppression: it establishes that the certi-fied pipeline runs end-to-end on real qLDPC syn-drome data, and it marks the connectivity fron-tier where hardware, not decoding, is the binding constraint. 
+
+# 9 Discussion and Outlook 
+
+Degenerate maximum-likelihood decoding of CSS codes is partition-function estimation: not metaphorically, but by the exact reduction of Proposition 1, which turns each logical class into an unconstrained, strictly positive Markov ran-dom field over the code’s check variables and extends unchanged to spacetime decoding with faulty measurements. This reframing makes three decades of probabilistic-inference machinery di-rectly applicable to the decoding problem of the code families most likely to power early fault-tolerant machines, and our experiments show that both of its main branches pay off. The sam-pling branch yields a decoder with a property no standard qLDPC decoder offers: per-decision cer-tificates, either statistical (paired bootstrap on CRN-coupled anneals) or exact (Lemma 1 com-posed with constant-factor estimators such as WISH). It tracks the exact degenerate ML de-coder on surface codes, matches the BP+OSD family on bivariate bicycle codes, and certifies the bulk of its decisions from code capacity through circuit-level noise, validated on the [[72 , 12 , 6]] 
+
+code against an exact reference, with 0 true vio-lations among 231 certified decisions. The region 
+
+branch spans the hierarchy: the Bethe decoder reproduces exact ML on surface codes at millisec-ond cost (a degeneracy-aware decoder in the la-tency class of MWPM), and one level up, elim-ination clusters turn the modest induced width of the [[72 , 12 , 6]] coset graph into the first ex-act degenerate-ML decoder for a qLDPC code, strictly outperforming BP+OSD and supplying deterministic mini-bucket certificates; the same construction’s failure at gross-code width ( 49 /60 
+
+decisions broken by loose MBE bounds) marks precisely where tighter bounded-cluster bounds are needed. Equally informative are the failures we report: direct inter-class bridging and BAR collapse on the low overlap between coset dis-tributions, establishing that the anneal through infinite temperature is the right bridge and that certificate strength comes from the test statistic, 
+
+15 not from a shorter path. The obvious open front for the sampling branch is speed: seconds per decode versus the microsec-ond real-time loop of superconducting hardware. We see three roles for it nonetheless. First, as a reference decoder : certified ML decisions pro-vide the yardstick against which fast heuristics should be measured on qLDPC codes, a role so far playable only on the surface code; our Bethe and BP+OSD comparisons already use it this way. Second, as a second-stage triage decoder :the certificate marks the small fraction of syn-dromes on which fast decoders are likely wrong, and slower certified decoding of only those syn-dromes fits latency budgets in memory experi-ments and offline analysis. Third, as a bridge to annealing hardware : WISH needs only MAP oracles, each a QUBO on the coset MRF, so a quantum annealer can in principle serve as the inner loop of a certified decoder, a code-hardware pairing complementary to the platform discussion of [8, 39]. The Bethe branch invites the oppo-site program: it is fast enough for real-time use, and its two open problems, fixed-point selection at strong coupling and Kikuchi regions absorbing the CSS four-cycles, are classical approximate-inference questions with a large existing liter-ature [29]. Beyond decoding, the coset MRF makes learned proposal distributions and param-eter estimation of correlated noise models from syndrome streams standard inference questions on a well-defined model class. 
+
+# Acknowledgments 
+
+This research has been funded by the Federal Ministry of Research, Technology and Space of Germany (BMFTR) and the state of North Rhine-Westphalia as part of the Lamarr Institute for Machine Learning and Artificial Intelligence. 
+
+# Author contributions 
+
+N.P. conceived the idea and wrote the initial draft. All authors contributed to the writing and to the discussion of the results. Large language models were used to optimize the text. 
+
+# References 
+
+[1] A. Y. Kitaev. Fault-tolerant quantum com-putation by anyons. Annals of Physics ,303(1):2–30, 2003. [2] E. Dennis, A. Kitaev, A. Landahl, and J. Preskill. Topological quantum mem-ory. Journal of Mathematical Physics ,43(9):4452–4505, 2002. [3] A. G. Fowler, M. Mariantoni, J. M. Martinis, and A. N. Cleland. Surface codes: Towards practical large-scale quantum computation. 
+
+Physical Review A , 86(3):032324, 2012. [4] D. Gottesman. Fault-tolerant quantum com-putation with constant overhead. Quan-tum Information and Computation , 14(15– 16):1338–1372, 2014. [5] N. P. Breuckmann and J. N. Eberhardt. Quantum low-density parity-check codes. 
+
+PRX Quantum , 2(4):040101, 2021. [6] P. Panteleev and G. Kalachev. Asymptoti-cally good quantum and locally testable clas-sical LDPC codes. In Proceedings of the 54th Annual ACM SIGACT Symposium on The-ory of Computing (STOC) , pages 375–388, 2022. [7] A. Leverrier and G. Zémor. Quantum Tan-ner codes. In Proceedings of the 63rd IEEE Annual Symposium on Foundations of Com-puter Science (FOCS) , pages 872–883, 2022. [8] S. Bravyi, A. W. Cross, J. M. Gambetta, D. Maslov, P. Rall, and T. J. Yoder. High-threshold and low-overhead fault-tolerant quantum memory. Nature , 627:778–782, 2024. [9] P. Panteleev and G. Kalachev. Degener-ate quantum LDPC codes with good finite length performance. Quantum , 5:585, 2021. [10] J. Roffe, D. R. White, S. Burton, and E. Campbell. Decoding across the quantum low-density parity-check code landscape. 
+
+Physical Review Research , 2(4):043423, 2020. [11] R. M. Neal. Annealed importance sam-pling. Statistics and Computing , 11(2):125– 139, 2001. [12] S. Ermon, C. P. Gomes, A. Sabharwal, and B. Selman. Taming the curse of dimension-ality: Discrete integration by hashing and 
+
+16 optimization. In Proceedings of the 30th In-ternational Conference on Machine Learning (ICML) , pages 334–342, 2013. [13] M. J. Wainwright and M. I. Jordan. Graph-ical models, exponential families, and varia-tional inference. Foundations and Trends in Machine Learning , 1(1–2):1–305, 2008. [14] C. P. Robert and G. Casella. Monte Carlo Statistical Methods . Springer, New York, NY, 2nd edition, 2004. [15] T. Kadowaki and H. Nishimori. Quan-tum annealing in the transverse Ising model. 
+
+Physical Review E , 58(5):5355–5363, 1998. [16] R. Dechter and I. Rish. Mini-buckets: A gen-eral scheme for bounded inference. Journal of the ACM , 50(2):107–153, 2003. [17] O. Higgott. PyMatching: A Python package for decoding quantum codes with minimum-weight perfect matching. ACM Transactions on Quantum Computing , 3(3):1–16, 2022. [18] S. Bravyi, M. Suchara, and A. Vargo. Effi-cient algorithms for maximum likelihood de-coding in the surface code. Physical Review A, 90(3):032326, 2014. [19] A. Hutter, J. R. Wootton, and D. Loss. Effi-cient Markov chain Monte Carlo algorithm for the surface code. Physical Review A ,89(2):022326, 2014. [20] R. G. Gallager. Low-density parity-check codes. IRE Transactions on Information Theory , 8(1):21–28, 1962. [21] D. J. C. MacKay. Good error-correcting codes based on very sparse matrices. 
+
+IEEE Transactions on Information Theory ,45(2):399–431, 1999. [22] T. J. Richardson and R. L. Urbanke. The ca-pacity of low-density parity-check codes un-der message-passing decoding. IEEE Trans-actions on Information Theory , 47(2):599– 618, 2001. [23] J. Pearl. Probabilistic Reasoning in Intelli-gent Systems: Networks of Plausible Infer-ence . Morgan Kaufmann, San Francisco, CA, 1988. [24] D. Koller and N. Friedman. Probabilis-tic Graphical Models: Principles and Tech-niques . MIT Press, Cambridge, MA, 2009. [25] D. Roth. On the hardness of approxi-mate reasoning. Artificial Intelligence , 82(1– 2):273–302, 1996. [26] S. L. Lauritzen and D. J. Spiegelhalter. Local computations with probabilities on graphi-cal structures and their application to expert systems. Journal of the Royal Statistical So-ciety: Series B , 50(2):157–224, 1988. [27] S. Geman and D. Geman. Stochastic relax-ation, Gibbs distributions, and the Bayesian restoration of images. IEEE Transactions on Pattern Analysis and Machine Intelligence ,6(6):721–741, 1984. [28] F. R. Kschischang, B. J. Frey, and H.-A. Loeliger. Factor graphs and the sum-product algorithm. IEEE Transactions on Informa-tion Theory , 47(2):498–519, 2001. [29] J. S. Yedidia, W. T. Freeman, and Y. Weiss. Constructing free-energy approx-imations and generalized belief propagation algorithms. IEEE Transactions on Informa-tion Theory , 51(7):2282–2312, 2005. [30] R. J. McEliece, D. J. C. MacKay, and J.-F. Cheng. Turbo decoding as an instance of Pearl’s “belief propagation” algorithm. IEEE Journal on Selected Areas in Communica-tions , 16(2):140–152, 1998. [31] D. Gottesman. Stabilizer Codes and Quan-tum Error Correction . PhD thesis, California Institute of Technology, 1997. [32] A. R. Calderbank and P. W. Shor. Good quantum error-correcting codes exist. Phys-ical Review A , 54(2):1098–1105, 1996. [33] A. M. Steane. Error correcting codes in quantum theory. Physical Review Letters ,77(5):793–797, 1996. [34] S. Bravyi, D. Poulin, and B. Terhal. Trade-offs for reliable quantum information stor-age in 2D systems. Physical Review Letters ,104(5):050503, 2010. [35] J.-P. Tillich and G. Zémor. Quantum LDPC codes with positive rate and minimum dis-tance proportional to the square root of the blocklength. IEEE Transactions on Infor-mation Theory , 60(2):1193–1202, 2014. [36] P. Panteleev and G. Kalachev. Quantum LDPC codes with almost linear minimum 
+
+17 distance. IEEE Transactions on Information Theory , 68(1):213–229, 2022. [37] N. Baspin and A. Krishna. Connectivity constrains quantum codes. Quantum , 6:711, 2022. [38] L. Z. Cohen, I. H. Kim, S. D. Bartlett, and B. J. Brown. Low-overhead fault-tolerant quantum computing using long-range con-nectivity. Science Advances , 8(20):eabn1717, 2022. [39] Q. Xu, J. P. Bonilla Ataides, C. A. Patti-son, N. Raveendran, D. Bluvstein, J. Wurtz, B. Vasić, M. D. Lukin, L. Jiang, and H. Zhou. Constant-overhead fault-tolerant quantum computation with reconfigurable atom arrays. Nature Physics , 20:1084–1090, 2024. [40] C. H. Bennett. Efficient estimation of free energy differences from Monte Carlo data. Journal of Computational Physics ,22(2):245–268, 1976. 
+
+18

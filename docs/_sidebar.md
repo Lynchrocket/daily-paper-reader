@@ -1,6 +1,9 @@
 * <a class="dpr-sidebar-root-link" href="#/">首页</a>
 * <a class="dpr-sidebar-root-link dpr-sidebar-noactive-link" href="javascript:void(0)" data-dpr-hash="#/tutorial/README">使用教程</a>
 * Daily Papers
+  * 2026-08-29 <!--dpr-date:20260829-->
+    * 精读区
+      * <a class="dpr-sidebar-item-link dpr-sidebar-item-structured" href="#/202608/29/2608.25545v1-certified-decoding-of-quantum-ldpc-codes" data-sidebar-item="{&quot;title&quot;: &quot;Certified decoding of quantum LDPC codes&quot;, &quot;link&quot;: &quot;https://arxiv.org/abs/2608.25545v1-certified-decoding-of-quantum-ldpc-codes&quot;, &quot;score&quot;: &quot;10.0&quot;, &quot;tags&quot;: [{&quot;kind&quot;: &quot;query&quot;, &quot;label&quot;: &quot;qec-decoding&quot;}], &quot;evidence&quot;: &quot;量子LDPC码解码&quot;}">Certified decoding of quantum LDPC codes</a>
   * 2026-08-26 <!--dpr-date:20260826-->
     * 精读区
       * <a class="dpr-sidebar-item-link dpr-sidebar-item-structured" href="#/202608/26/2608.21852v1-quantum-locally-repairable-codes-from-negacyclic-and-repeated-root-cyclic-codes-over-small-fields" data-sidebar-item="{&quot;title&quot;: &quot;Quantum Locally Repairable Codes from Negacyclic and Repeated-Root Cyclic Codes over Small Fields&quot;, &quot;link&quot;: &quot;https://arxiv.org/abs/2608.21852v1-quantum-locally-repairable-codes-from-negacyclic-and-repeated-root-cyclic-codes-over-small-fields&quot;, &quot;score&quot;: &quot;8.0&quot;, &quot;tags&quot;: [{&quot;kind&quot;: &quot;query&quot;, &quot;label&quot;: &quot;qec-code&quot;}], &quot;evidence&quot;: &quot;通过常量循环码CSS构造量子稳定子码，对应稳定子码研究&quot;}">Quantum Locally Repairable Codes from Negacyclic and Repeated-Root Cyclic Codes over Small Fields</a>

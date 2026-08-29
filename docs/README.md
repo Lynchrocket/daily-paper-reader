@@ -6,27 +6,23 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-08-26
-- 运行时间：2026-08-26 22:22:40 UTC
+- 最新运行日期：2026-08-29
+- 运行时间：2026-08-29 02:39:32 UTC
 - 运行状态：成功
-- 本次总论文数：3
-- 精读区：3
+- 本次总论文数：1
+- 精读区：1
 - 速读区：0
 
 ### 今日简报（AI）
-今日精读2篇高分论文，聚焦量子纠错码与量子网络路径优化，无速读文章。最值得关注的方向是“小域上的循环码构造本地可修复码”和“稳定子码保护下的量子网络时空路径设计”，均获8.0分。建议后续结合这两项成果，探索将高效纠错码应用于量子网络路由的实际可行性。
-- 详情：[/202608/26/README](/202608/26/README)
+今日精读1篇量子LDPC码认证解码论文（10.0/10）。
+该研究聚焦量子LDPC码的认证解码方法，是量子纠错方向的高分成果。
+建议优先阅读其解码验证与性能分析部分，理解认证机制如何提升可靠性。
+- 详情：[/202608/29/README](/202608/29/README)
 
 ### 精读区论文标签
-1. [Quantum Locally Repairable Codes from Negacyclic and Repeated-Root Cyclic Codes over Small Fields](/202608/26/2608.21852v1-quantum-locally-repairable-codes-from-negacyclic-and-repeated-root-cyclic-codes-over-small-fields)  
-   标签：评分：8.0/10、query:qec-code
-   evidence：通过常量循环码CSS构造量子稳定子码，对应稳定子码研究
-2. [Spatio-temporal Path Optimization for Stabilizer-Code-Protected Quantum Networks](/202608/26/2608.22766v2-spatio-temporal-path-optimization-for-stabilizer-code-protected-quantum-networks)  
-   标签：评分：8.0/10、query:qec-code
-   evidence：稳定子码保护量子网络中的QEC恢复与路径联合优化
-3. [Improved Quantum Codes with Transversal T Gates](/202608/26/2608.24000v1-improved-quantum-codes-with-transversal-t-gates)  
-   标签：评分：8.0/10、query:qec-code
-   evidence：研究带横向T门的CSS码，推进容错量子纠错码族
+1. [Certified decoding of quantum LDPC codes](/202608/29/2608.25545v1-certified-decoding-of-quantum-ldpc-codes)  
+   标签：评分：10.0/10、query:qec-decoding
+   evidence：量子LDPC码解码
 
 ### 速读区论文标签
 - 本次无速读推荐。

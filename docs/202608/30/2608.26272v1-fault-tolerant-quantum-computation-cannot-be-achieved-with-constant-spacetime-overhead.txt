@@ -1,0 +1,2524 @@
+Title: Fault-tolerant quantum computation cannot be achieved with constant spacetime overhead
+
+URL Source: https://arxiv.org/pdf/2608.26272v1
+
+Published Time: Fri, 28 Aug 2026 00:06:30 GMT
+
+Number of Pages: 40
+
+Markdown Content:
+# Fault-tolerant quantum computation cannot be achieved with constant spacetime overhead 
+
+Kishor Bharti, 1, 2 Tobias Haug, 3 and Andrew Tanggara 4, 5 
+
+> 1
+
+QuICS, NIST/University of Maryland, College Park, Maryland 20742, USA 
+
+> 2
+
+UMIACS, University of Maryland, College Park, Maryland 20742, USA 
+
+> 3
+
+Quantum Research Center, Technology Innovation Institute, Abu Dhabi, United Arab Emirates 
+
+> 4
+
+Nanyang Quantum Hub, School of Physical and Mathematical Sciences, Nanyang Technological University, Singapore 639673 
+
+> 5
+
+Centre for Quantum Technologies, National University of Singapore, 3 Science Drive 2, Singapore 117543 
+
+The threshold theorem states that quantum computations can be made reliable below a physical error threshold, at the cost of additional physical qubits and circuit depth. Recent work has reduced these space and time overheads to polylogarithmic or nearly logarithmic scalings, but whether the cumulative spacetime overhead can be constant has remained unclear. Here, we show that even for the simplest task of preserving quantum information in a quantum memory, under an optimistic noise model and allowing general adaptive protocols, there is an unavoidable logarithmic contribution to the cumulative spacetime overhead. This additional cost can nevertheless be shared among many logical qubits, so sufficiently wide computations, including standard implementations of Shor’s algorithm, may still achieve constant relative overhead. We further give a positive-rate CSS code construction that attains the memory bound, identify sufficient conditions under which the same scaling extends from quantum memory to fault-tolerant circuit implementations, and derive circuit-size bounds for subsystem spacetime codes. Our work establishes fundamental limits on the resources required for quantum fault tolerance. 
+
+The threshold theorem establishes that arbitrarily long quantum computations can be made reliable below a physical error threshold, with explicit upper bounds on the required overhead [1–6]. What it does not determine is how small this overhead can ultimately be. In par-ticular, what is the minimum cumulative physical cost required to sustain a computation of a desired duration and target accuracy? A central question is whether fault tolerance can be achieved with constant cumulative over-head. Space overhead measures the number of physi-cal qubits required at a given time, whereas cumulative spacetime overhead accounts for both how many physical qubits are used and for how long they are required. Previous work has made substantial progress on the former: Gottesman’s constant-overhead framework and subsequent quantum low-density parity-check (qLDPC) code constructions allow the number of physical qubits to scale linearly with the logical width [7–10], even for general circuit noise [11]. Concrete qLDPC archi-tectures based on long-range connectivity and reconfig-urable atom arrays achieve low overhead in their respec-tive settings [12, 13]. Recent protocols combine constant space overhead with reduced time overhead [14–16], while related approaches achieve low-overhead logical opera-tions for high-rate codes [17, 18]. Lower-bound results point to fundamental limitations on these resources. Fawzi, M¨ uller-Hermes, and Shayeghi showed that, under non-unitary noise, the required phys-ical width cannot remain independent of the computa-tion duration [19], with related converse and geometric bounds obtained in Refs. [20, 21]. These results constrain instantaneous resources, but do not determine the min-imum cumulative circuit size or its dependence on the target error. Whether constant cumulative overhead is possible, particularly for adaptive fault-tolerant proto-cols, has therefore remained open. Here, we address this question by considering quantum memory, arguably the simplest fault-tolerant task: pre-serving an arbitrary quantum state for a prescribed time. Despite this simplicity, memory already captures the fun-damental cost of maintaining quantum information in the presence of noise. For independent erasure noise, even allowing arbitrary adaptive protocols and ideal recovery, we determine this cost exactly up to constant factors. Storing K logical qubits for S time steps with target er-ror ε requires 
+
+Cmin (K, S, ε ) = Θ 
+
+
+
+S
+
+
+
+K + log 
+
+ Sε
+
+ 
+
+. (1) Here, Cmin denotes the minimum worst-case number of physical storage locations, where one storage location corresponds to keeping one physical qubit for one time step. Such locations are the points in spacetime at which stored qubits remain exposed to noise; the formal adap-tive model and error criterion are given in Methods A and Supplementary Information (SI) C. The two contributions have a simple interpretation. The term SK is the cost of retaining the logical infor-mation itself, whereas S log( S/ε ) is an additional relia-bility cost required to keep the probability of losing the stored information sufficiently small over the full dura-tion. This second contribution is unavoidable even when the protocol adapts its physical resources to previous measurement outcomes. Conversely, a positive-rate CSS-code construction with ideal recovery achieves the same scaling, making the bound tight. The result reveals a width–duration tradeoff in fault tolerance. The minimum relative overhead scales as Θ
+
+
+
+1 + log( S/ε )
+
+K
+
+
+
+. (2) arXiv:2608.26272v1 [quant-ph] 26 Aug 2026 2            
+
+> K
+> log( S/ε )constant overhead logarithmic overhead
+> K = Θ(log( S/ε ))
+> FIG. 1. The optimal relative overhead under independent erasure noise is controlled by the ratio log( S/ϵ )/K , where K
+> is the number of logical qubits, Sthe storage duration and ϵ
+> the target error. At the crossover K= Θ(log( S/ϵ )), the costs of retaining the logical information and maintaining reliability are comparable. For K= Ω(log( S/ϵ )), the relative overhead remains constant, whereas for K=o(log( S/ϵ )) the reliability cost dominates and the overhead grows logarithmically.
+
+For a fixed or small logical register, the overhead there-fore grows with the storage duration; in particular, for constant or inverse-polynomial target error and K =
+
+O(1), it grows logarithmically. By contrast, when K =Ω(log( S/ε )), the additional reliability cost can be shared among many logical qubits and the relative overhead can remain constant. Thus, constant overhead can be possi-ble for sufficiently wide computations, but no single con-stant can bound the spacetime overhead uniformly over all widths and prescribed durations. Fig. 1 summarizes this crossover. Beyond quantum memory, we show that the same qualitative limitation persists for general non-unitary qubit noise, and we identify sufficient conditions un-der which the same width–reliability tradeoff extends to fault-tolerant circuits. Under these conditions, wide polynomial-depth computations, including standard im-plementations of Shor’s algorithm, can amortize the addi-tional reliability cost, whereas Grover search lies near the crossover and protocols that repeatedly reuse a small co-herent register, such as iterative phase estimation or long-time simulation, can enter the regime in which this cost dominates. Finally, we derive complementary bounds for subsystem spacetime codes, linking circuit resources to code distance and logical error. Taken together, these results show that fault-tolerance overhead is governed not only by how much quantum information is processed, but also by how long that information must remain pro-tected.  
+
+> I. CIRCUIT-SIZE BOUNDS FOR ERASURE NOISE
+
+Let us consider an adaptive physical circuit Q that stores K logical qubits for S time steps. We call it a (K, S, ε ) memory protocol if, after decoding, its action differs from perfect storage, the identity channel on the 
+
+K logical qubits, by at most ε in diamond norm. To quantify the cumulative cost of the protocol, we count the number of physical circuit locations, where each gate, measurement, preparation or period of storage represents a point at which noise can act. Because the protocol may adapt to measurement outcomes, different executions can use different numbers of physical storage locations. For a complete measurement record hS with nonzero prob-ability, let C(Q; hS ) denote the number of storage loca-tions used in that execution. We define Cpath (Q) as the largest such cost over all possible measurement records, and Cmin (K, S, ε ) as the smallest worst-case cost among all protocols achieving the target accuracy. First, we consider an erasure noise model, where at ev-ery time step, each physical qubit is independently erased with probability p, and the erased locations are known to the recovery operation. If all live physical qubits are erased at one time step, the stored quantum state is lost and no later recovery can reconstruct an arbitrary input. This model is not only analytically convenient: erasure-qubit architectures aim to convert dominant physical faults into erasures at known locations, providing a con-crete setting in which located-erasure noise is physically relevant [22]. To derive the reliability contribution, first consider a one-qubit adaptive memory protocol Q and write C =
+
+Cpath (Q). Let Psurv (S, C ) denote the probability that no time step erases the entire live register. Even when the physical width is chosen adaptively, 
+
+Psurv (S, C ) ≤ exp 
+
+
+
+−Sp C/S 
+
+. (3) We reduce the adaptive optimization to a determinis-tic allocation of the available storage locations and then apply Jensen’s inequality. To connect this event to log-ical error, we apply the memory to one half of a Bell pair and let Fe be the final entanglement fidelity. On a complete-erasure event, the output is separable from the reference and has Bell-state fidelity at most 1 /2. Thus 
+
+Fe ≤ Psurv + (1 − Psurv )/2, and hence 1 − Fe ≥ 12
+
+
+
+1 − e−Sp C/S 
+
+. (4) If the diamond error is at most ε < 1, define cε =
+
+− log(1 − ε). For S > c ε,
+
+C ≥ S
+
+log(1 /p ) log Scε
+
+. (5) We obtain Cpath ≥ SK from a separate Schmidt-number argument. Combining these inequalities, we obtain the lower bound in Theorem 1. We state the bounds and their proof idea here, derive them in Methods C, and give the complete adaptive proofs in SI E. Let δGV ≃ 0.1100 (see Methods D and SI F for de-tails). For p < δ GV , we use the CSS Gilbert–Varshamov 3bound to choose positive-rate CSS codes whose distance is linear in the block length and whose relative distance can be chosen larger than p [23, 24]. We then use a Chernoff bound to show that the probability of an un-correctable erasure pattern decreases exponentially in the block length. We choose 
+
+N = O(K + log( S/ε )) , (6) which both encodes the K logical qubits and suppresses the total error over S time steps. Applying ideal recov-ery after each time step and the telescoping inequality, we bound the total diamond-norm error by ε. We give the binary-entropy definition of δGV and the parameter choices in Methods D, and we give the complete con-struction and tightness statement in SI F. 
+
+Theorem 1. Let Cmin (K, S, ε ) denote the infimum of the worst-case circuit size over adaptive K-qubit memo-ries with ideal recovery, where the worst case is over real-izable complete measurement records with nonzero prob-ability. Fix 0 < p < δ GV and 0 < ε 0 < 1. For inde-pendent erasure noise and total diamond-norm error of 
+
+ε ∈ (0 , ε 0],
+
+Cmin (K, S, ε ) = Θ( S (K + log( S/ε ))) . (7) 
+
+We state the parameter dependence precisely in Corol-lary 19. 
+
+Dividing by the ideal circuit size KS gives 
+
+Cmin (K, S, ε )
+
+KS = Θ 
+
+
+
+1 + log( S/ε )
+
+K
+
+
+
+. (8) The reliability term dominates when K = o(log( S/ε )), is comparable to the dimension term when K =Θ(log( S/ε )), and is lower order when K = ω(log( S/ε )). Thus bounded relative overhead already holds for K =Ω(log( S/ε )). The positive-rate code does not eliminate this term; it distributes the additional locations among the logical qubits in the block. For example, let p = 10 −2, S = 10 9, and ε = 10 −3.Then cε = − log(1 − ε) ≃ 1.0005 × 10 −3, and the one-qubit bound in Eq. (5) gives 
+
+CS ≥ log( S/c ε)log(1 /p ) ≃ 6.00 . (9) Moreover, log( S/ε ) ≃ 27 .63, so 1 + log( S/ε )/K equals 28 .63, 1 .86, 1 .22, and 1 .027 for K = 1 , 32 , 128, and 1024, respectively. These values illustrate the crossover param-eter in Eq. (8); finite-device estimates additionally de-pend on the constants and architecture-specific location counts.  
+
+> II. CIRCUIT-LEVEL UPPER BOUND
+
+A memory code does not by itself give a fault-tolerant implementation of a general circuit. We therefore state conditions under which the memory scaling extends to logical gates. We assume a positive-rate code family with available block lengths within a constant factor of any sufficiently large target length. A length-N code block consists of N physical qubits; positive rate means that it encodes a number of logical qubits proportional to N .An entire logical layer on a block of length N must have a gadget using at most cq N physical qubits for at most ct
+
+time steps. For every preceding measurement record, the implemented joint quantum–classical channel, tensored with the identity on an arbitrary external system that may be entangled with the logical input and on which neither channel acts, must be within diamond-norm dis-tance Ae −βN of the corresponding ideal logical layer. Here β > 0 is the block-length error-suppression expo-nent and A ≥ 1 is a fixed prefactor. We include all quan-tum systems retained between gadgets in the circuit-size count and state the formal assumptions in Methods E. Here T is the ideal circuit depth and S is the implementa-tion depth, so S ≤ ctT . We write CFT for the worst-case number of physical circuit locations over complete mea-surement records. 
+
+Theorem 2. Conditional circuit upper bound. Under these assumptions, an ideal circuit of width K, depth 
+
+T , and target diamond-norm error ε admits a fault-tolerant implementation whose worst-case physical circuit size satisfies 
+
+CFT ≤ cgad T
+
+
+
+K + 1 + log AT ε
+
+
+
+, (10) 
+
+where cgad > 0 depends only on the code-and-gadget fam-ily. 
+
+We choose a block length N = O(K + log( T /ε )). The rate condition ensures that the block encodes all K logi-cal qubits, while the telescoping inequality bounds the to-tal error by T Ae −βN . Since each logical layer uses O(N )physical qubits for O(1) time steps, the total circuit size is O(T N ). After dividing by the ideal circuit size KT ,we obtain relative overhead O(1 + log( T /ε )/K ). We give the derivation in Methods E. Existing general-purpose compilers with constant space overhead realize a different point in the width– depth tradeoff by allowing nonconstant time over-head [14–16]. Under the stated assumptions, relative overhead is bounded when K = Ω(log( T /ε )), and the logarithmic term is lower order when K = ω(log( T /ε )); we give examples in SI K.  
+
+> III. SUBSYSTEM SPACETIME-CODE BOUNDS
+
+Theorem 1 applies directly to general adaptive memory protocols, without requiring a circuit-to-code representa-tion. We next consider fault-tolerant circuits that admit an exact spacetime-code description, which allows circuit resources to be related to code distance and logical error. 4Motivated by circuit-to-code, qLDPC, and fault-complex representations of fault-tolerant circuits [25–29], as well as recent low-overhead constructions based on spacetime lifting [30], we consider circuits for which selected Pauli fault locations define an exact binary linear subsystem spacetime code. Let its parameters be [[ Nst , k, r, d st ]], where k and r
+
+are the numbers of protected and gauge qubits, Nst is the number of selected fault coordinates, and dst is the dressed distance. The subsystem Singleton bound gives 
+
+Nst ≥ k + r + 2( dst − 1) . (11) Let Cst denote the physical circuit-location count asso-ciated with the circuit-to-code map, which takes a cho-sen fault-tolerant Clifford circuit and selected elemen-tary Pauli fault locations to its exact binary linear sub-system spacetime code. This quantity is not automat-ically Cpath : the latter counts storage locations in the memory model, whereas Cst depends on the locations in-cluded in the explicit spacetime-code construction. As-sume that Nst ≤ cloc Cst for a scale-independent constant 
+
+cloc . This assumption says that the construction assigns at most a constant number of spacetime-code coordinates per counted circuit location. Without it, a bound on the code length need not give a bound on the physical cir-cuit size. Combining this assumption with Eq. (11), we obtain 
+
+Cst ≥ k + r + 2( dst − 1) 
+
+cloc 
+
+. (12) Let PL be the probability that syndrome-based Pauli recovery leaves a nontrivial dressed logical Pauli. For a dressed logical Pauli L, define Ov ν (L) as the overlap be-tween the fault distribution ν(F ) and its translate ν(F L ). Since F and F L have the same syndrome but cannot both be corrected, 
+
+PL ≥ 12 Ov ν (L), Ov ν (L) = X
+
+> F
+
+min {ν(F ), ν (F L )}.
+
+(13) For full-support product Pauli noise, let qmin and qmax be the smallest and largest single-coordinate probabilities of Pauli noise operators I, X, Y, Z , and set ρ = qmin /q max .Choosing a minimum-weight L, we obtain 
+
+PL ≥ ρdst 
+
+1 + ρdst . (14) Consequently, if qmin < q max and PL ≤ ε < 1/2, define 
+
+d⋆ε = log((1 − ε)/ε )log( qmax /q min ) . (15) Thus d⋆ε is the minimum spacetime distance required by the target logical error ε under the stated product-Pauli-noise model. Then 
+
+dst ≥ d⋆ε ,Nst ≥ max {k + r, k + r + 2( d⋆ε − 1) } . (16) We therefore find that vanishing logical Pauli error re-quires growing distance and growing absolute redun-dancy under the stated assumptions. We give the deriva-tion in Methods F, and the complete assumptions and proofs in SI H.  
+
+> IV. DISCUSSION
+
+Our results show that fault tolerance carries an un-avoidable cumulative cost that is not captured by space overhead alone. Even for the elementary task of pre-serving quantum information, maintaining reliability for longer times requires additional physical resources. For a fixed number of logical qubits, this leads to a logarith-mically growing relative spacetime overhead. Thus, al-though fault-tolerant architectures can achieve constant space overhead, no single constant can bound the cumu-lative overhead across all logical widths and durations. This limitation has an important qualification. The additional reliability cost can be shared across many log-ical qubits. Consequently, sufficiently wide computations can retain constant relative overhead, whereas proto-cols that repeatedly reuse a small coherent register are fundamentally more constrained. Fault-tolerance over-head is therefore governed not only by the overall size of a computation, but by how its quantum information is distributed across space and time. This distinction separates wide polynomial-depth computations, such as standard implementations of Shor’s algorithm, from long-lived memories, iterative phase estimation and other pro-tocols that keep a small quantum register coherent for many rounds. Our tight result is obtained for independent erasure noise and is attained by a positive-rate CSS-code con-struction with ideal recovery. The broader results in-dicate that the same physical mechanism persists be-yond this setting: non-unitary noise imposes a grow-ing reliability cost (see SI D), while suitable code and gadget properties can allow this cost to be amortized in fault-tolerant circuits. These results complement recent progress towards constant-space and low-overhead fault tolerance [7, 8, 14–16] by identifying when constant cu-mulative overhead is, and is not, possible. An important next step is to understand how these fundamental bounds are modified by the constraints of realistic architectures, including locality, decoding, com-munication and non-Clifford resource preparation. More generally, the width–duration trade-off identified here should be relevant whenever a small quantum system must remain coherent for a long time, including quantum memories, networking, sensing and long-time simulation. It provides a simple principle for fault-tolerant design: reliability costs can be amortized over space, but they cannot be eliminated. 5 
+
+> METHODS A. Memory model and error criterion
+
+We first define the adaptive memory protocol and the circuit-size quantities used in the main theorem. The adaptive protocol Q evolves for S time steps, with the 
+
+sth application of the physical noise channel denoted by 
+
+∂s. Immediately before ∂s, the protocol uses only the preceding classical measurement record hs−1 to select its complete physical quantum register 
+
+Hlive  
+
+> s
+
+(hs−1) = O
+
+> a∈Γs(hs−1)
+
+C2
+
+> a
+
+,qs(hs−1) = |Γs(hs−1)|
+
+(17) where Γ s(hs−1) is the complete physical register. Every qubit in this tensor product is acted on by the speci-fied noise channel and contributes one storage location, namely the standard wait location for one qubit during one time step. After the noise application, an ideal con-troller may measure, discard, reset, or introduce quan-tum systems and update the classical record. Classi-cal records are not included in the quantum circuit size. Only systems present at a modeled time step enter this storage-location count; a circuit-level model additionally counts the preparations, gates, measurements, and waits used by the intervening control. This model is the storage-location restriction of the standard circuit-location model used in threshold proofs. Refining a modeled time step into its constituent prepa-ration, gate, measurement, recovery, and wait locations can only increase the location count. Consequently, a lower bound on the storage-location count is also a lower bound on the total number of locations in a gate-level fault-tolerant circuit. The peak width, the circuit size of an execution, the worst-case circuit size, and the mean circuit size are, re-spectively, 
+
+Qpeak = max  
+
+> s
+
+sup 
+
+> hs−1
+
+qs,C(Q; hS ) = X
+
+> s
+
+qs(hs−1),Cpath (Q) = sup 
+
+> hS
+
+C(Q; hS ),Cav (Q) = EhS C(Q; hS ).
+
+(18) These quantities satisfy Cav (Q) ≤ Cpath (Q) ≤ Qpeak S.We define Cmin (K, S, ε ) as inf Q Cpath (Q) over adaptive protocols whose decoded memory channel has diamond-norm error at most ε. When the protocol is clear, we sup-press the argument Q. The fixed-duration requirement states that the unknown quantum information remains in the counted physical system until the prescribed fi-nal time. In the memory theorem, we compare the ideal and encoded memories over the same S time steps, so 
+
+Cideal = KS . In the circuit-level theorem, T denotes the ideal circuit depth and S denotes the implementa-tion depth. For a decoded memory channel M, the error is ∥M − 
+
+id ∥⋄, with the reference system included in the definition of the diamond norm. In the spacetime-code results, PL
+
+instead denotes the probability that Pauli recovery leaves a nontrivial dressed logical Pauli. We use the two error measures in separate statements.  
+
+> B. Time-step convention
+
+We use the standard synchronized circuit model, in which each discrete time step has duration τ > 0. When elementary operations have different durations, we may choose τ as the duration of the longest elementary oper-ation, with shorter operations followed by wait locations as required [31, Sec. 15.5]. If tstore is the prescribed wall-clock storage time, then 
+
+S =
+
+ tstore 
+
+τ
+
+
+
+. (19) Writing Nτ for the noise accumulated by one qubit during this interval, the channel used in the discrete model is 
+
+N = Nτ . A fixed-width memory using N physical qubits therefore contains N S storage locations and has physical qubit-time τ N S . We use the same time-step convention for the unencoded and encoded memories.  
+
+> C. Erasure-noise lower bound
+
+Here we derive Eqs. (3) to (5); we give the com-plete proofs in Lemma 11, Theorem 12, Proposition 13, and Corollary 14 of SI E. At time step s, each of the qs(hs−1) physical qubits is independently erased with probability p, and every era-sure location is revealed. The width is chosen before the erasures at the current time step are known. We call the event in which all qs(hs−1) qubits are erased a complete-erasure event. For an integer bound C on the circuit size of every individual execution, let F (s, v ) be the largest possible probability of avoiding a complete-erasure event during 
+
+s remaining time steps with v physical storage locations available. If the next time step uses a live width n ≤ v,complete erasure occurs with probability pn, and the con-ditional probability of avoiding complete erasure there-after is at most F (s−1, v −n). Here n is the width chosen for this time step and may change during the protocol; N
+
+is reserved for the fixed block length in the upper-bound construction. Hence 
+
+F (s, v ) ≤ max 
+
+> 0≤n≤v
+
+(1 − pn)F (s − 1, v − n). (20) Induction bounds an adaptive protocol by the optimal deterministic allocation n1 + · · · + nS ≤ C. Applying 1 −6
+
+x ≤ e−x and Jensen’s inequality to the convex function 
+
+px gives Eq. (3). Conditioned on the first complete-erasure event, the in-accessible reference is separable from every system avail-able to the recovery operation. Subsequent processing cannot restore this entanglement, so the final Bell-state fidelity on this event is at most 1 /2. Averaging over mea-surement and erasure records proves Eq. (4). Diamond-norm error ε implies 1 − Fe ≤ ε/ 2 and hence Eq. (5). For K logical qubits, use a reference system of dimen-sion 2 K . If every complete measurement record with nonzero probability contained a time step with fewer than K physical qubits, then every conditional output state would have Schmidt number at most 2 K−1 and overlap at most 1 /2 with the maximally entangled state. The same would hold for their mixture, contradicting diamond-norm error below one. Therefore at least one complete record satisfies qs ≥ K at every time step, and 
+
+Cpath ≥ KS . We state the result for finite or countable classical outcome sets; continuous outcomes require the corresponding measure-theoretic formulation. We give the complete proof in Proposition 13.  
+
+> D. CSS-code upper bound
+
+Here we derive the block-size choice in Eq. (6) and the upper bound in Theorem 1. Let h2 denote the binary entropy and let δGV ∈ (0 , 1/2) be the unique solution of h2(δGV ) = 1 /2; numerically, 
+
+δGV ≃ 0.1100. For fixed p < δ GV , choose 
+
+p < ∆ < δ GV , 0 < R < 1 − 2h2(∆) , a = D(∆ ∥p) > 0.
+
+(21) Here D(x∥y) = x log( x/y ) + (1 − x) log((1 − x)/(1 − y)) denotes the binary relative entropy, with natural loga-rithms. For every sufficiently large integer N , the CSS Gilbert–Varshamov bound provides a code encoding at least RN logical qubits with distance at least ∆ N . Let 
+
+N0 be an integer such that this code-existence statement holds for every N ≥ N0, and choose 
+
+N =
+
+
+
+max 
+
+
+
+N0, K + 1 
+
+R , 1
+
+a log 2Sε
+
+ 
+
+. (22) The number X of erasures at one time step is dis-tributed as Bin( N, p ), and the Chernoff bound gives Pr[ X ≥ ∆N ] ≤ e−aN . Every erasure pattern of weight below the code distance is exactly correctable. On the re-maining patterns the recovered channel may be arbitrary, so the diamond-norm error of one time step with ideal recovery is at most 2 e−aN . The telescoping inequality over S time steps gives total error at most 2 Se −aN ≤ ε.Since the protocol has fixed width, Cpath = N S . The construction is nonconstructive and permits inefficient, nonlocal ideal recovery. The restriction p < δ GV ap-plies only to this upper-bound construction. We give the code-existence bound, erasure tail bound, block construc-tion, and tightness statement in Theorems 15 and 18, Lemma 17, and Corollary 19 of SI F.  
+
+> E. Circuit-level upper bound
+
+We state the formal gadget assumptions in Assump-tion 21 of SI G. The circuit theorem assumes constants 
+
+Rgad , c q , c t, β > 0, A ≥ 1, cN ≥ 1, and N0. For every suf-ficiently large target length, an available block length lies within a factor cN of that target. A length-N block en-codes at least Rgad N logical qubits. Every allowed logical layer, including state preparation and measurement, has a gadget using at most cq N physical qubits for at most ct
+
+time steps. For every preceding measurement record and every reference system, the joint quantum–classical out-put channel is within diamond-norm distance Ae −βN of the ideal logical layer. Every quantum system and classi-cal output passed between successive gadgets is included in this condition and in the resource count. Set 
+
+x = max 
+
+
+
+N0, KRgad 
+
+, 1
+
+β log AT ε
+
+
+
+, (23) and choose an available block length N satisfying x ≤
+
+N ≤ cN x. The block encodes all K logical qubits, and the telescoping inequality over T adaptive logical layers gives total diamond-norm error at most T Ae −βN ≤ ε.The implementation depth is at most ctT , and CFT ≤
+
+cq ctN T . This proves Eq. (10). We give the formal state-ment and proof in Theorem 23 of SI G.  
+
+> F. Subsystem spacetime-code bounds
+
+We define an exact subsystem spacetime code only af-ter selecting elementary Pauli fault locations and spec-ifying a circuit-to-code map. Its coordinates need not be in one-to-one correspondence with physical storage locations. Here Cst denotes the location count asso-ciated with that map; it need not equal Cpath of the memory model. To obtain a circuit-size bound, we as-sume that Nst ≤ cloc Cst for a scale-independent constant 
+
+cloc . Applying the binary subsystem Singleton bound to [[ Nst , k, r, d st ]] proves Eqs. (11) and (12); we state the formal assumption and give the proof in Assumption 24 and Theorem 25 of SI H. For the probability bound, Pauli fault strings have dis-tribution ν, and PL denotes the probability that recovery leaves a nontrivial dressed logical Pauli. The decoder re-ceives the complete stabilizer syndrome and independent private randomness and returns a Pauli recovery with the same syndrome. For a dressed logical Pauli L, the map F 7 → F L partitions the faults into pairs with iden-tical syndrome. The decoder cannot correct both faults in a pair. Summing the smaller probability in each pair gives Eq. (13). Under product noise, F and F L differ only on supp( L), and each single-coordinate likelihood ratio lies in [ ρ, ρ −1]. Taking wt( L) = dst gives Eq. (14); rearranging this bound and applying the Singleton in-equality gives Eq. (16). We give the complete proofs in Theorem 27 and Corollary 30 of SI H, while the separate 7sufficient condition for a positive threshold is Theorem 32 in SI I. 
+
+DATA AVAILABILITY 
+
+No datasets were generated or analysed in this study. 
+
+CODE AVAILABILITY 
+
+No custom code was used to establish the results. All analytical derivations are provided in the SI. 
+
+ACKNOWLEDGEMENTS 
+
+A.T. is supported by the CQT PhD Scholarship, the Google PhD Fellowship Program and the CQT Young Researcher Career Development Grant. K.B. is sup-ported by a Hartree Fellowship from the Joint Center for Quantum Information and Computer Science (QuICS) at the University of Maryland, College Park. Genera-tive artificial intelligence tools were used to assist with ideation, language editing, organization, and the prepa-ration of portions of the manuscript. 
+
+AUTHOR CONTRIBUTIONS 
+
+All authors contributed equally to the conceptu-alization, methodology, formal analysis, verification, and interpretation of the results. All authors con-tributed equally to drafting, reviewing, and editing the manuscript and approved its final version. 
+
+COMPETING INTERESTS 
+
+The authors declare no competing interests. 
+
+[1] P. W. Shor, Fault-tolerant quantum computation, in Pro-ceedings of the 37th Annual Symposium on Foundations of Computer Science (IEEE, 1996) pp. 56–65. [2] D. Aharonov and M. Ben-Or, Fault-tolerant quantum computation with constant error, in Proceedings of the 29th Annual ACM Symposium on Theory of Computing 
+
+(1997) pp. 176–188. [3] A. Y. Kitaev, Quantum computations: Algorithms and error correction, Russian Mathematical Surveys 52 , 1191 (1997). [4] E. Knill, R. Laflamme, and W. H. Zurek, Resilient quan-tum computation, Science 279 , 342 (1998). [5] P. Aliferis, D. Gottesman, and J. Preskill, Quantum accuracy threshold for concatenated distance-3 codes, Quantum Information and Computation 6, 97 (2006), arXiv:quant-ph/0504218. [6] J. Preskill, Reliable quantum computers, Proceedings of the Royal Society of London A 454 , 385 (1998), arXiv:quant-ph/9705031. [7] D. Gottesman, Fault-tolerant quantum computation with constant overhead, Quantum Information and Computa-tion 14 , 1338 (2014). [8] O. Fawzi, A. Grospellier, and A. Leverrier, Con-stant overhead quantum fault-tolerance with quan-tum expander codes, in 59th IEEE Symposium on Foundations of Computer Science (2018) pp. 743–754, arXiv:1808.03821. [9] P. Panteleev and G. Kalachev, Asymptotically good quantum and locally testable classical LDPC codes, in 
+
+Proceedings of the 54th Annual ACM Symposium on The-ory of Computing (2022) pp. 375–388. [10] A. Leverrier and G. Z´ emor, Quantum tanner codes, in 
+
+63rd IEEE Symposium on Foundations of Computer Sci-ence (2022) pp. 872–883. [11] M. Christandl, O. Fawzi, and A. Goswami, Fault-tolerant quantum computation with constant overhead for general noise, PRX Quantum 6, 040334 (2025). [12] L. Z. Cohen, I. H. Kim, S. D. Bartlett, and B. J. Brown, Low-overhead fault-tolerant quantum computing using long-range connectivity, Science Advances 8, eabn1717 (2022). [13] Q. Xu, J. P. Bonilla Ataides, C. A. Pattison, N. Raveen-dran, D. Bluvstein, J. Wurtz, B. Vasi´ c, M. D. Lukin, L. Jiang, and H. Zhou, Constant-overhead fault-tolerant quantum computation with reconfigurable atom arrays, Nature Physics 20 , 1084 (2024). [14] H. Yamasaki and M. Koashi, Time-efficient constant-space-overhead fault-tolerant quantum computation, Na-ture Physics 20 , 247 (2024). [15] S. Tamiya, M. Koashi, and H. Yamasaki, Fault-tolerant quantum computation with polylogarithmic time and constant space overheads, Nature Physics 22 , 27 (2026). [16] Q. T. Nguyen and C. A. Pattison, Quantum fault tol-erance with constant-space and logarithmic-time over-heads, in Proceedings of the 57th Annual ACM Sym-posium on Theory of Computing (2025) pp. 730–737, arXiv:2411.03632. [17] D. J. Williamson and T. J. Yoder, Low-overhead fault-tolerant quantum computation by gauging logical oper-ators, Nature Physics 22 , 598 (2026), arXiv:2410.02213 [quant-ph]. [18] A. Cowtan, Z. He, D. J. Williamson, and T. J. Yoder, Parallel logical measurements via quantum code surgery, PRX Quantum 7, 020325 (2026), arXiv:2503.05003 [quant-ph]. [19] O. Fawzi, A. M¨ uller-Hermes, and A. Shayeghi, A lower bound on the space overhead of fault-tolerant quantum computation, in 13th Innovations in Theoretical Com-puter Science Conference , LIPIcs, Vol. 215 (2022) pp. 68:1–68:20, revised proof available as arXiv:2202.00119, arXiv:2202.00119. [20] G. Uthirakalyani, A. K. Nayak, and A. Chatterjee, A con-verse for fault-tolerant quantum computation, Quantum 
+
+7, 1087 (2023), arXiv:2211.00697. 8
+
+[21] N. Baspin, O. Fawzi, and A. Shayeghi, A lower bound on the overhead of quantum error correction in low dimen-sions (2023), arXiv:2302.04317 [quant-ph]. [22] S. Gu, A. Retzker, and A. Kubica, Fault-tolerant quan-tum architectures based on erasure qubits, Physical Re-view Research 7, 013249 (2025). [23] A. R. Calderbank and P. W. Shor, Good quantum error-correcting codes exist, Physical Review A 54 , 1098 (1996). [24] A. Ashikhmin, Fidelity lower bounds for stabilizer and CSS quantum codes, IEEE Transactions on Information Theory 60 , 3104 (2014). [25] D. Bacon, S. T. Flammia, A. W. Harrow, and J. Shi, Sparse quantum codes from quantum circuits, IEEE Transactions on Information Theory 63 , 2464 (2017). [26] N. Delfosse and A. Paetznick, Spacetime codes of clifford circuits (2023), arXiv:2304.05943 [quant-ph]. [27] Y. Li, Low-density parity-check representation of fault-tolerant quantum circuits, Physical Review Research 7,013115 (2025). [28] T. Hillmann, G. Dauphinais, I. Tzitrin, and M. Vas-mer, Single-shot and measurement-based quantum error correction via fault complexes, Physical Review A 112 ,L040401 (2025). [29] A. Pesah, A. K. Daniel, I. Tzitrin, and M. Vasmer, Fault-tolerant transformations of spacetime codes (2025), arXiv:2509.09603 [quant-ph]. [30] Y. Xu, Y. Wang, and Z.-W. Liu, A framework for low-overhead quantum fault tolerance via spacetime lifting (2026), arXiv:2606.06365 [quant-ph]. [31] D. Gottesman, Surviving as a quantum computer in a classical world (2026), draft textbook, version of 31 March 2026. [32] M. A. Nielsen and I. L. Chuang, Quantum Computation and Quantum Information , 10th ed. (Cambridge Univer-sity Press, 2010). [33] A. Klappenecker and P. K. Sarvepalli, On subsystem codes beating the quantum hamming or singleton bound, Proceedings of the Royal Society A: Mathematical, Phys-ical and Engineering Sciences 463 , 2887 (2007). [34] P. W. Shor, Algorithms for quantum computation: Dis-crete logarithms and factoring, in Proceedings of the 35th Annual Symposium on Foundations of Computer Science 
+
+(IEEE, 1994) pp. 124–134. [35] C. Gidney and M. Eker˚ a, How to factor 2048 bit RSA in-tegers in 8 hours using 20 million noisy qubits, Quantum 
+
+5, 433 (2021). [36] L. K. Grover, A fast quantum mechanical algorithm for database search, in Proceedings of the Twenty-Eighth An-nual ACM Symposium on Theory of Computing (ACM, 1996) pp. 212–219. [37] G. Brassard, P. Høyer, M. Mosca, and A. Tapp, Quan-tum amplitude amplification and estimation, in Quantum Computation and Information , Contemporary Mathe-matics, Vol. 305 (American Mathematical Society, 2002) pp. 53–74, arXiv:quant-ph/0005055. [38] A. Y. Kitaev, Quantum measurements and the abelian stabilizer problem (1995), arXiv:quant-ph/9511026. [39] M. Dobˇ s´ ıˇ cek, G. Johansson, V. Shumeiko, and G. Wendin, Arbitrary accuracy iterative quantum phase estimation algorithm using a single ancillary qubit: Atwo-qubit benchmark, Physical Review A 76 , 030306 (2007). [40] D. Grinko, J. Gacon, C. Zoufal, and S. Woerner, Itera-tive quantum amplitude estimation, npj Quantum Infor-mation 7, 52 (2021), arXiv:1912.05559. [41] D. W. Berry, A. M. Childs, and R. Kothari, Hamilto-nian simulation with nearly optimal dependence on all parameters, in 2015 IEEE 56th Annual Symposium on Foundations of Computer Science (IEEE, 2015) pp. 792– 809, arXiv:1501.01715. [42] G. H. Low and I. L. Chuang, Hamiltonian simulation by qubitization, Quantum 3, 163 (2019), arXiv:1610.06546. [43] T. Albash and D. A. Lidar, Adiabatic quantum compu-tation, Reviews of Modern Physics 90 , 015002 (2018). [44] M. Szegedy, Quantum speed-up of markov chain based algorithms, in Proceedings of the 45th Annual IEEE Sym-posium on Foundations of Computer Science (IEEE, 2004) pp. 32–41. [45] V. Giovannetti, S. Lloyd, and L. Maccone, Advances in quantum metrology, Nature Photonics 5, 222 (2011). 9
+
+# Supplementary Information 
+
+In the Supplementary Information, we provide proofs and additional details supporting the claims in the main text. A. Notation 10 B. Preliminaries 10 1. States and channels 10 2. Schmidt number 11 3. Paulis and subsystem codes 11 4. The entanglement functional 12 C. Quantum-memory model 12 1. Ideal and fault-tolerant circuits 12 2. Circuit-size measures 13 3. Circuit locations 13 4. Fixed-duration memories 13 D. Circuit-size lower bound for general noise 14 1. Entanglement contraction 14 2. Layerwise circuit-size lower bound 14 3. Dimension bound and combined result 15 E. Erasure-noise lower bound 16 1. Complete erasure 16 2. Dimension along one execution 17 F. CSS-code upper bound for erasure noise 18 1. Code existence and concentration 18 2. Block size and logical error 20 G. Circuit-level upper bound 22 H. Subsystem spacetime-code bounds 26 1. Circuit-to-code relation 26 2. Singleton and exact correction 27 3. Same-syndrome fault bound 28 I. Distance and threshold conditions 31 J. Consequences for resource scaling 33 1. Resource lower bounds from error converses 33 2. Resource upper bounds from error suppression 34 3. Relation among the results 36 K. Width and depth regimes for quantum algorithms 36 1. Polynomial-depth quantum algorithms 37 2. Shor’s factoring algorithm 37 3. Unstructured quantum search 38 4. Phase estimation 38 5. Amplitude estimation 39 6. Long-time Hamiltonian simulation and quantum signal processing 39 7. Adiabatic algorithms and quantum walks 39 8. Long-lived memories, networking and sensing 40 10 
+
+Supplementary Information A: Notation 
+
+We summarize the symbols used in this paper in Table I. Constants hidden by asymptotic notation may depend on parameters explicitly fixed in the corresponding statement, but not on the scaling variables. In the uniform erasure bounds, these constants may depend on the fixed erasure rate p and on ε0, but not on K, S, or ε.
+
+TABLE I. Symbols. Symbol Meaning Symbol Meaning 
+
+K Logical qubits stored together in the memory and circuit results. 
+
+k, r Protected and gauge qubits of a subsystem spacetime code. 
+
+T, S Ideal circuit depth and implementation depth (number of time steps), respectively; these need not be equal. 
+
+∂s The sth application of the physical noise chan-nel. 
+
+qs(hs−1) Number of physical qubits immediately before 
+
+∂s, selected from the preceding measurement record. 
+
+qs Maximum physical width at time step s over preceding measurement records. 
+
+Qpeak Peak physical width over time steps and mea-surement records. 
+
+Cideal Ideal logical circuit size, counting one wire lo-cation per logical qubit and layer. 
+
+Q Adaptive quantum circuit implementing the memory protocol. 
+
+CFT , C st Worst-case physical count in the circuit the-orem and location count associated with the spacetime circuit-to-code map, respectively. 
+
+Clay Sum over time steps of the maximum physical width at each time step. 
+
+Cpath Worst-case storage-location count over com-plete measurement records for one protocol. 
+
+Cav Expected physical circuit size, counting stor-age locations. 
+
+Nst Selected Pauli fault coordinates in an exact spacetime code. 
+
+dst Minimum weight of a nontrivial dressed logi-cal Pauli. 
+
+cloc Scale-independent constant in Nst ≤ cloc Cst 
+
+for the specified spacetime circuit-to-code measure. 
+
+PL Logical Pauli failure probability after complete-syndrome Pauli recovery. Ov ν (L) Overlap between the fault distributions ν(F )and ν(F L ). 
+
+qmin , q max Extrema over selected coordinates and all four Pauli-symbol probabilities, including I.
+
+ρ Ratio qmin /q max .
+
+ε Variable target diamond error or, where stated, target logical Pauli failure. 
+
+δ Fixed target diamond error in the general-channel theorem. 
+
+p Erasure or physical fault probability. κN Contraction constant for the fixed non-unitary qubit channel N .
+
+δGV Smaller root of h2(x) = 1 /2, approximately 0.1100. 
+
+Rgad Rate lower bound for the code family in the conditional circuit theorem. 
+
+Supplementary Information B: Preliminaries 1. States and channels 
+
+A density operator ρ is positive semidefinite with Tr ρ = 1. A quantum channel is a completely positive trace-preserving linear map. For a linear map T , the diamond norm is 
+
+∥T ∥ ⋄ = sup 
+
+> m≥1
+
+sup  
+
+> X̸=0
+
+∥(T ⊗ id m)( X)∥1
+
+∥X∥1
+
+. (B1) The auxiliary dimension need not exceed the input dimension. Every channel has diamond norm one, the norm is stable under tensoring with an identity channel, and it is submultiplicative under composition. If ∥M − id ∥⋄ ≤ ε,then this bound applies in particular to an input entangled with an inaccessible reference. 11 For an integer D ≥ 2, let |ΦD ⟩ denote the maximally entangled state of two D-dimensional systems: 
+
+|ΦD ⟩ = D−1/2
+
+> D−1
+
+X
+
+> j=0
+
+|j⟩| j⟩, ΦD = |ΦD ⟩⟨ ΦD |. (B2) For D = 2 we write Φ. A bipartite state is separable if it is a convex combination of product states. 
+
+Lemma 3 (Bell-state witness) . For every separable two-qubit state σ,
+
+Tr(Φ σ) ≤ 12 , ∥Φ − σ∥1 ≥ 1. (B3) 
+
+Proof. For a pure product state |a⟩| b⟩, Cauchy–Schwarz gives 
+
+|⟨ Φ|a, b ⟩| 2 = 12 |a0b0 + a1b1|2 ≤ 12 . (B4) Linearity extends the fidelity bound to mixtures. Measuring the two-outcome test {Φ, I − Φ} distinguishes Φ from σ
+
+with classical ℓ1 distance at least 2(1 − Tr Φ σ) ≥ 1. Trace norm cannot increase under a measurement, so ∥Φ − σ∥1 ≥
+
+1. We will use the telescoping identity. For implemented channels Λ 1, . . . , ΛT and their corresponding ideal channels Γ1, . . . , ΓT ,ΛT · · · Λ1 − ΓT · · · Γ1 =
+
+> T
+
+X
+
+> t=1
+
+ΛT · · · Λt+1 (Λ t − Γt)◦Γt−1 · · · Γ1. (B5) Submultiplicativity and unit diamond norm of channels imply 
+
+∥ΛT · · · Λ1 − ΓT · · · Γ1∥⋄ ≤
+
+> T
+
+X
+
+> t=1
+
+∥Λt − Γt∥⋄, (B6) provided each bound is uniform over the reference systems and classical conditioning needed at that replacement.  
+
+> 2. Schmidt number
+
+For a bipartite pure state on A : B, its Schmidt rank is the number of nonzero coefficients in its Schmidt decompo-sition across the bipartition A : B [32, Sec. 2.5]. The Schmidt number of a mixed state is the smallest integer d such that the state can be written as a convex combination of pure states, each of Schmidt rank at most d. Local channels and conditioning on local classical outcomes do not increase Schmidt number. 
+
+Lemma 4 (Singlet fraction from Schmidt number) . If a state σ has Schmidt number at most d, then 
+
+Tr(Φ D σ) ≤ dD . (B7) 
+
+Proof. Consider first a pure state |ψ⟩ of Schmidt rank r ≤ d. In matrix form, its coefficient matrix A has Frobenius norm one and rank at most r. Since ⟨ΦD |ψ⟩ = D−1/2 Tr A, Cauchy–Schwarz for the nonzero singular values gives 
+
+| Tr A| ≤ √r∥A∥2 = √r. Thus |⟨ ΦD |ψ⟩| 2 ≤ r/D ≤ d/D . A convex decomposition into such pure states and linearity prove the mixed-state claim.  
+
+> 3. Paulis and subsystem codes
+
+We regard Pauli strings modulo global phase. A binary linear subsystem stabilizer code [[ N, k, r, d ]] has stabilizer group S, gauge group G, k protected logical qubits and r gauge qubits. Its dressed distance, which allows a logical Pauli to act on the gauge subsystem and minimizes its weight modulo gauge operators, is 
+
+d = min {wt( L) : L ∈ N (S) \ G} . (B8) 12 The binary subsystem Singleton inequality is 
+
+k + r ≤ N − 2( d − 1) (B9) for d ≥ 2, including impure binary linear subsystem codes [33]. When d = 1, the same displayed inequality reduces to the elementary dimension bound k + r ≤ N .Here a coordinate is one of the N qubit positions, and a Pauli distribution assigns a probability to each Pauli string 
+
+F = ( F1, . . . , F N ). A full-support product Pauli distribution has 
+
+ν(F ) = 
+
+> N
+
+Y
+
+> i=1
+
+πi(Fi), πi(P ) > 0 (P ∈ { I, X, Y, Z }). (B10) A random Pauli is local stochastic with rate p if, for every coordinate set A, the probability that all coordinates in A
+
+are faulty is at most p|A|. Independent erasure noise with rate p replaces each erased qubit by an orthogonal erasure state and reveals the erased locations to the recovery operation.  
+
+> 4. The entanglement functional
+
+For supp( ρ) ⊆ supp( σ) define 
+
+χ2(ρ, σ ) = Tr[( ρ − σ)σ−1/2(ρ − σ)σ−1/2], (B11) with the inverse restricted to the support of σ; otherwise set χ2 = + ∞. Define 
+
+Eχ(ρAB ) = min  
+
+> σ∈Sep( A:B)
+
+χ2(ρAB , σ ). (B12) Thus Eχ is the smallest χ2-divergence from ρAB to a separable state across A : B; we use it to track the loss of entanglement under noise. We use four standard properties in the proof [19]: ∥ρ − σ∥21 ≤ χ2(ρ, σ ); monotonicity of 
+
+Eχ under separable channels; convexity; and Eχ(Φ) ≤ 3. For the last claim choose σ = I/ 4 and compute 
+
+χ2(Φ , I/ 4) = 4 Tr[(Φ − I/ 4) 2] = 3 . (B13) Consequently, with dSep (ρ) = min σ∈Sep ∥ρ − σ∥1,
+
+dSep (ρ)2 ≤ Eχ(ρ). (B14)  
+
+> Supplementary Information C: Quantum-memory model 1. Ideal and fault-tolerant circuits
+
+Consider an ideal noise-free circuit C = CT ◦ · · · ◦ C 1. We count one logical circuit location for each logical qubit present in each time step, whether it undergoes a nontrivial gate or an identity. If nt logical qubits are present after layer t, its peak width and circuit size are 
+
+n = max  
+
+> t
+
+nt, Cideal =
+
+> T
+
+X
+
+> t=1
+
+nt. (C1) For a constant-width K-qubit memory, the ideal operation is the identity, but the prescribed duration gives T layers of K storage locations and hence Cideal = KT .The physical protocol Q evolves for S time steps. Immediately before time step s, the preceding classical mea-surement record hs−1 determines the complete physical register Γ s(hs−1) and its width qs(hs−1); the specified noise channel is then applied once to every qubit in that register, and this application is denoted by ∂s. The protocol may use earlier outcomes to choose the register at time s, but it cannot choose the time-step schedule after seeing later noise outcomes. The register Γ s(hs−1) includes every quantum system retained for use after the noise application; there is no uncounted noiseless quantum memory. A physical qubit stored during one time step contributes one storage location, including when the same physical qubit is reused at later time steps. Thus, for a complete record 13 
+
+hS , we denote the location-count circuit size by C(Q; hS ) = PSs=1 qs(hs−1). See Fig. S1 for a pictorial synopsis. In the fixed-width case, qs = N for every s, so C(Q; hS ) = N S ; in the adaptive case, qs is determined by the prior record 
+
+hs−1, so the execution cost can depend on the realized measurement record. Only systems present at a modeled time step enter the storage-location count. A circuit-level model addition-ally includes the preparation, gate, measurement, and wait locations used between successive time steps. Classical measurement records are not counted as quantum circuit locations. Thus an ancilla prepared and discarded entirely between two modeled time steps does not contribute to the storage-only count, whereas an ancilla retained until a modeled time step is included in qs. 
+
+> 2. Circuit-size measures
+
+We use four resource measures: peak width, the sum of the largest width at each time step, the worst-case size of a complete execution, and the mean execution size. Define 
+
+Qpeak = max  
+
+> 1≤s≤S
+
+sup 
+
+> hs−1
+
+qs(hs−1), (C2) 
+
+Clay =
+
+> S
+
+X
+
+> s=1
+
+sup 
+
+> hs−1
+
+qs(hs−1), (C3) 
+
+Cpath (Q) = sup 
+
+> hS
+> S
+
+X
+
+> s=1
+
+qs(hs−1), (C4) 
+
+Cav (Q) = EhS
+
+> S
+
+X
+
+> s=1
+
+qs(hs−1). (C5) Then 
+
+Cav (Q) ≤ Cpath (Q) ≤ Clay ≤ Qpeak S. (C6) The first inequality compares an expectation with a supremum. The second holds because the width of any execution at time step s is at most the maximum width sup hs−1 qs(hs−1) at that time step. The third follows from the definition of the peak width Qpeak . The two circuit-size measures can differ: if a random bit selects width 100 at time step 1 or width 100 at time step 2, but never both, then every execution has size 100 whereas Clay = 200.  
+
+> 3. Circuit locations
+
+In the standard threshold-theorem formulation, a circuit is decomposed into preparation, gate, measurement, and wait or storage locations, and the noise model assigns an error rate to each type of location. A fault-tolerant simulation then replaces every ideal location, including a storage location, by the corresponding encoded gadget. Here an encoded gadget is the physical fault-tolerant circuit that implements one ideal logical location on encoded data, including the required error correction. We therefore define circuit-size overhead as the ratio of physical to ideal location counts [31, Ch. 10]. This accounting treats active operations and storage within a single circuit model. For a quantum memory, a physical qubit present during one time step is a storage location. Hence P 
+
+> s
+
+qs(hs−1) is the circuit size of the execution specified by hS , Cpath is the worst-case circuit size over complete measurement records, and Cav is the expected circuit size. A gate-level implementation refines each modeled time step into preparation, recovery, routing, measurement, and wait locations, so its total location count is at least the storage-location count used here. If each modeled time step is represented by a bounded number of elementary layers and all participating ancillas are included, the two location counts agree up to constant factors. The location count also records the duration of an identity circuit, whose nonidentity logical-gate count is zero. Accordingly, the general-channel theorem lower-bounds Clay , the sum of the maximum widths over the individual time steps, whereas the erasure theorem lower-bounds Cpath , the worst-case size of a realizable execution.  
+
+> 4. Fixed-duration memories
+
+A fixed-duration quantum memory may be adaptive: it receives an unknown K-qubit state initially, returns it after 
+
+S time steps, and may choose its width at time s from the classical record of earlier time steps. The protocol may not 14 
+
+(a) Fixed-width protocol              
+
+> qs=Nfor every sKlogical qubits encode decode 12· · · SC(Q;hS) = N S
+
+(b) Adaptive protocol              
+
+> qs=qs(hs−1)
+> Klogical qubits encode decode
+> q1q2(h1)· · · qS(hS−1)
+> C(Q;hS) = PSs=1 qs(hs−1)
+
+FIG. S1. Quantum-memory circuit-size accounting. (a) In a fixed-width protocol, the live register contains N physical qubits at every time step, so one execution contains N S storage locations. (b) In an adaptive protocol, the earlier measurement record 
+
+hs−1 determines the live width qs(hs−1) at time step s. The orange dots denote storage locations. Ideal control between time steps may include recovery, measurement, fresh ancillas and classical feedforward. 
+
+replace the prescribed storage interval by a shorter identity channel or transfer input-dependent quantum information to an uncounted noiseless memory before the final time. This additional timing requirement is necessary because identity circuits of different depths implement the same input–output channel. For a family indexed by a code-family parameter λ, a decoder threshold is 
+
+pth = sup p ≥ 0 : for every 0 ≤ p′ < p, lim  
+
+> λ→∞
+
+PL(λ, p ′) = 0 . (C7) The family has a positive decoder threshold when pth > 0. The parameter λ may be the block length, lattice size, or concatenation level and need not equal the code distance. The threshold condition states that the logical error can be made arbitrarily small by increasing λ. The resource lower bound proved here applies to every protocol that achieves a prescribed logical error. 
+
+Supplementary Information D: Circuit-size lower bound for general noise 1. Entanglement contraction 
+
+Lemma 5 (Entanglement contraction for m noisy qubits) . For every non-unitary qubit channel N , there is κN ∈ (0 , 1] 
+
+such that the following holds. Let a bipartite register contain m ≥ 1 noisy qubits and finite-dimensional classical registers. Apply N ⊗m to the qubits and then a separable channel across the bipartition. If ρ and ρ′ are the states before and after these operations, then 
+
+Eχ(ρ′) ≤ (1 − κm 
+
+> N
+
+)Eχ(ρ). (D1) 
+
+Proof. The revised proof of Lemma 5 in Ref. [19] establishes the inequality above with m = ni, the actual number of noisy qubits in the layer. Equations (12)–(18) give the unital-channel case, while Eqs. (19) and (27) extend the argument to non-unital qubit channels. We use this layer-dependent form before replacing m by a global peak width. The classical registers are block-diagonal outcome registers and do not represent coherent quantum side information. 
+
+2. Layerwise circuit-size lower bound 
+
+We now accumulate the entanglement contraction over the storage time. This gives a lower bound on Clay , the sum of the largest physical widths at the individual time steps, for any non-unitary qubit channel. 
+
+Theorem 6 (One-qubit lower bound) . Let N be a non-unitary qubit channel and κ = κN . Let a memory channel 
+
+M store one qubit for S time steps, with qs = sup hs−1 qs(hs−1) and Clay = P 
+
+> s
+
+qs. If 
+
+∥M − id ∥⋄ ≤ δ < 12 , (D2) 15 
+
+then 
+
+(1 − 2δ)2 ≤ 3
+
+> S
+
+Y
+
+> s=1
+
+(1 − κ2qs ). (D3) 
+
+Let Cδ = log[3 /(1 − 2δ)2]. If 0 < κ < 1 and S > C δ , then 
+
+Clay ≥ S
+
+2 log(1 /κ ) log SCδ
+
+. (D4) 
+
+If κ = 1 , no memory with error δ < 1/2 survives one nonempty time step. Proof. Bell-pair test. Prepare Φ and send one half through each of two independent copies of the memory. Label the two memory copies A and B. Both halves of the Bell pair therefore pass through the physical noise at every time step, as required by the contraction argument. Their encoders are local across A : B, so monotonicity and Eq. (B14) give Eχ(ρ0) ≤ 3. 
+
+Contraction over successive time steps. We may assume that every qs is finite, since otherwise the circuit-size bound is immediate. Because the widths are integer-valued, each finite supremum is attained. Also qs ≥ 1: if the physical register were empty on every branch before some noise application, only classical data and newly prepared local systems would remain, so the decoded state would be separable. By Lemma 3, its distance from Φ would then be at least one, contradicting the two-copy error bound 2 δ < 1. For a measurement record using fewer than qs physical qubits, add fixed local qubits, apply the same noise to them, and discard them. This addition changes neither the logical channel nor Eχ. The two copies then contain exactly 2 qs
+
+noisy qubits. Their control operations, including measurement and classical feedforward, form a separable channel across A : B. Iterating Lemma 5 yields 
+
+Eχ(ρS ) ≤ 3
+
+> S
+
+Y
+
+> s=1
+
+(1 − κ2qs ). (D5) Local decoders do not increase this upper bound. 
+
+Accuracy preserves entanglement. The decoded state is ω = ( M ⊗ M )(Φ). Since 
+
+M ⊗ M − id ⊗ id = ( M − id) ⊗ M + id ⊗ (M − id) , (D6) we have ∥ω − Φ∥1 ≤ 2δ. For every separable σ, the triangle inequality and Lemma 3 give ∥ω − σ∥1 ≥ 1 − 2δ. Hence Eq. (B14) implies Eχ(ω) ≥ (1 − 2δ)2. Combining with Eq. (D5) proves Eq. (D3). 
+
+From product to sum. The inequality 1 − x ≤ e−x gives 
+
+Y
+
+> s
+
+(1 − κ2qs ) ≤ exp 
+
+"
+
+− X
+
+> s
+
+κ2qs
+
+#
+
+. (D7) Thus Eq. (D3) implies 
+
+> S
+
+X
+
+> s=1
+
+κ2qs ≤ Cδ . (D8) 
+
+From the width sum to circuit size. When 0 < κ < 1, f (x) = κ2x is convex. Jensen gives 
+
+X
+
+> s
+
+κ2qs ≥ Sκ 2Clay /S . (D9) Together with Eq. (D8), taking logarithms and using log κ < 0 gives Eq. (D4). If κ = 1, every factor associated with a nonempty time step in Eq. (D3) vanishes, contradicting δ < 1/2.  
+
+> 3. Dimension bound and combined result
+
+Proposition 7 (Information-dimension lower bound) . If a protocol stores K ≥ 1 logical qubits through S time steps and ∥M K − id K ∥⋄ ≤ δ < 1, then qs ≥ K at every time step and Clay ≥ KS .16 
+
+Proof. Let D = 2 K and feed one half of Φ D into the memory. At boundary s, include the complete classical transcript and pad each branch to qs. The live quantum register has dimension 2 qs , so its state with the reference has Schmidt number at most 2 qs . Later local processing cannot increase it. By Lemma 4, the final overlap with Φ D is at most 2qs−K . Diamond closeness gives overlap at least 1 − δ/ 2 > 1/2. Hence 2 qs−K > 1/2. Since qs − K is an integer, 
+
+qs ≥ K. Summing over s proves the claim. 
+
+Theorem 8 (Layerwise circuit-size lower bound for general noise) . Let 0 < κ N < 1. Every K-qubit memory lasting 
+
+S time steps with fixed diamond-norm error δ < 1/2 and S > C δ obeys 
+
+Clay ≥ max 
+
+
+
+KS, S log( S/C δ )2 log(1 /κ N )
+
+
+
+,Clay = Ω( S (K + log S)) .
+
+(D10) 
+
+Proof. The first term follows from Proposition 7. For the second, fix K − 1 logical inputs to pure states and discard their outputs. Pre- and post-processing do not increase the diamond-norm error, so this gives a one-qubit memory with no larger value of Clay . Apply Theorem 6 and use max {x, y } ≥ (x + y)/2. 
+
+Corollary 9 (No uniform constant relative bound on Clay ). Under the fixed-duration assumptions in SI C 4 and the clock convention in Methods B, no compiler for a non-unitary qubit channel can satisfy Clay ≤ CC ideal with one constant C for every memory width and duration at any fixed diamond-norm error below 1/2.Proof. Choose a one-qubit ideal memory of duration T , so Cideal = T . The fixed-duration and clock assumptions give 
+
+S ≥ T . If 0 < κ N < 1, Theorem 6 gives Clay = Ω( S log S) = Ω( T log T ). If κN = 1, the same theorem excludes error below 1 /2 after one nonempty time step. 
+
+> Supplementary Information E: Erasure-noise lower bound
+
+In Lemma 11, Theorem 12, Proposition 13, and Corollary 14, we prove, respectively, the survival bound, the one-qubit lower bound, the dimension bound, and their combined K-qubit form used in the main-text erasure section and the corresponding Methods subsection.  
+
+> 1. Complete erasure
+
+Fix p ∈ (0 , 1). At every time step, each physical qubit is independently erased with probability p, and the erased locations are known to the recovery operation. The width at ∂s is selected from the earlier measurement record hs−1,before the erasure pattern at time step s is known. We assume that every complete measurement record satisfies P 
+
+> s
+
+qs(hs−1) ≤ C.
+
+Lemma 10 (Complete erasure removes entanglement with the reference) . Feed half of a Bell state into the memory and retain the other half in a reference system R. Condition on the first time step in which every physical qubit is erased, including the time-step index and the preceding measurement record. Thereafter, the joint state of R and every system available to the recovery operation is separable. The conditional final Bell-state fidelity is at most 1/2.Proof. The erasure channel replaces every physical qubit by an orthogonal erasure state that is independent of its input. After complete erasure, the recovery operation retains only erasure locations, classical records, and newly prepared states that were initially independent of R. The conditional state is separable across the reference and recovery systems. Later operations act only on the recovery systems and cannot create entanglement with R. Apply Lemma 3 to the final two-qubit state. 
+
+Lemma 11 (Probability of avoiding complete erasure) . Let Psurv (S, C ) be the largest probability, over all adaptive protocols whose every execution has circuit size at most C, that no complete-erasure event occurs. Then 
+
+Psurv (S, C ) ≤ max   
+
+> n1,...,n S∈Z≥0P
+> sns≤CS
+
+Y
+
+> s=1
+
+(1 − pns ) ≤ e−Sp C/S 
+
+. (E1) 17 
+
+Proof. Let F (s, v ) be the largest survival probability when s time steps remain and at most v further storage locations may be used. Clearly F (0 , v ) = 1. A deterministic next width n ≤ v survives the next time step with probability 1 − pn; conditioned on any surviving erasure pattern, the remaining success probability is at most F (s − 1, v − n). A randomized choice of the next width is an average over deterministic choices and therefore cannot exceed the largest deterministic value. Thus 
+
+F (s, v ) ≤ max 
+
+> 0≤n≤v
+
+(1 − pn)F (s − 1, v − n). (E2) Induction on s proves the first inequality of Eq. (E1). For a fixed feasible allocation, 1 − x ≤ e−x gives 
+
+Y
+
+> s
+
+(1 − pns ) ≤ exp 
+
+"
+
+− X
+
+> s
+
+pns
+
+#
+
+. (E3) The function px is convex and decreasing. Jensen and P 
+
+> s
+
+ns ≤ C imply 
+
+X
+
+> s
+
+pns ≥ Sp (P  
+
+> sns)/S
+
+≥ Sp C/S . (E4) Substituting this lower bound into the preceding exponential upper bound proves the second inequality in Eq. (E1). 
+
+Theorem 12 (One-qubit circuit-size bound for erasure noise) . Every one-qubit memory lasting S time steps for which each individual execution has circuit size at most C obeys 
+
+1 − Fe ≥ 12 (1 − e−Sp C/S 
+
+). (E5) 
+
+If its diamond error is at most ε < 1, let cε = − log(1 − ε). Whenever S > c ε,
+
+C ≥ S
+
+log(1 /p ) log Scε
+
+. (E6) 
+
+Proof. By Lemma 11, complete erasure occurs with probability at least 1 − e−Sp C/S 
+
+. Partition the records according to the first complete-erasure event. On every such record, Lemma 10 bounds the fidelity by 1 /2; when complete erasure does not occur, the fidelity is at most one. Averaging gives Eq. (E5). Diamond error ε implies 1 − Fe ≤ ε/ 2. Combining with Eq. (E5) yields 
+
+e−Sp C/S 
+
+≥ 1 − ε, Sp C/S ≤ cε. (E7) Taking logarithms and using log p = − log(1 /p ) gives Eq. (E6).  
+
+> 2. Dimension along one execution
+
+Proposition 13 (One execution retains the full logical dimension) . Let an adaptive protocol with a finite or countable set of classical measurement records store K ≥ 1 logical qubits for S time steps. Let MK denote the decoded channel on the K-qubit logical input. If ∥M K − id K ∥⋄ ≤ ε < 1, then some complete record with nonzero probability satisfies 
+
+qs(hs−1) ≥ K for all s, (E8) 
+
+and therefore Cpath ≥ KS .Proof. Let D = 2 K and input half of Φ D , retaining the reference R. Suppose instead that every complete record with nonzero probability contains at least one time step with qs ≤ K −1. Conditioned on such a record, the physical register at that time step has dimension at most 2 K−1, so its joint state with R has Schmidt number at most 2 K−1. Each later branch is obtained by a local trace-nonincreasing map on the memory system, so conditioning and normalization do not increase the Schmidt number. Hence every normalized conditional output state, and therefore their mixture, has Schmidt number at most 2 K−1. By Lemma 4, its overlap with Φ D is at most 1 /2, whereas diamond-norm closeness gives overlap at least 1 − ε/ 2 > 1/2. This contradiction proves the claim. 18 
+
+Corollary 14 (Combined circuit-size lower bound for erasure noise) . If a K-qubit erasure memory lasting S time steps has diamond error at most ε < 1, then 
+
+Cpath ≥ KS (E9) 
+
+and, for S > c ε,
+
+Cpath ≥ S
+
+log(1 /p ) log Scε
+
+. (E10) 
+
+For every fixed ε0 < 1, uniformly over 0 < ε ≤ ε0 and sufficiently large S,
+
+Cpath = Ω 
+
+
+
+S
+
+
+
+K + log Sε
+
+ 
+
+. (E11) 
+
+Proof. The dimension term follows from Proposition 13. Fixing K − 1 logical inputs and discarding their outputs produces a one-qubit memory with no larger worst-case circuit size, so Theorem 12 gives the second term. For 0 < ε ≤ ε0 < 1, cε = − log(1 − ε) lies between positive constant multiples of ε. Hence log( S/c ε) = Θ(log( S/ε )). Combining the two lower bounds proves the result. 
+
+> Supplementary Information F: CSS-code upper bound for erasure noise
+
+In this section we give detailed results on a memory protocol that uses a family of CSS codes under erasure noise. Theorem 15 gives positive-rate CSS codes with linear distance, Lemma 17 bounds the probability that one time step contains too many erasures, and Theorem 18 combines these facts into a fixed-width memory construction. Together with the erasure lower bound, Corollary 19 proves the scaling stated in Theorem 1 and Eq. (8).  
+
+> 1. Code existence and concentration
+
+Define the binary entropy h2(x) = −x log 2 x − (1 − x) log 2(1 − x), and let h−12 : [0 , 1] → [0 , 1/2] denote the inverse of its restriction to [0 , 1/2]. Set δGV = h−12 (1 /2) ≃ 0.1100. 
+
+Theorem 15 (Binary CSS Gilbert–Varshamov bound) . For any real ∆, R such that 0 < ∆ < δ GV and 0 < R < 
+
+1 − 2h2(∆) , there exists N0 such that for every integer N ≥ N0 a binary CSS stabilizer code exists with parameters 
+
+[[ N, K N , d N ]] satisfying 
+
+KN ≥ RN, dN ≥ ∆N. (F1) 
+
+Proof. Since R < 1 − 2h2(∆) and h2 is continuous, we may choose ∆ ′ such that ∆ < ∆′ < δ GV , R < 1 − 2h2(∆ ′). (F2) We may then choose R′ such that 
+
+R < R ′ < 1 − 2h2(∆ ′). (F3) In the notation of Ref. [24], an ( N, k 1,N , k 2,N ) CSS code is defined by binary linear codes C1 ⊆ C2 of dimensions 
+
+k1,N and k2,N . Now let 
+
+r1 = 1 − R′
+
+2 , r2 = 1 − r1 = 1 + R′
+
+2 , (F4) and, for each N , choose 
+
+k1,N = ⌊r1N ⌋, k2,N = N − k1,N . (F5) This choice is balanced in the sense of Ref. [24], namely k1,N = N − k2,N . Equation (29) of [24] gives a binary generator matrix of rank k1,N + N − k2,N for the associated self-orthogonal code. The corresponding CSS stabilizer code therefore encodes 
+
+KN = N − (k1,N + N − k2,N ) = k2,N − k1,N = N − 2k1,N . (F6) 19 Since k1,N = ⌊r1N ⌋ ≤ r1N , it follows that 
+
+KN ≥ N − 2r1N = R′N > RN. (F7) Let dGV (N, k 1,N , k 2,N ) be the largest integer defined in Theorem 19 of Ref. [24]. That theorem states that an (N, k 1,N , k 2,N ) CSS code exists with minimum distance 
+
+dN = dGV (N, k 1,N , k 2,N ). (F8) Moreover, k1,N /N → r1 and k2,N /N → r2. Applying Eq. (42) of Ref. [24] to this sequence of integer dimensions gives lim  
+
+> N→∞
+
+dN
+
+N = h−12 (min {r1, 1 − r2}) = h−12 (r1) = h−12
+
+ 1 − R′
+
+2
+
+
+
+. (F9) Here the O(1) rounding in Eq. (F5) changes the constituent-code rates by only O(1 /N ) and hence does not change the limit. The balanced condition equates the two arguments in the minimum in Eq. (42) of Ref. [24], making r1 = 1 − r2;it does not assert that the realized X- and Z-distances are equal. Because h2 is strictly increasing on (0 , 1/2), the inequality R′ < 1 − 2h2(∆ ′) in Eq. (F3) is equivalent to ∆′ < h −12
+
+ 1 − R′
+
+2
+
+
+
+. (F10) It follows from Eq. (F9) that there exists N0 such that, for every N ≥ N0,
+
+dN
+
+N ≥ ∆′ > ∆. (F11) Together with Eq. (F7), this gives 
+
+KN ≥ RN, dN ≥ ∆N (F12) for every N ≥ N0, proving Eq. (F1). 
+
+Remark 16. The condition R < 1−2h2(∆) places the target rate strictly below the balanced CSS Gilbert–Varshamov guaranteed-rate curve at relative distance ∆. The original asymptotic form of this tradeoff appears in Ref. [23]. The proof above uses the finite-length CSS bound and its asymptotic evaluation from Ref. [24] in order to obtain a code for every sufficiently large block length. 
+
+Lemma 17 (Binomial Chernoff bound) . For a binomial random variable X ∼ Bin( N, p ) (i.e. Pr[ X = x] =  Nx
+
+px(1 −
+
+p)N −x for x ∈ { 0, . . . , N }) and real numbers p, ∆ such that p < ∆ < 1, it holds that 
+
+Pr[ X ≥ ∆N ] ≤ e−N D (∆ ∥p), (F13) 
+
+where D(∆ ∥p) is the binary Kullback–Leibler divergence with natural logarithms, given by 
+
+D(∆ ∥p) = ∆ log ∆
+
+p + (1 − ∆) log 1 − ∆1 − p > 0. (F14) 
+
+Proof. Write X = PNi=1 Bi, where the Bi are independent Bernoulli random variables with success probability p. Fix 
+
+θ > 0 and apply Markov’s inequality to the nonnegative random variable Y = eθX with threshold a = eθ∆N . Since the function x 7 → eθx is increasing, Pr[ X ≥ ∆N ] = Pr[ eθX ≥ eθ∆N ] ≤ e−θ∆N E[eθX ]. (F15) Independence among {Bi}Ni=1 gives 
+
+E[eθX ] = 
+
+> N
+
+Y
+
+> i=1
+
+E[eθB i ] = (1 − p + pe θ )N . (F16) Combining Eqs. (F15) and (F16) yields Pr[ X ≥ ∆N ] ≤  e−θ∆(1 − p + pe θ )N . (F17) 20 The logarithm of the factor on the right-hand side is 
+
+f (θ) = −θ∆ + log(1 − p + pe θ ) with ddθ f (θ) = −∆ + pe θ
+
+1 − p + pe θ . (F18) Its unique minimizer θ∗ over θ > 0 satisfies 
+
+eθ∗ = ∆(1 − p)
+
+p(1 − ∆) , (F19) which is larger than one because ∆ > p . Substituting θ = θ∗ gives 
+
+e−θ∗∆(1 − p + pe θ∗ ) = 
+
+ p
+
+∆
+
+∆  1 − p
+
+1 − ∆
+
+1−∆
+
+= e−D(∆ ∥p). (F20) Hence Pr[ X ≥ ∆N ] ≤ e−N D (∆ ∥p). Finally, D(∆ ∥p) > 0 because ∆ ̸ = p. 
+
+> 2. Block size and logical error
+
+Theorem 18 (CSS-code construction for erasure noise) . Consider real numbers p, ∆, R such that 0 < p < ∆ < δ GV 
+
+and 0 < R < 1 − 2h2(∆) , and set a = D(∆ ∥p). For all integers K, S ≥ 1 and 0 < ε ≤ 1, the K logical qubits can be encoded into one [[ N, K N , d N ]] CSS code block with KN ≥ K to give a memory with ideal recovery, diamond error at most ε, and fixed width 
+
+N ≤ c0
+
+
+
+K + 1 + log 2Sε
+
+
+
+, (F21) 
+
+where c0 depends only on p, ∆, R . Since the width is fixed, both Clay and Cpath are equal to N S . Here K is the number of logical input qubits, KN is the number of logical qubits encoded by the selected N -qubit CSS code block, and S is the number of memory time steps, equivalently, the number of applications of the erasure-noise channel. Proof. Let N0 be as in Theorem 15 for a fixed pair (∆ , R ) satisfying 0 < ∆ < δ GV and 0 < R < 1 − 2h2(∆). Choose the least integer N satisfying 
+
+N ≥ max 
+
+
+
+N0, K + 1 
+
+R , 1
+
+a log 2Sε
+
+
+
+. (F22) By Theorem 15, the inequality N ≥ N0 ensures that this value of N admits an [[ N, K N , d N ]] CSS code with KN ≥ RN 
+
+and dN ≥ ∆N . Moreover, N ≥ (K + 1) /R and R > 0 imply RN ≥ K + 1, and hence KN ≥ K + 1 > K . Encode the 
+
+K-qubit input into any chosen K of the KN logical qubits of this code and fix the remaining KN − K logical inputs to known pure states |ψ⟩:... ...... ...
+
+K
+
+memory circuit 
+
+KN − K
+
+|ψ⟩|ψ⟩
+
+. (F23) The diagram is schematic at the logical level: the encoder maps these KN logical inputs into the N physical qubits of the code block. 21 At one time step, let [ N ] = {1, . . . , N } and identify an erasure pattern with its erasure set E ∈ 2[N ], where 2 [N ]
+
+is the power set of [ N ]. Under independent erasure noise, Pr[ E] = p|E|(1 − p)N −| E|, and the number X = |E| of erased physical qubits satisfies X ∼ Bin( N, p ). We encode the input in the distance-dN CSS code chosen above. Call the erasure set E good when |E| < d N and bad when |E| ≥ dN , and define Pbad = Pr[ |E| ≥ dN ] = Pr[ X ≥ dN ]. Every good erasure set is exactly correctable because the erased locations are known. Since dN ≥ ∆N , the event 
+
+{X ≥ dN } is contained in {X ≥ ∆N }. Applying Lemma 17 with Bernoulli parameter p and threshold ∆ > p , and using a = D(∆ ∥p), gives 
+
+Pbad ≤ Pr[ X ≥ ∆N ] ≤ e−aN . (F24) For an erasure set E, let Λ E be the recovered logical channel on the K encoded logical input qubits conditioned on 
+
+E, with its output re-encoded in the same block and the other KN − K logical qubits returned to their fixed states before the next time step, and let Λ = P  
+
+> E∈2[N]
+
+Pr( E)Λ E be the channel averaged over the random erasure set E.For good erasure sets, we have Λ E = id; for bad erasure sets, ∥ΛE − id ∥⋄ ≤ 2. Hence 
+
+∥Λ − id ∥⋄ ≤ X 
+
+> E∈2[N]
+> |E|≥ dN
+
+Pr( E)∥ΛE − id ∥⋄ ≤ 2Pbad ≤ 2e−aN . (F25) Because the erasure sets at different time steps are independent and the same code, erasure channel, and recovery are used at every time step, write ΛS = Λ ◦ · · · ◦ Λ| {z } 
+
+> Stimes
+
+(F26) for the recovered logical channel after S time steps. The telescoping bound ∥ΛT · · · Λ1 −ΓT · · · Γ1∥⋄ ≤ PTt=1 ∥Λt −Γt∥⋄
+
+in Eq. (B6) gives, upon taking T = S, Λ t = Λ, and Γ t = id, 
+
+∥ΛS − id ∥⋄ ≤ S∥Λ − id ∥⋄ ≤ 2Se −aN ≤ ε. (F27) The final inequality follows from N ≥ a−1 log(2 S/ε ) (c.f. Eq. (F22)). Here N is the least integer satisfying Eq. (F22). Writing the maximum on the right-hand side of Eq. (F22) as M , the least integer N satisfying N ≥ M is ⌈M ⌉, so 
+
+N = ⌈M ⌉ ≤ M + 1 ≤ 1 + N0 + K + 1 
+
+R + 1
+
+a log 2Sε ≤ c0
+
+
+
+K + 1 + log 2Sε
+
+
+
+, (F28) for a constant c0 depending only on N0, R, and a; for example, one may take c0 = 1 + N0 + R−1 + a−1. Since N0
+
+depends only on ∆ , R and a = D(∆ ∥p), this constant depends only on p, ∆, R . This proves Eq. (F21). Lastly, let Q denote this fixed-width memory protocol. Since the construction uses one N -qubit code block at every time step, qs(hs−1) = N for every s and every preceding measurement record hs−1. Hence every execution has circuit size 
+
+C(Q; hS ) = 
+
+> S
+
+X
+
+> s=1
+
+qs(hs−1) = N S, (F29) and it follows that 
+
+Cpath (Q) = sup 
+
+> hS
+> S
+
+X
+
+> s=1
+
+qs(hs−1) = N S =
+
+> S
+
+X
+
+> s=1
+
+sup 
+
+> hs−1
+
+qs(hs−1) = Clay , (F30) concluding the proof. 
+
+Corollary 19 (Optimal worst-case circuit size) . Fix real numbers p, ε 0 such that 0 < p < δ GV and 0 < ε 0 < 1. For adaptive protocols under independent erasure noise and ideal recovery, 
+
+Cmin (K, S, ε ) = Θ 
+
+
+
+S
+
+
+
+K + log Sε
+
+ 
+
+. (F31) 
+
+More precisely, there exist constants c−, c + > 0 and an integer S0 ≥ 1, depending only on p and ε0, such that, for all integers K ≥ 1 and S ≥ S0 and every ε ∈ (0 , ε 0],
+
+c−S
+
+
+
+K + log Sε
+
+
+
+≤ Cmin (K, S, ε ) ≤ c+S
+
+
+
+K + log Sε
+
+
+
+. (F32) 22 
+
+Proof. The lower bound is Corollary 14, valid for every adaptive protocol. Taking the infimum over admissible protocols gives the same lower bound for Cmin (K, S, ε ), with constants and a lower threshold for S depending only on 
+
+p and ε0. By Theorem 18, the fixed-width memory protocol construction Q using a CSS code from Theorem 15 has 
+
+Cmin (K, S, ε ) ≤ Cpath (Q) = N S ≤ c0S
+
+
+
+K + 1 + log 2Sε
+
+
+
+= O
+
+
+
+S
+
+
+
+K + log Sε
+
+ 
+
+. (F33) After fixing p, choose ∆ = p + δGV 
+
+2 , R = 1 − 2h2(∆) 2 . (F34) Then ∆ , R, a , and c0 depend only on p. For K, S ≥ 1 and 0 < ε ≤ ε0, we have K + 1 ≤ 2K and log 2Sε ≤
+
+
+
+1 + log 2 log(1 /ε 0)
+
+
+
+log Sε . (F35) Thus the constant in the upper bound depends only on p and ε0. Combining it with the uniform lower bound proves the stated inequalities. The dimension and reliability terms are comparable when K = Θ(log( S/ε )). The construction is an existence proof with ideal recovery; it does not provide an efficient decoder or a geometrically local implementation. 
+
+> Supplementary Information G: Circuit-level upper bound
+
+Definition 20 (Logical gadget) . A logical gadget is a physical circuit built from preparations, elementary gates, measurements, waits, and classical feedforward. In the absence of noise, it implements one ideal logical layer on encoded data exactly. Its output contains every quantum system and classical measurement outcome passed to the next logical layer. Let eGh and Gh denote, respectively, the noisy and ideal logical quantum–classical channels conditioned on a permitted preceding measurement record h. An error bound δ is composable if, for every h, every external reference system R, and every joint logical-reference input state ρLR ,
+
+h eGh − G h
+
+
+
+⊗ id R
+
+i
+
+(ρLR ) 1
+
+≤ δ. (G1) Equivalently, 
+
+eGh − G h ⋄
+
+≤ δ (G2) uniformly over permitted preceding records. Because these are quantum–classical channels, the comparison includes both the quantum output and the distribution of the newly produced classical outcomes. 
+
+Assumption 21 (Positive-rate gadget family with exponentially small error) . Fix a physical noise model. There are constants Rgad , c q , c t, β > 0, A ≥ 1, cN ≥ 1, and N0 ≥ 1, and a code family with a specified set Ngad ⊆ N of available block lengths, satisfying the following properties. When N ∈ N gad , the corresponding code block and all the gadgets specified below exist under the fixed physical noise model. (i) A length-N code block encodes at least Rgad N logical qubits. (ii) For every real x ≥ N0, there exists an available block length N ∈ N gad such that 
+
+x ≤ N ≤ cN x. (G3) (iii) For every logical layer composed of operations from a specified gate set, including the state preparations and measurements in that set, that acts on at most Rgad N logical qubits, there is a corresponding gadget. The set need only contain the operations used by the ideal circuit; universality is required only if the statement is to cover arbitrary circuits. (iv) The gadget has live physical width at most cq N at every time step, including every physical quantum system used by the gadget. 23 (v) It lasts at most ct time steps, including the classical computation and feedback time used for decoding and recovery. (vi) For each logical layer t, available block length N , and permitted preceding measurement record h, let eGN,t,h be the effective logical quantum–classical channel implemented by the noisy gadget, including its newly produced classical outcomes, and let Gt,h be the corresponding ideal logical-layer channel. For every external reference system R that is not acted on by the gadget and every joint logical-reference input state ρLR ,
+
+ eGN,t,h − G t,h 
+
+
+
+⊗ id R
+
+
+
+(ρLR ) 1
+
+≤ Ae −βN . (G4) Equivalently, 
+
+eGN,t,h − G t,h ⋄
+
+≤ Ae −βN , (G5) uniformly over t and h. Here A ≥ 1 is a fixed finite-block-length prefactor and β > 0 is the block-length error-suppression exponent. They may depend on the fixed physical noise model and the code-and-gadget family, but are independent of N , the logical layer t, the preceding record h, the logical input, and the external reference system. Thus δN := Ae −βN is a uniform upper bound on the composable error of one logical gadget. (vii) Every quantum system and newly produced classical outcome passed to the next gadget is included in the gadget output. No uncounted quantum memory or environment is carried between gadgets. 
+
+Remark 22. This assumption is stronger than currently established general-purpose compiler theorems with constant space overhead [14–16]. In particular, it requires a complete logical layer, rather than an isolated logical gate, to use 
+
+O(N ) physical qubits for O(1) time steps with error at most Ae −βN , uniformly over the logical layer, preceding record, logical input, and external reference system. These are sufficient assumptions for Theorem 23; we do not assert that a current architecture satisfies them. 
+
+Theorem 23 (Conditional circuit achievability) . Under Assumption 21, consider an ideal circuit composed of the specified logical layers, of width K ≥ 1 and depth T ≥ 1, and let C denote its overall ideal quantum–classical channel. For every target diamond-norm error 0 < ε ≤ 1, there exist an available block length N ∈ N gad and a corresponding simulation whose overall noisy quantum–classical channel eCN and implementation depth S satisfy 
+
+eCN − C ⋄
+
+≤ ε, S ≤ ctT. (G6) 
+
+The simulation has worst-case physical circuit size CFT satisfying 
+
+CFT ≤ cgad T
+
+
+
+K + 1 + log AT ε
+
+
+
+, (G7) 
+
+where cgad depends only on the gadget family. Here CFT is the supremum, over realizable complete classical measure-ment records, of the total number of physical preparation, gate, measurement, and wait locations in the corresponding execution. Therefore 
+
+CFT 
+
+KT = O
+
+
+
+1 + log( T /ε )
+
+K
+
+
+
+. (G8) 
+
+Proof. Assumption 21(i)–(iii) provide an available code block with sufficient logical capacity and a gadget for every ideal logical layer; Assumption 21(vi) controls the simulation error; and Assumption 21(iv), (v), and (vii) control the implementation depth and physical location count. The lower and upper inequalities in Assumption 21(ii) are used separately below. Now, let us set 
+
+x = max 
+
+
+
+N0, KRgad 
+
+, 1
+
+β log AT ε
+
+
+
+. (G9) By Assumption 21(ii), choose an available block length N ∈ [x, c N x]. The inequality N ≥ x, together with the definition of x, gives 
+
+N ≥ KRgad 
+
+, and hence Rgad N ≥ K. (G10) 24 By Assumption 21(i), the length-N code block therefore encodes at least Rgad N ≥ K logical qubits and can accom-modate the entire width-K logical register. Moreover, every layer of a width-K ideal circuit acts on at most 
+
+K ≤ Rgad N (G11) logical qubits. Since the circuit is composed of operations from the specified gate set, Assumption 21(iii) therefore supplies a corresponding physical gadget for every one of its T logical layers. Set δN = Ae −βN . For t = 1 , . . . , T , let Ht−1 denote the set of measurement records preceding logical layer t. By Assumption 21(vi), for every layer t = 1 , . . . , T and every permitted preceding record h ∈ Ht−1,
+
+eGN,t,h − G t,h ⋄
+
+≤ δN . (G12) Then, let eGN,t and Gt be the quantum–classical channels that, on the history block labelled by h ∈ Ht−1, act respectively as eGN,t,h and Gt,h and retain the updated classical record in their outputs. To make the averaging over preceding measurement records explicit, let L denote the logical data system and consider an arbitrary quantum– classical input, possibly entangled with an external reference R, of the form 
+
+ρLHR = X
+
+> h∈Ht−1
+
+ph ρhLR ⊗ | h⟩⟨ h|H . (G13) Here ph is the probability of the preceding record h generated by the part of the relevant hybrid circuit before layer 
+
+t. So for all ρ over L, we can write 
+
+eGN,t (ρ ⊗ | h⟩⟨h|) = eGN,t,h (ρ), Gt(ρ ⊗ | h⟩⟨h|) = Gt,h (ρ). (G14) Thus, by the triangle inequality for the trace norm and Eq. (G12), we have 
+
+ eGN,t − Gt
+
+
+
+⊗ id R
+
+
+
+(ρLHR ) 1
+
+≤ X
+
+> h∈Ht−1
+
+ph
+
+ eGN,t,h − G t,h 
+
+
+
+⊗ id R
+
+
+
+(ρhLR ) 1
+
+≤ X
+
+> h∈Ht−1
+
+phδN = δN . (G15) Because the branchwise estimate is uniform in h, no fixed or common history distribution needs to be assumed, and 
+
+eGN,t − Gt ⋄
+
+≤ δN . (G16) Write the noisy and ideal overall quantum–classical channels as 
+
+eCN = eGN,T ◦ · · · ◦ eGN, 1, C = GT ◦ · · · ◦ G1, (G17) respectively. The telescoping identity in Eq. (B6) gives 
+
+eCN − C =
+
+> T
+
+X
+
+> t=1
+
+eGN,T ◦ · · · ◦ eGN,t +1 ◦
+
+ eGN,t − Gt
+
+
+
+◦ Gt−1 ◦ · · · ◦ G1. (G18) Each summand is the change produced by replacing the t-th noisy gadget by its ideal controlled logical layer in the corresponding hybrid circuit. Submultiplicativity of the diamond norm and the unit diamond norm of every channel therefore give 
+
+eCN − C ⋄
+
+≤
+
+> T
+
+X
+
+> t=1
+
+eGN,t − Gt ⋄
+
+≤ T δ N = T Ae −βN (G19) Now, the inequality N ≥ x supplied by Assumption 21(ii) also gives 
+
+N ≥ 1
+
+β log AT ε , (G20) 25 which implies that, 
+
+T Ae −βN ≤ T A exp 
+
+
+
+− log AT ε
+
+
+
+= ε. (G21) Therefore the simulated circuit satisfies 
+
+eCN − C ⋄
+
+≤ T Ae −βN ≤ ε. (G22) This establishes that the chosen simulation meets the target diamond-norm error of ε and hence is an admissible simulation for Theorem 23. We next make the location count explicit. Fix a realizable complete classical record hT . For the gadget imple-menting logical layer t, let st(hT ) be its duration and let qt,u (hT ) be its live physical width at its uth time step. By Assumption 21(v), 
+
+st(hT ) ≤ ct for every t, (G23) and hence the implementation depth along this execution satisfies 
+
+S(hT ) = 
+
+> T
+
+X
+
+> t=1
+
+st(hT ) ≤ ctT. (G24) Taking the supremum over complete measurement records gives 
+
+S := sup 
+
+> hT
+
+S(hT ) ≤ ctT. (G25) By Assumption 21(iv), 
+
+qt,u (hT ) ≤ cq N (G26) at every physical time step of every gadget. In the synchronized circuit model, the number of physical preparation, gate, measurement, and wait locations at that time step is at most the live physical width. Therefore, for every realizable complete measurement record hT ,
+
+Cphys ( eCN ; hT ) ≤
+
+> T
+
+X 
+
+> t=1
+> st(hT)
+
+X
+
+> u=1
+
+qt,u (hT ) ≤
+
+> T
+
+X 
+
+> t=1
+> st(hT)
+
+X
+
+> u=1
+
+cq N = cq N
+
+> T
+
+X
+
+> t=1
+
+st(hT ) = cq N S (hT ). (G27) Here Assumption 21(vii) ensures that every quantum system retained between successive gadgets is included in the gadget width and hence in this location count. Taking the supremum over complete measurement records and using Eq. (G25) gives 
+
+CFT = sup 
+
+> hT
+
+Cphys ( eCN ; hT ) ≤ cq N sup 
+
+> hT
+
+S(hT ) = cq N S ≤ cq ctN T. (G28) Now we use the inequality N ≤ cN x in Assumption 21(ii) and Eq. (G9) to obtain 
+
+N ≤ cN max 
+
+
+
+N0, KRgad 
+
+, 1
+
+β log AT ε
+
+
+
+≤ cN
+
+
+
+N0 + KRgad 
+
++ 1
+
+β log AT ε
+
+
+
+≤ bgad 
+
+
+
+K + 1 + log AT ε
+
+
+
+, (G29) where 
+
+bgad = cN max 
+
+n
+
+N0, R −1gad , β −1o
+
+. (G30) Substituting the block-length bound in Eq. (G29) into the location-count bound in Eq. (G28) gives 
+
+CFT ≤ cq ctN T ≤ cq ctbgad T
+
+
+
+K + 1 + log AT ε
+
+
+
+= cgad T
+
+
+
+K + 1 + log AT ε
+
+
+
+, (G31) where cgad = cq ctbgad .26 Thus the target-error requirement determines the logarithmic contribution to N , while the width and depth bounds convert the selected block length into the asserted worst-case physical circuit size. Therefore, cgad depends only on the constants appearing in Assumption 21. Dividing by KT and using log( AT /ε ) = log A + log( T /ε ) gives 
+
+CFT 
+
+KT ≤ cgad 
+
+
+
+1 + 1
+
+K + log AK + log( T /ε )
+
+K
+
+
+
+= O
+
+
+
+1 + log( T /ε )
+
+K
+
+
+
+, (G32) since A is fixed and K ≥ 1. The diamond-norm estimate in Eq. (G22) and Eq. (G25) prove the accuracy and depth claims in Eq. (G6), respec-tively, while the preceding location-count estimate in Eq. (G31) proves Eq. (G7). We do not claim that any existing architecture satisfies Assumption 21 or attains the circuit-level scaling in The-orem 23. We give sufficient code-and-gadget assumptions under which physical circuit size has the same additive dependence on logical width and target error. A direct comparison with the memory converse also requires an explicit relation between the ideal circuit depth T and the implementation depth S.
+
+> Supplementary Information H: Subsystem spacetime-code bounds
+
+In Assumption 24, Theorems 25 and 27, and Corollary 30, we state the circuit-to-code assumption and prove the bounds used in the main text and the corresponding Methods subsection; in Remark 28, we give the three-qubit repetition-code example.  
+
+> 1. Circuit-to-code relation
+
+Fix a fault-tolerant circuit and a selected list of Nst elementary Pauli fault locations. Suppose fault propagation and measured checks define an exact binary linear subsystem code [[ Nst , k, r, d st ]] , (H1) with stabilizer Sst , gauge group Gst and 
+
+dst = min {wt( L) : L ∈ N (Sst ) \ G st }. (H2) Such correspondences arise naturally for Clifford circuits and Pauli reductions of broader protocols [25, 26, 29]. We do not assert such a correspondence for every fault-tolerant protocol. The code length counts selected Pauli fault locations, whereas physical circuit size counts storage locations. We therefore impose the following assumption separately for each circuit-size measure to which it is applied. 
+
+Assumption 24. For the specified circuit-to-code location count Cst , there is a scale-independent constant cloc > 0such that 
+
+Nst ≤ cloc Cst . (H3) The assumption holds when each physical circuit location is associated with at most a constant number of selected fault coordinates. It may fail when the spacetime-code coordinates include the union of mutually exclusive adaptive branches. In addition, a Pauli string in the abstract code must be realizable by the circuit fault model, with the stated weight and probability, before a code-level correction statement can be transferred to the circuit. For example, consider a protocol with two time steps that uses one physical qubit at time step 1, produces one of 
+
+M classical outcomes, and uses one outcome-dependent physical qubit at time step 2. Every physical execution has 
+
+Cpath = Clay = 2 . (H4) A coordinate list formed from the union of all outcome-dependent locations instead has Nst = 1 + M . The comparison 
+
+Nst ≤ cloc Cpath would require cloc ≥ (M + 1) /2, which is not independent of the problem size. This example does not assert that the union defines an exact subsystem code; it demonstrates why the coordinate-to-circuit-size comparison must be stated explicitly. 27  
+
+> 2. Singleton and exact correction
+
+Theorem 25 (Subsystem Singleton circuit-size bound) . Every exact binary linear subsystem spacetime code 
+
+[[ Nst , k, r, d st ]] with k ≥ 1 satisfies 
+
+Nst ≥ k + r + 2( dst − 1) . (H5) 
+
+Under Assumption 24, 
+
+Cst ≥ k + r + 2( dst − 1) 
+
+cloc 
+
+. (H6) 
+
+Proof. If dst = 1, the code space contains a k-qubit protected subsystem and an r-qubit gauge subsystem, so it has dimension 2 k+r inside an Nst -qubit space and therefore Nst ≥ k + r. If dst ≥ 2, the subsystem Singleton inequality Eq. (B9) reads 
+
+k + r ≤ Nst − 2( dst − 1) . (H7) Adding 2( dst − 1) to both sides gives 
+
+k + r + 2( dst − 1) ≤ Nst , (H8) which is Eq. (H5). By Eq. (H3), 
+
+Nst ≤ cloc Cst . (H9) Since cloc > 0, division by cloc preserves the direction of the inequality and gives 
+
+Cst ≥ Nst 
+
+cloc 
+
+. (H10) Combining this inequality with Eq. (H5) yields 
+
+Cst ≥ Nst 
+
+cloc 
+
+≥ k + r + 2( dst − 1) 
+
+cloc 
+
+, (H11) which proves Eq. (H6). 
+
+Corollary 26 (Cost of correcting every small Pauli fault) . Assume the relevant Pauli strings are realized by circuit faults and Assumption 24 holds. If every Pauli fault of weight at most t is corrected exactly, then 
+
+dst ≥ 2t + 1 , Cst ≥ k + r + 4 tcloc 
+
+. (H12) 
+
+Proof. If dst ≤ 2t, choose a dressed logical L of weight at most 2 t. Partition its support into two sets of size at most 
+
+t and write L = E1E2. Because L has zero syndrome, E1 and E2 have the same syndrome. No recovery can correct both: otherwise their quotient L would act trivially on the protected subsystem, contrary to its definition. Thus 
+
+dst ≥ 2t + 1. The inequality dst ≥ 2t + 1 implies 
+
+dst − 1 ≥ 2t, and hence 2( dst − 1) ≥ 4t. (H13) Therefore Eq. (H6) gives 
+
+Cst ≥ k + r + 2( dst − 1) 
+
+cloc 
+
+≥ k + r + 4 tcloc 
+
+, (H14) as claimed. 28 
+
+3. Same-syndrome fault bound 
+
+Let F be a phase-free Pauli fault string with distribution ν. Its complete syndrome s(F ) consists of commutation signs with a fixed generating set of Sst . The decoder may use internal randomness U chosen independently of F and chooses a Pauli recovery R(s(F ), U ) having the same syndrome. The residual is 
+
+Lres (F, U ) = R(s(F ), U )F ∈ N (Sst ). (H15) Failure occurs when Lres ∈ N (Sst ) \ G st . The only fault-dependent input to the decoder is the syndrome; no erasure flag, analogue likelihood, or leakage information distinguishes faults with the same syndrome. For a dressed logical L, define the L-shifted distribution νL(F ) = ν(F L ) and overlap Ov ν (L) = X
+
+> F
+
+min {ν(F ), ν (F L )} = 1 − ∥ ν − νL∥TV . (H16) Here ∥ν − νL∥TV = 12
+
+P 
+
+> F
+
+|ν(F ) − νL(F )| is the total-variation distance. 
+
+Theorem 27 (Pauli-pairing bound) . Fix an exact binary linear subsystem code [[ Nst , k, r, d st ]] with k ≥ 1. For every deterministic or randomized complete-syndrome decoder defined above and every dressed logical Pauli L ∈ N (Sst )\G st ,
+
+PL ≥ 12 Ov ν (L) (H17) 
+
+In addition, suppose that ν is a full-support product Pauli distribution: there are single-coordinate probability distri-butions πi on {I, X, Y, Z } such that 
+
+ν(F ) = 
+
+> Nst
+
+Y
+
+> i=1
+
+πi(Fi) for every F ∈ { I, X, Y, Z }Nst ,πi(P ) > 0 for every 1 ≤ i ≤ Nst and P ∈ { I, X, Y, Z },
+
+X 
+
+> P∈{ I,X,Y,Z }
+
+πi(P ) = 1 for every 1 ≤ i ≤ Nst .
+
+(H18) 
+
+Then set 
+
+qmin := min  
+
+> 1≤i≤Nst
+> P∈{ I,X,Y,Z }
+
+πi(P ), qmax := max  
+
+> 1≤i≤Nst
+> P∈{ I,X,Y,Z }
+
+πi(P ), ρ := qmin 
+
+qmax 
+
+. (H19) 
+
+Then it holds that 
+
+PL ≥ ρdst 
+
+1 + ρdst . (H20) 
+
+Full support implies that every phase-free Pauli string has strictly positive probability and that 0 < q min ≤ qmax . Hence 
+
+ρ ∈ (0 , 1] , and the likelihood ratios used above are well-defined. Proof. Fix a dressed logical Pauli (which may act on the gauge subsystem but acts nontrivially on the protected subsystem). L ∈ N( Sst ) \ G st . Multiplication by L partitions the phase-free Pauli faults into disjoint unordered pairs. Let PNst denote the set of phase-free Pauli strings on the Nst selected fault coordinates, and let FL denote the resulting set of unordered pairs. 
+
+FL = {{ F, F L } : F ∈ P Nst }. (H21) The two members have the same syndrome because L commutes with every element of Sst .For a fixed decoder seed U , the decoder uses the same recovery R on F and F L . The two residual operators are RF 
+
+and RF L = ( RF )L. They cannot both belong to Gst , since otherwise their quotient would imply L ∈ G st . Thus either 
+
+F or F L causes a logical failure, and the failure contribution of that pair is at least min {ν(F ), ν (F L )}. Summing over fault pairs {F, F L } gives 
+
+PL ≥ X
+
+> {F,F L }∈F L
+
+min {ν(F ), ν (F L )} = 12
+
+X
+
+> F
+
+min {ν(F ), ν (F L )}, (H22) 29 which proves Eq. (H17). Since this holds for every fixed seed, averaging proves it for a randomized decoder. Now assume full-support product Pauli noise and choose L with wt( L) = dst . Since ν(F ) = Q 
+
+> i
+
+πi(Fi) and multiplication by L changes only the coordinates in supp( L), 
+
+ν(F L )
+
+ν(F ) = Y
+
+> i∈supp( L)
+
+πi(( F L )i)
+
+πi(Fi) . (H23) Every factor lies in [ ρ, ρ −1], where ρ = qmin /q max . Therefore 
+
+ρdst ≤ ν(F L )
+
+ν(F ) ≤ ρ−dst . (H24) For one pair {F, F L }, let mF = min {ν(F ), ν (F L )} and MF = max {ν(F ), ν (F L )}. Eq. (H24) gives mF /M F ≥ ρdst ,and hence 
+
+mF ≥ ρdst 
+
+1 + ρdst (mF + MF ). (H25) Summing over the disjoint pairs, whose total probability is one, yields 
+
+PL ≥ ρdst 
+
+1 + ρdst , (H26) which proves Eq. (H20). 
+
+Remark 28 (Three-qubit repetition code) . For the bit-flip repetition code, S1 = Z1Z2, S2 = Z2Z3, and X = X1X2X3.The same-syndrome pairs are 
+
+I ↔ X1X2X3, X1 ↔ X2X3, X2 ↔ X1X3, X3 ↔ X1X2. (H27) Under independent X faults with probability p ≤ 1/2, majority decoding has logical failure probability 3 p2(1 −p)+ p3 =3p2 − 2p3 = 12 Ov ν (X) and therefore attains the overlap bound. This code does not correct arbitrary single-qubit Pauli faults. 
+
+Remark 29 (Identity probability matters) . The extrema qmin , q max include all four Pauli symbols. For symmetric depolarizing noise with total nonidentity probability p < 3/4, 
+
+π(I) = 1 − p, π(X) = π(Y ) = π(Z) = p/ 3, ρ = p
+
+3(1 − p) . (H28) The case qmin = qmax forces all four probabilities to equal 1 /4; it is the completely depolarizing Pauli distribution, not a rare-error limit. 
+
+Corollary 30 (Accuracy forces distance) . Under the full-support product-noise hypotheses of Theorem 27, if qmin <qmax and PL ≤ ε < 1/2, then 
+
+dst ≥ log[(1 − ε)/ε ]log( qmax /q min ) (H29) 
+
+and 
+
+Nst ≥ max 
+
+
+
+k + r, k + r − 2 + 2 log[(1 − ε)/ε ]log( qmax /q min )
+
+
+
+. (H30) 
+
+Under Assumption 24, it holds that 
+
+Cst ≥ 1
+
+cloc 
+
+max 
+
+
+
+k + r, k + r − 2 + 2 log[(1 − ε)/ε ]log( qmax /q min )
+
+
+
+. (H31) 
+
+If qmin = qmax , then PL ≥ 1/2.30 
+
+Proof. Suppose first that qmin < q max . Full-support product Pauli noise then implies 0 < ρ = qmin 
+
+qmax 
+
+< 1. (H32) Combining Eq. (H20) of Theorem 27 with PL ≤ ε gives 
+
+ρdst 
+
+1 + ρdst ≤ PL ≤ ε. (H33) Since 1 + ρdst > 0 and 1 − ε > 0, it follows that 
+
+ρdst ≤ ε 1 + ρdst 
+
+=⇒ (1 − ε)ρdst ≤ ε
+
+=⇒ ρdst ≤ ε
+
+1 − ε . (H34) Taking the logarithm of both sides of the last inequality gives 
+
+dst log ρ ≤ log ε
+
+1 − ε . (H35) Because log ρ < 0, division by log ρ reverses the direction of the inequality. Therefore 
+
+dst ≥ log[ ε/ (1 − ε)] log ρ = log[(1 − ε)/ε ]log( qmax /q min ) , (H36) which proves Eq. (H29). Substituting Eq. (H29) into Eq. (H5) gives 
+
+Nst ≥ k + r + 2( dst − 1) ≥ k + r − 2 + 2 log[(1 − ε)/ε ]log( qmax /q min ) . (H37) Since dst ≥ 1, Eq. (H5) also gives 
+
+Nst ≥ k + r + 2( dst − 1) ≥ k + r. (H38) Taking the stronger bound of Eqs. (H37) and (H38) proves Eq. (H30). Under Assumption 24, Eq. (H3) and cloc > 0 imply 
+
+Cst ≥ Nst 
+
+cloc 
+
+. (H39) Combining this inequality with Eq. (H30) proves Eq. (H31). Finally, if qmin = qmax , then ρ = 1, and Eq. (H20) gives 
+
+PL ≥ 1dst 
+
+1 + 1 dst = 12 , (H40) as claimed. 
+
+Corollary 31 (Vanishing error forces growing protection) . For every scale λ, let [[ Nst (λ), k (λ), r (λ), d st (λ)]] be an exact binary linear subsystem spacetime code with k(λ) ≥ 1, equipped with a deterministic or randomized complete-syndrome decoder and a full-support product Pauli fault distribution as in Theorem 27. Let qmin (λ) and qmax (λ) be the corresponding single-coordinate probability extrema and define 
+
+ρλ := qmin (λ)
+
+qmax (λ) . (H41) 
+
+Assume that there is a scale-independent constant ρ0 ∈ (0 , 1] such that 
+
+ρλ ≥ ρ0 for every scale λ. (H42) 
+
+If PL(λ) → 0, then 
+
+dst (λ) → ∞ , Nst (λ) − k(λ) − r(λ) → ∞ . (H43) 31 
+
+Proof. Suppose, for contradiction, that dst (λ) does not tend to infinity. Then there are a finite constant D and an infinite subsequence along which dst (λ) ≤ D. For every λ in this subsequence, 
+
+ρdst (λ) 
+
+> λ
+
+≥ ρDλ ≥ ρD 
+
+> 0
+
+, (H44) where the first inequality uses 0 < ρ λ ≤ 1 and dst (λ) ≤ D, and the second uses ρλ ≥ ρ0. Since the function 
+
+x 7 → x/ (1 + x) is increasing for x > 0, Eq. (H20) gives 
+
+PL(λ) ≥ ρdst (λ)
+
+> λ
+
+1 + ρdst (λ)
+
+> λ
+
+≥ ρD
+
+> 0
+
+1 + ρD
+
+> 0
+
+> 0. (H45) The final lower bound is independent of λ, contradicting PL(λ) → 0. Hence dst (λ) → ∞ .Applying the subsystem code Singleton bound Eq. (H5) at every scale and subtracting k(λ) + r(λ) from both sides gives 
+
+Nst (λ) − k(λ) − r(λ) ≥ 2 dst (λ) − 1. (H46) Since the right side tends to infinity due to dst (λ) → ∞ established above, so does the left side. This proves the asserted divergence of the absolute spacetime-code redundancy. The Singleton bound controls the spacetime-code length; it gives a physical circuit-size bound only under Assump-tion 24. The overlap inequality holds for arbitrary Pauli fault distributions under syndrome-only Pauli recovery, whereas the distance-dependent form uses the product-noise assumption. The results require growing absolute re-dundancy as the logical error tends to zero, but they do not require growing relative overhead when the number of protected logical qubits increases simultaneously. 
+
+> Supplementary Information I: Distance and threshold conditions
+
+Distance growth is necessary under the product-Pauli assumptions of Theorem 27, but distance alone does not imply a threshold. A code family may have increasing distance while the number of fault patterns that cause logical failure grows too rapidly. We state a sufficient condition for the spacetime-code family to have a positive decoder threshold by counting malignant fault sets. Let λ index a spacetime-code family and set 
+
+tλ =
+
+ dst (λ) − 12
+
+
+
+. (I1) At scale λ, let F be an induced phase-free Pauli fault string and let U denote the decoder randomness, with U omitted for a deterministic decoder. A joint realization ( F, U ) is a failed fault pattern if the residual defined in Eq. (H15) of the preceding section is a nontrivial dressed logical Pauli: 
+
+Lres (F, U ) ∈ N (Sst ) \ G st . (I2) Its faulty-coordinate support is supp( F ) := {i : Fi̸ = I}. (I3) A set W of fault coordinates is called a malignant fault set if there are nonidentity Pauli labels on the coordinates in 
+
+W and, when the decoder is randomized, a value of U , for which a fault pattern with support exactly W is failed. Let Wλ,w be a chosen collection of malignant fault sets of cardinality w over spacetime code with index λ. These collections cover decoder failure if, for every failed realization ( F, U ), there are some w ≥ tλ + 1 and some W ∈ W λ,w 
+
+such that 
+
+W ⊆ supp( F ). (I4) In particular, the restriction w ≥ tλ + 1 is part of the covering hypothesis and requires that no fault pattern of weight at most tλ is failed. If Pauli labels are counted separately, they may be included in the constant μ below. Let p ≥ 0denote the underlying physical noise-strength parameter, with p = 0 corresponding to the noiseless physical circuit. Let Fλ,p denote the induced Pauli fault string at scale λ, and let PL(λ, p ) denote the probability, over both Fλ,p and the independent decoder randomness, of a failed realization. We say that the family has a positive decoder threshold 
+
+precisely when pth > 0 for the quantity defined in Eq. (C7). 32 
+
+Theorem 32 (Sufficient condition for a positive threshold) . Assume: (i) dst (λ) → ∞ ;(ii) For every physical noise strength p ≥ 0, the induced fault strings are local stochastic with a scale-uniform rate 
+
+pst (p) ∈ [0 , 1] : for every scale λ and every set A ⊆ { 1, . . . , N st (λ)},
+
+Pr  
+
+> p
+
+[A ⊆ supp( Fλ,p )] ≤ pst (p)|A|. (I5) 
+
+Moreover, 
+
+pst (0) = 0 , pst (p) −→ 0 as p → 0. (I6) 
+
+(iii) the chosen decoder corrects every induced Pauli fault pattern of weight at most tλ, the malignant sets cover decoder failure, and for constants C, μ > 0 independent of λ and p,
+
+|W λ,w | ≤ CN st (λ)μw; (I7) 
+
+(iv) log Nst (λ) = o(dst (λ)) .If μp st (p) < 1, then 
+
+PL(λ, p ) ≤ CN st (λ)[ μp st (p)] tλ+1 
+
+1 − μp st (p) −→ 0. (I8) 
+
+Consequently, there exists p0 > 0 such that 
+
+lim  
+
+> λ→∞
+
+PL(λ, p ) = 0 for every fixed 0 ≤ p < p 0. (I9) 
+
+Thus pth ≥ p0 > 0 in the sense of Eq. (C7) .Proof. For each W ∈ W λ,w , local stochasticity bounds the probability that all coordinates in W are faulty, irrespective of faults outside W , by pst (p)w. Let ζ = μp st (p). By the tλ-error-correction hypothesis, no fault pattern of weight at most tλ causes decoder failure. By the covering hypothesis, every remaining failure contains some W ∈ W λ,w with 
+
+w ≥ tλ + 1. Therefore the failure event is contained in 
+
+> Nst (λ)
+
+[
+
+> w=tλ+1
+
+[ 
+
+> W∈W λ,w
+
+{W ⊆ supp( Fλ,p )} , (I10) which explains the lower limit tλ + 1 in the following union bound: 
+
+{decoder failure } ⊆ 
+
+> Nst (λ)
+
+[
+
+> w=tλ+1
+
+[ 
+
+> W∈W λ,w
+
+{W ⊆ supp( Fλ,p )} . (I11) Applying the union bound to Eq. (I11) and then using Eq. (I5) gives 
+
+PL(λ, p ) ≤
+
+> Nst
+
+X
+
+> w=tλ+1
+
+|W λ,w |pst (p)w ≤ CN st 
+
+> Nst
+
+X
+
+> w=tλ+1
+
+ζw. (I12) When 0 ≤ ζ < 1, every term is nonnegative, so adding the terms with w > N st (λ) can only increase the sum: 
+
+> Nst (λ)
+
+X
+
+> w=tλ+1
+
+ζw ≤
+
+> ∞
+
+X
+
+> w=tλ+1
+
+ζw = ζtλ+1 
+
+> ∞
+
+X
+
+> j=0
+
+ζj = ζtλ+1 
+
+1 − ζ . (I13) Consequently, 
+
+PL(λ, p ) ≤ CN st (λ)
+
+> Nst (λ)
+
+X
+
+> w=tλ+1
+
+ζw ≤ CN st (λ)ζtλ+1 
+
+1 − ζ = CN st (λ)[ μp st (p)] tλ+1 
+
+1 − μp st (p) , (I14) 33 where the final equality uses ζ = μp st (p). This is Eq. (I8). If ζ = 0, the conclusion is immediate. If 0 < ζ < 1, the logarithm of the numerator of Eq. (I8) is, apart from the additive constant log C,log Nst + ( tλ + 1) log ζ. (I15) Moreover, Eq. (I1) gives 
+
+tλ + 1 = 
+
+ dst (λ) − 12
+
+
+
++ 1 ≥ dst (λ)2 . (I16) Since 0 < ζ < 1, one has log ζ < 0, and therefore log Nst (λ) + ( tλ + 1) log ζ ≤ log Nst (λ) + dst (λ)2 log ζ = o(dst (λ)) + dst (λ)2 log ζ −→ −∞ . (I17) Here we used assumptions (i) and (iv). Hence the numerator in Eq. (I8) tends to zero, while 1 − ζ > 0 is independent of λ. Thus we have proved that PL(λ, p ) → 0 for every fixed p satisfying μp st (p) < 1. Note that the factor ζtλ+1 
+
+provides exponential suppression in the spacetime-code distance, while assumption (iv) ensures that the prefactor 
+
+Nst (λ) grows too slowly to overcome this suppression. Finally, since pst (p) → 0 as p → 0 by assumption (ii) and μ > 0 is independent of p, there exists p0 > 0 such that 
+
+pst (p) < 1
+
+μ for every 0 ≤ p < p 0. (I18) Thus μp st (p) < 1 throughout the interval [0 , p 0), and the preceding argument gives lim  
+
+> λ→∞
+
+PL(λ, p ) = 0 for every fixed 0 ≤ p < p 0. (I19) By Eq. (C7), pth ≥ p0 > 0, which proves the positive-threshold claim. The same-syndrome fault bound and Corollary 31 are converse results. The theorem above is a sufficient condition for a positive threshold: it controls the number of malignant fault sets as a function of their weight. It does not imply optimal physical circuit size.  
+
+> Supplementary Information J: Consequences for resource scaling 1. Resource lower bounds from error converses
+
+Theorem 27 and Corollary 30 combine a lower bound on logical error with a size–distance relation. We state this conversion in general form in the following proposition. 
+
+Proposition 33 (Accuracy-dependent cost from a converse) . Fix a physical noise strength p. Suppose a family of codes or fault-tolerant gadgets is indexed by its distance d ∈ N, and let Cres (d) denote one specified scalar resource count for its distance-d member. The choice of resource is fixed throughout the proposition. Depending on the application, 
+
+Cres (d) may denote the physical-qubit count, the spacetime-code length Nst (d), the circuit-to-code location count Cst (d),or the worst-case physical circuit size CFT (d). No equivalence among these resource counts is assumed. Consider 
+
+a(p) > 0, b(p) > 0, cres > 0, β > 0, γ > 0, (J1) 
+
+independent of d, such that 
+
+PL(d, p ) ≥ a(p)e−b(p)dβ
+
+, Cres (d) ≥ cres dγ . (J2) 
+
+If PL(d, p ) ≤ ε for 0 < ε < a (p), then 
+
+d ≥
+
+ 1
+
+b(p) log a(p)
+
+ε
+
+1/β 
+
+, Cres (d) ≥ cres 
+
+ 1
+
+b(p) log a(p)
+
+ε
+
+γ/β 
+
+. (J3) 34 
+
+Proof. Combining the assumed converse lower bound with the target upper bound gives 
+
+a(p)e−b(p)dβ
+
+≤ PL(d, p ) ≤ ε. (J4) Since a(p) > 0, division by a(p) yields 
+
+e−b(p)dβ
+
+≤ εa(p) . (J5) Taking the logarithm of both positive sides gives 
+
+−b(p)dβ ≤ log εa(p) = − log a(p)
+
+ε . (J6) Multiplying by −1 reverses the inequality. Since b(p) > 0, 
+
+dβ ≥ 1
+
+b(p) log a(p)
+
+ε . (J7) Because β > 0, taking the positive 1 /β power proves 
+
+d ≥
+
+ 1
+
+b(p) log a(p)
+
+ε
+
+1/β 
+
+. (J8) Finally, γ > 0 implies that d 7 → dγ is increasing. Substituting this distance lower bound into Cres (d) ≥ cres dγ gives 
+
+Cres (d) ≥ cres 
+
+ 1
+
+b(p) log a(p)
+
+ε
+
+γ/β 
+
+, (J9) as claimed. Consider a depth-T circuit implemented by the logical gadgets of Definition 20. If each gadget has uniform com-posable diamond-norm error at most ε/T , then Eq. (B6) gives 
+
+eC − C ⋄
+
+≤
+
+> T
+
+X
+
+> t=1
+
+εT = ε. (J10) For an exponentially suppressing gadget family, this sufficient per-gadget allocation produces a distance and resource upper bound containing log( T /ε ). It does not prove that a log( T /ε ) reliability contribution is necessary for every complete T -layer computation. Applying the converse proposition with target ε/T would give such a lower bound only if every individual gadget were itself required to have error at most ε/T ; the overall error requirement on the complete circuit does not imply this. A necessary T dependence therefore requires a converse formulated directly for the complete computation.  
+
+> 2. Resource upper bounds from error suppression
+
+Define log + x = max {0, log x}.
+
+Proposition 34 (Sufficient cost from suppression) . Fix a physical noise strength p and an integer M ≥ 1. Let D ⊆ N
+
+be the set of distances realized by a code-and-gadget family. For every d ∈ D and every m = 1 , . . . , M , consider a logical gadget in the sense of Definition 20, implementing one complete ideal logical layer. Such a layer may include logical gates, state preparations, measurements and classical feedforward. For a permitted preceding measurement record h, let eGd,p,m,h denote the noisy effective logical quantum–classical channel of the mth gadget at distance d and physical noise strength p, and let Gm,h denote the corresponding ideal logical-layer channel. Define the uniform composable error by 
+
+q(d, p ) := sup  
+
+> 1≤m≤Mhpermitted
+
+eGd,p,m,h − G m,h ⋄
+
+. (J11) 35 
+
+The diamond norm includes arbitrary joint logical-reference input states and external reference systems, as specified in Definition 20. Thus “uniform” means that the same bound q(d, p ) applies to every one of the M gadgets and every permitted preceding measurement record. Suppose this error satisfies 
+
+q(d, p ) ≤ B(p)e−α(p)dβ
+
+, B(p) > 0, α(p) > 0, β > 0, (J12) 
+
+and suppose its physical circuit size is at most 
+
+CH dγ , CH > 0, γ > 0. (J13) 
+
+Here B(p) is the finite-distance error prefactor, α(p) is the error-suppression coefficient, β is the error-suppression exponent, CH is the distance-to-circuit-size prefactor, and γ is the circuit-size exponent. These quantities are inde-pendent of d, M and ε, although B(p) and α(p) may depend on the fixed physical noise strength p.Assume that there are constants d0 ≥ 1 and κ ≥ 1 such that, for every real target distance x ≥ d0, there is an available distance d ∈ D satisfying 
+
+x ≤ d ≤ κx. (J14) 
+
+Thus a target distance is a calculated lower bound sufficient for the desired accuracy, whereas an available distance is the distance of an actual member of the code-and-gadget family. Suppose that these M logical gadgets have total composable error at most 
+
+Ccomp M q (d, p ), (J15) 
+
+where Ccomp > 0 is independent of d, M and ε. For direct diamond-norm telescoping as in Eq. (B6) , one may take 
+
+Ccomp = 1 . Then target error 0 < ε ≤ 1 is achieved with per-gadget circuit size 
+
+O
+
+
+
+1 + 1
+
+α(p) log +
+
+Ccomp B(p)Mε
+
+γ/β !
+
+. (J16) 
+
+Proof. Define the calculated reliability distance 
+
+bd := 
+
+
+
+1 + 1
+
+α(p) log +
+
+Ccomp B(p)Mε
+
+1/β 
+
+. (J17) Set 
+
+x := max {d0, bd}. (J18) By Eq. (J14), choose an available d ∈ D satisfying 
+
+x ≤ d ≤ κx. (J19) In particular, d ≥ bd.Let 
+
+R := Ccomp B(p)Mε . (J20) By Eq. (J17), 
+
+α(p) bdβ = α(p) + log + R ≥ log + R. (J21) Since d ≥ bd and β > 0, 
+
+Ccomp M q (d, p ) ≤ Ccomp B(p)M e −α(p)dβ
+
+≤ εRe − log + R ≤ ε. (J22) The last inequality follows from Re − log + R ≤ 1: it is an equality when R ≥ 1, while for 0 < R < 1 it reduces to R ≤ 1. It remains to bound the circuit size. Since bd ≥ 1, Eq. (J19) gives 
+
+d ≤ κ max {d0, bd} ≤ κ max {d0, 1} bd. (J23) Substituting this upper bound for the chosen available distance d into the assumed circuit-size bound gives 
+
+CH dγ ≤ CH [κ max {d0, 1}]γ bdγ = O
+
+
+
+1 + 1
+
+α(p) log +
+
+Ccomp B(p)Mε
+
+γ/β !
+
+. (J24) The multiplicative factor from replacing the calculated target distance by an available distance is independent of M
+
+and ε, so it does not change the asserted asymptotic scaling. 36 
+
+TABLE II. Summary of the main results. Result Model and resource Scientific content Erasure-noise lower bound Independent erasures; arbitrary ideal adaptive recovery; worst-case circuit size Cpath over com-plete records; variable target error Complete erasure at one time step and a Schmidt-number argument give Cpath =Ω( S[K + log( S/ε )]). CSS-code construc-tion 
+
+p < δ GV ; positive-rate CSS-code existence; ideal recovery One block of width O(K + log( S/ε )) matches the lower-bound scaling. General memory lower bound Fixed independent non-unitary qubit channel; arbitrary ideal adaptive control; sum Clay of the maximum widths over the individual time steps; fixed diamond-norm error Every fixed-duration memory satisfies Clay =Ω( S(K + log S)). Thus no constant relative bound on this quantity holds uniformly for all widths and durations. Conditional circuit upper bound Positive-rate blocks; complete logical layers us-ing O(N ) qubits and O(1) time steps; uniform 
+
+e−Ω( N ) diamond-norm error These sufficient assumptions give physical cir-cuit size O(T (K + log( T /ε ))). Subsystem Singleton bound Exact binary linear subsystem spacetime code and an explicit comparison between fault coor-dinates and circuit locations Distance requires additional fault coordinates and, under the comparison assumption, addi-tional physical circuit size. Same-syndrome Pauli-fault bound Complete-syndrome Pauli decoder; arbitrary Pauli distribution for the distribution-overlap form; product noise for the distance form Faults with the same syndrome but different logical actions lower-bound the logical error and therefore the required distance. Threshold condition Local-stochastic induced faults and an exponen-tial bound on the number of malignant fault sets Increasing distance together with a controlled number of malignant sets is sufficient for a pos-itive threshold; increasing distance alone is not. 
+
+3. Relation among the results 
+
+In Table II, we summarize the main results and their relation to one another. 
+
+Supplementary Information K: Width and depth regimes for quantum algorithms 
+
+The tight erasure-noise result concerns a quantum memory of logical width K and storage duration S, measured in time steps. Under the assumptions of Theorem 2, the same additive dependence appears as an upper bound for a circuit of logical width K and depth T . In this section, we use εFT for the desired error of the fault-tolerant implementation, which is distinct from the approximation error of the ideal algorithm. For a fixed-width circuit, we define the ideal logical circuit size by 
+
+Glog = KT, (K1) where idle logical-qubit locations are included. The conditional circuit result gives 
+
+CFT = O
+
+
+
+T
+
+
+
+K + 1 + log AT εFT 
+
+ 
+
+. (K2) Here A is the fixed gadget-error prefactor in Assumption 21. Ignoring fixed constants and the lower-order additive term, this has the form 
+
+CFT = O
+
+
+
+Glog + T log TεFT 
+
+
+
+. (K3) For the memory problem with independent erasures, setting T = S gives the matching scaling 
+
+Cmin (K, S, ε FT ) = Θ 
+
+
+
+KS + S log SεFT 
+
+
+
+(K4) within the parameter range of Theorem 1. 37 The relative size of the two contributions is determined by the ratio log( T /ε FT )
+
+K −→ 0 when the logarithmic term is asymptotically smaller ,
+
+log( T /ε FT )
+
+K = Θ(1) when the two terms have the same order ,
+
+log( T /ε FT )
+
+K −→ ∞ when the logarithmic term dominates .
+
+(K5) Accordingly, K = Ω(log( T /ε FT )) is sufficient for constant relative overhead in the conditional circuit upper bound, whereas the logarithmic contribution is negligible only when K = ω(log( T /ε FT )). For erasure-noise memory, Eq. (8) shows that the minimum relative overhead is Θ(1 + log( S/ε FT )/K ). For general circuits, Theorem 2 gives the corresponding conditional upper bound, but the memory converse does not give a matching lower bound for every algorithm.  
+
+> 1. Polynomial-depth quantum algorithms
+
+Consider a family of algorithms indexed by an input size n. Suppose that 
+
+K(n) = Ω( n), T (n) = poly( n), εFT (n) ≥ 1poly( n) .
+
+Then log T (n)
+
+εFT (n) = O(log n),
+
+and therefore log( T /ε FT )
+
+K = O
+
+ log nn
+
+
+
+−→ 0.
+
+Thus the logarithmic term is asymptotically smaller than the ideal logical circuit size for this class of circuits. This class includes standard polynomial-depth implementations of quantum Fourier transforms, reversible arith-metic, variational algorithms of polynomial depth, polynomial-time Hamiltonian simulation, and Shor’s factoring algorithm. This comparison concerns only the two terms in the conditional upper bound and does not imply that the practical physical overhead of these algorithms is small.  
+
+> 2. Shor’s factoring algorithm
+
+For factoring an n-bit integer, standard implementations of Shor’s algorithm use a number of logical qubits that grows at least linearly with n, while their logical depth is polynomial in n [34]. Thus 
+
+K(n) = Ω( n), log T (n) = O(log n),
+
+and hence log( T /ε FT )/K → 0 for constant or inverse-polynomial εFT .As a representative numerical example, the abstract circuit estimate of Gidney and Eker˚ a [35] uses 
+
+K = 3 n + 0 .002 n log 2 n
+
+logical qubits and measurement depth 
+
+T = 500 n2 + n2 log 2 n. 
+
+For RSA-2048, these expressions give 
+
+K ≃ 6.19 × 10 3, T ≃ 2.14 × 10 9.38 Taking εFT = 10 −3 gives log TεFT 
+
+≃ 28 .4when the natural logarithm is used, and hence log( T /ε FT )
+
+K ≃ 4.6 × 10 −3.
+
+For this abstract circuit estimate, the logarithmic contribution is therefore small relative to KT . This numerical ratio should not be interpreted as a physical overhead estimate because the asymptotic notation hides noise-dependent and architecture-dependent constants. In particular, state distillation, routing, decoding, connectivity and the duration of logical operations can dominate a practical implementation.  
+
+> 3. Unstructured quantum search
+
+In the standard oracle model, Grover search over a space of size N = 2 n has logical width K and query depth T
+
+with the scaling [36] 
+
+K = Θ( n), T = Θ( √N ) = Θ(2 n/ 2).
+
+An explicit implementation of the oracle may add further circuit depth. It follows that log T = Θ( n) = Θ( K),
+
+so that log( T /ε FT )
+
+K = Θ(1) for constant or inverse-polynomial εFT . The two contributions in the conditional circuit bound therefore have the same asymptotic order. The same conclusion applies to amplitude amplification in the query model [37] with initial success probability a.Since its query depth is 
+
+T = Θ( a−1/2),
+
+the relevant ratio is log( T /ε FT )
+
+K = Θ 
+
+ log(1 /a ) + log(1 /ε FT )
+
+K
+
+
+
+.
+
+Thus the relative size of the two terms depends on the scaling of the initial success probability with the logical width.  
+
+> 4. Phase estimation
+
+The relative size of the two terms for phase estimation depends on the circuit implementation [38, 39]. In standard phase estimation, obtaining m bits of phase precision uses an m-qubit control register and controlled evolutions of total duration approximately 2 m. If the target system contains q logical qubits, then 
+
+K = q + Θ( m), T = Θ(2 m),
+
+and therefore log( T /ε FT )
+
+K = Θ 
+
+ m + log(1 /ε FT )
+
+q + m
+
+
+
+.
+
+For q = O(m), the logarithmic term and KT may have the same asymptotic order. If q ≫ m, the logarithmic term is asymptotically smaller. 39 Iterative phase estimation instead reuses one control qubit. Its width and depth scale as 
+
+K = q + O(1) , T = Θ(2 m) = Θ(1 /δ ),
+
+where δ ≃ 2−m is the desired phase precision. Hence log( T /ε FT )
+
+K = Θ 
+
+ log(1 /δ ) + log(1 /ε FT )
+
+q
+
+
+
+.
+
+For a fixed-size target system and increasing precision, this ratio diverges and the logarithmic term dominates. This example shows that the comparison depends on the circuit implementation, not only on the abstract computational problem.  
+
+> 5. Amplitude estimation
+
+A similar distinction occurs in quantum amplitude estimation [37, 40]. Implementations based on a full phase-estimation register use additional logical qubits to store the precision, thereby increasing K. Iterative and maximum-likelihood variants reuse a small control register. For a fixed q-qubit problem register and estimation error δalg , their coherent query depth can scale as 
+
+T = O(1 /δ alg ),
+
+up to the details of the chosen variant. The corresponding ratio is log( T /ε FT )
+
+K = O
+
+ log(1 /δ alg ) + log(1 /ε FT )
+
+q
+
+
+
+.
+
+For a fixed, small problem register, this ratio can grow with the required precision, in which case the logarithmic term dominates. Here δalg and εFT have different meanings. The first is the numerical error of the ideal algorithm, whereas the second is the probability or channel error introduced by its physical implementation.  
+
+> 6. Long-time Hamiltonian simulation and quantum signal processing
+
+Consider a q-qubit system simulated under the standard sparse-Hamiltonian or block-encoding access assumptions by a circuit of depth D [41, 42]. The relevant ratio is log( D/ε FT )
+
+q .
+
+If the simulated time and inverse simulation error are polynomial in q and the required oracle or block encoding has a polynomial-depth implementation, then D = poly( q) and this ratio tends to zero. If 
+
+D = exp(Θ( q)) ,
+
+the ratio is Θ(1). If q is fixed while the simulated time or required polynomial degree tends to infinity, the ratio diverges and the logarithmic term eventually dominates. This situation can occur in long-time dynamical simulation, high-resolution spectroscopy, spectral filtering and quantum signal-processing protocols that repeatedly apply a fixed block encoding to a small logical register.  
+
+> 7. Adiabatic algorithms and quantum walks
+
+For an adiabatic algorithm on K = Θ( n) logical qubits with polynomial runtime [43], 
+
+T = poly( n),
+
+the ratio log( T /ε FT )/K tends to zero. If an exponentially small spectral gap produces 
+
+T = exp(Θ( n)) ,40 
+
+TABLE III. Representative scaling of log( T /ε FT )/K for different quantum algorithms. The entries describe asymptotic circuit families and assume constant or inverse-polynomial fault-tolerance error unless stated otherwise. The comparison can change when a different implementation changes the circuit width or depth. Workload Representative scaling Ratio log( T /ε FT )/K 
+
+Reason Polynomial-depth algo-rithms 
+
+K = Ω( n), T = poly( n) −→ 0 log( T /ε FT ) = O(log n) ≪ K
+
+Shor factoring K = Ω( n), T = poly( n) −→ 0 The logical register grows much faster than the logarithm of the depth Grover search on 2 n items K = Θ( n), T = Θ(2 n/ 2) Θ(1) log T = Θ( K)Standard phase estima-tion 
+
+K = q + Θ( m), T = Θ(2 m) Θ(1) or −→ 0 The precision register contributes Θ( m)qubits Iterative phase estima-tion 
+
+K = q + O(1), T = Θ(1 /δ ) May diverge Diverges when log(1 /δ ) ≫ q
+
+Iterative amplitude esti-mation 
+
+K = q + O(1), T = O(1 /δ alg ) May diverge A small register is reused for many coher-ent queries Long-time simulation or signal processing 
+
+K = q, T = D Depends on scal-ing Tends to zero for D = poly( q), is Θ(1) for D = exp(Θ( q)), and diverges when log D ≫ q
+
+Adiabatic evolution with exponential runtime 
+
+K = Θ( n), T = exp(Θ( n)) Θ(1) The logical width and logarithmic dura-tion have the same order Long-lived quantum memory 
+
+K = O(1), T → ∞ −→ ∞ The reliability term grows while the stored logical width remains fixed Quantum-network wait-ing or sequential sensing 
+
+K = O(1), T → ∞ −→ ∞ A small coherent register is retained across many rounds 
+
+then log T = Θ( n) = Θ( K),
+
+the ratio is Θ(1). The logarithmic term dominates only when log T grows asymptotically faster than the logical width. The same comparison applies to quantum walks [44]. A walk with polynomial hitting time in n has a vanishing ratio when K = Θ( n), whereas a walk on 2 n states requiring 2 Θ( n) coherent steps has a ratio of order one. 
+
+8. Long-lived memories, networking and sensing 
+
+The logarithmic term most clearly dominates when a small logical register must remain coherent for a long time. If 
+
+K = K0
+
+is fixed and T → ∞ , then log( T /ε FT )
+
+K0
+
+−→ ∞ .
+
+Examples include long-lived quantum memories, quantum-network buffers, memories waiting for heralded entangle-ment, sequential channel discrimination and sensing protocols that accumulate a phase over many coherent interro-gation rounds [45]. When a task requires preservation of an arbitrary quantum state for a prescribed duration, it falls within the memory setting and obeys the corresponding circuit-size lower bound. In Table III, we compare the two terms in the conditional circuit upper bound. We do not give a matching lower bound for every algorithm in the table. An algorithm may measure and reset ancillas, change its logical width during the computation, or be required to work only for specified inputs, whereas the memory lower bound protects an arbitrary input, including one entangled with a reference. We also do not include architecture-dependent costs from decoding, routing, communication, or non-Clifford state preparation.

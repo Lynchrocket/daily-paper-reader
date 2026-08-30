@@ -6,28 +6,24 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-08-29
-- 运行时间：2026-08-29 22:47:19 UTC
+- 最新运行日期：2026-08-30
+- 运行时间：2026-08-30 22:54:36 UTC
 - 运行状态：成功
-- 本次总论文数：2
+- 本次总论文数：1
 - 精读区：1
-- 速读区：1
+- 速读区：0
 
 ### 今日简报（AI）
-今日精读1篇、速读1篇，共覆盖2篇量子计算相关论文。  
-最值得关注的是《Certified decoding of quantum LDPC codes》（9.0/10），聚焦量子LDPC码的可认证解码；另一篇则指出常数时空开销的容错量子计算无法实现（6.0/10）。  
-建议先研读高分精读论文的认证解码框架，再结合速读结论评估实际量子计算方案的资源约束。
-- 详情：[/202608/29/README](/202608/29/README)
+今日精读1篇论文，聚焦量子计算容错领域。核心结论：容错量子计算无法在恒定时空开销下实现，这对量子资源设计有直接影响。建议后续关注低开销容错方案的最新进展，并结合实例理解其约束。
+- 详情：[/202608/30/README](/202608/30/README)
 
 ### 精读区论文标签
-1. [Certified decoding of quantum LDPC codes](/202608/29/2608.25545v1-certified-decoding-of-quantum-ldpc-codes)  
-   标签：评分：9.0/10、query:qec-decoding
-   evidence：该论文直接针对量子LDPC码提出认证解码算法，处理退化最大似然解码
+1. [Fault-tolerant quantum computation cannot be achieved with constant spacetime overhead](/202608/30/2608.26272v1-fault-tolerant-quantum-computation-cannot-be-achieved-with-constant-spacetime-overhead)  
+   标签：评分：8.0/10、query:qec-code
+   evidence：分析容错量子计算中时空开销的基本极限，与量子纠错码的阈值行为相关。
 
 ### 速读区论文标签
-1. [Fault-tolerant quantum computation cannot be achieved with constant spacetime overhead](/202608/29/2608.26272v1-fault-tolerant-quantum-computation-cannot-be-achieved-with-constant-spacetime-overhead)  
-   标签：评分：6.0/10、query:qec-decoding
-   evidence：关于容错量子计算时空开销的研究，与量子纠错密切相关
+- 本次无速读推荐。
 
 
 <div class="dpr-home-promo-card">

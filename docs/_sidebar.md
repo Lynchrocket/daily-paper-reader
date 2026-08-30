@@ -1,6 +1,9 @@
 * <a class="dpr-sidebar-root-link" href="#/">首页</a>
 * <a class="dpr-sidebar-root-link dpr-sidebar-noactive-link" href="javascript:void(0)" data-dpr-hash="#/tutorial/README">使用教程</a>
 * Daily Papers
+  * 2026-08-30 <!--dpr-date:20260830-->
+    * 精读区
+      * <a class="dpr-sidebar-item-link dpr-sidebar-item-structured" href="#/202608/30/2608.26272v1-fault-tolerant-quantum-computation-cannot-be-achieved-with-constant-spacetime-overhead" data-sidebar-item="{&quot;title&quot;: &quot;Fault-tolerant quantum computation cannot be achieved with constant spacetime overhead&quot;, &quot;link&quot;: &quot;https://arxiv.org/abs/2608.26272v1-fault-tolerant-quantum-computation-cannot-be-achieved-with-constant-spacetime-overhead&quot;, &quot;score&quot;: &quot;8.0&quot;, &quot;tags&quot;: [{&quot;kind&quot;: &quot;query&quot;, &quot;label&quot;: &quot;qec-code&quot;}], &quot;evidence&quot;: &quot;分析容错量子计算中时空开销的基本极限，与量子纠错码的阈值行为相关。&quot;}">Fault-tolerant quantum computation cannot be achieved with constant spacetime overhead</a>
   * 2026-08-29 <!--dpr-date:20260829-->
     * 精读区
       * <a class="dpr-sidebar-item-link dpr-sidebar-item-structured" href="#/202608/29/2608.25545v1-certified-decoding-of-quantum-ldpc-codes" data-sidebar-item="{&quot;title&quot;: &quot;Certified decoding of quantum LDPC codes&quot;, &quot;link&quot;: &quot;https://arxiv.org/abs/2608.25545v1-certified-decoding-of-quantum-ldpc-codes&quot;, &quot;score&quot;: &quot;9.0&quot;, &quot;tags&quot;: [{&quot;kind&quot;: &quot;query&quot;, &quot;label&quot;: &quot;qec-decoding&quot;}], &quot;evidence&quot;: &quot;该论文直接针对量子LDPC码提出认证解码算法，处理退化最大似然解码&quot;}">Certified decoding of quantum LDPC codes</a>

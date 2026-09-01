@@ -1,0 +1,450 @@
+Title: Error-Adaptive Quasi-local Decoding of the Toric Code
+
+URL Source: https://arxiv.org/pdf/2608.27740v1
+
+Published Time: Mon, 31 Aug 2026 00:23:27 GMT
+
+Number of Pages: 14
+
+Markdown Content:
+# Error-Adaptive Quasi-local Decoding of the Toric Code 
+
+Hossein Dehghani, 1, 2, 3, ∗ Sarang Gopalakrishnan, 4 and Michael Gullans 3, 5 
+
+> 1
+
+Department of Physics, University of Maryland, College Park, Maryland 20742, USA 
+
+> 2
+
+Joint Quantum Institute, NIST/University of Maryland, College Park, Maryland 20742, USA 
+
+> 3
+
+Joint Center for Quantum Information and Computer Science, NIST/University of Maryland, College Park, Maryland 20742, USA 
+
+> 4
+
+Department of Electrical and Computer Engineering, Princeton University, Princeton, New Jersey 08544, USA 
+
+> 5
+
+National Institute of Standards and Technology, Gaithersburg, Maryland 20899, USA 
+
+Topological quantum memories need decoders that are both reliable and scalable, but these goals compete: globally informed decoders are accurate near threshold yet expensive, while strictly local rules are fast but can miss long-range structure. Motivated by recent recoverability and mixed-state viewpoints, we make this tradeoff operational for the dephased toric code through a decoder-level local recoverability diagnostic. We compare global MWPM corrections to quasi-local corrections inside a target region and define a matching ratio Rmatch , with mismatch ϵmatch = 1 − Rmatch .Across geometry families, ϵmatch shows strong buffer-controlled suppression and is well organized by a two-geometry scaling form. For scaled families, especially a = b = d/ 8, Rmatch exhibits a clear crossing and finite-size collapse near p ∼ 0.09, consistent with a growing recoverability scale near the decoding transition. We use this scaling to formulate an adaptive buffer-selection rule and to identify a distance-scaled initialization for a composite quasi-local RG decoder on the full torus. In the tuned family a0 = b0 = d/ 8, the resulting logical-failure curves show an apparent finite-size crossing at p ≃ 0.09–0 .10, below the conventional MWPM threshold scale. We focus on dephasing noise with perfect syndrome measurements to cleanly isolate the underlying behavior. 
+
+I. INTRODUCTION 
+
+Topological quantum error-correcting codes are a lead-ing route to fault-tolerant quantum computation, be-cause logical information is stored nonlocally while error syndromes are extracted through local stabilizer mea-surements [1, 2]. In this framework, decoding is the computational step that maps syndrome data to phys-ical corrections and therefore directly sets the practi-cal performance-cost tradeoff of a code family. A cen-tral challenge is the tension between locality and reli-ability: global decoders can capture long-range corre-lations near threshold but are computationally costly, while local rules can be much faster but may fail precisely where long-range structure becomes important. For the dephased toric code [1], global minimum-weight perfect matching (MWPM) remains the standard reference [2, 3], with threshold behavior connected to the random-bond Ising transition [2, 4, 5]. Recent works on mixed-state topological phases and noisy quantum memories recast this decoder tradeoff in terms of recoverability for mixed states [6–9]. Under noise and syndrome conditioning, the relevant object is a density matrix rather than a pure-code state, and the core question becomes recoverability: can logical infor-mation be reconstructed from local data, or is system-scale information fundamentally required? In this lan-guage, decodability is associated with a phase where re-covery remains quasi-local up to a finite length scale,   
+
+> ∗Current address: QuEra Computing Inc., Boston, MA 02135, USA
+
+while approaching the transition drives that scale up-ward. This viewpoint is closely tied to finite Markov length, local reversibility, and channel-circuit formulations of re-covery [8, 10–12]. It is also naturally connected to Petz-map and approximate-recovery theory [13–17], where one asks when local reduced information is sufficient to re-construct the global logical content. From a decoder-design perspective, this suggests that a practically useful quantity is not only a threshold number, but a geometry-dependent recoverability scale that indicates how much neighborhood information is needed for local decisions to match global ones. The objective of this paper is to make that recoverability-scale idea operational for a concrete de-coder family. We ask: for a target region A, how much of the global MWPM decision inside A is already deter-mined by syndrome data in a finite neighborhood A ∪ B?We quantify this by a matching ratio between local and global corrections [7], and use it as a decoder-level proxy for local recoverability. Our main results are threefold. First, the local-global mismatch ϵmatch = 1 − Rmatch follows a simple scal-ing structure in ( a, b ) with strong buffer-controlled sup-pression. Second, for distance-scaled families (notably 
+
+a = b = d/ 8 in our data), the matching ratio exhibits a clear crossing and finite-size collapse near p ∼ 0.09, con-sistent with a growing recoverability scale near the tran-sition. Third, this scaling yields an adaptive buffer rule and motivates the distance-scaled initialization of a com-posite quasi-local RG decoder on the full torus. For the families studied here, that composite decoder displays threshold-like logical-failure behavior, with a finite-size arXiv:2608.27740v1 [quant-ph] 27 Aug 2026 2crossing below the conventional MWPM threshold scale. We intentionally keep the scope narrow. We focus on dephasing with perfect measurements so the matching-ratio mechanism can be isolated cleanly. Extensions to repeated-syndrome noisy-measurement decoding [18, 19], and to alternative fast local solver families [20–22], are left for separate treatment. The remainder of the paper is organized as follows. In Sec. II we define the subregion decoder and the match-ing ratio. Section III introduces the scaling ansatz for the local-global mismatch, and Sec. IV shows the transition-like behavior of the matching ratio for scaled families. In Sec. V we extract the adaptive buffer rule, in Sec. VI we construct the composite quasi-local RG decoder, in Sec. VII we present its whole-system logical-failure results, in Sec. VIII we analyze complexity and fast-decoding implications, and in Sec. IX we discuss broader implications and extensions.  
+
+> II. SUBREGION DECODER AND MATCHING RATIO
+
+We begin by fixing the toric-code geometry, the target and buffer regions, and the operational definition of the matching ratio. The toric code and its boundary (surface-code) variant are canonical topological stabilizer-code constructions [1, 23]. The toric code places physical qubits on edges of a square lattice with periodic boundary conditions. Using the standard convention, the stabilizers are 
+
+Av = Y
+
+> e∋v
+
+Xe, Bp = Y
+
+> e∈∂p
+
+Ze, (1) where Av is the star operator at vertex v and Bp is the plaquette operator on face p. The code space is the si-multaneous +1 eigenspace of all Av and Bp.Logical operators are noncontractible loops around the two cycles of the torus. A convenient representative set is ¯Zx/y = Y
+
+> e∈γx/y
+
+Ze, ¯Xx/y = Y
+
+> e∈˜γx/y
+
+Xe, (2) where γx/y and ˜ γx/y are primal and dual noncontractible cycles. In the dephasing setting, physical errors are Z-type, so the relevant syndrome is generated by violated X-type checks (star defects), while Z plaquette checks remain unaffected by the noise channel. Decoding therefore re-duces to pairing these syndrome defects on the vertex lattice; throughout this manuscript, the global reference decoder is MWPM on the full torus. For this dephasing code-capacity model (independent 
+
+Z errors, perfect syndrome measurements), the natu-ral optimal benchmark is maximum-likelihood decoding (MLD). Here MLD means choosing the most likely logical class of syndrome-compatible error chains, rather than reconstructing one microscopic error chain exactly. For a fixed syndrome, many Z-error chains produce the same defect pattern, and two such chains can differ either by local contractible loops or by noncontractible loops that change the encoded logical action. Successful decod-ing therefore depends on whether the final error-plus-correction is topologically trivial on the torus, not on whether the decoder reproduces the physical error chain edge by edge. The MLD groups all compatible chains according to their logical action, sums their probabilities within each class, and chooses the most probable class. Exact MLD is, however, computationally intractable in general: optimal decoding of stabilizer codes is #P-complete [24], and identifying a most likely compati-ble error is NP-hard [25]. Practical decoders such as MWPM, and the composite decoder studied here, are therefore suboptimal surrogates for an intractable opti-mum. In the toric-code setting this class-summed decod-ing problem maps to the phase transition of the two-dimensional random-bond Ising model (RBIM) on the Nishimori line. This mapping was established in the Dennis–Kitaev–Landahl–Preskill work [2] and analyzed further in Refs. [3, 26]. It gives a natural reference scale 
+
+pML  
+
+> c
+
+≈ 0.109 (about 10 .9%), while practical MWPM thresholds for the same setting are typically slightly lower, around pMWPM  
+
+> c
+
+≈ 0.103 [2, 3]. We use these val-ues as baseline context for the composite-decoder results reported below. To define a local decoder, we consider a square tar-get region A with linear size a, together with an annulus buffer region B with width b around it (Fig. 1). The lo-cal decoder has access to the syndrome in A ∪ B, but the correction that is kept is restricted to the target region 
+
+A. Throughout the paper, a and b are measured in units of the X-stabilizer (vertex) lattice spacing: a distance-d
+
+toric code corresponds to a d × d periodic vertex lattice, while the geometry schematic is drawn on the underlying 2d × 2d grid containing vertices, plaquette centers, and edge qubits. In that drawing, one vertex-lattice spac-ing corresponds to two grid units. Every later scaling plot and every RG step in the composite decoder refers back to this distinction: corrections are committed only in the target region, while the buffer supplies auxiliary syndrome information. Given two decoders, we define the matching ratio of their outputs as the fraction of samples for which the two decoders give the same correction inside the target region. More explicitly, let Dglob be the global MWPM decoder and let DA,B be the local decoder acting on 
+
+A ∪ B. For a syndrome sample Si, let P glob  
+
+> i,A
+
+be the re-striction of the global Pauli correction to A, and let P A,B i,A 
+
+be the Pauli correction produced by the local decoder in 
+
+A. Then 
+
+Rmatch (Dglob , DA,B ) = 1
+
+N
+
+> N
+
+X
+
+> i=1
+
+δ
+
+
+
+P glob  
+
+> i,A
+
+, P A,B i,A 
+
+
+
+, (3) 3                 
+
+> AB
+> 2dab
+> FIG. 1. Geometry of the local decoder region for the toric code (qubits live on edges, shown as filled circles). The local decoder acts on a target square Aof linear size a(blue) to-gether with a surrounding buffer region Bof width b(red). The full system is a distance-dtoric code with periodic bound-ary conditions (not shown), drawn on the underlying 2 d×2d
+> grid; one X-stabilizer (vertex) lattice spacing corresponds to two grid units, and aand bare quoted in vertex-lattice spac-ings throughout the paper.
+
+where δ(x, y ) = 1 if x = y and 0 otherwise. In this manuscript, equality in Eq. (3) is literal Pauli-string equality on A for the fixed decoder implementa-tions and deterministic tie-breaking used in the simula-tions. We do not quotient by local stabilizers inside A,nor do we reduce the comparison to a class-only notion of equivalence. Such a stabilizer-quotiented or class-only statistic would be the more natural object for probing the locality structure of MLD itself, since MLD is defined at the level of logical equivalence classes rather than spe-cific correction representatives. In practice, however, the decoders studied here return concrete Pauli representa-tives, so we use literal representative agreement as the operational statistic relevant for decoder design. This quantity is useful for two reasons. First, it di-rectly measures how much of the global pairing decision is already fixed by local syndrome information. Second, it is much cheaper to scan over many choices of a and 
+
+b using the matching ratio than to build a full whole-system decoder every time. So in practice the matching-ratio analysis is the first step in deciding how to build the composite decoder. A statistic of this type was introduced in Ref. [7], where the probability that a truncated MWPM solve on a block plus surrounding buffer reproduces the global pairing on the block (with block, buffer, and system size scaled together) is used to establish the toric-code mixed-state phase. Our Rmatch is its decoder-oriented counter-part: the target and buffer sizes are varied independently, agreement is literal equality of the committed correction inside A, and the statistic is used to select decoder geom-etry rather than to construct a local channel for phase equivalence. The matching ratio has the same broad flavor as more information-theoretic recoverability diagnostics, es-pecially the conditional mutual information (CMI) used to define a finite Markov length [8]; see also Refs. [10, 12]. To make that comparison precise, let C denote the exte-rior complement of A ∪ B on the torus, so that A is the target region, B is the surrounding buffer, and C is the rest of the system beyond the buffer. The CMI is 
+
+I(A : C|B) = S(AB ) + S(BC ) − S(B) − S(ABC ), (4) with S(X) = −Tr ρX log ρX the von Neumann entropy of region X.The point of invoking CMI here is not the entropy formula by itself, but its conditional-information mean-ing. Small I(A : C|B) means that once the information in the buffer region B is known, the exterior region C
+
+contains little additional information about A; equiva-lently, B approximately screens A from C, so A-B-C
+
+behaves like an approximate Markov chain. This is con-ceptually close to what Rmatch asks operationally. There too one conditions on the local data in A ∪ B and asks whether access to the outside of the buffer still changes the decision inside A. In our decoder language, a small mismatch ϵmatch = 1 − Rmatch means that the exterior region C rarely changes the correction selected in A once the decoder already sees A ∪ B. Thus the analogy is about conditional screening by the buffer, not about iden-tifying entropies with decoder outputs. The two quanti-ties are therefore related in interpretation but not iden-tical: I(A : C|B) is a state property with an information-theoretic recovery meaning, whereas Rmatch and ϵmatch 
+
+are explicitly decoder-dependent agreement statistics.  
+
+> III. SCALING ANSATZ FOR THE MATCHING RATIO
+
+Having defined the decoder observable, we next ask how it depends on geometry and error rate. For decoder design, it is convenient to work with the mismatch variable 
+
+ϵmatch (p; a, b ) = 1 − Rmatch (p; a, b ). (5) This local-global mismatch is easier to organize across geometry families than Rmatch itself. A form that works well for the present data is 
+
+ϵmatch (p; a, b ; d) ≃ C(p, d )
+
+ ab
+
+α(p)
+
+e−b/ξ (p), (6) with C(p, d ) an amplitude that is independent of the patch geometry ( a, b ) but not, in general, of the system size d. Eq. (6) is used as an empirical finite-size fit, not as an exact closed-form derivation. We fit it at a sin-gle distance, which determines α(p) and ξ(p) but leaves 4the d-dependence of the amplitude unresolved; on gen-eral scaling grounds one expects d to enter through the ratio d/ξ (p) and to drop out once d ≫ ξ(p), which is the regime of the fits reported here. The structure of Eq. (6) should be compared carefully with the CMI scal-ing ansatz in Ref. [8]. In their toric-code geometry, the inner region A is kept O(1) while the annular width r of the surrounding regions is varied, leading near criticality to a one-parameter form I(A : C|B) = r−αΦ(( p−pc)r1/ν )and hence I(A : C|B) ∼ r−α exactly at p = pc; away from criticality the same work finds exponential decay 
+
+I(A : C|B) ∼ e−r/ξ ±(p) [8]. This power law in the buffer size is natural in their setting because, after coarse grain-ing, the only growing geometric scale is the annular width itself. Our ansatz is therefore of the same flavor, but not the same object and not the same scaling form. Here the target size is itself varied and can be comparable to the buffer, so the residual geometry dependence is kept explicitly through the prefactor ( a/b )α(p) rather than be-ing absorbed into a pure power of the buffer width alone. Eq. (6) should therefore be read as a decoder-geometry ansatz for the mismatch, not as the CMI ansatz of Ref. [8] transplanted verbatim. The truncated-matching analysis of Ref. [7] likewise modeled the local-global disagreement as a pure expo-nential in the buffer width, which is natural in its tied-scale geometry, where only one length exists by construc-tion. Once a and b are decoupled, a buffer-width expo-nential alone no longer organizes the data [Fig. 2(a)]; the (a/b )α(p) prefactor supplies the missing target-size de-pendence, while Eq. (6) reduces back to that single-scale form on constrained families such as a = b.The interpretation is then as follows: ξ(p) is an ef-fective recoverability length controlling buffer suppres-sion, and α(p) captures the residual dependence on how large the target is relative to the buffer. In this work we use C(p, d ), α(p), and ξ(p) as effective fitting parameters that organize the data and motivate the decoder design; a dedicated extraction of these parameters as physical observables is left to future work. Representative scaling behavior is shown in Fig. 2. Panel (a) isolates the target-size dependence, whose slope gives α(p), panel (c) isolates the suppression with buffer size, and panel (b) shows the constrained family a = b
+
+that is later used as a scaled decoder family. If the mis-match were controlled by a single buffer scale, as in the CMI problem with a fixed O(1) target region, panel (a) would carry little independent information once panel (c) was known. Instead, the data are organized by a genuine two-geometry dependence on both a and b, which is why the decoder design below depends on both target size and buffer size, and why the scaled families receive separate attention. Quantitatively, fitting each panel to a power of the scanned length times the buffer exponential returns a power +0 .52 for the target scan at fixed buffer, −0.55 for the buffer scan at fixed target, and ≈ 0 on the a = b
+
+diagonal (values at p = 0 .06; the target-scan exponent rises to 0 .58 at p = 0 .07). This approximate + α/ −α/ 0pattern is the fingerprint of the ratio prefactor ( a/b )α:the target and buffer powers are equal and opposite to within the fitting uncertainty (+0 .52 versus −0.55), so the ratio form is what the data support at the present statistical confidence rather than as an exact identity. It also furnishes a near parameter-free check: the target-scan exponent α ≃ 0.52 predicts a factor b−α in the buffer scan, and a direct fit there gives −0.55, consistent within uncertainty and with no adjustable parameters.  
+
+> IV. CROSSING AND FINITE-SIZE SCALING OF THE MATCHING RATIO
+
+We next focus on scaled geometry families, where the matching ratio can be analyzed as a transition-like ob-servable in its own right, connecting the subregion statis-tic to a growing recoverability scale near the decoding threshold. Once a and b are scaled together, the matching ra-tio develops a transition-like structure as a function of physical error rate. In the data analyzed here, one clean family is a = b = d/ 8, shown in Fig. 3. The curves cross near p0 ≈ 0.091, and a simple collapse works with an ef-fective exponent ν ∼ 1.63 for the plotted dataset. Panel (a) provides direct evidence for a crossing in the decoder observable itself, while panel (b) shows that the same dataset can be organized by a standard one-parameter finite-size scaling variable. First, once the local support is allowed to grow with system size, the quasi-local decoder develops a sharp transition at an error rate close to, but measurably below, the global decoding threshold. The crossing at p0 ≈ 0.091 lies below pMWPM  
+
+> c
+
+≈ 0.103 for the same noise model. At the present sizes we cannot cleanly separate the possible origins of this offset: residual finite-size drift of the cross-ing point, the fact that literal representative agreement is a stricter criterion than logical success, and the possi-bility that quasi-local agreement is genuinely lost before decodability itself. We therefore treat p0 as a crossover scale for the matching statistic, not as the logical thresh-old. Second, the analysis gives a concrete way to define the local scales inside the composite decoder. The re-gions A and B are extracted from the subregion data rather than chosen by hand. For this family, finite-size analysis is consistent with 
+
+Rmatch (p, d ) ≈ F 
+
+
+
+(p − p0)d1/ν 
+
+,p0 ≈ 0.091 , ν ≈ 1.63 .
+
+(7) Using a fixed broad-window fitting protocol for this fam-ily, we obtain p0 ≈ 0.091 and ν ≈ 1.63. We do not attach formal error bars to these values: the dominant uncer-tainty is not the statistical scatter of a single-window fit but the finite-size drift of the crossing point discussed above, which a fixed set of distances does not capture, and ν should accordingly be read as an effective collapse parameter rather than a precise exponent. The quality of 5                               
+
+> (a) (b)
+> (c)
+> FIG. 2. Numerical scaling of the local-global mismatch. (a) ln ϵmatch versus ln a. (b) ln ϵmatch for the constrained family a=b.(c) ln ϵmatch versus b.Panel (a) isolates target-size dependence, panel (b) probes the scaled family used later in the decoder construction, and panel (c) isolates buffer-size dependence. Taken together, the three panels motivate the two-geometry ansatz in Eq. (6) rather than a single-variable CMI-style scaling form controlled only by buffer width. All panels are at d= 64, with the complementary length held fixed at vertex scale 4 ( b= 4 in (a), a= 4 in (c)); error bars are 1 σstatistical. Black lines are fits to Eq. (6), i.e. ln ϵmatch = ln C+α(p) ln( a/b )−b/ξ (p), giving α≃0.52 and 0 .58 at p= 0 .06 and 0 .07.
+
+the collapse is sufficient for the decoder-design use made of it below, though not for a precision determination of the exponents. The crossing resides in the system-size dependence of the amplitude C(p, d ), which the fixed-distance fits of Sec. III do not determine. On a scaled family a = b the ratio prefactor is unity and Eq. (6) reduces to ϵmatch ≃
+
+C(p, d ) e−a/ξ (p); were C independent of d, the curves of the family would be strictly ordered in d at every p and could never cross. The crossing is thus direct evidence that C(p, d ) varies with system size. The reason this vari-ation is invisible in Fig. 2 is one of regime rather than of geometric ratio: those scans sit well below threshold, where ξ(p) is short compared with the system, the exte-rior of the patch lies many correlation lengths away, and the amplitude is effectively saturated. The scaled fam-ilies instead cross near p0, where ξ(p) has grown com-parable to d and the amplitude is no longer saturated. The crossing is therefore a finite-size effect controlled by 
+
+d/ξ (p), precisely the combination organized by the col-lapse variable in Eq. (7); resolving the form of C(p, d ), expected to be a scaling function of d/ξ (p), is left to fu-ture work. Empirically, the a = b = d/ 2 family in Fig. 8 crosses at slightly higher p than the a = b = d/ 4 family, consistent with larger local supports tracking the global decoder to higher error rates. The current fitted value ν ≈ 1.63 is somewhat larger than the ν ≈ 1.5 value commonly associated with the 6two-dimensional RBIM/Nishimori universality class for global decoding observables [2, 4, 26]. At the present system sizes, this difference should be read as a finite-size and observable-dependent effect rather than as evidence for a distinct universality class. A broader-size scaling study is needed for a definitive exponent estimate.  
+
+> V. ADAPTIVE BUFFER SELECTION
+
+The scaling analysis becomes practically useful once it is converted into an adaptive rule for choosing the buffer size. Given a target mismatch tolerance η, we define 
+
+bc(p, η ; ρ) = min b : ϵmatch (p; ρb, b ) ≤ η , (8) where ρ = a/b is fixed within a chosen scaled family. Here 
+
+η is a user-chosen tolerance parameter, distinct from the measured mismatch ϵmatch itself. This says how large the buffer should be at a given physical error rate if we want the local decoder to stay within a prescribed mismatch from the global one. Within the ansatz of Eq. (6), setting 
+
+a = ρb gives the closed form 
+
+bc(p, η ; ρ) ≃ ξ(p)
+
+
+
+ln C(p, d )
+
+η + α(p) ln ρ
+
+
+
+, (9) rounded up to the nearest integer buffer size. Because the ratio prefactor is independent of b at fixed ρ, this inversion is exact within the ansatz. In practice we eval-uate Eq. (8) directly on the measured mismatch data rather than through the fit; Eq. (9) makes explicit how the required buffer inherits the growth of ξ(p) near the transition. We do not extract ξ(p) itself in this work; the measured growth of bc(p, η ) with p plays that role operationally. Far below threshold, a small buffer suffices; as p ap-proaches the transition, the required buffer grows. The matching-ratio scaling thus determines not only that the decoder should be quasi-local, but how quasi-local it must be. Figure 4(a) shows the raw improvement of local-global agreement with increasing buffer size, while panel (b) repackages that information into the opera-tional quantity bc(p, η ; ρ) that provides a general initial-ization rule for the composite decoder.  
+
+> VI. COMPOSITE QUASI-LOCAL RG DECODER
+
+With the buffer rule in hand, we now use the local de-coder as a building block for a decoder on the whole torus. We refer to this construction as the composite quasi-local RG decoder (composite decoder below). The algorithm is simple in spirit, and one RG round is summarized in Fig. 5. 1. Tile the graph with quasi-local decoders, each de-fined by a target region A and a surrounding buffer 
+
+B.2. Decode each region and keep only the part of the correction acting inside A.3. Update the syndrome. If residual defects remain, enlarge the local regions and repeat. 4. Continue this RG-style procedure until no defects remain. To make the RG part explicit, let ar and br denote the target-region size and buffer width at RG step r.The initial choice ( a0, b 0) is taken from the matching-ratio analysis. In particular, one can choose b0 from the target mismatch tolerance through bc(p, η ; ρ) at fixed ρ =
+
+a/b , then set a0 = ρb 0. After each round we enlarge the regions, and the baseline implementation studied here uses a doubling rule, 
+
+ar+1 = 2 ar , br+1 = 2 br , (10) so that neighboring regions with residual defects are merged at the next scale. One subtlety is that a local patch may contain an odd number of defects, in which case local annihilation inside the patch is not possible. In our implementation this is handled by adding virtual boundary nodes on ∂(A ∪ B)in the local MWPM graph, so odd local parity can be absorbed at the boundary and the patch can still return a partial correction. These leftovers, together with residual defects created where correction paths are truncated at the target boundary, are then handled at the next RG step after the regions are enlarged; the RG stage is thus not optional bookkeeping but the part of the decoder that takes care of pairings invisible at the original local scale. The round-to-round update of A and B is not arbi-trary: it is taken from the matching-ratio analysis above, which is how the subregion study informs the whole-system decoder. The local decoder is used to remove the easy short-range part of the syndrome, and the RG enlargement is what promotes the leftover problem to a new local problem on a larger scale. This architecture is related in spirit to earlier RG de-coders [27–30] and, at the level of a single round, to the truncated-MWPM channel of Ref. [7], but the or-ganizing principle is different. In this work, each RG round is built from explicit local MWPM patch solves, and the patch geometry is selected from matching-ratio scaling rather than from a fixed coarse-graining prescrip-tion. The subregion statistic thus guides the decoder schedule: first remove short-range structure with tuned quasi-local patches, then promote only the residual syn-drome to larger scales. That data-driven patch-selection step is the key new ingredient relative to prior RG con-structions. One RG round consists of three steps: decode every active patch, keep only the correction inside its target region, and then recompute the residual syndrome. If the residual syndrome is empty, the algorithm stops. If not, the active regions are merged according to Eq. (10) 7                           
+
+> FIG. 3. Crossing and finite-size scaling of the matching ratio for the scaled family a=b=d/ 8. (a) Crossing behavior of
+> Rmatch (p) across code distances. (b) Corresponding finite-size collapse around p0. The crossing signals transition-like behavior of the local-global agreement once the local support is scaled with system size.
+> FIG. 4. Error-adaptive choice of the buffer size. (a) Rmatch versus bfor representative physical error rates p; the dashed line marks the agreement level Rmatch = 1 −η= 0 .98 corresponding to η= 0 .02. (b) Adaptive buffer size bc(p, η ) extracted from the same fixed-geometry data, shown for target mismatch tolerances η= 0 .01–0 .05; the required buffer grows as papproaches the transition and as the tolerance ηis tightened. This analysis motivates the distance-scaled initialization used for the composite decoder below.
+
+and the same procedure is repeated. The decoder thus in-terpolates between a strictly local one-step decoder and a global decoder: the first round is local, while later rounds bring in larger and larger scales only where they are needed. Figure 5(a) illustrates one round of patchwise decoding, the residual-defect patterns that are already resolved locally, and the leftover boundary-associated de-fects that force the merge to the next scale. There are also two natural ways to run the decoder. One is sequential, where patches are decoded one af-ter another and the syndrome is updated after each lo-cal step. The other is a two-step parallel version based on a checkerboard tiling: first decode all gray regions, then update the syndrome, then decode all black regions. Neighboring buffers can overlap, but only corrections in-side each target region A are committed at a given sub-step, which prevents double counting on shared bound-aries. A completely simultaneous update would other-wise over-apply corrections on adjacent regions, so the checkerboard schedule is the minimal way to keep the RG construction parallel without changing the correction rule itself. This gray/black scheduling is closely anal-ogous to the layered structure used in parallel-window decoding, where one first decodes a set of mutually non-8overlapping windows in parallel and then uses a second layer of windows to reconcile the regions between them [31]. In our setting the windows are spatial patches rather than spacetime windows, but the role of the two-coloring is the same. The checkerboard version is the one relevant for fast decoding. Even though the present implementation is still quasi-local, it already has the right architecture for a parallel decoder, since different patches can be pro-cessed simultaneously at each RG stage. The overall cost then depends on three ingredients: the initial quasi-local scale extracted from the matching-ratio ansatz, the cost of the inner patch solver, and the number of RG rounds required before the residual syndrome disappears. This is why the composite decoder should be viewed as an RG architecture rather than as just a local patch decoder run many times.  
+
+> VII. RESULTS FOR THE COMPOSITE DECODER
+
+Having constructed the composite decoder from the matching-ratio analysis, we now evaluate its whole-system logical-failure rate. Once the local scales are cho-sen from the matching-ratio analysis, the whole-system decoder shows threshold-like behavior [32]. In the tuned family, we initialize with a0 = b0 = d/ 8 and then apply the RG doubling schedule in Eq. (10) until the resid-ual syndrome is eliminated. This distance-scaled initial-ization is the family analyzed in Sec. IV; we adopt it uniformly across p rather than re-evaluating bc(p, η ; ρ)at each error rate, so the decoder demonstrated here is a fixed scaled-family instance of the general adaptive construction. A direct benchmark of the fully adaptive 
+
+bc(p, η ; ρ) prescription is left for future work. For this set-ting, the crossing window in Fig. 6(a) indicates a compos-ite crossing window pcomp  
+
+> ×
+
+≈ 0.09–0 .10, to be compared with pMWPM  
+
+> c
+
+≈ 0.103 for the same noise model. Matching-ratio scaling therefore does not remain a sub-region diagnostic only: it motivates how the local regions are initialized and updated in the composite decoder, and with that choice the whole-system decoder exhibits the threshold-like behavior shown here. At the present sizes we quote only a crossing window. A controlled extrac-tion of the composite threshold with quantified uncer-tainty would require denser sampling near the crossing and larger code distances, which we leave to future work. We further note that the d/ 8 family was identified and evaluated on the same dataset; selecting the family on a subset of sizes or error rates and evaluating on held-out ones is a natural predictive test that we also leave to future work.  
+
+> VIII. COMPLEXITY AND FAST-DECODING IMPLICATIONS
+
+We next examine what the composite construction does and does not imply for fast decoding, distinguish-ing the multiscale structure it motivates from stronger asymptotic claims that the present data do not yet es-tablish. In the present implementation, the local patch sizes that work best still grow with the code distance, so the decoder is not strictly local. We are not claiming a constant-depth or proven polylogarithmic-time decoder theorem here. Still, the structure of the algorithm points in that di-rection. Let ℓr denote the typical linear size of the local decoder used at RG step r, and let Tpatch (ℓr ) be the cost of decoding one such patch. In a checkerboard-parallel implementation, the parallel depth is controlled mainly by the number of RG steps and by the cost of the inner patch solver. Schematically, depth( d) ∼
+
+> rmax
+
+X
+
+> r=0
+
+Tpatch (ℓr ), rmax = O(log d). (11) For blossom-based MWPM on a patch graph with 
+
+npatch = O(ℓ2 
+
+> r
+
+) vertices, a conservative worst-case model is Tpatch (ℓr ) = O(n3patch ) = O(ℓ6 
+
+> r
+
+). In practice, modern sparse implementations can be much faster: the sparse-blossom algorithm in PyMatching v2 (the open-source MWPM package used widely in QEC) reports runtime that is approximately linear in detector-graph size over relevant benchmark regimes, while remaining an exact MWPM solver [33, 34]. If in a future implementation one can keep ℓr bounded, or at least polylogarithmic in d, then the same architec-ture would lead naturally to depth( d) = O(Tpatch (ℓmax ) log d) . (12) This is the sense in which the present decoder may be relevant for fast decoding: not because the present imple-mentation is already fast in a rigorous asymptotic sense, but because the outer RG structure and the checkerboard schedule are compatible with that goal. From an applications viewpoint, recent real-time local-decoding programs show that locality can be engineered for high throughput and low latency on dedicated hard-ware [19, 35–39]. Combined with an RG-style outer schedule, these ingredients make multiscale implemen-tations of the present architecture technically plausible. Recent studies have also developed local-recoverability and strictly local-decoding viewpoints relevant to this regime [7, 8, 10, 40, 41]. Here we use an operational matching statistic to set the quasi-local MWPM patch scaling, and then build the full-system composite decoder from that scaling rule. 9
+
+(a) 
+
+## RG round rAr 
+
+> 0
+
+## Ar
+
+> 1
+
+## Ar 
+
+> 2
+
+## Ar 
+
+> 3
+
+## merge RG round r+1 
+
+## Ar+1 0
+
+## Br+1 pair residual defects target region Ai 
+
+> syndrome defect buffer region Bi
+> defect-pairing path (error correction)
+
+(b) 
+
+FIG. 5. Composite quasi-local decoder architecture. (a) Adjacent local regions Ai with overlapping buffers Bi at RG round 
+
+r, and their merge to a larger region at RG round ( r+1). Local sectors with no residual defects or with two bulk defects are resolved within RG round r, while boundary-associated residual defects are paired after the merge step. Blue segments mark the defect-pairing paths used to annihilate syndrome defects and correct errors. (b) Two-step checkerboard schedule used to parallelize patch updates without double counting on neighboring regions. 
+
+FIG. 6. Logical-failure data for the composite quasi-local decoder. For each syndrome sample, the decoder runs local MWPM on active patches, commits only corrections inside each target region A, updates the residual syndrome, and, if residual defects remain, merges to the next RG round according to Eq. (10) and repeats. The dataset shown here uses the tuned initialization 
+
+a0 = b0 = d/ 8. Panel (a) shows the resulting logical-failure curves versus p, with an apparent crossing window pcomp  
+
+> ×
+
+≈ 0.09– 0.10. Panel (b) shows the finite-size collapse of the same data. 
+
+IX. DISCUSSION AND OUTLOOK 
+
+This work turns matching-ratio scaling into a concrete design rule for composite quasi-local RG decoding. The local-global mismatch ϵmatch follows a simple dependence on a and b that motivates how A and B are initialized and updated across RG rounds. Using this rule, the result-ing composite decoder exhibits threshold-like behavior on the full torus. In this framework, subregion analysis guides the decoder geometry and therefore the decod-10 ing architecture. The matching ratio serves as an oper-ational recoverability scale, consistent with recent local-recoverability analyses [7, 8, 10]. The present implementation is quasi-local and isolates an intermediate regime between fully global and strictly local decoding. A direct next step is to keep the same composite RG structure while replacing the MWPM patch solver with faster local kernels [19, 21, 35, 36]. The most immediate extension is to noisy syndrome measure-ments, where decoding becomes intrinsically spacetime and effectively (2 + 1)-dimensional for surface-code mem-ories. In that regime, the local regions are no longer only spatial patches; they become finite spacetime windows, and the matching-ratio diagnostic should be generalized to compare local and global decisions on spacetime world-lines. This extension is also closely related to spacetime-window schemes that parallelize decoding in time by di-viding the syndrome history into overlapping windows [42]. Recent information-theoretic and stat-mech analy-ses of repeated-syndrome dynamics support this direction and suggest concrete diagnostics for finite recoverability scales in the presence of measurement noise [8, 10, 18]. The same framework can be extended across code fam-ilies. The most direct step is the surface code with open boundaries [23], where edge and corner effects modify the local pairing structure relative to the torus. More broadly, the same local-global agreement statis-tics can set decoder window and region scales wher-ever matching-based decoding applies, including higher-dimensional homological constructions [2, 43], color codes decoded by projection to surface-code problems [44– 46], and bivariate-bicycle codes with matching-based de-coders [47–50]. A complementary longer-term direction is to promote the elementary objects of the decoder from physical patches to logical-gadget spacetime blocks, con-necting to recent correlated-decoding and transversal-logic analyses [51–54]. 
+
+> ACKNOWLEDGMENTS
+
+H.D. was supported in part by NSF grant OMA-2120757, and Simons Foundation. M.G. was supported by the NSF funded NQVL:QSTD: Design: QRAQL, and NSF grant PHY-2309135 to the Kavli Institute for Theoretical Physics (KITP). The authors acknowledge the University of Maryland supercomputing resources (https://hpcc.umd.edu) made available for conducting the research reported in this paper. 
+
+> Appendix A: Simulation methods and decoder algorithms
+
+For completeness, this appendix records the algorith-mic details that underlie the numerical implementation used in the main text: the patch-level update rule and the full composite RG decoder, in compact form. The simulations use toric-code syndrome snapshots under dephasing noise with perfect syndrome measure-ments. Let s ∈ Fm 
+
+> 2
+
+be the syndrome vector, c ∈ Fn
+
+> 2
+
+the accumulated Pauli-Z correction vector on edges, and 
+
+H the parity-check matrix for X stabilizers. Syndrome updates are performed as 
+
+s ← s ⊕ H∆c (A1) after each committed correction increment ∆ c.Patch geometry is defined by a target square A (linear size ar ) and buffer width br at RG round r. The initial (a0, b 0) is selected from the matching-ratio analysis in the main text; subsequent rounds follow Eq. (10). The parallel implementation uses a checkerboard schedule so that no two simultaneously updated target regions share a boundary. 
+
+Algorithm 1 PatchMWPM : local MWPM patch up-date                            
+
+> Require: Current syndrome s, target region A, buffer B,local graph on A∪B, deterministic MWPM tie-breaking
+> Ensure: Committed local correction increment ∆ cA(sup-ported on A)
+> 1: Restrict syndrome defects to A∪Band build the local matching graph.
+> 2: Add virtual boundary nodes on ∂(A∪B) so odd local defect parity is allowed.
+> 3: Run MWPM on the local graph to obtain ∆ cA∪B.
+> 4: Project to target support: ∆ cA←ΠA(∆ cA∪B).
+> 5: return ∆cA
+
+11 
+
+FIG. 7. Appendix control: checkerboard-parallel versus sequential composite-decoder updates for matched geometry ( d, a, b ) = (12 , 4, 4) and matched shot budget. The horizontal axis is the physical error rate p. The two update schedules track each other across the analysis window. 
+
+Algorithm 2 Composite quasi-local RG decoder 
+
+Require: Initial syndrome s0, maximum rounds rmax , initial geometry ( a0, b 0), mode ∈ { sequential, checkerboard }
+
+Ensure: Final correction c and residual syndrome s 
+
+> 1:
+
+c ← 0, s ← s0, r ← 0 
+
+> 2:
+
+Build initial active patch set P0 from ( a0, b 0) 
+
+> 3:
+
+while s̸ = 0 and r ≤ rmax do  
+
+> 4:
+
+if mode is checkerboard then  
+
+> 5:
+
+Build ordered groups Gr ← { gray patches in Pr , black patches in Pr } 
+
+> 6:
+
+else  
+
+> 7:
+
+Build ordered groups Gr ← {{ P } : P ∈ P r } (one patch per group, in update order)  
+
+> 8:
+
+end if  
+
+> 9:
+
+for all groups g ∈ G r in update order do  
+
+> 10:
+
+for all patches P ∈ g do  
+
+> 11:
+
+∆cA(P ) ← PatchMWPM (s, A (P ), B (P ))  
+
+> 12:
+
+end for  
+
+> 13:
+
+∆cg ← L 
+
+> P∈g
+
+∆cA(P ) 
+
+> 14:
+
+c ← c ⊕ ∆cg 
+
+> 15:
+
+s ← s ⊕ H∆cg 
+
+> 16:
+
+end for  
+
+> 17:
+
+if s = 0 then  
+
+> 18:
+
+return (c, s ) 
+
+> 19:
+
+end if  
+
+> 20:
+
+Enlarge/merge active regions via Eq. (10) to form Pr+1  
+
+> 21:
+
+r ← r + 1  
+
+> 22:
+
+end while  
+
+> 23:
+
+return (c, s ) ▷ r max safety cap reached; unresolved syndrome indicated by s̸ = 0 
+
+In practice we use deterministic solver settings so repeated runs on identical syndromes produce identi-cal patch-level outputs, which is necessary for stable matching-ratio statistics and reproducible checkerboard updates. In our simulations, rmax is used as a safety cap, not as a design ingredient of the decoder schedule; within the parameter ranges reported here, this cap was not saturated. We also include two supplementary controls with matched shot budgets. Figure 7 compares checkerboard-parallel and sequential update schedules at a single matched geometry, and Fig. 8 shows the same crossing trend at aspect ratios a = b = d/ 8 (on an independent set of code distances) and a = b = d/ 4 (a larger target-to-buffer scaling). 12 
+
+FIG. 8. Appendix control: additional distance-scaled matching-ratio families at aspect ratios a = b = d/ 8 (left) and a = b = d/ 4(right), quoted in the same vertex-lattice units used throughout. The horizontal axis is the physical error rate p. The left panel reproduces the main-text a = b = d/ 8 family on an independent set of code distances, and the right panel exhibits the same qualitative crossing for the larger a = b = d/ 4 family. 13 
+
+[1] A. Y. Kitaev, Annals of Physics 303 , 2 (2003). [2] E. Dennis, A. Kitaev, A. Landahl, and J. Preskill, Jour-nal of Mathematical Physics 43 , 4452 (2002). [3] C. Wang, J. Harrington, and J. Preskill, Annals of Physics 303 , 31 (2003). [4] F. Merz and J. Chalker, Physical Review B 65 , 054425 (2002). [5] J. W. Harrington, Analysis of quantum error-correcting codes: symplectic lattice codes and toric codes (California Institute of Technology, 2004). [6] I. Cong, N. Maskara, M. C. Tran, H. Pichler, G. Se-meghini, S. F. Yelin, S. Choi, and M. D. Lukin, Nature Communications 15 , 1527 (2024). [7] S. Sang, Y. Zou, and T. H. Hsieh, Physical Review X 14 ,031044 (2024). [8] S. Sang and T. H. Hsieh, Physical Review Letters 134 ,070403 (2025). [9] A. deMarti iOlius, P. Fuentes, R. Or´ us, P. M. Crespo, and J. E. Martinez, Quantum 8, 1498 (2024). [10] S. Sang, L. A. Lessa, R. S. K. Mong, T. Grover, C. Wang, and T. H. Hsieh, arXiv preprint 10.48550/arXiv.2507.02292 (2025), arXiv:2507.02292. [11] L. A. Lessa, S. Sang, T.-C. Lu, T. H. Hsieh, and C. Wang, arXiv preprint 10.48550/arXiv.2503.12792 (2025), arXiv:2503.12792. [12] R. Ma, V. Khemani, and S. Sang, arXiv preprint 10.48550/arXiv.2509.15204 (2025), arXiv:2509.15204. [13] D. Petz, Communications in Mathematical Physics 105 ,123 (1986). [14] H. Barnum and E. Knill, Journal of Mathematical Physics 43 , 2097 (2002). [15] O. Fawzi and R. Renner, Communications in Mathemat-ical Physics 340 , 575 (2015). [16] M. Junge, R. Renner, D. Sutter, M. M. Wilde, and A. Winter, Annales Henri Poincare 19 , 2955 (2018). [17] S. Beigi, N. Datta, and F. Leditzky, Journal of Mathe-matical Physics 57 , 082203 (2016). [18] J. Hauser, Y. Bao, S. Sang, A. Lavasani, U. Agrawal, and M. P. A. Fisher, Physical Review B 113 , 054303 (2026). [19] L. Caune, L. Skoric, N. S. Blunt, A. Ruban, J. McDaniel, J. A. Valery, A. D. Patterson, A. V. Gramolin, J. Ma-janiemi, K. M. Barnes, T. Bialas, O. Bugdayci, O. Craw-ford, G. P. Geher, H. Krovi, E. Matekole, C. Topal, S. Po-letto, M. Bryant, K. Snyder, N. I. Gillespie, G. Jones, K. Johar, E. T. Campbell, and A. D. Hill, arXiv preprint 10.48550/arXiv.2410.05202 (2024), arXiv:2410.05202. [20] N. Delfosse and N. H. Nickerson, Quantum 5, 595 (2021). [21] T. Chan and S. C. Benjamin, Quantum 7, 1183 (2023). [22] S. Wolanski and B. Barber, arXiv preprint 10.48550/arXiv.2406.14527 (2025), arXiv:2406.14527. [23] S. Bravyi and A. Kitaev, arXiv preprint 10.48550/arXiv.quant-ph/9811052 (1998), arXiv:quant-ph/9811052 [quant-ph]. [24] P. Iyer and D. Poulin, IEEE Transactions on Information Theory 61 , 5209 (2015). [25] M.-H. Hsieh and F. Le Gall, Physical Review A 83 ,052331 (2011). [26] A. Honecker, M. Picco, and P. Pujol, Physical review letters 87 , 047201 (2001). [27] G. Duclos-Cianci and D. Poulin, Physical review letters 
+
+104 , 050504 (2010). [28] S. Bravyi and J. Haah, Physical review letters 111 ,200501 (2013). [29] G. Duclos-Cianci and D. Poulin, arXiv preprint 10.48550/arXiv.1304.6100 (2013), arXiv:1304.6100. [30] K. Duivenvoorden, N. P. Breuckmann, and B. M. Ter-hal, IEEE Transactions on Information Theory 65 , 2545 (2018). [31] L. Skoric, D. E. Browne, K. M. Barnes, N. I. Gillespie, and E. T. Campbell, Nature Communications 14 , 7040 (2023). [32] F. H. Watson and S. D. Barrett, New Journal of Physics 
+
+16 , 093045 (2014). [33] O. Higgott and C. Gidney, Quantum 9, 1600 (2025). [34] O. Higgott and C. Gidney, Pymatching v2, GitHub repos-itory (2022). [35] B. Barber, K. M. Barnes, T. Bialas, O. Bugdayci, E. T. Campbell, N. I. Gillespie, K. Johar, R. Rajan, A. W. Richardson, L. Skoric, C. Topal, M. L. Turner, and A. B. Ziad, Nature Electronics 8, 84 (2025). [36] A. B. Ziad, A. Zalawadiya, C. Topal, J. Camps, G. P. Geh´ er, M. P. Stafford, and M. L. Turner, Nature Com-munications 16 , 11048 (2025). [37] F. Battistel, C. Chamberland, K. Johar, R. W. Overwa-ter, F. Sebastiano, L. Skoric, Y. Ueno, and M. Usman, Nano Futures 7, 032003 (2023). [38] H. Bomb´ ın, C. Dawson, Y.-H. Liu, N. Nicker-son, F. Pastawski, and S. Roberts, arXiv preprint 10.48550/arXiv.2303.04846 (2023), arXiv:2303.04846. [39] T. Chan, arXiv preprint 10.48550/arXiv.2406.01701 (2024), arXiv:2406.01701. [40] E. Lake, arXiv preprint 10.48550/arXiv.2506.03266 (2025), arXiv:2506.03266. [41] E. Lake, arXiv preprint 10.48550/arXiv.2510.08056 (2025), arXiv:2510.08056. [42] X. Tan, F. Zhang, R. Chao, Y. Shi, and J. Chen, PRX Quantum 4, 040344 (2023). [43] H. Bomb´ ın and M. A. Martin-Delgado, Journal of Math-ematical Physics 48 , 052105 (2007). [44] H. Bomb´ ın and M. A. Martin-Delgado, Physical Review Letters 97 , 180501 (2006). [45] N. Delfosse, Physical Review A 89 , 012317 (2014). [46] A. Kubica, B. Yoshida, and F. Pastawski, New Journal of Physics 17 , 083026 (2015). [47] D. J. C. MacKay, G. Mitchison, and P. L. McFad-den, IEEE Transactions on Information Theory 50 , 2315 (2004). [48] S. Bravyi, A. W. Cross, J. M. Gambetta, et al. , Nature 
+
+627 , 778 (2024). [49] K. Sahay, D. J. Williamson, and B. J. Brown, arXiv preprint 10.48550/arXiv.2602.22770 (2026), arXiv:2602.22770. [50] S.-J. S. Tan, I. Gill, E. Huang, P. Liu, C. Zhao, H. De-hghani, A. Kubica, H. Zhou, and A. Dua, arXiv preprint 10.48550/arXiv.2603.05402 (2026), arXiv:2603.05402. [51] M. Cain, C. Zhao, H. Zhou, N. Meister, J. P. Bonilla Ataides, A. Jaffe, D. Bluvstein, and M. D. Lukin, arXiv preprint 10.48550/arXiv.2403.03272 (2024), arXiv:2403.03272. [52] H. Zhou, C. Zhao, M. Cain, D. Bluvstein, N. Maskara, C. Duckering, H.-Y. Hu, S.-T. Wang, A. Kubica, and M. D. Lukin, Nature 646 , 303 (2025). 14 
+
+[53] M. Cain, D. Bluvstein, C. Zhao, S. Gu, N. Maskara, M. Kalinowski, A. A. Geim, A. Kubica, M. D. Lukin, and H. Zhou, arXiv preprint 10.48550/arXiv.2505.13587 (2025), arXiv:2505.13587. [54] Y. Xu, Y. Zhou, J. P. Sethna, and E.-A. Kim, arXiv preprint 10.48550/arXiv.2510.10835 (2026), arXiv:2510.10835.

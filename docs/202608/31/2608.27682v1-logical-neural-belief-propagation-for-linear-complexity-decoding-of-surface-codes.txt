@@ -1,0 +1,918 @@
+Title: Logical Neural Belief Propagation for Linear-Complexity Decoding of Surface Codes
+
+URL Source: https://arxiv.org/pdf/2608.27682v1
+
+Published Time: Mon, 31 Aug 2026 00:18:18 GMT
+
+Number of Pages: 12
+
+Markdown Content:
+## Logical Neural Belief Propagation for Linear-Complexity Decoding of Surface Codes 
+
+Hee-Youl Kwak 1, Seong-Joon Park 2, Dae-Young Yun 1,∗, Eliya Nachmani 3, and Jae-Won Kim 4,∗
+
+> 1
+
+Department of Electrical, Electronic and Computer Engineering, University of Ulsan, Ulsan 44610, South Korea 
+
+> 2
+
+Department of Electrical Engineering, Pohang University of Science and Technology (POSTECH), Pohang, Gyeongbuk 37673, South Korea 
+
+> 3
+
+School of Electrical and Computer Engineering, Ben-Gurion University of the Negev, Israel 
+
+> 4
+
+Department of Electronic Engineering, Gyeongsang National University, Jinju 52828, South Korea 
+
+(Dated: August 31, 2026) Quantum error correction (QEC) requires decoders that achieve high logical accuracy while scal-ing efficiently with the code length. Belief propagation (BP) is attractive for its linear decoding complexity, but conventional BP decoders often fail to reach sufficient logical accuracy on surface codes. We propose Logical Neural Belief Propagation (L-NBP), a BP-based neural decoder that redirects the decoding objective from physical-level decoding to logical-level decoding. L-NBP first runs a neural BP (NBP) module that produces posterior beliefs, and a logical classifier then trans-forms these beliefs into a continuous-valued soft syndrome and predicts the logical operator. Because all components in L-NBP are trainable by backpropagation, L-NBP is trained end-to-end, so that the NBP module learns to extract soft syndromes that are favorable for logical classification. On surface codes, L-NBP matches or outperforms the BP with ordered-statistics decoding (BP-OSD) and minimum-weight perfect matching (MWPM) while retaining the linear complexity of BP, and achieves a threshold of 17 .5% under depolarizing noise. Moreover, under circuit-level noise, L-NBP matches the accuracy of BP-OSD on the distance-9 surface code while requiring only 0 .2% of its complexity. These results show that combining BP, neural weights, and logical-level decoding enables scalable and high-accuracy quantum decoding. 
+
+I. INTRODUCTION 
+
+Quantum computing promises significant advantages for solving certain classically intractable problems [1–5]. To realize this potential at scale, quantum error correc-tion (QEC) is indispensable for protecting quantum in-formation from noise [6–9]. Among existing QEC codes, surface codes are a leading candidate owing to their high error threshold and local connectivity [10–12]. Surface codes can exhibit a threshold behavior: once the physical error rate falls below a threshold value, the logical error rate (LER) decreases as the code distance d grows. QEC decoders must achieve a low LER while oper-ating within the coherence time of the quantum system, demanding extremely low computational complexity [13– 15]. Minimum-weight perfect matching (MWPM) [11, 12, 16] is a standard decoder for surface codes, but it has worst-case superlinear complexity. Belief propaga-tion (BP) [17–19] is attractive from a scalability view-point because its message-passing complexity scales lin-early with the code length. However, BP alone is not sufficiently accurate for surface codes because of short cycles and quantum degeneracy [19, 20]. Neural belief propagation (NBP) improves BP by introducing train-able weights that break the symmetry of messages [21]. Nevertheless, the accuracy of standalone BP and NBP     
+
+> ∗Corresponding authors: yundy@ulsan.ac.kr and jae-won07.kim@gnu.ac.kr
+
+remains limited, and neither exhibits clear threshold be-havior. In this work, we propose logical NBP (L-NBP), a BP-based neural decoder that redirects the decoding objec-tive from physical-level decoding to logical-level decod-ing. Rather than identifying a physical error pattern, L-NBP couples NBP with a logical classifier that predicts the logical operator induced by the physical error. The decoder first processes the measured hard syndrome with an NBP stage to produce posterior beliefs. A logical clas-sifier then converts these beliefs into a continuous-valued 
+
+soft syndrome and maps it to the logical operator by a lightweight neural network. Because all operations in L-NBP are trainable, the decoder is trained end-to-end (E2E) with a logical-level classification loss [22]. The key point is that NBP is trained not to recover the underlying physical error, but to extract a soft syndrome that is use-ful for inferring the correct logical operator. As a result, unlike decoders built on high-capacity architectures such as transformers [23–25], L-NBP achieves a low LER even with a logical classifier implemented as a simple multi-layer perceptron (MLP). At the same time, since both the NBP stage and the logical classifier have linear com-plexity, L-NBP is a linear-complexity decoder. We evaluate L-NBP under the code-capacity noise model with depolarizing noise. Numerical results show that, merely by changing the decoding objective from physical to logical, L-NBP significantly outperforms NBP. Moreover, despite preserving the linear-complexity scaling, L-NBP matches or outperforms superlinear-complexity decoders such as MWPM [11, 12, 16] and BP with ordered-statistics decoding (BP-OSD) [26, 27]. Under the code-capacity model, L-NBP attains a thresh-old of 17 .5%, exceeding those of MWPM (14 .5%) and arXiv:2608.27682v1 [quant-ph] 27 Aug 2026 2BP-OSD (16 .5%) and other high-complexity decoders such as quantum error correction code transformer (QECCT) [23] and BP with additional memory effects (AMBP) [28]. We further evaluate L-NBP under the phenomeno-logical and circuit-level noise models [11, 29], in which the syndrome is measured over multiple rounds. Under circuit-level noise, BP-OSD operates on the detector er-ror model (DEM), whose graph contains a large number of fault nodes spread across the measurement rounds, so its complexity grows rapidly. L-NBP avoids this cost: since its NBP module only needs to produce a soft syn-drome, it operates on a compact extended stabilizer ma-trix whose column count remains the code length n per-round. Moreover, because the soft syndrome is a com-pressed quantity that is independent of the number of rounds, the logical classifier retains exactly the same structure as in the single-round case. Consequently, L-NBP preserves its linear O(n) complexity per round even at the circuit level, irrespective of the number of faults. At d = 9, L-NBP achieves accuracy comparable to both BP-OSD and Relay-BP [30] while requiring only about 0.2% and 0 .06% of their respective complexities.  
+
+> A. Related Work
+
+To improve the performance of BP decoding, existing approaches add a post-processing stage. BP-OSD [26, 27, 31] uses BP beliefs as reliability information for OSD post-processing, while belief-matching [32] converts them into MWPM edge weights. Another line of work com-bines neural networks with classical decoders: neural pre-decoders preprocess the measured syndrome or generate a residual hard syndrome before MWPM (or union-find) is applied [33–35]. L-NBP differs from all of these: its post-processing stage is itself a simple neural network, and because every stage is trainable, the NBP module and the logical classifier are trained jointly so that they reinforce each other. Another line of work boosts BP decoding by coupling multiple diverse BP decoders in an ensemble-like manner, as in AMBP [28] and Relay-BP [30]. In the worst case, however, these methods consume a very large number of BP iterations—51 stages of 150 iterations for AMBP and 300 additional stages of 60 iterations for Relay-BP. By contrast, L-NBP fixes the BP budget to just 60 itera-tions and appends only a lightweight MLP with a single hidden layer, which is advantageous in terms of worst-case latency. Fully neural decoders have also been studied for surface codes, including feed-forward [22, 36], convolutional [37], and transformer-based [23–25] models, which directly learn a mapping from the measured syndrome to physi-cal errors or logical operators. Simple feed-forward net-works are attractive from an implementation viewpoint but offer limited accuracy [22, 36], whereas high-capacity architectures such as CNNs and transformers achieve X       
+
+> (a) (b)
+> FIG. 1. (a) A d= 3 surface-code lattice with data and ancilla qubits and stabilizers. (b) QEC workflow: a physical error E
+> induces the syndrome s, and L-NBP uses sto infer a recovery operation.
+
+stronger performance at the cost of scalability and train-ing effort [24, 25, 37]. In contrast, L-NBP uses a linear-complexity iterative decoder as its main computational module and needs only a lightweight logical classifier. It therefore retains the low-complexity advantage of BP while achieving logical accuracy competitive with far more expensive decoders.  
+
+> B. Organization of the Paper
+
+The rest of this paper is organized as follows. Section II reviews the necessary background. Section III presents the proposed L-NBP decoder: the logical classifier, the E2E training objective, and the extension to the multi-round measurement models. Section IV evaluates L-NBP in terms of both LER and complexity, and Section V concludes the paper.   
+
+> II. PRELIMINARIES A. Quantum Stabilizer Codes
+
+An [[ n, k, d ]] quantum stabilizer code encodes k logical qubits into n entangled physical qubits to protect against errors [8, 9]. The stabilizer group S is an abelian subgroup of the n-qubit Pauli group P⊗n with P = {I, X, Y, Z },generated by m = n − k independent, mutually commut-ing generators {Si}mi=1 . They are represented in a stabi-lizer matrix S ∈ { I, X, Y, Z }m×n. The codespace C is the common +1 eigenspace of all stabilizers, 
+
+C = |ψ⟩ | S |ψ⟩ = + |ψ⟩ , ∀S ∈ S , (1) forming a 2k-dimensional subspace of the full 2n-dimensional Hilbert space. The logical Pauli group is given by L = N (S)/S, where N (S) denotes the set of Pauli operators that commute with all elements of S. The 3code distance d is the minimum weight of any nontrivial logical operator, i.e., any operator in N (S) \ S .Rotated surface codes, parameterized as [[ d2, 1, d ]], are among the most prominent stabilizer codes because they require only local connectivity between physical qubits [12]. As illustrated in Fig. 1(a) for distance d = 3, n = d2
+
+physical (data) qubits are arranged on a two-dimensional lattice to encode a single logical qubit ( k = 1), with 
+
+m = n − 1 stabilizers split equally into Z-type (de-tecting X errors) and X-type (detecting Z errors). The logical operators of the surface code are represented by chains of Pauli operators connecting opposite boundaries of the lattice. A representative of ¯X is a vertical chain of d consecutive X operators, while a representative of ¯Z
+
+is a horizontal chain of d consecutive Z operators, with ¯Y = i ¯X ¯Z. Together with the trivial logical operator ¯I,they form the logical group L = { ¯I, ¯X, ¯Z, ¯Y }.A physical error E ∈ P ⊗n acting on the data qubits transforms the logical state to E |ψ⟩ and is detected via the symplectic inner product ⟨E, S i⟩, which equals 0 if E
+
+and Si commute and 1 if they anticommute. We collect these outcomes into the binary measured syndrome 
+
+s = S ⊙ E =  ⟨E, S 1⟩, . . . , ⟨E, S m⟩ ∈ { 0, 1}m, (2) where S ⊙ E denotes the syndrome map that evaluates the symplectic product of each stabilizer generator with 
+
+E. A stabilizer with syndrome bit si = 1 is said to be acti-vated by the physical error, and inactive otherwise. Each 
+
+si is obtained by measuring a dedicated ancilla qubit at the end of a syndrome-extraction circuit. For example, in Fig. 1(a), an X error on the top-left data qubit ac-tivates its adjacent Z-stabilizer, yielding si = 1 on the corresponding ancilla qubit.  
+
+> B. Quantum BP and NBP Decoders
+
+In the code-capacity model, where stabilizer measure-ments are error-free, the decoder produces an estimate ˆE
+
+from the measured syndrome s of size m. Quantum BP decoding estimates physical errors by iteratively passing log-likelihood ratio (LLR) messages over a Tanner graph, which consists of n variable nodes (VNs) corresponding to physical qubits and m check nodes (CNs) correspond-ing to stabilizers. Each CN ci is initialized with the cor-responding measured syndrome bit si, and the decoder exchanges messages between CNs and VNs over a maxi-mum of ℓ iterations in order to infer whether an error has occurred on each qubit. At every iteration ℓ ∈ { 1, . . . , ℓ },the decoder produces a posterior LLR Λ (ℓ) 
+
+> j,e
+
+for each VN vj
+
+and error type e ∈ { X, Y, Z }, which quantifies the belief that Ej = I relative to Ej = e. The complete message update rules are deferred to Appendix A. The estimated error ˆEj for VN vj is read from the posterior LLRs, ˆEj =
+
+
+
+I if Λ (ℓ) 
+
+> j,e
+
+> 0 for all e, 
+
+arg min 
+
+> e
+
+Λ(ℓ) 
+
+> j,e
+
+otherwise , (3) and the decoded syndrome ˆ s = S ⊙ ˆE is computed from ˆE. The decoding outcome falls into one of three cases: 1. If ˆ s̸ = s, a flagged failure is declared. 2. If ˆ s = s but E ˆE ∈ L , an unflagged failure is de-clared and the logical state is changed. 3. If ˆ s = s and E ˆE ∈ S , decoding succeeds and the logical state is preserved. The LER is then the sum of the flagged and unflagged failure probabilities. While unflagged failures are un-detectable, flagged failures can be handled by post-processing. In particular, the posterior LLRs Λ (ℓ) 
+
+> j,e
+
+can be forwarded to a post-processing stage. NBP retains this message-passing structure but re-places the plain sums in the VN and posterior updates with weighted sums, whose trainable weights are col-lected in a parameter set θN defined in (A6). In clas-sical BP, all of these weights are fixed to one, whereas weighted BP applies a single fixed scaling factor to the CN messages. NBP with parameters θN generates ˆE and is trained to estimate the physical error pattern E using the loss function 
+
+LNBP (θN) = Pr 
+
+h ˆE E / ∈ S 
+
+i
+
+, (4) which coincides with the LER; a differentiable surro-gate [21, 38] is used in practice for training.  
+
+> C. Logical-Level Decoding
+
+The BP decoder above is a physical-level decoder that estimates the error on each individual physical qubit. For QEC, however, the exact physical error is not the final object of interest. Decoding can therefore be formulated as logical-level decoding [22, 37]. For a stabilizer code, any physical error can be decomposed as 
+
+E = T (s) L S, (5) where T (s) ∈ P ⊗n is a pure error, L ∈ L is a logical oper-ator, and S ∈ S is a stabilizer element. The pure error is a low-weight Pauli operator that reproduces the measured syndrome s and is constructed from precomputed elemen-tary pure errors associated with the syndrome bits. Ap-plying the recovery T (s) maps the corrupted state E |ψ⟩
+
+back into the codespace, 
+
+T (s) E |ψ⟩ = L S |ψ⟩ = L |ψ⟩ . (6) Thus, the remaining decoding task is to estimate the log-ical operator L.For the surface code with one logical qubit, the logical operators are { ¯I, ¯X, ¯Z, ¯Y }. A logical-level decoder pro-duces an estimated logical operator ˆL and applies the re-covery ˆE = ˆLT (s). If ˆL = L, then ˆEE |ψ⟩ = S |ψ⟩ = |ψ⟩4다
+
+> 다
+
+FIG. 2. The proposed L-NBP decoder consists of two stages. The NBP module processes the measured hard syndrome s and produces posterior beliefs Λ (ℓ)
+
+> j,e
+
+; the logical classifier then converts these beliefs into a soft syndrome ˜ s and maps it to the logical operator. All stages of L-NBP are trained end-to-end for accurate logical classification. 
+
+and decoding succeeds; otherwise, the residual logical op-erator ˆLL ̸ = ¯I corrupts the logical state and results in a logical failure. Although both physical- and logical-level decoders ulti-mately output a recovery ˆE, they differ in what they esti-mate: a physical-level decoder infers ˆE directly, whereas a logical-level decoder only estimates the logical operator ˆL
+
+and obtains the recovery deterministically as ˆE = ˆL T (s), since the pure error T (s) is fixed by the measured syn-drome. The main task therefore reduces to a four-way classification over { ¯I, ¯X, ¯Z, ¯Y }.
+
+III. LOGICAL NEURAL BELIEF PROPAGATION 
+
+The overall error-correction process for the proposed L-NBP decoder is illustrated in Fig. 1(b), with its de-tailed architecture shown in Fig. 2. L-NBP first runs the NBP module on the measured syndrome s and appends a logical classifier that converts the resulting posterior LLRs into a soft syndrome and maps it to the logical operator ˆL, from which the final recovery ˆE = ˆL T (s) is obtained. 
+
+A. Logical Classifier 
+
+For NBP, the decoded syndrome ˆ s = S ⊙ ˆE is obtained from the estimated error ˆE. Each bit ˆ si is hard-valued, equal to 0 if CN i is inactive and 1 if it is active. The NBP module, however, provides soft information about the estimated error, so we can replace the hard decoded syndrome with a soft syndrome whose value reflects the reliability that each CN is activated. From the posterior LLRs Λ (ℓ) 
+
+> j,e
+
+in (A7) produced by the NBP module, we com-pute an edge-wise posterior LLR Λ (ℓ) 
+
+> j→i
+
+that represents the belief that the estimated error on qubit j commutes or anticommutes with stabilizer Si. Applying the same derivation as in (A2), for a Z-type stabilizer, Λ(ℓ) 
+
+> j→i
+
+= ζ(−Λ(ℓ) 
+
+> j,Z
+
+) + Λ (ℓ) 
+
+> j,X
+
+− ζ(Λ (ℓ) 
+
+> j,X
+
+− Λ(ℓ) 
+
+> j,Y
+
+), (7) and for an X-type stabilizer, Λ(ℓ) 
+
+> j→i
+
+= ζ(−Λ(ℓ) 
+
+> j,X
+
+) + Λ (ℓ) 
+
+> j,Z
+
+− ζ(Λ (ℓ) 
+
+> j,Z
+
+− Λ(ℓ) 
+
+> j,Y
+
+), (8) where ζ(x) = ln(1 + ex) is the softplus function. These edge-wise posterior LLRs are aggregated at each CN via the min-sum rule, yielding the soft syndrome at CN i and iteration ℓ:
+
+s(ℓ) 
+
+> i
+
+=
+
+ Y
+
+> j∈N c(i)
+
+sgn(Λ (ℓ)
+
+> j→i
+
+)
+
+ min  
+
+> j∈N c(i)
+
+Λ(ℓ) 
+
+> j→i
+
+. (9) To extract richer soft information from the NBP mod-ule, the soft syndromes across iterations are combined through a learnable weighted sum, 
+
+si =
+
+> K
+
+X
+
+> k=1
+
+γ(k) s(k∆)  
+
+> i
+
+, K = ℓ/ ∆, (10) where ∆ is the iteration sampling interval, K = ℓ/ ∆ is the number of aggregated soft syndromes, and {γ(k)}Kk=1 
+
+are trainable weights summing to one. Finally, si is nor-malized by a learnable temperature τ and passed through a tanh nonlinearity: ˜si = tanh 
+
+ (−1) si si
+
+τ
+
+
+
+. (11) The factor ( −1) si incorporates the measured syndrome bit si, so that ˜ si is a residual soft syndrome that com-bines the NBP belief with the measured syndrome. The resulting soft syndrome ˜ si takes values in [ −1, 1], while its magnitude reflects the confidence of the soft decision. 5
+
+Algorithm 1: L-NBP decoding 
+
+Input: Measured hard syndrome s
+
+/* Stage 1: NBP message passing */ 
+
+Initialize μ(0)  
+
+> j→i,e
+
+= Λ (0)  
+
+> j,e
+
+from the initial prior LLR; 
+
+for ℓ = 1 to ℓ do 
+
+Belief quantization: compute λ(ℓ−1)  
+
+> j→i
+
+via (A2); CN update: compute ν(ℓ) 
+
+> i→j
+
+via (A3); VN update: compute μ(ℓ) 
+
+> j→i,e
+
+via (A4)–(A5); Decision: compute posterior LLR Λ (ℓ) 
+
+> j,e
+
+via (A7); 
+
+/* Stage 2: Logical classification */ 
+
+for k = 1 to K (K = ℓ/ ∆) do 
+
+Set ℓ = k∆; Compute Λ (ℓ) 
+
+> j→i
+
+via (7)–(8); Compute s(ℓ) 
+
+> i
+
+=  Q  
+
+> j
+
+sgn(Λ (ℓ)
+
+> j→i
+
+) min j |Λ(ℓ)
+
+> j→i
+
+|;Aggregate: si = PKk=1 γ(k)s(k∆)  
+
+> i
+
+;Normalize: ˜ si = tanh  (−1) si si/τ ;MLP: h = tanh( Wh˜s + bh), z = Woh + bo;
+
+Output: Predicted logical operator ˆL = arg max c zc
+
+Next, the MLP takes the soft syndrome ˜ s ∈ [−1, 1] m
+
+as input and produces a four-dimensional logit vector z,one entry per logical operator { ¯I, ¯X, ¯Z, ¯Y }. It is realized with a single hidden layer, 
+
+h = tanh( Wh ˜s + bh), (12) 
+
+z = Wo h + bo ∈ R4, (13) where Wh ∈ Rh×m, bh ∈ Rh, Wo ∈ R4×h, bo ∈ R4, and h
+
+is the hidden dimension. The predicted logical operator is ˆL = arg max c zc, and the final recovery operator is ˆE = ˆL T (s). As in Section II C, decoding succeeds if ˆL
+
+matches the true logical operator and fails otherwise. 
+
+B. L-NBP Decoding 
+
+Let f C 
+
+> θC
+
+denote the logical classifier just described, which maps the posterior LLRs Λ (ℓ) 
+
+> j,e
+
+to the logit vector z,with trainable parameters θC = {γ(k), τ, W h, bh, W o, bo}.Combining the NBP and classifier stages, the complete L-NBP decoder is the composition 
+
+f LΘ = f C 
+
+> θC
+
+◦ f N 
+
+> θN
+
+, Θ = {θN, θ C}, (14) which maps a measured hard syndrome s to a logit vector 
+
+f LΘ(s) ∈ R4 and predicts ˆL = arg max c [f LΘ(s)] c. The two stages act in sequence, as summarized in Algorithm 1: the NBP module f N 
+
+> θN
+
+runs trainable message passing on 
+
+s and produces the posterior LLRs Λ (ℓ)
+
+> j,e
+
+, which the logical classifier f C 
+
+> θC
+
+then converts into the soft syndrome ˜ s and maps to the output logit vector. All components of L-NBP are piecewise differentiable, so the decoder is trainable end-to-end and is optimized 0 20 40 60 80 100 
+
+Epoch 
+
+> 10 −3
+> 10 −2
+> 10 −1
+> 10 0
+> Logical Error Rate
+> BP BP-OSD NBP L-NBP
+
+FIG. 3. LER versus training epochs for the d = 9 surface code under the code-capacity model. Both NBP and L-NBP improve on BP, but only L-NBP converges to a substantially lower LER and surpasses the BP-OSD baseline. 
+
+with the logical-level cross-entropy loss 
+
+LL-NBP (Θ) = CE  f LΘ(s), L  , (15) where L is the true logical operator. Gradients are back-propagated through the logical classifier into the NBP module. Notably, we do not additionally train the NBP module with a physical-level loss such as (4), which tar-gets the NBP module’s own LER. Such a loss would bias the NBP module toward its own physical-level decoding, whereas L-NBP requires the NBP beliefs to be useful for the final logical-level classification. The training hyper-parameters, including the hidden dimension h = 256 and the number of BP iterations ℓ = 60, are summarized in Appendix B. Fig. 3 shows the LER at the physical error rate p =0.05 over training epochs for the d = 9 surface code under the code-capacity model. NBP improves on BP but satu-rates at a limited LER. By adopting the logical-decoding objective, L-NBP achieves a much larger improvement and surpasses the BP-OSD baseline. 
+
+C. Qualitative Analysis via t-SNE Visualization 
+
+To understand why the soft syndrome is effective and why a simple logical classifier suffices, we use t-SNE [39] to visualize how the soft syndrome ˜ s produced by the NBP stage evolves during training. Fig. 4 shows 1000 samples collected for the surface code at d = 9 and 
+
+p = 0.05, each colored by its logical operator. Early in training after 100 batches (Fig. 4(a)), the four logi-cal operators are heavily overlapped and largely indistin-guishable. As training progresses, they begin to pull apart and form compact, clearly separated clusters as shown in Fig. 4(d) by the end of training. In other words, the E2E objective drives the NBP stage to learn a soft-syndrome 6              
+
+> (a) (b) (c) (d)
+> FIG. 4. t-SNE visualization of the L-NBP soft syndrome ˜ sat successive training stages, after (a) 100, (b) 500, and (c) 1000 training batches, and (d) at the end of training (surface code d= 9, p= 0 .05). Each color represents one of the four logical operators {¯I, ¯X, ¯Z, ¯Y}. As training proceeds, the soft syndrome separates into increasingly compact and well-separated clusters by logical operator.
+
+representation in which the lightweight classifier can eas-ily separate the logical operators.  
+
+> D. Extension to Multi-Round Measurement Models
+
+So far, we have assumed the code-capacity noise model, in which stabilizer measurements are perfect and the measured syndrome is noiseless. We now consider the multi-round measurement models, namely the phe-nomenological [11, 40, 41] and circuit-level [12, 29, 32] noise models, in which stabilizer measurements are re-peated over multiple rounds and the measured syndrome itself can be faulty. The phenomenological noise model performs R rounds of syndrome extraction, typically set to R = d for sur-face codes. In each round r ∈ { 0, 1, . . . , R − 1}, a Pauli error Fr ∈ P ⊗n acts on the data qubits with probability 
+
+p/ 3 per error type, and the measurement is corrupted by a binary measurement error mr ∈ { 0, 1}m with proba-bility p per bit. An additional syndrome readout round at r = R is appended as a boundary condition, where 
+
+FR ∈ P ⊗n acts on the data qubits and the syndrome measurement is error-free, i.e., mR = 0. Because per-round errors accumulate on the data qubits, the decoding target of physical-level decoders is the cumulative error 
+
+E = F0F1 · · · FR. The syndrome measured at round r re-flects the accumulated error F0 · · · Fr and is corrupted by 
+
+mr :
+
+sr = S ⊙ (F0 · · · Fr ) ⊕ mr ∈ { 0, 1}m, (16) where ⊕ denotes the entrywise modulo-2 (XOR) addi-tion. The BP decoder operates on the detectors dr =
+
+sr ⊕ sr−1, with the convention s−1 = 0 [32, 41]. Taking {dr }Rr=0 as input, it jointly estimates the per-round data errors {Fr }Rr=0 and the measurement errors 
+
+{mr }R−1 
+
+> r=0
+
+[40, 41]. Decoding runs on an extended stabi-lizer matrix Sext such as 
+
+Sext =
+
+
+
+S 0 · · · 0 I 0 · · · 00 S · · · 0 I I . . . ...... ... . . . ... 0 . . . . . . 00 0 · · · S 0 · · · I I
+
+ . (17) The extended matrix has m(R + 1) rows for detectors, 
+
+n(R + 1) columns for data errors, and mR columns for measurement errors. The cumulative error estimate is ˆE = ˆF0 · · · ˆFR. In the NBP variant, the message-passing weights are made trainable. For logical-level decoding, as in the code-capacity case, L-NBP predicts the logical operator L in the decompo-sition E = T (sR) L S , where the pure error T (sR) is obtained from the measured final-round syndrome sR.The NBP module runs on the extended matrix Sext ,takes {dr }Rr=0 as input, and produces per-round poste-rior LLRs. To obtain the soft syndrome from these LLRs, we exploit the linearity of the syndrome map. The de-coded final syndrome is ˆ sR = S ⊙ ˆE = S ⊙ ( ˆF0 · · · ˆFR) = 
+
+LRr=0 S ⊙ ˆFr , so the estimated error ˆFr for each round contributes to ˆ sR through the same stabilizer connections in S. Since an XOR in the binary domain corresponds to the min-sum rule in the LLR domain, the soft syndrome for each CN can be computed as 
+
+s(ℓ) 
+
+> i
+
+=
+
+> R
+
+Y
+
+> r=0
+
+Y
+
+> j∈N c(i)
+
+sgn  Λ(ℓ)(j,r )→i
+
+!
+
+min 
+
+> 0≤r≤Rj∈N c(i)
+
+Λ(ℓ)(j,r )→i ,
+
+(18) for i = 1 , . . . , m , where Λ (ℓ)(j,r )→i is the edge-wise poste-rior LLR sent from the VN at qubit j in round r to CN 
+
+i at iteration ℓ. Aggregating over iterations and combin-ing with the measured syndrome sR as in (10)–(11) then yields a soft syndrome ˜ s ∈ [−1, 1] m.The resulting soft syndrome has length m = n − 1regardless of R; that is, the NBP module absorbs the 7syndrome history {sr }Rr=0 across the temporal dimen-sion and acts as a syndrome-history compressor. Con-sequently, the logical classifier needs no architectural change between single-round and multi-round decoding, and its input size stays m.Under the circuit-level noise model, we perform a Z-memory experiment using the Stim stabilizer-circuit sim-ulator [29]. The Stim simulator provides a DEM, which is converted into a binary parity-check matrix HDEM of size Nd ×Nf , whose Nd rows correspond to detectors and whose Nf columns correspond to faults. BP-OSD runs BP on HDEM to obtain posterior LLRs for the faults, which are then post-processed by OSD. L-NBP, by contrast, does not need to identify which faults occurred: its NBP module serves only to extract a soft syndrome. It can therefore operate on the extended stabilizer matrix Sext of (17) rather than on HDEM . The two matrices have the same number of rows, but HDEM 
+
+has far more columns, since it introduces one column per circuit-level fault mechanism. Running message pass-ing on the much smaller Sext therefore yields a consid-erably lighter BP stage. Aside from obtaining the detec-tors {dr }Rr=0 from Stim, L-NBP under circuit-level noise follows exactly the same procedure as under phenomeno-logical noise: the soft syndrome is extracted with (18) and passed to the same logical classifier. Further details of the circuit-level model are provided in Appendix C. 
+
+IV. SIMULATION RESULTS A. LER Comparison 
+
+Figs. 5(a)–(c) compare the LER of MWPM [11, 12, 16], BP [19], NBP [21], BP-OSD [26, 27], and L-NBP under the code-capacity, phenomenological, and circuit-level noise models, respectively. MWPM is implemented with the PyMatching library [42]. BP and NBP both use 60 BP iterations, and NBP is trained for physical-level decoding. BP-OSD uses OSD-0 together with a weighted min-sum BP of 60 iterations and a fixed scaling factor of 0.625 [26, 27]. For the code-capacity model in Fig. 5(a), BP performs poorly because of short cycles and degeneracy, and NBP improves on it by introducing trainable weights, yet still falls short of the MWPM and BP-OSD baselines. L-NBP, in contrast, outperforms BP-OSD. The large gap between NBP and L-NBP confirms that the gain comes primarily from changing the decoding objective from physical to logical. The same trend holds under the phenomenolog-ical and circuit-level noise models in Figs. 5(b) and (c): L-NBP matches or exceeds BP-OSD and MWPM. Under the circuit-level model, we compare in terms of LER per round and additionally compare against Relay-BP [30], which exploits all detector information and runs on HDEM . It employs a first stage (termed a leg ) of 80 BP iterations followed by 300 additional stages of 60 it-erations each, amounting to a maximum of 18 ,080 itera-0.03 0.05 0.1 0.15 0.2                   
+
+> Physical Error Rate p
+> 10 −5
+> 10 −4
+> 10 −3
+> 10 −2
+> 10 −1
+> 10 0
+> Logical Error Rate
+> uncoded
+> BP NBP MWPM BP-OSD L-NBP
+> (a) d= 13, code-capacity 0.005 0.01 0.02 0.03 0.05 0.08
+> Physical Error Rate p
+> 10 −5
+> 10 −4
+> 10 −3
+> 10 −2
+> 10 −1
+> 10 0
+> Logical Error Rate
+> uncoded
+> BP NBP MWPM BP-OSD L-NBP
+> (b) d= 9, phenomenological 0.002 0.003 0.005 0.007 0.01
+> Physical Error Rate p
+> 10 −5
+> 10 −4
+> 10 −3
+> 10 −2
+> 10 −1
+> Logical Error Rate per Round
+> uncoded
+> BP NBP MWPM Relay-BP BP-OSD L-NBP
+> (c) d= 9, circuit-level
+
+FIG. 5. LER comparison under (a) code-capacity noise at 
+
+d = 13, (b) phenomenological noise at d = 9, and (c) circuit-level noise at d = 9. 
+
+tions. In contrast, L-NBP uses only 60 iterations, yet it is only slightly worse than Relay-BP. As the next subsec-tion shows, L-NBP nonetheless holds a clear advantage in decoding complexity. 80.03 0.05 0.1 0.15 0.2                       
+
+> Physical Error Rate p
+> 10 −3
+> 10 −2
+> 10 −1
+> 10 0
+> Logical Error Rate
+> uncoded NBP ( d= 5 )NBP ( d= 7 )NBP ( d= 9 )NBP ( d= 11 )NBP ( d= 13 )
+> (a) 0.03 0.05 0.1 0.15 0.2
+> Physical Error Rate p
+> 10 −4
+> 10 −3
+> 10 −2
+> 10 −1
+> 10 0
+> Logical Error Rate
+> uncoded L-NBP MWPM BP-OSD L-NBP ( d= 5 )L-NBP ( d= 7 )L-NBP ( d= 9 )L-NBP ( d= 11 )L-NBP ( d= 13 )(b) 10 610 710 8
+> FLOPs at d= 13
+> 15.5 16.0 16.5 17.0 17.5 18.0
+> Threshold (%)
+> L-NBP BP-OSD AMBP QECCT L-NBP BP-OSD AMBP QECCT (c)
+
+FIG. 6. LER versus physical error rate across code distances for (a) NBP and (b) L-NBP under the code-capacity model. NBP degrades as d grows and shows no threshold, whereas L-NBP exhibits clear threshold behavior with a threshold of 17 .5%. (c) FLOPs versus threshold at d = 13 for AMBP [28], QECCT [23], BP-OSD [26, 27], and L-NBP; L-NBP attains the best accuracy–complexity trade-off. 
+
+Fig. 6 plots the LER of NBP and L-NBP across code distances under the code-capacity model. NBP degrades as d increases and shows no threshold. L-NBP, by con-trast, exhibits clear threshold behavior with a threshold of 17 .5%, exceeding those of MWPM (14 .5%) and BP-OSD (16 .5%). Fig. 6(c) compares the threshold across several decoders 1 together with their decoding complex-ity, measured in floating-point operations (FLOPs) at 
+
+d = 13. Beyond BP-OSD, we additionally compare against the QECCT [23] and AMBP [28]. The QECCT, a fully neural network using a transformer architecture, attains a threshold of 17 .1%, but its reliance on a trans-former drives the cost up to 604 M FLOPs. AMBP re-peatedly invokes BP—51 BP stages in total, each with 150 iterations—so that, even without a post-processing stage, it still requires 95 M FLOPs. BP-OSD [26, 27] reaches a 16 .5% threshold at 1 .95 M FLOPs, whereas L-NBP achieves a higher 17 .5% threshold at only 0 .89 M FLOPs, yielding the best accuracy–complexity trade-off among the compared decoders. 
+
+B. Complexity Analysis 
+
+Next, we evaluate the decoding complexity in terms of the code length n. Under the code-capacity model, the complexity of BP and NBP is proportional to the number of edges in the decoding graph. Since this number grows as O(n) for surface codes, both BP and NBP scale linearly in n. On top of NBP, L-NBP adds the logical classifier, whose soft-syndrome extraction and MLP are also linear in n, so it incurs only a slight overhead over NBP. L-NBP thus preserves the overall linear complexity,  
+
+> 1MWPM is omitted from the FLOPs comparison, as its combina-torial matching is not directly measurable in FLOPs.
+
+as confirmed by Fig. 7(a). In contrast, BP-OSD grows cubically as O(n3); already at d = 13 ( n = 169), L-NBP achieves about a 54 .4% reduction in FLOPs relative to BP-OSD. Under the phenomenological model, the decoding problem has input size m(d + 1) = ( n − 1)( √n + 1) for R = d measurement rounds. BP and NBP there-fore incur a total cost of O(n√n). In L-NBP, extract-ing the soft syndrome likewise costs O(n√n), and the resulting soft syndrome of length m = n − 1 is passed to the MLP, which costs O(n) over the R rounds. Thus, across all rounds, BP, NBP, and L-NBP all cost O(n√n)in total, corresponding to a linear O(n) complexity per round. In contrast, BP-OSD costs O(n4.5) in total and 
+
+O(n4) per round, as its OSD post-processing overhead grows rapidly. As shown in Fig. 7(b), the FLOPs gap between the two therefore widens as n grows, and at 
+
+d = 9 ( n = 81), L-NBP consumes only about 2 .3% of the FLOPs required by BP-OSD. The linear-y inset, which replots L-NBP alone, makes its linear O(n) scaling ex-plicit. Finally, under the circuit-level model, the BP-based decoders run over the DEM parity-check matrix HDEM ,whose column size Nf is very large. As a result, the OSD stage of BP-OSD costs O(N 3 
+
+> f
+
+), which grows rapidly with 
+
+Nf . L-NBP instead operates on the far more compact extended stabilizer matrix Sext , and therefore performs the same operations as in the phenomenological case, re-taining the linear O(n) complexity per round. Table I shows that Sext is a 720 × 1530 matrix for d = 9, com-pared with the much larger 720 × 12750 HDEM . Con-sequently, BP-OSD incurs a high complexity not only in its OSD post-processing but also in its BP stage, whereas L-NBP remains lightweight in both its BP stage and its post-processing stage (i.e., the logical classifier). Over-all, L-NBP operates at only 0 .2% of the complexity of BP-OSD, a 99 .8% reduction. Moreover, although Relay-920 40 60 80 100 120 140 160 
+
+Code length n       
+
+> 0500K 1M 1.5M 2M
+> FLOPs per round
+> 54.4% reduction
+> BP NBP BP-OSD L-NBP
+> (a) Code-capacity 10 20 30 40 50 60 70 80
+
+Code length n          
+
+> 100K 1M 10M
+> FLOPs per round
+> 97.7% reduction
+> 15 30 45 150K 300K
+> BP NBP BP-OSD L-NBP (b) Phenomenological 10 20 30 40 50 60 70 80
+
+Code length n   
+
+> 100K 1M 10M 100M 1G
+> FLOPs per round
+> 99.8% reduction
+> 15 30 45 150K 300K
+> BP NBP Relay-BP BP-OSD L-NBP (c) Circuit-level
+
+FIG. 7. FLOPs versus code length for BP, NBP, BP-OSD, and L-NBP. (a) Code-capacity: L-NBP is linear and close to NBP, with only a slight classifier overhead. (b) Phenomenological: the gap to BP-OSD widens; the linear-y inset shows L-NBP stays linear. (c) Circuit-level: L-NBP remains linear, while the other decoders operate on the large HDEM and scale steeply. TABLE I. Comparison, at d = 9, of the matrix used for BP decoding, the number of BP iterations, and the per-round FLOPs of the BP and post-processing (OSD or logical classi-fier) stages. Method Matrix Iter. FLOPs per round BP Post Total BP-OSD HDEM 
+
+(720 × 12750) 60 3 M 366 M 369 M Relay-BP HDEM 
+
+(720 × 12750) 18080 953 M 0 953 M L-NBP Sext 
+
+(720 × 1530) 60 566 K 12 K 0.58 M 
+
+BP has no post-processing stage, its BP stage alone is highly complex, and L-NBP runs at only about 0 .06% of its complexity. Fig. 7(c) shows that L-NBP is an order of magnitude less complex than BP-OSD and Relay-BP, and is even lighter than plain BP and NBP, which run on 
+
+HDEM . As the linear-y inset confirms, L-NBP retains its linear O(n) scaling under the circuit-level noise model. 
+
+V. CONCLUSION 
+
+Despite its popularity as a standard decoder in clas-sical coding, BP decoding has not been used on its own for quantum codes because it struggles to infer the un-derlying physical error. To address this, we proposed L-NBP, which combines NBP with a logical classifier to in-fer the logical operator rather than the physical error. It exploits a property unique to quantum codes: recovering the logical operator, rather than the exact physical er-ror, is sufficient for correction. Across a range of noise models, L-NBP maintains the linear complexity O(n)of BP decoding while matching or outperforming the superlinear-complexity MWPM and BP-OSD decoders. Under the code-capacity model, L-NBP attains the high-est threshold of 17 .5% among BP-OSD, QECCT, and AMBP while incurring the lowest complexity, achiev-ing the best accuracy–complexity trade-off. Compared to BP-OSD, L-NBP reduces complexity by 99 .8% under the circuit-level model at d = 9, since its BP stage only gener-ates a soft syndrome rather than solving the multi-round fault-estimation task, allowing it to operate on a much smaller graph. L-NBP thus raises the potential of BP-based decoding for QEC, achieving high accuracy, linear complexity, and scalability all at once. 
+
+Appendix A: BP and NBP Message Update Rules 
+
+For each VN vj and error type e ∈ { X, Y, Z }, the ini-tial prior LLR is set according to the noise model. For physical error rate p, each Pauli error occurs on a phys-ical qubit with probability p/ 3 under depolarizing noise, giving Λ(0)  
+
+> j,e
+
+= ln 
+
+ P (Ej = I)
+
+P (Ej = e)
+
+
+
+= ln 
+
+ 1 − pp/ 3
+
+
+
+. (A1) Since the exact value of p is often unavailable and mi-nor deviations have negligible impact [38], we use a fixed initialization p = 0 .1. At each iteration ℓ from 1 to ℓ, messages are exchanged between VNs and CNs. Let μ(ℓ) 
+
+> j→i,e
+
+denote the message from VN vj to CN ci for error type e, initialized as 
+
+μ(0)  
+
+> j→i,e
+
+= Λ (0)  
+
+> j,e
+
+. From the previous VN message vector (μ(ℓ−1)  
+
+> j→i,X
+
+, μ (ℓ−1)  
+
+> j→i,Y
+
+, μ (ℓ−1)  
+
+> j→i,Z
+
+), we first compute a scalar VN message λ(ℓ−1)  
+
+> j→i
+
+, which represents the belief that the error 10 
+
+Ej commutes with Si,j :
+
+λ(ℓ−1)  
+
+> j→i
+
+= ln 
+
+ 1 + exp 
+
+
+
+−μ(ℓ−1) 
+
+> j→i, S i,j
+
+
+
+exp 
+
+
+
+−μ(ℓ−1) 
+
+> j→i, e 1
+
+
+
++ exp 
+
+
+
+−μ(ℓ−1) 
+
+> j→i, e 2
+
+
+
+(A2) = ζ
+
+
+
+−μ(ℓ−1) 
+
+> j→i, S i,j
+
+
+
++ μ(ℓ−1)  
+
+> j→i, e 1
+
+− ζ
+
+
+
+μ(ℓ−1)  
+
+> j→i, e 1
+
+− μ(ℓ−1) 
+
+> j→i, e 2
+
+
+
+,
+
+where {e1, e 2} = {X, Y, Z } \ { Si,j } and ζ(x) = ln(1 + ex)is the softplus function. On the CN side, the CN message ν(ℓ) 
+
+> i→j
+
+from CN ci to VN vj is computed via the min-sum rule, incorporating the measured syndrome bit si:
+
+ν(ℓ) 
+
+> i→j
+
+= ( −1) si
+
+ Y
+
+> j′∈N c(i)\{ j}
+
+sgn 
+
+
+
+λ(ℓ−1) 
+
+> j′→i
+
+ min  
+
+> j′∈N c(i)\{ j}
+
+λ(ℓ−1)  
+
+> j′→i
+
+.
+
+(A3) The VN message for each error type e is then updated as a weighted, extrinsic combination of the prior LLR and the incoming CN messages, followed by a damping step: ˆμ(ℓ) 
+
+> j→i, e
+
+= β(ℓ) 
+
+> j
+
+Λ(0)  
+
+> j,e
+
++ X  
+
+> i′∈N v(j)\{ i}⟨e, S i′,j ⟩=1
+
+α(ℓ) 
+
+> i′→j
+
+ν(ℓ) 
+
+> i′→j
+
+, (A4) 
+
+μ(ℓ) 
+
+> j→i, e
+
+= ˆ μ(ℓ) 
+
+> j→i, e
+
++ (1 − η(ℓ)
+
+> j→i
+
+) μ(ℓ−1) 
+
+> j→i, e
+
+. (A5) Here, α(ℓ) 
+
+> i′→j
+
+, β(ℓ) 
+
+> j
+
+, and η(ℓ) 
+
+> j→i
+
+are trainable weights: 
+
+θN = α(ℓ) 
+
+> i→j
+
+, β (ℓ) 
+
+> j
+
+, η (ℓ) 
+
+> j→i
+
+. (A6) In the extrinsic sum of (A4), only CNs whose stabilizers anticommute with the error type e (i.e., ⟨e, S i′,j ⟩ = 1) contribute. The damping step (A5) mixes the updated message with the previous-iteration message to improve convergence on graphs with short cycles. At each iteration, the posterior LLR Λ(ℓ) 
+
+> j,e
+
+is com-puted analogously to (A4), but over the full neighbor-hood Nv (j): Λ(ℓ) 
+
+> j,e
+
+= β(ℓ) 
+
+> j
+
+Λ(0)  
+
+> j,e
+
++ X  
+
+> i′∈N v(j)
+> ⟨e, S i′,j ⟩=1
+
+α(ℓ) 
+
+> i′→j
+
+ν(ℓ) 
+
+> i′→j
+
+. (A7) In classical BP, all of the weights in θN are fixed to one. Weighted BP instead applies a single fixed scaling factor to α(ℓ) 
+
+> i→j
+
+.
+
+Appendix B: Training and Evaluation Details 
+
+For training, we use the Adam optimizer [43] with a batch size of 256 and 1 ,000 batches per epoch, for a to-tal of 1000 epochs. The learning rate is set to 10 −4 and annealed by a factor of 1 /100 with a cosine schedule. All trainable weights are initialized using Xavier initializa-tion [44]. Training samples are collected at p = 0 .15, 0 .03, and 0 .007 for the code-capacity, phenomenological, and circuit-level models, respectively. The decoder parame-ters are set to ℓ = 60 BP iterations, a hidden dimension of h = 256 for the logical classifier, and an iteration sam-pling interval of ∆ = 10. Training is performed on a single NVIDIA RTX A5000 GPU; for the d = 9 surface code under the code-capacity model, one epoch of L-NBP training takes about 30 seconds, and the full training run takes roughly 8 hours. Every LER estimate reported in Figs. 5 and 6 is ob-tained from at least 10 5 Monte Carlo trials, with the simulation continued until at least 1000 logical failures are collected, which yields statistically reliable estimates. The threshold is defined as the crossing point among the LER curves for different distances. 
+
+Appendix C: Circuit-Level Noise Model Details 
+
+We use Stim’s standard rotated surface-code memory circuit, surface code:rotated memory z , with code dis-tance d and R = d syndrome-extraction rounds, followed by a final data-qubit measurement. A depolarizing error of probability p is applied after each Clifford gate and to the data qubits before each syndrome round. Thus, each non-identity single- and two-qubit Pauli error oc-curs with probability p/ 3 and p/ 15, respectively. The re-set and measurement flip probabilities are set to p.For the Z-memory experiment, the X-type stabilizer outcomes at the first and final temporal boundaries are not deterministic and therefore do not define detectors in Stim. Consequently, Stim reports Rm detectors rather than ( R+1) m. Accordingly, when constructing Sext for L-NBP, we trim the corresponding boundary rows so that its detector rows match those reported by Stim. Thus, both HDEM and the trimmed Sext operate on the same set of Rm detectors. A logical failure is declared when the decoder’s predicted logical-observable flip differs from that reported by Stim. 
+
+Appendix D: Ablation Study 
+
+TABLE II. Ablation results for the surface code with d = 11 under depolarizing noise. Method Input to classifier E2E LER Train ( p = 0 .05) Baseline Soft syndrome (11) Yes 3.8×10 −4
+
+Variant A Measured hard syndrome s No 2.3×10 −2
+
+Variant B Residual hard syndrome ˆ s ⊕ s No 4.5×10 −1
+
+Variant C Soft syndrome (11) No 3.5×10 −1
+
+Variant D Soft syndrome (D1) Yes 6.1×10 −4
+
+Variant E Posterior LLRs {Λ(ℓ)
+
+> j,e
+
+} Yes 4.0×10 −4
+
+Table II reports ablation results for the surface code 11          
+
+> (a) (b) (c) (d)
+> FIG. 8. t-SNE visualization of (a) the measured hard syndrome s, (b) the soft syndrome from untrained BP, (c) the soft syndrome from independently trained NBP, and (d) the E2E-trained L-NBP soft syndrome ˜ s(surface code d= 9, p= 0 .05). Only the E2E-trained L-NBP soft syndrome forms compact, well-separated clusters by logical operator.
+
+with d = 11. The L-NBP baseline uses the proposed soft syndrome in (11) with E2E training. Variant A directly feeds the measured hard syndrome s to the MLP, without using the NBP module. This variant therefore reduces to a standalone MLP-based logical decoder and achieves an LER of 2 .3 × 10 −2, substantially worse than the L-NBP baseline. This result shows that directly classifying the measured syndrome with a lightweight MLP is insuffi-cient for accurate logical decoding. Variant B instead feeds the residual hard syndrome ˆs ⊕ s to the MLP, where ˆ s = S ⊙ ˆE is obtained from the hard decision of the NBP module. This setting is in line with the residual-syndrome post-processing of [33– 35]. Because the hard decision prevents gradients from propagating through the NBP module, only the logical classifier is trained. The resulting LER remains poor, in-dicating that retaining only hard residual information discards information that is important for logical clas-sification. Variant C uses the proposed soft syndrome but first trains the NBP module independently as a physical-level decoder and then freezes it before training the logical classifier. Its poor performance shows that simply pro-viding soft NBP beliefs is not sufficient; the NBP mod-ule must be optimized jointly with the logical classifier so that its beliefs become informative for the logical-level objective. Variant D considers an alternative soft syndrome con-structed directly from the edge messages λ(ℓ) 
+
+> j→i
+
+in (A2), which has previously been explored for quantum BP de-coding [45]. In contrast to the extrinsic aggregation in (A3), this message-based soft syndrome is computed over all incoming edge messages at each CN: 
+
+ Y
+
+> j∈N c(i)
+
+sgn( λ(ℓ)
+
+> j→i
+
+)
+
+ min  
+
+> j∈N c(i)
+
+|λ(ℓ)
+
+> j→i
+
+| ∈ R. (D1) Its sign, however, is not necessarily consistent with the syndrome estimate ˆ s determined by the posterior LLRs. Although this variant is trained E2E and performs sub-stantially better than the hard-syndrome variants, its LER is still higher than that of the proposed posterior-based soft syndrome. Finally, Variant E directly feeds the posterior LLRs 
+
+{Λ(ℓ)
+
+> j,e
+
+}j,e to the MLP without constructing the soft syn-drome. It achieves an LER of 4 .0 × 10 −4, comparable to the proposed L-NBP baseline. However, this approach increases the classifier input dimension from m to 3 n
+
+even in the single-round setting. The difference becomes more pronounced under multi-round measurement mod-els, where the posterior LLRs are produced for every qubit and measurement round, causing the classifier in-put dimension to grow with the number of rounds. Fig. 8 presents a t-SNE-based ablation study. The mea-sured hard syndrome (Fig. 8(a)) and the soft syndromes from untrained BP (Fig. 8(b)) and independently trained NBP (Fig. 8(c)) all remain heavily overlapped across logical operators. Only the E2E-trained soft syndrome (Fig. 8(d)) collapses into compact, well-separated clus-ters.              
+
+> [1] P. W. Shor, SIAM Rev. 41 , 303 (1999). [2] L. K. Grover, in Proc. 28th Annu. ACM Symp. Theory Comput. (STOC) (1996) pp. 212–219. [3] A. W. Harrow, A. Hassidim, and S. Lloyd, Phys. Rev. Lett. 103 , 150502 (2009). [4] A. Aspuru-Guzik, A. D. Dutoi, P. J. Love, and M. Head-Gordon, Science 309 , 1704 (2005). [5] A. Peruzzo, J. McClean, P. Shadbolt, M.-H. Yung, X.-Q. Zhou, P. J. Love, A. Aspuru-Guzik, and J. L. O’Brien, Nat. Commun. 5, 4213 (2014). [6] P. W. Shor, Phys. Rev. A52 ,R2493(R)–R2496(R) (1995).
+
+12 
+
+[7] A. M. Steane, Phys. Rev. Lett. 77 , 793 (1996). [8] D. Gottesman, Phys. Rev. A 54 , 1862 (1996). [9] B. M. Terhal, Rev. Mod. Phys. 87 , 307 (2015). [10] A. Y. Kitaev, Annals of Physics 303 , 2 (2003). [11] E. Dennis, A. Kitaev, A. Landahl, and J. Preskill, J. Math. Phys. 43 , 4452 (2002). [12] A. G. Fowler, M. Mariantoni, J. M. Martinis, and A. N. Cleland, Phys. Rev. A 86 , 032324 (2012). [13] Google Quantum AI, Nature 614 , 676 (2023). [14] Google Quantum AI, Nature 638 , 920 (2025). [15] N. Delfosse, A. Paz, A. Vaschillo, and K. M. Svore, arXiv preprint arXiv:2310.15313 10.48550/arXiv.2310.15313 (2023). [16] J. Edmonds, Can. J. Math. 17 , 449 (1965). [17] R. G. Gallager, IRE Trans. Inf. Theory 8, 21 (1962). [18] D. J. C. MacKay, G. Mitchison, and P. L. McFadden, IEEE Trans. Inf. Theory 50 , 2315 (2004). [19] D. Poulin and Y. Chung, Quantum Inf. Comput. 8, 987 (2008). [20] Z. Babar, P. Botsinis, D. Alanis, S. X. Ng, and L. Hanzo, IEEE Access 3, 2492 (2015). [21] Y.-H. Liu and D. Poulin, Phys. Rev. Lett. 122 , 200501 (2019). [22] S. Varsamopoulos, B. Criger, and K. Bertels, Quantum Sci. Technol. 3, 015004 (2017). [23] Y. Choukroun and L. Wolf, in Proc. AAAI Conf. Artif. Intell. (AAAI) , Vol. 38 (2024) pp. 64–72. [24] J. Bausch, A. W. Senior, F. J. H. Heras, T. Edlich, A. Davies, M. Newman, C. Jones, K. Satzinger, M. Y. Niu, S. Blackwell, G. Holland, D. Kafri, J. Atalaya, C. Gidney, D. Hassabis, S. Boixo, H. Neven, and P. Kohli, Nature 635 , 834 (2024). [25] S.-J. Park, H.-Y. Kwak, and Y. Kim, arXiv preprint (2025), arXiv:2510.11593 [quant-ph]. [26] P. Panteleev and G. Kalachev, Quantum 5, 585 (2021). [27] J. Roffe, D. R. White, S. Burton, and E. T. Campbell, Phys. Rev. Research 2, 043423 (2020). [28] K.-Y. Kuo and C.-Y. Lai, npj Quantum Information 8,111 (2022). [29] C. Gidney, Quantum 5, 497 (2021). [30] T. M¨ uller, T. Alexander, M. E. Beverland, M. B¨ uhler, B. R. Johnson, T. Maurer, and D. Vandeth, arXiv preprint arXiv:2506.01779 (2025). [31] H.-Y. Kwak, S.-J. Park, H. Jung, J. Ha, and J.-W. Kim, arXiv preprint (2025), arXiv:2512.18273 [quant-ph]. [32] O. Higgott, T. C. Bohdanowicz, A. Kubica, S. T. Flam-mia, and E. T. Campbell, Phys. Rev. X 13 , 031007 (2023). [33] K. Meinerz, C.-Y. Park, and S. Trebst, Phys. Rev. Lett. 
+
+128 , 080505 (2022). [34] C. Chamberland, J. Olle, M. Li, S. Thornton, and I. Baratta, arXiv preprint (2026), arXiv:2604.12841 [quant-ph]. [35] K. Zhang, J. Xu, F. Zhang, L. Kong, Z. Ji, and J. Chen, arXiv preprint (2025), arXiv:2509.03954 [quant-ph]. [36] C. Chamberland and P. Ronagh, Quantum Sci. Technol. 
+
+3, 044002 (2018). [37] H. Jung, I. Ali, and J. Ha, IEEE Transactions on Quan-tum Engineering 5, 3102513 (2024). [38] S. Miao, A. Schnerring, H. Li, and L. Schmalen, IEEE Access 11 , 1 (2025). [39] L. van der Maaten and G. Hinton, J. Mach. Learn. Res. 
+
+9, 2579 (2008). [40] K.-Y. Kuo, I.-C. Chern, and C.-Y. Lai, in Proc. IEEE Int. Symp. Inf. Theory (ISIT) (2021) pp. 1552–1557. [41] K.-Y. Kuo and C.-Y. Lai, IEEE Trans. Inf. Theory 71 ,1824 (2025). [42] O. Higgott, ACM Trans. Quantum Comput. 3, 16 (2022). [43] D. P. Kingma and J. Ba, in Proc. Int. Conf. Learn. Rep-resentations (ICLR) (2015) pp. 1–15. [44] X. Glorot and Y. Bengio, in Proc. Int. Conf. Artif. Intell. Stat. (AISTATS) (2010) pp. 249–256. [45] N. Raveendran, J. Valls, A. K. Pradhan, N. Rengaswamy, F. Garcia-Herrero, and B. Vasi´ c, EPJ Quantum Technol. 
+
+10 , 1 (2023).

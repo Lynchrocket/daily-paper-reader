@@ -6,21 +6,29 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-08-30
-- 运行时间：2026-08-30 22:54:36 UTC
+- 最新运行日期：2026-08-31
+- 运行时间：2026-09-01 00:32:21 UTC
 - 运行状态：成功
-- 本次总论文数：1
-- 精读区：1
+- 本次总论文数：3
+- 精读区：3
 - 速读区：0
 
 ### 今日简报（AI）
-今日精读1篇论文，聚焦量子计算容错领域。核心结论：容错量子计算无法在恒定时空开销下实现，这对量子资源设计有直接影响。建议后续关注低开销容错方案的最新进展，并结合实例理解其约束。
-- 详情：[/202608/30/README](/202608/30/README)
+今日精读两篇表面码量子纠错论文，聚焦噪声模型与解码效率。  
+最值得关注：双同位素编码方案可结合真实噪声提升性能，而线性复杂度的神经置信传播解码显著降低计算开销。  
+普通读者可沿此追踪量子纠错从理论噪声到实用解码的落地进展。
+- 详情：[/202608/31/README](/202608/31/README)
 
 ### 精读区论文标签
-1. [Fault-tolerant quantum computation cannot be achieved with constant spacetime overhead](/202608/30/2608.26272v1-fault-tolerant-quantum-computation-cannot-be-achieved-with-constant-spacetime-overhead)  
-   标签：评分：8.0/10、query:qec-code
-   evidence：分析容错量子计算中时空开销的基本极限，与量子纠错码的阈值行为相关。
+1. [Quantifying the Dual-isotope Advantage for Ytterbium-array Surface Codes using Realistic Noise Models](/202608/31/2608.27568v1-quantifying-the-dual-isotope-advantage-for-ytterbium-array-surface-codes-using-realistic-noise-models)  
+   标签：评分：9.0/10、query:qec-code
+   evidence：研究双同位素镱阵列的表面码存储，使用实际噪声模型
+2. [Logical Neural Belief Propagation for Linear-Complexity Decoding of Surface Codes](/202608/31/2608.27682v1-logical-neural-belief-propagation-for-linear-complexity-decoding-of-surface-codes)  
+   标签：评分：9.0/10、query:qec-decoding
+   evidence：提出面向表面码的逻辑神经置信传播解码器
+3. [Error-Adaptive Quasi-local Decoding of the Toric Code](/202608/31/2608.27740v1-error-adaptive-quasi-local-decoding-of-the-toric-code)  
+   标签：评分：9.0/10、query:qec-decoding
+   evidence：针对环面码（表面码）的量子纠错解码，提出准局部解码器
 
 ### 速读区论文标签
 - 本次无速读推荐。

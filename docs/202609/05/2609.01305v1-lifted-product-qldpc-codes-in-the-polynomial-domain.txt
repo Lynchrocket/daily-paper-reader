@@ -1,0 +1,666 @@
+Title: Lifted-Product QLDPC Codes in the Polynomial Domain
+
+URL Source: https://arxiv.org/pdf/2609.01305v1
+
+Published Time: Wed, 02 Sep 2026 01:29:30 GMT
+
+Number of Pages: 6
+
+Markdown Content:
+# Lifted-Product QLDPC Codes in the Polynomial Domain 
+
+Vahid Nourozi †, Mohsen Moradi ∗, Roxana Smarandache ‡, and David G. M. Mitchell †,
+
+> †
+
+Klipsch School of Electrical and Computer Engineering, New Mexico State University Las Cruces, NM 88003, USA, Email: nourozi@nmsu.edu; dgmm@nmsu.edu. 
+
+> ∗
+
+School of Electrical, Computer and Energy Engineering, Arizona State University Tempe, AZ 85287, USA, Email: mmorad11@asu.edu. 
+
+> ‡
+
+Departments of Mathematics and Electrical Engineering, University of Notre Dame Notre Dame, IN 46556, USA, Email: rsmarand@nd.edu. 
+
+Abstract —This paper presents a finite-length polynomial-domain formulation of lifted-product quantum low-density parity-check (QLDPC) codes. We formulate the code construc-tion over the quotient ring F2[D]/(DL + 1) , where polynomial base matrices are lifted entrywise to binary circulant blocks. This representation gives a compact algebraic description of the lifted-product parity-check matrices and allows CSS orthogonality to be analyzed before binary expansion. We show that the standard circulant lifting map is compatible with polynomial conjugation, which implies that the resulting binary matrices satisfy the CSS commutation constraint. The construction is illustrated with a constraint length 7, rate 1/2 NASA convolutional code example, and numerical examples are provided from a 3 × 4 polynomial parity-check matrix. The finite-length performance of selected constructed codes is then evaluated over the depolarizing channel using various benchmark decoders. The resulting framework gives a structured method to construct finite-length lifted-product QLDPC codes from small polynomial base matrices. 
+
+I. I NTRODUCTION 
+
+# QUANTUM error correction is essential for reliable quan-tum information processing in the presence of noise and decoherence. Within this area, Calderbank–Shor–Steane (CSS) codes provide one of the main algebraic frameworks to construct stabilizer codes from classical linear codes [1]– [3]. Among modern CSS-based families, quantum low-density parity-check (QLDPC) codes have attracted particular atten-tion because they offer sparse parity-check operators together with the possibility of nonzero asymptotic rate and growing minimum distance [4], [5]. A foundational step in this direc-tion was the hypergraph-product (HGP) construction of Tillich and Z´ emor, which showed how tensor-product structure can be used to obtain QLDPC codes with positive rate and minimum distance proportional to the square root of the blocklength [6]. More recently, Panteleev and Kalachev introduced the lifted-product (LP) framework, which generalizes product constructions for quantum codes and led to quantum LDPC codes with almost linear growth of minimum distance [7]. In subsequent work, they showed that lifted products over non-abelian groups yield asymptotically good quantum LDPC codes, thereby establishing a major breakthrough in the theory of QLDPC constructions [8]. These results make the lifted product one of the central modern tools for building structured quantum codes. At the same time, practical implementations often require finite-length codes with explicit algebraic de-scriptions, controlled block size, and constructions that remain compatible with structured hardware-oriented representations. One natural way to realize such structure is through poly-nomial and quasi-cyclic descriptions. Classical LDPC block and convolutional codes based on circulant matrices provide a convenient algebraic language for lifting small base matrices into large sparse binary parity-check matrices [9]–[11]. In the LP setting, this point of view is especially useful because it allows the base matrices to be written over the quotient ring 
+
+F2[D]/(DL + 1) and then lifted entrywise to binary circulant blocks. Recent work on finite-length LP QLDPC codes has shown that, in the quasi-cyclic setting, combinatorial con-straints on the base matrices can strongly affect the resulting quantum minimum distance and degeneracy properties [12], [13]. This highlights the need for an algebraic formulation of the LP construction that makes the orthogonality mechanism transparent in the polynomial domain. In this paper, we explore the finite-length polynomial-domain formulation of LP-QLDPC codes. In particular, we formulate the LP parity-check matrices directly over the quotient ring RL = F2[D]/(DL +1) , so that small polynomial base matrices provide compact descriptions of the correspond-ing circulant lifted binary parity-check matrices. We then prove that standard circulant lifting is conjugate-compatible and use this property to give a compact polynomial-domain proof of the CSS commutation condition HX HTZ = 0.
+
+This framework also connects convolutional code polynomial parity-check matrices with finite-length LP-QLDPC construc-tion through tail-biting circulant lifting. This provides a poly-nomial domain construction and verification framework that can be used together with existing finite-length search and distance-optimization methods. The approach is illustrated with a constraint length 7, rate R = 1/2 NASA convo-lutional code example, and additional numerical examples are provided from a 3 × 4 polynomial parity-check matrix. The finite-length performance of selected constructed codes is then evaluated over the depolarizing channel using various benchmark decoders. arXiv:2609.01305v1 [cs.IT] 1 Sep 2026 II. B ACKGROUND 
+
+A. Polynomial Rings and Quotient Structures 
+
+Definition 1 (Polynomial Ring) . The polynomial ring F2[D]
+
+consists of all polynomials in the indeterminate D with coefficients in the field F2, with addition and multiplication defined by standard polynomial arithmetic modulo 2. 
+
+Definition 2 (Quotient Ring) . For a positive integer L, the quotient ring RL , F2[D]/(DL + 1) consists of equivalence classes of polynomials in F2[D], where p(D) ∼ q(D) if and only if p(D) − q(D) is divisible by DL + 1 .By the polynomial division algorithm, every equivalence class has a unique remainder of degree less than L. We use this remainder as the canonical representative of the class. Hence, every element of RL can be written uniquely as 
+
+p(D) = 
+
+> L−1
+
+∑
+
+> i=0
+
+aiDi ∈ F2[D]/(DL + 1) , ai ∈ F2.
+
+Since the field has characteristic two, the relation DL + 1 = 0 
+
+in RL implies DL = 1 . Hence, exponents are reduced modulo 
+
+L, and D−1 = DL−1 in RL.
+
+Definition 3 (Polynomial conjugation) . For a polynomial 
+
+p(D) = ∑L−1 
+
+> i=0
+
+aiDi ∈ RL, define its conjugate (or invo-lution) polynomial p(D)∗ ∈ RL as 
+
+p(D)∗ , p(D−1) = 
+
+> L−1
+
+∑
+
+> i=0
+
+aiD−i =
+
+> L−1
+
+∑
+
+> i=0
+
+aiD(L−i) mod L.
+
+Definition 4 (CSS Code) . An [[N,K,d]] CSS quantum code is specified by two binary parity-check matrices HX , H Z ∈
+
+FrX ×N 
+
+> 2
+
+and FrZ ×N 
+
+> 2
+
+satisfying the CSS commutation condition 
+
+HX HTZ = 0 .
+
+Equivalently, Im( HX ) ⊆ ker( HZ ) and Im( HZ ) ⊆ ker( HX ).
+
+The number of logical qubits is K = N − rank( HX ) −
+
+rank( HZ ), and the quantum minimum distance is d =min {dX , d Z }, where 
+
+dX = min {wt( x)|x ∈ ker( HZ ) \ Im( HX )},
+
+and 
+
+dZ = min {wt( z)|z ∈ ker( HX ) \ Im( HZ )}.
+
+B. Circulant Matrices and Lifting 
+
+In this section, we formalize the basic objects that we will use repeatedly: circulant permutation matrices, the lifting operation from polynomials to circulant matrices, and the resulting polynomial–circulant correspondence [9]. 
+
+Definition 5 (Circulant permutation matrix) . Let L ∈ N and 
+
+0 ≤ s < L . The L × L circulant permutation matrix Circ L(s)
+
+is defined as the cyclic shift of the identity matrix row-by-row by s positions to the right, i.e., for all i, j ∈ { 0, 1, . . . , L − 1},
+
+(Circ L(s)) 
+
+> i,j
+
+=
+
+{
+
+1, if j ≡ i + s (mod L),
+
+0, otherwise .
+
+We now formalize the lifting operation that associates a binary circulant matrix to each polynomial in F2[D]/(DL +1) .This operation gives a finite circulant, or tail-biting, block representation of polynomial convolutional-code components. 
+
+Definition 6 (Lifting operation for polynomials) . Fix L ∈ N
+
+and consider the ring RL = F2[D]/(DL + 1) . For a polyno-mial p(D) ∈ RL the lifting operation LL maps p(D) to an 
+
+L × L binary circulant matrix 
+
+LL(p) ,
+
+> L−1
+
+∑
+
+> i=0
+
+ai Circ L(i),
+
+where the sum is taken over F2 (entrywise modulo 2). 
+
+Intuitively, the coefficient ai = 1 tells us to add the circulant permutation matrix corresponding to a shift by i positions; if ai = 0 , that shift is absent. The first row of LL(p) is exactly the coefficient vector (a0, a 1, . . . , a L−1), and all other rows are its cyclic shifts. Now we extend this lifting operation entrywise to polynomial matrices. 
+
+Definition 7 (Polynomial–circulant correspondence) . Let 
+
+P (D) = (pij (D)) ∈ Rm×nL be an m × n matrix with entries in RL. The lifting (or polynomial–circulant correspondence )associates to P (D) the binary matrix 
+
+LL
+
+(P (D)) , (LL(pij (D)) ) 
+
+> i,j
+
+∈ F mL ×nL  
+
+> 2
+
+,
+
+i.e., each polynomial entry pij (D) is replaced by the L × L
+
+circulant matrix LL
+
+(pij (D)) from Definition 6. The resulting 
+
+mL × nL matrix is block-circulant with L × L blocks. C. Depolarizing Channel Model and BP-based Decoders 
+
+To evaluate the finite-length error-correction performance of our constructed codes, we will later use several standard BP-based decoders over the depolarizing channel. The quater-nary belief propagation (QBP) decoder [14], [15] performs message passing on the CSS Tanner graphs while keeping a local belief over the four Pauli symbols {I, X, Y, Z }. Under the depolarizing channel, the error qi on the qubit i satisfies 
+
+Pr( qi = I) = 1 − p, 
+
+Pr( qi = X) = Pr( qi = Y ) = Pr( qi = Z) = p
+
+3 .
+
+Unlike independent X- and Z-component decoding, QBP accounts for the coupling introduced by the Y error. The de-coder iteratively updates the messages and returns a hard Pauli estimate, which is then checked for syndrome consistency and logical correctness. In QBP with guided decimation (QBPGD) [16], short runs (T iterations) of the QBP decoder are interleaved with G
+
+reliability-based decimation steps. At each decimation step, one highly reliable qubit is fixed, and QBP is then restarted on the reduced problem. This procedure helps break sym-metric message passing failures caused by short cycles and degeneracy, but it can increase the decoding cost because several QBP runs may be required. We also evaluate our codes using a reinforcement-learning-based sequential decoder (RL-S) [17]. It uses the same underlying BP message-update rules, but replaces the flooding schedule with a learned sequential variable-node update order. The learned policy is trained offline and then used during inference to select the next variable node based on a local syndrome-driven state. III. T HE CONJUGATE TRANSPOSE OPERATION IN QUOTIENT RINGS 
+
+We now define and establish basic algebraic properties of the conjugate transpose in RL = F2[D]/(DL + 1) . This operation is crucial for our approach, since it underpins the orthogonality proofs and design of LP codes. 
+
+A. Algebraic Properties 
+
+By Definition 3, polynomial conjugation is the map 
+
+p(D) 7 → p∗(D) = p(D−1) interpreted in the quotient ring (with DL ≡ 1). 
+
+B. Matrix Conjugate Operations 
+
+Lemma 1 (Basic properties of ∗). The map ∗ : RL → RL is 
+
+F2-linear, involutive, and multiplicative: 
+
+(p + q)∗ = p∗ + q∗, (p∗)∗ = p, (pq )∗ = p∗q∗.
+
+Proof. Linearity and involution follow immediately from Def-inition 3. For multiplicativity, note that ∗ acts as D 7 → D−1,and (D−1)k = D−k in RL.
+
+Definition 8 (Matrix Conjugate Transpose) . For a polynomial matrix B = [bij (D)] (with entries in RL), the conjugate transpose B∗ is defined by 
+
+(B∗) 
+
+> ij
+
+(D) = (bji (D))∗.
+
+That is, B∗ is the transpose of B with each entry replaced by its conjugate polynomial. 
+
+We use the convention of the ∗ operator notation for this operation, which is not to be confused with the Hermitian transpose. The conjugation is performed within the ring RL
+
+and with conjugation as defined in Def. 3. 
+
+Proposition 1 (Conjugate Transpose Properties) . For any conformable polynomial matrices A, B : 
+
+> •
+
+(A + B)∗ = A∗ + B∗. 
+
+> •
+
+(A · B)∗ = B∗ · A∗. 
+
+> •
+
+(A∗)∗ = A. 
+
+> •
+
+(A ⊗ B)∗ = A∗ ⊗ B∗, where ⊗ denotes the Kronecker product. 
+
+IV. L IFTED -P RODUCT CONSTRUCTION AND 
+
+ORTHOGONALITY 
+
+A. Lifting map and the conjugate-compatibility condition 
+
+We use the standard circulant lifting map from RL to binary 
+
+L × L circulant matrices following Definition 6. 
+
+Lemma 2 (Ring-homomorphism property) . For all p, q ∈ RL,
+
+LL(p + q) = LL(p) + LL(q), LL(pq ) = LL(p) LL(q),
+
+and the same holds entrywise for lifted matrices (block-circulant matrix multiplication). Proof. This follows from a standard property of circulant polynomial representations: multiplication and addition of circulant matrices corresponds to multiplication and addition in RL.
+
+Definition 9 (Conjugate-compatible lifting (explicit condi-tion)) . We say that the lifting map LL is conjugate-compatible 
+
+with ∗ if, for every p ∈ RL,
+
+LL(p∗) = LL(p)T .
+
+Lemma 3 (Conjugate-compatibility holds for standard cir-culant lifting) . The lifting map in Definition 6 is conjugate-compatible: LL(p∗) = LL(p)T for all p ∈ RL. Consequently, for any matrix B over RL,
+
+LL(B∗) = LL(B)T .
+
+Proof. It suffices to verify the claim on monomials. For 
+
+p(D) = Di,
+
+p(D)∗ = D−i = D(L−i) mod L.
+
+Also, Circ L(i)T = Circ L(−i) = Circ L(( L−i) mod L). Thus 
+
+LL(( Di)∗) = LL(Di)T . This is then extended by F2-linearity to all p ∈ RL and then entrywise to matrices. 
+
+B. Lifted-product polynomial check matrices 
+
+Let B1 ∈ Rm1×n1 
+
+> L
+
+and B2 ∈ Rm2×n2 
+
+> L
+
+be arbitrary polynomial parity-check base matrices. Define the asymmetric LP polynomial check matrices 
+
+BX ,
+
+[
+
+B1 ⊗ In2
+
+∣∣∣ Im1 ⊗ B∗
+
+> 2
+
+]
+
+∈ R m1 n2 ×(n1 n2 +m1m2 ) 
+
+> L
+
+, (1) 
+
+BZ ,
+
+[
+
+In1 ⊗ B2
+
+∣∣∣ B∗ 
+
+> 1
+
+⊗ Im2
+
+]
+
+∈ R n1 m2 ×(n1 n2 +m1m2 ) 
+
+> L
+
+, (2) 
+
+where ⊗ denotes the Kronecker product over the coefficient ring RL and Is is the s × s identity matrix. Then define the lifted binary parity-check matrices by 
+
+HX , LL(BX ) ∈ F m1 n2L×(n1 n2+m1 m2)L 
+
+> 2
+
+,HZ , LL(BZ ) ∈ F n1m2L×(n1n2 +m1m2)L 
+
+> 2
+
+.
+
+C. Conditional LP orthogonality theorem 
+
+Theorem 1 (Polynomial-domain LP orthogonality) . Assume the lifting map LL is conjugate-compatible (Definition 9). Then for any base matrices B1, B 2 over RL, the lifted-product matrices satisfy 
+
+HX HTZ = 0 over F2.
+
+Proof. We first prove the polynomial-domain identity 
+
+BX B∗ 
+
+> Z
+
+= 0 in RL. (3) From (2) we have 
+
+B∗ 
+
+> Z
+
+=
+
+[ (In1 ⊗ B2)∗
+
+(B∗ 
+
+> 1
+
+⊗ Im2 )∗
+
+]
+
+=
+
+[In1 ⊗ B∗
+
+> 2
+
+B1 ⊗ Im2
+
+]
+
+,
+
+using I∗ 
+
+> k
+
+= Ik and (B∗ 
+
+> 1
+
+)∗ = B1, and the standard identity 
+
+(A ⊗ C)∗ = A∗ ⊗ C∗. Now multiply BX (a horizontal concatenation) by B∗ 
+
+> Z
+
+(a vertical concatenation): 
+
+BX B∗ 
+
+> Z
+
+= ( B1 ⊗ In2 )( In1 ⊗ B∗ 
+
+> 2
+
+) + ( Im1 ⊗ B∗ 
+
+> 2
+
+)( B1 ⊗ Im2 ).
+
+Because the coefficient ring RL is commutative, the mixed-product rule for Kronecker products applies: 
+
+(A ⊗ C)( B ⊗ D) = ( AB ) ⊗ (CD ),
+
+for all conformable matrices over RL. Hence 
+
+(B1 ⊗ In2 )( In1 ⊗ B∗ 
+
+> 2
+
+) = ( B1In1 ) ⊗ (In2 B∗ 
+
+> 2
+
+) = B1 ⊗ B∗ 
+
+> 2
+
+,
+
+and similarly 
+
+(Im1 ⊗ B∗ 
+
+> 2
+
+)( B1 ⊗ Im2 ) = ( Im1 B1) ⊗ (B∗ 
+
+> 2
+
+Im2 ) = B1 ⊗ B∗ 
+
+> 2
+
+.Therefore 
+
+BX B∗ 
+
+> Z
+
+= ( B1 ⊗ B∗ 
+
+> 2
+
+) + ( B1 ⊗ B∗ 
+
+> 2
+
+) = 0 
+
+because char( RL) = 2 . This proves (3). Now we lift to binary matrices. By Lemma 2, 
+
+LL(BX B∗ 
+
+> Z
+
+) = LL(BX ) LL(B∗ 
+
+> Z
+
+).
+
+By conjugate-compatibility (Lemma 3), 
+
+LL(B∗ 
+
+> Z
+
+) = LL(BZ )T = HTZ . Thus 
+
+HX HTZ = LL(BX ) LL(BZ )T = LL(BX ) LL(B∗ 
+
+> Z
+
+)= LL(BX B∗ 
+
+> Z
+
+) = LL(0) = 0 .
+
+Remark 1. Theorem 1 shows that the CSS commutation condition can be certified before binary expansion. Instead of forming the full binary matrices HX and HZ and then checking HX HTZ = 0, one may verify the corresponding polynomial-domain identity over RL.
+
+Example 1 (NASA constraint length 7 symmetric LP exam-ple) . Consider the NASA constraint length 7, rate R = 1 /2
+
+convolutional code [18] with polynomial base matrix 
+
+B(D) = [h11 (D) h12 (D)] ∈ R1×27 , R7 = F2[D]/(D7 +1) ,
+
+where 
+
+h11 (D) = 1 + D + D3 + D4 + D6,h12 (D) = 1 + D3 + D4 + D5 + D6.
+
+We take the symmetric lifted-product construction, so that 
+
+B1 = B2 = B, m = 1 , n = 2 .By Definition 3, the conjugates are 
+
+h∗
+
+> 11
+
+(D) = h11 (D), h∗
+
+> 12
+
+(D) = 1 + D + D2 + D3 + D4.
+
+Hence the polynomial LP check matrices are 
+
+BX = [ B ⊗ I2
+
+∣∣ I1 ⊗ B∗ ]
+
+=
+
+[ h11 (D) 0 h12 (D) 0 h∗
+
+> 11
+
+(D)0 h11 (D) 0 h12 (D) h∗
+
+> 12
+
+(D)
+
+]
+
+.
+
+and 
+
+BZ = [ I2 ⊗ B ∣∣ B∗ ⊗ I1
+
+]
+
+=
+
+[ h11 (D) h12 (D) 0 0 h∗
+
+> 11
+
+(D)0 0 h11 (D) h12 (D) h∗
+
+> 12
+
+(D)
+
+]
+
+.
+
+Now apply the standard circulant lifting map L7(·) entry-wise to obtain the binary parity-check matrices 
+
+HX = L7(BX ), HZ = L7(BZ ).
+
+Since m = 1 , n = 2 , and L = 7 , both lifted matrices have 
+
+N = ( n2 + m2)L = (2 2 + 1 2) · 7 = 35 columns and mnL =1 · 2 · 7 = 14 rows. Therefore, HX , H Z ∈ F14 ×35 2 . Moreover, the standard circulant lift is conjugate compatible, i.e., 
+
+L7(p∗(D)) = L7(p(D)) T , for all p(D) ∈ R7.
+
+Therefore, by Theorem 1, HX HTZ = 0 , so the lifted pair 
+
+(HX , H Z ) defines a valid CSS code. 
+
+This example is intended only to illustrate the polynomial-domain construction in Theorem 1 and the conjugate-compatible lifting argument that guarantees HX HTZ = 0 .V. N UMERICAL RESULTS 
+
+In this section, we provide finite-length examples obtained from the polynomial domain LP construction of Theorem 1 and evaluate the resulting QLDPC codes using the benchmark decoders described in Section II-C. For QBP and RL-S, we set a maximum number of iterations T as noted in each figure. For QGBPD, we set T =100 and G = N , for a total maximum of GT iterations. We use 
+
+B1(D) = B2(D) = H(D),
+
+where 
+
+H(D) = 
+
+ D50 D105 D74 D4
+
+D8 + D30 D7 + D105 D80 D73 
+
+D28 D37 D73 D13 
+
+ .
+
+The base matrix H(D) was selected through a computational search over small 3 × 4 polynomial matrices. We focused on full-support polynomial base matrices that remain sparse after circulant lifting while providing enough algebraic structure to produce nonzero-rate LP codes with balanced X- and Z-distance behavior. The selected base matrix gave the strongest finite-length results among the candidates considered. For each lifting size L, the entries of H(D) are reduced modulo 
+
+DL + 1 , and the lifted-product CSS parity-check matrices are formed according to Theorem 1 with B1 = B2 = H.The parameters of the codes obtained from the avail-able computations are summarized in Table I. The table shows that changing the lifting size L produces a family of structured finite-length QLDPC codes with different block lengths, dimensions, and distance estimates. In the following simulations, we focus on selected members of this family and compare QBP, QBPGD, and RL-S over the depolarizing channel. For these decoders, T is the maximum number of iterations allowed and in the case of QBPGD the total is multiplied by the rounds of decimation G.1 The reported metric is the block error rate, i.e. , the probability that the decoder either fails to return a consistent syndrome or returns a recovery in the wrong logical coset.                                                                                          
+
+> TABLE I PARAMETERS OF THE LIFTED -PRODUCT CODES OBTAINED FROM THE
+> 3×4POLYNOMIAL BASE MATRIX WITH B1(D) = B2(D) = H(D).
+> LNKdXdZd
+> 10 250 18 88811 275 15 12 12 12 12 300 20 12 12 12 13 325 17 14 14 14 14 350 22 12 12 12 15 375 19 16 16 16 16 400 24 13 13 13 17 425 21 18 18 18 24 600 32 ≤20 ≤20 ≤20
+> 41 1025 45 ≤26 ≤26 ≤26
+> 83 2075 87 ≤34 ≤34 ≤34
+> 1In our experiments, we use a large Tfor QBP and set G=Nand
+> T= 100 for QBPGD in order to ensure good performance at the cost of high complexity. This is used so that we can see the limiting behavior of these codes with the respective decoders. Many good strategies exist to lower that complexity, often maintaining similar performance. 0.04 0.05 0.06 0.07 0.08 0.09 0.1
+
+p                       
+
+> 10 -5
+> 10 -4
+> 10 -3
+> 10 -2
+> 10 -1
+> Block Error Rate
+> QBP, T= 10000 QBPGD, GT = 42500 RL-S, T= 100 RL-S, T= 1000
+> Fig. 1. Block error rate comparison for the constructed [[425 ,21 ,18]] lifted-product QLDPC code obtained from the 3×4polynomial base matrix with lifting size L= 17 .
+> 0.05 0.06 0.07 0.08 0.09 0.1
+
+p                   
+
+> 10 -6
+> 10 -5
+> 10 -4
+> 10 -3
+> 10 -2
+> 10 -1
+> Block Error Rate
+> QBP, T= 10000 QBPGD, GT = 60000 RL-S, T= 100 RL-S, T= 1000
+> Fig. 2. Block error rate comparison for the constructed [[600 ,32 , d ≤20]]
+> lifted-product QLDPC code obtained from the 3×4polynomial base matrix with lifting size L= 24 .
+
+Fig. 1 shows the block error rate performance of our constructed [[425 , 21 , 18]] code corresponding to L = 17 .We compare QBP, QBPGD, and RL-S with different iteration budgets. The results show that the constructed code can be decoded effectively by BP-based methods over the depolariz-ing channel. Fig. 2 considers the constructed length N = 600 
+
+code obtained with lifting size L = 24 . For this code, K = 32 
+
+and a minimum distance search implemented using the Gurobi Optimizer [19] gives dX , d Z , d ≤ 20 , as shown in Table I. The same set of benchmark decoders is used over the depolarizing channel. The results show that the RL-S scheme improves the block error rate relative to QBP. In particular, RL-S with a larger iteration budget gives the best performance among the plotted decoders. Finally, Fig. 3 evaluates a larger constructed code with block length N = 2075 , corresponding to lifting size L = 83 .For this code, K = 87 and a minimum distance search gives 
+
+dX , d Z , d ≤ 34 . For this construction, we observe that the QBP and QBPGD show a severe error floor, but that the RL-S decoder does not. This is due, in part, to the large number of 4-cycles in the graph ( 30 , 378 4-cycles). The observed improvement is consistent with our previous results for RL         
+
+> 0.085 0.09 0.095 0.1 0.105 0.11 0.115 0.12 0.125
+
+p                 
+
+> 10 -6
+> 10 -5
+> 10 -4
+> 10 -3
+> 10 -2
+> 10 -1
+> 10 0
+> Block Error Rate
+> QBP, T= 10000 QBPGD, GT = 207500 RL-S, T= 100
+> Fig. 3. Block error rate comparison for the constructed [[2075 ,87 , d ≤34]]
+> lifted-product QLDPC code obtained from the 3×4polynomial base matrix with lifting size L= 83 .
+
+decoding of polar codes [20], for which the graphs have large numbers of 4-cycles and the agent can effectively optimize the message passing schedule to mitigate that weakness. VI. C ONCLUSIONS 
+
+We presented a polynomial-domain formulation of finite-length lifted-product QLDPC codes over the quotient ring 
+
+RL = F2[D]/(DL + 1) . In this formulation, small polynomial base matrices are lifted entrywise to binary circulant blocks, giving a compact representation of the full binary parity-check matrices. The main algebraic contribution is the identification and use of conjugate-compatible circulant lifting. This prop-erty allows the CSS commutation condition HX HTZ = 0 to be proved directly in the polynomial domain before binary ex-pansion. This viewpoint connects classical convolutional code polynomial descriptions with finite-length LP-QLDPC code construction. We illustrated the construction using a constraint length 7 NASA convolutional code and a 3 × 4 polynomial base matrix, producing a family of structured finite-length QLDPC codes. Selected examples were evaluated over the depolarizing channel using BP-based decoders, showing that the constructed codes are compatible with practical iterative decoding methods. This work should be viewed as a description and ver-ification framework that can be used for new LP-QLDPC code design rather than a new asymptotic LP result. Future work includes combining this polynomial-domain formulation with systematic distance-search constraints, optimizing the choice of polynomial base matrices, and designing syndrome-extraction schedules adapted to the resulting structure. ACKNOWLEDGEMENT 
+
+This material is based upon work supported by the National Science Foundation under Grant No. CCF-2145917. REFERENCES [1] A. R. Calderbank and P. W. Shor, “Good quantum error-correcting codes exist,” Physical Review A , vol. 54, no. 2, pp. 1098–1105, 1996. [2] A. M. Steane, “Error correcting codes in quantum theory,” Physical Review Letters , vol. 77, no. 5, pp. 793–797, 1996. [3] D. Gottesman, Stabilizer codes and quantum error correction . Cali-fornia Institute of Technology, 1997. [4] D. J. MacKay, G. Mitchison, and P. L. McFadden, “Sparse-graph codes for quantum error correction,” IEEE Transactions on Information Theory , vol. 50, no. 10, pp. 2315–2330, 2004. [5] N. P. Breuckmann and J. N. Eberhardt, “Balanced product quantum codes,” IEEE Transactions on Information Theory , vol. 67, no. 10, pp. 6653–6674, 2021. [6] J.-P. Tillich and G. Z´ emor, “Quantum LDPC codes with positive rate and minimum distance proportional to the square root of the blocklength,” 
+
+IEEE Transactions on Information Theory , vol. 60, no. 2, pp. 1193– 1202, 2013. [7] P. Panteleev and G. Kalachev, “Quantum LDPC codes with almost linear minimum distance,” IEEE Transactions on Information Theory , vol. 68, no. 1, pp. 213–229, 2022. [8] ——, “Asymptotically good quantum and locally testable classical LDPC codes,” in Proceedings of the 54th Annual ACM SIGACT Symposium on Theory of Computing , 2022, pp. 375–388. [9] R. M. Tanner, D. Sridhara, A. Sridharan, T. E. Fuja, and J. Costello, Daniel J., “LDPC block and convolutional codes based on circulant matrices,” IEEE Transactions on Information Theory , vol. 50, no. 12, pp. 2966–2984, 2004. [10] R. Smarandache and P. O. Vontobel, “Quasi-cyclic LDPC codes: In-fluence of proto-and Tanner-graph structure on minimum Hamming distance upper bounds,” IEEE Transactions on Information Theory ,vol. 58, no. 2, pp. 585–607, 2012. [11] A. A. Kovalev and L. P. Pryadko, “Quantum Kronecker sum-product low-density parity-check codes with finite rate,” Physical Review A—Atomic, Molecular, and Optical Physics , vol. 88, no. 1, p. 012311, 2013. [12] N. Raveendran, D. Declercq, and B. Vasi´ c, “On the minimum distances of finite-length lifted product quantum LDPC codes,” arXiv preprint arXiv:2503.07567 , 2025. [13] P. Panteleev and G. Kalachev, “Degenerate quantum LDPC codes with good finite length performance,” Quantum , vol. 5, p. 585, 2021. [14] D. Poulin and Y. Chung, “On the iterative decoding of sparse quantum codes,” Quantum Information & Computation , vol. 8, no. 10, pp. 987– 1000, 2008. [15] K.-Y. Kuo and C.-Y. Lai, “Refined belief propagation decoding of sparse-graph quantum codes,” IEEE Journal on Selected Areas in Information Theory , vol. 1, no. 2, pp. 487–498, 2020. [16] H. Yao, W. Abu Laban, C. H¨ ager, A. Graell i Amat, and H. D. Pfister, “Belief propagation decoding of quantum LDPC codes with guided decimation,” in Proceedings of the IEEE International Symposium on Information Theory (ISIT) , 2024, pp. 2478–2483. [17] M. Moradi, V. Nourozi, S. Habib, and D. G. M. Mitchell, “Learning to decode quantum LDPC codes via belief propagation,” 2026. [18] J. Hamkins, “A joint receiver-decoder for convolutionally coded binary phase-shift keying (BPSK),” TMO Progress Report , pp. 42–139, 1999. [19] Gurobi Optimization, LLC, “Gurobi Optimizer Reference Manual,” 2026, version 13.0. [Online]. Available: https://www.gurobi.com [20] M. Moradi, S. Habib, and D. G. M. Mitchell, “Enhancing belief prop-agation decoding of polar codes: A reinforcement learning approach,” 
+
+IEEE Communications Letters , vol. 29, no. 6, pp. 1285–1289, 2025.

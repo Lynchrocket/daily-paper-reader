@@ -1,0 +1,1792 @@
+Title: Quantum LDPC and High-Rate CSS Codes from Fair-Density Parity-Check Codes
+
+URL Source: https://arxiv.org/pdf/2609.01181v1
+
+Published Time: Wed, 02 Sep 2026 01:19:44 GMT
+
+Number of Pages: 16
+
+Markdown Content:
+> 1
+
+# Quantum LDPC and High-Rate CSS Codes from Fair-Density Parity-Check Codes 
+
+## Hessam Mahdavifar 
+
+Abstract —We construct quantum low-density parity-check (qLDPC) and high-rate Calderbank–Shor–Steane (CSS) codes from our recently introduced classical fair-density parity-check (FDPC) codes. To this end, we introduce a structured sparsification of FDPC parity-check matrices, which reduces their check weights while preserving the underlying combinatorial structure and distance guarantees. Combined with the hypergraph-product con-struction, this yields finite-length qLDPC codes with analytically controlled blocklength, dimension, certified distance, and stabilizer weight. For quantum blocklengths N < 10 5, the constructions introduced here span guaranteed rates from approximately 0.35% 
+
+to 25 .8% and certified quantum distances from 12 to 69 , with stabilizer weights between 8 and 16 .In the large-blocklength regime, allowing the FDPC order and sparsified check weight to scale moderately with blocklength yields a family of high-rate CSS codes, which we refer to as quantum FDPC (qFDPC) codes, with rate RQ and minimum distance D
+
+satisfying 
+
+RQ = 1 − O
+
+ 1log log N
+
+
+
+, D = Ω( N 1/4),
+
+and stabilizer weight O(log N log log N ). Finally, the analytically available FDPC weight distribution provides explicit information about the logical operators of the resulting hypergraph-product codes. Over the quantum erasure channel, this structure yields rigorous first-order maximum likelihood (ML) expressions and a higher-order weight-distribution approximation to the ML logical block error probability. This enables estimation of finite-length operating points and the onset of the error-floor regime. To the best of our knowledge, beyond surface-code-type con-structions, this is the first finite-rate qLDPC framework to provide both finite-length certified minimum-distance information and an analytical characterization of low-weight logical multiplicities. 
+
+I. I NTRODUCTION 
+
+Quantum error correction provides the basic mechanism for protecting quantum information against noise, with stabilizer codes and the Calderbank–Shor–Steane (CSS) construction providing the linear algebraic framework underlying many modern quantum code families [1–3]. In particular, quantum low-density parity-check (qLDPC) codes have emerged as a compelling class [4–10] because they satisfy the desired property of sparse stabilizer measurements together with the possibility of nonvanishing coding rate and growing minimum distance [10]. From a code construction perspective, qLDPC codes are substantially more constrained than their classical LDPC coun-terparts: the sparse parity-check matrices defining the X-
+
+H. Mahdavifar is with the Department of Electrical and Com-puter Engineering, Northeastern University, Boston, MA 02115 (email: h.mahdavifar@northeastern.edu.) 
+
+and Z-type stabilizers must simultaneously satisfy the exact commutation condition HX HT 
+
+> Z
+
+= 0. This constraint left open a central theoretical question in quantum coding theory: whether qLDPC codes could simultaneously have constant rate, linear minimum distance, and bounded stabilizer weight. A sequence of breakthroughs over the past decade has led to a solution for this fundamental problem. The hypergraph-product construction of Tillich and Zémor gave qLDPC codes with positive rate and minimum distance proportional to the square root of the quantum blocklength [6]. This √N barrier was subsequently surpassed by fiber-bundle codes, which achieved distance Ω( N 3/5/ polylog N ) [11], and by lifted-product con-structions of Panteleev and Kalachev, which attained almost-linear minimum distance [12]. Most notably, Panteleev and Kalachev later constructed asymptotically good qLDPC codes with both constant rate and linear minimum distance, resolving the long-standing qLDPC conjecture [13]. Quantum Tanner codes also provided a closely related expander-based route to asymptotically good quantum codes with linearly growing minimum distance [14]. These results establish the remarkable potential of qLDPC codes in the asymptotic regime. At the same time, they leave considerable room for constructions whose finite-length parameters, stabilizer weights, and mini-mum distance can be characterized or bounded analytically. This work approaches the finite-length qLDPC design prob-lem from a different perspective. Instead of following the mainstream approach, i.e., starting from a sparse quantum code and then attempting to analyze its structure, we begin with a classical code family with sufficiently explicit combinatorial properties. Our recently introduced fair-density parity-check (FDPC) codes provide such a starting point [15]: they have very small column weight, controlled row weight, and a highly structured underlying graph representation. We first exploit this structure to derive an exact ensemble-average weight distribu-tion for FDPC codes of arbitrary order and use it to obtain probabilistic minimum-distance guarantees. We then introduce structured sparsification procedures that replace the moderately dense FDPC checks by lower-weight checks while retaining controlled column weight and preserving the minimum-distance guarantee of the parent FDPC code. For the finite-length ensembles of interest, the resulting sparsified components also preserve an analytically accessible weight distribution. Using these sparsified FDPC codes as components of the hypergraph-product construction leads to two complementary quantum regimes. With fixed component degrees, we obtain finite-length qLDPC codes with bounded stabilizer weight and arXiv:2609.01181v1 [cs.IT] 1 Sep 2026 2
+
+analytically controlled tradeoffs among blocklength, dimension, and certified minimum distance. In a different scaling regime, where the FDPC order and sparsified check weight grow moderately with blocklength, the construction yields high-rate CSS codes, which we refer to as quantum FDPC (qFDPC) codes, with RQ → 1, D = Ω( N 1/4), and polylogarithmic stabilizer weight. Beyond the code parameters, the readily available FDPC weight distribution provides additional finite-length information through the canonical logical structure of hypergraph-product codes. Over the quantum erasure channel, this connection yields rigorous first-order maximum likelihood (ML) expressions and a higher-order weight-distribution ap-proximation that can be used to estimate finite-length operating points and predict the onset of the error-floor regime. It is worth noting that the finite-length analytical access to low-weight logical operators is not common among qLDPC constructions. Surface-code-type constructions are an important exception, where geometric structure and weight-enumerator methods allow explicit characterization of minimum-weight and low-weight logical operators [16, 17]. Beyond this topo-logical setting, existing qLDPC weight-distribution analyses have largely focused on establishing or verifying minimum distance [18, 19]. To the best of our knowledge, the framework developed here is the first finite-rate qLDPC construction to provide both finite-length certified minimum-distance informa-tion and an analytical characterization of low-weight logical multiplicities. The rest of this paper is organized as follows. Section II reviews CSS codes, hypergraph-product constructions, and the classical FDPC framework. Section III develops the higher-order FDPC weight-distribution analysis and introduces the sparsification procedures used throughout the paper. Section IV applies these classical components to HGP constructions, while Section V relates the FDPC weight distribution to the logical structure of the resulting quantum codes and develops the ML analysis for the quantum erasure channel. Section VI presents various types of new finite-length qLDPC construc-tions and evaluates their parameters and performance. Finally, Section VII concludes the paper and discusses directions for future work. II. P RELIMINARIES 
+
+A. Quantum Stabilizer and CSS Codes 
+
+Throughout the paper, ker( ·), row( ·), and rank( ·) denote the kernel, row space, and binary rank of a matrix, respectively. An [[ N, K, D ]] quantum stabilizer code is a 2K -dimensional subspace C ⊆ (C2)⊗N specified by a collection of mutually commuting N -qubit Pauli operators, called stabilizers. We denote the group generated by these operators by S. Then the code space is their simultaneous +1 eigenspace: 
+
+C = |ψ⟩ ∈ (C2)⊗N : s|ψ⟩ = |ψ⟩, ∀s ∈ S . (1) Each independent generator of S imposes a parity-check con-straint on the encoded state. The minimum distance D is the minimum Pauli weight of a nontrivial logical operator, namely 
+
+D = min {wt( P ) : P ∈ N (S) \ S} , (2) where N (S) denotes the normalizer of S in PN and wt( P ) is the number of qubits on which P acts nontrivially. A Calderbank–Shor–Steane (CSS) code is a stabilizer code whose stabilizer generators can be separated into X-type and 
+
+Z-type operators. It is specified by two binary matrices HX ∈
+
+FmX ×N 
+
+> 2
+
+, and HZ ∈ FmZ ×N 
+
+> 2
+
+, satisfying the commutation condition HX HT 
+
+> Z
+
+= 0 . Equivalently, stabilizer checks can be represented in binary form as 
+
+HCSS =
+
+HX 00 HZ
+
+
+
+.
+
+The rows of HX specify X-type stabilizers and the rows of 
+
+HZ specify Z-type stabilizers. If redundant rows are allowed, the number of encoded logical qubits is 
+
+K = N − rank( HX ) − rank( HZ ). (3) Also, for the CSS code, the spaces of logical equivalence classes are 
+
+LZ ≜ ker HX / row( HZ ), and LX ≜ ker HZ / row( HX ). (4) The inclusions row( HZ ) ⊆ ker HX and row( HX ) ⊆ ker HZ
+
+follow from the CSS orthogonality condition HX HTZ = 0 .An X error is detected/corrected through the Z-type checks 
+
+HZ , while a Z error is detected/corrected through the X-type checks HX . The minimum distance of a CSS code can be characterized in terms of the corresponding binary spaces. The minimum weights of nontrivial logical X- and Z-type operators are, respectively, 
+
+DX = min {wt( x) : x ∈ ker( HZ ) \ row( HX )} , (5) 
+
+DZ = min {wt( z) : z ∈ ker( HX ) \ row( HZ )} , (6) and the quantum minimum distance is D = min {DX , D Z }.Throughout the paper, we use lowercase notation (e.g., 
+
+dA, d B , d ) for classical-code minimum distances and distance thresholds, and uppercase notation (e.g., D, D X , D Z ) for quantum-code minimum distances and their certified lower bounds. A family of CSS codes is quantum low-density parity-check (qLDPC) if the row and column weights of HX and HZ remain bounded as the quantum blocklength grows. In particular, bounded row weight corresponds to bounded stabilizer weight. 
+
+B. Hypergraph-Product Codes 
+
+Let HA ∈ FmA×nA 
+
+> 2
+
+and HB ∈ FmB ×nB 
+
+> 2
+
+be parity-check matrices of two classical binary linear codes. The hypergraph-product (HGP) construction [6] defines the CSS matrices 
+
+HX = HA ⊗ InB ImA ⊗ HT
+
+> B
+
+ , (7) 
+
+HZ = InA ⊗ HB HT 
+
+> A
+
+⊗ ImB
+
+ , (8) 3
+
+where ⊗ denotes the Kronecker product. These matrices satisfy 
+
+HX HT 
+
+> Z
+
+= 0 by construction, and the quantum blocklength is 
+
+N = nAnB + mAmB .
+
+In this work, we use full-row-rank parity-check matrices. Writing kA = nA − mA and kB = nB − mB , and letting dA
+
+and dB denote the corresponding classical minimum distances, the resulting HGP code has [6] 
+
+K = kAkB , and D = min {dA, d B }.
+
+Let wr (H) and wc(H) denote the maximum row and column weights of a matrix H, respectively. Then the maximum weights of the resulting X- and Z-type stabilizer generators satisfy 
+
+wX ⩽ wr (HA) + wc(HB ), and wZ ⩽ wc(HA) + wr (HB ).
+
+We will frequently use the symmetric case HA = HB = H,where H is a full-row-rank parity-check matrix of an [n, k, d ]
+
+classical code. In this case, 
+
+N = n2 + ( n − k)2, K = k2, D = d, 
+
+and the maximum stabilizer weight is upper bounded by 
+
+wr (H) + wc(H).
+
+C. Fair-Density Parity-Check Codes 
+
+Fair-density parity-check (FDPC) codes were introduced by the author in [15] as structured high-rate classical codes with constant column weight and moderately growing row weight. Let n = q2, where q ⩾ 2 is an integer. The original FDPC construction in [15] was presented using q = 2 t, and hence even 
+
+q. The same construction extends to arbitrary q ⩾ 2. The base FDPC parity-check matrix Hb ∈ F2q×q2 
+
+> 2
+
+has column weight 2
+
+and row weight q. Its columns consist of all weight-2 binary vectors of length 2q whose two nonzero positions have indices differing by an odd number. The matrix has rank( Hb) = 2 q−1,and the corresponding base code has minimum distance 4.An order-s FDPC code is obtained by stacking s indepen-dently permuted copies of the base matrix, 
+
+Hs =
+
+
+
+Hb
+
+π1(Hb)
+
+...
+
+πs−1(Hb)
+
+ , (9) where each πi denotes a permutation of the n columns. Thus, 
+
+Hs has 2sq rows, row weight q, and column weight 2s. Within each layer, the sums of the checks associated with the two sides of Kq,q are identical, giving one dependency per layer. Moreover, the corresponding all-ones sums are identical across the s layers. Hence Hs has at least 2s − 1 independent row dependencies, and 
+
+k ⩾ n − 2sq + 2 s − 1.
+
+The main advantages of FDPC codes for our purposes are their explicit high-rate structure, controlled row/column weight, analytically tractable minimum-distance behavior, and a weight distribution that can be explicitly characterized. Subsequent work has further developed the classical FDPC framework. In particular, [20] introduced a low-complexity encoding algo-rithm. Furthermore, [21] developed a layered normalized min-sum decoder for improved finite-length decoding performance. These follow-up works further demonstrate the suitability of FDPC codes as structured classical components for the quantum constructions considered in this paper. III. E XTENDING FDPC C ODES : W EIGHT DISTRIBUTION 
+
+ANALYSIS AND SPARSIFICATION 
+
+In this section, we develop two extensions of the classical FDPC framework that make it particularly suitable for the quantum constructions considered in this work. First, we study higher-order FDPC codes and characterize their weight distri-bution in terms of the FDPC order. Second, we introduce a structured check-splitting operation for sparsifying FDPC codes that reduces the row weight of their parity-check matrix while keeping their column weight controlled. This is done in such a way that the resulting code, which may itself be an LDPC code, inherits the minimum-distance guarantee of the parent FDPC code. For the special case of structured order-2 sparsification developed later in this section, the post-sparsification weight distribution is also available explicitly. Together, these two ingredients provide the classical matrices needed to obtain both bounded-stabilizer-weight qLDPC codes and the high-rate CSS constructions developed in the next section. 
+
+A. Higher-Order FDPC Codes: Weight Distribution and Min-imum Distance Analysis 
+
+We first extend the weight-distribution analysis of FDPC codes, which was developed with a particular focus on order 2 in [15]. In contrast to the analysis in [15], which relied on enumerating irreducible codewords in the base code to obtain bounds on the weight distribution, the analysis here uses the graph-theoretic representation of the FDPC base code together with the MacWilliams identity. This leads to an exact characterization of the base-code weight enumerator and, con-sequently, an exact expression for the ensemble-average weight distribution of FDPC codes of arbitrary order. Recall that the base matrix Hb can be viewed, up to a permutation of its rows and columns, as the vertex–edge incidence matrix of the complete bipartite graph with q nodes in each part, denoted by Kq,q . Hence, the base FDPC code 
+
+Cb = ker( Hb) is the cycle space of Kq,q .Let Wb(z) = Pq2 
+
+> w=0
+
+Awzw denote the weight enumerator of 
+
+Cb. The next theorem shows that the bipartite structure of Hb
+
+gives an explicit expression for Wb(z).
+
+Theorem 1. Let Cb = ker( Hb) be the length-n = q2 base FDPC code. Then 
+
+Wb(z) = 2 −2qqX
+
+> a=0
+> q
+
+X
+
+> b=0
+
+qa
+
+ qb
+
+
+
+(1 + z)q2−δ(a,b )(1 − z)δ(a,b ),
+
+(10) 4
+
+where 
+
+δ(a, b ) = q(a + b) − 2ab. (11) 
+
+Equivalently, the number of weight-w codewords is 
+
+Aw = 2 −2qqX
+
+> a=0
+> q
+
+X
+
+> b=0
+
+qa
+
+ qb
+
+
+
+Kw
+
+ δ(a, b ); q2 , (12) 
+
+where 
+
+Kw(x; n) = 
+
+> w
+
+X
+
+> j=0
+
+(−1) j
+
+xj
+
+ n − xw − j
+
+
+
+is the binary Krawtchouk polynomial. Proof: As noted above, Hb is the vertex–edge incidence matrix of Kq,q . Therefore, Cb is the cycle space of Kq,q , while its dual C⊥ 
+
+> b
+
+= row( Hb) is the cut space of Kq,q .Consider a subset S of the 2q vertices containing a vertices from the left part and b vertices from the right part. The corresponding cut contains 
+
+a(q − b) + ( q − a)b = q(a + b) − 2ab = δ(a, b )
+
+edges. There are  qa
+
+  qb
+
+ choices of such a subset. Since S and its complement define the same cut, every cut is counted exactly twice. Hence, the weight enumerator of the cut space is 
+
+WC⊥ 
+
+> b
+
+(z) = 12
+
+> q
+
+X
+
+> a=0
+> q
+
+X
+
+> b=0
+
+qa
+
+ qb
+
+
+
+zδ(a,b ). (13) Since rank( Hb) = 2 q − 1, we have |C ⊥ 
+
+> b
+
+| = 2 2q−1. Applying the MacWilliams identity to C⊥ 
+
+> b
+
+gives 
+
+Wb(z) = 1
+
+|C ⊥ 
+
+> b
+
+| (1 + z)q2
+
+WC⊥
+
+> b
+
+ 1 − z
+
+1 + z
+
+
+
+= 2 −2qqX
+
+> a=0
+> q
+
+X
+
+> b=0
+
+qa
+
+ qb
+
+
+
+(1 + z)q2−δ(a,b )(1 − z)δ(a,b ),
+
+(14) which proves (10). Extracting the coefficient of zw and using 
+
+[zw](1 + z)n−x(1 − z)x = Kw(x; n)
+
+gives (12). We next recall the random ensemble of FDPC codes of a given order s > 1 used throughout this work [15]. First, the base code Cb is fixed and then s − 1 permutations π1, . . . , π s−1
+
+of the n = q2 coordinates are chosen independently and uniformly at random. The resulting random order-s FDPC code can also be represented by 
+
+C(s) = Cb ∩ π1(Cb) ∩ · · · ∩ πs−1(Cb). (15) All expectations in the rest of this section are taken over this random ensemble of order-s FDPC codes. 
+
+Corollary 2. For an order-s FDPC code drawn from the above random ensemble, let A(s) 
+
+> w
+
+denote the random variable representing the number of codewords of Hamming weight w
+
+in that code. Then 
+
+E
+
+h
+
+A(s)
+
+> w
+
+i
+
+= Asw
+
+ nw
+
+s−1 , (16) 
+
+where Aw is given exactly by Theorem 1. Proof: Fix a weight-w support S of the base code. Under a uniformly random coordinate permutation, the probability that 
+
+S is also a support of a weight-w codeword in a permuted copy is Aw/ nw
+
+. Since the s − 1 permutations are independent and the first layer contains Aw such supports, we have 
+
+E
+
+h
+
+A(s)
+
+> w
+
+i
+
+= Aw
+
+Aw
+
+ nw
+
+!s−1
+
+.
+
+For the minimum-distance analysis, we will use the following simple uniform bound on the base-code weight distribution. 
+
+Lemma 3. For the base FDPC code Cb, we have Aw ⩽ qw
+
+for 0 ⩽ w ⩽ n = q2. Moreover, for the random ensemble of order-s FDPC codes we have 
+
+E
+
+h
+
+A(s)
+
+> w
+
+i
+
+⩽
+
+ ws−1
+
+qs−2
+
+w
+
+. (17) 
+
+Proof: Since Cb is the cycle space of Kq,q , every codeword corresponds to an edge set having even degree at every vertex. Hence, Aw = 0 for odd w. Let w be even. For either side of the bipartition, the w edge endpoints can be paired in w!2w/ 2(w/ 2)! 
+
+ways, and the resulting pairs can be assigned to the q vertices in qw/ 2 ways. Applying this independently to both sides and dividing by the w! orderings of the w distinct edges gives 
+
+Aw ⩽ w!2w(( w/ 2)!) 2 qw =
+
+  ww/ 2
+
+
+
+2w qw ⩽ qw.
+
+For the second claim, Corollary 2 and  nw
+
+ ⩾ (n/w )w, with 
+
+n = q2, give 
+
+E
+
+h
+
+A(s)
+
+> w
+
+i
+
+⩽ qsw 
+
+(q2/w )(s−1) w =
+
+ ws−1
+
+qs−2
+
+w
+
+.
+
+The ensemble-average bound in (17) can be converted, through a first-moment argument, into a probabilistic lower bound on the minimum distance. This is done in the next theorem. 
+
+Theorem 4. For every integer s ⩾ 3 and any 0 < δ < 1,a code C drawn from the random ensemble of order-s FDPC codes satisfies 
+
+Pr( dmin (C) ⩾ ds(δ)) ⩾ 1 − δ, (18) 
+
+where 
+
+ds(δ) def 
+
+=
+
+$ δ
+
+1 + δ
+
+ 1
+
+> s−1
+
+q s−2
+
+> s−1
+
+%
+
+. (19) 
+
+Consequently, for a constant s ⩾ 3, there exist order-s FDPC codes with dmin = Ω 
+
+
+
+q s−2
+
+> s−1
+
+
+
+= Ω 
+
+
+
+n s−22( s−1) 
+
+
+
+, where n = q2.Proof: Let ρ = δ/ (1 + δ). For every 1 ⩽ w < d s(δ), (17) gives E
+
+h
+
+A(s)
+
+> w
+
+i
+
+⩽ ρw. Therefore, 
+
+E
+
+
+
+> ds(δ)−1
+
+X
+
+> w=1
+
+A(s)
+
+> w
+
+ ⩽
+
+> ∞
+
+X
+
+> w=1
+
+ρw = ρ
+
+1 − ρ = δ. 5
+
+By Markov’s inequality, the probability that there exists a nonzero codeword of weight below ds(δ) in C is at most δ.This completes the proof of the first part. For the second part, for any fixed δ ∈ (0 , 1) , this probability is strictly less than one and, hence, there exists a realization satisfying dmin ⩾ ds(δ). For fixed s ⩾ 3, the factor (δ/ (1 + 
+
+δ)) 1/(s−1) is a positive constant, and we have 
+
+ds(δ) = Ω 
+
+
+
+q s−2
+
+> s−1
+
+
+
+= Ω 
+
+
+
+n s−22( s−1) 
+
+
+
+,
+
+where n = q2. This completes the proof. Combining Theorem 4 with the rate bound 
+
+R ⩾ 1 − 2sq + 2s − 1
+
+q2
+
+provides the rate–distance scaling of higher-order FDPC codes. For a constant s ⩾ 3 and any 0 < δ < 1, the rate satisfies 
+
+R = 1 − O(1 /q ). Also, with probability at least 1 − δ,
+
+dmin ⩾
+
+$ δ
+
+1 + δ
+
+ 1
+
+> s−1
+
+q s−2
+
+> s−1
+
+%
+
+.
+
+If the order is allowed to grow as s = Θ(log q), the rate remains 
+
+R = 1 − O
+
+ log qq
+
+
+
+,
+
+while the minimum distance scales as dmin = Ω( q) = Ω( √n).Note that the case s = 2 requires a separate analysis. Corollary 2 remains valid for s = 2 and gives the exact ensemble average. However, the uniform bound of Lemma 3 reduces in this case to 
+
+E
+
+h
+
+A(2) 
+
+> w
+
+i
+
+⩽ ww,
+
+which does not yield a growing minimum-distance guarantee through the above first-moment argument. This is why Theo-rem 4 is stated for s ⩾ 3. The order-2 case was studied in more detail in [15]. 
+
+B. Sparsification of FDPC Codes 
+
+The parity-check matrix of an order-s FDPC code has column weight 2s, which can be fixed to an even constant, whereas its row weight is q = √n and, hence, grows with the blocklength. This growth is closely tied to the high-rate nature of the construction. Note that since Hs has 2sq rows and n = q2 columns, its check-to-variable ratio is 
+
+2sq n = 2sq ,
+
+which vanishes as q grows for fixed s. Thus, with a fixed column weight, allowing the row weight to grow is what enables the rate of the FDPC family to approach one. In contrast, keeping both the row and column weights bounded leads naturally to a nonvanishing check density and, hence, to a rate bounded away from one. This observation suggests using a high-rate FDPC code as a parent code and trading some of its rate for sparser parity checks. The key question is whether the high-weight checks of the parent code can be replaced by several lower-weight checks without sacrificing its useful distance properties. We show that this can be done through a simple check-splitting operation. Each weight-q row is partitioned into ℓ = q/L 
+
+disjoint checks of weight L, for some integer L > 1 that divides 
+
+q, while every variable remains in exactly the same number, 2s,of checks. Consequently, the resulting matrix has row weight 
+
+L and column weight 2s, while its code is a subcode of the parent FDPC code and, therefore, inherits its minimum-distance guarantee. This operation provides an explicit interpolation between high-rate FDPC codes and conventional regular LDPC codes. By choosing L to grow with q, one can retain a rate approaching one while reducing the row density of the parent matrix. On the other hand, for fixed s and fixed L > 2s, the resulting matrices have bounded row and column weights. Thus, check splitting with an underlying fixed parameter L turns the FDPC construction into a family of (2 s, L )-regular LDPC codes. Next, we specify this check-splitting operation in more detail and formally refer to it as sparsification .
+
+Definition 1 (Sparsification of an FDPC matrix) . Let Hs be an order-s FDPC parity-check matrix of length n = q2, with rows 
+
+h1, . . . , h m, where m = 2 sq . Let L divide q and set ℓ = q/L .For each i ∈ [m], partition the support of hi as 
+
+supp( hi) = S(1)  
+
+> i
+
+˙∪ S(2)  
+
+> i
+
+˙∪ · · · ˙∪ S(ℓ) 
+
+> i
+
+, with |S(j) 
+
+> i
+
+| = L, 
+
+where ˙∪ denotes disjoint union. Let h(j) 
+
+> i
+
+∈ Fn 
+
+> 2
+
+be the indicator vector of S(j) 
+
+> i
+
+. Thus, hi = Pℓj=1 h(j) 
+
+> i
+
+. The L-sparsification of 
+
+Hs, denoted by eHs, is the parity-check matrix whose rows are 
+
+h(j) 
+
+> i
+
+, for i ∈ [m], j ∈ [ℓ]. The corresponding code 
+
+eCs = ker( eHs)
+
+is called the L-sparsified FDPC code. 
+
+Lemma 5. Let eCs = ker( eHs) of rate eR be an L-sparsified FDPC code corresponding to the parent code Cs. Then 
+
+eCs ⊆ C s, and dmin ( eCs) ⩾ dmin (Cs).
+
+Moreover, 
+
+dim( eCs) ⩾ n − 2sn L + 2 s − 1, (20) 
+
+and consequently 
+
+eR ⩾ 1 − 2sL + 2s − 1
+
+n . (21) 
+
+Proof: Each row of Hs is the sum of the rows replacing it in eHs. Hence, row( Hs) ⊆ row( eHs), which implies eCs ⊆ C s.This shows the first part. For the second part, eHs contains 
+
+2sn/L rows. Within each FDPC layer, the sum of all sparsified checks associated with one side of Kq,q equals the all-ones vector, and the same holds for the opposite side. Hence each layer contributes one linear dependency. Moreover, these all-ones sums are identical across the s layers, yielding s − 1
+
+additional independent dependencies. Therefore, 
+
+rank( eHs) ⩽ 2sn L − (2 s − 1) ,6
+
+which gives 
+
+dim( eCs) ⩾ n − 2sn L + 2 s − 1.
+
+Dividing by n gives the stated rate bound. Beyond the deterministic distance guarantee above, sparsi-fication can substantially suppress the low-weight codewords of the parent FDPC code. To quantify this effect, we consider random L-sparsification, in which the support of each parent check is partitioned independently and uniformly into ℓ = q/L 
+
+subsets of size L.Suppose a vector overlaps a given weight-q parent check in d
+
+positions. The probability that it satisfies all ℓ checks produced by the sparsification is 
+
+pq,L (d) = [zd] Φ L(z)ℓ
+
+ qd
+
+ , where ΦL(z) = 
+
+> L
+
+X 
+
+> j=0
+> jeven
+
+Lj
+
+
+
+zj . (22) For example, pq,L (0) = 1 , while pq,L (2) = L−1 
+
+> q−1
+
+. This illus-trates the additional suppression of low-weight configurations. For a fixed parent matrix Hs with rows h1, . . . , h m, let 
+
+di(x) = | supp( x) ∩ supp( hi)|. If eAw denotes the number of weight-w codewords after random sparsification, using inde-pendence of the row partitions we get 
+
+Esp 
+
+h eAw | Hs
+
+i
+
+= X
+
+> x∈C s
+> wt( x)= wm
+
+Y
+
+> i=1
+
+pq,L (di(x)) , (23) where the expectation Esp [. | Hs] is taken over the independent random L-sparsifications of the rows of a given Hs, conditioned on the parent matrix Hs being fixed. Consequently, in the same probability space, a first-moment bound yields 
+
+Pr 
+
+
+
+dmin ( eCs) < d | Hs
+
+
+
+⩽
+
+> d−1
+
+X
+
+> w=1
+
+Esp 
+
+h eAw | Hs
+
+i
+
+. (24) Equations (23) and (24) apply to general random sparsification, but their evaluation requires the detailed overlap profiles of the parent codewords. For the finite-length constructions considered later, we next identify an order-2 specialization for which the post-sparsification weight distribution is available explicitly. 
+
+C. A Special Case: Order-2 Sparsified FDPC Codes 
+
+The general sparsification analysis above applies to arbitrary choices of the partitions in Definition 1. In particular, Eq. (23) gives the average weight distribution under random sparsifica-tion. Its direct evaluation, however, requires the overlap profile of each parent-codeword support with the individual parity checks. For the finite-length constructions of Section VI, it is useful to consider a structured order-2 specialization for which both the post-sparsification weight distribution and a stronger dimension bound are readily available. Let q = ℓL . Recall that a base FDPC layer is the cycle code of Kq,q . Partition each of the two vertex sets of Kq,q into ℓ
+
+groups of size L, and, for every vertex, split its weight-q star check according to the ℓ groups on the opposite side. This is a particular L-sparsification in the sense of Definition 1. Under this splitting, the q2 coordinates of one layer decompose into 
+
+ℓ2 disjoint blocks, each corresponding to a copy of KL,L .Let Csp  
+
+> q,L
+
+denote the resulting one-layer code. Then 
+
+Csp  
+
+> q,L
+
+∼= Cb(L)⊕ℓ2
+
+, (25) where ⊕ denotes the direct sum of linear codes and Cb(L)⊕ℓ2
+
+consists of ℓ2 independent copies of the base FDPC code Cb(L)
+
+with parameter L acting on disjoint sets of L2 coordinates. Accordingly, if WL(z) denotes the weight enumerator in The-orem 1 evaluated with q = L, then 
+
+Bq,L (z) ≜ WL(z)ℓ2
+
+=
+
+> q2
+
+X
+
+> w=0
+
+Bq,L,w zw (26) is the exact weight enumerator of one sparsified layer. More-over, let k0 denote the dimension of this one-layer sparsified code. Since each of the ℓ2 disjoint copies of Cb(L) has dimension (L − 1) 2, we have 
+
+k0 ≜ dim( Csp 
+
+> q,L
+
+) = ℓ2(L − 1) 2. (27) For the order-2 ensemble, let the relative coordinate permu-tation between the two sparsified layers be uniformly random, and define 
+
+eC(2)  
+
+> q,L
+
+= Csp  
+
+> q,L
+
+∩ π
+
+
+
+Csp 
+
+> q,L
+
+
+
+. (28) 
+
+Proposition 6. The parity-check matrix of eC(2)  
+
+> q,L
+
+has row weight 
+
+L and column weight 4. If eAw denotes the number of weight-w
+
+codewords, then 
+
+E[ eAw] = B2
+
+> q,L,w
+
+ q2
+
+> w
+
+ . (29) 
+
+Furthermore, 
+
+dim 
+
+ eC(2) 
+
+> q,L
+
+
+
+⩾ 2ℓ2(L − 1) 2 − q2 = ℓ2(L2 − 4L + 2) . (30) 
+
+Proof: The row and column weights follow directly from the order-2 sparsification. For the weight distribution, a fixed weight-w codeword of the first sparsified layer belongs to the uniformly permuted second layer with probability Bq,L,w / q2
+
+> w
+
+.Hence, by the same permutation-counting argument used in Corollary 2, (29) follows. Finally, the intersection of two k0-dimensional subspaces of Fq2 
+
+> 2
+
+has dimension at least 2k0 − q2,which together with (27) gives (30). The structured order-2 ensemble of Proposition 6 will be used throughout the finite-length constructions in Section VI. Next, we illustrate its dimension bound and the resulting check-weight reduction for some examples. 
+
+Example 1. Consider first the structured order-2 sparsified FDPC ensemble with q = 15 and L = 5 . Here, n = q2 = 225 
+
+and ℓ = q/L = 3 . For comparison, the unsparsified order-
+
+2 FDPC code has row weight 15 , column weight 4, and dimension 
+
+k ⩾ n − 4q + 3 = 225 − 60 + 3 = 168 .7
+
+Under the structured sparsification of this subsection, the row weight is reduced to L = 5 while the column weight remains equal to 4. Proposition 6 gives 
+
+ek ⩾ ℓ2(L2 − 4L + 2) = 3 2(25 − 20 + 2) = 63 .
+
+Thus, the structured sparsification changes the classical param-eters from a high-rate FDPC code with rate at least 168 /225 
+
+to a (4 , 5) -regular LDPC code with rate at least 63 /225 .As a second example, let q = 32 and L = 8 , so that n =1024 and ℓ = 4 . The unsparsified order-2 FDPC code has row weight 32 , column weight 4, and dimension 
+
+k ⩾ n − 4q + 3 = 1024 − 128 + 3 = 899 .
+
+The structured sparsification gives a (4 , 8) -regular parity-check matrix, and Proposition 6 yields 
+
+ek ⩾ ℓ2(L2 − 4L + 2) = 4 2(64 − 32 + 2) = 544 .
+
+Hence, the guaranteed rate is reduced from at least 899 /1024 
+
+to at least 544 /1024 , while the row weight is reduced from 32 
+
+to 8.IV. Q UANTUM CSS C ODES FROM FDPC AND SPARSIFIED 
+
+FDPC C ODES 
+
+We now use FDPC and sparsified FDPC parity-check ma-trices as classical components of the hypergraph-product con-struction. The unsparsified FDPC matrices provide the high-rate classical structure and distance guarantees developed in the previous section, while sparsification allows the row weight to be reduced in a controlled manner. This leads to two useful quantum regimes: qLDPC codes with bounded stabilizer weight, obtained from fixed-order sparsified FDPC matrices, and high-rate CSS codes obtained by allowing the FDPC order and sparsified row weight to scale moderately with blocklength. 
+
+A. General Hypergraph-Product Construction 
+
+We first consider an asymmetric HGP construction in which the FDPC-based component is paired with an arbitrary second classical code. This flexibility is useful for controlling the resulting quantum dimension and distance, and includes the symmetric construction as an important special case. Let HA be obtained from an L-sparsified order-s FDPC matrix eHs of length n = q2 by removing linearly dependent rows. The original FDPC matrix is included as the special case 
+
+L = q. Denote 
+
+rA = rank( eHs), kA = n − rA,
+
+and let dA be the minimum distance of the classical code 
+
+ker( HA) = ker( eHs). Note that removing redundant rows does not change the classical code and cannot increase the row or column weights. Hence, we have 
+
+rA ⩽ 2sn L , wr (HA) ⩽ L, and wc(HA) ⩽ 2s, (31) while Lemma 5 gives dA ⩾ dmin (Cs).As the second component, let HB be any full-row-rank parity-check matrix of a classical [nB , k B , d B ] code, and write 
+
+rB = nB − kB .Applying the hypergraph-product construction to HA and 
+
+HB results in a CSS code with parameters specified in the following theorem. 
+
+Theorem 7. The hypergraph-product construction based on 
+
+HA and HB gives a [[ N, K, D ]] CSS code with 
+
+N = nn B + rArB , K = kAkB , and D = min {dA, d B }.
+
+(32) 
+
+Its X- and Z-stabilizer weights satisfy 
+
+wX ⩽ L + wc(HB ), and wZ ⩽ 2s + wr (HB ). (33) 
+
+Furthermore, we have 
+
+N ⩽ nn B
+
+
+
+1 + 2sLrB
+
+nB
+
+
+
+, (34) 
+
+K ⩾ nk B
+
+
+
+1 − 2sL
+
+
+
+. (35) 
+
+Proof: Since both HA and HB are full row rank, the standard hypergraph-product formulas give (32). The stabilizer-weight bounds follow from (31), while (34) and (35) follow from rA ⩽ 2sn/L .Let 
+
+RA = kA
+
+n , and RB = kB
+
+nB
+
+denote the rates of the two classical components. Since rA/n =1 − RA and rB /n B = 1 − RB , the quantum rate, denoted by 
+
+RQ, is given by 
+
+RQ = RARB
+
+1 + (1 − RA)(1 − RB ) . (36) In particular, using (31), 
+
+RQ ⩾
+
+ 1 − 2sL
+
+ RB
+
+1 + 2sL (1 − RB ) . (37) Thus, the second classical component provides an additional degree of freedom in trading off quantum rate and distance, while the FDPC component controls the structured sparsity and supplies the inherited distance guarantee. 
+
+B. Quantum FDPC Codes 
+
+A particularly natural specialization of the general HGP construction is to use the same FDPC component for both classical codes, i.e., HB = HA. In this symmetric case, let 
+
+r = rA, k = kA, d = dA. Then the quantum parameters reduce to 
+
+N = n2 + r2, K = k2, and D = d, (38) with stabilizer weights of the resulting CSS code upper bounded by L + 2 s. For L ⩾ 2s, the dimension bound in Eq. (35) can be squared in the symmetric construction, giving 
+
+N ⩽ n2
+
+
+
+1 + 4s2
+
+L2
+
+
+
+, K ⩾ n2
+
+
+
+1 − 2sL
+
+2
+
+,8
+
+and therefore, 
+
+RQ = R2
+
+> A
+
+1 + (1 − RA)2 ⩾
+
+ 1 − 2sL
+
+2
+
+1 +   2sL
+
+2 . (39) This construction gives rise to the quantum FDPC codes defined formally next. 
+
+Definition 2 (Quantum FDPC codes) . A quantum FDPC (qFDPC) code is a CSS code obtained through the symmetric hypergraph-product construction using an L-sparsified order-
+
+s FDPC code as both classical components. The original unsparsified FDPC construction is included as the special case 
+
+L = q.
+
+The parameters s and L provide two distinct degrees of freedom in the qFDPC construction. The order s governs the minimum-distance behavior of the parent FDPC ensemble, whereas L controls the rate loss introduced by sparsifica-tion and, together with s, the stabilizer weight. Later in this section, we show that an appropriate joint scaling of these parameters produces high-rate CSS codes with polynomially growing minimum distance and substantially reduced stabilizer weight. A polylogarithmic stabilizer-weight specialization is given subsequently in Corollary 9. Throughout the large-blocklength analysis in the remainder of this section, the integer parameters are taken along sequences satisfying the divisibility condition L | q required by the sparsification construction. For the joint scaling mentioned above, we choose s and L
+
+jointly as functions of q. Let 
+
+s = Θ(log q), and L = s g (q),
+
+where g(q) → ∞ and sg (q) = o(q). The first condition is sufficient to obtain the Ω( q) minimum-distance scaling of the parent FDPC ensemble, while the second ensures that sparsification reduces the check weight substantially below its original value q. These choices of parameters lead to the following theorem. 
+
+Theorem 8. Consider a sequence of integer parameters 
+
+(q, s, L ) satisfying L | q, s = Θ(log q), and L = sg (q), where 
+
+g(q) → ∞ and sg (q) = o(q). For any fixed 0 < δ < 1, the resulting qFDPC code satisfies, with probability at least 1 − δ,
+
+D ⩾
+
+$ δ
+
+1 + δ
+
+ 1
+
+> s−1
+
+q s−2
+
+> s−1
+
+%
+
+. (40) 
+
+Consequently, 
+
+D = Ω( N 1/4),
+
+where the implied constant may depend on δ and on the constants in s = Θ(log q). Moreover, 
+
+RQ = 1 − O
+
+ 1
+
+g(q)
+
+
+
+,
+
+and the stabilizer weight in the resulting qFDPC code is 
+
+wstab = O(log N g (q)) .
+
+Proof: Since g(q) → ∞ , we have L = sg (q) ⩾ 2s
+
+for all sufficiently large q. Hence, Eq. (39) applies and, using 
+
+L = sg (q), gives 
+
+RQ ⩾ (1 − 2/g (q)) 2
+
+1 + 4 /g (q)2 = 1 − O
+
+ 1
+
+g(q)
+
+
+
+.
+
+By Theorem 4 and the fact that sparsification cannot decrease minimum distance, (40) holds with probability at least 1 − δ.Since s = Θ(log q) and δ is fixed, we have 
+
+ δ
+
+1 + δ
+
+1/(s−1) 
+
+= Θ(1) ,
+
+and also 
+
+q(s−2) /(s−1) = q q −1/(s−1) = Θ( q).
+
+Hence, up to the inconsequential floor operation, D = Ω( q).Furthermore, 
+
+n2 ⩽ N ⩽ n2
+
+
+
+1 + 4
+
+g(q)2
+
+
+
+.
+
+Hence, N = Θ( q4) and, therefore, D = Ω( N 1/4). Finally, 
+
+wstab ⩽ L + 2 s = s(g(q) + 2) = O(log N g (q)) .
+
+Corollary 9. Consider an integer parameter sequence satisfy-ing L | q, s = Θ(log q), and L = Θ(log q log log q). Then, for any fixed 0 < δ < 1, the resulting qFDPC code satisfies, with probability at least 1 − δ,
+
+D = Ω( N 1/4),
+
+while 
+
+RQ = 1 − O
+
+ 1log log N
+
+
+
+, (41) 
+
+and 
+
+wstab = O(log N log log N ).
+
+Proof: Set g(q) = Θ(log log q) in Theorem 8. Since 
+
+N = Θ( q4), we have log q = Θ(log N ) and log log q =Θ(log log N ), which completes the proof. For comparison, setting L = q recovers the original FDPC matrix without sparsification. In this case, for s = Θ(log q),
+
+RQ = 1 − O
+
+ log qq
+
+
+
+= 1 − O
+
+ log NN 1/4
+
+
+
+,
+
+while the same probabilistic distance scaling 
+
+D = Ω( N 1/4)
+
+is retained. However, the stabilizer weight now grows as 
+
+wstab = q + 2 s = Θ( N 1/4).
+
+Thus, sparsification trades part of the excess rate of the original FDPC construction for a substantial reduction in stabilizer weight, from polynomial to polylogarithmic in the quantum blocklength. 
+
+Remark 1. The distance bound in Theorem 8 is conservative in the sense that it only uses the minimum-distance guarantee 9
+
+of the parent FDPC code. In particular, the additional parity constraints introduced by L-sparsification are used to control the rate and stabilizer weight, but their effect on the mini-mum distance is not exploited. The weight-distribution analysis of Section III suggests that sparsification can substantially suppress low-weight codewords. Therefore, sparsification may yield stronger distance scaling than the parent-code guarantee alone. Establishing an improved asymptotic distance scaling for the sparsified ensemble is therefore left for future work. In addition to the symmetric qFDPC construction, we also consider an asymmetric HGP construction in which one clas-sical component is an FDPC code and the other is a repetition code. This construction is useful for two reasons. First, the repetition length provides an additional finite-length design parameter for trading blocklength and distance while retaining bounded stabilizer weight. Second, as shown in Section V, the logical classes in one Pauli sector can be characterized exactly in terms of the codewords of the FDPC component. This provides an explicit connection between the FDPC weight distribution and the ML performance of the resulting quantum code over the erasure channel. 
+
+Definition 3 (Quantum FDPC–Rep codes) . Let HA be the parity-check matrix of an L-sparsified order-s FDPC code, and let HR be a full-row-rank parity-check matrix of the length-r repetition code. Throughout, we take HR to be the standard path parity-check matrix of the repetition code, whose rows have weight 2 and whose maximum column weight is 
+
+2. A quantum FDPC–Rep (qFDPC–Rep) code is the CSS code obtained from the hypergraph product construction with underlying components HA and HR.
+
+We use the term qFDPC–Rep to distinguish this asymmetric construction from the symmetric qFDPC codes of Definition 2. In Section VI, we will use both constructions to obtain explicit finite-length quantum codes with bounded stabilizer weight. V. W EIGHT DISTRIBUTION AND ML P ERFORMANCE ON THE QUANTUM ERASURE CHANNEL 
+
+In this section, we connect the finite-length weight-distribution analysis of FDPC codes to maximum-likelihood (ML) decoding over the quantum erasure channel. We first review the erasure model and show how the classical FDPC weight enumerator can be used to bound the ML probability of error. We then transfer these weight-distribution results to the logical operators of hypergraph-product quantum FDPC codes and derive a first-order approximation to the ML probability of error. 
+
+A. Quantum erasure channel and the role of the weight distri-bution 
+
+The quantum erasure channel is one of the standard models for studying the information-theoretic performance of quantum error-correcting codes [22, 23]. Each physical qubit in this model is erased independently with probability p, and the locations of the erased qubits are revealed to the decoder. Throughout the rest of this paper, p denotes the physical erasure probability of the quantum erasure channel. For notational sim-plicity, we use the same symbol p for both the classical binary erasure channel and the quantum erasure channel, with the channel being clear from context. Conditioned on an erasure, the affected qubit can equivalently be regarded as undergoing a uniformly random Pauli error. Thus, for a CSS code with check matrices HX and HZ , decoding over a fixed erased set 
+
+E reduces to solving 
+
+HZ,E xE = sX , and HX,E zE = sZ , (42) where HX,E and HZ,E denote the corresponding erased-column submatrices. Erasure decoding of quantum codes has been studied ex-tensively in several settings. Delfosse and Zémor showed that maximum-likelihood (ML) decoding of surface codes over the quantum erasure channel can be performed in linear time [24]. For hypergraph-product codes, [25] developed a fast erasure decoder based on peeling and a vertical–horizontal decomposition. Also, [26] studied belief-propagation decod-ing with guided decimation for general qLDPC codes. Re-cent approaches also include cluster decomposition [27] and stabilizer-assisted inactivation [28], both aimed at approaching or attaining ML erasure-decoding performance with reduced complexity. The erasure model is also of increasing practical relevance. In neutral-atom architectures, dominant error mechanisms can in some cases be detected and converted into located erasures [29]. This possibility has motivated the study of codes tailored to biased erasure noise [30], and mid-circuit conversion of gate errors into erasures has been demonstrated experimentally in metastable 171 Yb atomic qubits [31]. The ML decoding performance of a binary linear code 
+
+C ⊆ Fn 
+
+> 2
+
+over a classical binary erasure channel with erasure probability p admits an explicit finite-length bound in terms of its weight distribution [32]. Let WC (z) = Pnw=0 Awzw denote the weight enumerator of C. Averaging over an i.i.d. erasure pattern, WC (p) is precisely the expected number of codewords consistent with the unerased observations, and straightforward bounding gives 
+
+P ML e (p) ⩽ 12 [WC (p) − 1] = 12
+
+> n
+
+X
+
+> w=1
+
+Awpw. (43) For the FDPC ensembles considered here, the ensemble-average weight distribution is available analytically. Hence, averaging (43) over the ensemble yields a computable finite-length bound 
+
+EC
+
+P ML e (p) ⩽ 12
+
+> n
+
+X
+
+> w=1
+
+EC [Aw] pw. (44) 
+
+B. Logical weight distribution of quantum FDPC codes 
+
+The logical structure of HGP codes is well understood. The original construction of Tillich and Zémor gives the dimension and distance of the product code in terms of the two classical component codes [6]. More explicitly, HGP logical operators 10 
+
+can be chosen to have support on individual rows or columns of the two product blocks. It was later shown that these “line” operators can be chosen to form a symplectic canonical basis [33]. Hence, the codewords of the classical components appear naturally as representatives of quantum logical operators. For the qFDPC–Rep construction of Definition 3, we are interested in a stronger quantity than the weight of a particular logical representative: the minimum weight within each logical equivalence class. In fact, two representatives that differ by a stabilizer implement the same logical operator but may have different Hamming weights. Consider therefore an HGP code with component matrices HA and HB , where HA is the FDPC component and HB = HR is the parity-check matrix of a repetition code. For this qFDPC–Rep family, the complete minimum-weight logical-class distribution in one Pauli sector can be characterized exactly. 
+
+Proposition 10 (Logical-class weight distribution of qFD-PC–Rep codes) . Consider a qFDPC–Rep code of Definition 3. Let HA ∈ Fm×n 
+
+> 2
+
+be a full-row-rank parity-check matrix of the FDPC component, with CA = ker HA, and let HR ∈ F(r−1) ×r
+
+> 2
+
+be a full-row-rank parity-check matrix of the length-r repetition code. With LZ defined as in Eq. (4) , there is an isomorphism 
+
+LZ ∼= CA. (45) 
+
+Under this isomorphism, the minimum physical weight of the logical class associated with a ∈ C A is exactly wt( a).Therefore, if 
+
+WA(z) = 
+
+> n
+
+X
+
+> w=0
+
+A(A) 
+
+> w
+
+zw (46) 
+
+is the weight enumerator of the FDPC component and M Zw
+
+denotes the number of Z-logical classes having minimum physical weight w, then we have 
+
+M Zw = A(A) 
+
+> w
+
+. (47) 
+
+Proof: Represent a Z-type operator by a pair (U, V ),where U ∈ Fn×r 
+
+> 2
+
+, and V ∈ Fm×(r−1) 2 . The condition (U, V ) ∈
+
+ker HX is equivalent to 
+
+HAU + V H R = 0 . (48) Define 
+
+ϕZ : ker HX −→ C A, and ϕZ (U, V ) = U 1r . (49) Since HR1r = 0 , Eq. (48) gives HAU 1r = 0 , so ϕZ (U, V ) ∈CA.The map ϕZ is surjective. In fact, for any a ∈ C A and any 
+
+j ∈ [r], (ae Tj , 0) ∈ ker HX and ϕZ (ae Tj , 0) = a. Moreover, every Z-stabilizer can be written as (T H R, H AT ), for some 
+
+T ∈ Fn×(r−1) 2 , and hence belongs to ker ϕZ . Conversely, if 
+
+ϕZ (U, V ) = 0 , then every row of U has even parity. Since 
+
+row( HR) is the even-parity subspace of Fr
+
+> 2
+
+, there exists T ∈
+
+Fn×(r−1) 2 such that U = T H R. Substituting into Eq. (48) yields 
+
+(HAT + V )HR = 0 .
+
+The full row rank of HR implies V = HAT . Hence 
+
+ker ϕZ = row( HZ ).
+
+Since ϕZ is surjective and ker ϕZ = row( HZ ), it induces the isomorphism 
+
+LZ ∼= CA,
+
+which proves Eq. (45). Finally, let a = ϕZ (U, V ). Whenever ai = 1 , the ith row of U has odd weight and hence contains at least one nonzero entry. Therefore, 
+
+wt( U, V ) ⩾ wt( U ) ⩾ wt( a).
+
+The representative (ae Tj , 0) attains equality for any j ∈ [r].Thus, the minimum physical weight of the logical class corre-sponding to a is exactly wt( a), which proves Eq. (47). Proposition 10 gives an exact transfer of the classical FDPC weight distribution to the Z-logical classes of the qFDPC–Rep code. In particular, the FDPC weight distribution is not just the weight distribution of a selected set of logical representa-tives. Instead, it gives the minimum physical weight of every logical equivalence class in this sector. For a random FDPC component, 
+
+E[M Zw ] = E[Aw]. (50) Hence, the ensemble-average weight distribution derived earlier applies to the Z-logical-class weight distribution of the corre-sponding qFDPC–Rep ensemble. 
+
+C. First-order approximation of the ML probability of error 
+
+Since errors that differ only by a stabilizer are equivalent, ML decoding over a fixed erasure pattern can fail logically only when the erased qubits support a nontrivial logical operator [23, 28]. This standard characterization makes the minimum-weight logical operators particularly important in the low-erasure regime. If DZ denotes the Z distance and N ZDZ is the number of distinct physical Z-logical operators of weight DZ ,then we have 
+
+P ML e,Z (p) = N ZDZ
+
+2 pDZ + O pDZ +1  . (51) In fact, no erasure set of cardinality smaller than DZ can support a nontrivial Z-logical operator. For an erasure set of cardinality exactly DZ , the presence of a minimum-weight log-ical operator produces one binary logical ambiguity and hence a conditional ML error probability 1/2. A similar statement holds for the X sector. For HGP codes, the multiplicities N ZDZ and N XDX can be related explicitly to the minimum-weight distributions of the classical component codes. We assume throughout that the classical component codes have full coordinate support, i.e., for every coordinate j there exists a codeword whose jth coordinate is nonzero. Equivalently, a generator matrix of each component code has no all-zero column. Similarly, for a parity-check matrix, full coordinate support means that no column is linearly independent of all the remaining columns. 11 
+
+The repetition component considered below has full coordinate support, and we restrict the FDPC-based logical-weight analysis to realizations with this property. The condition is verifiable for any particular realization and is used only in counting the multiplicity of the line logical operators. 
+
+Proposition 11 (First-order ML erasure probability of HGP codes) . Let HA and HB be full-row-rank parity-check matrices of classical codes CA and CB , with lengths nA and nB ,minimum distances dA and dB , and full coordinate support. Let A(A) 
+
+> dA
+
+and A(B) 
+
+> dB
+
+denote the numbers of minimum-weight codewords in the two component codes. Then, for the corre-sponding HGP code, the sector distances satisfy DZ = dA and 
+
+DX = dB . Moreover, 
+
+P ML e,Z (p) = nB A(A)
+
+> dA
+
+2 pdA + O pdA+1  , (52) 
+
+P ML e,X (p) = nAA(B)
+
+> dB
+
+2 pdB + O pdB +1  . (53) 
+
+Proof: We prove the Z-sector statement and the X-sector statement follows by symmetry. As discussed in the preced-ing subsection, the logical operators of an HGP code admit line representatives determined by codewords of the classical components. Under the full-coordinate-support assumption, for every minimum-weight codeword a ∈ C A and every j ∈ [nB ],
+
+(ae Tj , 0) is a nontrivial Z-logical operator of weight dA.Conversely, applying the same kernel argument used in the proof of Proposition 10 to the second component shows that for every nontrivial Z-logical operator (U, V ) there exists b ∈ C B
+
+such that 0̸ = U b ∈ C A. Consequently, 
+
+dA ⩽ wt( U b) ⩽ wt( U ) ⩽ wt( U, V ),
+
+and hence DZ = dA.It remains to characterize the equality case. If wt( U, V ) = 
+
+dA, then the above inequalities imply V = 0 and wt( U ) = dA.The logical constraint then reduces to HAU = 0 and, hence, every column of U belongs to CA. Since every nonzero column has weight at least dA and the total weight of U is exactly dA,
+
+U contains exactly one nonzero column. Thus every minimum-weight Z-logical operator is of the form (ae Tj , 0) with wt( a) = 
+
+dA. Therefore, 
+
+N ZdA = nB A(A) 
+
+> dA
+
+. (54) No erasure pattern of weight smaller than dA can support a nontrivial Z-logical operator. At weight dA, each minimum-weight logical support produces a single binary logical ambi-guity and, hence, a conditional ML error probability of 1/2.Thus, 
+
+P ML e,Z (p) = nB A(A)
+
+> dA
+
+2 pdA + O(pdA+1 ),
+
+completing the proof. For the symmetric qFDPC construction of Definition 2, the two component codes are identical. Let n, d, and Ad denote the component blocklength, minimum distance, and number of minimum-weight codewords, respectively. Proposition 11 gives 
+
+P ML e,Z (p) = P ML e,X (p) = nA d
+
+2 pd + O pd+1  . (55) For the FDPC codes considered here, d ⩾ 4, and the minimum-weight X- and Z-logical operators have distinct supports. The two sector contributions therefore add at first order, yielding 
+
+P ML e (p) = nA d pd + O pd+1  . (56) Thus, the first-order ML probability of error of a qFDPC code is determined specifically by the minimum-distance term of the classical FDPC weight distribution. For the qFDPC–Rep construction of Definition 3, let the FDPC component have parameters (n, d ) and minimum-weight multiplicity Ad. The repetition component has length r, mini-mum distance r, and a single nonzero codeword. Proposition 11 therefore gives 
+
+P ML e,Z (p) = rA d
+
+2 pd + O pd+1  , (57) 
+
+P ML e,X (p) = n
+
+2 pr + O pr+1  . (58) Consequently, 
+
+P ML e (p) = 
+
+
+
+rA d
+
+2 pd + O(pd+1 ), d < r, n
+
+2 pr + O(pr+1 ), r < d, rA d + n
+
+2 pd + O(pd+1 ), r = d. 
+
+(59) Note that when d = r, the minimum-weight Z- and X-line operators have distinct physical supports as the former are column-line operators while the latter are row-line operators. Hence, their first-order contributions add. Equations (56) and (59) provide an explicit operational use of the FDPC weight distribution. In particular, the minimum distance determines the leading exponent of the ML probability of error, while the minimum-weight multiplicity Ad determines its first-order coefficient. 
+
+Remark 2. The connection between the FDPC weight distribu-tion and ML performance developed above relies on the erasure locations being known to the decoder. For standard Pauli code-capacity channels, degenerate ML decoding compares probabil-ities of stabilizer cosets, and the scalar weight distributions of the classical component codes do not in general determine these coset probabilities. Therefore, extending our analysis to such channels requires additional information beyond the component weight distributions. VI. F INITE -L ENGTH Q LDPC C ONSTRUCTIONS FROM 
+
+FDPC C OMPONENTS 
+
+In this section, we use the finite-length FDPC results de-veloped throughout the paper to construct qLDPC codes with bounded stabilizer weight. Our objective is not to optimize a single code parameter in isolation. Instead, we aim to il-lustrate the tradeoffs among quantum blocklength, dimension, minimum distance, and stabilizer weight that can be obtained using FDPC components in HGP constructions. We focus on quantum blocklengths below 10 5 and consider two stabilizer-weight regimes. We first restrict the maximum stabilizer weight 12 
+
+to 10 , enabling comparison with commonly studied finite-length qLDPC codes with small checks. We then moderately relax this constraint to illustrate the substantial rate improve-ments that become available with larger stabilizer weights. The component-code distance guarantees and weight-distribution quantities used throughout this section are obtained from the finite-length FDPC analysis developed earlier in the paper. 
+
+A. Constructions with stabilizer weight up to 10 
+
+We first consider two classes of finite-length qLDPC con-structions with maximum stabilizer weight at most 10 . We refer to the symmetric HGP construction using the same order-2
+
+sparsified FDPC code as both classical components as a sim-FD qLDPC code. We refer to the HGP construction using an order-
+
+2 sparsified FDPC code as one component and a repetition code as the other as an FD–Rep qLDPC code. These names will be used throughout this section to distinguish the finite-length qLDPC constructions from the general qFDPC families introduced earlier. Specifically, we use the order-2 sparsified FDPC components of Subsection III-C, for which the ensemble-average weight distribution is available explicitly from Eq. (29). Such a com-ponent has row weight L and column weight 4. Consequently, the stabilizer weight wstab for the sim-FD qLDPC construction satisfies 
+
+wstab ⩽ L + 4 , (60) whereas the FD–Rep qLDPC construction satisfies 
+
+wstab ⩽ max {L + 2 , 2s + 2 }.
+
+For L ⩾ 4 and s = 2 , as in all constructions reported below, this reduces to 
+
+wstab ⩽ L + 2 . (61) Thus, the constraint wstab ⩽ 10 permits L ⩽ 6 for sim-FD qLDPC codes and L ⩽ 8 for FD–Rep qLDPC codes. We restrict attention to quantum blocklengths N < 10 5.To enhance the analysis beyond the minimum distance val-ues, we use the complete analytical FDPC weight distribution to obtain a higher-order approximation to the ML logical block error probability. We refer to this as the weight-distribution (WD) approximation . Recall from Section V that the first-order ML probability is determined by the minimum-weight logical operators. The same line-logical construction produces logical operators at all weights appearing in the component-code weight distribution. The WD approximation retains all of these contributions rather than only the minimum-weight term. Following the first-moment argument used in the proof of Theorem 4, define 
+
+δd ≜
+
+> d−1
+
+X
+
+> w=1
+
+Aw, where Aw ≜ E[Aw] = B2
+
+> q,L,w
+
+ q2
+
+> w
+
+ . (62) Thus, Aw is the ensemble-average weight distribution given explicitly by Eq. (29). Throughout this section, every FDPC component is drawn from the order-2 sparsified ensemble of Subsection III-C. As in Proposition 11, the line-logical multiplicities used below are understood for full-coordinate-support realizations. Let dA denote the minimum distance of a realization A of the order-2 sparsified FDPC ensemble of Subsection III-C. Since the event dA < d , for a given d, requires the existence of at least one nonzero codeword of weight below d, the first-moment bound gives 
+
+Pr( dA < d ) ⩽ δd, (63) and hence 
+
+Pr( dA ⩾ d) ⩾ 1 − δd. (64) For the finite-length constructions reported in this section, we define 
+
+dcert  
+
+> A
+
+≜ max 
+
+
+
+d : δd ⩽ 12
+
+
+
+, (65) which implies 
+
+Pr  dA ⩾ dcert 
+
+> A
+
+ ⩾ 12 . (66) Thus, for every single FDPC component parameter choice considered later in this section, there exist realizations at-taining the reported certified component distance. Also, the subensemble of these realizations is called the good-distance 
+
+subensemble. Therefore, in forming the WD approximation for this subensemble, we set the weight-distribution terms below 
+
+dcert  
+
+> A
+
+to zero and retain the analytically available ensemble-average coefficients Aw for w ⩾ dcert  
+
+> A
+
+. This truncation is an approximation to the weight distribution of the good-distance subensemble, since Aw denotes the unconditional ensemble average rather than the conditional quantity 
+
+EAw dA ⩾ dcert 
+
+> A
+
+ .
+
+Nevertheless, Eq. (66) implies the one-sided bound 
+
+EAw dA ⩾ dcert 
+
+> A
+
+ ⩽ 2Aw,
+
+for every w. Thus, conditioning on the certified-distance event can increase any retained ensemble-average coefficient by at most a factor of two. For a sim-FD qLDPC code, the resulting weight-distribution (WD) approximation to the ML logical block error probability at physical erasure probability p is 
+
+bP WD e (p) = n
+
+> n
+
+X
+
+> w=dcert
+> A
+
+Awpw, (67) where n is the blocklength of the FDPC component. For an FD–Rep qLDPC code with repetition length r, we use 
+
+bP WD e (p) = r
+
+2
+
+> n
+
+X
+
+> w=dcert
+> A
+
+Awpw + n
+
+2 pr . (68) The leading terms of Eqs. (67) and (68) coincide with the rigorous first-order ML expressions of Section V, and the remaining terms retain the higher-weight line logical operators determined by the complete FDPC weight distribution. Two 13 
+
+TABLE I: Representative finite-length sim-FD qLDPC and FD–Rep qLDPC constructions with N < 10 5 and maximum stabilizer weight wstab ⩽ 10 . Here dcert  
+
+> A
+
+is the certified FDPC component distance defined in Eq. (65), and Dcert is the corresponding certified quantum distance defined in Eq. (69). For FD–Rep qLDPC codes, r denotes the repetition-code length. WD denotes the weight-distribution approximation defined in Eqs. (67)–(68). The error-floor column gives the estimated logical error probability at which the leading retained contribution at Dcert becomes equal to all higher-weight contributions combined. The quantity 
+
+pcap is the quantum-erasure capacity boundary evaluated at the guaranteed rate. Values marked by † lie beyond the reported asymptotic capacity reference and should be interpreted only as formal crossings of the WD approximation.                                                                                                                                                                                                   
+
+> Construction (q, L )rNKRQdcert
+> ADcert wstab
+> bPeat error-floor onset pWD ML (10 −6)pWD ML (10 −12 )pcap
+> sim-FD qLDPC (10 ,5) –⩽15 184 ⩾784 ⩾5.16% 14 14 93.48 ×10 −50.284 0.108 0.474
+> sim-FD qLDPC (12 ,6) –⩽28 480 ⩾3 136 ⩾11 .01% 14 14 10 2.89 ×10 −50.256 0.098 0.445
+> sim-FD qLDPC (15 ,5) –⩽76 869 ⩾3 969 ⩾5.16% 32 32 91.15 ×10 −11 0.498 †0.351 0.474
+> sim-FD qLDPC (12 ,4) –⩽36 612 ⩾324 ⩾0.885% 38 38 81.30 ×10 −12 0.591 †0.427 0.496
+> FD–Rep qLDPC (64 ,8) 16 ⩽94 336 ⩾2 176 ⩾2.31% 146 16 10 7.43 ×10 −40.262 0.110 0.488
+> FD–Rep qLDPC (56 ,8) 22 ⩽99 862 ⩾1 666 ⩾1.67% 114 22 10 1.33 ×10 −60.375 0.204 0.492
+> FD–Rep qLDPC (48 ,8) 29 ⩽97 056 ⩾1 224 ⩾1.26% 84 29 10 5.53 ×10 −10 0.372 0.302 0.494
+> FD–Rep qLDPC (40 ,8) 42 ⩽97 950 ⩾850 ⩾0.868% 60 42 10 6.94 ×10 −17 0.367 0.355 0.496
+> FD–Rep qLDPC (35 ,7) 53 ⩽98 725 ⩾575 ⩾0.582% 64 53 91.46 ×10 −19 0.422 0.406 0.497
+> FD–Rep qLDPC (30 ,6) 69 ⩽99 500 ⩾350 ⩾0.352% 70 69 84.16 ×10 −23 0.495 0.472 0.498
+
+effects are not captured: logical operators outside the line-logical family, and overlaps among distinct logical-erasure events. For later use, let Dcert denote the certified quantum distance of the construction. For the sim-FD qLDPC and FD–Rep qLDPC codes considered here, 
+
+Dcert =
+
+(
+
+dcert  
+
+> A
+
+, sim-FD qLDPC ,
+
+min {dcert  
+
+> A
+
+, r }, FD–Rep qLDPC . (69) Accordingly, the leading coefficient of the WD approximation is 
+
+CDcert =
+
+
+
+nA dcert  
+
+> A
+
+, sim-FD qLDPC ,r
+
+2 Adcert  
+
+> A
+
+, FD–Rep qLDPC , dcert  
+
+> A
+
+< r, n
+
+2 , FD–Rep qLDPC , r < d cert  
+
+> A
+
+,rA r + n
+
+2 , FD–Rep qLDPC , r = dcert  
+
+> A
+
+.
+
+(70) For a target logical block error probability ε, we define 
+
+pWD ML (ε) implicitly by 
+
+bP WD e
+
+ pWD ML (ε) = ε. (71) Thus, pWD ML (ε) is the physical erasure probability at which the WD approximation predicts an ML logical block error probability ε. For the constructions with wstab ⩽ 10 , we report pWD ML (10 −6) and pWD ML (10 −12 ). The latter probes an ultra-low-error regime that is difficult to access by Monte Carlo simulation, while the two operating points together indicate the steepness of the predicted low-error behavior. Waterfall and error-floor behavior has also been observed numerically for long HGP codes over the quantum erasure channel [34]. Here, we use the analytically available WD ap-proximation to characterize the onset of the error-floor regime. Writing 
+
+bP WD e (p) = CDcert pDcert 
+
++ bP WD e,> Dcert (p), (72) we define the error-floor onset pEF implicitly by 
+
+CDcert pDcert  
+
+> EF
+
+= bP WD e,> Dcert (pEF ). (73) At p = pEF , the leading retained contribution at Dcert accounts for one half of the WD approximation; for p < p EF , this is the dominant retained term. Rather than reporting pEF itself, Table I reports bP WD e (pEF ), which gives the estimated logical block error probability at which the leading-term-dominated error-floor regime begins. For reference, the quantum capacity of the qubit erasure channel is [22] 
+
+Qer (p) = max {1 − 2p, 0}. (74) The asymptotic quantum-capacity boundary corresponding to rate RQ is 
+
+pcap ≜ 1 − RQ
+
+2 . (75) The values of pcap reported below are evaluated using the guaranteed finite-length rate. Since the actual dimension of a realization may exceed its guaranteed lower bound, the reported pcap is an upper bound on the capacity boundary corresponding to the actual code rate. Moreover, for qLDPC families with uniformly bounded stabilizer-generator weight, stricter asymptotic rate upper bounds over the quantum erasure channel are known [35]. Thus, pcap is included only as a general information-theoretic reference. Table I illustrates two separate finite-length regimes. The sim-FD qLDPC construction provides the larger rates; for example, the (q, L ) = (12 , 6) construction has guaranteed rate above 11% with stabilizer weight 10 . The FD–Rep qLDPC construction instead trades rate for certified quantum distance: 14 
+
+under the same N < 10 5 and wstab ⩽ 10 constraints, the examples shown reach Dcert = 69 while maintaining stabilizer weight between 8 and 10 .The error-floor-onset column shows a strong dependence on Dcert . For the smaller-distance constructions, the leading retained contribution becomes dominant at comparatively mod-erate logical block error probabilities. For example, the FD–Rep qLDPC code with Dcert = 16 enters the minimum-weight-dominated regime at bP WD e ≃ 7.4 × 10 −4, while for Dcert = 22 
+
+the corresponding value is approximately 1.3 × 10 −6. As the certified distance increases, the onset is rapidly pushed to much lower error probabilities: it is approximately 5.5 × 10 −10 for 
+
+Dcert = 29 and below 10 −16 for Dcert = 42 .The two pWD ML columns provide an alternative view of the predicted low-error behavior. For the smaller-distance codes, reducing the target logical block error probability from 10 −6
+
+to 10 −12 requires a substantial reduction in the physical erasure probability. For example, for the (q, L ) = (12 , 6) sim-FD qLDPC construction, pWD ML decreases from approximately 0.256 
+
+to 0.098 . For the larger-distance FD–Rep qLDPC constructions, the two operating points become much closer, which reflects the strong dependence of the complete retained WD sum on the physical erasure probability. At these operating points, higher-weight line-logical terms can also make a substantial contribution. The higher-weight terms can also be important when the certified quantum distance of an FD–Rep qLDPC code is determined by the repetition component, i.e., when r < d cert  
+
+> A
+
+.In this case, the repetition term determines the leading power of p, while the accumulation of higher-weight FDPC line logicals can become significant at larger erasure probabilities. Consequently, the complete FDPC weight distribution provides finite-length information beyond the certified distance and its leading multiplicity. 
+
+B. Constructions with moderately relaxed stabilizer weight 
+
+We next moderately relax the stabilizer-weight constraint and consider constructions with 
+
+11 ⩽ wstab ⩽ 16 .
+
+Increasing the sparsification parameter L reduces the rate loss of the classical FDPC components and can therefore substantially increase the rate of the resulting quantum code. In this regime, we consider the sim-FD and FD–Rep qLDPC constructions introduced in the preceding subsection. We also consider asymmetric HGP constructions using two different order-2 sparsified FDPC components, which we refer to as FD– FD qLDPC codes. Allowing the two FDPC components to have different parameters provides an additional knob to tune for the finite-length rate–distance tradeoff. For an FD–FD qLDPC construction with component codes 
+
+A and B, let nA and nB denote their blocklengths, and let 
+
+dcert  
+
+> A
+
+and dcert  
+
+> B
+
+denote their certified component distances as defined in Eq. (65), using the first-moment criterion δd ⩽ 1/2.The corresponding certified quantum distance is 
+
+Dcert = min dcert  
+
+> A
+
+, d cert  
+
+> B
+
+. (76) Note that the two FDPC components are drawn independently. Since each component satisfies its certified-distance bound with probability at least 1/2, both bounds hold simultaneously with probability at least 1/4. Consequently, there exists an FD–FD realization satisfying 
+
+D ⩾ min dcert  
+
+> A
+
+, d cert  
+
+> B
+
+= Dcert .
+
+Let A(A) 
+
+> w
+
+and A(B) 
+
+> w
+
+denote the ensemble-average weight dis-tributions of the two FDPC components. Using the same good-distance truncation convention as in the preceding subsection, the weight-distribution (WD) approximation extends to 
+
+bP WD e (p) = nB
+
+2
+
+> nA
+
+X
+
+> w=dcert
+> A
+
+A(A) 
+
+> w
+
+pw + nA
+
+2
+
+> nB
+
+X
+
+> w=dcert
+> B
+
+A(B) 
+
+> w
+
+pw. (77) The two terms correspond to the two families of line logical op-erators. For identical components, Eq. (77) reduces to Eq. (67). We use the same definitions of pWD ML (ε) and the error-floor onset as in the preceding subsection. The constructions considered here have substantially higher rates than many of the distance-oriented codes in Table I. We therefore report the operating points pWD ML (10 −3) and 
+
+pWD ML (10 −6), rather than the 10 −6 and 10 −12 values used there. These target logical block error probabilities better characterize the operating regime of the higher-rate codes. The error-floor-onset column is retained separately. The numbers reported in this column indicate the lower-error regime in which the minimum-weight contribution becomes dominant. Table II shows that even a moderate relaxation of the stabilizer-weight constraint can produce a substantial increase in rate. For the sim-FD qLDPC construction, allowing stabilizer weight 12 yields a guaranteed rate above 23% . Allowing the two FDPC components to differ provides a further improve-ment: the (16 , 8) ×(18 , 9) FD–FD qLDPC construction reaches a guaranteed rate of approximately 25 .8% with stabilizer weight 
+
+13 and certified quantum distance Dcert = 12 . This is more than twice the largest guaranteed rate among the weight-10 
+
+sim-FD qLDPC examples in Table I. The FD–FD qLDPC constructions illustrate the additional rate–distance flexibility obtained by choosing the two classical components independently. Within the same N < 10 5 range, the examples shown span guaranteed rates from approximately 
+
+25 .8% at Dcert = 12 to approximately 4.0% at Dcert = 24 .Within the WD approximation, the estimated error-floor onset is pushed to lower logical block error probabilities, from roughly 
+
+10 −4 for the distance-12 examples to the 10 −9–10 −10 range for the distance-18 and distance-24 examples. Another type of tradeoff can be observed within the FD– Rep qLDPC family. Increasing L from 9 to 14 raises the guaranteed quantum rate from approximately 1.1% to 2.3% ,while increasing the stabilizer weight from 11 to 16 . Over the 15 
+
+TABLE II: Representative finite-length sim-FD, FD–FD, and FD–Rep qLDPC constructions with N < 10 5 and moderately relaxed stabilizer weight 11 ⩽ wstab ⩽ 16 . A component (q, L ) denotes an order-2 sparsified FDPC code of Subsection III-C, and Rep( r) denotes a length-r repetition code. The FDPC component distances are certified with δd ⩽ 1/2, and Dcert denotes the resulting certified quantum distance defined by Eq. (69) for the sim-FD and FD–Rep constructions and by Eq. (76) for the FD–FD constructions. WD denotes the weight-distribution approximation. The error-floor column gives the estimated logical block error probability at which the leading retained contribution at Dcert becomes equal to all higher-weight contributions combined. The quantities pWD ML (10 −3) and pWD ML (10 −6) are the physical erasure probabilities at which the WD approximation reaches the corresponding target logical block error probabilities. The quantity pcap is the quantum-erasure capacity boundary evaluated at the guaranteed rate.                                                                                                                                                                                                                         
+
+> Construction Components NKRQDcert wstab
+> bPeat error-floor onset pWD ML (10 −3)pWD ML (10 −6)pcap
+> sim-FD qLDPC (14 ,7) ×(14 ,7) ⩽49 232 ⩾8 464 ⩾17 .19% 12 11 1.58 ×10 −40.339 0.211 0.414
+> sim-FD qLDPC (16 ,8) ×(16 ,8) ⩽79 936 ⩾18 496 ⩾23 .14% 12 12 1.13 ×10 −40.307 0.198 0.384
+> FD–FD qLDPC (16 ,8) ×(18 ,9) ⩽99 264 ⩾25 568 ⩾25 .76% 12 13 6.60 ×10 −50.283 0.193 0.371
+> FD–FD qLDPC (10 ,5) ×(27 ,9) ⩽94 932 ⩾11 844 ⩾12 .48% 14 13 1.30 ×10 −50.315 0.260 0.438
+> FD–FD qLDPC (8 ,4) ×(33 ,11) ⩽90 864 ⩾5 688 ⩾6.26% 18 15 4.53 ×10 −90.258 0.249 0.469
+> FD–FD qLDPC (12 ,4) ×(21 ,7) ⩽92 988 ⩾3 726 ⩾4.01% 24 11 3.41 ×10 −10 0.404 0.381 0.480
+> FD–Rep qLDPC (36 ,9) ×Rep(38) ⩽69 376 ⩾752 ⩾1.08% 38 11 4.69 ×10 −18 0.325 0.318 0.495
+> FD–Rep qLDPC (40 ,10) ×Rep(36) ⩽78 880 ⩾992 ⩾1.26% 36 12 1.98 ×10 −18 0.291 0.286 0.494
+> FD–Rep qLDPC (48 ,12) ×Rep(33) ⩽99 584 ⩾1 568 ⩾1.57% 33 14 5.24 ×10 −19 0.241 0.237 0.492
+> FD–Rep qLDPC (52 ,13) ×Rep(28) ⩽97 312 ⩾1 904 ⩾1.96% 28 15 2.11 ×10 −16 0.222 0.219 0.490
+> FD–Rep qLDPC (56 ,14) ×Rep(25) ⩽99 136 ⩾2 272 ⩾2.29% 25 16 5.44 ×10 −15 0.205 0.203 0.489
+
+same sequence, Dcert decreases from 38 to 25 . The pWD ML (10 −3)
+
+and pWD ML (10 −6) values remain relatively close for these larger-distance codes, which is consistent with the strong dependence of the retained WD approximation on the physical erasure probability. At the same time, the minimum-weight-dominated error-floor regime is predicted to begin only at very small logical block error probabilities. Tables I and II together show that the sparsification parameter 
+
+L and the choice of HGP components provide specific finite-length design controls. The strict wstab ⩽ 10 regime includes distance-oriented constructions with very small checks. On the other hand, a modest increase in stabilizer weight can substantially increase the rate. In particular, the relaxed-weight FD–FD qLDPC constructions reach rates above 20% without changing the underlying FDPC construction or abandoning bounded-weight stabilizers. VII. C ONCLUSION 
+
+In this paper, we developed a framework for constructing and analyzing qLDPC codes and newly introduced qFDPC codes from FDPC components. We derived finite-length weight distributions and probabilistic distance guarantees for the rel-evant FDPC ensembles and introduced sparsification mecha-nisms that produce bounded-weight HGP constructions. The resulting sim-FD, FD–FD, and FD–Rep qLDPC codes exhibit broad tradeoffs among rate, certified distance, blocklength, and stabilizer weight. A main feature of the construction is that the FDPC weight distribution remains analytically accessible. This allows us to relate classical component codewords to logical operators and to develop a weight-distribution approximation to the ML logical block error probability over the quantum erasure channel. The proposed constructions provide an alternative approach to other structured finite-length qLDPC families, including generalized bicycle (GB) codes [9, 36], bivariate bicycle (BB) codes [37–39], and the recently introduced univariate bicycle (UB) codes [40]. These bicycle constructions exploit algebraic structure in circulant parity-check matrices and illustrate how additional structure can be leveraged to analyze finite-length properties of qLDPC codes. These structures could potentially be combined with the proposed approach to improve the finite-length parameters. Several directions remain open. Deterministic choices of the sparsification and underlying permutations in the FDPC con-struction, together with a sharper characterization of the good-distance subensemble, could further improve the finite-length constructions and their ML estimates. It will also be important to evaluate these codes under practical Pauli-noise decoders. High-performance belief propagation (BP)-based approaches such as BP-OSD [9], BP with guided decimation (BPGD) [41], and multiple-bases BP list decoding (MBBP-LD) [42] provide natural starting points. Such studies may also reveal ways to exploit the FDPC graph structure in the decoder. REFERENCES [1] A. R. Calderbank and P. W. Shor, “Good quantum error-correcting codes exist,” Phys. Rev. A , vol. 54, pp. 1098–1105, Aug 1996. [Online]. Available: https://link.aps.org/doi/10.1103/PhysRevA.54.1098 [2] A. M. Steane, “Simple quantum error-correcting codes,” Phys. Rev. A, vol. 54, pp. 4741–4751, Dec 1996. [Online]. Available: https://link.aps.org/doi/10.1103/PhysRevA.54.4741 [3] D. Gottesman, “Stabilizer codes and quantum error correction,” 1997. [Online]. Available: https://arxiv.org/abs/quant-ph/9705052 [4] D. J. MacKay, G. Mitchison, and P. L. McFadden, “Sparse-graph codes for quantum error correction,” IEEE Transactions on Information Theory ,vol. 50, no. 10, pp. 2315–2330, 2004. 16 
+
+[5] A. A. Kovalev and L. P. Pryadko, “Quantum kronecker sum-product low-density parity-check codes with finite rate,” Physical Review A—Atomic, Molecular, and Optical Physics , vol. 88, no. 1, p. 012311, 2013. [6] J.-P. Tillich and G. Zémor, “Quantum LDPC codes with positive rate and minimum distance proportional to the square root of the blocklength,” 
+
+IEEE Transactions on Information Theory , vol. 60, no. 2, pp. 1193–1202, 2014. [7] Z. Babar, P. Botsinis, D. Alanis, S. X. Ng, and L. Hanzo, “Fifteen years of quantum LDPC coding and improved decoding strategies,” IEEE Access ,vol. 3, pp. 2492–2519, 2015. [8] J. Roffe, D. R. White, S. Burton, and E. Campbell, “Decoding across the quantum low-density parity-check code landscape,” Physical Review Research , vol. 2, no. 4, p. 043423, 2020. [9] P. Panteleev and G. Kalachev, “Degenerate quantum LDPC codes with good finite length performance,” Quantum , vol. 5, p. 585, Nov. 2021. [10] N. P. Breuckmann and J. N. Eberhardt, “Quantum low-density parity-check codes,” PRX Quantum , vol. 2, no. 4, p. 040101, 2021. [11] M. B. Hastings, J. Haah, and R. O’Donnell, “Fiber bundle codes: Breaking the n1/2 polylog( n) barrier for quantum LDPC codes,” in Proceedings of the 53rd Annual ACM SIGACT Symposium on Theory of Computing .Association for Computing Machinery, 2021, pp. 1276–1288. [12] P. Panteleev and G. Kalachev, “Quantum LDPC codes with almost linear minimum distance,” IEEE Transactions on Information Theory , vol. 68, no. 1, pp. 213–229, 2022. [13] ——, “Asymptotically good quantum and locally testable classical LDPC codes,” in Proceedings of the 54th Annual ACM SIGACT Symposium on Theory of Computing , ser. STOC ’22. Association for Computing Machinery, 2022, pp. 375–388. [14] A. Leverrier and G. Zémor, “Quantum tanner codes,” in 2022 IEEE 63rd Annual Symposium on Foundations of Computer Science (FOCS) . IEEE, 2022, pp. 872–883. [15] H. Mahdavifar, “High-rate fair-density parity-check codes,” in ICC 2024-IEEE International Conference on Communications . IEEE, 2024, pp. 2809–2814. [16] T. Farrelly, D. K. Tuckett, and T. M. Stace, “Local tensor-network codes,” 
+
+New Journal of Physics , vol. 24, no. 4, p. 043015, 2022. [17] D. Forlivesi, L. Valentini, and M. Chiani, “Performance analysis of quan-tum CSS error-correcting codes via MacWilliams identities,” Quantum ,vol. 9, p. 1950, 2025. [18] I. Dumer, A. A. Kovalev, and L. P. Pryadko, “Distance verification for classical and quantum LDPC codes,” IEEE Transactions on Information Theory , vol. 63, no. 7, pp. 4675–4686, 2017. [19] K. Kasai, “Finite-degree quantum LDPC codes reaching the Gilbert– Varshamov bound,” arXiv preprint arXiv:2603.24588 , 2026. [20] M. Moradi, S. Rabeti, and H. Mahdavifar, “On the high-rate FDPC codes: Construction, encoding, and a generalization,” arXiv preprint arXiv:2506.11345 , 2025. [21] N. Hosseinzadeh, M. Moradi, and H. Mahdavifar, “Layered normalized min-sum decoding with bit flipping for FDPC codes,” in ICC 2026-IEEE International Conference on Communications . IEEE, 2026, pp. 1–6. [22] C. H. Bennett, D. P. DiVincenzo, and J. A. Smolin, “Capacities of quantum erasure channels,” Physical Review Letters , vol. 78, no. 16, pp. 3217–3220, 1997. [23] M. Grassl, T. Beth, and T. Pellizzari, “Codes for the quantum erasure channel,” Physical Review A , vol. 56, no. 1, pp. 33–38, 1997. [24] N. Delfosse and G. Zémor, “Linear-time maximum likelihood decoding of surface codes over the quantum erasure channel,” Physical Review Research , vol. 2, no. 3, p. 033042, 2020. [25] N. Connolly, V. Londe, A. Leverrier, and N. Delfosse, “Fast erasure decoder for hypergraph product codes,” Quantum , vol. 8, p. 1450, 2024. [26] M. Gökduman, H. Yao, and H. D. Pfister, “Erasure decoding for quantum LDPC codes via belief propagation with guided decimation,” in 2024 60th Annual Allerton Conference on Communication, Control, and Computing ,2024, pp. 1–8. [27] H. Yao, M. Gökduman, and H. D. Pfister, “Cluster decomposition for improved erasure decoding of quantum LDPC codes,” IEEE Journal on Selected Areas in Information Theory , vol. 6, pp. 176–188, 2025. [28] G. Pech, M. Gökduman, H. Yao, and H. D. Pfister, “Stabilizer-assisted inactivation decoding of quantum error-correcting codes with erasures,” 
+
+arXiv preprint arXiv:2601.14236 , 2026. [29] Y. Wu, S. Kolkowitz, S. Puri, and J. D. Thompson, “Erasure conversion for fault-tolerant quantum computing in alkaline earth rydberg atom arrays,” Nature Communications , vol. 13, p. 4657, 2022. [30] K. Sahay, J. Jin, J. Claes, J. D. Thompson, and S. Puri, “High-threshold codes for neutral-atom qubits with biased erasure errors,” Physical Review X, vol. 13, no. 4, p. 041013, 2023. [31] S. Ma, G. Liu, P. Peng, B. Zhang, S. Jandura, J. Claes, A. P. Burgers, G. Pupillo, S. Puri, and J. D. Thompson, “High-fidelity gates and mid-circuit erasure conversion in an atomic qubit,” Nature , vol. 622, pp. 279– 284, 2023. [32] T. Richardson and R. Urbanke, Modern Coding Theory . Cambridge University Press, 2008. [33] A. O. Quintavalle, P. Webster, and M. Vasmer, “Partitioning qubits in hypergraph product codes to implement logical gates,” Quantum , vol. 7, p. 1153, 2023. [34] M. Gökduman, H. Yao, and H. D. Pfister, “The performance of long quantum LDPC codes based on the hypergraph product,” in 2025 IEEE International Symposium on Information Theory (ISIT) , 2025, pp. 1–6. [35] N. Delfosse and G. Zémor, “Upper bounds on the rate of low density stabilizer codes for the quantum erasure channel,” Quantum Information and Computation , vol. 13, no. 9–10, pp. 793–826, 2013. [36] R. Wang and L. P. Pryadko, “Distance bounds for generalized bicycle codes,” Symmetry , vol. 14, no. 7, p. 1348, 2022. [37] S. Bravyi, A. W. Cross, J. M. Gambetta, D. Maslov, P. Rall, and T. J. Yoder, “High-threshold and low-overhead fault-tolerant quantum memory,” Nature , vol. 627, no. 8005, pp. 778–782, 2024. [38] M. Wang and F. Mueller, “Coprime bivariate bicycle codes and their properties,” arXiv preprint arXiv:2408.10001 , 2024. [39] J. J. Postema and S. J. Kokkelmans, “Existence and characterisation of bivariate bicycle codes,” IEEE Transactions on Information theory ,vol. 72, no. 9, pp. 6728–6739, 2026. [40] S. Rabeti and H. Mahdavifar, “Univariate bicycle quantum LDPC codes: Explicit logical structure and distance bounds,” arXiv preprint arXiv:2605.14173 , 2026. [41] H. Yao, W. A. Laban, C. Häger, A. G. i Amat, and H. D. Pfister, “Belief propagation decoding of quantum LDPC codes with guided decimation,” in 2024 IEEE International Symposium on Information Theory (ISIT) .IEEE, 2024, pp. 2478–2483. [42] S. Rabeti and H. Mahdavifar, “Multiple-bases belief propagation list decoding for quantum LDPC codes,” arXiv preprint arXiv:2605.14170 ,2026.

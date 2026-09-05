@@ -1,0 +1,2029 @@
+Title: Fast Fault-Tolerant Decoders for Hypergraph Product and Lifted-Product Codes
+
+URL Source: https://arxiv.org/pdf/2608.31040v1
+
+Published Time: Tue, 01 Sep 2026 03:10:05 GMT
+
+Number of Pages: 32
+
+Markdown Content:
+# Fast Fault-Tolerant Decoders for Hypergraph Product and Lifted-Product Codes 
+
+Asit Kumar Pradhan, Nithin Raveendran, David Declercq and Bane Vasi´ c
+
+Department of Electrical and Computer Engineering, The University of Arizona, Tucson, AZ, 85721 USA 
+
+Email: asitpradhan@arizona.edu, {nithin, daviddeclercq}@arizona.edu, vasic@ece.arizona.edu 
+
+Abstract —We design low-complexity, fault-tolerant decoders for quantum low-density parity-check (QLDPC) codes with the goal of reducing decoding latency. We target two major bottlenecks of decoding under the circuit-level noise model: (i) post-processing via order-statistics decoding (OSD), and (ii) the large number of auxiliary variable nodes commonly introduced to represent CNOT-induced correlations during syndrome extraction. Our key observation is that propagating CNOT faults ( hook errors )create stabilizer-induced trapping sets (TSs) that are intrinsic to hypergraph-product (HGP) and lifted-product (LP) constructions. Therefore, instead of modeling each such fault with an explicit correlation node and relying on OSD to clean up the resulting failures, we design message-passing decoders that resolve the corresponding stabilizer-induced TSs directly. We obtain these decoders by deriving QLDPC decoders from decoders for the parent classical LDPC codes and using them collectively to correct broad families of stabilizer-induced TSs. For CNOT faults that manifest primarily as syndrome errors, we show that their effect is equivalent to a data error together with syndrome-bit measurement errors. Consequently, given repeated measurements and a decoding graph that already includes nodes representing syndrome-bit errors, no distinct variable node is needed for each CNOT fault. Using a phenomenological Tanner graph with nodes representing only data errors and syndrome-bit errors, simulations on the LP codes show a reduction in, or comparable, logical error rates relative to BP+OSD, at substantially lower decoding complexity. 
+
+I. I NTRODUCTION 
+
+Quantum information is intrinsically fragile, so quantum error-correcting codes (QECCs) must reliably extract error syndromes using low-depth circuits. Low-depth syndrome extraction is essential to prevent additional faults from ac-cumulating during each error-correction cycle. Achieving such shallow circuits requires sparse parity-check matrices, so that each check acts on only a small number of qubits. For robust error correction, the code distance should grow with the total number of physical qubits while preserving sparsity. Topological codes, such as surface codes [1], meet both of these criteria—sparse checks and increasing distance—but suffer from a vanishing rate: the ratio of logical to physical qubits approaches zero as the system size increases. As a result, they incur very large qubit overheads for large-scale quantum algorithms. These limitations have motivated the development of quan-tum low-density parity-check (QLDPC) codes, which aim to combine sparse parity checks with a non-vanishing rate and a distance that scales with system size. Constructions such as hypergraph-product (HGP) [2], balanced-product [3], lifted-product (LP) [4], and quantum Tanner codes [5] represent significant progress toward this goal. Realizing constant-overhead fault-tolerant quantum computa-tion with QLDPC codes faces several remaining challenges that can be grouped into three main categories: (1) code–architecture co-design, (2) efficient and scalable decoding, and (3) parallel logical gates. In code–architecture co-design, QLDPC codes and hardware architectures must be developed jointly so that (i) the inherently nonlocal connectivity of the codes can be efficiently embedded in the physical device and (ii) syndrome extraction can be accelerated through highly parallel gate execution, particularly when gate times are relatively low. In efficient and scalable decoding, decoders should achieve error-correction performance that improves with increasing code distance, while also running faster than the syndrome-extraction process so that decoding does not become the bottleneck of the error-correction cycle. In parallel logical gates, one must implement highly parallel, low-overhead, fault-tolerant logical gate operations on QLDPC codes. The co-design of codes and architectures has been explored in several works. For instance, the challenge of limited local connectivity in superconducting qubits is addressed in [6], while the issue of slow gate times in neutral-atom platforms is tackled in [7]. Low-overhead, fault-tolerant implementations of logical gates are studied in [8], [9], and their parallel execution is investigated in [10]. In this work, we focus on efficient and scalable decoding of QLDPC codes. The importance of fast decoding is emphasized in [11], which shows that a decoder significantly slower than syndrome extraction can negate the advantages of quantum algorithms. This point is further illustrated in [12], where in-creasing the error-correction cycle from 1 to 100 microseconds (with decoding time as the dominant contribution) increases the number of physical qubits required to break RSA in one week from about 1.5 × 10 5 to 5 × 10 7, assuming a physical error rate of 10 −3.
+
+A. Existing Approaches to Designing Low-Complexity De-coders 
+
+The challenges in designing fast decoders with low logical error rates for QLDPC codes are best understood by revisiting the decoding of classical LDPC codes, since QLDPC codes are defined by a pair of dual-containing classical LDPC codes. In the non-asymptotic regime, low-complexity iterative message-passing decoders for classical LDPC codes can fail when the error is supported on certain subgraphs of the Tanner graph arXiv:2608.31040v1 [cs.IT] 31 Aug 2026 called trapping sets (TSs) [13], [14]. The most harmful TSs are often induced by a subset of variable nodes on the support of a low-weight codewords. Such induced subgraphs contain fewer odd-degree check nodes than variable nodes, a property that often leads to decoding failure when the error is confined to that subgraph. In classical LDPC codes, error floors due TS-related decod-ing failures are typically mitigated in two steps. First, code constructions such as progressive-edge growth [15] reduce the number of short cycles, which in turn reduces the number of harmful TSs. Second, failures caused by the remaining TSs are mitigated by modifying the message-passing rules [16], [17]. For QLDPC codes, this strategy is fundamentally limited: because the two defining classical LDPC codes are dual-containing, the parity checks of one code are codewords of the other. As a result, subgraphs induced by their support inevitably act as TSs; these are referred to as stabilizer-induced TSs [18]. In [19], TS-related failures are reduced using a post-processing order-statistics decoder (OSD) applied after mes-sage passing. While OSD can reduce the decoding-failure rate, it substantially increases complexity. Specifically, it requires solving a linear system whose size scales with the blocklength, yielding cubic complexity. In addition, increasing the OSD order enlarges the greedy search over candidate error patterns, leading to exponential growth in complexity with the order. Consequently, OSD-based post-processing is typically impractical for QLDPC decoding. To overcome this limitation, several low-complexity variants of OSD have been proposed in [20]–[22], which reduce implementation cost without significantly degrading error-correction performance. Another approach, proposed in [23], eliminates the exponential search step by detecting from the decoder dynamics when the error lies in a TS. In [24], [25], the authors adapt techniques such as normalization and bias optimization, which modify message-passing rules to mitigate TS-related failures without relying on post-processing. In particular, the decoding algorithm in [24] employs multiple decoders that differ in their message-update rules at the variable nodes to reduce decoding failures. Neural-network-based approaches have also been investi-gated. In [26], [27], neural networks are trained to learn message-passing rules that resolve TS-related failures. Building on a more detailed understanding of the decoding dynamics within stabilizer-induced TSs, [28] proposes a scheduled message-passing decoder designed to avoid TS-induced failures under a certain technical condition. This scheduled decoder can be combined with other decoders that do not depend on post-processing to further boost their performance. For example, in the approach of [24], the number of parallel decoders needed to achieve a target logical error rate can be reduced by optimizing the scheduled decoder, rather than relying solely on a fully parallel decoder. The decoding approaches discussed so far assume an error-free syndrome extraction circuit and focus exclusively on optimizing decoders to avoid TS-related failures. Although this helps to clarify how TS-related decoding failures arise and how to prevent them, it is not sufficient for realistic hardware, where the syndrome extraction circuit itself can be faulty and introduce additional errors. The errors introduced during the syndrome extraction process fall into two main categories: (1) errors that propagate through the circuit and create correlated data errors, and (2) errors that do not propagate but instead corrupt the measured syndrome by effectively flipping some of the bits of the syndrome vector. To account for these errors, additional variable nodes are added to the decoding graph. For propagating errors, these nodes represent the resulting correlations and provide additional information to the decoder. For non-propagating errors that appear as flipped syndrome bits, they allow the decoder to identify error patterns that are consistent with the faulty syndrome, helping it converge. However, these additional nodes can also exacerbate non-convergence of BP decoding: they introduce many short cycles in the decoding graph, and combinations of these cycles can create new TSs beyond those already present in the code’s original Tanner graph. As in the case of perfect syndrome extraction, many decoding algorithms handle these failures using a post-processing OSD step, at the cost of increased complexity. In the imperfect syndrome extraction setting, this complexity increase is even more significant: the performance of the message-passing decoder is further degraded by the newly introduced short cycles, so the OSD must correct more residual errors. Moreover, the OSD complexity scales cubically with the number of variable nodes, which has now grown. This complexity growth can be mitigated by using more efficient OSD implementations [20]–[22], as in the perfect syndrome extraction setting. Decoding approaches that completely avoid post-processing can also be adapted to the imperfect syndrome extraction case. In [29], the authors design several neural-network-based decoders, each parameterized by a different bias (i.e., a different initial channel LLR), and run them in parallel to collectively reduce decoding failures. In [30], it is shown that running these decoders sequentially—feeding the output of one decoder as the input to the next—can further reduce decoding failures; this sequential strategy is known as relay 
+
+BP. Although these decoders avoid post-processing, running many of them sequentially still increases the decoding time, as reported in [30], even if the overhead can be substantially smaller than that of post-processing. Other list-based strategies also avoid post-processing while improving robustness. In [31], the decoder runs a small number of BP iterations, identifies the least reliable variable node (e.g., the node with the smallest-magnitude LLR), fixes its value, and then runs two BP instances corresponding to the two possible fixed values. This branching is repeated within each BP instance until the number of active instances reaches a preset list size; at that point, instances with the least reliable scores are pruned. The process continues until one of the remaining BP instances converges. The beam-search decoder avoids the sequential strategy considered in relay BP, but (like relay BP) relies on additional nodes representing CNOT faults for convergence. In [32], the authors consider list decoding on the code trellis, aggregating the probabilities of error candidates that correspond to the same syndrome. Both approaches report improved performance compared to BP+OSD, while avoiding explicit OSD-style post-processing. Unlike the message-passing decoders discussed above, this trellis-based decoder approximates coset decoding. While it maintains a decoding complexity that is linear in blocklength (as in BP), it can have a large constant factor due to the larger state space of the trellis. 
+
+B. Limitations of Existing Decoders and Motivation for Our Approach 
+
+The discussion in Section I-A highlights that many existing decoders focus on reducing or eliminating the additional complexity introduced by post-processing, rather than reducing the complexity of the underlying message-passing decoder. When the syndrome-extraction circuit is faulty, post-processing becomes more complex because the decoding graph must include extra variable nodes, as explained earlier. These additional Tanner-graph nodes represent faults during syndrome extraction and increase the cost of both OSD and message passing. Although they do not change the asymptotic scaling of message passing, they can significantly increase the constant factor, and thus the practical decoding cost. To quantify this overhead, consider the syndrome-extraction circuit of a QLDPC code from [6]. A failed CNOT gate can induce one of 15 two-qubit Pauli error operators; modeling these possibilities typically requires adding 15 variable nodes per potentially faulty CNOT. The total number of CNOT gates scales with the number of check nodes (proportional to the blocklength) times the check degree dc. Hence, the number of additional variable nodes scales as 15 dc× blocklength. For the bivariate-bicycle codes in [6], which have dc = 6 , this corresponds to a factor-15 × 6 = 90 increase in the number of variable nodes. This substantial overhead directly impacts the decoding cost and, consequently, the overall runtime of quantum algorithms and the physical-qubit estimates reported in [12]. In this work, we ask whether it is possible to (i) avoid adding extra nodes that account for circuit faults and (ii) avoid reliance on post-processing for resolving decoding failures. The main contributions of this paper are summarized as follows. 1) In Section III-A, we connect propagating circuit faults (hook errors ) to stabilizer-induced TSs and explain why introducing nodes that represent hook errors can substantially reduce the OSD order needed to correct such faults. 2) In Section IV, we characterize broad families of stabilizer-induced TSs in HGP and LP codes in terms of TSs in their parent classical codes, extending the characterization in [28] beyond products of tree-like subgraphs. We also relate these structures to circuit-level faults by quantifying how many CNOT failures suffice to induce them, which helps identify the dominant TSs that determine the slope of the logical error-rate curve in the error-floor regime. Our TS enumeration can also be used to sample error patterns to train neural-network decoders such as those in [33]. 3) In Section VI, we show that CNOT faults that manifest as syndrome errors can be reinterpreted as data errors together with syndrome measurement errors. Conse-quently, given repeated measurements and a decoding graph that already includes nodes representing syndrome measurement errors, one does not need a distinct variable node for each such CNOT failure to retain the same error-correction capability. 4) In Section IV, we derive design principles to avoid 
+
+stabilizer-induced TS-related decoding failures without adding explicit nodes to represent CNOT failures, given decoders that resolve TSs in the parent classical codes. In Section VII, we validate this approach by deriving QLDPC decoders from decoders of the parent codes that resolve the corresponding classical TSs. II. P RELIMINARIES 
+
+A. Notations 
+
+We use bold lowercase and uppercase letters to denote vectors and matrices, respectively. The i-th entry of a vector 
+
+a is written as a(i), and the (i, j )-th entry of a matrix A is written as A(i, j ). The i-th row and j-th column of A are denoted by A(i, :) and A(: , j ), respectively. The Hamming weight of a vector a, defined as the number of nonzero entries, is denoted by |a|. Calligraphic letters are used to denote sets; the cardinality of a set S is denoted by |S| . Script letters are used to denote graphs and subgraphs. Set-theoretic operations, such as intersection and union between two graphs, refer to applying these operations to the underlying node and edge sets that define the graphs or subgraphs. 
+
+B. Linear Codes 
+
+A (n, k )-binary linear code is a k-dimensional subspace of the n-dimensional vector space Fn 
+
+> 2
+
+, specified as the null space of a binary matrix H ∈ F(n−k)×n 
+
+> 2
+
+, called the parity-check matrix. The associated codespace U is 
+
+U = {u ∈ Fn 
+
+> 2
+
+: Hu = 0 (mod 2) }.
+
+The minimum distance dU of U is defined as the minimum Hamming weight of any nonzero codeword, i.e., 
+
+dU = min 
+
+> u∈U ,u̸=0
+
+|u|.
+
+A parity-check matrix can be represented by a bipartite graph known as a Tanner graph [14]. Let the Tanner graph corresponding to the parity-check matrix H be denoted by 
+
+G(V ∪C , E), where V is the set of variable nodes (corresponding to the columns of H), C is the set of check nodes (corresponding to the rows of H), and E is the set of edges of G. The set of check nodes connected to a variable node vj ∈ V is denoted by 
+
+Nvj , and the set of variable nodes connected to a check node 
+
+ci ∈ C is denoted by Nci . An edge exists between a check node ci ∈ C and a variable node vj ∈ V if the (i, j )-th entry of 
+
+H is 1. An example of a Tanner graph is shown in Figure 1. The dual of the linear code U, denoted by U⊥, is defined as v1
+
+v2
+
+v3
+
+v4
+
+c1
+
+c2
+
+c3         
+
+> Fig. 1: An example of a Tanner graph. Circular nodes represent variable nodes, and rectangular nodes represent check nodes. Each check node imposes a linear constraint on its neighboring variable nodes. For instance, check node c1is connected to variable nodes
+> v1and v2, which implies that in any valid codeword v1+v2≡0(mod 2) .
+
+the code whose codewords are orthogonal to that of U with associated codebook 
+
+U⊥ = {u′ : u′Tu = 0 (mod 2) }.
+
+C. Pauli Group 
+
+The set of Pauli matrices P = {I, X, Y, Z }, where 
+
+I =
+
+1 00 1
+
+
+
+, X =
+
+0 11 0
+
+
+
+, Y =
+
+0 −ii 0
+
+
+
+, Z =
+
+1 00 −1
+
+
+
+,
+
+forms a group [34]. The Pauli group P acts on the 2-dimensional complex Hilbert space C2. Larger groups can be formed by taking the n-fold tensor products of Pauli matrices, for n ∈ N. We denote this by Pn = {I, X, Y, Z }⊗n. The group Pn acts on a 2n-dimensional complex vector space. 
+
+D. Stabilizer Codes 
+
+Let S be an Abelian subgroup of Pn, generated by 
+
+{S1, S 2, . . . , S r }, with each Si ∈ P n \ I⊗n. The codespace U
+
+is defined as the subspace of C2n
+
+on which all elements of S act trivially, U = |ψ⟩ ∈ C2n
+
+: Si |ψ⟩ = |ψ⟩ for 1 ≤ i ≤ r [35]. Thus, U is the simultaneous +1 eigenspace of the operators in 
+
+S, and has dimension 2n−r . Elements of S are called stabilizers .For operators A and B, we say that they commute if AB = BA 
+
+and anticommute if AB = −BA . An operator in Pn that maps any codeword to another codeword is called a logical operator. The set of logical operators, denoted by L, is 
+
+L = L ∈ P n : L |ψ⟩ ∈ U for all |ψ⟩ ∈ U .
+
+Equivalently, L can be characterized as the subset of Pn
+
+consisting of operators that commute with every stabilizer. The stabilizer group S is a normal subgroup of L, and the quotient group L/S describes the operators that act non-trivially on (at least) one codeword. Because any two elements of Pn either commute or anticommute, whether an operator maps a codeword to another codeword can be determined from its commutation relations with the stabilizers. Any operator in L/S acts non-trivially on the codespace while remaining undetectable by the stabilizers. The minimum distance of the code defined by S is the minimum weight of a non-trivial element of L/S. There is an isomorphism between the single-qubit Pauli group and F22 under component wise addition, given by 
+
+I 7 → 0 0 , X 7 → 1 0 , Y 7 → 1 1 , Z 7 → 0 1 .
+
+This induces a binary representation of n-qubit Pauli operators and, in particular, a matrix representation of the stabilizer gen-erators. The binary representation of the stabilizer generators is called the parity-check matrix and is written as 
+
+H =  Hx | Hz
+
+,
+
+where Hx and Hz are binary matrices corresponding to the 
+
+X- and Z-type stabilizer generators, respectively, in the binary description of the stabilizer generators. Since the stabilizer generators commute, the parity-check matrix satisfies 
+
+HxHT 
+
+> z
+
++ HT 
+
+> x
+
+Hz = 0 (mod 2) . (1) 
+
+E. CSS Codes 
+
+Consider stabilizer codes whose stabilizer generators can be divided into two groups such that the generators in one group are n-fold tensor products of I and X, while the generators in the other group are n-fold tensor products of I and Z.The binary representations of the stabilizer generators of these codes have the form 
+
+H =
+
+Hx 00 Hz
+
+
+
+.
+
+The commutativity condition in (1) reduces to 
+
+HxHT 
+
+> z
+
+= 0, (2) which makes it possible to derive stabilizer codes from two classical codes that satisfy this condition. These are called CSS 
+
+codes, after Calderbank, Shor, and Steane, who first highlighted the connection between stabilizer codes and classical codes [36]. Let Uz and Ux denote the classical codes with parity-check matrices Hx and Hz, respectively. Since the Pauli logical operators must commute with the stabilizers, the binary representations of the X-type and Z-type logical operators are, respectively, 
+
+Lx = Ux/U⊥ 
+
+> z
+
+, Lz = Uz/U⊥ 
+
+> x
+
+,
+
+where U⊥ 
+
+> x
+
+and U⊥ 
+
+> z
+
+are the dual codes of Ux and Uz, respectively. The minimum distance of a CSS code is 
+
+d = min( dx, d z),
+
+where 
+
+dx = min 
+
+> u∈L x,u̸=0
+
+|u|, dz = min 
+
+> u∈L z,u̸=0
+
+|u|.
+
+Example 1. Consider the five-qubit stabilizer code char-acterized by the stabilizer group S, generated by S =<X1X2X3X4X5, Z 1Z2, Z 2Z3Z4Z5 >. In the shorthand nota-tion, Z1Z2 represents the five-fold tensor product Z ⊗ Z ⊗
+
+I ⊗ I ⊗ I, where Zi indicates the i-th element and identity operators are omitted. Since the stabilizer group generators of S have either X or Z operators, the code associated with it is a CSS code. In the binary representation, the X and Z
+
+parity-check matrices of the CSS code are given by 
+
+Hx = 1 1 1 1 1 and Hz =
+
+1 1 0 0 00 1 1 1 1
+
+
+
+.The binary forms of the logical Pauli operators are represented by the row space of 
+
+Lx = Lz =
+
+0 0 1 1 00 0 0 1 1
+
+
+
+.
+
+Since there are no weight-one vectors in the row spaces of 
+
+Lx and Lz, and there exists a vector of weight two, the code defined by the stabilizer group S has distance two. 
+
+F. Quantum LDPC Codes 
+
+QLDPC codes are a class of CSS codes whose stabilizer weights do not scale with blocklength. There exists several families of QLDPC codes that offer different trade-offs between distance, rate, and connectivity constraints. Although the results in this paper are qualitatively applicable to most QLDPC code families, they are formally derived and validated only for HGP [2] and LP [4] codes. HGP and LP codes are constructed from two classical codes, so we first provide a brief overview of classical LDPC codes before detailing their construction. 
+
+1) Classical quasi-cyclic LDPC Codes: Since LP codes are constructed from two classical quasi-cyclic LDPC codes, we restrict the discussion to quasi-cyclic LDPC codes. The parity-check matrices of quasi-cyclic codes admit a compact matrix representation, referred to as a base matrix. The elements of a base matrix take values from the quotient polynomial ring Rγ := F2[x]/(xγ − 1) . It is important to note that the quotient polynomial ring Rγ is isomorphic to the ring of binary circulant matrices of dimension γ × γ. The parity-check matrix H ∈ Fγm ×γn  
+
+> 2
+
+associated with a base matrix 
+
+B ∈ R m×nγ is obtained by substituting each entry of B with its corresponding circulant-matrix representation. The base matrix has a graphical representation similar to that of a parity-check matrix, called the base graph. Let G(V ∪ C , E) be the graphical representation of the base matrix B, where V and C are the sets of left and right nodes of G, corresponding to the columns and rows of the base matrix, respectively. To distinguish them from the nodes and edges of the Tanner graph, the nodes and edges of the base graphs are denoted with an underline. There is an edge between vj ∈ V and ci ∈ C if B(i , j) is a nonzero element of Rγ . To obtain the Tanner graph for a code from a base matrix B, we first expand B into its associated parity-check matrix and then follow the procedure described in Section II-B to construct the Tanner graph. Alternatively, the Tanner graph can be obtained directly from the base graph using the copy-and-permute operation [37]. The copy-and-permute operation involves two steps. In the copy step, the base graph is copied γ times. Denote the t-th copy of the base graph by 
+
+G(t) and its left nodes, right nodes, and edges by V(t), C(t),and E(t), respectively. During the permutation step, the edges of the base-graph copies are rearranged. Specifically, an edge 
+
+e that connects the variable node vj(t) ∈ V (t) to the check node ci(t) ∈ C (t) becomes an edge (which we still denote by e) connecting the variable node vj(t) to the check node 
+
+ci(πi,j(t)) , where πi,j is a cyclic permutation of [γ] determined by the circulant-matrix representation of B(i , j) . For a detailed description of the copy-and-permute operation, see [37]. 
+
+2) Lifted-product Codes: Given two base matrices B1 ∈Rm1×n1 
+
+> γ
+
+and B2 ∈ R m2×n2 
+
+> γ
+
+corresponding to two classi-cal LDPC codes, the LP construction, introduced by Pan-teleev and Kalachev [4], produces two base matrices Bx ∈Rm1n2×(m1m2+n1n2) 
+
+> γ
+
+and Bz ∈ R m2n1×(m1m2+n1n2) 
+
+> γ
+
+given by 
+
+Bx = B1 ⊗ In2 Im1 ⊗ B∗
+
+> 2
+
+ , (3) 
+
+Bz = In1 ⊗ B2 B∗ 
+
+> 1
+
+⊗ Im2
+
+ , (4) where B∗(i, j ) =  B(j, i )∗ and, for any B(i, j ) ∈ R γ ,
+
+ B(i, j )∗ =
+
+(  B(i, j )−1, if B(i, j ) ∈ R γ \ { 0},
+
+0, if B(i, j ) = 0 . (5) Since each nonzero ring element used in B1 and B2 corre-sponds to a circulant-permutation matrix, its inverse is equal to its transpose. Define Mx := γm 1n2, Mz := γm 2n1,and Q := γ(m1m2 + n1n2). The parity-check matrices 
+
+Hx ∈ FMx×Q 
+
+> 2
+
+and Hz ∈ FMz×Q 
+
+> 2
+
+corresponding to the base matrices Bx and Bz satisfy the condition in (2). Therefore,  Hx, Hz
+
+ together define a CSS code. When the elements of Bi, for i ∈ { 1, 2}, are chosen from F2 instead of Rγ , the matrices Bi can be interpreted as parity-check matrices of linear codes. In this case, the two matrices in (3) can be interpreted as parity-check matrices of two classical codes that satisfy the CSS criterion in (2). This modified construction of QLDPC codes is called the hypergraph product (HGP) construction, introduced by Tillich and Zémor [2]. Equivalently, LP codes can be constructed by taking the graph product of the Base graphs of the two classical LDPC codes. Since some aspects of the decoder behavior are easier to explain using the graph product viewpoint, we next describe the formulation of LP codes as a graph product. 
+
+Graphical description : The graph product of two base graphs, G1(V1 ∪ C 1, E1) and G2(V2 ∪ C 2, E2), yields a third graph GLP whose left nodes are given by 
+
+Q =
+
+
+
+V1
+
+# ×V2
+
+∪
+
+
+
+C1
+
+# ×C2
+
+,
+
+and whose right nodes are given by 
+
+C =
+
+
+
+C1
+
+# ×V2
+
+∪
+
+
+
+V1
+
+# ×C2
+
+. (6) Nodes and edges of the base graphs are distinguished by their corresponding superscripts. Moreover, we use a prime on subscripts (e.g., i′, j′) for indices associated with the first base graph G1, while indices associated with the second base graph G2 are written without a prime. Left-side nodes of the form v1j′ v2j , with v1j′ ∈ V 1 and v2j ∈ V 2, are called VV-type variable nodes, while those of the form c1i′ c2i , with c1i′ ∈ C 1
+
+and c2i ∈ C 2, are called CC-type variable nodes. Right-side nodes of the form c1i′ v2j , with c1i′ ∈ C 1 and v2j ∈ V 2, are called 
+
+X-stabilizers or X-checks, while those of the form v1j′ c2i , with 
+
+v1j′ ∈ V 1 and c2i ∈ C 2, are called Z-stabilizers or Z-checks. The collections of X-checks and Z-checks are denoted by Cx
+
+and Cz, respectively. From (6), it follows that 
+
+Cx = C1
+
+# ×V2 and Cz = V1
+
+# ×C2.× =
+
+VV-type 
+
+× =
+
+CC-type 
+
+× =
+
+CV-type 
+
+× =
+
+VC-type   
+
+> Fig. 2: Node types in the Tanner graphs of HGP/LP codes. VV-type variable nodes are depicted with a circle inside another circle because they are obtained by multiplying two variable nodes, each represented by a single circle. Analogously, CC-type variable nodes, X-checks, and Z-checks are represented, respectively, by a square inside another square, a circle inside a square, and a square inside a circle.
+
+In the product graph GLP , there is an edge between an X-check c1i′ v2j and a VV-type variable node v1 v2 if v1 ∈ N c1i′ and 
+
+v2 = v2j . Similarly, there is an edge between an X-check c1i′ v2j
+
+and a CC-type variable node c1 c2 if c1 = c1i′ and c2 ∈ N v2j .Therefore, the set of neighboring variable nodes of the X-check 
+
+c1i′ v2j is given by 
+
+Nc1i′ v2j =
+
+
+
+Nc1i′ ×v2j
+
+
+
+∪
+
+
+
+c1i′×Nv2j
+
+
+
+.
+
+Similarly, the set of neighboring variable nodes of a Z-type check v1j′ c2i is given by 
+
+Nv1j′ c2i =
+
+
+
+v1j′×Nc2i
+
+
+
+∪
+
+
+
+Nv1j′ ×c2i
+
+
+
+.
+
+Definition 1. The subgraph induced by a set of nodes in a graph consists of those nodes, their neighboring nodes, and all edges connecting the inducing nodes to their neighbors. Let the subgraphs induced by Cx and Cz in GLP be denoted by G x and G z, respectively. Observe that Gx and Gz are base graphs corresponding to the base matrices Bx and Bz given in (3), assuming G 1 and G 2 are base graphs corresponding to the base matrices B1 and B2, respectively. The product of two nodes, one from G 1 and the other from G 2, is illustrated in Figure 2. 
+
+G. Syndrome Measurement Circuit 
+
+Encoded states lie in the +1 eigenspace of the stabilizers, so checking whether a faulty state is in the codespace amounts to verifying that it lies in the +1 eigenspace. The circuit used to test whether a quantum state is in the +1 eigenspace of a given stabilizer generator is called a detector. A detector outputs +1 
+
+for states in the +1 eigenspace and −1 for states in the −1
+
+eigenspace. Taken together, the detectors corresponding to all stabilizer generators of a code form the syndrome measurement circuit [34]. To understand the structure and operation of a measurement circuit, consider the stabilizer group S = {I, Z }, which stabilizes the trivial state |0⟩. Prepare an ancilla qubit in the state |+⟩ and apply a CZ gate between the encoded qubit and the ancilla. If the encoded qubit is in the +1 eigenstate—here, the state |0⟩—the CZ gate leaves the ancilla unchanged, and the joint state is |0⟩ ⊗ (|0⟩ + |1⟩). Otherwise, the CZ gate 
+
+|q1⟩ •|0⟩ + |1⟩ • H    
+
+> (a) Measurement of Zstabilizer that stabilizes the |0⟩state.
+
+|q1⟩|0⟩ •    
+
+> (b) Measurement of Xoperator that stabilizes the |+⟩state. Fig. 3: Measurement of stabilizers that acts on one qubit.
+
+|q2⟩ • I
+
+|q3⟩ I•Z Z
+
+|q4⟩ I•Z Z
+
+|q5⟩ I•Z Z
+
+|0⟩ + |1⟩ •X•X•X•X H  
+
+> Fig. 4: Measurement of the Z2Z3Z4Z5operator.
+
+flips the phase of the ancilla, producing |0⟩ ⊗ (|0⟩ − | 1⟩). Note that after applying the CZ gate, the encoded qubit and ancilla remain in a product state rather than becoming entangled. Thus, by applying a Hadamard gate to the ancilla qubit and then measuring it in the Z basis, one can determine whether the encoded state lies in the codespace. The corresponding measurement circuit is shown in Figure 3 (a). To extend the above notion of syndrome measurement for Z-stabilizers from a single qubit to multiple qubits, recall that a stabilizer is the tensor product of Pauli matrices and the encoded state is the tensor product of the eigenvectors of these Pauli matrices such that the product of their respective eigenvalues equals one. Therefore, to identify whether a faulty encoded state belongs to the +1 eigen space, initially apply CZ gates sequentially between the ancilla, prepared in the |0⟩+|1⟩ state, and the qubits on which the Z stabilizer acts non-trivially. Then measure the ancilla. Figure 4 illustrates the measurement circuit for the stabilizer generator Z2Z3Z4Z5 from the stabilizer group S in Example 1. Analogously, it can be shown that the measurement of a X stabilizer involves initializing an ancilla qubit in the state 
+
+|0⟩ , followed by applying CNOT gates sequentially between the ancilla and each qubit that the X stabilizer affects non-trivially, with the ancilla qubit acting as the control qubit. The measurement of the eigenvalue corresponding to the X operator is shown in Figure 3b. 
+
+H. Detector-Error Matrix 
+
+Given a specified set of fault locations together with all possible errors associated with each location, the detector–error matrix indicates whether a given error causes the codeword states to exit the codespace. Let K denote the set of fault locations in a circuit, and let Fk for k ∈ K denote the error at the k-th location, with Fk taking the values in the set Fk.The error detector matrix associated with the syndrome-measurement circuit for R rounds of measurement is aI X X X I I Z ZX • X I • I Z • Z I • ZI • Z X • X I • I Z • ZX • X I • Z Z • Z I • I
+
+> Fig. 5: Propagation of errors through CNOT and CZ gates.
+
+binary matrix of dimension Rr × P 
+
+> k∈K
+
+|F k|, where the rows correspond to the detectors and the columns correspond to errors in the circuit. The (i, j )-th entry of the error–detector matrix is 1 if the error corresponding to the j-th column causes the i-th detector to output −1. To determine whether a specific error changes a detector output from +1 to −1, one must consider the detector output when only that error is present and no other errors occur in the circuit. This can be done by propagating the error through the controlled gates according to the following rules [34]. For CNOT, we use the convention that the tensor-product ordering is (target ⊗ control) , consistent with Fig. 5: 
+
+(I ⊗ X) CNOT = ( X ⊗ X) CNOT , (7) 
+
+(I ⊗ Z) CNOT = ( I ⊗ Z) CNOT , (8) 
+
+(Z ⊗ I) CNOT = ( Z ⊗ Z) CNOT , (9) 
+
+(I ⊗ X) CZ = ( Z ⊗ X) CZ , (X ⊗ I) CZ = ( X ⊗ Z) CZ ,
+
+(10) 
+
+(I ⊗ Z) CZ = ( I ⊗ Z) CZ , (Z ⊗ I) CZ = ( Z ⊗ I) CZ .
+
+(11) The above propagation rules are illustrated in Figure 5. Note that an ancilla error can propagate to multiple data qubits. Such errors are referred to as hook errors [34]. In Figure 4, an X error on the ancilla propagates to qubits q3, q4, and q5, manifesting as 
+
+Z errors on these qubits. The error–detector matrix has Rr rows, where r denotes the number of generators of the stabilizer group and R is the number of rounds of syndrome measurement. Each stabilizer-generator measurement is associated with a single detector. Consequently, for R rounds of syndrome measurement there are rR detectors in total. The Tanner graph associated with the error–detector matrix is commonly referred to as the 
+
+circuit-level Tanner graph (or detector–error Tanner graph ). 
+
+Definition 2. The effective minimum distance is the smallest number of physical faults whose propagation through the entire syndrome extraction circuit results in a nontrivial logical Pauli operator. 
+
+Example 2. Consider the syndrome measurement circuit corresponding to the code in Example 1, in which the X
+
+stabilizer is measured once and the Z stabilizers are measured twice (see Figures 6 and 7). The fault locations are shown as a set of random gates Fi for i ∈ [16] . Each Fi takes values in 
+
+{I, X, Z } according to a specified probability distribution. The error-detector matrix corresponding to the detectors associated with the Z stabilizers is given by                                                                            
+
+> X1X2X3X4X5X6X7X8X9X10 X11 X12 X13 X14 X15 X16
+> 
+> 1100010101000000011110011010000011000101000110000111100110001111
+> .
+
+(12) The column labeled Xk represents the detector outputs when the error at the k-th location is X, i.e., when Fk = X. Note that when Fk = Z, the outputs of the detectors associated with the Z stabilizers do not change; hence, errors with Fk = Z
+
+are omitted from the error-detector matrix in (12). The first two rows correspond to detectors linked to the first round of measurements of the stabilizers Z1Z2 and Z2Z3Z4Z5,respectively. The third and fourth rows correspond to their measurements in the second round. Figure 7 illustrates how to determine the entries of a column by inserting an X fault at the 6-th location and propagating it to the end of the circuit. Since an X error at the 6-th location flips the outputs of the first and third detectors, the corresponding entries are 1 in the column labeled X6. In contrast, an X error at the 7-th location is not detected. Consequently, the column labeled X7 consists entirely of zeros. This implies that the effective distance of the circuit is strictly less than two. An alternative representation of the error-detector matrix in (12) is                                                                            
+
+> X1X2X3X4X5X6X7X8X9X10 X11 X12 X13 X14 X15 X16
+> 
+> 1100010101000000011110011010000000000000010110000000000000101111
+> .
+
+(13) In this alternative representation, the first two rows are identical to those in (12). The third row is the modulo-two sum of the measurement outcomes for Z1Z2 from the first and second rounds, and the fourth row is the modulo-two sum of the measurement outcomes for Z2Z3Z4Z5 from the two rounds. The minimum effective distance is the same for both representations, as they have the same null space [38]. However, the alternative representation is sparser, which makes it more amenable to iterative decoding. 
+
+I. Noise Models and Decoders 
+
+We consider three noise models: (1) capacity-error model, (2) phenomenological noise model, and (3) circuit-level noise model [39].In the capacity-error model, each data qubit independently undergoes a Pauli error X, Y , or Z with probability p/ 3, while all gates and syndrome measurements are assumed to be perfect. In the phenomenological noise model, each data qubit independently undergoes a Pauli error X, Y ,or Z with probability p/ 3, and each measurement outcome is independently flipped with probability p; there are no CNOT gate errors. In the circuit-level noise model, each data qubit indepen-dently undergoes a Pauli error X, Y , or Z with probability |q1⟩ F1 • F12 •|q2⟩ F2 F8 • • F13 • • |q3⟩ F3 • F14 •|q4⟩ F4 F9 • F15 •|q5⟩ F5 • F16 •|+⟩ • F6 • • F7 • • H
+
+|+⟩ • • H F10 
+
+|+⟩ • • • • H F11 
+
+|+⟩ • • H
+
+|+⟩ • • • • H
+
+Fig. 6: Syndrome measurement circuit for the CSS code in 1: The fault locations are shown as a set of random gates Fi, for i ∈ [16] , which are Pauli matrices with fixed probabilities. The X stabilizer is measured once, and the Z stabilizers are measured twice. 
+
+|q1⟩ I • I • I
+
+|q2⟩ I X X X•X•X X X•X•X X
+
+|q3⟩ I X X X•X X X•X X
+
+|q4⟩ I X X X•X X X•X X 
+
+|q5⟩ I X X•X X•X
+
+|+⟩ • X • X • X • X • X H
+
+|+⟩ •I•Z Z
+
+|+⟩ I•Z•I •Z•I I 
+
+|+⟩ •I•Z Z
+
+|+⟩ I•Z•I•Z•I I
+
+Fig. 7: Determination of the group of detectors whose outputs vary when F6 = X in the circuit shown in Figure 6: The errors on the inputs and outputs of the controlled Z and CNOT gates are displayed, except in the cases where both inputs are identity. All measurements are performed in the Z basis. Observe that error F6 = X propagates to qubits |q2⟩ , |q3⟩ , |q4⟩ , |q5⟩ and is detected by the second and fourth detectors. These detectors are associated with the measurements of stabilizer Z1Z2 from Example 1. p/ 3. Each CNOT gate independently fails with probability p;conditioned on failure, it applies one of the nontrivial two-qubit Pauli errors 15 uniformly at random (so each occurs with probability p/ 15 ). Finally, each measurement outcome is independently flipped with probability p. We primarily focus on the circuit-level noise model, and refer to the capacity-error and phenomenological noise models only when needed for comparison. Under these noise model, the primary aim of the decoder, given the detector outputs, also referred to as the syndrome vector, is to accurately estimate the error vector on the data qubits up to the stabilizer group. Should the decoder be unable to do so, a decoding failure is declared. III. W HY DOES OSD W ORK BETTER ON 
+
+DETECTOR -E RROR TANNER GRAPHS ?The detector-error Tanner graph facilitates the convergence of BP+OSD by introducing additional variable nodes that represent faults during syndrome measurement, which can substantially reduce the logical error rate. These extra nodes allow the decoder to capture correlations induced by the measurement circuit, but they also dramatically increase decoding complexity. This raises a central question: are nodes representing faults essential for achieving a low decoding-failure rate, or can one design decoders that operate on a smaller Tanner graph (without a dedicated variable node for every fault) while retaining comparable performance? To answer this, we first ask how the additional nodes help BP+OSD: do they improve BP, OSD, or both, and through what mechanism? Here, we focus on failures in which the decoder converges to a logical error. We separate the discussion by fault type: (i) CNOT faults that introduce hook errors (propagating data errors) and (ii) CNOT faults that introduce syndrome-bit errors together with a non-propagating data error. 
+
+A. CNOT faults and stabilizer-induced TSs 
+
+In the capacity error model, as discussed in Section I-A, BP decoders can fail to converge on QLDPC codes due to 
+
+stabilizer-induced trapping sets [18], [28]. Here, we connect this phenomenon to hook errors during syndrome measurement. Consider the measurement of an X-type stabilizer generator of an HGP code in Fig. 8a, where CNOTs are applied in the order indicated on the edges. If the CNOT associated with edge label 3 fails and introduces an X error on the ancilla, that error propagates to the data qubits v11 v2, v 12 v2, v 13 v2, and v14 v2
+
+(Fig. 8b). The resulting data-error pattern is supported on the 
+
+stabilizer-induced TS associated with c1v2, and BP is unlikely to converge. This mechanism makes stabilizer-induced TSs particularly harmful in the circuit-level error model: a single gate fault can activate a stabilizer-induced TS. Next, we examine the factors that contribute to the improved decoding failure rate of the BP+OSD decoder when it is run on the detector-error Tanner graph. To this end, we first delineate the working principles of the BP+OSD decoder. Let the number of columns in the detector-error parity-check matrix be denoted by N and its rank by r. In the BP+OSD decoding framework, the BP decoder is first run for a specified number of iterations on the detector-error Tanner graph to produce a soft value (e.g., an LLR) for each of the N variable nodes. The variable nodes are then ranked by reliability, e.g., by the magnitude of their soft values. The order-t OSD step next permutes the columns of the detector-error parity-check matrix according to this reliability ordering and performs Gaussian elimination to obtain a full-rank systematic form. Using this systematic form, OSD enumerates all test patterns of weight at most t
+
+on a subset of N − r less-reliable positions; for each test pattern, it computes the corresponding values on the remaining 
+
+r positions so that the resulting length-N error estimate satisfies the measured syndrome. This generates Pti=0 
+
+ N −ri
+
+ candidate solutions. Finally, OSD selects the candidate with the largest a priori probability (equivalently, the best metric with respect to the BP soft values). With the above explanation of the BP+OSD decoding approach, let us re-examine the trapping-set example depicted in Figure 8. This scenario helps to clarify the advantage of adding additional variable nodes to handle hook errors during the decoding process. To simplify the discussion, assume that the variable nodes that form the TS are not part of the r
+
+variable nodes with the highest soft values. This is reasonable because the error estimate tends to oscillate between iterations when the support of the error pattern lies within a stabilizer-induced TS. In cases where the error pattern contains only one hook error, as illustrated in Figure 8c, it is likely to become a candidate solution for OSD-1. However, if no additional node representing the hook error is present, the true error pattern is considered as a candidate solution only when the OSD order is three or greater. An OSD of order three is sufficient, as there exists a corresponding weight-3 error pattern that matches the syndrome, although the hook error in Figure 8b spreads to four qubits. Note that stabilizer generators alone are not the only source of TSs; their linear combinations can also induce them [28]. As the size of such linear combinations grows, the required OSD order to resolve the corresponding TSs increases in both cases—whether or not additional nodes are included to account for hook errors. In particular, this increase is much faster when additional variable nodes representing hook errors are absent. The resulting increase in decoder complexity is illustrated in Fig. 9a through an example in which a pair of hook errors creates a TS induced by two stabilizer generators. Consider the TS formed by two X-type stabilizer generators, as shown in Fig. 9a. Assume that the CNOT operations associated with the edges labeled 3 fail during the syndrome measurement and introduce X errors in the corresponding ancilla qubits. These X errors subsequently propagate to data qubits d5, d 6, d 7, d 11 , d 12 , and d13 , collectively forming an error pattern that activates the TS depicted in Fig. 9a. This shows that, in the circuit-level error model, the TS in Fig. 9a can be triggered by just two hook errors, instead of the six data errors required in the capacity error model. In Fig. 9c, the two blue variable nodes represent these X-type errors, which arise after the CNOT operations. A variable node associated with v11 v12
+
+c1
+
+v13 v14
+
+# ×
+
+c1c21
+
+v13v2
+
+v14v2
+
+v12v2
+
+v11v2
+
+c1c22 c1c23
+
+v2
+
+c21
+
+c22
+
+c23  
+
+> 1234
+
+5        
+
+> 67
+> (a) TS induced by the X-type stabilizer generator c1v2,i.e., the graph product of check node c1and variable node
+> v2. Dotted lines indicate the edges connecting c1v2to its neighboring variable nodes, and the annotations specify the order in which the corresponding CNOT gates are applied during syndrome measurement. Solid lines show the induced subgraph within Gz.
+
+c1c21
+
+Ic1c22
+
+Ic1c23
+
+Iv13 v2 I X Xv14 v2 I X Xv12 v2 I X Xv11 v2 I Xc1v2 • • •X •X •X •X •X                     
+
+> (b) A hook error activating the stabilizer-induced TS in Figure 8a. The CNOT gate corresponding to the edge with label 3fails and introduces an Xer-ror in the ancilla. This Xerror sub-sequently spreads to the data qubits
+> v11v2, v 12v2, v 13v2,and v14v2, which is enough to induce the TS [28]. (c) The TS induced by c1v2in-corporates an extra variable node (colored blue) symbolizing an X-error in the ancilla following the execution of the CNOT associated with the edge labeled 3. The inner shapes of the checks that do not satisfy the measured syndrome are depicted in black. OSD-1is capable of addressing this TS caused by a hook error. Fig. 8: Example illustrating of how a hook error activates stabilizer-induced TSs.
+
+a hook error is adjacent to a check node if that check node can detect the corresponding hook error. Thus, the adjacent check nodes of these variable nodes are determined by whether the check node detects the associated hook error. Running the OSD-2 decoder on the Tanner graph, which includes the two blue variable nodes for hook errors, is likely to produce candidate solutions that include the true error pattern. However, omitting these nodes from the Tanner graph would require an OSD decoder of order six or higher to resolve the TS. Given the exponential increase in OSD complexity with order, it is advantageous to incorporate variable nodes that capture correlations from hook errors. Figure 9 illustrates how CNOT faults that create hook errors propagate to correlated data errors and thus activate a stabilizer-induced TS in the detector-error Tanner graph. The above discussion explains why fault-representing nodes help the OSD stage: by explicitly modeling the hook-error correlations, the true error pattern can appear at much lower OSD order. However, adding these nodes can also worsen the convergence of the BP because it introduces additional short cycles [40], [41]. These nodes representing faults become unnecessary if BP itself is modified to resolve the corresponding stabilizer-induced TSs. An approach in this direction is [28], which characterizes the TSs of HGP/LP codes as graph products of parent-code subgraphs and shows that alternating VV/CC message updates can ensure convergence when the relevant subgraphs are cycle-free. Since good classical codes typically contain many cycles, this guarantees convergence only for a restricted class of TSs [42]. Here, we propose decoders that resolve a broader class of stabilizer-induced TSs by leveraging decoders for the underlying parent-code , thereby avoiding the need to add a fault node for every correlation-inducing event. 
+
+B. CNOT Faults and Syndrome-Measurement Errors 
+
+In this section, we discuss CNOT faults that occur during stabilizer measurement and do not propagate to other data qubits, but nevertheless corrupt the measured syndrome. In 
+
+detector-error Tanner graphs, such faults are often modeled by introducing additional variable nodes. Whenever a stabilizer generator acts nontrivially on a data qubit, the measurement circuit applies a two-qubit gate (e.g., a CNOT) between that qubit and an ancilla. If a data error is introduced midway through the measurement circuit, it is detected only by those stabilizer checks whose relevant two-qubit gates occur after the error. As a result, the measured syndrome can differ from the syndrome of the final data-error pattern. We illustrate this effect using the Steane code in Fig. 10. Assume all CNOT gates are perfect except the gate between data qubit d7 and ancilla a2, and that this faulty CNOT induces a Z error on d7. In the first round, this error is detected by only the first and third stabilizers, even though a pre-existing 
+
+Z error on d7 would be detected by all three. Feeding such an inconsistent syndrome to a decoder can lead to miscorrection; in this example, a maximum-likelihood decoder would apply a correction on d5, turning a single-qubit error into a two-qubit error. ×
+
+d1
+
+d8
+
+d6
+
+d7
+
+d11 
+
+d12 
+
+d13 
+
+d4
+
+d5
+
+d2
+
+d9
+
+d3
+
+d10 
+
+1 2 345671 235 467
+
+(a) An example of a TS created by two X-type stabilizers, formed through the graph product of the subgraph induced by two check nodes of one parent classical code and the subgraph induced by a variable node from the other parent classical code. The dotted edges showed the edges connected to the X-type stabilizers. Solid lines denote the edges of the subgraph induced by these X-type stabilizer generators. The labels on these dotted lines indicate the order in which the CNOT operations associated with them are carried out during the stabilizer measurement. 
+
+d1
+
+Id2
+
+Id3
+
+Id4
+
+I X Xd5
+
+I Xd6
+
+I X I Id7
+
+I X Xa1 • • •X •X X •X •X •Xa2 • • •X •X •X X •X •Xd8
+
+Id9
+
+Id10 
+
+Id11 
+
+I X Xd12 
+
+I X Xd13 
+
+I X
+
+(b) Hook errors activating the TS shown in Fig. 9a. Both CNOT gates corresponding to the edges labeled 3 in Fig. 9a fail, causing 
+
+X errors in the respective ancillas. These 
+
+X errors then propagate to the data qubits that participate in later CNOT operations with those ancillas. Here, the X-error that propagated from ancilla a1 to data d6 is canceled by the X error that propagates from ancilla a2 to data d6.(c) detector-error Tanner graph featuring two additional variable nodes (colored blue) to represent the X errors introduced after the faulty execution of CNOTs corre-sponding to the edges labeled 3
+
+in Figure 9a. The inner shapes of the checks that do not satisfy the measured syndrome are depicted in black. Fig. 9: Example illustrating how a combination of hook errors induce TSs. 
+
+The corresponding detector-error matrix is 
+
+
+
+0 0 0 1 1 1 1 1 0 0 0 0 0 0 00 1 1 0 0 1 1 0 0 0 0 0 0 0 01 0 1 0 1 0 1 1 0 0 0 0 0 0 00 0 0 0 0 0 0 0 0 0 0 1 1 1 10 0 0 0 0 0 0 1 0 1 1 0 0 1 10 0 0 0 0 0 0 0 1 0 1 0 0 0 1
+
+
+
+,
+
+(14) where the cyan block corresponds to the first round of stabilizer measurement. In that round, the eighth column (the Z error introduced after the faulty CNOT) coincides with the fifth column, so these two faults are indistinguishable from a single-round syndrome; in particular, adding explicit fault nodes alone does not resolve the ambiguity when the code is not single-shot. Repeating the measurement mitigates this issue. In (14), the two highlighted blocks together correspond to two rounds, and the eighth column becomes unique, allowing an optimal decoder to identify the correct fault. This motivates the use of nodes to represent such faults together with repeated measurements. We next ask whether one can handle these CNOT-failure induced syndrome errors without introducing explicit fault nodes; we return to this question in Section VI. IV. S TABILIZER -I NDUCED TS S WITH MULTIPLE COPIES OF 
+
+TS S FROM A PARENT CODE 
+
+Iterative message-passing decoders fail in the error-floor region of classical LDPC codes due to short cycles and their combinations in the Tanner graph, known as classical TSs. An HGP/LP code inherits these structures from its parent classical codes, resulting in multiple isomorphic copies of each classical TS in the derived HGP/LP code. Certain collections of these isomorphic copies form large stabilizer-induced TSs that arise from linear combinations of stabilizer generators. Hook errors during the measurement of these stabilizer generators can introduce errors in multiple copies simultaneously, increasing the likelihood that enough copies become active (in the sense d1
+
+I Id2
+
+I Id3
+
+I Id4
+
+I Id5
+
+I Id6
+
+I Id7
+
+Z Z Z Z Z Z Z Z Z Z Za1 • • I • Z • Z H |+⟩ • • I • Z • Z Ha2 • • I • • I H |+⟩ • I • Z • • Z Ha3 • • • I • Z H |+⟩ • • • I • Z H           
+
+> Fig. 10: Circuit errors leading to an erroneous syndrome (and why repeating the measurement helps): A faulty CNOT between d7and a2
+> introduces a Zerror on d7during syndrome extraction, so in the first round it is detected only by the first and third stabilizers; in contrast, a pre-existing Zerror on d7(present before measurement) would be detected by all three generators. Repeating the syndrome measurement in a second round makes the syndrome history distinguish this CNOT-induced fault from data errors that were present before measurement.
+
+defined below) to cause a decoding failure. It is therefore crucial to analyze the decoding dynamics of these large stabilizer-induced TSs and to design decoders that can avoid decoding failures caused by them. In this section, we focus on stabilizer-induced TSs that contain multiple copies of a TS from one of the parent classical LDPC codes. Due to the similarity between the TSs induced by Z-type and X-type stabilizer generators, we restrict our attention to those induced by the X-type stabilizer generators. This extends the study of stabilizer-induced TSs considered in [28], which focused only on TSs that are the graph product of tree-like subgraphs from the Tanner graphs of the parent classical LDPC codes, by allowing one of the subgraphs involved in the graph product to have cycles. Next, we formally define these TSs and provide an example to illustrate our approach. 
+
+Definition 3. An (a, b ) TS of an LDPC code is a subgraph of the Tanner graph induced by a set of a variable nodes that contains b odd-degree check nodes. The critical number of a TS (with respect to a given iterative decoder) is the smallest number of variable nodes that must initially be in error to cause a decoding failure. 
+
+Remark 1. (Active TSs ) Throughout this section, we view TSs as candidate failure mechanisms for a specific iterative decoder. A classical TS is said to be active if the number of erroneous variable nodes it contains is at least its critical number. 
+
+Example 3. Consider the product of a degree-four check node, 
+
+c1, from G1 with a classical TS, T (V2s ), from G2, as shown in Figure 11a. To simplify the pictorial representation, X-type (or CV-type) generators and their edges have been omitted. Since 
+
+c1 has degree four, the graph contains four identical copies of 
+
+T (V2s ). These isomorphic copies are denoted by v1i × T (V2s )
+
+for v1i ∈ N c1 . In each copy, the variable nodes from T (V2s )
+
+are transformed into VV-type variable nodes, while the check nodes are transformed into VC-type check nodes. The edges are therefore represented as edges between VV-type variable nodes and VC-type check nodes. This observation is formalized in Part 1 of Lemma 1, described later in this section. Furthermore, note that two isomorphic copies of T (V2s ) do not share nodes or edges; this is formalized in Part 2 of Lemma 1. The graph in Figure 11a is induced by X-type stabilizer generators (CV-type checks) c1v21 , c1v22 , c1v23 , and c1v24 . This can be verified by checking that the variable nodes in the graph coincide exactly with those present in the subgraphs induced by these generators. To facilitate this verification, the nodes in the figure are color-coded, since the X-type stabilizer generators themselves are not shown in Figure 11a. As an example, consider the subgraph induced by the X-type stabilizer generator c1v21 , shown in Figure 11b. In this subgraph, the outer circle in the representation of VV-type variable nodes is derived from the four neighboring variable nodes of c1, represented as , , and . The inner circle is derived from 
+
+v21 , represented by . Similarly, the outer rectangle in the representation of CC-type variable nodes is derived from c1,represented as , and the inner rectangle is derived from one of the three neighboring check nodes of v21 , represented as , , and . From this, one can verify that the variable nodes connected to c1v21 are in T (c1) × T (V2s ), which is shown in Figure 11a. Although not explicitly stated for brevity, the analogous properties hold for variable nodes connected to X-type stabilizers c1v22 , c1v23 , and c1v24 . These can be used to confirm that these four X-type stabilizer generators indeed induce the graph in Figure 11a. This observation is formalized in Part 3 of Lemma 1. Finally, observe that every CC-type c1  
+
+> v12v13v11v14
+
+# ×                      
+
+> v11×T(V2s)v12×T(V2s)v13×T(V2s)v14×T(V2s)
+> T(V2s)
+> v21v22
+> v23
+> v24
+
+(a) The figure shows how the graph product of a degree-four check node, c1, from G1 and a TS, T (V2s ),from G2 results in a graph that has four identical copies of TS T (V2s ). These identical copies are given by v1i × T (V2s ) for v1i ∈ N c1 . Note that part of the resulting graph from the graph product that contains only Z-stabilizers is shown. This graph is induced by CV-type stabilizer generators c1v21 , c 1v22 , c 1v23 and c1v24
+
+within Gz. To see that indeed the graph is induced by these stabilizer generators, the subgraphs induced by 
+
+X-type stabilizer generators c1v21 and c1v22 within Gz are explicitly shown in Figure 11b. As this TS is induced by four X-type stabilizer generators, it can be induced by hook errors introduced during their measurement. Similar to how the CC-type variable node is shown to connect with two stabilizer generators in Figure 11b, other CC-type variable nodes in the upper part of the figure can also be shown to connect with two stabilizer generators among those that induce this subgraph. 
+
+> c1v21
+> c1v22
+
+(b) Stabilizer-induced TSs induced by the X-type sta-bilizer generators c1v21 and 
+
+c1v22 within Gz. All vari-able nodes in these two in-duced subgraphs also appear in Fig. 11a. The CC-type variable node represented by is common to both sub-graphs. Fig. 11: Illustration of a stabilizer-induced TS containing multiple copies of a classical TS from G2.
+
+variable node is connected to one VC-type check node in each of the isomorphic copies of T (V2s ), as formalized in Part 6 of Lemma 1. When a stabilizer-induced TS contains multiple isomorphic copies of a classical TS, we call a copy active if it contains at least the critical number of errors for that underlying classical TS. We call the overall stabilizer-induced TS active if at least 
+
+⌈|N c1 |/2⌉ of these copies are active (and analogously, in the dual case, if at least ⌈|N v2 |/2⌉ copies are active for the relevant variable node v2). Intuitively, decoders derived from the parent-code decoders can resolve such stabilizer-induced TSs without modification as long as the number of active copies is strictly less than ⌈|N c1 |/2⌉ (resp., ⌈|N v2 |/2⌉); when this threshold is met or exceeded, the derived decoder may fail and additional measures are needed. The following lemma formalizes the observations made in Example 3 about how multiple instances of a given TS arise in HGP codes, inherited from their parent classical LDPC codes. 
+
+Lemma 1. Consider an HGP code constructed from the graph product of two classical LDPC codes, represented by regular Tanner graphs G1 and G2. Let V2s ⊂ V 2 denote a subset of variable nodes of G2, and let T (V2s ) be the subgraph induced by these nodes. For a check node c1 in G1, denote by T (c1)
+
+the subgraph it induces. The subgraph induced by CV-type stabilizer generators that are obtained from c1 and V2s is defined as 
+
+Tstab ≜  T (c1) × T (V2s ) ∩ Gz,
+
+where Gz is the Tanner graph corresponding to the Z-stabilizer generators. 1) The subgraph Tstab contains |N 1c | pairwise isomorphic copies of T (V2s ), one for each neighboring variable node 
+
+v1i′ ∈ N c1 . For a fixed v1i′ ∈ N c1 , each variable node 
+
+v2 ∈ T (V2s ) corresponds to the VV-type variable node 
+
+v1i′ v2, and each check node c2j ∈ T (V2s ) corresponds to the VC-type check node v1i′ c2j .2) These isomorphic copies do not share any common vertices, i.e.,  {v1i′ } × T (V2s ) ∩  {v1k′ } × T (V2s ) = ∅
+
+for all v1i′ , v 1k′ ∈ N c1 with v1i′̸ = v1k′ .3) The subgraph Tstab is induced by the CV-type stabilizer generators contained in {c1} × V 2s .4) Assume that T (V2s ) is a TS in the Tanner graph G2. Then there exists a measurement schedule such that a single CNOT failure in the measurement circuit of each CV-type stabilizer generator in the set {c1} × V 2s can corrupt all variable nodes in ℓ of the isomorphic copies of T (V2s )
+
+contained in Tstab , for some ℓ ∈ { 1, 2, . . . , |N 1c |} .5) Let C2o denote the set of check nodes that have an odd degree in T (V2s ). The stabilizer support (i.e., the set of variable nodes on which the corresponding stabilizer vector is nonzero) generated by linear combinations of stabilizer generators in {c1} × V 2s then contains all VV-type variable nodes in Tstab , as well as all CC-type variable nodes in {c1} × C 2o .6) Each CC-type variable node c1c2 is connected to the VC-type check node v1i′ c2 in the isomorphic copy {v1i′ } × T (V2s ), for all v1i′ ∈ N c1 .
+
+Proof. 1) Consider a VV-type variable node v1v2 in sub-graph Tstab , where v1 ∈ N c1 and v2 ∈ T (V2s ). The neighborhood of v1v2 in Gz is identical to the neighbor-hood of v2 in G2 because the set of check nodes adjacent to v1v2 in Gz is given by {v1} × N v2 . Consequently, for each v1 ∈ N c1 , the subgraph {v1} × T (V2s ) is isomorphic to T (V2s ), yielding |N c1 |, such isomorphic copies in Tstab .2) From the definition of the graph product, it follows that the subgraphs ({v1i′ } × T (V2s )) and ({v1k′ } × T (V2s )) 
+
+have no common vertices whenever v1i′̸ = v1k′ . Hence, 
+
+({v1i′ } × T (V2s )) ∩ ({v1k′ } × T (V2s )) = ∅.3) To show that the subgraph Tstab is induced by the CV-type check nodes in {c1} × V 2s , it suffices to verify that the set of variable nodes adjacent to these check nodes coincides with the set of variable nodes in the subgraph. From the construction of the subgraph, variable nodes within subgraph Tstab are given by 
+
+V(Tstab ) = 
+
+
+
+Nc1 × V 2s
+
+| {z }
+
+> VV-type
+
+
+
+∪
+
+
+
+{c1} × 
+
+ [ 
+
+> v2∈V 2s
+
+[
+
+> c2∈N v2
+
+c2 | {z }
+
+> CC-type
+
+.
+
+(15) Rewriting this as a union over v2 ∈ V 2s yields 
+
+V(Tstab ) = [
+
+> v2∈V 2s
+
+ Nc1 × { v2}| {z }
+
+> VV-type neighbors
+
+∪ [
+
+> v2∈V 2s
+
+ {c1} × N v2
+
+| {z }
+
+> CC-type neighbors
+
+.
+
+(16) By construction, the variable nodes described in (16) are precisely the neighbors of the check nodes in {c1} × V 2s .Comparing (16) with (15) shows that this set of neighbors coincides with the set of variable nodes of Tstab . Hence 
+
+Tstab is exactly the subgraph induced by the check-node set {c1} × V 2s .4) We want to show that there exists a measurement schedule such that a single CNOT failure in the measurement circuit of each CV-type stabilizer generator in the set 
+
+{c1} × V 2s can corrupt all VV-type variable nodes in 
+
+ℓ isomorphic copies of T (V2s ). Fix distinct neighbors 
+
+v11 , . . . , v 1 
+
+> ℓ
+
+∈ N c1 . Consider a stabilizer generator of the form c1v2i with v2i ∈ V 2s . Its measurement circuit consists of an ancilla qubit and CNOT gates from the ancilla to all variable nodes connected to it. Since the order of these CNOTs can be chosen arbitrarily, we may choose a schedule in which the ℓ CNOT gates CNOT (ancilla → v1i′ v2i ), ∀ i′ ∈ [ℓ]
+
+are executed last. Assume that exactly one CNOT in the measurement circuit for this stabilizer generator fails and introduces an X-error on the ancilla immediately before these last ℓ CNOTs. Then, by the hook-error propagation rule from Section III-A, this X-error is copied to the ℓ
+
+data qubits v11 v2i , . . . , v 1 
+
+> ℓ
+
+v2i . Now repeat this construction for every stabilizer generator in the set {c1} × V 2s . For each v2i ∈ V 2s , choose the same type of schedule (with the CNOTs to v11 v2i , . . . , v 1 
+
+> ℓ
+
+v2i executed last) and assume one such CNOT failure. Therefore, after performing the measurement of all these stabilizer generators, the full set of erroneous VV-type variable nodes is 
+
+[
+
+> i′∈[ℓ]
+
+ {v1 
+
+> i′
+
+} × V 2s
+
+,
+
+which is the union of VV-type variable nodes in ℓ
+
+isomorphic copies of T (V2s ) contained in Tstab .5) Consider the set of CV-type stabilizer generators in 
+
+{c1} × V 2s = { c1v2i : v2i ∈ V 2s }.
+
+The stabilizer support generated by linear combinations of these generators is the set of variable nodes that appear in the support of an odd number of generators in {c1} × V 2s .Fix any v2i ∈ V 2s . The VV-type variable nodes in the support of the generator c1v2i are Nc1 × { v2i }, i.e., the VV-type variable nodes of the form v1v2i with v1 ∈ N c1 .Now take two stabilizer generators c1v2i and c1v2k in 
+
+{c1} × V 2s , with v2i̸ = v2k. Their VV-type supports, 
+
+Nc1 × { v2i } and Nc1 × { v2k},
+
+are disjoint. Hence, no VV-type variable node in Tstab 
+
+can appear in more than one stabilizer generator in {c1}× V2s . Therefore, each VV-type variable node in Tstab 
+
+appears in exactly one generator of {c1} × V 2s , and thus appears in the support of an odd number of generators. It follows that the stabilizer support contains all VV-type variable nodes present in Tstab . We now determine the CC-type variable nodes in Tstab that lie in the support of an odd number of generators in {c1} × V 2s . A CC-type variable node in Tstab has the form c1c2j , where c2j is a check node in T (V2s ). Such a node belongs to the support of a generator c1v2i ∈ { c1} × V 2s if and only if the check node c2j is adjacent to v2i in the Tanner graph of the second code, i.e., 
+
+c1c2j ∈ supp( c1v2i ) ⇐⇒ c2j ∈ N v2i .
+
+Equivalently, the number of generators in {c1} × V 2s
+
+whose support contains c1c2j is exactly the degree of c2j
+
+in T (V2s ). Thus, c1c2j is contained in the support of an odd number of these stabilizer generators if and only if the degree of c2j in T (V2s ) is odd. By definition, the set of such check nodes is C2o . Therefore, a CC-type variable node c1c2j lies in the stabilizer support if and only if 
+
+c2j ∈ C 2o . This characterizes completely which VV- and CC-type variable nodes are in the stabilizer support, with the role of VV-nodes determined by the non-intersecting support of stabilizer generators and the role of CC-nodes determined by odd-degree check nodes in T (V2s ).6) The set of VC-type check nodes connected to the CC-type variable node c1c2 is Nc1 × { c2}. Recall that the isomorphic copies of T (V2s ) within Tstab are given by 
+
+{v1i′ } × T (V2s ), v1i′ ∈ N c1 .Since the check node c2 is contained in T (V2s ), it follows that for each v1i′ ∈ N c1 , the VC-type check node v1i′ c2
+
+belongs to the corresponding isomorphic copy {v1i′ } × 
+
+T (V2s ).
+
+Remark 2. Part 4 of Lemma 1 analyzes a fixed syndrome-measurement schedule and shows that the number of CNOT failures needed to activate multiple isomorphic copies of an inherited TS does not grow with the number of copies. A natural question is whether this non-scaling is an artifact of that particular schedule. In fact, there are many other schedules with the same behavior. It is unclear whether there exists a schedule for which the minimum number of CNOT failures required to activate a fixed number of inherited TS copies grows with the number of available copies; we do not know the answer. Even if schedules exist that suppress the activation of certain inherited TSs, optimizing a single schedule to avoid activating all inherited TSs is challenging: a schedule that suppresses activation of one inherited TS may inadvertently activate a different one, and each parent code typically contains many distinct TSs. Accordingly, in this work we do not attempt to optimize the measurement schedule. Instead, we design decoders that resolve inherited TSs when they appear in Tstab , making schedule optimization unnecessary to avoid these structures in our setting. We also note that for HGP codes, the effective distance is invariant under the choice of the measurement schedule [43]. Consequently, by resolving 
+
+stabilizer-induced TSs directly, the decoders considered in this work provide error-correction capabilities that grow with the effective distance. In an HGP code, the Tanner graphs Gx and Gz associated with the X- and Z-stabilizer generators arise as graph products of two parent LDPC codes with Tanner graphs G1 and G2.Lemma 1 shows that a classical TS from G2 can reappear inside a subgraph induced by an X-type stabilizer in Gz, due to the presence of multiple isomorphic copies of G2 in Gz.Similarly, G T 
+
+> 1
+
+also appears multiple times in Gz, so isomorphic copies of a classical TS from G T 
+
+> 1
+
+can occur within an X-type stabilizer-induced TS. The difference between stabilizer-induced TSs that contain multiple copies inherited from G2
+
+and those inherited from G T 
+
+> 1
+
+lies in the role of the variable nodes: for TSs inherited from G2, the variable nodes of the classical TS become VV-type nodes and CC-type nodes connect different copies, whereas for TSs inherited from G T 
+
+> 1
+
+the roles are reversed. These observations are formalized in Appendix A. To illustrate this, consider Figure 12a, which depicts the graph product of the classical TS T (C1s ) from G T 
+
+> 1
+
+with a variable node v2 from G2. We denote this graph by T (C1s ) ×
+
+T (v2). The graph contains three isomorphic, pairwise disjoint copies, namely T (C1s ) × c2j for c2j ∈ N v2 . It is generated by CV-type stabilizer generators c11v2, c 12v2, and c13v2 (see Example 3 for a color-coded verification). These properties are formally stated in Lemma 6 in Appendix A. Analogous structural results for stabilizer-induced TSs extend to LP codes and can be established by a similar argument combined with [28, Lemma 4]. Lemma 1 quantifies, for the families considered there, how many CNOT failures during syndrome measurement are required to induce the corresponding stabilizer-induced TSs. As discussed in Section III, addressing such large stabilizer-induced structures via OSD can require increasing the OSD order with the number of inducing stabilizer generators, which is not viable for HGP/LP decoding. Next, we illustrate a decoding approach that builds on good decoders for the parent LDPC codes and can resolve TSs like the one shown in Fig. 12a without relying on OSD and without requiring optimization of the measurement schedule. 
+
+A. Deriving QLDPC Decoders from Parent Code Decoders 
+
+We first describe properties of HGP/LP codes that allow us to derive decoders from those of the parent classical codes. Recall that the Tanner graph Gz of an HGP (respectively, LP) code contains |V 1| (respectively, |V 1|) disjoint copies of G2
+
+(respectively, G 2). As in Part 2 of Lemma 1, these copies of G2
+
+(respectively, G 2) are pairwise disjoint, and the union of their variable nodes is exactly the full set of VV-type variable nodes of Gz. Every check node in Gz is adjacent to at least one VV-type variable node. Thus, we can apply a parent-code decoder 
+
+D2, originally defined on G2, independently to each embedded copy of G2 to estimate errors at the corresponding VV-type variable nodes. Equivalently, this defines a decoder acting on the subgraph of Gz induced by VV-type variable nodes, denoted 
+
+Gz(VV ). We denote this decoder by Dvv . Similarly, starting from a decoder DT 
+
+> 1
+
+defined on G T 
+
+> 1
+
+, we obtain a decoder Dcc 
+
+that acts on the subgraph of Gz induced by CC-type variable nodes, denoted Gz(CC ). We view Dvv and Dcc as functions, written Dvv (·) and Dcc (·), that take a syndrome vector as input and output error estimates on VV-type and CC-type variable nodes, respectively. A decoder for Gz is then obtained by running Dvv on Gz(VV ) and Dcc on Gz(CC ) alternately until the estimated syndrome matches the measured syndrome. This alternating procedure is effective only under the following condition: if an error pattern has support on both VV-type and CC-type variable nodes, then no check node is adjacent to both a VV-type variable node in the support of the error and a CC-type variable node in the support of the error. When decoding the TSs considered in this section, we enforce this condition by preprocessing (Steps 6–12 and Steps 18–24) that flips selected variable-node estimates so that every check node is adjacent exclusively to VV-type nodes in support of the error or exclusively to CC-type nodes in support of the error, but never to both. The next three lemmas formalize (i) when such a purely-VV syndrome (or purely-CC) compatible representative of the error pattern exists, and (ii) why the preprocessing steps in Algorithm 1 guarantee their existence for the stabilizer-induced TS families studied here. The decoding procedure is summarized in Algorithm 1. Following construction in (3), the error associated with the VV-type variable node v1i′ v2i is the (n2(i′ − 1) + i)-th entry of the error vector e. Similarly, the error associated with the CC-type variable node c1j′ c2j is the (n1n2 + ( j′ − 1) m2 + j)-th entry of e.T (C1s ) × c22           
+
+> T(C1s)×c21
+> T(C1s)×c23
+> c11c12
+> c13
+> T(C1s)
+
+# × v2 
+
+> c21c22c23
+
+(a) The figure shows how the graph product of a TS T (C1s ) from G T 
+
+> 1
+
+with a degree-three variable node v2 from G2 results in a graph that contains three isomorphic copies of the TS. These copies are T (C1s ) × c2j for c2j ∈ N v2 . To reduce clutter, only the part of the resulting graph containing Z-stabilizers is shown. The same graph is induced in Gz by the X-type stabilizer generators c11v2, c 12v2, and c13v2; see Fig. 12b for two induced subgraphs. Since this structure is induced by CV-type stabilizer generators, it can be activated by hook errors introduced during their measurement. 
+
+> c11v2
+> c13v2
+
+(b) stabilizer-induced subgraphs generated by the CV-type stabilizer generators c11v2
+
+and c12v2 within Gz. Observe that all vari-able nodes in these induced subgraphs also appear in Fig. 12a. The CC-type variable node represented by is shared by both induced subgraphs. Fig. 12: Illustration of a stabilizer-induced TS containing multiple copies of a classical TS from G T 
+
+> 1
+
+.
+
+Figure 13 illustrates, by means of an example, the operation of the decoder described in Algorithm 1. These ideas are formalized in Lemmas 2 and 3. In particular, Part 2 of Lemma 2 shows that Steps 7 and 19 are sufficient to determine whether there exists an error pattern exclusively on VV-type or CC-type variable nodes that is consistent with the measured syndrome. When such an error pattern does not exist, Lemma 3 shows that the preprocessing steps in Steps 8–12 or Steps 20 –24 
+
+ensure the existence of such an error pattern. The decoder then resolves the TSs considered in Lemma 1 and Lemma 6. 
+
+Lemma 2. Consider the stabilizer-induced TS Tstab ≜
+
+T (c1) × T (V2s ) in the Tanner graph Gz of the HGP/LP code defined in Lemma 1, where c1 is a check node in the parent Tanner graph G1, and V2s is a subset of variable nodes V2 in the parent Tanner graph G2. Furthermore, consider an error pattern ¯e consider as representative of its equivalent case in 
+
+Fq
+
+> 2
+
+/C⊥ 
+
+> x
+
+, where q = m1m2 + n1n2 is the number of qubits (variable nodes) and C⊥ 
+
+> x
+
+is the row space of Hx. Assume that supp(¯ e) does not fully contain the support of any logical operator. We ask whether there exists an error pattern ˜e and a vector s ∈ C ⊥ 
+
+> x
+
+such that ˜e = ¯ e+s and supp(˜ e) lies exclusively on the VV-type variable nodes. 1) If there exists at least one variable node v1i′ ∈ N c1 such that all checks in v1i′ × T (V2s ) are satisfied (i.e., there is no unsatisfied check in v1i′ × T (V2s )), then such an error pattern ˜e exists. 2) If no such error pattern ˜e exists, then for every variable node v1i′ ∈ N c1 there is at least one unsatisfied check node of the form v1i′ c2j , for some c2j ∈ T (V2s ).
+
+Proof. Let supp(¯ e) denote the support of the error pattern 
+
+¯e. Divide supp(¯ e) into two disjoint subsets supp(¯ evv ) and 
+
+supp(¯ ecc ) such that supp(¯ evv ) contains only VV-type variable nodes while supp(¯ ecc ) contains only CC-type variable nodes. In Part 2 of Lemma 1, we have seen that each VV-type variable node of Tstab is contained in exactly one subgraph of the form 
+
+{v1i′ } × T (V2s ) for some v1i′ ∈ N c1 , and that these subgraphs are pairwise disjoint, i.e., 
+
+({v1i′ }× T (V2s )) ∩({v1k′ }× T (V2s )) = ∅,
+
+∀ v1i′ , v 1k′ ∈ N c1 , i ′̸ = k′.
+
+This implies that supp(¯ evv ) can be further divided into |N c1 |
+
+disjoint subsets, say supp(¯ evv ,v 1i′ ) for v1i′ ∈ N c1 , such that 
+
+supp(¯ evv ,v 1i′ ) is contained in the subgraph {v1i′ } × T (V2s ).Recall that we want to establish a condition that guarantees there is an error pattern whose support lies entirely on VV-type variable nodes and that is consistent with the measured syndrome. If supp(¯ ecc ) = ∅, the claim is trivial. Therefore, in the remainder of the proof, we assume that supp(¯ ecc )̸ = ∅.Let us examine the conditions under which there exists a subgraph v1i′ × T (V2s ), for some v1i′ ∈ N c1 , that does not have unsatisfied check nodes. Since supp(¯ ecc )̸ = ∅, there exists at least one erroneous CC-type variable node. From Part 6 of Lemma 1, we know that any CC-type variable node in Tstab 
+
+is connected to exactly one check node in v1i′ × T (V2s ) for each v1i′ ∈ N c1 . Moreover, if supp(¯ evv ,v 1i′ ) = ∅, then the only possible sources of unsatisfied check nodes in v1i′ × T (V2s ) are erroneous CC-type variable nodes. Consequently, if v1i′ ×T (V2s )
+
+contains at least one erroneous CC-type variable node and 
+
+supp(¯ evv ,v 1i′ ) = ∅, then v1i′ × T (V2s ) must contain at least one unsatisfied check node. So the possibility of supp(¯ evv ,v 1i′ ) = ∅v11 × T (V2s ) v12 × T (V2s ) v13 × T (V2s ) v14 × T (V2s )
+
+(a) Iteration 1: In the first two classical TSs (from the left), all VV-type variable nodes are in error; in the third, only the two VV-type variable nodes are in error; in the fourth, none are in error. The decoder is initialized with the estimated error vector set to zero, so the mismatched and measured syndromes coincide. For each v1i′ ∈ N c1 , there is at least one unsatisfied check in v1i′ × T (V2s ). Hence, the decoder selects a neighbor of c1 (say v13 ) and flips the CC-type variable nodes connected to unsatisfied checks of form v13 c2 
+
+> j
+
+(i.e., the unsatisfied checks in v13 × T (V2s )). The outer boundary of the CC-type variable nodes to be flipped is highlighted in red.                    
+
+> v11×T(V2s)v12×T(V2s)v13×T(V2s)v14×T(V2s)
+
+(b) Iteration 2: In the first iteration, only CC-type variable nodes connected to unsatisfied checks in the structure v13 × T (V2s ) are flipped. Except for the one in the lower part, these nodes are not actually erroneous and thus become part of the mismatched error (inner black shapes), together with the VV-type variable nodes that are part of mismatched error in the first iteration. Flipping them toggles the status of their neighboring checks: previously satisfied checks become unsatisfied and vice versa. After this step, only the third copy of the classical TS has no unsatisfied checks. By Part 1 of Lemma 2, this implies the existence of an error pattern supported solely on VV-type variable nodes whose syndrome equals the mismatched syndrome. In the second iteration, a decoder that can correct any error pattern within a classical TS is applied to the VV-type variable nodes. Consequently, for each structure v1i′ × T (V2s ), with v1i′ ∈ N c1 , the decoder estimates an error pattern on VV-type nodes (indicated by red borders) whose support matches the mismatched syndrome within that structure.                    
+
+> v11×T(V2s)v12×T(V2s)v13×T(V2s)v14×T(V2s)
+
+(c) Convergence to a stabilizer: In iteration 2, the variable nodes with a red outer border are identified as erroneous. Among these nodes, we update the set of estimated errors by removing those that belong to the mismatched error set and adding those that do not belong to it. From Part 5 of Lemma 1, it follows that the variable nodes in the mismatched error form a stabilizer, which shows that the decoder has converged to a stabilizer. Fig. 13: Decoding iterations are shown for the stabilizer-induced TS in Fig. 11a, which contains multiple classical TSs. The decoder consists of two classical LDPC decoders: a decoder that acts on CC-type variable nodes and a second decoder that acts on VV-type variable nodes. The latter takes as input the mismatched syndrome (discrepancies between the measured and estimated syndromes) produced by the first decoder and is derived from a decoder designed to resolve classical TSs in the underlying classical LDPC code. Variable nodes with mismatched errors (discrepancies between actual and estimated errors) are shaded gray, as are the check nodes associated with mismatched syndromes. Algorithm 1: Decoder that resolves TSs containing multiple copies of a TS inherited from a parent code. 
+
+Input: Measured syndrome σ, Maximum number of iterations 
+
+M axiter 
+
+Output: Error estimate ˆe
+
+Data: Tanner graph Gz, Decoders Dvv (·) and Dcc (·).
+
+Variables: Intermediate error estimate on VV-type (respectively, CC-type) variable nodes ˜evv (respectively, ˜ecc ), Intermediate error estimate ˜e = ˜evv ˜ecc 
+
+,Mismatched syndrome ˜σ, Estimated syndrome ˆσ
+
+Initialization: ˜σ = σ, ˆe = 0 
+
+> 1
+
+Run decoder Dcc on Tanner graph Gz(CC ) to obtain error estimate 
+
+ˆecc given syndrome ˜σ, i.e., ˆecc = Dcc ( ˜ σ). 
+
+> 2
+
+Update the estimated error ˆe ← ˆe + 0 ˆecc 
+
+. 
+
+> 3
+
+Compute the updated mismatched syndrome ˜σ ← ˜σ + Hz
+
+ 0
+
+ˆeT
+
+> cc
+
+
+
+. 
+
+> 4
+
+if ˜σ = 0 then  
+
+> 5
+
+Declare that decoding is successful and Exit  
+
+> 6
+
+for each c1l′ ∈ C 1 do  
+
+> 7
+
+if there exist more than 
+
+j
+
+Nc1l′ /2
+
+k
+
+variable nodes v1i′ ∈ N c1l′
+
+such that, for each of these nodes, there exists at least one VC-type check of the form v1i′ c2j , for some c2j ∈ C 2, that is unsatisfied (i.e., ˜σ(m2(i′ − 1) + j) = 1 ) then  
+
+> 8
+
+Randomly choose an unsatisfied VC-type check of the form 
+
+v1k′ c2j for v1k′ ∈ N c1l′ and c2j ∈ C 2 
+
+> 9
+
+for each c2l ∈ C 2 do  
+
+> 10
+
+if ˜σ(m2(k′ − 1) + l) = 1 then  
+
+> 11
+
+Flip the error estimate on CC-type variable node 
+
+c1l′ c2l , i.e., ˆe(n1n2 + ( l′ − 1) m2 + l) ←
+
+ˆe(n1n2 + e(( l′ − 1) m2 + l) ⊕ 1. 
+
+> 12
+
+Update the syndrome vector accordingly 
+
+˜σ = ˜ σ ⊕ H(: , n 1n2 + ( l′ − 1) m2 + l). 
+
+> 13
+
+Run decoder Dvv on Tanner graph Gz(VV ) to obtain error estimate 
+
+ˆevv given syndrome ˜σ, i.e., ˆevv = Dvv ( ˜ σ). 
+
+> 14
+
+Update the estimated error ˆe ← ˆe + ˆevv 0. 
+
+> 15
+
+Compute the updated mismatched syndrome ˜σ ← ˜σ + Hz
+
+ˆeT
+
+> vv
+
+0
+
+
+
+. 
+
+> 16
+
+if ˜σ = 0 then  
+
+> 17
+
+Declare that decoding is successful and Exit  
+
+> 18
+
+for each v2k ∈ V 2 do  
+
+> 19
+
+if there exist more than 
+
+j
+
+Nv2k
+
+/2
+
+k
+
+check nodes c2j ∈ N v2k
+
+such that, for each of these nodes, there exists at least one VC-type check of the form v1i′ c2j , for some v1i′ ∈ V 1, that is unsatisfied (i.e., ˜σ(m2(i′ − 1) + j) = 1 ) then  
+
+> 20
+
+Randomly choose an unsatisfied VC-type check of the form 
+
+v1i′ c2l for c2l ∈ N v2k
+
+and v1i′ ∈ V 1 
+
+> 21
+
+for each v1k′ ∈ V 1 do  
+
+> 22
+
+if ˜σ(m2(k′ − 1) + l) = 1 then  
+
+> 23
+
+Flip error estimate on v1k′ v2k,i.e., ˆe(n2(k′ − 1) + k) ← ˆe(n2(k′ − 1) + k) ⊕ 1. 
+
+> 24
+
+Update syndrome 
+
+˜σ = ˜ σ ⊕ H((: , (n2(k′ − 1) + k). 
+
+> 25
+
+Repeat Steps 1 to 5.
+
+is ruled out when v1i′ × T (V2s ) does not have any unsat-isfied check nodes. In what follows, we consider the case 
+
+supp(¯ evv ,v 1i′ )̸ = ∅.Now consider the case where {v1i′ } × T (V2s ) has no unsatisfied check nodes and supp(¯ evv ,v 1i′ )̸ = ∅. Define an error pattern f ∈ Fq 
+
+> 2
+
+with non-empty support such that 
+
+supp( f ) = supp(¯ evv ,v 1i′ ). Since we consider the full syn-drome in Gz, a zero-syndrome pattern must be a stabilizer or a logical operator. By assumption, f cannot be a logical operator. Moreover, supp( f ) is contained in the single subgraph 
+
+{v1i′ } × T (V2s ), and this subgraph does not contain a CV-type stabilizer: by the definition of the neighbor set of a CV-type check node, any CV-type stabilizer involves VV-type variable nodes with more than one value of the first coordinate. Hence, the syndrome corresponding to f is non-zero. Next, we examine how erroneous variable nodes that are not contained in {v1i′ } × T (V2s ), but are contained in Tstab , alter the set of unsatisfied check nodes associated with the error pattern f . The unsatisfied check nodes caused by the error vector f can be written as v1i′ × C 2o , where C2o is the subset of check nodes in 
+
+T (V2s ) whose parity-check equations are violated by the VV-type errors in supp( f ). As (v1i′ × V 2s ) ∩ (v1k′ × V 2s ) = ∅ for any distinct v1i′ , v 1k′ ∈ N c1 , erroneous variable nodes in v1k′ × V 2s do not affect the number of unsatisfied check nodes in v1i′ × V 2s .This further implies that, given the error pattern ¯e, the set of unsatisfied check nodes in v1i′ × T (V2s ) depends only on (i) the VV-type variable nodes in the subgraph {v1i′ } × T (V2s ) and (ii) the CC-type variable nodes in Tstab , and is unaffected by VV-type variable nodes in {v1k′ } × T (V2s ) for any v1k′ ∈ N c1
+
+with k′̸ = i ′. Each check node v1i′ c2j in v1i′ × C 2o , for c2j ∈ C 2o ,has only one CC-type variable node as a neighbor, namely c1c2j .This follows from the fact that the CC-type neighbors of v1i′ c2j
+
+in Tstab are of the form c1c2j . Moreover, c1c2j has only one neighbor in subgraph v1i′ × T (V2s ). Therefore, for subgraph 
+
+v1i′ × T (V2s ) to have no unsatisfied check nodes, all CC-type variable nodes in c1 × C 2o must be erroneous. Moreover, the fact that v1i′ × T (V2s ) does not have any unsatisfied check nodes implies that the only erroneous CC-type variable nodes in Tstab are those in c1 × C 2o . Any other CC-type variable node outside this set would create an additional unsatisfied check node in v1i′ × T (V2s ), which would contradict the assumption that this subgraph has no unsatisfied check nodes. Define the projection of supp( f ) onto V2, denoted by 
+
+P2(supp( f )) , as 
+
+P2(supp( f )) = v2k : there exists v1k′ v2k ∈ supp( f ) .
+
+Recall that supp( f ) = supp(¯ evv ,i′ ). Now consider the stabi-lizer induced by CV-type stabilizer generators 
+
+c1 × T  P2(supp( f )) .
+
+Let s be the binary representation of this induced stabilizer. From Part 5 of Lemma 1, it follows that the set of CC-type variable nodes in supp( s) is c1 × C 2o . We have shown earlier that supp(¯ ecc ) = c1 × C 2o . Therefore, the support of the vector 
+
+˜e = ¯ e + s contains only VV-type variable nodes, which proves the claim in Part 1. Since the statement in Part 2 is exactly the contrapositive of the statement in Part 1, its validity follows immediately and does not require a separate proof. Using arguments similar to those in the proof of Lemma 2, we can derive conditions that guarantee the existence of an error pattern supported only on CC-type variable nodes within the stabilizer-induced TS T (C1s ) × T (v2), where C1s ⊂ C 1 and v2 ∈ V 2. In particular, if there exists a check node c2j ∈ N v2
+
+such that there are no unsatisfied check nodes in T (C1s ) × c2j ,then there exists an error pattern, supported only on the CC-type variable nodes in T (C1s ) × T (v2), that matches the measured syndrome. 
+
+Lemma 3. Let Gz be the Z-Tanner graph of an HGP/LP code obtained from the parent Tanner graphs G1 and G2. Fix c1 ∈ C 1
+
+and V2s ⊆ V 2, and assume that a decoder D2 on G2 successfully decodes every error pattern whose support is contained in the TS T (V2s ). Then, for any error pattern supported within the 
+
+stabilizer-induced TS T (c1) × T (V2s ), Algorithm 1 (with preprocessing Steps 6–12) produces a syndrome-compatible error pattern supported only on the VV-type variable nodes in this TS, and a subsequent run of Dvv (derived from D2)corrects the error. Similarly, fix v2 ∈ V 2 and C1s ⊆ C 1, and assume that a decoder DT 
+
+> 1
+
+on G T 
+
+> 1
+
+successfully decodes every error pattern whose support is contained in the TS T (C1s ). Then, for any error pattern supported within T (C1s ) × T (v2), preprocessing Steps 18–24 produces a syndrome-compatible error pattern supported only on the CC-type variable nodes, and one subsequent run of Dcc (derived from DT 
+
+> 1
+
+) corrects the error. 
+
+Proof. We prove the lemma for the case T (c1) × T (V2s ); the case T (C1s ) × T (v2) is analogous. According to Lemma 2, to complete the proof, it suffices to show that, after the preprocessing steps (6–12) in Algorithm 1, there exists a node v1i′ ∈ Nc1 such that all checks of the form v1i′ c2j ,with c2j ∈ T (V2s ), are satisfied. Indeed, by that lemma, the existence of such a node is equivalent to the existence of an error pattern supported only on VV-type variable nodes that is compatible with the measured syndrome. Moreover, since the error patterns considered here are supported within 
+
+T (c1) × T (V2s ), the syndrome is zero outside this induced subgraph; for the decoders considered, this implies that no variable nodes outside this induced subgraph are flipped, and hence preprocessing does not create unsatisfied VC-type checks outside T (c1) × T (V2s ).We now verify that the preprocessing steps (6–12) guarantee the existence of such a node. In Step 7, the algorithm examines whether there exist more than ⌊|N c1 |/2⌋ variable nodes v1i′ ∈Nc1 such that, for each such variable node, there exists at least one unsatisfied VC-type check node of the form v1i′ c2j , with 
+
+c2j ∈ T (V2s ). If there are at most ⌊|N c1 |/2⌋ such variable nodes, then there exists a node v1i′ ∈ N c1 for which all checks v1i′ c2j
+
+are satisfied, and we are done. Otherwise, assume that there are more than ⌊|N c1 |/2⌋ variable nodes v1i′ ∈ N c1 such that, for each such variable node, there exists at least one unsatisfied VC-type check node of the form v1i′ c2j , with c2j ∈ T (V2s ). Note that this subsumes the condition in Part 2 of Lemma 2 concerning the non-existence of error patterns solely supported on VV-type variable nodes. In this case, the algorithm proceeds to Step 8: it randomly selects an unsatisfied VC-type check node v1k′ c2j for 
+
+v1k′ ∈ N c1 . Fix the variable node v1k′ and for each unsatisfied check of the form v1k′ c2j , Step 11 flips the corresponding CC-type variable node c1c2j . By Part 6 of Lemma 1, for each fixed 
+
+v1i′ ∈ N c1 and each c2j ∈ T (V2s ), the CC-type variable node 
+
+c1c2j is adjacent to exactly one VC-type check node of the form 
+
+v1i′ c2j in {v1i′ } × T (V2s ). Since flipping a variable node toggles the parity of every incident check node, flipping c1c2j toggles the syndrome of v1k′ c2j , and it does not affect any check of the form v1k′ c2 
+
+> ℓ
+
+with ℓ̸ = j. (Such a flip may toggle checks of the form v1i′ c2j for v1i′̸ = v1k′ , but this is irrelevant for our goal, which is to ensure the existence of at least one v1i′ —namely 
+
+v1k′ —for which all checks v1i′ c2j are satisfied.) Therefore, since Step 11 flips c1c2j for every unsatisfied check v1k′ c2j , after all these flips are performed, all checks of the form v1k′ c2j are satisfied. Thus, after preprocessing, for the specific node v1k′
+
+chosen in Step 8, there are no unsatisfied checks of the form 
+
+v1k′ c2j . Equivalently, after preprocessing there always exists a node v1i′ ∈ N c1 , namely v1i′ = v1k′ , such that no check v1i′ c2j is unsatisfied. By Lemma 2, the existence of this node v1i′ implies the existence of an error pattern supported only on VV-type variable nodes that is compatible with the measured syndrome. By the assumption of the lemma, the decoder Dvv corrects any such error pattern within T (c1) × T (V2s ). Therefore, once preprocessing has produced such a node v1i′ , Algorithm 1 will successfully correct every error pattern in T (c1) × T (V2s ).This completes the proof. 
+
+Remark 3. Lemma 3 is stated for a single decoder D2 that resolves every error pattern supported on T (V2s ). When no single decoder achieves this property, the lemma extends directly with D2 replaced by a set of decoders, under the assumption that every such error pattern is resolved by at least one member of the set. The preprocessing steps are executed once and the resulting estimates are shared across each decoder in the set. Then the member decoders in the set run on each of the embedded copies of the parent code’s Tanner graph in 
+
+Gz. The guaranties of this section, and the adversarial results reported in Table I, are with respect to this assumption. Next, we study stabilizer-induced TSs of the form T (C1s ) ×
+
+T (V2s ). Here, T (C1s ) is a subgraph of G T 
+
+> 1
+
+with C1s ⊆ C 1, and 
+
+T (V2s ) is a subgraph of G2 with V2s ⊆ V 2. We first analyze the case in which T (C1s ) is a tree in G T 
+
+> 1
+
+and T (V2s ) is a TS in 
+
+G2. This setting reduces to cases studied above when |C 1s | = 1 
+
+(i.e., T (C1s ) = c1) or when |V 2s | = 1 (i.e., T (V2s ) = v2). We now explain why these TSs must be analyzed. In the low-error regime, the slope of the logical error-rate curve is governed by the smallest TS on which the decoder fails to converge. Suppose that we wish to guarantee correction of every TS induced by an error pattern of weight at most μ (including both gate failures and data errors due to decoherence). Part 4 of Lemma 1 implies that any weight-μ error pattern that induces 
+
+T (V2s ) in G2 also induces a weight-μ error pattern supported on T (c1) × T (V2s ) in Gz. We showed above that Algorithm 1 resolves T (c1) × T (V2s ) for any c1 ∈ C 1, provided that we have a decoder that resolves T (V2s ) in G2. However, this condition is necessary but not sufficient to guarantee correction of all TSs induced by error patterns of weight at most μ. For example, for some V2ss ⊆ V 2, if T (V2ss ) is induced in G2 by an error pattern of weight less than μ/ 2, then by an argument analogous to Part 4 of Lemma 1 the TS T (c1j ∪ c1k) × T (V2ss )
+
+can be induced by error patterns of weight less than μ. Such TSs are not addressed in Lemma 3. We must therefore analyze the more general product TS T (C1s ) × T (V2s ). Fortunately, Algorithm 1, with an amended Step 8, can correct these error patterns when T (C1s ) is a tree. We prove this formally in the following Lemma 4. Before that, we discuss the intuition behind the need to amend Step 8 and how the amendment enables the decoder to correct such TSs. In the next section, we consider the case where T (C1s ) is not a tree. Recall the role of Steps 6–7 in Algorithm 1. For each check node c1 ∈ C 1, Step 7 bounds the number of subgraphs of the form v1 × T (V2s ) that contain at least one unsatisfied check by |N c1 |/2. If this bound is not satisfied, Step 8 selects one such subgraph, and the subsequent steps toggle the error estimate on the CC-type variable nodes so that the selected subgraph has no unsatisfied checks. Under this condition, Lemma 2 implies that the syndrome is consistent with an error pattern supported only on VV-type variable nodes. This implication is the key step used in Lemma 3 to prove the correction of errors supported on T (c1) × T (V2s ).For a TS of the form T (C1s ) × T (V2s ) with T (C1s ) a tree, one would like to apply the same argument by focusing on a leaf check node c1j′ ∈ T (C1s ). This leaf check node has exactly one neighbor v1sh ∈ N c1j′ that is also adjacent to another check node c1nbr in the tree. Because v1sh × T (V2s ) lies in both 
+
+T (c1j′ ) × T (V2s ) and T (c1nbr ) × T (V2s ), the syndrome on this shared slice can be influenced by errors in either of the subgraphs. Consequently, even if this shared subgraph has no unsatisfied checks after flipping CC-type variable nodes, Lemma 2 need not apply. To address this, we amend Step 8 as follows. In the pass of the outer loop corresponding to a leaf check node c1j′ (with shared neighbor v1sh ), instead of choosing a single unsatisfied VC-type check, we choose two distinct unsatisfied VC-type checks of the form v1k1 c2j1 and v1k2 c2j2 with v1k1 , v 1k2 ∈ N c1j′ ,if they exist. For t ∈ { 1, 2}, we perform the preprocessing steps (Steps 8–12) using v1kt , then run Dvv , and test whether all VC-type checks in (Nc1j′ \ { v1sh }) × T (V2s ) are satisfied, i.e., whether ˜σ is zero on those checks. If the test fails for 
+
+t = 1 , we revert the CC-type flips performed in this attempt and repeat the procedure for t = 2 . In the setting of Lemma 4, the second attempt always succeeds. Similarly, Step 20 can be amended to show the convergence of the decoder when T (C1s )
+
+is a TS and T (V2s ) is a tree. 
+
+Lemma 4. Consider the Tanner graph Gz obtained by the HGP/LP construction in Lemma 3. Define 
+
+Tstab ≜ T (C1s ) × T (V2s ),
+
+where T (C1s ) and T (V2s ) are subgraphs in G T 
+
+> 1
+
+and G2,respectively. Assume that one of these two subgraphs is a tree. 1) If T (C1s ) is a tree and T (V2s ) is a TS, assume that every 
+
+c1 ∈ C 1s has degree at least 5 in G T 
+
+> 1
+
+, i.e., |N c1 | ≥ 5, and that D2 resolves T (V2s ). Then Algorithm 1, with the proposed amendment to Step 8, successfully decodes 
+
+Tstab .2) If T (V2s ) is a tree and T (C1s ) is a TS, assume that every 
+
+v2 ∈ V 2s has degree at least 5 in G2, i.e., |N v2 | ≥ 5, and that DT 
+
+> 1
+
+resolves T (C1s ). Then Algorithm 1, with the analogous amendment in Step 20, successfully decodes 
+
+Tstab .
+
+Proof. We prove only Part (1) of the lemma; Part (2) follows by symmetry, swapping the roles of the two factors and using the analogous amendment to Step 20. Let T (C1s ) be a tree in G T 
+
+> 1
+
+, and let c1j′ be a leaf check node in this tree. Then there exists a unique shared neighbor 
+
+v1sh ∈ N c1j′ such that v1sh is also adjacent to some other check node c1nbr ̸ = c1j′ in T (C1s ). Moreover, every v1 ∈ N c1j′ \{ v1sh } is not adjacent to any other check node in T (C1s ). Fix the pass of the outer loop in Steps 6–12 of Algorithm 1 indexed by c1l′ = c1j′ .We claim that after this pass and the subsequent run of Dvv ,all VC-type checks of the form v1c2 with v1 ∈ N c1j′ \ { v1sh }
+
+and c2 ∈ T (V2s ) ∩ C 2 are satisfied. We divide the proof into two cases depending on whether the condition in Step 7 is met. If the condition in Step 7 is met, then by definition there are at most 
+
+j
+
+|N c1j′ |/2
+
+k
+
+nodes v1 ∈ N c1j′ that participate in an unsatisfied check of the form v1c2 with c2 ∈ T (V2s ) ∩ C 2. In particular (and using |N c1j′ | ≥ 5 from the lemma assumptions), there exists at least two v1i′ ∈ N c1j′ such that all checks v1i′ c2
+
+with c2 ∈ T (V2s ) ∩ C 2 are satisfied. Moreover, since only the check nodes in v1sh × T (V2s ) can be affected by errors coming from (T (C1s ) \ { c1j′ }) × T (V2s ), we can choose such a 
+
+v1i′̸ = v1sh ; otherwise, every v1 ∈ N c1j′ \ { v1sh } would participate in an unsatisfied check, forcing the condition in Step 7 to fail. For such a choice of v1i′̸ = v1sh , the subgraph v1i′ × T (V2s )
+
+does not have unsatisfied VC-type checks. Moreover, since v1i′ is not shared with any other check node in T (C1s ), the syndrome on this slice is not affected by errors in (T (C1s ) \ { c1j′ }) ×
+
+T (V2s ). Thus, Lemma 2 when applied to T (c1j′ ) × T (V2s )
+
+yields a syndrome-consistent error pattern supported only on VV-type variable nodes within T (c1j′ ) × T (V2s ). Since D2
+
+resolves T (V2s ), the subsequent run of Dvv corrects this pattern. In particular, all VC-type checks in  Nc1j′ \ { v1sh } × T (V2s )
+
+are satisfied. Otherwise, when the condition in Step 7 fails, we apply the amended Step 8. Specifically, we choose two unsatisfied VC-type checks of the form v1k1 c2j1 and v1k2 c2j2 with distinct 
+
+v1k1 , v 1k2 ∈ N c1j′ . We first perform the preprocessing steps (Steps 8–12) using v1k1 . If, after this preprocessing and the subsequent run of Dvv , all VC-type checks in (Nc1j′ \ { v1sh }) ×
+
+T (V2s ) are satisfied, then we are done. Otherwise, we revert the CC-type flips performed in this attempt and repeat the same procedure using v1k2 . We now argue that the second attempt succeeds. Since the condition in Step 7 fails, at least 
+
+⌊|N c1j′ |/2⌋ + 1 nodes in Nc1j′ participate in an unsatisfied check of the form v1c2 with c2 ∈ T (V2s ) ∩ C 2. Because |N c1j′ | ≥ 5,we have ⌊|N c1j′ |/2⌋ + 1 ≥ 3. Therefore, we can choose two unsatisfied checks of the forms v1k1 c2j and v1k2 c2 
+
+> ℓ
+
+with distinct 
+
+v1k1 , v 1k2 ∈ N c1j′ and c2j , c 2 
+
+> ℓ
+
+∈ T (V2s ) ∩ C 2, and hence select two distinct unsatisfied VC-type checks with endpoints v1k1
+
+and v1k2 .After the preprocessing steps (Steps 8–12) using v1k1 , the slice v1k1 × T (V2s ) has no unsatisfied VC-type checks (by construction of Steps 8–12). If v1k1̸ = v1sh , then the syndrome on this slice is unaffected by errors in (T (C1s )\{ c1j′ })×T (V2s )
+
+since v1k1 is not shared with any other check node in T (C1s ).Thus Lemma 2 applied to T (c1j′ ) × T (V2s ) yields a syndrome-consistent error pattern supported only on VV-type variable nodes within T (c1j′ )\v1sh ×T (V2s ). Since D2 resolves T (V2s ),the subsequent run of Dvv corrects this pattern, and in particular all VC-type checks in  Nc1j′ \{ v1sh }×T (V2s ) become satisfied. Therefore, if the first attempt fails, we must have v1k1 = v1sh .Since v1sh is the unique shared neighbor of c1j′ in the tree and 
+
+v1k2̸ = v1k1 , it follows that v1k2̸ = v1sh . In the second attempt we have v1k2̸ = v1sh , so the syndrome on v1k2 × T (V2s ) is unaffected by errors in (T (C1s \ { c1j′ })) × T (V2s ). Therefore, the same application of Lemma 2 and the subsequent run of 
+
+Dvv show that all VC-type checks in  T (c1j′ )\{ v1sh }×T (V2s )
+
+become satisfied. We have thus shown that, after completing the pass corresponding to the leaf check node c1j′ including the subsequent run of Dvv , all VC-type checks incident to  T (c1j′ ) \ { v1sh } × T (V2s ) are satisfied. Hence, all VC-type checks within T (c1j′ ) \ { v1sh } × T (V2s ) become satisfied, and we can peel c1j′ from T (C1s ). Iterating this peeling argument over the strictly smaller remaining tree shows that the decoder is successful on all of Tstab , which completes the proof. In Lemma 3 and Lemma 4, we showed that, under the stated degree/tree hypotheses, and using Algorithm 1 with the amended Step 8 and Step 20 when needed, decoders derived from the parent classical decoders can resolve certain stabilizer-induced TSs that contain multiple copies of a classical TS, provided the parent decoder already resolves the underlying classical TS. Thus, at least for this family of large stabilizer-induced structures, one can avoid decoder failures without designing an entirely new decoder from scratch. This is notable because in the circuit-level error model considered here, such large TSs can be induced by a small number of CNOT failures despite involving many variable nodes. V. TS S IN HGP AND LP C ODES FROM TS S OF TWO PARENT 
+
+LDPC C ODES 
+
+Up to this point, we have focused on large TSs that arise when multiple copies of the same TS appear in a single parent LDPC code, and we have shown how to avoid the decoding failures they cause. Fixing these failures improves the logical error rate, but does not change its scaling with the physical error rate, because that scaling is determined by the lowest-weight error patterns. These lowest-weight error patterns can also come from composite TSs that combine trapping-set structures from both parent codes. In general, such composite TSs cannot be eliminated simply by reusing decoders inherited from the parent codes, especially when those decoders are not robust to noise in the syndrome. It is enough to concentrate on failures caused by TSs that contain TSs from one or both parent codes, because the analysis in [28] shows that all other error patterns can be corrected with an appropriate scheduled decoder (e.g., a left–right scheduled decoder). The following lemma describes several families of composite TSs that contain copies of TSs from each parent classical LDPC code and characterizes their structure. 
+
+Lemma 5. Let an HGP/LP code be constructed from two classical LDPC codes with Tanner graphs G1 and G2. Let 
+
+G T 
+
+> 1
+
+and G T 
+
+> 2
+
+denote the graphs obtained from G1 and G2,respectively, by exchanging the roles of the variable and the check nodes. Denote by Gx and Gz the Tanner graphs corresponding to the X- and Z-stabilizer generators of the quantum code. Consider a TS T (C1s ) in G T 
+
+> 1
+
+and a TS T (V1s )
+
+in G1. Similarly, consider a TS T (V2s ) in G2 and a TS T (C2s )
+
+in G T 
+
+> 2
+
+. Here, C1s and C2s are subsets of check nodes, and V1s and 
+
+V2s are subsets of variable nodes, in G1 and G2, respectively. (In Parts 1–3 below we only use T (C1s ) and T (V2s ); the other two TSs are introduced for symmetry.) 1) The subgraphs {v1i′ } × T (V2s ) and T (C1s ) × { c2j }, for 
+
+v1i′ ∈ T (C1s ) and c2j ∈ T (V2s ), in the Tanner graph Gz
+
+have only one common node, namely the VC-type check node v1i′ c2j .2) Define the subgraph 
+
+Tcomp ≜  V1s⋆ × T (V2s ) ∪  T (C1s ) × C 2s⋆
+
+
+
+inside Gz, where  
+
+> •
+
+V1s⋆ is chosen as a subset of the variable nodes in T (C1s ) such that no two nodes in V1s⋆ share a common neighboring check node in G1, and  
+
+> •
+
+C2s⋆ is chosen as a subset of the check nodes in 
+
+T (V2s ) such that no two nodes in C2s⋆ share a common neighboring variable node in G2.Then, the support of no X-type stabilizer generators or CV-type check contains more than one variable node of Tcomp , implying that the number of CNOT faults required to induce Tcomp is equal to the number of data errors required to induce it. 3) Define the subgraph 
+
+Tcomp ≜  T (C1s⋆ ) × T (V2s ) ∪  T (C1s ) × T (V2s⋆ )
+
+inside Gz, where C1s⋆ ⊂ C 1s and V2s⋆ ⊂ V 2s . The following statements hold. (a) The subgraph Tcomp is induced by the CV-type checks (i.e., X-type) in the set  C1s⋆ × V 2s
+
+ ∪  C1s ×V2s⋆
+
+.(b) There exist syndrome-measurement schedules (in general, different ones for different expressions) such that the number of CNOT faults required to induce Tcomp is upper-bounded by the minimum of the following quantities: 
+
+e T (C1s ), G T
+
+> 1
+
+ |V 2s⋆ | + e T (V2s ), G2
+
+ |C 1s⋆ |,e T (C1s⋆ ), G T
+
+> 1
+
+ |V 2s | + e T (V2s⋆ ), G2
+
+ |C 1s |,e T (V1s⋆ ), G1
+
+ |C 2s | + e T (C2s⋆ ), G T
+
+> 2
+
+ |V 2s |,e T (V1s ), G1
+
+ |C 2s⋆ | + e T (C2s ), G T
+
+> 2
+
+ |V 2s⋆ |,
+
+where e(T , G ) denotes the number of data errors required to induce the trapping set T in the Tanner graph G .
+
+Proof. To complete the proof of Part 1, we must show that for any v1i′ ∈ T (C1s ) and any c2j ∈ T (V2s ), the subgraphs 
+
+{v1i′ } × T (V2s ) and T (C1s ) × { c2j }
+
+intersect in Gz only in the VC-type check node v1i′ c2j . First, consider the variable nodes. By construction, all variable nodes in the subgraph {v1i′ } × T (V2s ) are of VV-type, while all the variable nodes in the subgraph T (C1s ) × { c2j } are of CC-type. Hence, these two subgraphs do not share any variable nodes. Next, consider the check nodes. In subgraph {v1i′ } × T (V2s ),each check node has the form v1i′ c2 
+
+> ℓ
+
+with c2 
+
+> ℓ
+
+∈ T (V2s ). In subgraph T (C1s ) × { c2j }, each check node has the form v1k′ c2j
+
+with v1k′ ∈ T (C1s ). Therefore, the only check node that can possibly lie in the intersection of these two subgraphs is v1i′ c2j .Finally, since the variable node v1i′ belongs to T (C1s ) and the check node c2j belongs to T (V2s ), the check node v1i′ c2j actually lies in both {v1i′ } × T (V2s ) and T (C1s ) × { c2j }. Thus, these two subgraphs intersect exactly in this VC-type check node, which completes the proof of Part 1. Now consider two VV-type variable nodes, say v1i′ v2i and 
+
+v1k′ v2k from Tcomp . From the construction of Tcomp it follows that v1i′ , v 1k′ ∈ V 1s⋆ . Furthermore, the lemma assumes that no two variable nodes in V1s⋆ have a common check node as neighbor, which implies that the variable nodes v1i′ and v1k′ do not have a common check node as neighbor. A CV-type check node, say c1v2, can have both v1i′ v2i and v1k′ v2k as neighbors only if v2 = v2i = v2k (since a CV-type check fixes the second coordinate) and the check node c1 is a neighbor of both v1i′
+
+and v1k′ , that is, c1 ∈ N v1i′ ∩ N v1k′ . This is impossible because it contradicts the assumption of the lemma that no two variable nodes in V1s⋆ share a common check-node neighbor. An analogous argument applies to two CC-type variable nodes in Tcomp , using the assumption that no two check nodes in C2s⋆ share a common neighboring variable node in G2. Using this fact and following the same type of argument as in the proof of Part 5 of Lemma 1, we conclude that none of the variable nodes in Tcomp is present in the support of more than one CV-type checks of the form c1v2 with c1 ∈ C 1s⋆ and 
+
+v2 ∈ V 2s⋆ . So any error during the measurement of these checks does not propagate to more than one variable nodes in Tcomp .Consequently, the number of CNOT failures required to induce 
+
+Tcomp is equal to the number of data errors required to induce it, completing the proof of Part 2. To show that the subgraph Tcomp , defined in Part 3, is exactly the subgraph induced by the CV-type checks in 
+
+ C1s⋆ × V 2s
+
+ ∪  C1s × V 2s⋆
+
+,
+
+we must prove the following two statements: 1) Every variable node that appears in the support of a CV-type check from  C1s⋆ × V 2s
+
+ ∪  C1s × V 2s⋆
+
+ belongs to Tcomp . 2) Conversely, every variable node in Tcomp appears in support of at least one CV-type check from the above set. Proving both directions shows that the set of variable nodes of Tcomp coincides exactly with the set of variable nodes that is in the support of these CV-type checks. Therefore, Tcomp is the subgraph induced by these checks. The detailed argument is analogous to the proof of Part 3 of Lemma 1, so we do not repeat it here. Using a counting argument similar to that in the proof of Part 4 of Lemma 1, one can show that there exist syndrome-measurement schedules (in general, different ones for different expressions) such that the number of CNOT failures required to induce Tcomp is upper-bounded by the minimum of the four quantities listed in Part 3(b). More explicitly, for each of the four expressions in Part 3(b), the schedule construction of Part 4 of Lemma 1 applies columnwise to the starred factor: for every node of the starred set, a schedule exists in which the required copies of the non-starred TS are corrupted using 
+
+e(·, ·) faults, and the stated multiplier counts the columns. The minimum over the four expressions follows because any single such construction suffices to induce Tcomp . This completes the proof of Part 3. Part 1 of Lemma 5 explains how TSs inherited from the two parent codes can combine to form a composite TS in an HGP/LP code. In particular, when the TSs from both parents are simultaneously active, decoders derived from the parent-code decoders can fail even if each parent decoder corrects its own TS in isolation. The reason is that the two component TSs can share check nodes. In that case, the syndrome bit at a shared check is determined jointly by errors from both components, so the syndrome pattern of the composite TS need not decompose into the syndrome patterns of the two parent TSs. The same mechanism underlies the composite TS families in Parts 2 and 3. Parts 2 and 3 further distinguish composite TSs that can be induced by a number of CNOT failures equal to the number of data errors required to induce them from those for which these numbers can differ (depending on the measurement schedule). This distinction is useful when designing decoders that provably eliminate all error patterns up to a target Hamming weight, which in turn fixes the slope of the logical error-rate curve in the error-floor regime. We now illustrate the conclusions of Lemma 5 using the composite trapping-set examples in Fig. 14 and Fig. 15. In particular, Fig. 14a shows a (4 , 8) TS T (C1s ) in G T 
+
+> 1
+
+, and Fig. 14b shows a (4 , 4) TS T (V2s ) in G2. The composite TS  T (C1s ) × c26
+
+ ∪  v18 × T (V2s ) in Fig. 14c illustrates Part 1: it contains one copy of each parent TS, and these two copies share the VC-type check node v18 c26. When both copies are active, the parity bit at the shared check can c11   
+
+> v11v12
+> v13
+> v14
+> c12
+> v15v16
+> v17
+> c13
+> v18v19
+
+(a) A subgraph, denoted by 
+
+T (C1s ), of the Tanner graph G1
+
+induced by C1s = {c11, c 12, c 13}.Subgraph T (C1s ) behaves as a TS when the roles of variable and check nodes are interchanged. 
+
+> v21
+> c21
+> c22
+> c23
+> v22
+> c24
+> c25
+> v23
+> c26
+
+(b) A subgraph, denoted by 
+
+T (V2s ), of the Tanner graph G2
+
+induced by V2s = {v21 , v 22 , v 23 }. 
+
+> v18c26
+
+(c) Combination of the two classical TSs shown in (a) and (b), given by  T (C1s ) × c26
+
+ ∪  v18 × T (V2s ). In this combination, the copy of T (C1s ) and the copy of T (V2s ) share the check node v18 c26. Erroneous variable nodes are shown with black inner shapes, as are unsatisfied checks. When the variable nodes of both T (C1s ) × c26 and v18 × T (V2s ) are in error, the shared check becomes satisfied. A decoder for the HGP code derived from the decoders that resolve these TSs when used to decode the classical components is not guaranteed to decode such combined TSs, since the sets of unsatisfied checks in the component TSs change when they are combined. Fig. 14: Combining two TSs, each taken from a different parent code, to obtain a TS in the resulting HGP code. 
+
+change (or even cancel), so the composite syndrome no longer decomposes into the two component syndromes. Figure 15 illustrates the structural characterization in Parts 2–3: the composite TS contains multiple interconnected copies of the parent TS, and can be described as the subgraph induced by an explicit set of CV-type checks (equivalently, by a set of 
+
+X-type stabilizer generators). This induced-subgraph viewpoint is what enables schedule-dependent counting arguments for how many CNOT faults are needed to realize such structures. Even when constructing decoders that fully resolve composite TSs directly from classical decoders is challenging, using decoders derived from the parent codes as an initial design step significantly simplifies the process. When run as described in Algorithm 1, these derived decoders already eliminate many decoding failures, thereby reducing the number of remaining cases that must be addressed explicitly in our decoder design. The results of Sections IV-A and V together yield a design procedure targeting the dominant failure configurations in the error-floor regime. Given the operating regime of interest: (i) enumerate the TSs of the parent codes with small critical number; (ii) the arguments in Sections IV-A–V bound the number of circuit faults required to induce the corresponding product and composite TS families, and thereby identify which families can arise with few faults—families requiring substantially more faults, or error weights whose probability is negligible in the operating regime, require no treatment; (iii) design decoders for the dominant families via Lemmas 3 and 4; (iv) verify by adversarial error injection as in Section VII-A. We note that decoding approaches relying on post-processing or ensemble diversity possess no analogue of Step (ii). Without such a characterization of the failure mechanisms, one cannot identify which configurations dominate or certify that they have been addressed. VI. H ANDLING CNOT-F AILURE -I NDUCED SYNDROME 
+
+ERRORS WITHOUT ADDITIONAL NODES 
+
+The previous two sections connected CNOT faults to TSs and showed how to avoid the decoding failures they cause without adding extra nodes to the Tanner graph during decoding. Here we ask whether CNOT faults that introduce syndrome measurement errors (in addition to data errors), as described in Section III-B, can also be handled without introducing additional nodes. To illustrate the issue, consider the circuit in Fig. 10 for two rounds of X-stabilizer measurement. Suppose a faulty CNOT between data qubit d7 and ancilla qubit a2
+
+introduces a Z error on d7. If the readout of the syndrome can also be faulty, a natural way to model this is to add explicit nodes that represent measurement errors (syndrome-bits), which yields the phenomenological Tanner graph in Fig. 16. A key observation is that a Z error on d7 introduced during measurement has the same measured syndrome as a Z
+
+error present before measurement together with a syndrome-bit error on a2. More generally, a CNOT failure that manifests as a measurement error can often be reinterpreted as a data error plus one or more syndrome-bit errors. This suggests that explicit CNOT-fault nodes might be avoidable, but only at the cost of an increased effective rate of symptom noise. This tradeoff is different from the hook-error case, where explicit CNOT-fault nodes can be removed without increasing the effective noise. If measurement-induced CNOT faults are absorbed into syndrome-bit errors, then the decoder must tolerate additional syndrome noise, which typically requires increased temporal c13c26
+
+v13 c25 v17 c25
+
+v18 c26 v19 c26
+
+T (C1s ) × c25T (C1s ) × c22
+
+v13 c22 v17 c22
+
+c13c22
+
+T (C1s ) × c26
+
+c13c25
+
+v13 c26 v17 c26
+
+v18 c22 v18 c25
+
+v18 v23
+
+v18 × T (V2s )
+
+v19 v23
+
+v19 c22 v19 c25
+
+v19 × T (V2s )
+
+v13 v23
+
+v13 × T (V2s )
+
+v17 v23
+
+v17 × T (V2s )
+
+Fig. 15: The stabilizer-induced trapping set Tstab :=  T (C1s ) × T (v23 ) ∪  T (c13) × T (V2s ), where T (C1s ) and T (V2s ) are TSs in G T
+
+> 1
+
+and G2, respectively, c13 is a check node in G1, v23 is a variable node in G2, and T (c13), T (v23 ) denote the subgraphs induced by these single nodes. Because v23 has degree 3 in G2, the first product term contributes three copies of T (C1s ); because c13 has degree 4 in G1, the second contributes four copies of T (V2s ). These copies are interconnected through the check nodes adjacent to (i) the CC-type variable nodes c13c2j
+
+with c2j ∈ N v23 , and (ii) the VV-type variable nodes v1i′ v23 with v1i′ ∈ N c13 . To reduce clutter, only the nodes connecting the copies of T (C1s )
+
+to those of T (V2s ) are labeled. By arguments analogous to Part 3 of Lemma 1, Tstab is induced by the CV-type stabilizer generators in 
+
+(C1s × v23 ) ∪ (c13 × V 2s ).
+
+d1 d2 d3 d4 d5 d6 d7
+
+First round of syndrome measurement 
+
+d1 d2 d3 d4 d5 d6 d7
+
+Second round of syndrome measurement 
+
+s1 s2 s3
+
+Fig. 16: Tanner graph for two rounds of X-stabilizer measurements. Unfilled circles represent data-qubit errors, and rectangles represent 
+
+X-stabilizer generators. The blue node indicates a possible Z error caused by a faulty CNOT between data qubit d7 and ancilla a2 in the first round, while gray nodes indicate measurement errors in the recorded syndromes. The syndrome pattern resulting from a CNOT failure between d7 and a2 is identical to the pattern produced by an initial Z error on d7 together with a measurement error on a2, so the explicit CNOT-failure node is redundant. This figure is based on a CSS code rather than a QLDPC code, so the usual variable-node and check-node conventions for QLDPC Tanner graphs are not followed. The discussion applies to any CSS code, not only to QLDPC codes. Fig. 17: TSs in the phenomenological Tanner graph. The nodes corresponding to data qubits and stabilizer generators are shown as white circles and rectangles, respectively. The nodes corresponding to the syndrome are shown in gray. The erroneous variable nodes and unsatisfied checks are shown in black. Note that two distinct error patterns can match the same set of unsatisfied checks: (1) one includes the data-qubit nodes that are originally in error, and (2) the other includes additional (non-data) nodes corresponding to syndrome-bit errors in addition to data-qubits that are not in error. Due to the existence of multiple explanations of the same syndrome, a message-passing decoder might fail to converge. 
+
+redundancy (more rounds) or increased spatial redundancy (a lower-rate data–syndrome code [44]–[46]). If, instead, one keeps explicit CNOT-fault nodes, the resulting graph typically contains additional short cycles (in particular, 4-cycles) that can degrade iterative-decoder performance; post-processing can mitigate this but increases decoding complexity and latency. The phenomenological Tanner graph contains multiple time-slice copies of the stabilizer-measurement Tanner graph (see Fig. 16). Consequently, for a given measured syndrome, there can be multiple distinct error patterns consistent with that syndrome, which can prevent message-passing decoders from converging (Fig. 17). To reduce the risk of such failures, we run the decoder for a fixed number of iterations on one time slice, then switch to another time slice, and repeat, carrying over the current variable-node beliefs rather than reinitializing. Proceeding sequentially through time slices encourages the decoder to commit to a single consistent explanation of the syndrome rather than trying to satisfy multiple competing explanations simultaneously. VII. S IMULATION RESULTS 
+
+In this section, we first validate our earlier claims using adversarial simulations: we inject errors confined to a specific TS and verify that the decoder, designed according to the principles in the previous sections, successfully avoids the corresponding decoding failure. We then simulate the logical error rate under stochastic noise to compare the proposed decoder with the state-of-the-art BP+OSD and beam search 
+
+decoders. For these simulations, we use two LP codes, a 
+
+[[1054 , 140 , d ≤ 20]] code and a [[775 , 43 , d ≤ 20]] code, both constructed via (3). The [[1054 , 140 , d ≤ 20]] LP code is obtained by using 
+
+B1 = B2 = B =
+
+
+
+x x2 x3 x4 x5
+
+x5 x10 x20 x9 x18 
+
+x25 x19 x7 x14 x28 
+
+ ,
+
+while the [[775 , 43 , d ≤ 20]] LP code is obtained by using 
+
+B1 = B2 = B =
+
+
+
+x x2 x3 x4
+
+x5 x10 x20 x9
+
+x25 x19 x7 x14 
+
+ ,
+
+in (3). Let us denote the classical Tanner graph obtained by lifting the base matrix B by G , and the Tanner graph obtained by exchanging the roles of variable and check nodes in G
+
+by G T. In general, LP and HGP codes are built from two (possibly different) classical codes, so we used superscripts to distinguish nodes belonging to each code’s Tanner graph. In this section, however, we take both classical codes to be the same. Consequently, the superscripts are no longer necessary, and we omit them from the notation in what follows. 
+
+A. Adversarial noise model 
+
+We next consider stabilizer-induced TSs, which arise from the graph product of tree-like subgraphs of the parent code’s Tanner graph. In the Tanner graph corresponding to the Z-type stabilizer generators, we enumerate error patterns supported on TSs induced by one, two, or three X-type stabilizer generators, restricting each pattern to lie either entirely on the VV-type qubits or entirely on the CC-type qubits. For two or more generators, we define the support as the union of their supports, i.e., a qubit is included if it is covered by at least one generator; qubits common to multiple stabilizer generators are therefore retained. We restrict each adversarial pattern to VV-type or CC-type variable nodes because, for the stabilizer-induced TS families illustrated in Section III, these two restrictions capture the two canonical degenerate failure modes: the erroneous variables lie entirely on one side (among VV and CC) of Gz
+
+and all checks in the TS are unsatisfied. We compare against a flooding-schedule min-sum decoder with OSD-CS post-processing of order 10 . Its performance strongly depends on the soft output passed to OSD-CS. Using the a posteriori LLRs from the iteration with the fewest unsatisfied checks is the most favorable choice; even then, min-sum + OSD-CS (10) leaves approximately two fifths of the error patterns supported on a single stabilizer generator, and roughly one quarter of the error patterns supported on three stabilizer generators, uncorrected for the [[1054 , 140 , d ≤ 20]] 
+
+code. Passing instead the LLRs after a fixed budget of 50 
+
+iterations is markedly worse: on the same code, essentially none of the error patterns supported on a single stabilizer generator and only 1% of the error patterns supported on three stabilizer generators are corrected. Similar failure rates are also observed for the [[775 , 43 , d ≤ 20]] code. In contrast, a min-sum decoder run under the alternating (VV/CC) message-update schedule of [28] corrects all of these error patterns on both codes, without post-processing, and typically within two iterations. The beam-search decoder proposed in [31] would converge better if it were run with this alternating schedule on the phenomenological Tanner graph, which can resolve these stabilizer-induced TSs without needing additional rounds. The correlations introduced during syndrome extraction can alternatively be represented by augmenting the decoding matrix with one variable node per hook error —the correlated multi-qubit error left by a single ancilla fault. As discussed in Section III, this kind of augmentation is expected to improve convergence because it makes previously correlated faults explicit in the decoding graph. This also corrects every pattern considered, but at a considerably higher cost: the augmentation multiplies the number of variable nodes and raises the check degrees, increasing the complexity of both message passing and when used the Gaussian elimination and combination sweep in OSD. The alternating schedule reaches the same outcome on the unmodified graph and with no post-processing at all. Next, we consider decoding failures in the Tanner graph Gz
+
+caused by TSs of the forms T (c) × T (Vs) and T (Cs) × T (v)
+
+(see Section IV). Here, T (Vs) and T (Cs) are TSs in G and G T,respectively, while c and v denote a check node and a variable node in G . In the adversarial setting, we test Algorithm 1 using the derived decoders Dvv and Dcc constructed in Section IV-A. For TSs of the form T (c) × T (Vs), we take Dcc to be the min-sum decoder and use, as Dvv , a set of decoders derived from parent-code decoders. For TSs of the form T (Cs)×T (v),the roles of Dvv and Dcc are swapped, as in Section IV-A. For our experiments, we select T (Vs) to be the (5 , 3) , (6 , 4) , and 
+
+(7 , 3) TSs in G for both LP codes [[1054 , 140 , d ≤ 20]] and 
+
+[[775 , 43 , d ≤ 20]] . In our experiments, it suffices to fix the check node c in T (c) × T (Vs) and to vary only T (Vs). The reason is that the rule in Step 10, together with Dvv (derived from a parent-code decoder that resolves T (Vs)), resolves the resulting TS independently of the specific choice of c. We use the finite-alphabet iterative decoders (FAIDs) [17], described in Appendix B, to construct 4-bit decoders that avoid decoding failures in Gz induced by these TSs. When ten 4-bit FAIDs are run as a set, they correct all enumerated error patterns for the [[1054 , 140 , d ≤ 20]] code; for the [[775 , 43 , d ≤ 20]] 
+
+code, a two-decoder FAID set suffices. The decoder-set sizes reported in this section (two for the [[775 , 43 , d ≤ 20]] code and ten for the [[1054 , 140 , d ≤ 20]] code) reflect the differing TS neighborhood of the two parent Tanner graphs used to construct these two LP codes, not the blocklengths. Because the ability of a finite-precision decoder to resolve a TS depends on the neighborhood in which the TS is embedded, the search must be repeated for each code; it is, however, performed entirely offline and contributes nothing to decoding latency. For comparison, Table I reports success rates for BP (implemented here as flooding min-sum) combined with OSD-CS (10) under four variants: decoding on the original graph vs. the detector-error Tanner graph, and passing to OSD either the best aposteriori LLRs L⋆ (early stopping—fewest unsatisfied checks) or the final-iteration LLRs L(50) . We contrast these baselines with the proposed decoder (FAID set + Algorithm 1), which requires neither decoding on the detector-error Tanner graph nor post-processing. We also compare the success rates of the 
+
+beam-search decoder when its internal min-sum decoder is implemented using the alternating VV/CC schedule proposed in [28]. Table I highlights four takeaways consistent with the design principles developed in Sections III–V. First, on the code-level 
+
+Tanner graph, BP+OSD can fail on these stabilizer-induced TS families, and the outcome can depend strongly on whether OSD is fed the final-iteration LLRs L(50) or the best-so-far LLRs L⋆.Second, decoding on the detector-error Tanner graph typically improves BP+OSD by making correlations due to hook errors 
+
+explicit, although it does not uniformly dominate in every setting. Third, the proposed decoder achieves 100% success throughout the table because it is designed to avoid these failures, following the principles established in Section IV-A. Fourth, beam search achieves performance comparable to min-sum+OSD-CS, despite operating on the phenomenological 
+
+Tanner graph (without additional variable nodes representing CNOT faults), consistent with its ability to mitigate failures associated with classical TSs. We now consider decoding failures in the Tanner graph Gz
+
+caused by combined TSs. 
+
+ T (Cs) × T (v) ∪  T (c) × T (Vs)
+
+introduced in Section V. Unlike the TSs considered previously, Algorithm 1 is not guaranteed (see Section V) to avoid failures on these combined structures, even when Dvv (·) and Dcc (·) are derived from parent-code decoders that individually correct all error patterns on T (Vs) and T (Cs). As discussed in Section V, the combined TS is still resolved if the underlying parent-code decoder used to derive Dvv or Dcc remains robust on 
+
+T (Vs) or T (Cs), respectively, even in the presence of a single erroneous syndrome bit. For the TSs T (Cs) that live in the transpose Tanner graph G T, we find empirically that min-sum is already robust to a single syndrome-bit error. We attribute this to the high row rank of the transpose parity-check matrix (for the parent codes underlying the LP constructions studied here) and the large minimum distance of the transpose code. For example, for the [155 , 64 , 20] parent code underlying the 
+
+[[1054 , 140 , d ≤ 20]] LP code, the transpose code has only four codewords and minimum distance 62 , and G T does not exhibit small harmful TSs that cause the min-sum decoder to fail on G . Systematically enumerating TSs in G T is difficult, so we instead test elementary candidates built from a small number of overlapping cycles (which typically have a larger number of unsatisfied checks than comparable TSs on the G
+
+side). We verify convergence by running the min-sum directly on G T, including with one flipped syndrome bit, without designing a specialized FAID for the transpose side. Therefore, as described in Section V, Algorithm 1 resolves TS of the form (T (c) × T (Vs)) ∪(T (v) × T (Cs)) . Apart from this, we tested that these composite TSs get resolved in the presence of a one-bit syndrome error when we start with a round of Dcc (·)
+
+followed by a round of Dvv (·). Both Dvv (·) and Dcc (·) are derived from min-sum decoders. This observation would help us minimize the number of decoders while using an ensemble TABLE I: Decoding success rates (%) for error patterns supported inside a stabilizer-induced trapping set T (c) × T (Vs) of an LP code, as a function of the number of simultaneously active copies of the classical TS T (Vs), the error weight within each active copy, and the number of erroneous CC-type variable nodes drawn from the same TS. MS denotes the min-sum decoder, run with a flooding schedule for 50 iterations. For each TS, decoding success rate is reported for only the error patterns with a − 1 and a. circuit-level denotes decoding on the detector–error Tanner graph; code-level denotes decoding on the code Tanner graph Hz itself. L⋆ and L(50) denote the a posteriori 
+
+LLRs passed to the post-processor, taken respectively from the iteration with the fewest unsatisfied checks and from the last iteration. The subscript “cl” marks that the decoder is run on the detector–error Tanner graph. The last column is a scheduled beam decoder, run on the 
+
+phenomenological detector graph ( R = 3 rounds) with a layered schedule with beam width 16 , and maximum number of rounds 24 ; a decoding counts as a success only if the returned residual is a stabilizer.                                                                                                                                                                                                                                                                                                                                                  
+
+> Code T(Vs)Weight Copies CC err. MS +OSD-CS(10) FAID set
+> +Alg. 1 Scheduled beam code-level L⋆code-level L(50) circuit-level L⋆
+> cl circuit-level L(50) cl
+> [[1054 ,140]] (5 ,3) 410100.00 100.00 64.00 96.00 100.00 100.00
+> 1100.00 100.00 100.00 100.00 100.00 100.00
+> 30100.00 92.00 100.00 76.00 100.00 100.00
+> 1100.00 0.00 92.00 100.00 100.00 100.00
+> 510100.00 100.00 60.00 100.00 100.00 100.00
+> 1100.00 20.00 100.00 100.00 100.00 100.00
+> 30100.00 0.00 100.00 60.00 100.00 40.00
+> 1100.00 0.00 80.00 60.00 100.00 50.00
+> (6 ,4) 51097.22 29.26 48.33 98.89 100.00 100.00
+> 198.52 33.89 97.59 98.89 100.00 100.00
+> 3081.30 0.00 77.78 55.93 100.00 96.67
+> 179.07 0.19 84.26 69.07 100.00 88.33
+> 610100.00 16.67 22.22 100.00 100.00 90.00
+> 1100.00 13.33 86.67 91.11 100.00 90.00
+> 3083.33 0.00 41.11 12.22 100.00 10.00
+> 161.11 0.00 50.00 24.44 100.00 20.00
+> (7 ,3) 610100.00 13.81 34.29 88.57 100.00 90.00
+> 1100.00 5.24 89.52 88.10 100.00 87.14
+> 3069.05 0.00 43.81 19.05 100.00 42.86
+> 161.90 0.00 64.29 38.10 100.00 30.00
+> 710100.00 0.00 10.00 50.00 100.00 70.00
+> 196.67 0.00 66.67 33.33 100.00 50.00
+> 306.67 0.00 26.67 0.00 100.00 0.00
+> 126.67 0.00 33.33 3.33 100.00 0.00
+> [[775 ,43]] (5 ,3) 410100.00 100.00 50.00 100.00 100.00 100.00
+> 1100.00 100.00 100.00 100.00 100.00 100.00
+> 30100.00 90.00 90.00 90.00 100.00 100.00
+> 1100.00 100.00 100.00 90.00 100.00 100.00
+> 510100.00 100.00 50.00 100.00 100.00 100.00
+> 1100.00 100.00 100.00 100.00 100.00 100.00
+> 30100.00 100.00 100.00 100.00 100.00 0.00
+> 1100.00 50.00 100.00 100.00 100.00 60.00
+> (6 ,4) 510100.00 100.00 50.00 100.00 100.00 100.00
+> 1100.00 99.38 99.38 99.38 100.00 100.00
+> 3090.74 90.74 91.98 78.40 100.00 93.33
+> 193.21 93.83 95.68 88.27 100.00 81.67
+> 610100.00 77.78 22.22 100.00 100.00 90.00
+> 1100.00 88.89 88.89 100.00 100.00 90.00
+> 3074.07 88.89 77.78 55.56 100.00 50.00
+> 188.89 92.59 85.19 66.67 100.00 50.00
+> (7 ,3) 610100.00 61.90 23.81 96.83 100.00 97.14
+> 1100.00 71.43 87.30 98.41 100.00 97.14
+> 3085.71 84.13 73.02 47.62 100.00 30.00
+> 195.24 73.02 76.19 50.79 100.00 28.57
+> 71066.67 66.67 0.00 100.00 100.00 90.00
+> 166.67 33.33 66.67 88.89 100.00 90.00
+> 3066.67 22.22 22.22 11.11 100.00 20.00
+> 166.67 33.33 55.56 44.44 100.00 20.00
+
+of decoders without compromising the logical error rate, as we will see in Section VII-A. This robustness is also true for the BP+OSD results on the detector-error Tanner graph: the OSD post-processor can tolerate a small number of syndrome-bit errors as the detector-error Tanner graph makes the relevant faults explicit. Motivated by Section VI, we also tested the convergence of the decoder on the phenomenological Tanner graph, which includes nodes for data errors and syndrome-measurement errors but no explicit nodes for CNOT-induced faults. In all of the adversarial settings mentioned above, we flip one quarter of the syndrome bits associated with the TSs and observe that the decoder still converges to the correct estimate. 
+
+Remark 4. Classical TSs denoted by T (Cs) in G T also tend to be easier to resolve in the presence of a small number of syndrome-bit errors because they often involve higher check degrees (here, 4 and 5) and therefore a larger number of odd-degree checks than TSs denoted by T (Vs) in G . If T (Cs)
+
+had only a small number of odd-degree checks, then one would likely need to optimize both Dvv (·) and Dcc (·); this is most relevant for higher-distance codes at modest blocklengths (a few hundred qubits). Finally, the decoder proposed in Section IV-A relies on the product structure of HGP/LP codes (disjoint isomorphic copies of the parent Tanner graphs). For code families without such parent-code decomposition (e.g., bivariate-bicycle codes [6]), the same high-level principles still apply (TS enumeration, targeted TS-resolving decoder design, and fault-node elimination in Section VI), but a corresponding structural characterization of stabilizer-induced TSs remains an open problem. 
+
+B. Stochastic noise model 
+
+In this section, we use the circuit-level depolarizing noise model of Section II-I. We perform three rounds of syndrome measurement and assume that the final round is perfect. Faults are sampled via the corresponding detector–error 
+
+matrix (equivalently, the detector–error Tanner graph) of the measurement circuit. The baseline BP+OSD (min-sum + OSD-0) and the beam-search decoder of [31] run on the detector– error Tanner graph. We also evaluate two decoders that run on the phenomenological Tanner graph (with variable nodes for data-qubit errors and syndrome-bit errors, but without a dedicated variable node for each circuit-fault location): (i) the proposed layered min-sum ensemble decoder and (ii) a layered beam-search decoder. In both phenomenological-graph decoders, message passing uses alternating VV- and CC-type variable-node updates to mitigate decoding failures due to 
+
+stabilizer-induced TSs. The layered min-sum ensemble uses two schedules: Schedule 1 augments min-sum with a VV-side FAID stage, while Schedule 2 uses a deeper layered min-sum schedule (no FAIDs). The layered beam-search decoder uses the same layered schedule as Schedule 1. In all cases, the variable-node priors are assigned according to the same 
+
+circuit-level noise model; in particular, when decoding on the phenomenological Tanner graph, these priors depend on the measurement circuit and are obtained by marginalizing the circuit-fault probabilities represented in the detector–error 
+
+Tanner graph. The beam-search decoder running on the detector– error Tanner graph does not use post-processing and therefore has a lower decoding cost than BP+OSD. However, unlike the layered decoders on the phenomenological Tanner graph, its message-passing step also runs on the detector–error Tanner graph and therefore has a higher per-iteration cost. The two variants in the proposed ensemble share a layered min-sum decoder on the phenomenological Tanner graph. Here, 
+
+copies refers to the embedded copies of the code-level Tanner graph. In each min-sum iteration, we use the following layered update order: (i) all variable nodes representing syndrome-bit errors; (ii) CC-type variable nodes in the odd copies; (iii) VV-type variable nodes in the odd copies; (iv) again, all variable nodes representing syndrome-bit errors; (v) CC-type variable nodes in the even copies; (vi) VV-type variable nodes in the even copies. We run min-sum for 60 iterations under this schedule. This ordering separates message updates between odd and even copies. As discussed in Section VI, a given syndrome can admit distinct explanations across these copies, and alternating odd/even updates helps avoid the associated failures. Within each copy, alternating CC- and VV-type updates mitigates 
+
+stabilizer-induced TSs (cf. Section V). 
+
+a) Schedule 1 (FAID-assisted VV stage): After min-sum, we apply the CC-side flipping (preprocessing) step of Algorithm 1. We then discard the VV-type portion of the current estimate, recompute the residual syndrome, and run the FAID set on each embedded copy of the parent Tanner graph inside Gz
+
+(all FAIDs per copy, in parallel). For the [[1054 , 140 , d ≤ 20]] 
+
+code, we run 10 FAIDs in parallel with a maximum of 80 
+
+iterations; for the [[775 , 43 , d ≤ 20]] code, we run 2 FAIDs in parallel with a maximum of 100 iterations. These FAID sets are those constructed in Section VII-A and collectively correct all adversarial error patterns reported in Table I. 
+
+b) Schedule 2 (deeper layered min-sum, no FAIDs): The second schedule uses the same layer ordering but performs a small number of sub-iterations within each layer before moving to the next; it does not use specialized parent-code FAIDs. Compared to Algorithm 1, we use a fixed min-sum iteration budget and then (for Schedule 1) invoke the VV-side FAID stage. This is motivated by our current FAID library: we did not include a single FAID that corrects all error patterns on a (7 , 3) TS, and TS-focused FAIDs can fail or diverge when additional errors occur in the TS neighborhood. This limitation is not fundamental, and the correctness arguments of Lemma 3 remain unchanged; see Remark 3. More generally, one could design an ensemble in which each member targets a specific TS family, as in Algorithm 1. Such an approach may require a larger ensemble to achieve comparable logical error rates unless designed carefully; we leave this direction for future work. We also simulate the beam-search decoder using the same layered schedule as Schedule 1 on the phenomenological 
+
+Tanner graph. Since the beam-search decoder is robust to some classical TSs inherited from the parent Tanner code, it does not require a specialized mechanism to avoid TS-induced decoding failures. In Figures 18a and 18b, we compare the logical error rates of the proposed layered decoders against BP+OSD and the beam-search decoder with the flooding schedule. The FAID-assisted layered decoder achieves a comparable logical error rate while offering substantially lower per-iteration decoding complexity, since it operates on the much smaller phenomenological Tanner graph and requires no post-processing. Among the tested methods, the beam-search decoder on the phenomenological 
+
+Tanner graph with the proposed layered schedule achieves the best logical error rate. More broadly, these results support the design principle that, once decoding failures due to the dominant inherited (parent-code) trapping-set families are mit-igated, running an iterative decoder on the phenomenological 
+
+Tanner graph under the proposed layered schedule can achieve competitive logical-error-rate performance without decoding on the expanded detector–error Tanner graph. Determining TABLE II: Iteration counts (latency proxy) for decoding the                          
+
+> [[1054 ,140 , d ≤20]] LP code at depolarizing rate p= 0 .0015 ,over 5×10 6frames (same frame set for every decoder). We report the mean iteration count over all frames, the mean over the slowest
+> 0.1% of frames, and the maximum observed. Iterations are counted by treating message updates in different layers as separate iterations; this approximates latency when independent updates can be parallelized. For ensembles, members are assumed to run concurrently and a frame’s iteration count is the minimum over members that return a syndrome-consistent estimate.
+> Decoder mean slowest 0.1% max Ensemble 1 (with FAID) 15.6 96 432
+> Layered beam search 15.6 140 9000 Ensemble 2 ( 2×layered beam search) 15.6 99 732
+
+which decoder is best suited to a given quantum hardware platform requires further study. In particular, it remains to be seen whether beam-search can meet hardware-specific latency constraints and whether it retains comparable performance under finite-precision implementations. Finally, it would be interesting to optimize the FAID stage to close the remaining gap to layered beam-search , since FAIDs are naturally aligned with finite-precision implementations. Next, we simulate both layered decoders on the 
+
+[[1054 , 140 , d ≤ 20]] LP code for 5×10 6 frames at depolarizing rate p = 0 .0015 . We report the mean iteration count over all frames and over the slowest 0.1% of frames. For latency accounting, we count message updates in different layers as separate iterations; this approximates latency when independent updates can be parallelized. The mean iteration count over all frames indicates the expected impact of decoding latency on quantum-algorithm runtime (e.g., for non-Clifford gates that depend on decoding outcomes). The mean iteration count over the slowest 0.1% of frames indicates whether the decoder can mitigate the syndrome-backlog problem. We emphasize that these iteration counts are latency indicators rather than hardware-accurate latency estimates, since they do not account for implementation constraints (e.g., routing overheads or the cost of aggregating outputs across the ensemble). Both layered decoders converge on all 5 × 10 6 frames. The iteration counts are reported in Table II. However, on the slowest decodable frames, the layered beam-search decoder requires a larger number of iterations under the schedule considered here. This iteration count can be reduced by using an alternative layered beam-search schedule. In particular, for our second layered beam-search configuration, we use the schedule of Section VII-A designed to resolve TS-induced failures. In general, these results suggest that an ensemble of decoders (or schedules) tailored to different TS mechanisms may help meet latency requirements. VIII. CONCLUSION 
+
+This work provides guidelines for designing decoders that operate on phenomenological Tanner graphs, which do not include nodes for correlated errors. This avoids the additional decoding complexity introduced by such nodes. Although the logical error rates of the layered proposed decoders are better than those of BP+OSD, they can be further improved by optimizing the parent code decoders to resolve larger TSs. It would also be interesting to extend these design approaches from the quantum memory setting to the quantum computing setting. APPENDIX ASTABILIZER -INDUCED TS IN G T
+
+Lemma 6. Consider an HGP code constructed from two classical LDPC codes with Tanner graphs G1 and G2. Let 
+
+Gz denote the Tanner graph of the Z-checks. Let C1s ⊆ C 1
+
+be a subset of check nodes of G1, and let T (C1s ) be the subgraph of G1 induced by these check nodes (equivalently, the corresponding trapping-set subgraph in G T 
+
+> 1
+
+). For a variable node v2 ∈ V 2, let T (v2) be the subgraph it induces. Define 
+
+Tstab ≜  T (C1s ) × T (v2) ∩ Gz.
+
+Then: 1) The subgraph Tstab contains |N v2 | pairwise isomorphic copies of T (C1s ), one for each c2j ∈ N v2 . For a fixed 
+
+c2j ∈ N v2 , each check node c1 ∈ T (C1s ) corresponds to the CC-type variable node c1c2j , and each variable node 
+
+v1 adjacent to c1 corresponds to the VC-type check node 
+
+v1c2j .2) These isomorphic copies are pairwise disjoint, i.e., 
+
+ T (C1s ) × { c2j } ∩  T (C1s ) × { c2 
+
+> ℓ′
+
+} = ∅
+
+for all distinct c2j , c 2 
+
+> ℓ′
+
+∈ N v2 .3) The subgraph Tstab is induced by the CV-type stabilizer generators contained in C1s × { v2}.4) Assume that T (C1s ) behaves as a TS in G T 
+
+> 1
+
+. Then there exists a measurement schedule such that a single CNOT failure in the measurement circuit of each CV-type stabilizer generator in C1s × { v2} can corrupt all variable nodes in ℓ of the isomorphic copies of T (C1s )
+
+contained in Tstab , for some ℓ ∈ { 1, 2, . . . , |N v2 |} .5) Let V1o denote the set of variable nodes of G1 that have odd degree in the subgraph T (C1s ). The stabilizer support generated by linear combinations of stabilizer generators in C1s × { v2} then contains all CC-type variable nodes in 
+
+Tstab , as well as all VV-type variable nodes in V1o ×{ v2}.6) Each VV-type variable node v1v2 in Tstab is adjacent to the VC-type check node v1c2 in every isomorphic copy 
+
+T (C1s ) × { c2}, for all c2 ∈ N v2 .
+
+Proof. Parts 1, 2, 3, and 6 follow from the corresponding parts of Lemma 1 by exchanging the roles of G2 and G T 
+
+> 1
+
+;equivalently, by exchanging the roles of VV-type and CC-type variable nodes and of VC-type checks indexed by (variable, check) and (check, variable) pairs. The arguments carry over verbatim under this exchange. For Part 4, the construction of Part 4 of Lemma 1 applies with the following modification: for each generator c1i′ v2 ∈C1s × { v2}, the fault is scheduled among the CNOT gates connecting the ancilla to the data qubits in {c1i′ } × N v2 , i.e., the CC-type portion of Nc1i′ v2 , rather than the VV-type portion 0.1 0.2 0.3 0.4 0.5 0.6
+
+·10 −2
+
+10 −7
+
+10 −6
+
+10 −5
+
+10 −4
+
+10 −3
+
+10 −2
+
+10 −1
+
+10 0
+
+Depolarizing probability Logical error rate 
+
+> BP+OSD-0 (det.-err.) Beam-search (det.-err.) Layered MS ensemble (phen.) Layered beam-search (phen.)
+
+(a) Logical error rate as a function of the depolarizing noise rate for the [[1054 , 140 , d ≤ 20]] LP code. 
+
+0.2 0.3 0.4 0.5 0.6 0.7
+
+·10 −2
+
+10 −7
+
+10 −6
+
+10 −5
+
+10 −4
+
+10 −3
+
+10 −2
+
+10 −1
+
+10 0
+
+Depolarizing probability Logical error rate 
+
+> BP+OSD-0 (det.-err.) Beam-search (det.-err.) MS ensemble (phen.) Layered beam-search (phen.)
+
+(b) Logical error rate as a function of the depolarizing noise rate for the [[775 , 43 , d ≤ 20]] code. Fig. 18: Comparison of logical error rates under the circuit-level depolarizing noise model. The BP+OSD and beam-search baselines operate on the detector–error Tanner graph. We also consider two layered decoders that operate on the phenomenological Tanner graph (with variable nodes for data-qubit and syndrome-bit errors, but without a dedicated variable node for each circuit-fault location) and use alternating VV/CC variable-node updates to mitigate stabilizer-induced trapping-set failures. The first is the proposed layered min-sum ensemble, which uses two schedules: Schedule 1 augments min-sum with a VV-side FAID stage, while Schedule 2 uses a deeper layered min-sum schedule (no FAIDs). The second is a layered beam-search decoder; its message-passing uses the same layered schedule as Schedule 1 of the min-sum ensemble. In the legend, MS denotes min-sum , and the parenthetical tag ( det-er or phen ) indicates the Tanner graph on which message passing is performed. In all cases, variable-node priors are assigned from the same circuit-level noise model (with phenomenological -graph priors obtained by marginalizing circuit-fault probabilities from the detector–error graph). We use three rounds of syndrome measurement, with the final round assumed perfect. 
+
+used in Lemma 1. Choosing the schedule so that the ℓ gates 
+
+CNOT( ancilla → c1i′ c2jt ), t ∈ [ℓ], are executed last, a single 
+
+X fault on the ancilla immediately before these gates corrupts the CC-type nodes c1i′ c2j1 , . . . , c 1i′ c2jℓ . Repeating this for every 
+
+c1i′ ∈ C 1s corrupts all CC-type variable nodes in the ℓ isomorphic copies T (C1s ) × { c2jt }.For Part 5, a VV-type node v1v2 lies in the support of the generator c1i′ v2 if and only if c1i′ ∈ N v1 ; the number of generators in C1s ×{ v2} containing it therefore equals the degree of v1 in T (C1s ), which is odd exactly when v1 ∈ V 1o . The CC-type supports {c1i′ } × N v2 are pairwise disjoint across distinct 
+
+c1i′ ∈ C 1s , since the first coordinates differ; hence each CC-type variable node of Tstab appears in exactly one generator and lies in the stabilizer support. APPENDIX BFAID A b-bit FAID, denoted by DFAID , is characterized by four parameters (M, Y, m c→v , m v→c), where M is the alphabet of possible message values, Y = {C, −C} is the set of possible channel values, mv→c is the function that determines the message from variable node v to check node c based on the incoming messages at v, mc→v is the function that determines the message from check node c to variable node v based on the incoming messages at c. The message alphabet is defined as 
+
+M = {0, ±L1, ±L2, . . . , ±Ls},
+
+where Li, for 1 ≤ i ≤ s, are non-negative real numbers, and 
+
+s = 2 b−1 − 1, with the ordering Li ≤ Lj for i < j . For a check node c, the outgoing message from c to a variable node 
+
+v is given by 
+
+mc→v = (1 − 2σc) Y
+
+> v′∈N c\{ v}
+
+sgn( mv′→c) min 
+
+> v′∈N c\{ v}
+
+|mv′→c|,
+
+where Nc is the set of variable nodes connected to check node c, sgn( ·) is the sign function, and σc is the syndrome bit corresponding to check node c. For a variable node v of degree dv , the outgoing message from v to a check node c is given by 
+
+mv→c = Q
+
+ X 
+
+> c′∈N v\{ c}
+
+mc′→v + w(mv )C
+
+ ,
+
+where mv denotes the vector of extrinsic incoming messages to v, with |mv | = dv − 1 and mv ∈ M dv −1. The function 
+
+Q(·) is the quantizer defined as 
+
+Q(y) = 
+
+(sgn( y)Li, if Ti ≤ | y| < T i+1 ,
+
+0, if |y| < T 1,
+
+where {T1, . . . , T s, T s+1 = ∞} is a set of thresholds with 
+
+Ti ∈ R+ for 1 ≤ i ≤ s and Ti > T j for any i > j . The coefficient w(mv ) depends on the incoming messages. When 
+
+w(mv ) is a constant, the decoder reduces to the offset min-sum decoder. At the end of each iteration, the bit estimate associated with each variable node is determined by evaluating the sign of all incoming messages together with the channel value C.At the beginning of the decoding process, all messages from variable nodes to check nodes are initialized to C. In this work, we choose w(mv ) to be constant when v is a CC-type variable node, while it is made dependent on the incoming messages when v is a VV-type variable node. REFERENCES [1] S. B. Bravyi and A. Y. Kitaev, “Quantum codes on a lattice with boundary,” 1998. [Online]. Available: https://arxiv.org/abs/quant-ph/9811052 [2] J.-P. Tillich and G. Zémor, “Quantum LDPC codes with positive rate and minimum distance proportional to the square root of the blocklength,” 
+
+IEEE Transactions on Information Theory , vol. 60, no. 2, pp. 1193–1202, Feb. 2014. [3] N. P. Breuckmann and J. N. Eberhardt, “Balanced product quantum codes,” IEEE Transactions on Information Theory , vol. 67, no. 10, pp. 6653–6674, Oct. 2021. [4] P. Panteleev and G. Kalachev, “Quantum LDPC codes with almost linear minimum distance,” IEEE Transactions on Information Theory , vol. 68, no. 1, pp. 213–229, 2022. [Online]. Available: https://doi.org/10.1109/TIT.2021.3119384 [5] A. Leverrier and G. Zémor, “Quantum tanner codes,” in 2022 IEEE 63rd Annual Symposium on Foundations of Computer Science (FOCS) . IEEE, 2022, pp. 872–883. [Online]. Available: https://doi.org/10.1109/FOCS54457.2022.00117 [6] S. Bravyi, A. W. Cross, J. M. Gambetta, D. Maslov, P. Rall, and T. J. Yoder, “High-threshold and low-overhead fault-tolerant quantum memory,” Nature , vol. 627, no. 8005, pp. 778–782, 2024. [Online]. Available: https://doi.org/10.1038/s41586-024-07107-7 [7] Q. Xu, J. P. Bonilla Ataides, C. A. Pattison, N. Raveendran, D. Bluvstein, J. Wurtz, B. Vasi´ c, M. D. Lukin, L. Jiang, and H. Zhou, “Constant-overhead fault-tolerant quantum computation with reconfigurable atom arrays,” Nature Physics , vol. 20, no. 7, pp. 1084–1090, 2024. [Online]. Available: https://doi.org/10.1038/s41567-024-02479-z [8] L. Z. Cohen, I. H. Kim, S. D. Bartlett, and B. J. Brown, “Low-overhead fault-tolerant quantum computing using long-range connectivity,” Science Advances , vol. 8, no. 20, p. eabn1717, 2022. [Online]. Available: https://doi.org/10.1126/sciadv.abn1717 [9] H. Zhou, C. Zhao, M. Cain, D. Bluvstein, N. Maskara, C. Duckering, H.-Y. Hu, S.-T. Wang, A. Kubica, and M. D. Lukin, “Low-overhead transversal fault tolerance for universal quantum computation,” 
+
+Nature , vol. 646, no. 8084, pp. 303–308, 2025. [Online]. Available: https://doi.org/10.1038/s41586-025-09543-5 [10] Q. Xu, H. Zhou, G. Zheng, D. Bluvstein, J. P. B. Ataides, M. D. Lukin, and L. Jiang, “Fast and parallelizable logical computation with homological product codes,” Physical Review X , vol. 15, no. 2, p. 021065, 2025. [Online]. Available: https://doi.org/10.1103/PhysRevX.15.021065 [11] B. M. Terhal, “Quantum error correction for quantum memories,” 
+
+Reviews of Modern Physics , vol. 87, no. 2, pp. 307–346, Apr. 2015. [Online]. Available: https://doi.org/10.1103/RevModPhys.87.307 [12] P. Webster, L. Berent, O. Chandra, E. T. Hockings, N. Baspin, F. Thomsen, S. C. Smith, and L. Z. Cohen, “The pinnacle architecture: Reducing the cost of breaking rsa-2048 to 100 000 physical qubits using quantum LDPC codes,” 2026. [Online]. Available: https://arxiv.org/abs/2602.11457 [13] S. K. Chilappagari, S. Sankaranarayanan, and B. Vasi´ c, “Error floors of LDPC codes on the binary symmetric channel,” in 2006 IEEE International Conference on Communications , vol. 3, 2006, pp. 1089–1094. [Online]. Available: https://doi.org/10.1109/ICC.2006.254892 [14] B. Vasi´ c, D. V. Nguyen, and S. K. Chilappagari, Failures and Error Floors of Iterative Decoders . Oxford: Academic Press, 2014, ch. 6, pp. 299–341. [15] X.-Y. Hu, E. Eleftheriou, and D.-M. Arnold, “Progressive edge-growth Tanner graphs,” in GLOBECOM’01. IEEE Global Telecommunications Conference (Cat. No.01CH37270) , vol. 2, 2001, pp. 995–1001. [Online]. Available: https://doi.org/10.1109/GLOCOM.2001.965567 [16] J. Chen, A. Dholakia, E. Eleftheriou, M. P. C. Fossorier, and X.-Y. Hu, “Reduced-complexity decoding of LDPC codes,” IEEE Transactions on Communications , vol. 53, no. 8, pp. 1288–1299, 2005. [Online]. Available: https://doi.org/10.1109/TCOMM.2005.852852 [17] D. Declercq, B. Vasi´ c, S. K. Planjery, and E. Li, “Finite alphabet iterative decoders—part ii: Towards guaranteed error correction of LDPC codes via iterative decoder diversity,” IEEE Transactions on Communications , vol. 61, no. 10, pp. 4046–4057, 2013. [Online]. Available: https://doi.org/10.1109/TCOMM.2013.090513.120444 [18] N. Raveendran and B. Vasi´ c, “Trapping sets of quantum LDPC codes,” Quantum , vol. 5, p. 562, Oct. 2021. [Online]. Available: https://doi.org/10.22331/q-2021-10-14-562 [19] J. Roffe, D. R. White, S. Burton, and E. Campbell, “Decoding across the quantum low-density parity-check code landscape,” Physical Review Research , vol. 2, no. 4, p. 043423, Dec. 2020. [Online]. Available: https://doi.org/10.1103/PhysRevResearch.2.043423 [20] P. Panteleev and G. Kalachev, “Degenerate quantum LDPC codes with good finite length performance,” Quantum , vol. 5, p. 585, 2021. [Online]. Available: https://doi.org/10.22331/q-2021-10-19-585 [21] J. Roffe, D. R. White, S. Burton, and E. Campbell, “Decoding across the quantum low-density parity-check code landscape,” Physical Review Research , vol. 2, no. 4, p. 043423, Dec. 2020. [Online]. Available: https://doi.org/10.1103/PhysRevResearch.2.043423 [22] T. Hillmann, L. Berent, A. O. Quintavalle, J. Eisert, R. Wille, and J. Roffe, “Localized statistics decoding for quantum low-density parity-check codes,” Nature Communications , vol. 16, no. 1, p. 8214, 2025. [Online]. Available: https://doi.org/10.1038/s41467-025-63214-7 [23] J. Du Crest, M. Mhalla, and V. Savin, “Stabilizer inactivation for message-passing decoding of quantum LDPC codes,” in 2022 IEEE Information Theory Workshop (ITW) , 2022, pp. 488–493. [Online]. Available: https://doi.org/10.1109/ITW54588.2022.9965902 [24] D. Chytas, N. Raveendran, and B. Vasi´ c, “Enhanced min-sum decoding of quantum codes using previous iteration dynamics,” 2025. [Online]. Available: https://arxiv.org/abs/2501.05021 [25] K.-Y. Kuo and C.-Y. Lai, “Refined belief propagation decoding of sparse-graph quantum codes,” IEEE Journal on Selected Areas in Information Theory , vol. 1, no. 2, pp. 487–498, 2020. [Online]. Available: https://doi.org/10.1109/JSAIT.2020.3011758 [26] A. K. Pradhan, N. Raveendran, N. Rengaswamy, X. Xiao, and B. Vasi´ c, “Learning to decode trapping sets in QLDPC codes,” in 2023 12th International Symposium on Topics in Coding (ISTC) . IEEE, 2023, pp. 1– 5. [Online]. Available: https://doi.org/10.1109/ISTC57237.2023.10273526 [27] S. Miao, A. Schnerring, H. Li, and L. Schmalen, “Neural belief propagation decoding of quantum LDPC codes using overcomplete check matrices,” 2023. [Online]. Available: https://arxiv.org/abs/2212.10245 [28] A. K. Pradhan, N. Raveendran, N. Rengaswamy, and B. Vasi´ c, “Linear time iterative decoders for hypergraph-product and lifted-product codes,” 2025. [Online]. Available: https://arxiv.org/abs/2504.01728 [29] J. Chen, Z. Yi, Z. Liang, and X. Wang, “Improved belief propagation decoding algorithms for surface codes,” IEEE Transactions on Quantum Engineering , 2025. [Online]. Available: https://doi.org/10.1109/TQE. 2025.3577769 [30] T. Müller, T. Alexander, M. E. Beverland, M. Bühler, B. R. Johnson, T. Maurer, and D. Vandeth, “Improved belief propagation is sufficient for real-time decoding of quantum memory,” 2025. [Online]. Available: https://arxiv.org/abs/2506.01779 [31] M. Ye, D. Wecker, and N. Delfosse, “Beam search decoder for quantum LDPC codes,” 2025. [Online]. Available: https://arxiv.org/abs/2512.07057 [32] A. Leverrier and R. Urbanke, “Approximating optimal decoding of quantum LDPC codes with narrow frontiers,” 2026. [Online]. Available: https://arxiv.org/abs/2606.20513 [33] A. Gu, J. Ataides, M. D. Lukin, and S. F. Yelin, “Scalable neural decoders for practical fault-tolerant quantum computation,” 2026. [Online]. Available: https://arxiv.org/abs/2604.08358 [34] M. A. Nielsen and I. L. Chuang, Quantum Computation and Quantum Information: 10th Anniversary Edition , 10th ed. Cambridge: Cambridge University Press, 2010. [35] D. Gottesman, “Stabilizer codes and quantum error correction,” Ph.D. dissertation, California Institute of Technology, 1997. [36] A. R. Calderbank and P. W. Shor, “Good quantum error-correcting codes exist,” Physical Review A , vol. 54, no. 2, pp. 1098–1105, 1996. [37] D. Divsalar, C. Jones, S. Dolinar, and J. Thorpe, “Protograph based LDPC codes with minimum distance linearly growing with block size,” in Proceedings of IEEE GLOBECOM 2005 , 2005. [38] P.-J. H. S. Derks, A. Townsend-Teague, A. G. Burchards, and J. Eisert, “Designing fault-tolerant circuits using detector error models,” 2024. [Online]. Available: https://arxiv.org/abs/2407.13826 [39] E. Dennis, A. Kitaev, A. Landahl, and J. Preskill, “Topological quantum memory,” Journal of Mathematical Physics , vol. 43, no. 9, pp. 4452–4505, 2002. [40] M. Pacenti, N. Raveendran, and B. Vasic, “Trapping sets of detector error models,” arXiv preprint arXiv:2608.11516 , 2026. [41] S. Bhatnagar, M. Pacenti, N. Raveendran, D. Declercq, and B. Vasi´ c, “Impulse decoding of quantum ldpc codes: Equivalence of degeneracy and code-shortening,” arXiv preprint arXiv:2606.18240 , 2026. [42] T. Richardson and R. Urbanke, Modern Coding Theory . Cambridge: Cambridge University Press, 2008. [43] A. G. Manes and J. Claes, “Distance-preserving stabilizer measurements in hypergraph product codes,” Quantum , vol. 9, p. 1618, 2025. [Online]. Available: https://doi.org/10.22331/q-2025-08-13-1618 [44] A. Ashikhmin, C.-Y. Lai, and T. A. Brun, “Quantum data-syndrome codes,” IEEE Journal on Selected Areas in Communications ,vol. 38, no. 3, pp. 449–462, 2020. [Online]. Available: https: //doi.org/10.1109/JSAC.2020.2969030 [45] E. T. Campbell, “A theory of single-shot error correction for adversarial noise,” Quantum Science and Technology , vol. 4, no. 2, p. 025006, 2019. [Online]. Available: https://doi.org/10.1088/2058-9565/ab0d0d [46] E. Guttentag, A. Nemec, and K. R. Brown, “Robust syndrome extraction via BCH encoding,” in 2024 IEEE International Symposium on Information Theory (ISIT) . IEEE, 2024, pp. 2281–2286. [Online]. Available: https://doi.org/10.1109/ISIT57864.2024.10619234

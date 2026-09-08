@@ -6,32 +6,22 @@
 </div>
 
 ## 每次日报
-- 最新运行日期：2026-09-07
-- 运行时间：2026-09-07 23:24:34 UTC
+- 最新运行日期：2026-09-08
+- 运行时间：2026-09-08 23:02:39 UTC
 - 运行状态：成功
-- 本次总论文数：3
-- 精读区：1
-- 速读区：2
+- 本次总论文数：0
+- 精读区：0
+- 速读区：0
 
 ### 今日简报（AI）
-- 今日共生成 3 篇推荐（精读 1 篇，速读 2 篇）
-- 精读：《A Sim-to-Real Study of Surface-Code Decoder Benchmarking》（9.0/10）
-- 速读：《High-Rank Encoding Can Improve Approximate Quantum Error Correction》（7.0/10）, 《Quantum thermalization achieves optimal approximate quantum error correction》（6.0/10）
-- 这些结果覆盖了当下较热的方向，建议先看精读区论文的关键问题与方法。
-- 详情：[/202609/07/README](/202609/07/README)
+> 今日无新推荐，系统未产出可展示论文。
+- 详情：[/202609/08/README](/202609/08/README)
 
 ### 精读区论文标签
-1. [A Sim-to-Real Study of Surface-Code Decoder Benchmarking](/202609/07/2609.04557v1-a-sim-to-real-study-of-surface-code-decoder-benchmarking)  
-   标签：评分：9.0/10、query:qec-decoding
-   evidence：专门研究表面码解码器的基准测试，直接对应表面码解码算法查询。
+- 本次无精读推荐。
 
 ### 速读区论文标签
-1. [High-Rank Encoding Can Improve Approximate Quantum Error Correction](/202609/07/2609.00778v1-high-rank-encoding-can-improve-approximate-quantum-error-correction)  
-   标签：评分：7.0/10、query:qec-code
-   evidence：研究高阶编码在近似量子纠错中的作用，推动量子码从纯态编码向混合态编码拓展
-2. [Quantum thermalization achieves optimal approximate quantum error correction](/202609/07/2609.04121v1-quantum-thermalization-achieves-optimal-approximate-quantum-error-correction)  
-   标签：评分：6.0/10、query:qec-code
-   evidence：近似量子纠错与码率-距离关系，属于量子纠错编码理论主题
+- 本次无速读推荐。
 
 
 <div class="dpr-home-promo-card">
